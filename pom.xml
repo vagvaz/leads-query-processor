@@ -20,7 +20,7 @@
         <module>core</module>
         <module>planner</module>
         <module>deployer</module>
-        <module>node-query-executor</module>
+        <module>nqe</module>
         <module>plugins</module>
     </modules>
 
