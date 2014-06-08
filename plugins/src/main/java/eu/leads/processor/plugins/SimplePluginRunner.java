@@ -28,6 +28,8 @@ import static eu.leads.processor.plugins.EventType.*;
 
 /**
  * Created by vagvaz on 6/3/14.
+ * This is a the listener that is able to run plugins it is an infinsipan listeners that
+ * registeres to create,modify,remove events is asynchronous and NOT clustered.
  */
 @Listener(clustered = false, sync = false)
 public class SimplePluginRunner implements LeadsListener {

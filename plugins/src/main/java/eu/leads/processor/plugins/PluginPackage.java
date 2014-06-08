@@ -7,7 +7,8 @@ import java.io.Serializable;
 
 /**
  * Created by vagvaz on 6/3/14.
- */
+ * This class packages a plugin in order to upload it to the system
+ * */
 public class PluginPackage implements Serializable {
     private byte[] jar;
     private String className;
@@ -55,6 +56,11 @@ public class PluginPackage implements Serializable {
         this.id = id;
     }
 
+    /**
+     * This function loads the configuration file of the plugin from a file
+     *
+     * @param configFileName the configuration filename
+     */
     private void loadConfigFromFile(String configFileName) {
         config = FSUtilities.loadBytesFromFile(configFileName);
     }
@@ -76,6 +82,10 @@ public class PluginPackage implements Serializable {
         this.config = config;
     }
 
+    /**
+     * This function loads the jar of a plugin.
+     * @param jarFileName The jar filename that we will load the plugin jar
+     */
     public void loadJarFromFile(String jarFileName) {
 
         jar = FSUtilities.loadBytesFromFile(jarFileName);

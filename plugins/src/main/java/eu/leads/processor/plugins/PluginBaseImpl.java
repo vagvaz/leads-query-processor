@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Created by vagvaz on 6/3/14.
+ * A basic plugin that logs each operation on a cache it takes as parameters
+ * pluign.id and plugin.version
+ *
  */
 public class PluginBaseImpl implements PluginInterface {
     Configuration config;
@@ -18,12 +21,12 @@ public class PluginBaseImpl implements PluginInterface {
 
     @Override
     public String getId() {
-        return id;
+        return PluginBaseImpl.class.getCanonicalName();
     }
 
     @Override
     public void setId(String id) {
-        this.id = id;
+        return;
     }
 
     @Override
@@ -31,6 +34,12 @@ public class PluginBaseImpl implements PluginInterface {
         return PluginBaseImpl.class.getCanonicalName();
     }
 
+    /**
+     * This function is called by the system once in order to initialize the plugin
+     *
+     * @param config  The Hierarchical Configuration for the plugin
+     * @param manager The InfinispanManager given to the plugin to getCaches and stuff
+     */
     @Override
     public void initialize(Configuration config, InfinispanManager manager) {
         this.manager = manager;
@@ -41,6 +50,8 @@ public class PluginBaseImpl implements PluginInterface {
         logCache = (Cache) manager.getPersisentCache("logCache");
     }
 
+    /**
+     * The plugin should cleanup its self...*/
     @Override
     public void cleanup() {
         log.info("Cleanup " + getId());
