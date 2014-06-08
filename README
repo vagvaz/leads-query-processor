@@ -33,6 +33,9 @@ an thelete mporeite na kanete locally osa branch thelete. Tha protimousa oti
 allages exete na tis pernate sto proswpika sas  kai na kanete pull request wste 
 na enswmatwnw tis allages sas.
 
+*** gia na kanete push to branch sas 
+git push -u origin branchname
+
 Epishs sas parakalw issues provlhmata bugs pou den diorthwnete mhn mou ta lete 
 opws pernate apo to grafeio
 dhmiourghste new issue sto repository.
