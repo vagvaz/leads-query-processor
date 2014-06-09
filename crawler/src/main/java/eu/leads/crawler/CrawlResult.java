@@ -7,32 +7,34 @@ import java.io.Serializable;
  */
 public class CrawlResult implements Serializable, Comparable<CrawlResult> {
 
-    public double pagerank;
-    public double sentiment;
+  public double pagerank;
+  public double sentiment;
 
-    public CrawlResult(double p, double s) {
-        pagerank = p;
-        sentiment = s;
-    }
+  public CrawlResult(double p, double s) {
+    pagerank = p;
+    sentiment = s;
+  }
 
-    @Override
-    public int compareTo(CrawlResult crawlResult) {
-        if (pagerank > crawlResult.pagerank) {
-            return 1;
-        } else if (pagerank == crawlResult.pagerank) {
-            if (sentiment > crawlResult.sentiment) {
-                return 1;
-            } else if (sentiment == crawlResult.sentiment) {
-                return 0;
-            }
-        }
-        return -1;
+  /** {@inheritDoc} */
+  @Override
+  public int compareTo(CrawlResult crawlResult) {
+    if ( pagerank > crawlResult.pagerank ) {
+      return 1;
+    } else if ( pagerank == crawlResult.pagerank ) {
+      if ( sentiment > crawlResult.sentiment ) {
+        return 1;
+      } else if ( sentiment == crawlResult.sentiment ) {
+        return 0;
+      }
     }
+    return -1;
+  }
 
-    @Override
-    public String toString() {
-        return "(" + pagerank + "," + sentiment + ")";
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String toString() {
+    return "(" + pagerank + "," + sentiment + ")";
+  }
 
 }
 

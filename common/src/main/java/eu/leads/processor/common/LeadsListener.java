@@ -10,13 +10,28 @@ import java.io.Serializable;
 public interface LeadsListener extends Serializable {
 
 
-    public InfinispanManager getManager();
+  /**
+   * Getter for property 'manager'.
+   *
+   * @return Value for property 'manager'.
+   */
+  public InfinispanManager getManager();
 
-    public void setManager(InfinispanManager manager);
+  /**
+   * Setter for property 'manager'.
+   *
+   * @param manager Value to set for property 'manager'.
+   */
+  public void setManager(InfinispanManager manager);
 
-    public void initialize(InfinispanManager manager);
+  public void initialize(InfinispanManager manager);
 
-    public String getId();
+  /**
+   * Getter for property 'id'.
+   *
+   * @return Value for property 'id'.
+   */
+  public String getId();
 
 
 }

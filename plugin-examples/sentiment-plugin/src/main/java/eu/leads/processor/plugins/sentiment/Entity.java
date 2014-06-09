@@ -1,43 +1,42 @@
 package eu.leads.processor.plugins.sentiment;
 
 public class Entity {
-    String name;
-    String type;
+  String name;
+  String type;
 
-    public String getName() {
-        return name;
-    }
+  public String getType() {
+    return type;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setType(String type) {
+    this.type = type;
+  }
 
-    public String getType() {
-        return type;
-    }
+  @Override
+  public int hashCode() {
+    return name.hashCode();
+  }
 
-    public void setType(String type) {
-        this.type = type;
+  @Override
+  public boolean equals(Object ob) {
+    Entity other = null;
+    if ( ob instanceof Entity ) {
+      other = (Entity) ob;
+      return other.getName().equals(name);
     }
+    return false;
+  }
 
-    @Override
-    public String toString() {
-        return "Entity [name=" + name + ", type=" + type + "]";
-    }
+  public String getName() {
+    return name;
+  }
 
-    @Override
-    public boolean equals(Object ob){
-        Entity other = null;
-        if(ob instanceof Entity)
-        {
-            other = (Entity)ob;
-            return other.getName().equals(name);
-        }
-        return false;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    @Override
-    public int hashCode(){
-        return name.hashCode();
-    }
+  @Override
+  public String toString() {
+    return "Entity [name=" + name + ", type=" + type + "]";
+  }
 }

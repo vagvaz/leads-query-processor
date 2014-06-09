@@ -4,8 +4,8 @@ import eu.leads.processor.conf.LQPConfiguration;
 import junit.framework.TestCase;
 
 public class InfinispanClusterTest extends TestCase {
-    public static void main(String[] args) {
-        LQPConfiguration.initialize();
+  public static void main(String[] args) {
+    LQPConfiguration.initialize();
 //        InfinispanCluster cluster = WeldContext.INSTANCE.getBean(InfinispanCluster.class);
 //
 ////        cluster.initialize();
@@ -24,9 +24,9 @@ public class InfinispanClusterTest extends TestCase {
 //        PrintUtilities.printList(cluster.getManager().getMembers());
 //        System.out.println("cl2");
 //        PrintUtilities.printList(cluster2.getManager().getMembers());
-    }
+  }
 
-    public void testGetManager() throws Exception {
+  public void testGetManager() throws Exception {
 //        LQPConfiguration.initialize();
 //        InfinispanCluster cluster = WeldContext.INSTANCE.getBean(InfinispanCluster.class);
 //
@@ -46,5 +46,5 @@ public class InfinispanClusterTest extends TestCase {
 //        PrintUtilities.printList(cluster.getManager().getMembers());
 //        System.out.println("cl2");
 //        PrintUtilities.printList(cluster2.getManager().getMembers());
-    }
+  }
 }

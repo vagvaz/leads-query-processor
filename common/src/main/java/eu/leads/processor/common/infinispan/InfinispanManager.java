@@ -12,27 +12,36 @@ import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Created by vagvaz on 5/18/14.
- * This interface is a wrapper for different operations to an Infinispan cluster
- * Depending on the type of Infinispan cluster different implementaitons might be needed.
+ * Created by vagvaz on 5/18/14. This interface is a wrapper for different operations to an
+ * Infinispan cluster Depending on the type of Infinispan cluster different implementaitons might be
+ * needed.
  */
 
 public interface InfinispanManager {
-    //Manager related methods
-    public void setConfigurationFile(String configurationFile);
+  /**
+   * Setter for property 'configurationFile'.
+   *
+   * @param configurationFile Value to set for property 'configurationFile'.
+   */ //Manager related methods
+  public void setConfigurationFile(String configurationFile);
 
-    public void startManager(String configurationFile);
+  public void startManager(String configurationFile);
 
-    public EmbeddedCacheManager getCacheManager();
+  /**
+   * Getter for property 'cacheManager'.
+   *
+   * @return Value for property 'cacheManager'.
+   */
+  public EmbeddedCacheManager getCacheManager();
 
-    public void stopManager();
+  public void stopManager();
 
-    //Cache realted methods
-    public ConcurrentMap getPersisentCache(String name);
+  //Cache realted methods
+  public ConcurrentMap getPersisentCache(String name);
 
-    public ConcurrentMap getPersisentCache(String name, Configuration configuration);
+  public ConcurrentMap getPersisentCache(String name, Configuration configuration);
 
-    //    public ConcurrentMap getVersionedCache(String name);
+  //    public ConcurrentMap getVersionedCache(String name);
 //    public ConcurrentMap getVersionedCache(String name, Configuration configuration);
 //    public ConcurrentMap getWeaklyConsistentCache(String name);
 //    public ConcurrentMap getWeaklyConsistentCache(String name, Configuration configuration);
@@ -40,7 +49,7 @@ public interface InfinispanManager {
 //    public ConcurrentMap getSWMRCache(String name,Configuration configuration);
 //    public ConcurrentMap getAtomicCache(String name);
 //    public ConcurrentMap getAtomicCache(String name, Configuration configuration);
-    public void removePersistentCache(String name);
+  public void removePersistentCache(String name);
 
 //    public void removeVersionedCache(String name);
 //    public void removeVersionedCache(Cache cache);
@@ -52,28 +61,42 @@ public interface InfinispanManager {
 //    public void removeAtomicCache(Cache cache);
 
 
-    // Listener related methods
-    public void addListener(Object listener, Cache cache);
+  // Listener related methods
+  public void addListener(Object listener, Cache cache);
 
-    public void addListener(Object listener, String name);
+  public void addListener(Object listener, String name);
 
-    public void addListener(Object listener, String name, KeyFilter filter);
+  public void addListener(Object listener, String name, KeyFilter filter);
 
-    public void addListener(Object listener, String name, KeyValueFilter filter, Converter converter);
+  public void addListener(Object listener, String name, KeyValueFilter filter, Converter converter);
 
-    public void addListener(Object listener, Cache cache, KeyFilter filter);
+  public void addListener(Object listener, Cache cache, KeyFilter filter);
 
-    public void addListener(Object listener, Cache cache, KeyValueFilter filter, Converter converter);
+  public void addListener(Object listener, Cache cache, KeyValueFilter filter, Converter converter);
 
-    public void removeListener(Object listener, Cache cache);
+  public void removeListener(Object listener, Cache cache);
 
-    public void removeListener(Object listener, String cacheNane);
+  public void removeListener(Object listener, String cacheNane);
 
 
-    //Cluster and Jgroups related methods
-    public List<Address> getMembers();
+  /**
+   * Getter for property 'members'.
+   *
+   * @return Value for property 'members'.
+   */ //Cluster and Jgroups related methods
+  public List<Address> getMembers();
 
-    public Address getMemberName();
+  /**
+   * Getter for property 'memberName'.
+   *
+   * @return Value for property 'memberName'.
+   */
+  public Address getMemberName();
 
-    boolean isStarted();
+  /**
+   * Getter for property 'started'.
+   *
+   * @return Value for property 'started'.
+   */
+  boolean isStarted();
 }
