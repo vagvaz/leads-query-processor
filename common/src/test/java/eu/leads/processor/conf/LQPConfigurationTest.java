@@ -29,7 +29,7 @@ public class LQPConfigurationTest extends TestCase {
   }
 
   public void testInitialize2() throws Exception {
-    LQPConfiguration.initialize("conf2", false);
+    LQPConfiguration.initialize("conf", false);
     this.printConfig(LQPConfiguration.getConf());
   }
 
