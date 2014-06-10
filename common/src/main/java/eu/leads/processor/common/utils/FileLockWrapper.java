@@ -22,6 +22,10 @@ public class FileLockWrapper {
 
   public FileLockWrapper(String filename) {
     file = new File(filename + ".lock");
+    if(!file.getParentFile().mkdirs())
+    {
+      log.error("Could not create the directories for the lock of " + filename +".lock");
+    }
     try {
       channel = new RandomAccessFile(file, "rw").getChannel();
     } catch ( FileNotFoundException e ) {
@@ -43,7 +47,7 @@ public class FileLockWrapper {
       int counter = 1;
       while ( lock == null || !lock.acquiredBy().equals(channel) ) {
         try {
-          lock = channel.lock();
+          lock = channel.lock(0,Long.MAX_VALUE,false);
         } catch ( OverlappingFileLockException e ) {
           log.info("Lock File Found " + file.getCanonicalPath());
           try {
