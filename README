@@ -1,124 +1,73 @@
-*****Preliminaries
+This is the repository for the Leads Query Processor for users to implement and test their plugins.
 
-Geia sas to kainourio project gia to query processor einai etoimo opws epishs 
-kai ta plugins.
+COMPLILE & INSTALL
 
-To repo einai sto github kai einai private pros to paron to link einai 
-https://github.com/vagvaz/leads-query-processor.git
+To simplify the procedure right the dependencies on this repo is not the Leads-Infinispan project found here
+https://github.com/otrack/Leads-infinispan but the current under development infinispan. 
 
-Gia version control tha xrhsimopoihsoume to git. Akolouthoun merika tutorials 
-to prwto einai syntomo kai periektiko to 2o gia to github kai to 3o genikes gnwseis xrhsimes!!!
-git tutorial
-http://www.vogella.com/tutorials/Git/article.html#gitdefintion_localrepositories
-github tutorial
-https://help.github.com/articles/set-up-git		      
-general knowledge
-https://www.atlassian.com/git/tutorial/git-basics
+In later releases this will change.
+To compile and install your the required artifacts of the leads query processor use
 
-o kathe enas sas tha exei 1 branch
-vagvaz -> vagvaz
-lefteris -> lefteris
-ioakeim   -> ioakeim
-giannis    -> giannis
-odysseas   -> odysseas
-npavlakis   -> npavlakis
+mvn clean install
 
-thelw na mou steilete ta username sas sto github gia na sas kanw add. 
-Tha douleyete sto proswpiko sas branch kai otan teleiwnete kapoio feature tha 
-kanete pull request
 
-pull request https://help.github.com/articles/creating-a-pull-request
+Now you can develop your plugin by using the plugins-template maven project found in plugin-examples sub-folder.
+Some reference plugin implementations are:
 
-an thelete mporeite na kanete locally osa branch thelete. Tha protimousa oti 
-allages exete na tis pernate sto proswpika sas  kai na kanete pull request wste 
-na enswmatwnw tis allages sas.
+transform plugin, which projects some attributes from a cache
+sentiment plugin, which computes the sentiment of a webpage and its entities.
 
-*** gia na kanete push to branch sas 
-git push -u origin branchname
-
-Epishs sas parakalw issues provlhmata bugs pou den diorthwnete mhn mou ta lete 
-opws pernate apo to grafeio
-dhmiourghste new issue sto repository.
-
-*****Project
-
-afou kanete clone to project tha deite oti uparxoun diaforoi fakeloi praktika 
-ena gia kathe leitourgikh monada:
-common: koina xrhsima pragmata
-core:   ta apolutws aparaithta
-crawler: o crawler pou eftiaksa gia na testarete ta plugins kai genika
-deployer: o deployer
-nqe:  node query executor
-parent: voithitiko project gia na mporoume na kanoume build
-planner: o planner
-plugin-examples: aplws periexei to template maven project gia ta plugins kai to 
-sentiment and transform 			plugin gia reference
-plugins: kwdikas related sta plugins
-
-* Compile
-gia na kanete compile to project mvn compile
-* create jar. prosekste auto to jar einai MONO o kwdikas kai ta resources oxi 
-kai ta dependencies
-mvn package
-* create a super jar, dhmiourgeitai ena jar -with-dependencies me auto mporeite 
-na treksete to kwdika sas 
-mvn assembly:single
-
-* Developping
-Exw valei sxolia genika stis klasseis pou tha xreiasteite mind
-
----- in commmon -----
-LQPConfiguration (kaleita panta thn initialize wste na exete working cluster 
-ready infinispan)
-Tuple  tuple utility class for handling json objects
-StringConstants
-classes in utils folder
-InfinispanManager interface that abstracts Infinispan operators getCache bla bla
-InfinispanClusterSingleton.java xrhsimopoihste authn thn klash gia na apokthsete 
-prosvash se 1 InfinispanManager
+There is also a simple crawler for testing  based on the crawler https://github.com/otrack/Leads-crawler.
 
 
 
---- in plugins ----
-PluginBaseImpl ena basic plugin pou kanei log oti mpainei kai oti vgainei apo 
-mia getCache
-PluginInterface to interface pou tha prepei na ulopoioun ta plugins
-PluginManager h klash pou xrhsimopoieite gia na kanete upload kai deploy plugins
+Plugins
 
---- plugin-examples ---
-plugins-template folder pou xrhsimopoieite san base gia na kanete to plugin sas 
-(NA ALLAZETE to artifactId)
-		  mesa epishs uparxei kai enas fakelos test me 2 klaseis mia gia 
-testing gia local kai gia clustered. 
-sentiment plugin  to gnwsto sentiment and entity extraction plugin kanei compile 
-alla tou leipoun oi classifiers 77Mb ta exw anevasei edw http://goo.gl/4dfs8j 
-ama thelete na to treksete
+Leads Plugins are POJOs (Plain Old Java Objects) that are implemented by the users of the leads platform.
 
-transform-plugin aplo plugin pou aplws filtrarei kapoia attributes
+Each plugin has the following attributes:
+
+    An id that must be unique
+    A jar which contains the plugin code and its jar dependencies
+    A XML configuration file
+    A class name
+
+These attributes are packaged in PluginPackage class.
+
+The query processor stores all plugins in a KVS cache. When a user requests to deploy a plugin to a target cache, It adds the plugin to a listener that is not clustered for that cache. Moreover, the user defines which events for that cache is interested in (CREATE,REMOVE,MODIFY).
+
+A user can upload his/her plugin using
+
+boolean PluginManager.uploadPlugin(PluginPackage plugin)
+
+Plugins are deployed by the user using.
+
+//Using the default configuration
+ deployPlugin(String pluginId, String cacheName, EventType[] events)
+//Using Custom Configuration
+ deployPlugin(String pluginId, XMLConfiguration config, String cacheName, EventType[] events) 
+
+In leads query processor the plugins must implement the following interface
+
+  
+  public String getId();
+  public void setId(String id);
+  public String getClassName();
+  public Configuration getConfiguration();
+  public void setConfiguration(Configuration config);
+  
+  //Initialize the plugin, called once  the Configuration is a XMLConfiguration by Apache commons Configuration
+  //InfinispanManager is an Interface that wraps certain KVS functionality (getCache,addListener etc)
+  //If the initialization failed then the user should throw an Exception
+  //In order to avoid the installation of the plugin to the listener
+  public void initialize(Configuration config, InfinispanManager manager);
+  
+  //Clean up is called once when a plugin is undeployed
+  public void cleanup();
+  //Methods called when a key is modified, created or removed.
+  
+  public void modified(Object key, Object value, Cache<Object, Object> cache);
+  public void created(Object key, Object value, Cache<Object, Object> cache);
+  public void removed(Object key, Object value, Cache<Object, Object> cache);
 
 
----- Pws uloipoieitai ena plugin
-1. sto leads-query-processor project: mvn clean install 
-   etsi kanete compile kai egkathistate sto local maven repository sas ola ta 
-dependencies tou project.
-2. copy to fakelo plugin-examples/plugins-template se ena kainourio fakelo px 
-myplugin
-3. customize myplugin/pom.xml (ALLAZETE to artifactId, kai prostetete ta maven 
-deps)
-4. start happy coding....
-
-ta plugins ta exw gia reference mporeite na deite pws exw ulopoihsei auta ta 3 
-plugins. gia test exw kanei modify ton crawler pou eixe ftiaksei o Pierre wste 
-na gemizoume mia cache deite pws ton xrhsimmpoiw gia kapoio logo  to 
-crawler.seed configuration den douleyei 
-
----- PROSOXH
-1. epeidh evala na uparxoun file stores sta caches (shmainei oti swzontai se 
-arxeio) sto /tmp/ tha vriskontai arxeia cacheName.dat ta svhnete...
-2. mhn ksegelasteite kanontas iterations panw apo ena cache me to entrySet. Sto 
-deployment version den tha exete ola ta data gia na douleyei swsta...(twra 
-douleyei giati ola ta instances koitazoun to idio arxeio...)
-3. to state sas an to allaksete prepei na to ksanavalete sto KVS
-
-4. gia na testarete to clustered deployment prepei prwta na ftiaksete 1 jar me 
-ola ta dependencies mvn assembly:single) kai ena xml configuration arxeio. auta
