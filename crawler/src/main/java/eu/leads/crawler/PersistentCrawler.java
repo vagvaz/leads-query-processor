@@ -50,6 +50,8 @@ public class PersistentCrawler extends DefaultCrawler {
       Source src = new Source(page.getContent());
       String body = src.getTextExtractor().setIncludeAttributes(false).toString();
       Page page2 = new Page(page.getUrl(), page.getHeaders(), page.getResponseCode(), page.getCharset(), page.getResponseTime(), body.getBytes());
+      page2.setLinks(page.getLinks());
+      page2.setTitle(page.getTitle());
       preprocessingMap.putIfAbsent(page.getUrl().toString(), mapper.writeValueAsString(page2));
     } catch ( IOException e ) {
       e.printStackTrace();  // TODO: Customise this generated block
