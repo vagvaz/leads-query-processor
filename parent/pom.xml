@@ -31,7 +31,7 @@
     </dependencies>
 
     <properties>
-        <infinispan.version>7.0.0-SNAPSHOT</infinispan.version>
+        <infinispan.version>7.0.0.Alpha4</infinispan.version>
         <processor.version>1.0.0-SNAPSHOT</processor.version>
     </properties>
 
