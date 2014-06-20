@@ -24,7 +24,6 @@
         <module>nqe</module>
         <module>plugins</module>
         <module>crawler</module>
-        <module>pagerank-plugin</module>
     </modules>
 
 </project>
