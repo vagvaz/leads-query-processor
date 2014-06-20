@@ -72,6 +72,7 @@ public class DSPM extends FIP  {
 			tmpNode.setDspmVisits(tmpNode.getDspmVisits() + steps);
 
         graphCache.put(key, tmpNode);
+        sendVisitDriftIfNeeded(negative ? -steps : steps);
 
         if ( !tmpNode.getNeighbours().isEmpty() ){
 

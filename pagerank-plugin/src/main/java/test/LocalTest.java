@@ -9,6 +9,7 @@ import eu.leads.processor.plugins.PluginInterface;
 import eu.leads.processor.plugins.PluginManager;
 import eu.leads.processor.plugins.pagerank.PagerankPlugin;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
+import eu.leads.processor.plugins.pagerank.utils.Const;
 import org.apache.commons.configuration.XMLConfiguration;
 
 import java.util.Iterator;
@@ -33,6 +34,8 @@ public class LocalTest {
         XMLConfiguration config = new XMLConfiguration();
         //Set plugin configuration (could be loaded from file)
         config.setProperty("cache", "pagerankCache");
+        config.setProperty("vc_cache","vc_per_node");
+
         config.setProperty("attributes","links");
         config.setProperty("R","5");
         config.setProperty("rseed","11");
@@ -56,7 +59,6 @@ public class LocalTest {
 
         //Iterate through local cache entries to ensure things went as planned
         Map cache = InfinispanClusterSingleton.getInstance().getManager().getPersisentCache("pagerankCache");
-
         // retrieval of visit count of each cache's value, by calling : webpage.getVisitCount();
         //PrintUtilities.printMap(cache);
         printVCs(cache);
@@ -71,12 +73,13 @@ public class LocalTest {
      */
     private static void printVCs(Map mymap){
 
+        int global_vc = (Integer) InfinispanClusterSingleton.getInstance().getManager().getPersisentCache("vc_per_node").get(Const.GLOBAL_SUM);
         Iterator<Map.Entry> my_iterator = mymap.entrySet().iterator();
 
         while (my_iterator.hasNext()) {
 
             Map.Entry my_entry = my_iterator.next();
-            System.out.println(my_entry.getKey()+"->"+((DSPMNode) my_entry.getValue()).getVisitCount() );
+            System.out.println(my_entry.getKey()+"->"+(double) ((DSPMNode) my_entry.getValue()).getVisitCount() / (double) global_vc );
         }
     }
 }

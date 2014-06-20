@@ -2,7 +2,9 @@ package eu.leads.processor.plugins.pagerank.node;
 
 import gnu.trove.set.hash.THashSet;
 
-public class Node {
+import java.io.Serializable;
+
+public class Node implements Serializable {
 	
 	protected THashSet neighbours;
 	

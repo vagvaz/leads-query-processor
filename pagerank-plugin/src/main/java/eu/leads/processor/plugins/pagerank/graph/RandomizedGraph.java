@@ -3,6 +3,8 @@ package eu.leads.processor.plugins.pagerank.graph;
 import cern.jet.random.Uniform;
 import cern.jet.random.engine.RandomEngine;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.plugins.pagerank.node.Node;
+import eu.leads.processor.plugins.pagerank.utils.Const;
 import gnu.trove.iterator.TIntIntIterator;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.iterator.TIterator;
@@ -25,6 +27,8 @@ import java.util.List;
 public abstract class RandomizedGraph {
 
     protected Cache graphCache;
+    protected Cache vc_per_node;
+
     protected int R;
 
     protected static RandomEngine generator;
@@ -32,11 +36,17 @@ public abstract class RandomizedGraph {
 
     protected Logger log = LoggerFactory.getLogger(RandomizedGraph.class);
 
+    protected String nodeName;
+    protected int accurateLocalSum;
+
     public RandomizedGraph(int R, Configuration configuration, InfinispanManager infinispanManager, int seed) {
         initCacheAndAttrs(configuration, infinispanManager);
         generator = new cern.jet.random.engine.MersenneTwister64(seed);
         unif = new Uniform(generator);
 		this.R = R;
+
+        nodeName = infinispanManager.getCacheManager().getAddress().toString();
+        accurateLocalSum = 0;
 	}
 
     private void initCacheAndAttrs(Configuration configuration, InfinispanManager infinispanManager){
@@ -47,6 +57,18 @@ public abstract class RandomizedGraph {
             log.error("TargetCache is not defined using default for not breaking");
             graphCache = (Cache) infinispanManager.getPersisentCache("default");
         }
+
+        vc_per_node = (Cache) infinispanManager.getPersisentCache(configuration.getString("vc_cache"));
+        vc_per_node.put(Const.GLOBAL_SUM, 0);
+
+    }
+
+    public Cache getVc_per_node(){
+        return vc_per_node;
+    }
+
+    public void setVc_per_node(Cache vc_per_node){
+        this.vc_per_node = vc_per_node;
     }
 
     public Cache getGraphCache(){
@@ -64,6 +86,38 @@ public abstract class RandomizedGraph {
 	public void setR(int r) {
 		R = r;
 	}
+
+
+    public void sendVisitDriftIfNeeded(int drift){
+
+        accurateLocalSum += drift;
+        //VCperCloud[tmpNode.getMyCloud()] += drift;
+
+        if ( vc_per_node.containsKey(nodeName) ){
+            int old_estimate = (Integer) vc_per_node.get(nodeName);
+
+            if ( Math.abs( accurateLocalSum - old_estimate ) >
+                    ( Const.VIS_COUNT_DRIFT * accurateLocalSum ) ){
+
+                vc_per_node.put(nodeName, accurateLocalSum);
+                vc_per_node.put(Const.GLOBAL_SUM, (Integer) vc_per_node.get(Const.GLOBAL_SUM) +  (accurateLocalSum - old_estimate)  );
+            }
+        }
+        else{
+            vc_per_node.put(nodeName, accurateLocalSum);
+            vc_per_node.put(Const.GLOBAL_SUM, (Integer) vc_per_node.get(Const.GLOBAL_SUM) +  accurateLocalSum  );
+        }
+
+        /*if ( Math.abs( VCperCloud[tmpNode.getMyCloud()] - estVCperCloud[tmpNode.getMyCloud()] ) >
+                ( Main.VIS_COUNT_DRIFT * VCperCloud[tmpNode.getMyCloud()] ) ){
+
+            estVCperCloud[tmpNode.getMyCloud()] = VCperCloud[tmpNode.getMyCloud()];
+
+            cm.increaseLW( -1, -2, 2 );
+            cm.sendMsgs( -1, -2, 1 );
+        }*/
+
+    }
 
 	//public abstract void propagateWalks();
 

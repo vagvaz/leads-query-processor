@@ -32,6 +32,8 @@ public abstract class FIP extends RandomizedGraph {
             assert(tmpNode.getFipVisits()>=0);
             graphCache.put(key, tmpNode);
 
+            sendVisitDriftIfNeeded(-1);
+
             if (! next_pos.equals(-1) ){
 				assert( tmpNode.getNeighbours().contains(next_pos) );
 
@@ -71,6 +73,7 @@ public abstract class FIP extends RandomizedGraph {
                     graphCache.put(key, tmpNode);
                 }
 			}
+            sendVisitDriftIfNeeded(1);
 
 		}
 
