@@ -33,6 +33,9 @@ public class CommunicationHandler implements Handler<Message> {
   }
 
   public void register(String groupId, LeadsMessageHandler handler) {
+    LeadsMessageHandler oldHandler = handlers.remove(groupId);
+    if(oldHandler != null)
+      oldHandler =null;
     handlers.put(groupId,handler);
   }
 
@@ -41,6 +44,12 @@ public class CommunicationHandler implements Handler<Message> {
   }
 
   public LeadsMessageHandler getDefaultHandler() {
-    return handlers.get("default");
+    return getHandler("default") ;
+  }
+  public LeadsMessageHandler getHandler(String groupId){
+    LeadsMessageHandler result = handlers.get(groupId);
+    if(result == null)
+      result = getDefaultHandler();
+    return result;
   }
 }

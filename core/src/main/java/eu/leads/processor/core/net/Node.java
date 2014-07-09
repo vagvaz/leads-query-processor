@@ -11,13 +11,13 @@ import java.util.List;
  * Created by vagvaz on 7/8/14.
  */
 public interface Node {
-  public boolean sendTo(String nodeid, JsonObject message);
+  public void sendTo(String nodeid, JsonObject message);
 
   public void sendRequestTo(String nodeid, JsonObject message, LeadsMessageHandler handler);
 
-  public boolean sendToGroup(String groupId, JsonObject message);
+  public void sendToGroup(String groupId, JsonObject message);
 
-  public void sendRequestToGroup(String groupId, JsonObject message, CommunicationHandler handler);
+  public void sendRequestToGroup(String groupId, JsonObject message, LeadsMessageHandler handler);
 
   public void sendToAllGroup(String groupId, JsonObject message);
 
@@ -25,8 +25,8 @@ public interface Node {
 
   public void unsubscribe(String groupId);
 
-  public void initialize(JsonObject config, LeadsMessageHandler handler, Vertx vertx);
-  public void initialize(String id, String group, List<String> groups,LeadsMessageHandler handler,Vertx vertx);
+  public void initialize(JsonObject config, LeadsMessageHandler defaultHandler,LeadsMessageHandler failHandler, Vertx vertx);
+  public void initialize(String id, String group, List<String> groups,LeadsMessageHandler defaultHandler, LeadsMessageHandler failHandler,Vertx vertx);
 
   public JsonObject getConfig();
   public void setEventBus(EventBus bus);

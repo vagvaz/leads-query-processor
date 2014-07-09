@@ -16,15 +16,55 @@ import java.util.*;
  */
 public class DefaultNode implements Node {
   private EventBus bus;
-  JsonObject config;
+  private JsonObject config;
   private Logger logger;
   private int retries = ComUtils.DEFAULT_RETRIES;
   private long timeout = ComUtils.DEFAULT_TIMEOUT;
-  private AckHandler ackHandler;
   private long currentId;
   private Map<Long,JsonObject> pending;
   private Map<Long,AckHandler> pendingHandlers;
   private CommunicationHandler comHandler;
+
+
+
+  /**
+   * Getter for property 'comHandler'.
+   *
+   * @return Value for property 'comHandler'.
+   */
+  public CommunicationHandler getComHandler() {
+    return comHandler;
+  }
+
+  /**
+   * Setter for property 'comHandler'.
+   *
+   * @param comHandler Value to set for property 'comHandler'.
+   */
+  public void setComHandler(CommunicationHandler comHandler) {
+    this.comHandler = comHandler;
+  }
+
+  /**
+   * Getter for property 'failHandler'.
+   *
+   * @return Value for property 'failHandler'.
+   */
+  public LeadsMessageHandler getFailHandler() {
+    return failHandler;
+  }
+
+  /**
+   * Setter for property 'failHandler'.
+   *
+   * @param failHandler Value to set for property 'failHandler'.
+   */
+  public void setFailHandler(LeadsMessageHandler failHandler) {
+    this.failHandler = failHandler;
+  }
+
+  private LeadsMessageHandler failHandler;
+
   public DefaultNode() {
     config = new JsonObject();
     pending = new HashMap<Long, JsonObject>();
@@ -39,37 +79,36 @@ public class DefaultNode implements Node {
     return config.getString("group");
   }
   @Override
-  public boolean sendTo(String nodeid, JsonObject message) {
-    boolean send = true;
+  public void sendTo(String nodeid, JsonObject message) {
     JsonObject leadsMessage = MessageUtils.createLeadsMessage(message, getId(),ComUtils.P2P, nodeid);
-    long messageId = this.getNextMessageId();
-    AckHandler ack = new AckHandler(this,logger,messageId);
-    pending.put(messageId,leadsMessage);
-    pendingHandlers.put(messageId,ack);
-    bus.sendWithTimeout(getId(),leadsMessage,timeout,ack);
-    return send;
+    sendMessageToDestination(nodeid,leadsMessage,null);
   }
 
   @Override
-  public void sendRequestTo(String id, JsonObject message, LeadsMessageHandler handler) {
-
+  public void sendRequestTo(String nodeid, JsonObject message, LeadsMessageHandler handler) {
+    JsonObject leadsMessage = MessageUtils.createLeadsMessage(message, getId(),ComUtils.GROUP, nodeid);
+    sendMessageToDestination(nodeid,leadsMessage,handler);
   }
 
   @Override
-  public boolean sendToGroup(String groupId, JsonObject message) {
-    boolean send = true;
+  public void sendToGroup(String groupId, JsonObject message) {
     JsonObject leadsMessage = MessageUtils.createLeadsMessage(message, getId(),ComUtils.GROUP, groupId);
-    long messageId = this.getNextMessageId();
-    AckHandler ack = new AckHandler(this,logger,messageId);
-    pending.put(messageId,leadsMessage);
-    pendingHandlers.put(messageId,ack);
-    bus.sendWithTimeout(getId(),leadsMessage,timeout,ack);
-    return send;
+    sendMessageToDestination(groupId,leadsMessage,null);
   }
 
-  @Override
-  public void sendRequestToGroup(String groupId, JsonObject message, CommunicationHandler handler) {
+  private void sendMessageToDestination(String destination, JsonObject leadsMessage,LeadsMessageHandler handler) {
+    long messageId = this.getNextMessageId();
+    AckHandler ack = new AckHandler(this,logger,messageId,handler);
+    pending.put(messageId,leadsMessage);
+    pendingHandlers.put(messageId,ack);
+    bus.sendWithTimeout(destination,leadsMessage,timeout,ack);
+  }
 
+
+  @Override
+  public void sendRequestToGroup(String groupId, JsonObject message, LeadsMessageHandler handler) {
+    JsonObject leadsMessage = MessageUtils.createLeadsMessage(message, getId(),ComUtils.GROUP, groupId);
+    sendMessageToDestination(groupId,leadsMessage,handler);
   }
 
   @Override
@@ -86,6 +125,7 @@ public class DefaultNode implements Node {
       public void handle(AsyncResult<Void> event) {
         if(event.succeeded()){
           logger.info("subscribing to " + groupId + " succeded");
+          config.getArray("groups").add(groupId);
           comHandler.register(groupId,handler);
         }
         else{
@@ -103,6 +143,7 @@ public class DefaultNode implements Node {
       public void handle(AsyncResult<Void> event) {
         if(event.succeeded()){
           logger.info("unsubscribing to " + groupId + " succeded");
+          //TODO remove from config the groupId.config.getArray("groups").(groupId);
           comHandler.unregister(groupId);
         }
         else{
@@ -113,27 +154,27 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public void initialize(JsonObject config,LeadsMessageHandler handler, Vertx vertx) {
-    comHandler = new CommunicationHandler(handler);
+  public void initialize(JsonObject config,LeadsMessageHandler defaultHandler, LeadsMessageHandler failHandler, Vertx vertx) {
+    comHandler = new CommunicationHandler(defaultHandler);
+    this.failHandler = failHandler;
     bus = vertx.eventBus();
-    logger = LoggerFactory.getLogger(this.getClass().getCanonicalName()+"."+this.getId());
-    setConfig(config);
+    logger = LoggerFactory.getLogger(this.getClass().getCanonicalName() + "." + this.getId());
+    this.config = config.copy();
     registerToEventBusAddresses(this.config);
 
   }
 
   @Override
-  public void initialize(String id, String group, List<String> groups,LeadsMessageHandler handler, Vertx vertx) {
-    comHandler = new CommunicationHandler(handler);
-    bus = vertx.eventBus();
-    config.putString("id",id);
-    config.putString("group",group);
+  public void initialize(String id, String group, List<String> groups,LeadsMessageHandler defaultHandler, LeadsMessageHandler failHandler, Vertx vertx) {
+    JsonObject conf = new JsonObject();
+    conf.putString("id",id);
+    conf.putString("group",group);
     JsonArray array = new JsonArray();
     for(String g : groups){
       array.add(g);
     }
-
-    registerToEventBusAddresses(config);
+    conf.putArray("groups",array);
+    initialize(conf, defaultHandler,failHandler, vertx);
   }
 
   private void registerToEventBusAddresses(JsonObject config) {
@@ -149,18 +190,6 @@ public class DefaultNode implements Node {
   public JsonObject getConfig() {
     return config;
   }
-
-
-  public void setConfig(JsonObject config) {
-    this.config = config.copy();
-    bus.registerHandler(getId(),comHandler);
-    bus.registerHandler(getGroup(), comHandler);
-    Iterator<Object> it = this.config.getArray("groups").iterator();
-    while(it.hasNext()){
-      bus.registerHandler((String) it.next(), comHandler);
-    }
-  }
-
 
   @Override
   public void setEventBus(EventBus bus) {
@@ -191,19 +220,23 @@ public class DefaultNode implements Node {
   public void retry(Long messageId, AckHandler handler) {
     JsonObject msg = pending.get(messageId);
     if(msg.getString(MessageUtils.TYPE).equals(ComUtils.P2P)){
+      //resend message through event bus to the nodeid
       bus.sendWithTimeout(msg.getString(MessageUtils.TO),msg,timeout,handler);
     }
     else if (msg.getString(MessageUtils.TYPE).equals(ComUtils.GROUP)){
+      //resend message through event bus to the groupId, it is essentially the same as
+      //sending to one node since the event bus address is just an id.
       bus.sendWithTimeout(msg.getString(MessageUtils.TO),msg,timeout,handler);
     }
   }
 
   @Override
   public void succeed(Long messageId) {
+    //If succeded remove message and ackHandler
     JsonObject msg = pending.remove(messageId);
     AckHandler handler = pendingHandlers.remove(messageId);
     handler = null;
-    logger.error("Succeded Message: " + msg.toString() );
+    logger.info("Succeded Message: " + msg.toString());
   }
 
   @Override
@@ -213,12 +246,17 @@ public class DefaultNode implements Node {
     AckHandler handler = pendingHandlers.remove(messageId);
     handler = null;
     logger.error("Failed Message: " + msg.toString() );
+    if(failHandler != null){
+      failHandler.handle(msg);
+    }
+
 
   }
 
   @Override
   public  long getNextMessageId() {
-    return currentId++ % Long.MAX_VALUE;
+    currentId += (currentId+1) % Long.MAX_VALUE;
+    return currentId;
   }
 
 
