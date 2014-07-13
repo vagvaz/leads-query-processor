@@ -2,10 +2,9 @@ package eu.leads.processor.core.net;
 
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.eventbus.EventBus;
-import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Created by vagvaz on 7/8/14.
@@ -26,7 +25,7 @@ public interface Node {
   public void unsubscribe(String groupId);
 
   public void initialize(JsonObject config, LeadsMessageHandler defaultHandler,LeadsMessageHandler failHandler, Vertx vertx);
-  public void initialize(String id, String group, List<String> groups,LeadsMessageHandler defaultHandler, LeadsMessageHandler failHandler,Vertx vertx);
+  public void initialize(String id, String group, Set<String> groups,LeadsMessageHandler defaultHandler, LeadsMessageHandler failHandler,Vertx vertx);
 
   public JsonObject getConfig();
   public void setEventBus(EventBus bus);

@@ -19,4 +19,5 @@ public class StringConstants {
   public static final String PLUGIN_CACHE = "processor_plugins:";
   public static final String PLUGIN_ACTIVE_CACHE = "active_plugins_cache:";
   public static final String CRAWLER_DEFAULT_CACHE = "crawler.default.cache";
+  public static final java.lang.String WORKQUEUE_MOD_NAME = " io.vertx~mod-work-queue~2.0.0-final";
 }

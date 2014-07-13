@@ -165,7 +165,7 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public void initialize(String id, String group, List<String> groups,LeadsMessageHandler defaultHandler, LeadsMessageHandler failHandler, Vertx vertx) {
+  public void initialize(String id, String group, Set<String> groups,LeadsMessageHandler defaultHandler, LeadsMessageHandler failHandler, Vertx vertx) {
     JsonObject conf = new JsonObject();
     conf.putString("id",id);
     conf.putString("group",group);
