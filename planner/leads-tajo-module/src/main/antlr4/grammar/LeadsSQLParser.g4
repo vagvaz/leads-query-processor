@@ -24,7 +24,7 @@ options {
 }
 
 @header {
-package grammar; 
+ 
 }
 
 @members {
@@ -1001,7 +1001,7 @@ table_expression
 */
 
 from_clause
-  : FROM leads_window? table_reference_list  { System.out.println("from_clause"); }
+  : FROM leads_window? table_reference_list // { System.out.println("from_clause"); }
   ;
 
 leads_window

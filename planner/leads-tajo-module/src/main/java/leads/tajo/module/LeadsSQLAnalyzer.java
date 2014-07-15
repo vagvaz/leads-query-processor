@@ -22,14 +22,18 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.BufferedTokenStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.tajo.algebra.*;
 import org.apache.tajo.algebra.Aggregation.GroupType;
 import org.apache.tajo.algebra.LiteralValue.LiteralType;
 import org.apache.tajo.catalog.CatalogUtil;
+import org.apache.tajo.engine.parser.SQLErrorListener;
+import org.apache.tajo.engine.parser.SQLErrorStrategy;
+import org.apache.tajo.engine.parser.SQLParseError;
+import org.apache.tajo.engine.parser.SQLSyntaxError;
 //import org.apache.tajo.engine.parser.LeadsSQLParser.*;
 import org.apache.tajo.storage.StorageConstants;
 import org.apache.tajo.util.StringUtils;
@@ -48,12 +52,12 @@ import grammar.LeadsSQLParser;
 import grammar.LeadsSQLParserBaseVisitor;
 import grammar.SQLLexer;
 
-public class SQLAnalyzer extends LeadsSQLParserBaseVisitor<Expr> {
+public class LeadsSQLAnalyzer extends LeadsSQLParserBaseVisitor<Expr> {
 	private LeadsSQLParser parser;
-
-  public SQLAnalyzer() {
+ 
+  public LeadsSQLAnalyzer() {
   }
-
+  
   public Expr parse(String sql) {
     ANTLRInputStream input = new ANTLRInputStream(sql);
     SQLLexer lexer = new SQLLexer(input);
@@ -585,10 +589,11 @@ public class SQLAnalyzer extends LeadsSQLParserBaseVisitor<Expr> {
     }
     return columnRefs;
   }
+
   @Override
   public Expr visitTable_primary(LeadsSQLParser.Table_primaryContext ctx) {
     if (ctx.table_or_query_name() != null) {
-      Relation relation = new Relation(((BufferedTokenStream) ctx.table_or_query_name()).getText());
+      Relation relation = new Relation(ctx.table_or_query_name().get(0).getText());
       if (ctx.alias != null) {
         relation.setAlias(ctx.alias.getText());
       }

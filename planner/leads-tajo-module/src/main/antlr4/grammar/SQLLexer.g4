@@ -19,7 +19,7 @@
 lexer grammar SQLLexer;
 
 @header {
- package grammar;
+
 }
 
 @members {
