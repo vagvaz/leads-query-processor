@@ -1,4 +1,4 @@
-package eu.leads.processor.core.net;
+package eu.leads.processor.core.comp;
 
 import com.google.common.base.Strings;
 

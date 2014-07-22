@@ -1,5 +1,6 @@
 package eu.leads.processor.core.net;
 
+import eu.leads.processor.core.comp.LeadsMessageHandler;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.Message;

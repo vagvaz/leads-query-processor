@@ -1,7 +1,10 @@
-package eu.leads.processor.core.net;
+package eu.leads.processor.core.comp;
 
 import com.google.common.base.Strings;
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.core.net.DefaultNode;
+import eu.leads.processor.core.net.LogUtils;
+import eu.leads.processor.core.net.Node;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonArray;
@@ -33,7 +36,7 @@ public class DefaultComponent extends Verticle implements Component {
   LeadsMessageHandler actionHandler;
   LeadsMessageHandler failHandler;
   LeadsMessageHandler controlHandler;
-
+  LogUtils logUtil;
   Node com;
 
   public DefaultComponent() {
@@ -65,6 +68,7 @@ public class DefaultComponent extends Verticle implements Component {
     completeAddress  = id +".completed";
     persisentAddress = id +".state";
     logAddress = id+".log";
+    logUtil = new LogUtils(vertx.eventBus(),logId);
     secondaryGroups = new HashSet<String>();
     if(container.config().containsField("groups")){
       JsonArray array = container.config().getArray("groups");
@@ -221,7 +225,8 @@ public class DefaultComponent extends Verticle implements Component {
 
   @Override
   public void kill() {
-
+    logUtil.info("Component " + this.toString() + " is going to be killed... ");
+    System.exit(-1);
   }
 
   @Override

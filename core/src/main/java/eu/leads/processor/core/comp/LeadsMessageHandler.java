@@ -1,4 +1,4 @@
-package eu.leads.processor.core.net;
+package eu.leads.processor.core.comp;
 
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonObject;
