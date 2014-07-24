@@ -3,9 +3,11 @@ package eu.leads.processor.common.infinispan;
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.manager.EmbeddedCacheManager;
+/*
 import org.infinispan.notifications.Converter;
 import org.infinispan.notifications.KeyFilter;
 import org.infinispan.notifications.KeyValueFilter;
+*/
 import org.infinispan.remoting.transport.Address;
 
 import java.util.List;
@@ -66,13 +68,13 @@ public interface InfinispanManager {
 
   public void addListener(Object listener, String name);
 
-  public void addListener(Object listener, String name, KeyFilter filter);
+  /*public void addListener(Object listener, String name, KeyFilter filter);
 
   public void addListener(Object listener, String name, KeyValueFilter filter, Converter converter);
 
   public void addListener(Object listener, Cache cache, KeyFilter filter);
 
-  public void addListener(Object listener, Cache cache, KeyValueFilter filter, Converter converter);
+  public void addListener(Object listener, Cache cache, KeyValueFilter filter, Converter converter);*/
 
   public void removeListener(Object listener, Cache cache);
 

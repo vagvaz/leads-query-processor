@@ -36,13 +36,13 @@ import java.util.*;
  * is tokenized, and each token is queried against the bloom filter.
  * In the case that a token may exist in the bloom filter
  * (i.e. it may be one of the words of interest),
- * we place it in a CM sketch structure.
+ * we place it in a local CM sketch structure.
  *
  * The CM sketch structures are periodically synchronized
  * with the KVS.
  * The answer returned to the user querying about the frequency
  * of the words of his/her interest will be derived from the sum
- * of the CM sketches.
+ * of the frequencies derived from the local CM sketches.
  *
  *
  */
@@ -61,6 +61,7 @@ public class SynopsesTestPlugin implements PluginInterface {
     private int ctr;
 
     private HashMap<String, Integer> myFrequencies;
+    private String nodeName;
 
     @Override
     public String getId() {
@@ -105,6 +106,7 @@ public class SynopsesTestPlugin implements PluginInterface {
         mycm = new CM_Sketch<String>(StringFunnel.INSTANCE, 0.01, 0.01);
         ctr = 0;
 
+        nodeName = infinispanManager.getCacheManager().getAddress().toString();
     }
 
     @Override
@@ -120,15 +122,20 @@ public class SynopsesTestPlugin implements PluginInterface {
 
     protected void processTuple(String key, Tuple tuple) {
 
-        if (ctr  % 10 == 0 && ctr!=0){
+        if (ctr > 100){
+            ctr = 0;
+
             for (String s: wordsOfInterest) {
+
+                targetCache.put(nodeName+s, mycm.estimateCount(s) );
+
                 System.out.println(s+": true frequency: "+myFrequencies.get(s)+
                         ", estimated through CM sketch: "+
                             mycm.estimateCount(s));
+
+
             }
         }
-
-        ctr++;
 
         tuple.keepOnly(attributes);
 
@@ -148,6 +155,7 @@ public class SynopsesTestPlugin implements PluginInterface {
                 //then we place it into our local CM sketch structure
                 //in order to track its respective frequency
                 mycm.put(tmp);
+                ctr++;
             }
 
             //used only for testing purposes
