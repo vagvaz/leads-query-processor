@@ -1,7 +1,6 @@
 package eu.leads.processor.core.comp;
 
 import eu.leads.processor.core.net.Node;
-import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.json.JsonObject;
 
 /**

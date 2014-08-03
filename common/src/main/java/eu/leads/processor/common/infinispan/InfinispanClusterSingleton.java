@@ -10,39 +10,41 @@ package eu.leads.processor.common.infinispan;
  * throughout the project
  */
 public class InfinispanClusterSingleton {
-  private static final InfinispanClusterSingleton instance = new InfinispanClusterSingleton();
-  private InfinispanCluster cluster;
+   private static final InfinispanClusterSingleton instance = new InfinispanClusterSingleton();
+   private InfinispanCluster cluster;
 
-  /** Do not instantiate InfinispanClusterSingleton. */
-  private InfinispanClusterSingleton() {
-    cluster = new InfinispanCluster(CacheManagerFactory.createCacheManager());
-    cluster.getManager().getPersisentCache("clustered");
-  }
+   /**
+    * Do not instantiate InfinispanClusterSingleton.
+    */
+   private InfinispanClusterSingleton() {
+      cluster = new InfinispanCluster(CacheManagerFactory.createCacheManager());
+      cluster.getManager().getPersisentCache("clustered");
+   }
 
-  /**
-   * Getter for property 'instance'.
-   *
-   * @return Value for property 'instance'.
-   */
-  public static InfinispanClusterSingleton getInstance() {
-    return instance;
-  }
+   /**
+    * Getter for property 'instance'.
+    *
+    * @return Value for property 'instance'.
+    */
+   public static InfinispanClusterSingleton getInstance() {
+      return instance;
+   }
 
-  /**
-   * Getter for property 'manager'.
-   *
-   * @return Value for property 'manager'.
-   */
-  public InfinispanManager getManager() {
-    return instance.getCluster().getManager();
-  }
+   /**
+    * Getter for property 'manager'.
+    *
+    * @return Value for property 'manager'.
+    */
+   public InfinispanManager getManager() {
+      return instance.getCluster().getManager();
+   }
 
-  /**
-   * Getter for property 'cluster'.
-   *
-   * @return Value for property 'cluster'.
-   */
-  public InfinispanCluster getCluster() {
-    return this.cluster;
-  }
+   /**
+    * Getter for property 'cluster'.
+    *
+    * @return Value for property 'cluster'.
+    */
+   public InfinispanCluster getCluster() {
+      return this.cluster;
+   }
 }

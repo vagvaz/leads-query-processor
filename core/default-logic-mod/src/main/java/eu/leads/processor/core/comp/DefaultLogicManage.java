@@ -27,20 +27,20 @@ public class DefaultLogicManage extends ManageVerticle implements LeadsMessageHa
       publishGroup = config.getString("publish");
       workQueue = config.getString("workqueue");
       componentType = config.getString("componentType");
-      com.sendTo(parent, MessageUtils.createServiceStatusMessage(status,id,serviceType));
+      com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id, serviceType));
 
    }
 
    @Override
    public void startService() {
       super.startService();
-      com.subscribe(componentType,this);
-      com.subscribe(listenGroup,this);
-      com.sendTo(parent,MessageUtils.createServiceStatusMessage(status,id,serviceType));
-      if(config.containsField("start")){
+      com.subscribe(componentType, this);
+      com.subscribe(listenGroup, this);
+      com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id, serviceType));
+      if (config.containsField("start")) {
          JsonObject msg = new JsonObject();
-         msg.putString("type","pingpong");
-         msg.putString("count",Integer.toString(1));
+         msg.putString("type", "pingpong");
+         msg.putString("count", Integer.toString(1));
          com.sendWithEventBus(publishGroup, msg);
       }
    }
@@ -53,7 +53,7 @@ public class DefaultLogicManage extends ManageVerticle implements LeadsMessageHa
    @Override
    public void stopService() {
       super.stopService();
-      com.sendTo(parent,MessageUtils.createServiceStatusMessage(status,id,serviceType));
+      com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id, serviceType));
    }
 
    @Override
@@ -88,11 +88,11 @@ public class DefaultLogicManage extends ManageVerticle implements LeadsMessageHa
 
    @Override
    public void handle(JsonObject msg) {
-      if(msg.getString("type").equals("pingpong")){
+      if (msg.getString("type").equals("pingpong")) {
          long i = Long.parseLong(msg.getString("count"));
          logProxy.info("Received pingpong msg from " + msg.getString("from") + msg.toString());
-         msg.putString("replyTo",publishGroup);
-         com.sendWithEventBus(workQueue,msg);
+         msg.putString("replyTo", publishGroup);
+         com.sendWithEventBus(workQueue, msg);
       }
    }
 }

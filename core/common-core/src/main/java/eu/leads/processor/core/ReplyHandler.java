@@ -1,8 +1,6 @@
 package eu.leads.processor.core;
 
 import eu.leads.processor.core.comp.LeadsMessageHandler;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonObject;
 
 /**
@@ -10,46 +8,46 @@ import org.vertx.java.core.json.JsonObject;
  */
 public class ReplyHandler implements LeadsMessageHandler {
 
-  private JsonObject message = null;
-  private Object mutex = new Object();
+   private JsonObject message = null;
+   private Object mutex = new Object();
 
-  public JsonObject waitForMessage(){
-    JsonObject result = null;
-    synchronized ( mutex ){
+   public JsonObject waitForMessage() {
+      JsonObject result = null;
+      synchronized (mutex) {
 
-      while(message == null) {
-        try {
-          mutex.wait();
-        } catch ( InterruptedException e ) {
-          e.printStackTrace();
-        }
+         while (message == null) {
+            try {
+               mutex.wait();
+            } catch (InterruptedException e) {
+               e.printStackTrace();
+            }
+         }
+         result = message;
+         message = null;
       }
-      result = message;
-      message = null;
-    }
-    return result;
-  }
+      return result;
+   }
 
-  public boolean waitForStatus(){
-    boolean result = true;
-    synchronized ( mutex ){
+   public boolean waitForStatus() {
+      boolean result = true;
+      synchronized (mutex) {
 
-      while(message == null) {
-        try {
-          mutex.wait();
-        } catch ( InterruptedException e ) {
-          e.printStackTrace();
-        }
+         while (message == null) {
+            try {
+               mutex.wait();
+            } catch (InterruptedException e) {
+               e.printStackTrace();
+            }
+         }
+         result = message.getString("status").equals("ok");
+         message = null;
       }
-      result = message.getString("status").equals("ok");
-      message = null;
-    }
-    return result;
-  }
+      return result;
+   }
 
-    @Override
-    public void handle(JsonObject jsonObject) {
-        message = jsonObject;
-        mutex.notify();
-    }
+   @Override
+   public void handle(JsonObject jsonObject) {
+      message = jsonObject;
+      mutex.notify();
+   }
 }

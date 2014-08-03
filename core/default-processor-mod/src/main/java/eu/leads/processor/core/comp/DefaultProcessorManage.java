@@ -12,6 +12,7 @@ import org.vertx.java.core.json.JsonObject;
 public class DefaultProcessorManage extends ManageVerticle {
    protected final String serviceType = "default-processor";
    protected String workerId;
+
    @Override
    public void start() {
       super.start();
@@ -21,19 +22,19 @@ public class DefaultProcessorManage extends ManageVerticle {
    @Override
    public void initialize(JsonObject config) {
       super.initialize(config);
-      com.sendTo(parent, MessageUtils.createServiceStatusMessage(status,id,serviceType));
+      com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id, serviceType));
    }
 
    @Override
    public void startService() {
       super.startService();
-      container.deployWorkerVerticle("eu.leads.processor.core.comp.DefaultWorkerProcessor", config, 1, false, new Handler<AsyncResult<String>>(){
+      container.deployWorkerVerticle("eu.leads.processor.core.comp.DefaultWorkerProcessor", config, 1, false, new Handler<AsyncResult<String>>() {
          @Override
          public void handle(AsyncResult<String> event) {
-            if(event.succeeded()){
+            if (event.succeeded()) {
                workerId = event.result();
-               
-            }else{
+
+            } else {
                logProxy.error("Deploying Default Worker verticle failed. ");
             }
          }
@@ -50,7 +51,7 @@ public class DefaultProcessorManage extends ManageVerticle {
    public void stopService() {
       super.stopService();
       container.undeployVerticle(workerId);
-      com.sendTo(parent, MessageUtils.createServiceStatusMessage(status,id,serviceType));
+      com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id, serviceType));
    }
 
    @Override

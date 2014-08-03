@@ -16,38 +16,38 @@ import java.util.List;
 
 public class PagerankPlugin implements PluginInterface {
 
-    private String id;
-    protected List<String> attributes;
-    private DSPM myDSPM;
-    private Logger log = LoggerFactory.getLogger(PagerankPlugin.class);
-    private ObjectMapper my_mapper;
+   protected List<String> attributes;
+   private String id;
+   private DSPM myDSPM;
+   private Logger log = LoggerFactory.getLogger(PagerankPlugin.class);
+   private ObjectMapper my_mapper;
 
-    @Override
-    public void setId(String s) {
-        this.id = s;
-    }
+   @Override
+   public String getId() {
+      return id;
+   }
 
-    @Override
-    public String getId() {
-        return id;
-    }
+   @Override
+   public void setId(String s) {
+      this.id = s;
+   }
 
-    @Override
-    public String getClassName() {
-        return PagerankPlugin.class.getCanonicalName();
-    }
+   @Override
+   public String getClassName() {
+      return PagerankPlugin.class.getCanonicalName();
+   }
 
-    @Override
-    public void initialize(Configuration configuration, InfinispanManager infinispanManager) {
+   @Override
+   public void initialize(Configuration configuration, InfinispanManager infinispanManager) {
 
-        my_mapper = new ObjectMapper();
-        attributes = configuration.getList("attributes");
+      my_mapper = new ObjectMapper();
+      attributes = configuration.getList("attributes");
 
-        myDSPM = new DSPM(Integer.parseInt(configuration.getString("R"))-1, configuration,
-                infinispanManager, Integer.parseInt(configuration.getString("rseed")));
+      myDSPM = new DSPM(Integer.parseInt(configuration.getString("R")) - 1, configuration,
+                               infinispanManager, Integer.parseInt(configuration.getString("rseed")));
 
-        //testing(configuration);
-    }
+      //testing(configuration);
+   }
 
     /*private void testing(Configuration configuration){
         DenseDoubleMatrix1D google = null;
@@ -70,49 +70,52 @@ public class PagerankPlugin implements PluginInterface {
         System.exit(0);
     }*/
 
-    @Override
-    public void cleanup() {
+   @Override
+   public void cleanup() {
 
-    }
+   }
 
-    @Override
-    public void modified(Object key, Object value, Cache<Object, Object> objectObjectCache) {
-        processCrawled(key, value);
-    }
+   @Override
+   public void modified(Object key, Object value, Cache<Object, Object> objectObjectCache) {
+      processCrawled(key, value);
+   }
 
-    @Override
-    public void created(Object key, Object value, Cache<Object, Object> objectObjectCache) {
-        processCrawled(key, value);
-    }
+   @Override
+   public void created(Object key, Object value, Cache<Object, Object> objectObjectCache) {
+      processCrawled(key, value);
+   }
 
-    @Override
-    public void removed(Object o, Object o2, Cache<Object, Object> objectObjectCache) {
-    }
+   @Override
+   public void removed(Object o, Object o2, Cache<Object, Object> objectObjectCache) {
+   }
 
-    @Override
-    public Configuration getConfiguration() {
-        return null;
-    }
+   @Override
+   public Configuration getConfiguration() {
+      return null;
+   }
 
-    @Override
-    public void setConfiguration(Configuration configuration) {
+   @Override
+   public void setConfiguration(Configuration configuration) {
 
-    }
+   }
 
-    private void processCrawled(Object key, Object value) {
+   private void processCrawled(Object key, Object value) {
 
-        Page p = null;
-        try {p = my_mapper.readValue(value.toString(), Page.class);}
-        catch (IOException e) {e.printStackTrace();}
+      Page p = null;
+      try {
+         p = my_mapper.readValue(value.toString(), Page.class);
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
 
-        //remove self-loops (meaningless concerning PageRank)
-        String skey = key.toString();
-        for (URL u: p.getLinks()) {
-            if ( ! ( skey.equals(u.toString()) ) ){
-                myDSPM.processEdge( skey, u.toString() );
-            }
-        }
+      //remove self-loops (meaningless concerning PageRank)
+      String skey = key.toString();
+      for (URL u : p.getLinks()) {
+         if (!(skey.equals(u.toString()))) {
+            myDSPM.processEdge(skey, u.toString());
+         }
+      }
 
-    }
+   }
 
 }

@@ -154,16 +154,13 @@ public class ServiceController implements LeadsMessageHandler {
    }
 
    private void checkComponentStatus() {
-      if (serviceSets.get(ServiceStatus.INITIALIZED).size() == services.size())
-      {
+      if (serviceSets.get(ServiceStatus.INITIALIZED).size() == services.size()) {
          owner.setStatus(ComponentState.INITIALIZED);
       }
-      if (serviceSets.get(ServiceStatus.RUNNING).size() == services.size())
-      {
+      if (serviceSets.get(ServiceStatus.RUNNING).size() == services.size()) {
          owner.setStatus(ComponentState.RUNNING);
       }
-      if (serviceSets.get(ServiceStatus.STOPPED).size() == services.size())
-      {
+      if (serviceSets.get(ServiceStatus.STOPPED).size() == services.size()) {
          owner.setStatus(ComponentState.STOPPED);
       }
 

@@ -7,26 +7,26 @@ import eu.leads.processor.conf.LQPConfiguration;
  */
 public class LocalTest {
 
-  public static void main(String[] args) {
-    String targetCache = "mycache";
-    int sleepingPeriod = 20;
-    //Important Call to initialize System Configuration
-    LQPConfiguration.initialize();
+   public static void main(String[] args) {
+      String targetCache = "mycache";
+      int sleepingPeriod = 20;
+      //Important Call to initialize System Configuration
+      LQPConfiguration.initialize();
 
-    //Set CacheMode to get LcoalImplementation only
-    LQPConfiguration.getConf().setProperty("processor.infinispan.mode", "local");
+      //Set CacheMode to get LcoalImplementation only
+      LQPConfiguration.getConf().setProperty("processor.infinispan.mode", "local");
 
 	/*Configuration for plugin*/
 
 	/*deploy plugin locally*/
         /*PluginManager.deployLocalPlugin(plugin,config,"mytargetCacheName",
-					  EventType.CREATEANDMODIFY,
+                 EventType.CREATEANDMODIFY,
 					 InfinispanClusterSingleton.getInstance().getManager());*/
 
 
 	/*Start putting values to the cache */
 
 	/*Cleanup and close....*/
-    //        InfinispanClusterSingleton.getInstance().getManager().stopManager();
-  }
+      //        InfinispanClusterSingleton.getInstance().getManager().stopManager();
+   }
 }
