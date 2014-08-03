@@ -2,18 +2,15 @@ package eu.leads.processor.plugins.pagerank.graph;
 
 import cern.jet.random.Uniform;
 import cern.jet.random.engine.RandomEngine;
+import comm.ComChannel;
+import comm.Coordinator;
+import comm.Message;
+import comm.Worker;
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.plugins.pagerank.node.Node;
-import eu.leads.processor.plugins.pagerank.utils.Const;
-import gnu.trove.iterator.TIntIntIterator;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.iterator.TIterator;
 import gnu.trove.iterator.TObjectIntIterator;
 import gnu.trove.iterator.hash.TObjectHashIterator;
-import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.THashSet;
-import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.configuration.Configuration;
 import org.infinispan.Cache;
 import org.slf4j.Logger;
@@ -22,12 +19,11 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.List;
 
 public abstract class RandomizedGraph {
 
     protected Cache graphCache;
-    protected Cache vc_per_node;
+    protected Cache approx_sum_cache;
 
     protected int R;
 
@@ -37,19 +33,30 @@ public abstract class RandomizedGraph {
     protected Logger log = LoggerFactory.getLogger(RandomizedGraph.class);
 
     protected String nodeName;
-    protected int accurateLocalSum;
+    //protected int accurateLocalSum;
+
+    protected ComChannel channel;
+    protected Coordinator coord;
 
     public RandomizedGraph(int R, Configuration configuration, InfinispanManager infinispanManager, int seed) {
+
+
         initCacheAndAttrs(configuration, infinispanManager);
         generator = new cern.jet.random.engine.MersenneTwister64(seed);
         unif = new Uniform(generator);
 		this.R = R;
 
         nodeName = infinispanManager.getCacheManager().getAddress().toString();
-        accurateLocalSum = 0;
+        //accurateLocalSum = 0;
+
+        //Setup the communication enabled via Infinispan KVS
+        //The communication channel between coordinator and the workers
+        channel = new ComChannel(infinispanManager.getCacheManager().<String, Message>getCache()/*(Cache) infinispanManager.getPersisentCache("PageRankComCache")*/);
+        coord = new Coordinator(channel);
 	}
 
     private void initCacheAndAttrs(Configuration configuration, InfinispanManager infinispanManager){
+
         String targetCacheName = configuration.getString("cache");
         if(targetCacheName != null || !targetCacheName.equals("")) {
             graphCache = (Cache) infinispanManager.getPersisentCache(targetCacheName);
@@ -58,18 +65,28 @@ public abstract class RandomizedGraph {
             graphCache = (Cache) infinispanManager.getPersisentCache("default");
         }
 
-        vc_per_node = (Cache) infinispanManager.getPersisentCache(configuration.getString("vc_cache"));
-        vc_per_node.put(Const.GLOBAL_SUM, 0);
+        approx_sum_cache = (Cache) infinispanManager.getPersisentCache(configuration.getString("vc_cache"));
+        //approx_sum_cache.put(Const.GLOBAL_SUM, 0);
 
     }
 
-    public Cache getVc_per_node(){
-        return vc_per_node;
+
+    public Coordinator getCoord() {
+        return coord;
     }
 
-    public void setVc_per_node(Cache vc_per_node){
-        this.vc_per_node = vc_per_node;
+    public void setCoord(Coordinator coord) {
+        this.coord = coord;
     }
+
+
+    public Cache getApprox_sum_cache(){
+        return approx_sum_cache;
+    }
+
+    /*public void setApprox_sum_cache(Cache approx_sum_cache){
+        this.approx_sum_cache = approx_sum_cache;
+    }*/
 
     public Cache getGraphCache(){
         return graphCache;
@@ -90,22 +107,29 @@ public abstract class RandomizedGraph {
 
     public void sendVisitDriftIfNeeded(int drift){
 
-        accurateLocalSum += drift;
+        //accurateLocalSum += drift;
+
         //VCperCloud[tmpNode.getMyCloud()] += drift;
 
-        if ( vc_per_node.containsKey(nodeName) ){
-            int old_estimate = (Integer) vc_per_node.get(nodeName);
+        if ( approx_sum_cache.containsKey(nodeName) ){
+
+            ((Worker) approx_sum_cache.get(nodeName)).update(drift);
+            /*int old_estimate = ((Worker) approx_sum_cache.get(nodeName)).getPrevReported();
 
             if ( Math.abs( accurateLocalSum - old_estimate ) >
                     ( Const.VIS_COUNT_DRIFT * accurateLocalSum ) ){
 
-                vc_per_node.put(nodeName, accurateLocalSum);
-                vc_per_node.put(Const.GLOBAL_SUM, (Integer) vc_per_node.get(Const.GLOBAL_SUM) +  (accurateLocalSum - old_estimate)  );
-            }
+                approx_sum_cache.put(nodeName, accurateLocalSum);
+                approx_sum_cache.put(Const.GLOBAL_SUM, (Integer) approx_sum_cache.get(Const.GLOBAL_SUM) +  (accurateLocalSum - old_estimate)  );
+            }*/
         }
         else{
-            vc_per_node.put(nodeName, accurateLocalSum);
-            vc_per_node.put(Const.GLOBAL_SUM, (Integer) vc_per_node.get(Const.GLOBAL_SUM) +  accurateLocalSum  );
+
+            Worker w = new Worker(nodeName, 0, channel);
+            w.update(drift);
+            approx_sum_cache.put(nodeName, w);
+
+            // approx_sum_cache.put(Const.GLOBAL_SUM, (Integer) approx_sum_cache.get(Const.GLOBAL_SUM) +  accurateLocalSum  );
         }
 
         /*if ( Math.abs( VCperCloud[tmpNode.getMyCloud()] - estVCperCloud[tmpNode.getMyCloud()] ) >

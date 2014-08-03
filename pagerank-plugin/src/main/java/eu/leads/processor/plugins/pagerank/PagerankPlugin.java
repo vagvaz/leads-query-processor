@@ -72,7 +72,6 @@ public class PagerankPlugin implements PluginInterface {
 
     @Override
     public void cleanup() {
-
     }
 
     @Override

@@ -6,9 +6,9 @@ import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.lifecycle.ComponentStatus;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
-import org.infinispan.notifications.Converter;
+/*import org.infinispan.notifications.Converter;
 import org.infinispan.notifications.KeyFilter;
-import org.infinispan.notifications.KeyValueFilter;
+import org.infinispan.notifications.KeyValueFilter;*/
 import org.infinispan.remoting.transport.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,30 +115,30 @@ public class LocalInfinispanManager implements InfinispanManager {
   }
 
   /** {@inheritDoc} */
-  @Override
+  /*@Override
   public void addListener(Object listener, String name, KeyFilter filter) {
     Cache c = (Cache) this.getPersisentCache(name);
     this.addListener(listener, c, filter);
-  }
+  }*/
 
   /** {@inheritDoc} */
-  @Override
+  /*@Override
   public void addListener(Object listener, String name, KeyValueFilter filter, Converter converter) {
     Cache c = (Cache) this.getPersisentCache(name);
     c.addListener(listener, filter, converter);
-  }
+  }*/
 
   /** {@inheritDoc} */
-  @Override
+  /*@Override
   public void addListener(Object listener, Cache cache, KeyFilter filter) {
     cache.addListener(listener, filter);
-  }
+  }*/
 
   /** {@inheritDoc} */
-  @Override
+  /*@Override
   public void addListener(Object listener, Cache cache, KeyValueFilter filter, Converter converter) {
     cache.addListener(listener, filter, converter);
-  }
+  }*/
 
   /** {@inheritDoc} */
   @Override
