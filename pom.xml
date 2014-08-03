@@ -24,6 +24,7 @@
       <module>nqe</module>
       <module>plugins</module>
       <module>crawler</module>
+      <module>interface-manager</module>
    </modules>
 
 </project>
