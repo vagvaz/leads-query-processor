@@ -1,6 +1,7 @@
 package eu.leads.processor.core;
 
 import eu.leads.processor.core.net.Node;
+import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 /**
@@ -20,8 +21,6 @@ public class PersistenceProxy {
       this.id = id;
       this.bus = bus;
       replyHandler = new ReplyHandler();
-
-
       putAction = new JsonObject();
       putAction.putString("action", "put");
       putAction.putString("cache", "");
@@ -72,4 +71,15 @@ public class PersistenceProxy {
    }
 
 
+   public JsonArray batchGet(String cacheName, Long min) {
+      return null;
+   }
+
+   public JsonArray batchGet(String cacheName, Long min, Long max) {
+      return null;
+   }
+
+   public boolean contains(String queriescache, String candidateId) {
+      return false;
+   }
 }

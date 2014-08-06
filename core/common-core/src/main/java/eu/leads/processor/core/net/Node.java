@@ -49,5 +49,8 @@ public interface Node {
 
    public long getNextMessageId();
 
+   public String getId();
+   public String getGroup();
+
    void sendWithEventBus(String workQueue, JsonObject msg);
 }

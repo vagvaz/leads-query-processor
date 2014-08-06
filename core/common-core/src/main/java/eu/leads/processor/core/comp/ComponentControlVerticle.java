@@ -1,5 +1,6 @@
 package eu.leads.processor.core.comp;
 
+
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.ServiceCommand;
@@ -44,18 +45,18 @@ public class ComponentControlVerticle extends Verticle implements Component {
    protected LogProxy log;
    protected PersistenceProxy persistence;
    protected LeadsComponentHandler componentHandler;
-   JsonObject config; //components deployment configuration
-   String id; //The unique id for this deployment (uuid)
-   String componentType; // the component type for this deployment possible values n, {webservice,planner,deployer,nqe,monitor,stats}
-   String group; //component group
-   String internalGroup; // The internal group used to communicate between ComponentControl Verticle and the services
-   Set<String> secondaryGroups; // Secondary groups that the deployment should listen.
-   JsonArray services; // The rest non-default services that must be deployed by the
-   Set<String> servicesIds;
-   int numberOfprocessors;
-   private JsonObject workQueueConfig;
-   private LeadsMessageHandler failHandler;
-   private ServiceController serviceController;
+   protected JsonObject config; //components deployment configuration
+   protected String id; //The unique id for this deployment (uuid)
+   protected String componentType; // the component type for this deployment possible values n, {webservice,planner,deployer,nqe,monitor,stats}
+   protected String group; //component group
+   protected String internalGroup; // The internal group used to communicate between ComponentControl Verticle and the services
+   protected Set<String> secondaryGroups; // Secondary groups that the deployment should listen.
+   protected JsonArray services; // The rest non-default services that must be deployed by the
+   protected Set<String> servicesIds;
+   protected int numberOfprocessors;
+   protected JsonObject workQueueConfig;
+   protected LeadsMessageHandler failHandler;
+   protected ServiceController serviceController;
 
 
    /**
@@ -122,8 +123,10 @@ public class ComponentControlVerticle extends Verticle implements Component {
 
       internalGroup = componentPrefix + ".servicesGroup";
       failHandler = new DefaultFailHandler(this, com, log, persistence);
+      componentHandler = new LeadsComponentHandler(this,com,log,persistence);
 
-      com.initialize(id, group, secondaryGroups, componentHandler, failHandler, vertx);
+      //TODO check that messages will not be lost between controlverticle and logic (cause id)
+      com.initialize(id+".control", group, secondaryGroups, componentHandler, failHandler, vertx);
 
 
       logConfig = new JsonObject();
@@ -301,7 +304,8 @@ public class ComponentControlVerticle extends Verticle implements Component {
          });
 
       }
-
+      //subscribe to componentType control
+      com.subscribe(componentType+".control",componentHandler);
    }
 
    @Override

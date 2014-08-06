@@ -45,7 +45,7 @@ public class ServiceController implements LeadsMessageHandler {
    @Override
    public void handle(JsonObject message) {
       if (message.getString("type").equals(MessageTypeConstants.SERVICE_STATUS_REPLY)) {
-         String service = message.getString("from");
+         String service = message.getString(MessageUtils.FROM);
          ServiceStatus serviceStatus = ServiceStatus.valueOf(message.getString("status"));
          switch (owner.getState()) {
             case INITIALIZING:

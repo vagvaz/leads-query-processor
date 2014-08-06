@@ -10,10 +10,7 @@ import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.core.logging.impl.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by vagvaz on 7/8/14.
@@ -29,12 +26,14 @@ public class DefaultNode implements Node {
    private Map<Long, AckHandler> pendingHandlers;
    private CommunicationHandler comHandler;
    private LeadsMessageHandler failHandler;
+   private Set<Long> requests;
 
    public DefaultNode() {
       config = new JsonObject();
       pending = new HashMap<Long, JsonObject>();
       pendingHandlers = new HashMap<Long, AckHandler>();
-   }
+      requests = new HashSet<Long>();
+    }
 
    /**
     * Getter for property 'comHandler'.
@@ -72,10 +71,12 @@ public class DefaultNode implements Node {
       this.failHandler = failHandler;
    }
 
+   @Override
    public String getId() {
       return config.getString("id");
    }
 
+   @Override
    public String getGroup() {
       return config.getString("group");
    }
@@ -88,9 +89,18 @@ public class DefaultNode implements Node {
 
    @Override
    public void sendRequestTo(String nodeid, JsonObject message, LeadsMessageHandler handler) {
-      JsonObject leadsMessage = MessageUtils.createLeadsMessage(message, getId(), nodeid, ComUtils.GROUP);
-      sendMessageToDestination(nodeid, leadsMessage, handler);
+      long messageId = this.getNextMessageId();
+      String from =getId()+"-requests-"+messageId;
+      subscribeForRequest(from,handler);
+      requests.add(messageId);
+      JsonObject leadsMessage = MessageUtils.createLeadsMessage(message,from, nodeid, ComUtils.P2P);
+      AckHandler ack = new AckHandler(this, logger, messageId, null);
+      pending.put(messageId, leadsMessage);
+      pendingHandlers.put(messageId, ack);
+      bus.sendWithTimeout(nodeid, leadsMessage, timeout, ack);
    }
+
+
 
    @Override
    public void sendToGroup(String groupId, JsonObject message) {
@@ -109,8 +119,16 @@ public class DefaultNode implements Node {
 
    @Override
    public void sendRequestToGroup(String groupId, JsonObject message, LeadsMessageHandler handler) {
-      JsonObject leadsMessage = MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.GROUP);
-      sendMessageToDestination(groupId, leadsMessage, handler);
+      long messageId = this.getNextMessageId();
+      String from =getId()+"-requests-"+messageId;
+      subscribeForRequest(from,handler);
+      requests.add(messageId);
+      JsonObject leadsMessage = MessageUtils.createLeadsMessage(message,from, groupId, ComUtils.GROUP);
+      AckHandler ack = new AckHandler(this, logger, messageId, null);
+      pending.put(messageId, leadsMessage);
+      pendingHandlers.put(messageId, ack);
+      bus.sendWithTimeout(groupId, leadsMessage, timeout, ack);
+
    }
 
    @Override
@@ -137,6 +155,21 @@ public class DefaultNode implements Node {
 
    }
 
+   private void subscribeForRequest(final String groupId, final LeadsMessageHandler handler) {
+      bus.registerHandler(groupId, comHandler, new Handler<AsyncResult<Void>>() {
+         @Override
+         public void handle(AsyncResult<Void> event) {
+            if (event.succeeded()) {
+               logger.info("subscribing to " + groupId + " succeded");
+               config.getArray("groups").add(groupId);
+               comHandler.registerRequest(groupId, handler);
+            } else {
+               logger.error("Fail to subscribe to " + groupId);
+            }
+         }
+      });
+   }
+
    @Override
    public void unsubscribe(final String groupId) {
       bus.unregisterHandler(groupId, comHandler, new Handler<AsyncResult<Void>>() {
@@ -155,7 +188,7 @@ public class DefaultNode implements Node {
 
    @Override
    public void initialize(JsonObject config, LeadsMessageHandler defaultHandler, LeadsMessageHandler failHandler, Vertx vertx) {
-      comHandler = new CommunicationHandler(defaultHandler);
+      comHandler = new CommunicationHandler(defaultHandler,this);
       this.failHandler = failHandler;
       bus = vertx.eventBus();
       logger = LoggerFactory.getLogger(this.getClass().getCanonicalName() + "." + this.getId());
@@ -247,9 +280,13 @@ public class DefaultNode implements Node {
       AckHandler handler = pendingHandlers.remove(messageId);
       handler = null;
       logger.error("Failed Message: " + msg.toString());
+      if(requests.remove(messageId)){
+         comHandler.unregisterRequest(getId()+"-request-"+messageId);
+      }
       if (failHandler != null) {
          failHandler.handle(msg);
       }
+
 
 
    }

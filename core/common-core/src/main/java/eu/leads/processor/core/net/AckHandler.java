@@ -39,8 +39,8 @@ public class AckHandler implements Handler<AsyncResult<Message<JsonObject>>> {
    public void handle(AsyncResult<Message<JsonObject>> result) {
       if (result.succeeded()) {
          owner.succeed(msgId);
-         if (handler != null)
-            handler.handle(result.result().body());
+//         if (handler != null)
+//            handler.handle(result.result().body());
       } else {
          //IF maximum number of retries reached then fail the message
          if (retries == 0) {

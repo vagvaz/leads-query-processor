@@ -8,7 +8,7 @@ public class StringConstants {
    public static final String DEFAULT_CLUSTER_NAME = "defaultCluster";
    public static final String NODE_NAME_KEY = "nodeName";
    public static final String DEFAULT_NODE_NAME = "defaultNode";
-   public static final String UIMANAGERQUEUE = "SQLINTERFACE.TO.QUERYPROCESSOR";
+   public static final String IMANAGERQUEUE = "SQLINTERFACE.TO.QUERYPROCESSOR";
    public static final String PLANNERQUEUE = "PLANNERQUEUE";
    public static final String QUERIESCACHE = "queries";
    public static final String DEPLOYERQUEUE = "DEPLOYERQUEUE";
@@ -24,4 +24,5 @@ public class StringConstants {
    public static final java.lang.String PERSIST_MOD_NAME = "gr.tuc.softnet~persist-module~1.0-SNAPSHOT";
    public static final String GROUP_ID = "gr.tuc.softnet";
    public static final String VERSION = "1.0-SNAPSHOT";
+   public static final String ACTION = "action";
 }

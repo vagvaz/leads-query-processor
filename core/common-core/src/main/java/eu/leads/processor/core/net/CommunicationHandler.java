@@ -6,17 +6,22 @@ import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by vagvaz on 7/8/14.
  */
 public class CommunicationHandler implements Handler<Message> {
    private Map<String, LeadsMessageHandler> handlers;
-
-   public CommunicationHandler(LeadsMessageHandler defaultHandler) {
+   private Node owner;
+   private Set<String> requests;
+   public CommunicationHandler(LeadsMessageHandler defaultHandler,Node owner) {
+      this.owner = owner;
       handlers = new HashMap<String, LeadsMessageHandler>();
       handlers.put("default", defaultHandler);
+      requests = new HashSet<String>();
    }
 
    @Override
@@ -29,9 +34,17 @@ public class CommunicationHandler implements Handler<Message> {
       JsonObject object = new JsonObject();
       message.reply(MessageUtils.createLeadsMessage(object, from, to));
       LeadsMessageHandler handler = handlers.get(to);
+      if(requests.remove(to)){
+         owner.unsubscribe(to);
+      }
       if (handler == null)
          handler = handlers.get("default");
       handler.handle((JsonObject) message.body());
+   }
+
+   public void registerRequest(String groupId, LeadsMessageHandler handler){
+         requests.add(groupId);
+         register(groupId,handler);
    }
 
    public void register(String groupId, LeadsMessageHandler handler) {
@@ -54,5 +67,11 @@ public class CommunicationHandler implements Handler<Message> {
       if (result == null)
          result = getDefaultHandler();
       return result;
+   }
+
+   public void unregisterRequest(String request) {
+      if(requests.remove(request)){
+         owner.unsubscribe(request);
+      }
    }
 }

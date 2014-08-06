@@ -106,7 +106,8 @@ public class PersistenceVerticle extends Verticle {
    }
 
    private JsonObject getAction(JsonObject msg) {
-      JsonObject result = null;
+      JsonObject result = new JsonObject();
+
       String cacheName = msg.getString("cache");
       Cache<String, String> cache = caches.get(cacheName);
       if (cache == null) {
@@ -115,7 +116,13 @@ public class PersistenceVerticle extends Verticle {
       }
       String jsonValue = cache.get(msg.getString("key"));
       if (!Strings.isNullOrEmpty(jsonValue)) {
-         result = new JsonObject(jsonValue);
+         result.putString("status","ok");
+         result.putString("result",jsonValue);
+      }
+      else{
+         result.putString("status","fail");
+         result.putString("message","Key " + msg.getString("key") + " does not exist in cache " + cacheName);
+         result.putString("result","{}");
       }
       return result;
    }
