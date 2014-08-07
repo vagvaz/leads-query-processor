@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import eu.leads.processor.common.infinispan.CacheManagerFactory;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.core.comp.DefaultFailHandler;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
@@ -35,42 +36,47 @@ public class PersistenceVerticle extends Verticle {
 
    @Override
    public void start() {
-      super.start();
-      //Initialize vertx structures
-      config = container.config();
-      bus = new DefaultNode();
-      logUtil = new LogProxy(config.getString("log"), bus);
+      try {
+         super.start();
+         //Initialize vertx structures
+         config = container.config();
+         id = config.getString("id");
+//         componentId = config.getString("componentType");
+         bus = new DefaultNode();
+         logUtil = new LogProxy(config.getString("log"), bus);
 
-      LQPConfiguration.initialize();//TODO
+         LQPConfiguration.initialize();//TODO
 
-      this.manager = CacheManagerFactory.createCacheManager();
-      this.componentState = (Cache<String, String>) this.manager.getPersisentCache(componentId);
+         //  this.manager = CacheManagerFactory.createCacheManager();
+         //      this.componentState = (Cache<String, String>) this.manager.getPersisentCache(componentId);
 
-      dispatcher = new LeadsMessageHandler() {
+         dispatcher = new LeadsMessageHandler() {
 
-         @Override
-         public void handle(JsonObject message) {
-            JsonObject msg = message;
-            JsonObject reply = null;
-            String actionType = msg.getString("action");
-            if (actionType.equals("get")) {
-               reply = getAction(msg);
-            } else if (actionType.equals("put")) {
-               reply = putAction(msg);
-            } else if (actionType.equals("read")) {
-               reply = readAction(msg);
-            } else if (actionType.equals("store")) {
-               reply = storeAction(msg);
-            } else {
-               logUtil.error("Unknown ActionType " + actionType + " Cannot Handle in Persist");
+            @Override
+            public void handle(JsonObject message) {
+               JsonObject msg = message;
+               JsonObject reply = null;
+               String actionType = msg.getString("action");
+               if (actionType.equals("get")) {
+                  reply = getAction(msg);
+               } else if (actionType.equals("put")) {
+                  reply = putAction(msg);
+               } else if (actionType.equals("read")) {
+                  reply = readAction(msg);
+               } else if (actionType.equals("store")) {
+                  reply = storeAction(msg);
+               } else {
+                  logUtil.error("Unknown ActionType " + actionType + " Cannot Handle in Persist");
 
+               }
+               bus.sendTo(message.getString("from"), reply);
             }
-            bus.sendTo(message.getString("from"), reply);
-         }
-      };
+         };
 
-      bus.initialize(id, id, null, dispatcher, null, this.getVertx());
-
+         bus.initialize(id, id, null, dispatcher, null, this.getVertx());
+      }catch(Exception e ){
+         e.printStackTrace();
+      }
    }
 
    private JsonObject storeAction(JsonObject msg) {

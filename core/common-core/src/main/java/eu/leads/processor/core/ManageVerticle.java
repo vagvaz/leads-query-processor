@@ -4,6 +4,7 @@ import eu.leads.processor.core.comp.LeadsService;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.comp.ServiceStatus;
 import eu.leads.processor.core.net.DefaultNode;
+import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
@@ -35,12 +36,12 @@ public abstract class ManageVerticle extends Verticle implements LeadsService {
 
    @Override
    public void initialize(JsonObject config) {
-      setStatus(ServiceStatus.INITIALIZED);
       com = new DefaultNode();
       persistenceProxy = new PersistenceProxy(config.getString("persistence"), com);
       logProxy = new LogProxy(config.getString("log"), com);
       serviceHandler = new ServiceHandler(this, com, logProxy, persistenceProxy);
       com.initialize(id + ".manage", group, null, serviceHandler, serviceHandler, this.getVertx());
+      setStatus(ServiceStatus.INITIALIZED);
 
 
    }

@@ -211,7 +211,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
       });
 
       //deploy persistence module
-      container.deployModule(StringConstants.PERSIST_MOD_NAME, persistConfig, new Handler<AsyncResult<String>>() {
+      container.deployModule(StringConstants.PERSIST_MOD_NAME, persistConfig,1, new Handler<AsyncResult<String>>() {
 
          @Override
          public void handle(AsyncResult<String> asyncResult) {
@@ -225,7 +225,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
       });
 
       //deploy workqueue module.
-      container.deployModule(StringConstants.WORKQUEUE_MOD_NAME, workQueueConfig, new Handler<AsyncResult<String>>() {
+      container.deployModule(StringConstants.WORKQUEUE_MOD_NAME, workQueueConfig,1, new Handler<AsyncResult<String>>() {
 
          @Override
          public void handle(AsyncResult<String> asyncResult) {

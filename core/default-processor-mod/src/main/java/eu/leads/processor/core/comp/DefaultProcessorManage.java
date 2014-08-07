@@ -33,13 +33,16 @@ public class DefaultProcessorManage extends ManageVerticle {
          public void handle(AsyncResult<String> event) {
             if (event.succeeded()) {
                workerId = event.result();
+               setStatus(ServiceStatus.RUNNING);
 
             } else {
                logProxy.error("Deploying Default Worker verticle failed. ");
+               setStatus(ServiceStatus.FAILED);
             }
+            com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id, serviceType));
          }
       });
-      com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id, serviceType));
+//      com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id, serviceType));
    }
 
    @Override

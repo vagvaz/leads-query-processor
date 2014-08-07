@@ -88,11 +88,16 @@ public class DefaultLogicManage extends ManageVerticle implements LeadsMessageHa
 
    @Override
    public void handle(JsonObject msg) {
-      if (msg.getString("type").equals("pingpong")) {
-         long i = Long.parseLong(msg.getString("count"));
-         logProxy.info("Received pingpong msg from " + msg.getString("from") + msg.toString());
-         msg.putString("replyTo", publishGroup);
-         com.sendWithEventBus(workQueue, msg);
+      try {
+         if (msg.getString("type").equals("pingpong")) {
+            long i = Long.parseLong(msg.getString("count"));
+            logProxy.info("Received pingpong msg from " + msg.getString("from") + msg.toString());
+            msg.putString("replyTo", publishGroup);
+            com.sendWithEventBus(workQueue, msg);
+         }
+
+      } catch (Exception e) {
+         e.printStackTrace();
       }
    }
 }

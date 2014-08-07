@@ -28,14 +28,14 @@ public class PersistenceManageVerticle extends ManageVerticle {
    @Override
    public void startService() {
       super.startService();
-      container.deployWorkerVerticle("eu.leads.processor.core.PersistenceVerticle", persistConfig, 1, false, new Handler<AsyncResult<String>>() {
+      container.deployWorkerVerticle("eu.leads.processor.core.PersistenceVerticle", container.config(), 1, false, new Handler<AsyncResult<String>>() {
 
          @Override
          public void handle(AsyncResult<String> asyncResult) {
             if (asyncResult.succeeded()) {
                container.logger().info("Persist Vertice has been deployed ID " + asyncResult.result());
                persistVertcileId = asyncResult.result();
-               com.sendTo(group, MessageUtils.createServiceStatusMessage(ServiceStatus.RUNNING, id, serviceType));
+               com.sendTo(parent, MessageUtils.createServiceStatusMessage(ServiceStatus.RUNNING, id, serviceType));
 
             } else {
                container.logger().fatal("Persist Verticle failed to deploy");
@@ -54,7 +54,7 @@ public class PersistenceManageVerticle extends ManageVerticle {
       JsonObject persistConfig = new JsonObject();
       persistConfig.putString("id", persistAddress);
       persistConfig.putString("log", config.getString("log"));
-      com.sendTo(group, MessageUtils.createServiceStatusMessage(ServiceStatus.INITIALIZED, id, serviceType));
+      com.sendTo(parent, MessageUtils.createServiceStatusMessage(ServiceStatus.INITIALIZED, id, serviceType));
    }
 
    @Override
@@ -72,7 +72,7 @@ public class PersistenceManageVerticle extends ManageVerticle {
          public void handle(AsyncResult<Void> asyncResult) {
             if (asyncResult.succeeded()) {
                container.logger().info("Persist Vertice has been deployed ID " + asyncResult.result());
-               com.sendTo(group, MessageUtils.createServiceStatusMessage(ServiceStatus.STOPPED, id, serviceType));
+               com.sendTo(parent, MessageUtils.createServiceStatusMessage(ServiceStatus.STOPPED, id, serviceType));
                if (shouldStop)
                   stop();
             } else {
@@ -114,6 +114,6 @@ public class PersistenceManageVerticle extends ManageVerticle {
       super.fail(message);
       JsonObject failMessage = MessageUtils.createServiceStatusMessage(ServiceStatus.FAILED, id, serviceType);
       failMessage.putString("message", message);
-      com.sendTo(group, failMessage);
+      com.sendTo(parent, failMessage);
    }
 }
