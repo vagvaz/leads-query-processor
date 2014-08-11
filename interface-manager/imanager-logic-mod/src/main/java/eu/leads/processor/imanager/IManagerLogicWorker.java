@@ -205,7 +205,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
          String label = action.getLabel();
          Action newAction = null;
          action.setProcessedBy(id);
-         action.setStatus(ActionStatus.INPROCESS.toString());
+//         action.setStatus(ActionStatus.INPROCESS.toString());
 
          switch (ActionStatus.valueOf(action.getStatus())) {
             case PENDING: //probably received an action from an external source
@@ -241,6 +241,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                   log.error("Unknown PENDING Action received " + action.toString());
                   return;
                }
+               action.setStatus(ActionStatus.INPROCESS.toString());
                if (newAction != null) {
                   action.addChildAction(newAction.getId());
                   logAction(newAction);
