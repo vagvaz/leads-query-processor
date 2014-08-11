@@ -12,6 +12,7 @@
       <module>default-processor-mod</module>
       <module>default-logic-mod</module>
       <module>default-comp-mod</module>
+      <module>log-sink-module</module>
    </modules>
    <groupId>gr.tuc.softnet</groupId>
    <version>1.0-SNAPSHOT</version>
