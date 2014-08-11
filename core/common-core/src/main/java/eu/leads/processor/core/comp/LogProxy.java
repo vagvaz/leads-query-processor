@@ -18,6 +18,7 @@ public class LogProxy {
    public LogProxy(String log, Node com) {
       logId = log;
       bus = com;
+
    }
 
    public void info(String message) {

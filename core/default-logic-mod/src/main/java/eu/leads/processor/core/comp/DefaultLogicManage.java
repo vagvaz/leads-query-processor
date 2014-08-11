@@ -13,7 +13,7 @@ public class DefaultLogicManage extends ManageVerticle implements LeadsMessageHa
    protected String publishGroup;
    protected String componentType;
    protected String workQueue;
-
+   static int count = 0;
    @Override
    public void start() {
       super.start();
@@ -88,11 +88,13 @@ public class DefaultLogicManage extends ManageVerticle implements LeadsMessageHa
 
    @Override
    public void handle(JsonObject msg) {
+
       try {
          if (msg.getString("type").equals("pingpong")) {
             long i = Long.parseLong(msg.getString("count"));
-            logProxy.info("Received pingpong msg from " + msg.getString("from") + msg.toString());
+            logProxy.info(id + "\nLogic Received pingpong msg from " + msg.getString("from") + msg.toString());
             msg.putString("replyTo", publishGroup);
+            msg.putNumber("number",count++);
             com.sendWithEventBus(workQueue, msg);
          }
 

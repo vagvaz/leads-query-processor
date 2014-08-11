@@ -21,6 +21,7 @@ public class DefaultWorkerProcessor extends Verticle implements Handler<Message>
    JsonObject config;
    EventBus bus;
    LeadsMessageHandler leadsHandler;
+   LogProxy log;
 
    @Override
    public void start() {
@@ -54,6 +55,7 @@ public class DefaultWorkerProcessor extends Verticle implements Handler<Message>
                System.out.println("Registration " + event.toString());
             }
          });
+         log = new LogProxy(config.getString("log"),com);
       }catch(Exception e ){
          e.printStackTrace();
       }
@@ -65,10 +67,11 @@ public class DefaultWorkerProcessor extends Verticle implements Handler<Message>
       try {
          JsonObject msg = (JsonObject) message.body();
          if (msg.getString("type").equals("pingpong")) {
+            log.info(id + "\n Received pingpong " + msg.toString());
             long l = Long.parseLong(msg.getString("count"));
             l++;
             msg.putString("count", Long.toString(l));
-            container.logger().info("Received pingpong " + l);
+
             try { //Simulate heavy work.
                Thread.sleep(500);
             } catch (InterruptedException e) {

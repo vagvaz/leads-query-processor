@@ -135,6 +135,9 @@ public class ComponentControlVerticle extends Verticle implements Component {
       logConfig.putString("log", logAddress);
       logConfig.putString("persistence", persistenceAddress);
       logConfig.putString("parent", id + ".serviceMonitor");
+      logConfig.putString("componentType",getComponentType());
+      logConfig.putString("componentId",getId());
+
 
       persistConfig = new JsonObject();
       persistConfig.putString("id", persistenceAddress);
@@ -142,6 +145,8 @@ public class ComponentControlVerticle extends Verticle implements Component {
       persistConfig.putString("log", logAddress);
       persistConfig.putString("persistence", persistenceAddress);
       persistConfig.putString("parent", id + ".serviceMonitor");
+      persistConfig.putString("componentType",getComponentType());
+      persistConfig.putString("componentId",getId());
 
       workQueueConfig = new JsonObject();
       workQueueConfig.putString("address", workQueueAddress);
@@ -155,6 +160,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
       logicConfig.putString("parent", id + ".serviceMonitor");
       logicConfig.putString("componentType", componentType);
       logicConfig.putString("workqueue", workQueueAddress);
+      logicConfig.putString("componentId",getId());
       if (config.containsField("logic")) {
          logicConfig.mergeIn(config.getObject("logic"));
       }
@@ -167,6 +173,8 @@ public class ComponentControlVerticle extends Verticle implements Component {
       processorConfig.putString("persistence", persistenceAddress);
       processorConfig.putString("logic", logicAddress);
       processorConfig.putString("parent", id + ".serviceMonitor");
+      processorConfig.putString("componentType",getComponentType());
+      processorConfig.putString("componentId",getId());
       if (config.containsField("processor")) {
          processorConfig.mergeIn(config.getObject("processor"));
       }

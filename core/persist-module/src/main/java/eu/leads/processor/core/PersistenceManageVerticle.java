@@ -13,9 +13,9 @@ import org.vertx.java.core.json.JsonObject;
 
 public class PersistenceManageVerticle extends ManageVerticle {
    protected final String serviceType = "persistenceService";
-   String persistVertcileId = null;
-   String persistAddress = null;
-   JsonObject persistConfig = null;
+   static String persistVertcileId = null;
+   static String persistAddress = null;
+   static JsonObject persistConfig = null;
    boolean shouldStop = false;
 
    @Override
@@ -28,22 +28,25 @@ public class PersistenceManageVerticle extends ManageVerticle {
    @Override
    public void startService() {
       super.startService();
-      container.deployWorkerVerticle("eu.leads.processor.core.PersistenceVerticle", container.config(), 1, false, new Handler<AsyncResult<String>>() {
+      if(persistVertcileId == null) {
+         persistVertcileId = "";
 
-         @Override
-         public void handle(AsyncResult<String> asyncResult) {
-            if (asyncResult.succeeded()) {
-               container.logger().info("Persist Vertice has been deployed ID " + asyncResult.result());
-               persistVertcileId = asyncResult.result();
-               com.sendTo(parent, MessageUtils.createServiceStatusMessage(ServiceStatus.RUNNING, id, serviceType));
+         container.deployWorkerVerticle("eu.leads.processor.core.PersistenceVerticle", container.config(), 1, false, new Handler<AsyncResult<String>>() {
 
-            } else {
-               container.logger().fatal("Persist Verticle failed to deploy");
-               fail("Persist Verticle failed to deploy");
+            @Override
+            public void handle(AsyncResult<String> asyncResult) {
+               if (asyncResult.succeeded()) {
+                  container.logger().info("Persist Vertice has been deployed ID " + asyncResult.result());
+                  persistVertcileId = asyncResult.result();
+                  com.sendTo(parent, MessageUtils.createServiceStatusMessage(ServiceStatus.RUNNING, id, serviceType));
+
+               } else {
+                  container.logger().fatal("Persist Verticle failed to deploy");
+                  fail("Persist Verticle failed to deploy");
+               }
             }
-         }
-      });
-
+         });
+      }
 
    }
 

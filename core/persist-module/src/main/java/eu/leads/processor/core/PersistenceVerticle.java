@@ -41,14 +41,15 @@ public class PersistenceVerticle extends Verticle {
          //Initialize vertx structures
          config = container.config();
          id = config.getString("id");
-//         componentId = config.getString("componentType");
+         componentId = config.getString("componentId");
+
          bus = new DefaultNode();
          logUtil = new LogProxy(config.getString("log"), bus);
 
          LQPConfiguration.initialize();//TODO
 
-         //  this.manager = CacheManagerFactory.createCacheManager();
-         //      this.componentState = (Cache<String, String>) this.manager.getPersisentCache(componentId);
+           this.manager = CacheManagerFactory.createCacheManager();
+           this.componentState = (Cache<String, String>) this.manager.getPersisentCache(componentId);
 
          dispatcher = new LeadsMessageHandler() {
 

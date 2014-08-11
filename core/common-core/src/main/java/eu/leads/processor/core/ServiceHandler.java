@@ -3,6 +3,7 @@ package eu.leads.processor.core;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LeadsService;
 import eu.leads.processor.core.comp.LogProxy;
+import eu.leads.processor.core.comp.ServiceStatus;
 import eu.leads.processor.core.net.MessageTypeConstants;
 import eu.leads.processor.core.net.Node;
 import org.vertx.java.core.json.JsonObject;
@@ -29,13 +30,17 @@ public class ServiceHandler implements LeadsMessageHandler {
          String cmd = message.getString("command");
          switch (ServiceCommand.valueOf(cmd)) {
             case INITIALIZE:
-               owner.initialize(message.getObject("conf"));
+               if( !( (owner.getStatus().equals(ServiceStatus.INITIALIZING)) || (owner.getStatus().equals(ServiceStatus.INITIALIZED)) ) )
+               {
+                  owner.initialize(message.getObject("conf"));
+               }
                break;
             case START:
-               owner.startService();
-               ;
+               if(!(owner.getStatus().equals(ServiceStatus.RUNNING)))
+                  owner.startService();
                break;
             case STOP:
+               if( !( (owner.getStatus().equals(ServiceStatus.STOPPING)) || (owner.getStatus().equals(ServiceStatus.STOPPED)) ) )
                owner.stopService();
                break;
             case GETSTATUS:

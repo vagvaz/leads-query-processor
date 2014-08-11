@@ -25,14 +25,17 @@ public class LogManageVerticle extends ManageVerticle {
    @Override
    public void startService() {
       super.startService();
-      container.deployVerticle("eu.leads.processor.core.LogVerticle", logConfig, new Handler<AsyncResult<String>>() {
+      if(logVertcileId == null){
+
+      logVertcileId = "";
+      container.deployVerticle("eu.leads.processor.core.LogVerticle",logConfig, new Handler<AsyncResult<String>>() {
 
          @Override
          public void handle(AsyncResult<String> asyncResult) {
             if (asyncResult.succeeded()) {
                container.logger().info("Log Vertice has been deployed ID " + asyncResult.result());
                logVertcileId = asyncResult.result();
-               com.sendTo(group, MessageUtils.createServiceStatusMessage(ServiceStatus.RUNNING, id, serviceType));
+               com.sendTo(parent, MessageUtils.createServiceStatusMessage(ServiceStatus.RUNNING, id, serviceType));
 
             } else {
                container.logger().fatal("Log Verticle failed to deploy");
@@ -41,16 +44,16 @@ public class LogManageVerticle extends ManageVerticle {
          }
       });
 
-
+      }
    }
 
    @Override
    public void initialize(JsonObject config) {
       super.initialize(config);
       logAddress = id;//".log";
-      JsonObject logConfig = new JsonObject();
+      logConfig = new JsonObject();
       logConfig.putString("id", logAddress);
-      com.sendTo(group, MessageUtils.createServiceStatusMessage(ServiceStatus.INITIALIZED, id, serviceType));
+      com.sendTo(parent, MessageUtils.createServiceStatusMessage(ServiceStatus.INITIALIZED, id, serviceType));
    }
 
    @Override
@@ -68,7 +71,8 @@ public class LogManageVerticle extends ManageVerticle {
          public void handle(AsyncResult<Void> asyncResult) {
             if (asyncResult.succeeded()) {
                container.logger().info("Log Vertice has been deployed ID " + asyncResult.result());
-               com.sendTo(group, MessageUtils.createServiceStatusMessage(ServiceStatus.STOPPED, id, serviceType));
+               com.sendTo(parent, MessageUtils.createServiceStatusMessage(ServiceStatus.STOPPED, id, serviceType));
+               logVertcileId = null;
                if (shouldStop)
                   stop();
 
@@ -111,7 +115,7 @@ public class LogManageVerticle extends ManageVerticle {
       super.fail(message);
       JsonObject failMessage = MessageUtils.createServiceStatusMessage(ServiceStatus.FAILED, id, serviceType);
       failMessage.putString("message", message);
-      com.sendTo(group, failMessage);
+      com.sendTo(parent, failMessage);
 
    }
 }
