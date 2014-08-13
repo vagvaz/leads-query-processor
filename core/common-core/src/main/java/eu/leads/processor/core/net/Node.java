@@ -1,5 +1,6 @@
 package eu.leads.processor.core.net;
 
+import eu.leads.processor.core.ReplyHandler;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.eventbus.EventBus;
@@ -53,4 +54,6 @@ public interface Node {
    public String getGroup();
 
    void sendWithEventBus(String workQueue, JsonObject msg);
+
+   void sendWithEventBusReply(String id, JsonObject putAction, ReplyHandler replyHandler);
 }

@@ -2,7 +2,7 @@
 
   // Java verticle
   "main":"eu.leads.processor.core.PersistenceManageVerticle",
-
+"worker": true,
   // If your module is going to be registered in the Vert.x module registry you will also need the following
   // mandatory fields
   "description":"Put description of your module here",

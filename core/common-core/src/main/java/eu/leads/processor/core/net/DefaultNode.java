@@ -1,5 +1,6 @@
 package eu.leads.processor.core.net;
 
+import eu.leads.processor.core.ReplyHandler;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
@@ -113,7 +114,7 @@ public class DefaultNode implements Node {
       AckHandler ack = new AckHandler(this, logger, messageId, handler);
       pending.put(messageId, leadsMessage);
       pendingHandlers.put(messageId, ack);
-      bus.sendWithTimeout(destination, leadsMessage, timeout, ack);
+      bus.sendWithTimeout(destination, leadsMessage, timeout,ack);
    }
 
 
@@ -161,7 +162,7 @@ public class DefaultNode implements Node {
          public void handle(AsyncResult<Void> event) {
             if (event.succeeded()) {
                logger.info("subscribing to " + groupId + " succeded");
-               config.getArray("groups").add(groupId);
+//               config.getArray("groups").add(groupId);
                comHandler.registerRequest(groupId, handler);
             } else {
                logger.error("Fail to subscribe to " + groupId);
@@ -301,6 +302,12 @@ public class DefaultNode implements Node {
    public void sendWithEventBus(String groupId, JsonObject message) {
       JsonObject leadsMessage = MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.GROUP);
       bus.send(groupId, message);
+   }
+
+   @Override
+   public void sendWithEventBusReply(String groupId, JsonObject message, ReplyHandler replyHandler) {
+      JsonObject leadsMessage = MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.GROUP);
+      bus.send(groupId, message, replyHandler);
    }
 
 

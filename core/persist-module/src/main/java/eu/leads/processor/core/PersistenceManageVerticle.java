@@ -6,6 +6,7 @@ package eu.leads.processor.core;
 
 import eu.leads.processor.core.comp.ServiceStatus;
 import eu.leads.processor.core.net.MessageUtils;
+import eu.leads.processor.core.net.Node;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonObject;
@@ -17,6 +18,7 @@ public class PersistenceManageVerticle extends ManageVerticle {
    static String persistAddress = null;
    static JsonObject persistConfig = null;
    boolean shouldStop = false;
+
 
    @Override
    public void start() {
@@ -31,17 +33,19 @@ public class PersistenceManageVerticle extends ManageVerticle {
       if(persistVertcileId == null) {
          persistVertcileId = "";
 
-         container.deployWorkerVerticle("eu.leads.processor.core.PersistenceVerticle", container.config(), 1, false, new Handler<AsyncResult<String>>() {
+         getContainer().deployWorkerVerticle("eu.leads.processor.core.PersistenceVerticle", getContainer().config(), 1, false, new Handler<AsyncResult<String>>() {
+
+
 
             @Override
             public void handle(AsyncResult<String> asyncResult) {
                if (asyncResult.succeeded()) {
-                  container.logger().info("Persist Vertice has been deployed ID " + asyncResult.result());
+                  getContainer().logger().info("Persist Vertice has been deployed ID " + asyncResult.result());
                   persistVertcileId = asyncResult.result();
                   com.sendTo(parent, MessageUtils.createServiceStatusMessage(ServiceStatus.RUNNING, id, serviceType));
 
                } else {
-                  container.logger().fatal("Persist Verticle failed to deploy");
+                  getContainer().logger().fatal("Persist Verticle failed to deploy");
                   fail("Persist Verticle failed to deploy");
                }
             }
@@ -75,9 +79,11 @@ public class PersistenceManageVerticle extends ManageVerticle {
          public void handle(AsyncResult<Void> asyncResult) {
             if (asyncResult.succeeded()) {
                container.logger().info("Persist Vertice has been deployed ID " + asyncResult.result());
+               persistVertcileId = null;
                com.sendTo(parent, MessageUtils.createServiceStatusMessage(ServiceStatus.STOPPED, id, serviceType));
                if (shouldStop)
                   stop();
+
             } else {
                container.logger().fatal("Persist Verticle failed to undeploy");
                fail("Persist Verticle failed to undeploy");
