@@ -1,4 +1,4 @@
-package eu.leads.processor.core.planner;
+package eu.leads.processor.planner;
 
 /**
  * Created by vagvaz on 8/6/14.
