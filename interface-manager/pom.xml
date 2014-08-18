@@ -26,6 +26,7 @@
       <module>imanager-logic-mod</module>
       <module>processor-webservice</module>
       <module>imanager-processor-mod</module>
+      <module>webservice-client-library</module>
    </modules>
 
 
