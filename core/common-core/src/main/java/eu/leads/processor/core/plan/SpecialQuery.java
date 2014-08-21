@@ -6,7 +6,7 @@ import org.vertx.java.core.json.JsonObject;
 /**
  * Created by vagvaz on 8/4/14.
  */
-public abstract class SpecialQuery extends DataType implements Query {
+public class SpecialQuery extends DataType implements Query {
 
 
    public SpecialQuery(){
@@ -20,7 +20,9 @@ public abstract class SpecialQuery extends DataType implements Query {
       data.putObject("query",new JsonObject());
       setQueryType(QueryType.SPECIAL.toString());
    }
-
+   public SpecialQuery(JsonObject object){
+      super(object);
+   }
    @Override
    public String getQueryType() {
       return data.getString("queryType");
@@ -94,6 +96,16 @@ public abstract class SpecialQuery extends DataType implements Query {
       data.putString("location",location);
    }
 
+   @Override
+   public Plan getPlan() {
+      return null;
+   }
+
+   @Override
+   public void setPlan(Plan plan) {
+
+   }
+
 
    @Override
    public QueryContext getContext() {
@@ -124,10 +136,10 @@ public abstract class SpecialQuery extends DataType implements Query {
    }
 
    public String getSpecialQueryType(){
-      return data.getString("queryType");
+      return data.getString("specialQueryType");
    }
 
    public void setSpecialQueryType(String queryType){
-      data.putString("queryType",queryType);
+      data.putString("specialQueryType",queryType);
    }
 }

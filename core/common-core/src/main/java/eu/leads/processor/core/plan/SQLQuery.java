@@ -20,7 +20,9 @@ public class SQLQuery extends DataType implements Query {
       setQueryType(QueryType.SQL.toString());
 
    }
-
+   public SQLQuery(JsonObject object){
+      super(object);
+   }
    @Override
    public String getQueryType() {
       return data.getString("queryType");

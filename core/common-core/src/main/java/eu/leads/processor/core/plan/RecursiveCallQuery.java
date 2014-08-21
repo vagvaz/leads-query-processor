@@ -1,5 +1,7 @@
 package eu.leads.processor.core.plan;
 
+import org.vertx.java.core.json.JsonObject;
+
 /**
  * Created by vagvaz on 8/4/14.
  */
@@ -11,6 +13,15 @@ public class RecursiveCallQuery extends SpecialQuery {
       setSpecialQueryType("rec_call");
       setUrl(url);
       setDepth(depth);
+   }
+
+   public RecursiveCallQuery(SpecialQuery specialQuery) {
+      super(specialQuery.asJsonObject());
+      generatePlan();
+   }
+
+   private void generatePlan() {
+      
    }
 
    @Override

@@ -91,6 +91,7 @@
          <scope>test</scope>
       </dependency>
 
+
       <!-- Add any other dependencies that you want packaged into your module (in the lib dir) here
     as 'compile' dependencies. Here is an example
     <dependency>
