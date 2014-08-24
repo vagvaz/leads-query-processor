@@ -14,7 +14,9 @@ import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.core.logging.Logger;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -25,7 +27,7 @@ public class SubmitQueryHandler implements Handler<HttpServerRequest> {
 
 
    Node com;
-   LogProxy log;
+   Logger log;
    Map<String, SubmitQueryBodyHandler> bodyHandlers;
    Map<String, SubmitQueryReplyHandler> replyHandlers;
 
@@ -100,9 +102,11 @@ public class SubmitQueryHandler implements Handler<HttpServerRequest> {
    }
 
 
-   public SubmitQueryHandler(final Node com, LogProxy log) {
+   public SubmitQueryHandler(final Node com, Logger log) {
       this.com = com;
       this.log = log;
+      replyHandlers = new HashMap<>();
+      bodyHandlers = new HashMap<>();
    }
 
    @Override
@@ -115,6 +119,7 @@ public class SubmitQueryHandler implements Handler<HttpServerRequest> {
       SubmitQueryBodyHandler bodyHanlder = new SubmitQueryBodyHandler(reqId, replyHandler);
       replyHandlers.put(reqId, replyHandler);
       bodyHandlers.put(reqId, bodyHanlder);
+      request.bodyHandler(bodyHanlder);
    }
 
    public void cleanup(String id) {

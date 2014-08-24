@@ -46,7 +46,8 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
       com = new DefaultNode();
       com.initialize(id,imanager,null,this,null,vertx);
       log = new LogProxy(config.getString("log"),com);
-      persistence = new PersistenceProxy(config.getString("persist"),com);
+      persistence = new PersistenceProxy(config.getString("persistence"),com,vertx);
+      persistence.start();
       mapper = new ObjectMapper();
 
    }
@@ -54,8 +55,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
    @Override
    public void stop() {
       super.stop();
-      com.unsubscribe(id);
-      com.unsubscribe(imanager);
+      com.unsubscribeFromAll();
    }
 
    @Override
@@ -222,7 +222,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                   action.getData().putString("replyTo",msg.getString("from"));
                   com.sendWithEventBus(workQueueAddress, action.asJsonObject());
                } else if (label.equals(IManagerConstants.SUBMIT_QUERY)) {
-                  Action newACtion = createNewAction(action);
+                  newAction = createNewAction(action);
                   newAction.setCategory(ActionCategory.ACTION.toString());
                   newAction.setLabel(IManagerConstants.CREATE_NEW_QUERY);
                   newAction.setProcessedBy(id);
@@ -230,7 +230,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                   newAction.getData().putString("replyTo",msg.getString("from"));
                   com.sendWithEventBus(workQueueAddress, newAction.asJsonObject());
                } else if (label.equals(IManagerConstants.SUBMIT_SPECIAL)) {
-                  Action newACtion = createNewAction(action);
+                  newAction = createNewAction(action);
                   newAction.setCategory(ActionCategory.ACTION.toString());
                   newAction.setLabel(IManagerConstants.CREATE_NEW_SPECIAL_QUERY);
                   newAction.setProcessedBy(id);
@@ -253,7 +253,10 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                if (label.equals(IManagerConstants.GET_OBJECT)) {
                   com.sendTo(action.getData().getString("replyTo"),action.getResult());
                } else if (label.equals(IManagerConstants.PUT_OBJECT)) {
-                  com.sendTo(action.getData().getString("replyTo"),action.getResult());
+                  if(!action.getResult().containsField("message")){
+                     action.getResult().putString("message","");
+                  }
+                  com.sendTo(action.getData().getString("replyTo"), action.getResult());
                } else if (label.equals(IManagerConstants.GET_QUERY_STATUS)) {
                   com.sendTo(action.getData().getString("replyTo"), action.getResult());
                } else if (label.equals(IManagerConstants.GET_RESULTS)) {
@@ -316,8 +319,8 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
       result.setOwnerId(this.id);
       result.setProcessedBy("");
       result.setDestination("");
-      result.setData(null);
-      result.setResult(null);
+      result.setData(new JsonObject());
+      result.setResult(new JsonObject());
       result.setLabel("");
       result.setCategory("");
       return result;

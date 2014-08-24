@@ -85,10 +85,12 @@ public class Action  extends DataType{
    }
 
    public JsonObject getData(){
+      if(!data.containsField("data"))
+       data.putObject("data",new JsonObject());
       return data.getObject("data");
    }
    public void setData(JsonObject data){
-      data.putObject("data",data);
+      this.data.putObject("data",data);
    }
 
    public String getDestination(){

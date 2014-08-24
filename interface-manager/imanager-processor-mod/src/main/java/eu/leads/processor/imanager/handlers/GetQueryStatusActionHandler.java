@@ -32,7 +32,7 @@ public class GetQueryStatusActionHandler implements ActionHandler {
          String queryId = action.getData().getString("queryId");
          JsonObject actionResult = persistence.get(StringConstants.QUERIESCACHE, queryId);
          if (actionResult.getString("status").equals("ok")) {
-           result.setResult(actionResult.getObject("result"));
+           result.setResult(actionResult.getObject("result").getObject("status"));
          } else {
             actionResult.putString("error", "");
             result.setResult(actionResult);

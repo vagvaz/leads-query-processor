@@ -53,6 +53,7 @@ public class CreateQueryActionHandler implements ActionHandler {
                actionResult.putString("message", "Failed to add query " + sql + " from user " + user + " to the queries cache");
 
             }
+            actionResult.putObject("status",query.getQueryStatus().asJsonObject());
             result.setResult(actionResult);
             result.setStatus(ActionStatus.COMPLETED.toString());
          }

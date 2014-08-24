@@ -18,9 +18,11 @@ public class LeadsComponentRunner {
    public static void main(String[] args) {
       if(checkArguments(args)){
          readArguments(args);
-         String command = "vertx runMod " + component + " -ha -hagroup " + group + " -conf " + configuration;
+         String command = component + " -ha -hagroup " + group + " -conf " + configuration;
          try {
-            Process p = Runtime.getRuntime().exec(command);
+            ProcessBuilder builder = new ProcessBuilder("vertx","runMod",component,"-ha","-hagroup",group,"-conf",configuration);
+            Process p = builder.start();
+//            Process p = Runtime.getRuntime().exec(command);
 
          } catch (IOException e) {
             e.printStackTrace();

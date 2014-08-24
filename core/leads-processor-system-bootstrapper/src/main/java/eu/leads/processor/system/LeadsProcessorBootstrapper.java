@@ -44,20 +44,28 @@ public class LeadsProcessorBootstrapper {
    private static void deployComponent(String component, String ip) {
       JsonObject config = generateConfiguration(component);
       sendConfigurationTo(config,ip);
-      String prefixCommand = "ssh " + LQPConfiguration.getInstance().getConf().getString("processor.ssh.username")+"@" + ip;
+      String prefixCommand =  LQPConfiguration.getInstance().getConf().getString("processor.ssh.username")+"@" + ip;
       String group = LQPConfiguration.getInstance().getConf().getString("processor.group");
       String version = LQPConfiguration.getInstance().getConf().getString("processor.version");
 //      String command = "vertx runMod " + group +"~"+ component + "-mod~" + version + " -conf /tmp/"+config.getString("id")+".json";
       String basedir = LQPConfiguration.getInstance().getConf().getString("processor.baseDir");
-      String vertxComponent = group+"~"+component+"-comp-mod~"+version;
-      String command = " java -cp "+ basedir +"/lib/component-deployer.jar eu.leads.processor.system.LeadsComponentRunner "
-                     + vertxComponent + " "+ config.getString("group")+ " /tmp/" + config.getString("id")+".json ";
+      String vertxComponent =  null;
+      if(!component.equals("webservice")) {
+         vertxComponent = group + "~" + component + "-comp-mod~" + version;
+      }
+      else{
+         vertxComponent = group+"~"+"processor-webservice~"+version;
+      }
+
+      String command = " 'source ~/.bashrc; java -cp "+ basedir +"/lib/component-deployer.jar eu.leads.processor.system.LeadsComponentRunner "
+                     + vertxComponent + " "+ config.getString("group")+ " /tmp/" + config.getString("id")+".json '";
+      command = "/home/vagvaz/touchafile.sh " ;
       try {
-         Process p = Runtime.getRuntime().exec(prefixCommand+" "+command);
-         p.waitFor();
+         ProcessBuilder builder = new ProcessBuilder("ssh",prefixCommand,command,vertxComponent, config.getString("group"), "/tmp/"+config.getString("id")+".json");
+         Process p = builder.start();
+//         Process p = Runtime.getRuntime().exec(prefixCommand+" "+command);
+//         p.waitFor();
       } catch (IOException e) {
-         e.printStackTrace();
-      } catch (InterruptedException e) {
          e.printStackTrace();
       }
 
@@ -109,7 +117,7 @@ public class LeadsProcessorBootstrapper {
       }else if (component.equals("nqe")){
 
       }else if (component.equals("webservice")){
-
+         result.putNumber("port", LQPConfiguration.getConf().getInt("components.webservice.port"));
       }else if (component.equals("default")){
         JsonObject logic = new JsonObject();
          logic.putString("listen",LQPConfiguration.getConf().getString("components.default.listen"));

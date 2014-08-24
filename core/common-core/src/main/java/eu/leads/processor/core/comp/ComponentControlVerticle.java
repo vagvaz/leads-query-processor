@@ -298,7 +298,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
          }
          //merge into the service configuration the basic Configuration
          conf.mergeIn(basicConf);
-         container.deployModule(conf.getString("groupId") + "~" + componentType + "-" + serviceType + "mod~" + conf.getString("version"), 1, new Handler<AsyncResult<String>>() {
+         container.deployModule(conf.getString("groupId") + "~" + componentType + "-" + serviceType + "-mod~" + conf.getString("version"), 1, new Handler<AsyncResult<String>>() {
 
             @Override
             public void handle(AsyncResult<String> asyncResult) {

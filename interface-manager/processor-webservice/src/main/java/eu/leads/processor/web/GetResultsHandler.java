@@ -13,7 +13,9 @@ import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.core.logging.Logger;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,7 +25,7 @@ import java.util.UUID;
 public class GetResultsHandler implements Handler<HttpServerRequest> {
 
    Node com;
-   LogProxy log;
+   Logger log;
    Map<String,GetResultsReplyHandler> replyHandlers;
 
 
@@ -62,9 +64,10 @@ public class GetResultsHandler implements Handler<HttpServerRequest> {
 
 
 
-   public GetResultsHandler(final Node com,LogProxy log) {
+   public GetResultsHandler(final Node com,Logger log) {
       this.com = com;
       this.log = log;
+      replyHandlers = new HashMap<>();
    }
 
    @Override

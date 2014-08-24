@@ -35,12 +35,25 @@ public abstract class ManageVerticle extends Verticle implements LeadsService {
    }
 
    @Override
-   public void initialize(JsonObject config) {
+   public void initialize(JsonObject conf) {
+      JsonObject configuration = conf;
+      if(conf == null){
+         configuration = this.config;
+      }
       com = new DefaultNode();
-      persistenceProxy = new PersistenceProxy(config.getString("persistence"), com);
-      logProxy = new LogProxy(config.getString("log"), com);
+      System.err.println("\n\n"+this.getClass().getCanonicalName().toString());
+      System.err.println(" \ncom " + com.toString() );
+      System.err.println("\nthis.config " + this.config.toString());
+      System.err.println("\nPARAMETER->"+configuration.toString());
+      logProxy = new LogProxy(configuration.getString("log"), com);
+      persistenceProxy = new PersistenceProxy(configuration.getString("persistence"), com,vertx);
       serviceHandler = new ServiceHandler(this, com, logProxy, persistenceProxy);
       com.initialize(id + ".manage", group, null, serviceHandler, serviceHandler, this.getVertx());
+
+
+
+      persistenceProxy.start();
+
       setStatus(ServiceStatus.INITIALIZED);
 
 

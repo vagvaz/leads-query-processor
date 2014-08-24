@@ -1,8 +1,7 @@
 package eu.leads.processor.web;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.vertx.java.core.json.JsonObject;
 
 import javax.ws.rs.core.MediaType;
 import java.io.*;
@@ -90,7 +89,7 @@ public class WebServiceClient {
       os.close();
    }
 
-   public static Map<String,String> getObject(String table, String key, List<String> attributes) throws IOException {
+   public static JsonObject getObject(String table, String key, List<String> attributes) throws IOException {
       ObjectQuery ob = new ObjectQuery();
       ob.setAttributes(attributes);
       ob.setKey(key);
@@ -105,23 +104,24 @@ public class WebServiceClient {
 //        System.out.println("getResponse " + response);
       if(response.length() < 5)
          return null;
-      HashMap<String,String> res = (HashMap<String, String>) mapper.readValue(response, HashMap.class);
-      HashMap<String,String> result = new HashMap<>();
+//      HashMap<String,String> res = (HashMap<String, String>) mapper.readValue(response, HashMap.class);
+//      HashMap<String,String> result = new HashMap<>();
 //        for(Map.Entry<String,String> r : res.entrySet()){
 ////            if(!r.getValue().startsWith("["))
 ////               result.put(r.getKey(),mapper.readValue(r.getValue(),String.class));
 ////            else
 //               result.put(r.getKey(),r.getValue());
 //        }
-      return res;
+      JsonObject result = new JsonObject(response);
+      return result;
    }
 
-   public static  boolean putObject(String table,String key,Object object) throws IOException {
+   public static  boolean putObject(String table,String key,JsonObject object) throws IOException {
       boolean result = false;
       PutAction action = new PutAction();
       action.setTable(table);
       action.setKey(key);
-      action.setObject(mapper.writeValueAsString(object));
+      action.setObject(object.toString());
       address = new URL(host+":"+port+prefix+"object/put/");
       HttpURLConnection connection = (HttpURLConnection) address.openConnection();
       connection = setUp(connection,"POST", MediaType.APPLICATION_JSON,true,true);
@@ -129,7 +129,7 @@ public class WebServiceClient {
       setBody(connection,action);
       String response = getResult(connection);
       ActionResult aresult =  mapper.readValue(response, ActionResult.class);
-      result = aresult.getResult().equals("SUCCESS");
+      result = aresult.getStatus().equals("SUCCESS");
       return result;
    }
 

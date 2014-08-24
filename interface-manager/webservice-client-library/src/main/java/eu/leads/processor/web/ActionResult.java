@@ -24,11 +24,11 @@ public class ActionResult {
    public ActionResult(){
       result = "FAIL";
    }
-   public String getResult() {
+   public String getStatus() {
       return result;
    }
 
-   public void setResult(String result) {
+   public void setStatus(String result) {
       this.result = result;
    }
 }

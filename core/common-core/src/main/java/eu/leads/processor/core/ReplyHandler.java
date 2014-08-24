@@ -12,7 +12,7 @@ import org.vertx.java.core.json.JsonObject;
 public class ReplyHandler implements Handler<Message<JsonObject>>,LeadsMessageHandler {
 
    private JsonObject message = null;
-   private final Object mutex = new Object();
+   private volatile Object mutex = new Object();
 
    public JsonObject waitForMessage() {
       JsonObject result = null;

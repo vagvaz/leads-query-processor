@@ -181,7 +181,7 @@ public class DefaultNode implements Node {
                //TODO remove from config the groupId.config.getArray("groups").(groupId);
                comHandler.unregister(groupId);
             } else {
-               logger.error("Fail to subscribe to " + groupId);
+               logger.error("Fail to unsubscribe to " + groupId);
             }
          }
       });
@@ -308,6 +308,11 @@ public class DefaultNode implements Node {
    public void sendWithEventBusReply(String groupId, JsonObject message, ReplyHandler replyHandler) {
       JsonObject leadsMessage = MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.GROUP);
       bus.send(groupId, message, replyHandler);
+   }
+
+   @Override
+   public void unsubscribeFromAll() {
+
    }
 
 
