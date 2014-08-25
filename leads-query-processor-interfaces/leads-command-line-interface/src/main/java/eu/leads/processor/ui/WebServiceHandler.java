@@ -1,9 +1,5 @@
 package eu.leads.processor.ui;
 
-import eu.leads.processor.common.Tuple;
-
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**

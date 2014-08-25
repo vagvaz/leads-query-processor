@@ -7,6 +7,7 @@ import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 
+import eu.leads.processor.conf.LQPConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tajo.catalog.CatalogConstants;
@@ -35,13 +36,18 @@ public class LeadsCatalog{
 			LeadsCatalog.conf=inconf;
 		else{
 			conf = new TajoConf();
+         LQPConfiguration.initialize(true);
+         LQPConfiguration.getInstance().loadFile("catalog.xml");
+
 			 if (System.getProperty(ConfVars.RESOURCE_MANAGER_CLASS.varname) != null) {
 			      String testResourceManager = System.getProperty(ConfVars.RESOURCE_MANAGER_CLASS.varname);
 			      Preconditions.checkState(testResourceManager.equals(TajoWorkerResourceManager.class.getCanonicalName()));
 			      conf.set(ConfVars.RESOURCE_MANAGER_CLASS.varname, System.getProperty(ConfVars.RESOURCE_MANAGER_CLASS.varname));
 		    }
-		    conf.setInt(ConfVars.WORKER_RESOURCE_AVAILABLE_MEMORY_MB.varname, 1024);
-		    conf.setFloat(ConfVars.WORKER_RESOURCE_AVAILABLE_DISKS.varname, 2.0f);
+//		    conf.setInt(ConfVars.WORKER_RESOURCE_AVAILABLE_MEMORY_MB.varname, 1024);
+//		    conf.setFloat(ConfVars.WORKER_RESOURCE_AVAILABLE_DISKS.varname, 2.0f);
+         conf.setInt(ConfVars.WORKER_RESOURCE_AVAILABLE_MEMORY_MB.varname, LQPConfiguration.getConf().getInt("planner.catalog.memory",1024));
+		    conf.setFloat(ConfVars.WORKER_RESOURCE_AVAILABLE_DISKS.varname, LQPConfiguration.getConf().getFloat("planner.catalog.disks",1.0f));
 
 		    Object clusterTestBuildDir = null;
 			//this.standbyWorkerMode = conf.getVar(ConfVars.RESOURCE_MANAGER_CLASS)
@@ -52,10 +58,12 @@ public class LeadsCatalog{
 		      }
 
 		      //conf.set(CatalogConstants.STORE_CLASS,"org.apache.tajo.catalog.store.MemStore");// 
-		      conf.set(CatalogConstants.STORE_CLASS,"leads.tajo.catalog.LeadsMemStore");// 
-		      conf.set(CatalogConstants.CATALOG_URI, "jdbc:derby:" + clusterTestBuildDir + "/db");
-		      LOG.info("Apache Derby repository is set to "+conf.get(CatalogConstants.CATALOG_URI));
-		      conf.setVar(ConfVars.CATALOG_ADDRESS, "localhost:5998");
+		      conf.set(CatalogConstants.STORE_CLASS,LQPConfiguration.getConf().getString("planner.catalog.store","leads.tajo.catalog.LeadsMemStore"));//
+		      conf.set(CatalogConstants.CATALOG_URI, LQPConfiguration.getConf().getString("planner.catalog.uri","jdbc:derby:" + clusterTestBuildDir + "/db"));
+		      LOG.info("Apache Derby repository is set to "+LQPConfiguration.getConf().getString("planner.catalog.uri","jdbc:derby:" + clusterTestBuildDir + "/db"));
+		      conf.setVar(ConfVars.CATALOG_ADDRESS, LQPConfiguration.getConf().getString("planner.catalog.ip","0.0.0.0")+":"+
+            LQPConfiguration.getConf().getString("planner.catalog.port","5998"));
+
 
 
 		}
