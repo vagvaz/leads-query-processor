@@ -41,24 +41,25 @@ public class IManagerLogicManage extends ManageVerticle {
    @Override
    public void startService() {
       super.startService();
-      container.deployWorkerVerticle(IManagerLogicWorker.class.getCanonicalName(),workerConfig,1,false,new Handler<AsyncResult<String>>(){
-         @Override
-         public void handle(AsyncResult<String> event) {
-            if(event.succeeded()){
-               workerId = event.result();
-               logProxy.info("IManagerLogicWorker has been deployed.");
-               JsonObject statusMessage = MessageUtils.createServiceStatusMessage(status,id+".manage",serviceType);
-               com.sendTo(parent,statusMessage);
-            }
-            else{
-               String msg = "IManagerLogWorker could not be deployed";
+      if(workerId == null) {
+         workerId = "";
+         container.deployWorkerVerticle(IManagerLogicWorker.class.getCanonicalName(), workerConfig, 1, false, new Handler<AsyncResult<String>>() {
+            @Override
+            public void handle(AsyncResult<String> event) {
+               if (event.succeeded()) {
+                  workerId = event.result();
+                  logProxy.info("IManagerLogicWorker has been deployed.");
+                  JsonObject statusMessage = MessageUtils.createServiceStatusMessage(status, id + ".manage", serviceType);
+                  com.sendTo(parent, statusMessage);
+               } else {
+                  String msg = "IManagerLogWorker could not be deployed";
 
-               fail(msg);
+                  fail(msg);
+               }
             }
-         }
-      });
-      com.sendTo(parent, MessageUtils.createServiceStatusMessage(status,id,serviceType));
-
+         });
+//         com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id, serviceType));
+      }
    }
 
    @Override
@@ -69,6 +70,10 @@ public class IManagerLogicManage extends ManageVerticle {
    @Override
    public void stopService() {
       super.stopService();
+      if(workerId != null) {
+         container.undeployModule(workerId);
+         workerId = null;
+      }
       com.sendTo(parent, MessageUtils.createServiceStatusMessage(status,id,serviceType));
 
    }

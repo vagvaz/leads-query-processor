@@ -23,6 +23,9 @@ package leads.tajo.catalog;
  */
 
 import com.google.common.collect.Maps;
+import eu.leads.processor.common.infinispan.CacheManagerFactory;
+import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.tajo.TajoConstants;
@@ -49,8 +52,16 @@ public class LeadsMemStore implements CatalogStore {
   private final Map<String, CatalogProtos.FunctionDescProto> functions = Maps.newHashMap();
   private final Map<String, Map<String, IndexDescProto>> indexes = Maps.newHashMap();
   private final Map<String, Map<String, IndexDescProto>> indexesByColumn = Maps.newHashMap();
-
+  private InfinispanManager manager;
   public LeadsMemStore(Configuration conf) {
+     LQPConfiguration.initialize();
+     manager = CacheManagerFactory.createCacheManager();
+//     tablespaces = manager.getPersisentCache("leads.processor.catalog.tablespaces");
+//     databases = manager.getPersisentCache("leads.processor.catalog.databases");
+//     functions = manager.getPersisentCache("leads.processor.catalog.functions");
+//     indexes = manager.getPersisentCache("leads.processor.catalog.indexes");
+//     indexesByColumn = manager.getPersisentCache("leads.processor.catalog.indexesByColumn");
+
   }
 
   

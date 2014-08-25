@@ -103,4 +103,7 @@ public class TaJoModule {
 		return null;
 	}
 
+   public String Optimize(Session session, Expr expr) {
+      return null;
+   }
 }

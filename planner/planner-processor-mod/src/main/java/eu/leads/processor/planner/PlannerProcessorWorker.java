@@ -8,6 +8,8 @@ import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.planner.handlers.ProcessSQLQueryActionHandler;
+import eu.leads.processor.planner.handlers.ProcessSpecialQueryActionHandler;
 import leads.tajo.module.TaJoModule;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.EventBus;
@@ -37,13 +39,6 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
    @Override
    public void start() {
       super.start();
-      module = new TaJoModule();
-      module.init_connection(config.getString("catalog_ip","localhost"),config.getInteger("catalog_port",5998));
-      handlers = new HashMap<String,ActionHandler>();
-      handlers.put(QueryPlannerConstants.PROCESS_SQL_QUERY,new ProcessSQLQueryActionHandler(com,log,persistence,id,module));
-      handlers.put(QueryPlannerConstants.PROCESS_SPECIAL_QUERY,new ProcessSpecialQueryActionHandler(com,log,persistence,id,module));
-
-
       leadsHandler = new LeadsMessageHandler() {
          @Override
          public void handle(JsonObject event) {
@@ -55,6 +50,11 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
             }
          }
       };
+      module = new TaJoModule();
+      module.init_connection(config.getString("catalog_ip","localhost"),config.getInteger("catalog_port",5998));
+
+
+
       bus = vertx.eventBus();
       config = container.config();
       id = config.getString("id");
@@ -64,8 +64,14 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
       com = new DefaultNode();
       com.initialize(id, gr, null, leadsHandler, leadsHandler, vertx);
       bus.registerHandler(id + ".process", this);
+      persistence = new PersistenceProxy(config.getString("persistence"),com,vertx);
+      persistence.start();
       JsonObject msg = new JsonObject();
       msg.putString("processor", id + ".process");
+      handlers = new HashMap<String,ActionHandler>();
+      handlers.put(QueryPlannerConstants.PROCESS_SQL_QUERY,new ProcessSQLQueryActionHandler(com,log,persistence,id,module));
+      handlers.put(QueryPlannerConstants.PROCESS_SPECIAL_QUERY,new ProcessSpecialQueryActionHandler(com,log,persistence,id,module));
+      log = new LogProxy(config.getString("log"),com);
       bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {
          @Override
          public void handle(Message<JsonObject> event) {

@@ -14,10 +14,10 @@ public class PlannerControlVerticle extends ComponentControlVerticle {
 
    @Override
    public void start() {
-      super.start();
-      setup(config);
       plannerQueue = StringConstants.PLANNERQUEUE;
       deployerManageQueue = StringConstants.DEPLOYERQUEUE;
+      super.start();
+      setup(container.config());
       startUp();
    }
 
@@ -25,9 +25,9 @@ public class PlannerControlVerticle extends ComponentControlVerticle {
    public void setup(JsonObject conf) {
       super.setup(conf);
       logicConfig.putString("planner",plannerQueue);
-      logicConfig.putString("imanager", deployerManageQueue);
+      logicConfig.putString("deployer", deployerManageQueue);
       processorConfig.putString("planner",plannerQueue);
-      logicConfig.putString("imanager", deployerManageQueue);
+      logicConfig.putString("deployer", deployerManageQueue);
    }
 
    @Override

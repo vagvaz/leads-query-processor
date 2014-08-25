@@ -1,4 +1,4 @@
-package eu.leads.processor.planner;
+package eu.leads.processor.planner.handlers;
 
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.core.Action;
@@ -100,7 +100,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
    private void failQuery(Exception e, SQLQuery sqlQuery) {
       QueryStatus status = sqlQuery.getQueryStatus();
       status.setErrorMessage(e.getMessage());
-      status.setState(QueryState.FAILED);
+      status.setStatus(QueryState.FAILED);
       sqlQuery.setQueryStatus(status);
       persistence.put(StringConstants.QUERIESCACHE,sqlQuery.getId(),sqlQuery.asJsonObject());
    }

@@ -1,4 +1,4 @@
-package eu.leads.processor.planner;
+package eu.leads.processor.planner.handlers;
 
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
