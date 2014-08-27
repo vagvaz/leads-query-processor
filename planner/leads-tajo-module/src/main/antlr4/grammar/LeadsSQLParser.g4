@@ -136,12 +136,6 @@ table_partitioning_clauses
   | hash_partitions
   | list_partitions
   | column_partitions
-  | cql_window_clause
-  ;
-
-cql_window_clause
-  : PARTITION BY column_reference_list  LEFT_SBRACKET cql_window_type  RIGHT_SBRACKET 
-  | LEFT_SBRACKET cql_window_type  RIGHT_SBRACKET
   ;
 
 range_partitions
@@ -356,8 +350,7 @@ nonreserved_keywords
   | VARBINARY
   | VARBIT
   | VARCHAR
-  ; 
-
+  ;
 
 /*
 ===============================================================================
@@ -907,7 +900,7 @@ boolean_primary
   ;
 
 boolean_predicand
-  : parenthesized_boolean_value_expression 
+  : parenthesized_boolean_value_expression
   | nonparenthesized_value_expression_primary
   ;
 
@@ -1001,19 +994,8 @@ table_expression
 */
 
 from_clause
-  : FROM leads_window? table_reference_list // { System.out.println("from_clause"); }
+  : FROM table_reference_list
   ;
-
-leads_window
-  :  LEFT_SBRACKET leads_window_type NUMBER COLON NUMBER  RIGHT_SBRACKET
-  
-;
-
-leads_window_type
-	: VERSION  
-	| ROWS  
-	;
-
 
 table_reference_list
   :table_reference (COMMA table_reference)*
@@ -1091,18 +1073,10 @@ named_columns_join
   : USING LEFT_PAREN f=column_reference_list RIGHT_PAREN
   ;
 
-//table_primary
-//  : table_or_query_name ((AS)? alias=identifier)? (LEFT_PAREN column_name_list RIGHT_PAREN)?
-//  | derived_table (AS)? name=identifier (LEFT_PAREN column_name_list RIGHT_PAREN)?
-//  ;
-
 table_primary
   : table_or_query_name ((AS)? alias=identifier)? (LEFT_PAREN column_name_list RIGHT_PAREN)?
   | derived_table (AS)? name=identifier (LEFT_PAREN column_name_list RIGHT_PAREN)?
-  | table_or_query_name table_or_query_name cql_window_clause 
-  | table_or_query_name cql_window_clause
-  ; 
-
+  ;
 
 column_name_list
   :  identifier  ( COMMA identifier  )*
@@ -1316,16 +1290,12 @@ column_name
   ;
 
 query_specification
-  : SELECT time_stamp ? set_qualifier? select_list table_expression?
-  | xstream_clause LEFT_PAREN query_specification RIGHT_PAREN 
+  : SELECT set_qualifier? select_list table_expression?
   ;
 
 select_list
   : select_sublist (COMMA select_sublist)*
   ;
-
-time_stamp
-	: LEFT_SBRACKET VERSION  NUMBER COLON NUMBER RIGHT_SBRACKET;
 
 select_sublist
   : derived_column
@@ -1357,9 +1327,6 @@ column_reference_list
   : column_reference (COMMA column_reference)*
   ;
 
-xstream_clause
-  : ISTREAM | DSTREAM | RSTREAM
-  ;
 /*
 ==============================================================================================
   7.15 <subquery>

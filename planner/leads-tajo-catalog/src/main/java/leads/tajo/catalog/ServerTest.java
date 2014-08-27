@@ -105,6 +105,8 @@ public class ServerTest {
 		Schema schema2 = new Schema();
 		schema2.addColumn("deptname", Type.TEXT);
 		schema2.addColumn("manager", Type.TEXT);
+		schema2.addColumn("tmsp", Type.INT4);
+		
 
 		Schema schema3 = new Schema();
 		schema3.addColumn("deptname", Type.TEXT);
@@ -152,9 +154,10 @@ public class ServerTest {
 				schema5, StoreType.MEM, new KeyValueSet(), getTestDir("score3"));
 		catalog.createTable(score3);
 
-		FunctionDesc funcDesc = new FunctionDesc("sumtest", SumInt.class,
-				FunctionType.GENERAL, CatalogUtil.newSimpleDataType(Type.INT4),
-				CatalogUtil.newSimpleDataTypeArray(Type.INT4));
+	    FunctionDesc funcDesc = new FunctionDesc("sumtest", SumInt.class, FunctionType.AGGREGATION,
+	            CatalogUtil.newSimpleDataType(Type.INT4),
+	            CatalogUtil.newSimpleDataTypeArray(Type.INT4));
+
 
 		catalog.createFunction(funcDesc);
 		System.out.println("TestLeadsCatalogServer Started");

@@ -27,6 +27,8 @@ import org.apache.tajo.master.session.Session;
 import org.apache.tajo.catalog.*;
 import org.apache.tajo.conf.TajoConf;
 
+import com.google.protobuf.TextFormat.ParseException;
+
 /**
  * @author tr
  * 
@@ -56,7 +58,7 @@ public class TaJoModule {
 		}
 	}
 	public static String Optimize( Session session,
-			String sql) throws PlanningException {
+			String sql) throws PlanningException,ParseException {
 		
 		if (catalog == null) {
 			System.err.println("Catalog is Uninitialized");
@@ -64,7 +66,7 @@ public class TaJoModule {
 		}
 		try {
 			Expr expr = sqlAnalyzer.parse(sql);
-
+			//return expr.toString();
 			// Expr expr = sqlAnalyzer.parse(sql);
 			//System.out.println("Query: " + sql);
 			//System.out.println("Parsed:" + expr.toJson());
@@ -76,14 +78,18 @@ public class TaJoModule {
 			optimizer.optimize(newPlan);
 			
 			//System.out.println("END");
-			// return newPlan;
+			//return plan.toString();
 
 			return CoreGsonHelper.getPrettyInstance().toJson(
 					newPlan.getRootBlock().getRoot());
 		} catch (SQLSyntaxError e) {
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
-			throw new PlanningException("Parse Error");
+			throw new SQLSyntaxError("Parse Error" + e.getMessage());
+		}
+		catch (PlanningException e) {
+			// TODO: handle exception
+			throw new PlanningException("Planning Error"+ e.getMessage());
 		}
 	}
 

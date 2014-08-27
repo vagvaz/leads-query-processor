@@ -278,6 +278,7 @@ public class LeadsSQLAnalyzer extends LeadsSQLParserBaseVisitor<Expr> {
   @Override
   public RelationList visitFrom_clause(LeadsSQLParser.From_clauseContext ctx) {
     Expr[] relations = new Expr[ctx.table_reference_list().table_reference().size()];
+   // System.out.println(" Size = " + ctx.table_reference_list().table_reference().size());
     for (int i = 0; i < relations.length; i++) {
       relations[i] = visitTable_reference(ctx.table_reference_list().table_reference(i));
     }
@@ -593,7 +594,9 @@ public class LeadsSQLAnalyzer extends LeadsSQLParserBaseVisitor<Expr> {
   @Override
   public Expr visitTable_primary(LeadsSQLParser.Table_primaryContext ctx) {
     if (ctx.table_or_query_name() != null) {
-      Relation relation = new Relation(ctx.table_or_query_name().get(0).getText());
+    	if(ctx.table_or_query_name().isEmpty())
+    		 return null;
+    	 Relation relation = new Relation(ctx.table_or_query_name().getText());
       if (ctx.alias != null) {
         relation.setAlias(ctx.alias.getText());
       }

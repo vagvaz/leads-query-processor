@@ -19,7 +19,6 @@
 lexer grammar SQLLexer;
 
 @header {
-
 }
 
 @members {
@@ -215,7 +214,7 @@ COUNT : C O U N T;
 CUBE : C U B E;
 CUME_DIST : C U M E UNDERLINE D I S T;
 CURRENT : C U R R E N T;
- 
+
 DAY : D A Y;
 DAYS : D A Y S;
 DATABASE : D A T A B A S E;
@@ -321,7 +320,7 @@ VALUES : V A L U E S;
 VAR_SAMP : V A R UNDERLINE S A M P;
 VAR_POP : V A R UNDERLINE P O P;
 VARYING : V A R Y I N G;
-VERSION : V E R S I O N;
+
 WEEK : W E E K;
 
 YEAR : Y E A R;
