@@ -1,6 +1,5 @@
 package eu.leads.processor.common;
 
-//import eu.leads.processor.utils.StdOutputWriter;
 import org.infinispan.distexec.mapreduce.Reducer;
 
 import java.util.Iterator;

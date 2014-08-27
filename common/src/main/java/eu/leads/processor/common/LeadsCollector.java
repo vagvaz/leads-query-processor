@@ -1,5 +1,6 @@
 package eu.leads.processor.common;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.infinispan.Cache;
 import org.infinispan.distexec.mapreduce.Collector;
+import org.infinispan.manager.EmbeddedCacheManager;
 
 public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
 		Serializable {
@@ -22,13 +24,18 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
 		emitCount = new AtomicInteger();
 		this.maxCollectorSize = maxCollectorSize;
 		store_cache = collectorCache;
+		cache_name=collectorCache.getName();
 	}
 
 	// private Map<KOut, List<VOut>> store;
-	private Cache<KOut, List<VOut>> store_cache;
+	private transient Cache<KOut, List<VOut>> store_cache;
 	private final AtomicInteger emitCount;
 	private final int maxCollectorSize;
-
+	private String cache_name;
+	
+	
+	
+	
 	public Cache<KOut, List<VOut>> getCache() {
 		return store_cache;
 	}
@@ -52,6 +59,10 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
 	// public Map<KOut, List<VOut>> collectedValues() {
 	// return store;
 	// }
+	
+	public void initialize_cache(EmbeddedCacheManager manager){
+		store_cache=manager.getCache(cache_name);
+	}
 
 	public void reset() {
 		// store.clear();
@@ -72,5 +83,17 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
 	public boolean isOverflown() {
 		return emitCount.get() > maxCollectorSize;
 	}
-
+	private void writeObject(java.io.ObjectOutputStream stream)
+            throws IOException {
+//        stream.writeObject(name);
+//        stream.writeInt(id);
+//        stream.writeObject(DOB);
+    }
+	private void readObject(java.io.ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+		
+//        name = (String) stream.readObject();
+//        id = stream.readInt();
+//        DOB = (String) stream.readObject();
+    }
 }

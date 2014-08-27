@@ -7,6 +7,7 @@ import org.infinispan.distexec.mapreduce.Mapper;
 
 import eu.leads.processor.common.LeadsMapper;
 
+
 public class WordCountMapper extends LeadsMapper<String, String, String, Integer> {
    public WordCountMapper(Properties configuration) {
 		super(configuration);
