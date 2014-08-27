@@ -86,13 +86,13 @@ public class ServerTest {
 	
 	public static void TestsetUp() throws Exception {
 
-		mycatalogServer = new LeadsCatalog(null);
-		mycatalogServer.StartServer();
+//		mycatalogServer = new LeadsCatalog(null);
+//		mycatalogServer.StartServer();
 
 		// connect to the server in order to create the schemas
 		TajoConf c = new TajoConf();
 
-		catalog = new CatalogClient(c, "127.0.0.1", 5998);
+		catalog = new CatalogClient(c, "147.27.14.80", 5998);
 		catalog.createTablespace(DEFAULT_TABLESPACE_NAME,
 				"leadsfs://localhost:5998/warehouse");
 		catalog.createDatabase(DEFAULT_DATABASE_NAME, DEFAULT_TABLESPACE_NAME);

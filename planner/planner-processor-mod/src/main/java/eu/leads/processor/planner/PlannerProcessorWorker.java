@@ -39,6 +39,7 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
    @Override
    public void start() {
       super.start();
+      config = container.config();
       leadsHandler = new LeadsMessageHandler() {
          @Override
          public void handle(JsonObject event) {

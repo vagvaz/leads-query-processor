@@ -23,6 +23,7 @@ import org.apache.tajo.engine.planner.LogicalPlan;
 import org.apache.tajo.engine.planner.LogicalPlanner;
 import org.apache.tajo.engine.planner.PlanningException;
 import org.apache.tajo.engine.planner.logical.LogicalNode;
+import org.apache.tajo.engine.planner.logical.LogicalNodeVisitor;
 import org.apache.tajo.master.session.Session;
 import org.apache.tajo.catalog.*;
 import org.apache.tajo.conf.TajoConf;
@@ -73,11 +74,11 @@ public class TaJoModule {
 
 			LogicalPlan newPlan = planner.createPlan(session, expr);
 			LogicalNode plan = newPlan.getRootBlock().getRoot();
-			optimizer.optimize(newPlan);
-			
+			plan = optimizer.optimize(newPlan);
+
 			//System.out.println("END");
 			// return newPlan;
-
+         LogicalNodeVisitor visitor;
 			return CoreGsonHelper.getPrettyInstance().toJson(
 					newPlan.getRootBlock().getRoot());
 		} catch (SQLSyntaxError e) {

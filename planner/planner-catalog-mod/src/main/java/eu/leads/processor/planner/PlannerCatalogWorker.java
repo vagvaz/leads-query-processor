@@ -14,7 +14,7 @@ public class PlannerCatalogWorker  extends Verticle{
       super.start();
       TajoConf conf = new TajoConf();
       //Read configuration
-      catalogServer = new LeadsCatalog(conf);
+      catalogServer = new LeadsCatalog(null);
       try {
          catalogServer.StartServer();
       } catch (Exception e) {
