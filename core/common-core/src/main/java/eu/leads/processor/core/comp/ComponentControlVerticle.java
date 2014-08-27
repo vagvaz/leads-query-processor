@@ -289,16 +289,18 @@ public class ComponentControlVerticle extends Verticle implements Component {
          JsonObject conf = service.getObject("conf");
          for (String field : conf.getFieldNames()) {
             //replace id and group variables in the configuration values.
-            if (conf.getString(field).contains("$id")) {
-               conf.putString(field, conf.getString("field").replace("$id", id));
-            }
-            if (conf.getString(field).contains("$group")) {
-               conf.putString(field, conf.getString("field").replace("$group", group));
+            if(field.equals("id") || field.equals("group")) {
+               if (conf.getString(field).contains("$id")) {
+                  conf.putString(field, conf.getString(field).replace("$id", id));
+               }
+               if (conf.getString(field).contains("$group")) {
+                  conf.putString(field, conf.getString(field).replace("$group", group));
+               }
             }
          }
          //merge into the service configuration the basic Configuration
          conf.mergeIn(basicConf);
-         container.deployModule(conf.getString("groupId") + "~" + componentType + "-" + serviceType + "mod~" + conf.getString("version"), 1, new Handler<AsyncResult<String>>() {
+         container.deployModule(config.getString("groupId") + "~" + componentType + "-" + serviceType + "-mod~" + config.getString("version"),conf, 1, new Handler<AsyncResult<String>>() {
 
             @Override
             public void handle(AsyncResult<String> asyncResult) {

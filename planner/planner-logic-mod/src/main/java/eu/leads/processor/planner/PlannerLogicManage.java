@@ -40,23 +40,24 @@ public class PlannerLogicManage extends ManageVerticle {
    @Override
    public void startService() {
       super.startService();
-      container.deployWorkerVerticle(PlannerLogicWorker.class.getCanonicalName(),workerConfig,1,false,new Handler<AsyncResult<String>>(){
-         @Override
-         public void handle(AsyncResult<String> event) {
-            if(event.succeeded()){
-               workerId = event.result();
-               logProxy.info("PlannerLogicWorker has been deployed.");
-               JsonObject statusMessage = MessageUtils.createServiceStatusMessage(status,id+".manage",serviceType);
-               com.sendTo(parent,statusMessage);
-            }
-            else{
-               String msg = "PlannerLogWorker could not be deployed";
+      if(workerId == null) {
+         workerId = "";
+         container.deployWorkerVerticle(PlannerLogicWorker.class.getCanonicalName(), workerConfig, 1, false, new Handler<AsyncResult<String>>() {
+            @Override
+            public void handle(AsyncResult<String> event) {
+               if (event.succeeded()) {
+                  workerId = event.result();
+                  logProxy.info("PlannerLogicWorker has been deployed.");
+                  JsonObject statusMessage = MessageUtils.createServiceStatusMessage(status, id + ".manage", serviceType);
+                  com.sendTo(parent, statusMessage);
+               } else {
+                  String msg = "PlannerLogWorker could not be deployed";
 
-               fail(msg);
+                  fail(msg);
+               }
             }
-         }
-      });
-      com.sendTo(parent, MessageUtils.createServiceStatusMessage(status,id,serviceType));
+         });
+      }
 
    }
 
@@ -68,6 +69,10 @@ public class PlannerLogicManage extends ManageVerticle {
    @Override
    public void stopService() {
       super.stopService();
+      if(workerId != null){
+         container.undeployModule(workerId);
+         workerId = null;
+      }
       com.sendTo(parent, MessageUtils.createServiceStatusMessage(status,id,serviceType));
 
    }

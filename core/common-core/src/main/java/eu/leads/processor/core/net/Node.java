@@ -56,4 +56,6 @@ public interface Node {
    void sendWithEventBus(String workQueue, JsonObject msg);
 
    void sendWithEventBusReply(String id, JsonObject putAction, ReplyHandler replyHandler);
+
+   void unsubscribeFromAll();
 }

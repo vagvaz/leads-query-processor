@@ -1,6 +1,9 @@
 package eu.leads.processor.web;
 
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.core.comp.DefaultFailHandler;
+import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.Node;
@@ -8,22 +11,27 @@ import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.http.RouteMatcher;
 import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Verticle;
 
 /**
  * Created by vagvaz on 8/3/14.
  */
-public class LeadsWebServerVerticle extends Verticle {
+public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHandler {
 
    Handler<HttpServerRequest> failHandler;
    Node com;
-   LogProxy log;
-
+   Logger log;
+   String id ;
    public void start(){
+      id = "webservice-"+LQPConfiguration.getInstance().getHostname()+  container.config().getNumber("port",8080).toString();
+      LQPConfiguration.initialize(true);
       container.logger().info("Leads Processor REST service is starting...");
       com = new DefaultNode();
-      log = new LogProxy(container.config().getString("log"),com);
 
+      log = container.logger();
+      com.initialize(id,"webservice",null,this,null,getVertx());
+      JsonObject config = container.config();
       RouteMatcher matcher = new RouteMatcher();
 
 //      startEmbeddedCacheManager(configFile);
@@ -67,7 +75,13 @@ public class LeadsWebServerVerticle extends Verticle {
             
          }
       });
-      vertx.createHttpServer().requestHandler(matcher).listen(8080);
+      vertx.createHttpServer().requestHandler(matcher).listen((Integer) config.getNumber("port",8080));
       container.logger().info("Webserver started");
+   }
+
+   @Override
+   public void handle(JsonObject message) {
+      System.out.println(id + " received message " + message.toString());
+      log.warn(id + " received message " + message.toString());
    }
 }

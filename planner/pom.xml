@@ -10,6 +10,7 @@
       <module>planner-processor-mod</module>
       <module>leads-tajo-catalog</module>
       <module>leads-tajo-module</module>
+      <module>planner-catalog-mod</module>
    </modules>
 
    <parent>

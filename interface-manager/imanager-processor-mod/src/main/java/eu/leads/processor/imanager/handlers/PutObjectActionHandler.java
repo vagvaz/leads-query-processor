@@ -32,7 +32,7 @@ public class PutObjectActionHandler implements ActionHandler {
       try{
             String cacheName = action.getData().getString("table");
             String key = action.getData().getString("key");
-            JsonObject value = action.getData().getObject("value");
+            JsonObject value = new JsonObject(action.getData().getString("object"));
 
             boolean done = persistence.put(cacheName,key, value);
             JsonObject actionResult = new JsonObject();

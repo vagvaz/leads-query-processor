@@ -1,7 +1,6 @@
 package eu.leads.processor.planner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.PersistenceProxy;
@@ -22,7 +21,7 @@ import java.util.UUID;
 public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler {
 
    JsonObject config;
-   String imanager;
+   String deployer;
    String planner;
    LogProxy log;
    PersistenceProxy persistence;
@@ -36,14 +35,15 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
    public void start() {
       super.start();
       config = container.config();
-      imanager = config.getString("deployer");
+      deployer = config.getString("deployer");
       planner = config.getString("planner");
       workQueueAddress = config.getString("workqueue");
       id = config.getString("id");
       com = new DefaultNode();
-      com.initialize(id,imanager,null,this,null,vertx);
+      com.initialize(id, deployer,null,this,null,vertx);
       log = new LogProxy(config.getString("log"),com);
-      persistence = new PersistenceProxy(config.getString("persist"),com);
+      persistence = new PersistenceProxy(config.getString("persistence"),com,vertx);
+      persistence.start();
       mapper = new ObjectMapper();
 
    }
@@ -51,8 +51,7 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
    @Override
    public void stop() {
       super.stop();
-      com.unsubscribe(id);
-      com.unsubscribe(imanager);
+      com.unsubscribeFromAll();
    }
 
    @Override

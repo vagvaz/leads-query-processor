@@ -29,21 +29,22 @@ public class IManagerProcessorManage extends ManageVerticle {
    @Override
    public void startService() {
       super.startService();
-      container.deployWorkerVerticle("eu.leads.processor.imanager.IManagerProcessorWorker",config,1,false, new Handler<AsyncResult<String>>(){
-         @Override
-         public void handle(AsyncResult<String> event) {
-            if(event.succeeded())
-            {
-               workerId = event.result();
-               logProxy.info("IManagerProcessorWorker " + config.getString("id") + " has been deployed");
+      if(workerId == null) {
+         container.deployWorkerVerticle(IManageProcessorWorker.class.getCanonicalName(), config, 1, false, new Handler<AsyncResult<String>>() {
+            @Override
+            public void handle(AsyncResult<String> event) {
+               if (event.succeeded()) {
+                  workerId = event.result();
+                  logProxy.info("IManagerProcessorWorker " + config.getString("id") + " has been deployed");
+                  com.sendTo(parent, MessageUtils.createServiceStatusMessage(status,id,serviceType));
+               } else {
+                  logProxy.info("IManagerProcessorWorker " + config.getString("id") + " failed to deploy");
+                  stopService();
+               }
             }
-            else{
-               logProxy.info("IManagerProcessorWorker " + config.getString("id") + " failed to deploy");
-               stopService();
-            }
-         }
-      });
-      com.sendTo(parent, MessageUtils.createServiceStatusMessage(status,id,serviceType));
+         });
+      }
+
 
    }
 
@@ -57,6 +58,7 @@ public class IManagerProcessorManage extends ManageVerticle {
       super.stopService();
       if(workerId != null)
          container.undeployModule(workerId);
+      workerId = null;
       com.sendTo(parent, MessageUtils.createServiceStatusMessage(status,id,serviceType));
 
    }

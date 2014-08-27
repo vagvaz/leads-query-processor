@@ -9,14 +9,14 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 public class QueryStatus {
    private String id;
    private String status;
-   private String message;
+   private String errorMessage;
 
-   public String getMessage() {
-      return message;
+   public String getErrorMessage() {
+      return errorMessage;
    }
 
-   public void setMessage(String message) {
-      this.message = message;
+   public void setErrorMessage(String errorMessage) {
+      this.errorMessage = errorMessage;
    }
 
    public String getId() {
@@ -38,7 +38,7 @@ public class QueryStatus {
    }
    @Override
    public String toString(){
-      return id+":"+status+"\n"+message;
+      return id+":"+status+"\n"+ errorMessage;
 
    }
 }

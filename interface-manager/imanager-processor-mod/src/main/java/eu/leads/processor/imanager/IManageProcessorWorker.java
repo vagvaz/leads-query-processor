@@ -37,14 +37,6 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
    @Override
    public void start() {
       super.start();
-      handlers = new HashMap<String,ActionHandler>();
-      handlers.put(IManagerConstants.GET_OBJECT,new GetObjectActionHandler(com,log,persistence,id));
-      handlers.put(IManagerConstants.PUT_OBJECT,new PutObjectActionHandler(com,log,persistence,id));
-      handlers.put(IManagerConstants.GET_QUERY_STATUS,new GetQueryStatusActionHandler(com,log,persistence,id));
-      handlers.put(IManagerConstants.GET_RESULTS,new GetResultsActionHandler(com,log,persistence,id));
-      handlers.put(IManagerConstants.CREATE_NEW_QUERY,new CreateQueryActionHandler(com,log,persistence,id));
-      handlers.put(IManagerConstants.CREATE_NEW_SPECIAL_QUERY,new CreateSpecialQueryActionHandler(com,log,persistence,id));
-
       leadsHandler = new LeadsMessageHandler() {
          @Override
          public void handle(JsonObject event) {
@@ -65,8 +57,19 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
       com = new DefaultNode();
       com.initialize(id, gr, null, leadsHandler, leadsHandler, vertx);
       bus.registerHandler(id + ".process", this);
+      persistence = new PersistenceProxy(config.getString("persistence"),com,vertx);
+      persistence.start();
       JsonObject msg = new JsonObject();
       msg.putString("processor", id + ".process");
+      handlers = new HashMap<String,ActionHandler>();
+      handlers.put(IManagerConstants.GET_OBJECT,new GetObjectActionHandler(com,log,persistence,id));
+      handlers.put(IManagerConstants.PUT_OBJECT,new PutObjectActionHandler(com,log,persistence,id));
+      handlers.put(IManagerConstants.GET_QUERY_STATUS,new GetQueryStatusActionHandler(com,log,persistence,id));
+      handlers.put(IManagerConstants.GET_RESULTS,new GetResultsActionHandler(com,log,persistence,id));
+      handlers.put(IManagerConstants.CREATE_NEW_QUERY,new CreateQueryActionHandler(com,log,persistence,id));
+      handlers.put(IManagerConstants.CREATE_NEW_SPECIAL_QUERY,new CreateSpecialQueryActionHandler(com,log,persistence,id));
+      log = new LogProxy(config.getString("log"),com);
+
       bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {
          @Override
          public void handle(Message<JsonObject> event) {

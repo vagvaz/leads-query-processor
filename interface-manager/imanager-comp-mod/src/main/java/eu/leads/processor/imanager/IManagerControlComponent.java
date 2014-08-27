@@ -15,20 +15,20 @@ public class IManagerControlComponent extends ComponentControlVerticle {
 
    @Override
    public void start() {
-      super.start();
-      setup(config);
       plannerQueue = StringConstants.PLANNERQUEUE;
       iManagerQueue = StringConstants.IMANAGERQUEUE;
+      super.start();
+      setup(container.config());
       startUp();
    }
 
    @Override
    public void setup(JsonObject conf) {
       super.setup(conf);
-      logicConfig.putString("planner",plannerQueue);
-      logicConfig.putString("imanager",iManagerQueue);
-      processorConfig.putString("planner",plannerQueue);
-      logicConfig.putString("imanager",iManagerQueue);
+      this.logicConfig.putString("planner",plannerQueue);
+      this.logicConfig.putString("imanager",iManagerQueue);
+      this.processorConfig.putString("planner",plannerQueue);
+      this.logicConfig.putString("imanager",iManagerQueue);
    }
 
    @Override

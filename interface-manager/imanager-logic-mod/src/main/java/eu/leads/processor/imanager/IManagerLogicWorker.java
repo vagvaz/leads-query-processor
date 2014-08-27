@@ -46,7 +46,8 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
       com = new DefaultNode();
       com.initialize(id,imanager,null,this,null,vertx);
       log = new LogProxy(config.getString("log"),com);
-      persistence = new PersistenceProxy(config.getString("persist"),com);
+      persistence = new PersistenceProxy(config.getString("persistence"),com,vertx);
+      persistence.start();
       mapper = new ObjectMapper();
 
    }
@@ -54,8 +55,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
    @Override
    public void stop() {
       super.stop();
-      com.unsubscribe(id);
-      com.unsubscribe(imanager);
+      com.unsubscribeFromAll();
    }
 
    @Override
@@ -65,141 +65,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
       String to = msg.getString(MessageUtils.TO);
 
 
-////      if (type.equals("getObject")) {
-////         try {
-////            GetObjectQuery query = mapper.readValue(msg.getString("query"), GetObjectQuery.class);
-////            JsonObject result = persistence.get(query.getTable(), query.getKey());
-////            if (result.getString("status").equals("ok")) {
-////               com.sendTo(from, result.getObject("result"));
-////            } else {
-////               result.putString("error", "");
-////               com.sendTo(from, result);
-////            }
-////         } catch (IOException e) {
-////            e.printStackTrace();
-////         }
-////
-////      } else if (type.equals("putObject")) {
-////         try {
-////            PutObjectQuery query = mapper.readValue(msg.getString("query"), PutObjectQuery.class);
-////            JsonObject value = new JsonObject(query.getObject());
-////            boolean done = persistence.put(query.getTable(), query.getKey(), value);
-////            JsonObject result = new JsonObject();
-////            if (done) {
-////               result.putString("status", "SUCCESS");
-////            } else {
-////               result.putString("status", "FAIL");
-////               result.putString("error", "");
-////               result.putString("message", "Could not store object " + value.toString() + " to " + query.getTable() + " with key " + query.getKey());
-////            }
-////            com.sendTo(from, result);
-////         } catch (IOException e) {
-////            e.printStackTrace();
-////         }
-////
-////
-////      } else if (type.equals("getQueryStatus")) {
-////         String queryId = msg.getString("queryId");
-////         JsonObject result = persistence.get(StringConstants.QUERIESCACHE, queryId);
-////         if (result.getString("status").equals("ok")) {
-////            com.sendTo(from, result.getObject("result"));
-////         } else {
-////            result.putString("error", "");
-////            com.sendTo(from, result);
-////         }
-////
-////      } else if (type.equals("getResults")) {
-////         String queryId = msg.getString("queryId");
-////         Long min = Long.parseLong(msg.getString("min"));
-////         Long max = Long.parseLong(msg.getString("max"));
-////         JsonObject result = new JsonObject();
-////         if (min < 0) {
-////            result.putString("error", "");
-////            result.putString("message", "negative minimum parameter given");
-////         }
-////         JsonObject queryStatus = persistence.get(StringConstants.QUERIESCACHE, queryId);
-////         if (!queryStatus.getString("status").equals("COMPLETED")) {
-////            result.putString("error", "");
-////            result.putString("message", "query " + queryId + " has not been completed yet");
-////         } else {
-////            String cacheName = queryStatus.getString("output");
-////
-////            JsonArray tuples = null;
-////            if (max < 0) {
-////               tuples = persistence.batchGet(cacheName, min);
-////            } else {
-////               tuples = persistence.batchGet(cacheName, min, max);
-////            }
-////            updateQueryReadStatus(queryId, queryStatus, min, max);
-////            result.putString("id", queryId);
-////            result.putString("min", String.valueOf(min));
-////            result.putString("max", String.valueOf(max));
-////            result.putString("result", tuples.toString());
-////            result.putString("size", String.valueOf(tuples.size()));
-////         }
-////
-////      } else if (type.equals("submitQuery")) {
-////         JsonObject q = msg.getObject("query");
-////         if (q.containsField("sql")) {//SQL Query
-////            String user = q.getString("user");
-////            String sql = q.getString("sql");
-////            String uniqueId = generateNewQueryId(user);
-////            JsonObject result = new JsonObject();
-////            SQLQuery query = new SQLQuery(user, sql);
-////            query.setId(uniqueId);
-////            QueryStatus status = new QueryStatus(uniqueId, QueryState.PENDING, "");
-////            query.setQueryStatus(status);
-////            QueryContext context = new QueryContext(uniqueId);
-////            query.setContext(context);
-////            JsonObject queryStatus = status.asJsonObject();
-////            if (persistence.put(StringConstants.QUERIESCACHE, uniqueId, query.asJsonObject())) {
-////               com.sendTo(from, queryStatus);
-////               com.sendTo(planner, query.asJsonObject());
-////            } else {
-////               result.putString("error", "");
-////               result.putString("message", "Failed to add query " + sql + " from user " + user + " to the queries cache");
-////               com.sendTo(from, result);
-////            }
-////
-////
-////         } else { //Workflow Query
-////
-////         }
-////
-////      } else if (type.equals("submitSpecialQuery")) {
-////         JsonObject q = msg.getObject("query");
-////         if (q.containsField("sql")) {//SQL Query
-////
-////            String queryType = q.getString("queryType");
-////            if (queryType.equals("rec_call")) {
-////               String url = q.getString("url");
-////               String user = q.getString("user");
-////               int depth = Integer.parseInt("depth");
-////               String uniqueId = generateNewQueryId(user);
-////               JsonObject result = new JsonObject();
-////               RecursiveCallQuery query = new RecursiveCallQuery(user, url, depth);
-////               query.setId(uniqueId);
-////               QueryStatus status = new QueryStatus(uniqueId, QueryState.PENDING, "");
-////               query.setQueryStatus(status);
-////               QueryContext context = new QueryContext(uniqueId);
-////               query.setContext(context);
-////               JsonObject queryStatus = status.asJsonObject();
-////
-////               if (persistence.put(StringConstants.QUERIESCACHE, uniqueId, query.asJsonObject())) {
-////                  com.sendTo(from, queryStatus);
-////                  com.sendTo(planner, query.asJsonObject());
-////               } else {
-////                  result.putString("error", "");
-////                  result.putString("message", "Failed to add wgs query " + " from user " + user + " to the queries cache");
-////                  com.sendTo(from, result);
-////               }
-////            }
-//
-//
-//         } else {
-//            log.error("Received Unknown message action type \n" + msg.toString());
-//         }
-//      }
+
       if(type.equals("action")) {
          Action action = new Action(msg);
          String label = action.getLabel();
@@ -222,7 +88,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                   action.getData().putString("replyTo",msg.getString("from"));
                   com.sendWithEventBus(workQueueAddress, action.asJsonObject());
                } else if (label.equals(IManagerConstants.SUBMIT_QUERY)) {
-                  Action newACtion = createNewAction(action);
+                  newAction = createNewAction(action);
                   newAction.setCategory(ActionCategory.ACTION.toString());
                   newAction.setLabel(IManagerConstants.CREATE_NEW_QUERY);
                   newAction.setProcessedBy(id);
@@ -230,7 +96,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                   newAction.getData().putString("replyTo",msg.getString("from"));
                   com.sendWithEventBus(workQueueAddress, newAction.asJsonObject());
                } else if (label.equals(IManagerConstants.SUBMIT_SPECIAL)) {
-                  Action newACtion = createNewAction(action);
+                  newAction = createNewAction(action);
                   newAction.setCategory(ActionCategory.ACTION.toString());
                   newAction.setLabel(IManagerConstants.CREATE_NEW_SPECIAL_QUERY);
                   newAction.setProcessedBy(id);
@@ -253,7 +119,10 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                if (label.equals(IManagerConstants.GET_OBJECT)) {
                   com.sendTo(action.getData().getString("replyTo"),action.getResult());
                } else if (label.equals(IManagerConstants.PUT_OBJECT)) {
-                  com.sendTo(action.getData().getString("replyTo"),action.getResult());
+                  if(!action.getResult().containsField("message")){
+                     action.getResult().putString("message","");
+                  }
+                  com.sendTo(action.getData().getString("replyTo"), action.getResult());
                } else if (label.equals(IManagerConstants.GET_QUERY_STATUS)) {
                   com.sendTo(action.getData().getString("replyTo"), action.getResult());
                } else if (label.equals(IManagerConstants.GET_RESULTS)) {
@@ -316,8 +185,8 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
       result.setOwnerId(this.id);
       result.setProcessedBy("");
       result.setDestination("");
-      result.setData(null);
-      result.setResult(null);
+      result.setData(new JsonObject());
+      result.setResult(new JsonObject());
       result.setLabel("");
       result.setCategory("");
       return result;

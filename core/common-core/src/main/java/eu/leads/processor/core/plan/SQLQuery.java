@@ -20,7 +20,9 @@ public class SQLQuery extends DataType implements Query {
       setQueryType(QueryType.SQL.toString());
 
    }
-
+   public SQLQuery(JsonObject object){
+      super(object);
+   }
    @Override
    public String getQueryType() {
       return data.getString("queryType");
@@ -62,13 +64,13 @@ public class SQLQuery extends DataType implements Query {
    @Override
    public boolean isCompleted() {
       QueryStatus status = new QueryStatus(data.getObject("status"));
-      return status.getState() == QueryState.COMPLETED;
+      return status.getStatus() == QueryState.COMPLETED;
    }
 
    @Override
    public void setCompleted(boolean complete) {
       QueryStatus status = new QueryStatus(data.getObject("status"));
-      status.setState(QueryState.COMPLETED);
+      status.setStatus(QueryState.COMPLETED);
    }
 
    @Override

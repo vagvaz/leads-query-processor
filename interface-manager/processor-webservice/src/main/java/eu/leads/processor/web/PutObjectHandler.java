@@ -14,7 +14,9 @@ import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.core.logging.Logger;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,7 +28,7 @@ public class PutObjectHandler implements Handler<HttpServerRequest> {
 
 
    Node com;
-   LogProxy log;
+   Logger log;
    Map<String,PutObjectBodyHandler> bodyHandlers;
    Map<String,PutObjectReplyHandler> replyHandlers;
 
@@ -99,9 +101,11 @@ public class PutObjectHandler implements Handler<HttpServerRequest> {
    }
 
 
-   public PutObjectHandler(final Node com,LogProxy log) {
+   public PutObjectHandler(final Node com,Logger log) {
       this.com = com;
       this.log = log;
+      replyHandlers = new HashMap<>();
+      bodyHandlers = new HashMap<>();
    }
 
    @Override
@@ -114,6 +118,7 @@ public class PutObjectHandler implements Handler<HttpServerRequest> {
       PutObjectBodyHandler bodyHanlder = new PutObjectBodyHandler(reqId,replyHandler);
       replyHandlers.put(reqId,replyHandler);
       bodyHandlers.put(reqId,bodyHanlder);
+      request.bodyHandler(bodyHanlder);
    }
 
    public void cleanup(String id){

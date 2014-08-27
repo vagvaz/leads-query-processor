@@ -15,14 +15,14 @@ public class QueryStatus extends DataType {
    public QueryStatus(String id, QueryState state, String s) {
       super();
       setId(id);
-      setState(state);
+      setStatus(state);
       setErrorMessage(s);
    }
 
    public QueryStatus() {
       super();
       setId("");
-      setState(QueryState.PENDING);
+      setStatus(QueryState.PENDING);
       setErrorMessage("");
    }
 
@@ -34,18 +34,18 @@ public class QueryStatus extends DataType {
       return data.getString("id");
    }
 
-   public QueryState getState() {
-      return QueryState.valueOf(data.getString("state"));
+   public QueryState getStatus() {
+      return QueryState.valueOf(data.getString("status"));
    }
    public String getErrorMessage(){
-      return data.getString("error-message");
+      return data.getString("errorMessage");
    }
 
-   public void setState(QueryState state){
-      data.putString("state",state.toString());
+   public void setStatus(QueryState state){
+      data.putString("status",state.toString());
    }
 
    public void setErrorMessage(String message){
-      data.putString("error-message",message);
+      data.putString("errorMessage",message);
    }
 }

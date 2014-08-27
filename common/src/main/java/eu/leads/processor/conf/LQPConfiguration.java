@@ -214,6 +214,14 @@ public class LQPConfiguration {
 
    public void loadFile(String filename) {
       Configuration tmp = null;
+      File confFile = new File(filename);
+      if(!confFile.exists()){
+         confFile = new File(baseDir+filename);
+         if(!confFile.exists()){
+            log.error("File " + filename + "Could not be loaded because it does not exist neither in the working dir nor in " + baseDir);
+            return;
+         }
+      }
       if (filename.endsWith(".properties")) {
 
          try {
@@ -260,4 +268,6 @@ public class LQPConfiguration {
          }
       }
    }
+
+
 }

@@ -35,7 +35,7 @@ public class GetObjectHandler implements Handler<HttpServerRequest> {
 
 
    Node com;
-   LogProxy log;
+   Logger log;
    Map<String,GetObjectBodyHandler> bodyHandlers;
    Map<String,GetObjectReplyHandler> replyHandlers;
 
@@ -106,9 +106,11 @@ public class GetObjectHandler implements Handler<HttpServerRequest> {
    }
 
 
-   public GetObjectHandler(final Node com,LogProxy log) {
+   public GetObjectHandler(final Node com,Logger log) {
       this.com = com;
       this.log = log;
+      replyHandlers = new HashMap<>();
+      bodyHandlers = new HashMap<>();
    }
 
    @Override
@@ -121,6 +123,7 @@ public class GetObjectHandler implements Handler<HttpServerRequest> {
       GetObjectBodyHandler bodyHanlder = new GetObjectBodyHandler(reqId,replyHandler);
       replyHandlers.put(reqId,replyHandler);
       bodyHandlers.put(reqId,bodyHanlder);
+      request.bodyHandler(bodyHanlder);
    }
 
    public void cleanup(String id){

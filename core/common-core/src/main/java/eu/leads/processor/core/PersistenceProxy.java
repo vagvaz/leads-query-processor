@@ -18,7 +18,7 @@ public class PersistenceProxy extends Thread {
    private JsonObject storeAction;
    private JsonObject batchGetAction;
    private JsonObject containsAction;
-   private final  Object mutex = new Object();
+   private volatile  Object mutex = new Object();
    private JsonObject action = null;
    private Node bus;
    private ReplyHandler replyHandler;
@@ -85,7 +85,7 @@ public class PersistenceProxy extends Thread {
       containsAction.putString("cache","");
       containsAction.putString("key", "");
       this.vertx = vertx;
-
+      bus.initialize(cmpId+".proxy","persistgroup",null,replyHandler,null,vertx);
    }
 
    public JsonObject get(String cacheName, String key) {
@@ -129,7 +129,7 @@ public class PersistenceProxy extends Thread {
          putAction.putString("value", value.toString());
          action = putAction;
          System.out.println("pnput");
-         mutex.notify();
+         mutex.notifyAll();
       }
 //      bus.sendWithEventBusReply(id, putAction, replyHandler);
       result = replyHandler.waitForStatus();
@@ -192,9 +192,10 @@ public class PersistenceProxy extends Thread {
 
    @Override
    public void run() {
-      bus.initialize(cmpId+".proxy","persistgroup",null,replyHandler,null,vertx);
+
       while(toContinue) {
          synchronized (mutex) {
+            System.out.println("Thread " + Thread.currentThread().toString() + " mutex " + mutex.toString());
             if (action != null) {
                System.out.println("pa");
                bus.sendRequestTo(id, action, replyHandler);
@@ -209,12 +210,15 @@ public class PersistenceProxy extends Thread {
             }
          }
       }
+      bus.unsubscribe("persistgroup");
+      bus.unsubscribe(cmpId+".proxy");
    }
 
    public void cleanup(){
       synchronized (mutex){
          toContinue = false;
          this.stop();
+         mutex.notify();
       }
    }
 }

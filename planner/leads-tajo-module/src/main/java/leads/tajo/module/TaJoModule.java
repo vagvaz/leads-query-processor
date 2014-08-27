@@ -7,11 +7,7 @@ import grammar.LeadsSQLParser;
 import grammar.LeadsSQLParser.SqlContext;
 import grammar.SQLLexer;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.apache.tajo.algebra.Expr;
@@ -22,7 +18,6 @@ import org.apache.tajo.engine.planner.LeadsLogicalOptimizer;
 import org.apache.tajo.engine.planner.LogicalPlan;
 import org.apache.tajo.engine.planner.LogicalPlanner;
 import org.apache.tajo.engine.planner.PlanningException;
-import org.apache.tajo.engine.planner.logical.LogicalNode;
 import org.apache.tajo.master.session.Session;
 import org.apache.tajo.catalog.*;
 import org.apache.tajo.conf.TajoConf;
@@ -49,7 +44,7 @@ public class TaJoModule {
 
 	public void init_connection(String ip, int port){
 		try {
-			catalog = new CatalogClient(c, ip, port); // /TESTING	
+			catalog = new CatalogClient(c, ip, port);	
 			System.out.println("Connection to Catalog Server " + ip +':'+ port + " initialized !");
 		} catch (IOException e) {
 			catalog=null;
@@ -66,30 +61,9 @@ public class TaJoModule {
 		}
 		try {
 			Expr expr = sqlAnalyzer.parse(sql);
-			//return expr.toString();
-			// Expr expr = sqlAnalyzer.parse(sql);
-			//System.out.println("Query: " + sql);
-			//System.out.println("Parsed:" + expr.toJson());
-			planner = new LogicalPlanner((CatalogService) catalog);
-
-
-			LogicalPlan newPlan = planner.createPlan(session, expr);
-			LogicalNode plan = newPlan.getRootBlock().getRoot();
-			optimizer.optimize(newPlan);
-			
-			//System.out.println("END");
-			//return plan.toString();
-
-			return CoreGsonHelper.getPrettyInstance().toJson(
-					newPlan.getRootBlock().getRoot());
+			return Optimize(session, expr);
 		} catch (SQLSyntaxError e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
 			throw new SQLSyntaxError("Parse Error" + e.getMessage());
-		}
-		catch (PlanningException e) {
-			// TODO: handle exception
-			throw new PlanningException("Planning Error"+ e.getMessage());
 		}
 	}
 
@@ -103,10 +77,34 @@ public class TaJoModule {
 		LeadsSQLAnalyzer visitor = new LeadsSQLAnalyzer();
 		SqlContext context = parser.sql();
 		if (context.statement() != null)
-			// System.out.print(context + " dsf ");
 			return visitor.visitSql(context);
-		// return null;
+		
 		return null;
 	}
 
+   public static String Optimize(Session session, Expr expr) throws PlanningException {
+	   if (catalog == null) {
+		  // catalog.
+			System.err.println("Catalog is Uninitialized");
+			return null;
+		}
+	   
+		planner = new LogicalPlanner((CatalogService) catalog);
+
+		LogicalPlan newPlan = null;
+		try {
+			newPlan = planner.createPlan(session, expr);
+		} catch (PlanningException e) {
+			throw new PlanningException("Unable to Create Plan: " + e.getMessage());
+		}
+		
+		try {
+			optimizer.optimize(newPlan);
+		} catch (PlanningException e) {
+			throw new PlanningException("Unable to Optimize Plan: " + e.getMessage());
+		}
+		
+		return CoreGsonHelper.getPrettyInstance().toJson(
+				newPlan.getRootBlock().getRoot());
+   }
 }

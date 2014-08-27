@@ -3,6 +3,14 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
+   <packaging>pom</packaging>
+   <modules>
+      <module>deployer-comp-mod</module>
+      <module>deployer-logic-mod</module>
+      <module>deployer-processor-mod</module>
+      <module>deployer-monitor-mod</module>
+      <module>deployer-recovery-mod</module>
+   </modules>
 
    <parent>
       <groupId>gr.tuc.softnet</groupId>

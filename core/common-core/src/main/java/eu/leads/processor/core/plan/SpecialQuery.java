@@ -6,7 +6,7 @@ import org.vertx.java.core.json.JsonObject;
 /**
  * Created by vagvaz on 8/4/14.
  */
-public abstract class SpecialQuery extends DataType implements Query {
+public class SpecialQuery extends DataType implements Query {
 
 
    public SpecialQuery(){
@@ -20,7 +20,9 @@ public abstract class SpecialQuery extends DataType implements Query {
       data.putObject("query",new JsonObject());
       setQueryType(QueryType.SPECIAL.toString());
    }
-
+   public SpecialQuery(JsonObject object){
+      super(object);
+   }
    @Override
    public String getQueryType() {
       return data.getString("queryType");
@@ -59,13 +61,13 @@ public abstract class SpecialQuery extends DataType implements Query {
    @Override
    public boolean isCompleted() {
       QueryStatus status = new QueryStatus(data.getObject("status"));
-      return status.getState() == QueryState.COMPLETED;
+      return status.getStatus() == QueryState.COMPLETED;
    }
 
    @Override
    public void setCompleted(boolean complete) {
       QueryStatus status = new QueryStatus(data.getObject("status"));
-      status.setState(QueryState.COMPLETED);
+      status.setStatus(QueryState.COMPLETED);
    }
 
    @Override
@@ -92,6 +94,16 @@ public abstract class SpecialQuery extends DataType implements Query {
    @Override
    public void setLocation(String location) {
       data.putString("location",location);
+   }
+
+   @Override
+   public Plan getPlan() {
+      return null;
+   }
+
+   @Override
+   public void setPlan(Plan plan) {
+
    }
 
 
@@ -124,10 +136,10 @@ public abstract class SpecialQuery extends DataType implements Query {
    }
 
    public String getSpecialQueryType(){
-      return data.getString("queryType");
+      return data.getString("specialQueryType");
    }
 
    public void setSpecialQueryType(String queryType){
-      data.putString("queryType",queryType);
+      data.putString("specialQueryType",queryType);
    }
 }

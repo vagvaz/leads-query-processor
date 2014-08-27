@@ -3,6 +3,7 @@ package eu.leads.processor.web;
 import com.google.common.base.Strings;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.core.Action;
+import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.MessageUtils;
@@ -13,7 +14,9 @@ import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.core.logging.Logger;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -22,7 +25,7 @@ import java.util.UUID;
  */
 public class GetQueryStatusHandler implements Handler<HttpServerRequest> {
    Node com;
-   LogProxy log;
+   Logger log;
    Map<String,GetQueryStatusReplyHandler> replyHandlers;
 
 
@@ -61,16 +64,18 @@ public class GetQueryStatusHandler implements Handler<HttpServerRequest> {
 
 
 
-   public GetQueryStatusHandler(final Node com,LogProxy log) {
+   public GetQueryStatusHandler(final Node com,Logger log) {
       this.com = com;
       this.log = log;
+      replyHandlers = new HashMap<>();
+
    }
 
    @Override
    public void handle(HttpServerRequest request) {
       request.response().setStatusCode(200);
       request.response().putHeader(WebStrings.CONTENT_TYPE,WebStrings.APP_JSON);
-      log.info("Put Object Request");
+      log.info("Get Query Results Request");
       String reqId = UUID.randomUUID().toString();
       GetQueryStatusReplyHandler replyHandler = new GetQueryStatusReplyHandler(reqId,request);
 
@@ -87,7 +92,7 @@ public class GetQueryStatusHandler implements Handler<HttpServerRequest> {
       action.setComponentType("webservice");
       action.setTriggered("");
       action.setTriggers(new JsonArray());
-
+      action.setStatus(ActionStatus.PENDING.toString());
       JsonObject  queryRequest = new JsonObject();
       queryRequest.putString("queryId",queryId);
       action.setData(queryRequest);
