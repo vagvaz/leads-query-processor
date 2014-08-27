@@ -15,14 +15,16 @@ public class Message implements Serializable {
     String type;   //Type of Message
     Object body;   //The body of message
 
-    public static final  Message EMPTYMSG = new Message("","");
+    long ts;
 
-    public Message() {
-    }
+    public static final  Message EMPTYMSG = new Message("","",-11);
 
-    public Message(String from,String type){
+    public Message(String from,String type,Object body){
         this.from = from;
-        this.type = type;
+        this.type =type;
+        this.body = body;
+
+        ts = 0;
     }
 
     /**
@@ -41,13 +43,6 @@ public class Message implements Serializable {
      */
     public void setFrom(String from) {
         this.from = from;
-    }
-
-    public Message(String from,String type,Object body){
-        this.from = from;
-
-        this.type =type;
-        this.body = body;
     }
 
     /**
@@ -84,5 +79,13 @@ public class Message implements Serializable {
      */
     public void setBody(Object body) {
         this.body = body;
+    }
+
+    public long getTs() {
+        return ts;
+    }
+
+    public void setTs(long ts) {
+        this.ts = ts;
     }
 }

@@ -1,5 +1,6 @@
 package eu.leads.distsum;
 
+import org.infinispan.Cache;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.manager.EmbeddedCacheManager;
@@ -21,11 +22,11 @@ import java.util.*;
  * There is a group of nodes that monitor some streams of updates. We want to compute the total sum of these updates.
  * One node from the group acts as a coordinator and the rest of the nodes as workers.
  * The coordinator maintains the global sum, on the other hand, the worker nodes listen to the streams
- * of updates and maintain a local sum. Furthermore, the worker nodes have some constrains, in our case
- * these constrains are two numbers an upper and a lower  bound. In case of an update violates the constrains,
+ * of updates and maintain a local sum. Furthermore, the worker nodes have some all_deltas, in our case
+ * these all_deltas are two numbers an upper and a lower  bound. In case of an update violates the all_deltas,
  * then the worker informs the coordinator, which in turn asks all workers to
- * send their local values in order to recompute the global sum and the new constrains for each node.
- * After these recomputations, the coordinator sends the new constrains back to the workers.
+ * send their local values in order to recompute the global sum and the new all_deltas for each node.
+ * After these recomputations, the coordinator sends the new all_deltas back to the workers.
  *
  * Scenario:
  * We have one coordinator and 3 worker nodes. We have 4 rounds. In each round we update each worker once. Each worker's update will be chosen
@@ -52,68 +53,53 @@ import java.util.*;
 @Test
 public class UnitTest extends SingleCacheManagerTest{
 
-    public static final double epsilon = 0.1;
-    public static final int k = 10;
-
     public void run() {
+
+        Random rand = new Random();
 
         //The communication channel between coordinator and the workers
         ComChannel channel = new ComChannel(cacheManager.<String, Message>getCache());
-
         Coordinator coord = new Coordinator(channel);
 
-        //Create initial values and constrains for the workers
-        int numOfWorkers = 10;
-        ArrayList<Worker> workers = new ArrayList<Worker>(numOfWorkers);
-        Map<String,Integer> workerValues = new HashMap<String, Integer>(numOfWorkers);
-        Map<String,Constrain> workerConstrains = new HashMap<String, Constrain>(numOfWorkers);
 
-        int initValue = 10;
-        Constrain initConstrain = new Constrain(9,11);
+        ArrayList<Worker> workers = new ArrayList<Worker>();
+        //Create initial values and all_deltas for the workers
+        /*Map<String,Integer> workerValues = new HashMap<String, Integer>(numOfWorkers);
+        Map<String,Constrain> workerConstrains = new HashMap<String, Constrain>(numOfWorkers);*/
+
+        int numOfWorkers = 100;
         for ( int worker = 0; worker < numOfWorkers; worker++ ) {
             //Create new worker with initial values
-            Worker w = new Worker(Integer.toString(worker), new AbstractMap.SimpleEntry<Object, Double>(1, 10d), channel);
+            Worker w = new Worker(Integer.toString(worker), channel);
             workers.add(w);
-            //put worker initial globalSum into the map
-            /*workerValues.put(w.getId(), w.getLocalValue());
-            //put worker's constrain into the map
-            workerConstrains.put(w.getId(),w.getConstrain());*/
             //register worker to the channel
             channel.register(w.getId(),w);
         }
 
-        //Initialize structures kept by coordinator
-        coord.setLocalValues(workerValues);
-        coord.setConstrains(workerConstrains);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("------------");
 
         int[] updates = {1,1,1,1,2,2,-1,-1,-2};
-        int numberOfRounds = 4;
-        Random rand = new Random();
+        int numberOfRounds = 100;
+
         for ( int round = 0; round < numberOfRounds; round++ ) {
             System.out.println("********* ROUND " + round +" ********");
-            int realsum = 0;
+
             for ( int worker = 0; worker < numOfWorkers; worker++ ) {
+
+                //int objToUpd = (int) rand.nextGaussian() + 1000;
+                int objToUpd = rand.nextInt(100);
                 int update = updates[rand.nextInt(updates.length)];
-                int objToUpd = (int) rand.nextGaussian() + 1000;
 
-                System.out.println("obj: " + objToUpd);
+                workers.get(worker).update(objToUpd, update);
 
-                /*int oldValue = workers.get(worker).getLocalValue();
-                workers.get(worker).update(update);
-
-                System.out.println("worker " + worker + ": update=" +update+" oldval="+oldValue + " new newValue= " + workers.get(worker).getLocalValue());
-                realsum += workers.get(worker).getLocalValue();*/
             }
 
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();  // TODO: Customise this generated block
-            }
-            System.out.println("Real sum: " + realsum + " Global Sum: " +coord.getGlobalSum());
-            System.out.println("********* END OF ROUND " + round +" ********\n\n");
-            assert(0.9*realsum <= coord.getGlobalSum());
-            assert(1.1*realsum >= coord.getGlobalSum());
         }
 
 
