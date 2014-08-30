@@ -23,13 +23,6 @@ public class LeadsMapperCallable<K, V, kOut, vOut> implements
 	Set<K> keys;
 	LeadsMapper<K, V, kOut, vOut> mapper = null;
 
-	public void setEnvironment(Cache<K, V> cache, Set<K> inputKeys) {
-		
-		this.cache =  cache;
-		this.keys = inputKeys;
-		collector.initialize_cache(cache.getCacheManager());
-	}
-
 	public LeadsMapperCallable(Cache<K, V> cache,
 			LeadsCollector<kOut, vOut> collector,
 			LeadsMapper<K, V, kOut, vOut> mapper) {
@@ -38,6 +31,13 @@ public class LeadsMapperCallable<K, V, kOut, vOut> implements
 		this.collector = collector;
 		this.mapper = mapper;
 	}
+
+	public void setEnvironment(Cache<K, V> cache, Set<K> inputKeys) {
+
+		this.cache =  cache;
+		this.keys = inputKeys;
+		collector.initialize_cache(cache.getCacheManager());
+	}
 	
 	public List<K> call() throws Exception {
 		
@@ -45,8 +45,7 @@ public class LeadsMapperCallable<K, V, kOut, vOut> implements
 			System.out.println(" Mapper not initialized ");
 		} else {
 			List<K> result = new ArrayList<K>();
-			
-			//Use Cache Keys only
+
 			for (Entry< K, V  > entry : cache.entrySet()){
 				V value = entry.getValue();
 				if (value != null) {

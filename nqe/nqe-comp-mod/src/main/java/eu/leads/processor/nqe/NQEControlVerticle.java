@@ -5,18 +5,18 @@ import eu.leads.processor.core.comp.ComponentControlVerticle;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * edited by Krambo on 29/8/14.
+ * edited by KRambo on 29/8/14.
  */
 public class NQEControlVerticle extends ComponentControlVerticle {
 
    protected final String componentType = "nqe";
    private String plannerQueue;
-   private String iManagerQueue;
+   private String nqeQueue;
 
    @Override
    public void start() {
       plannerQueue = StringConstants.PLANNERQUEUE;
-      iManagerQueue = StringConstants.IMANAGERQUEUE;
+      nqeQueue = StringConstants.NODEEXECUTORQUEUE;
       super.start();
       setup(container.config());
       startUp();
@@ -26,9 +26,9 @@ public class NQEControlVerticle extends ComponentControlVerticle {
    public void setup(JsonObject conf) {
       super.setup(conf);
       this.logicConfig.putString("planner",plannerQueue);
-      this.logicConfig.putString("imanager",iManagerQueue);
+      this.logicConfig.putString("nqe",nqeQueue);
       this.processorConfig.putString("planner",plannerQueue);
-      this.logicConfig.putString("imanager",iManagerQueue);
+      //this.logicConfig.putString("nqe",nqeQueue);
    }
 
    @Override

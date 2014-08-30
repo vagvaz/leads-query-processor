@@ -35,10 +35,10 @@ public class NQEProcessorManage extends ManageVerticle {
             public void handle(AsyncResult<String> event) {
                if (event.succeeded()) {
                   workerId = event.result();
-                  logProxy.info("IManagerProcessorWorker " + config.getString("id") + " has been deployed");
+                  logProxy.info("NQEProcessorWorker " + config.getString("id") + " has been deployed");
                   com.sendTo(parent, MessageUtils.createServiceStatusMessage(status,id,serviceType));
                } else {
-                  logProxy.info("IManagerProcessorWorker " + config.getString("id") + " failed to deploy");
+                  logProxy.info("NQEProcessorWorker " + config.getString("id") + " failed to deploy");
                   stopService();
                }
             }

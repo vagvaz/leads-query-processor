@@ -48,11 +48,11 @@ public class NQELogicManage extends ManageVerticle {
             public void handle(AsyncResult<String> event) {
                if (event.succeeded()) {
                   workerId = event.result();
-                  logProxy.info("IManagerLogicWorker has been deployed.");
+                  logProxy.info("NQELogicWorker has been deployed.");
                   JsonObject statusMessage = MessageUtils.createServiceStatusMessage(status, id + ".manage", serviceType);
                   com.sendTo(parent, statusMessage);
                } else {
-                  String msg = "IManagerLogWorker could not be deployed";
+                  String msg = "NQELogWorker could not be deployed";
 
                   fail(msg);
                }
