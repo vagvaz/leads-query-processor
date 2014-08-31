@@ -95,6 +95,11 @@
          <artifactId>common-core</artifactId>
          <version>1.0-SNAPSHOT</version>
       </dependency>
+      <dependency>
+         <groupId>gr.tuc.softnet</groupId>
+         <artifactId>leads-query-processor-tajo-module</artifactId>
+         <version>0.0.1-SNAPSHOT</version>
+      </dependency>
       <!-- Add any other dependencies that you want packaged into your module (in the lib dir) here
     as 'compile' dependencies. Here is an example
     <dependency>

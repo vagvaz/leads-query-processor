@@ -18,6 +18,8 @@ import org.apache.tajo.engine.planner.LeadsLogicalOptimizer;
 import org.apache.tajo.engine.planner.LogicalPlan;
 import org.apache.tajo.engine.planner.LogicalPlanner;
 import org.apache.tajo.engine.planner.PlanningException;
+import org.apache.tajo.engine.planner.logical.LogicalNode;
+import org.apache.tajo.engine.planner.logical.NodeType;
 import org.apache.tajo.master.session.Session;
 import org.apache.tajo.catalog.*;
 import org.apache.tajo.conf.TajoConf;
@@ -103,7 +105,6 @@ public class TaJoModule {
 		} catch (PlanningException e) {
 			throw new PlanningException("Unable to Optimize Plan: " + e.getMessage());
 		}
-		
 		return CoreGsonHelper.getPrettyInstance().toJson(
 				newPlan.getRootBlock().getRoot());
    }
