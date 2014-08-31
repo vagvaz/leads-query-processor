@@ -1,4 +1,4 @@
-package eu.leads.processor.nqe.operators;
+package eu.leads.processor.nqe.operators.mapreduce;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

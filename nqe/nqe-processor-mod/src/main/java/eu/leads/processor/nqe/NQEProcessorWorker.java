@@ -62,12 +62,8 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
       JsonObject msg = new JsonObject();
       msg.putString("processor", id + ".process");
       handlers = new HashMap<String,ActionHandler>();
-      handlers.put(NQEConstants.MAPREDUCE_OPERATOR,new GetObjectActionHandler(com,log,persistence,id));
-//      handlers.put(NQEConstants.PUT_OBJECT,new PutObjectActionHandler(com,log,persistence,id));
-//      handlers.put(NQEConstants.GET_QUERY_STATUS,new GetQueryStatusActionHandler(com,log,persistence,id));
-//      handlers.put(NQEConstants.GET_RESULTS,new GetResultsActionHandler(com,log,persistence,id));
-//      handlers.put(NQEConstants.CREATE_NEW_QUERY,new CreateQueryActionHandler(com,log,persistence,id));
-//      handlers.put(NQEConstants.CREATE_NEW_SPECIAL_QUERY,new CreateSpecialQueryActionHandler(com,log,persistence,id));
+      handlers.put(NQEConstants.MAPREDUCE_OPERATOR,new MapReduceActionHandler(com,log,persistence,id));
+      
       log = new LogProxy(config.getString("log"),com);
 
       bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {

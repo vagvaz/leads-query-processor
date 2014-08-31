@@ -1,4 +1,4 @@
-package eu.leads.processor.nqe.operators;
+package eu.leads.processor.nqe.operators.mapreduce;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -86,7 +86,8 @@ public class GroupByReducer extends LeadsReducer<String, String> {
                         for (Expression e : elist.getExpressions()) {
                             if (e instanceof Column) {
                                 Column c = (Column) e;
-                                columnTypes.put(func.toString(), context.getColumnType(c.getColumnName(), c.getTable().getName()));
+                              //FIXIT
+                              //  columnTypes.put(func.toString(), context.getColumnType(c.getColumnName(), c.getTable().getName()));
                             }
 
                         }

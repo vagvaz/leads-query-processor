@@ -3,6 +3,8 @@ package eu.leads.processor.nqe.operators;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.leads.processor.execute.TupleComparator;
+import eu.leads.processor.nqe.operators.mapreduce.SortMapper;
+import eu.leads.processor.nqe.operators.mapreduce.SortReducer;
 import eu.leads.processor.query.QueryContext;
 import eu.leads.processor.utils.InfinispanUtils;
 import eu.leads.processor.utils.math.MathUtils;
