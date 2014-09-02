@@ -152,10 +152,11 @@ public class SentimentAnalysisModule implements SentimentAnalysis {
          System.out.println("No text provided");
          System.exit(-1);
       }
+
       Annotation annotation = pipeline.process(text);// getAnnotation(inputFormat, text, filterUnknown);
 //		pipeline.annotate(annotation);
 
-      int tempCount = 3, i = 0; // also include tempCount sentences after the
+      int tempCount = 1, i = 0; // also include tempCount sentences after the
       // entity is found
       CoreMap s1 = null, s2 = null, s3 = null;
       Sentiment s = new Sentiment();
@@ -163,44 +164,47 @@ public class SentimentAnalysisModule implements SentimentAnalysis {
       for (CoreMap sentence : annotation
                                       .get(CoreAnnotations.SentencesAnnotation.class)) {
          if (i == 0) {
-            s1 = sentence;
-         } else if (i == 1) {
             s2 = sentence;
-         } else if (i == 2) {
+         } else if (i == 1) {
             s3 = sentence;
          } else {
-            s1 = s2;
             s2 = s3;
             s3 = sentence;
          }
-
+         System.err.println(targetEntity + "\n " + sentence);
          if (sentence.toString().toUpperCase()
                      .contains(targetEntity.toUpperCase())) {
-
-            if (tempCount == 3) {
-               if (s1 != null) {
-                  // System.out.print(s1 + " --> ");
-                  s.value += outputTree(System.out, s1, outputFormats);
-               }
+            System.err.println(targetEntity + "was Found ");
+            if (tempCount == 1) {
+//               if (s1 != null) {
+//                  // System.out.print(s1 + " --> ");
+//                  s.value += outputTree(System.out, s1, outputFormats);
+//               }
                if (s2 != null) {
-                  // System.out.print(s2 + " --> ");
+
                   s.value += outputTree(System.out, s2, outputFormats);
+                 System.err.println(targetEntity + "\n " + s2 +"  --> " + s.value);
                }
                if (s3 != null) {
-                  // System.out.print(s3 + " --> ");
+//                  System.out.print(s3 + " --> ");
                   s.value += outputTree(System.out, s3, outputFormats);
+                  System.err.println(targetEntity + "\n " + s3 +"  --> " + s.value);
                }
             }
             // System.out.print(sentence + " --> ");
             s.value += outputTree(System.out, sentence, outputFormats);
 
-            tempCount = 2;
-         } else if (tempCount >= 0 && tempCount < 3) {
+            tempCount--;
+         } else if (tempCount >= 0 && tempCount < 1) {
             tempCount--;
             // System.out.print(sentence + " --> ");
             s.value += outputTree(System.out, sentence, outputFormats);
          } else
             tempCount = 3;
+
+         if(tempCount < 0 )
+            tempCount =1;
+
          i++;
       }
 
