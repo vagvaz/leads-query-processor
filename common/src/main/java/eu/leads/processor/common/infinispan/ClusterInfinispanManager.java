@@ -143,7 +143,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     */
    @Override
    public void addListener(Object listener, Cache cache) {
-
+      cache.addListener(listener,new RangeFilter());
       DistributedExecutorService des = new DefaultExecutorService(cache);
       List<Future<Void>> list = new LinkedList<Future<Void>>();
       for (Address a : getMembers()) {
