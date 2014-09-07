@@ -1,0 +1,47 @@
+*********************************
+Start date Fri Jun 27 11:34:20 EEST 2014
+Version Apatar_v1.12.12
+JRE Version 1.7.0_55
+JRE Vendor Oracle Corporation
+log4j.configuration = `file:/home/john/Desktop/Apatar_Apostolis/apatar_V_1.12.12_repo/apatar_V_1.12.12_repo/log4j.properties`
+user.dir= `/home/john/Desktop/Apatar_Apostolis/apatar_V_1.12.12_repo/apatar_V_1.12.12_repo`
+jdbc:derby:tempdb/application/temp_db;create=true
+*********************************
+Start date Fri Jun 27 11:34:21 EEST 2014
+Version Apatar_v1.12.12
+JRE Version 1.7.0_55
+JRE Vendor Oracle Corporation
+log4j.configuration = `file:/home/john/Desktop/Apatar_Apostolis/apatar_V_1.12.12_repo/apatar_V_1.12.12_repo/log4j.properties`
+user.dir= `/home/john/Desktop/Apatar_Apostolis/apatar_V_1.12.12_repo/apatar_V_1.12.12_repo`
+
+getSystemLookAndFeelClassName=`javax.swing.plaf.metal.MetalLookAndFeel`
+Project path=
+Configuration database closed.
+nodeClassParameter = `tuc.ws.hotelsInfo.HotelsInfoNode`
+nodeClassParameter = `com.apatar.keyvaluestore.KeyValueStoreNode`
+nodeClassParameter = `com.apatar.db2.DB2Node`
+nodeClassParameter = `com.apatar.join.JoinNode`
+> getHotels.address
+> getHotels.cleanRating
+> getHotels.servRating
+> getHotels.reviewURL
+> com.apatar.functions.FunctionNode@7d3de32f
+> com.apatar.functions.FunctionNode@6a0e62e5
+> com.apatar.functions.FunctionNode@567edec8
+> tuc.ws.hotelsInfo.HotelsInfoNode@1c541184
+> com.apatar.keyvaluestore.KeyValueStoreNode@19cb3c79
+> com.apatar.validate.FilterNode@6def3929
+> Join.Column0
+> com.apatar.functions.FunctionNode@7491eb21
+> Join.Column5
+> com.apatar.db2.DB2Node@17e3ff51
+> tuc.ws.hotelsInfo.HotelsInfoNode@798f2b17
+> com.apatar.join.JoinNode@2656315a
+> getHotels.address
+> getHotels.cleanRating
+> getHotels.servRating
+> getHotels.reviewURL
+> com.apatar.functions.FunctionNode@7d3de32f
+> com.apatar.functions.FunctionNode@6a0e62e5
+> com.apatar.functions.FunctionNode@567edec8
+> Join.Column0
