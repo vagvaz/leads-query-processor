@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="com.apatar.buzzsaw" version="0.0.1">
+	<requires>
+		<import plugin-id="com.apatar.core"/>
+		<import plugin-id="com.apatar.ui"/>
+		<import plugin-id="com.apatar.thirdparty"/>
+		<import plugin-id="com.apatar.webdav"/>
+	</requires>
+	<runtime>
+	    <library id="buzzsaw" path="bin/" type="code">
+	        <export prefix="*"/>
+	    </library>
+
+	    <!--library id="antlr" path="lib/antlr.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="commons-httpclient-contrib" path="lib/commons-httpclient-contrib.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="commons-logging" path="lib/commons-logging.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="commons-transaction" path="lib/commons-transaction-1.0.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="jakarta-slide-commandline" path="lib/jakarta-slide-commandline-2.1.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="jakarta-slide-webdavlib" path="lib/jakarta-slide-webdavlib-2.1.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="xml-im-exporter" path="lib/xml-im-exporter1.1.jar" type="code">
+	        <export prefix="*"/>
+	    </library-->
+
+
+	</runtime>
+	<extension plugin-id="com.apatar.core" point-id="Node" id="BuzzsawNode">
+		<parameter id="class" value="com.apatar.buzzsaw.BuzzsawNodeFactory"/>
+	</extension> 	
+	
+</plugin>

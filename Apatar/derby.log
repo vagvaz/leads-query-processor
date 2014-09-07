@@ -1,0 +1,22 @@
+----------------------------------------------------------------
+2014-09-07 13:10:45.075 GMT:
+ Booting Derby version The Apache Software Foundation - Apache Derby - 10.5.1.1 - (764942): instance a816c00e-0148-503c-f3c9-000007c2e688
+on database directory /home/john/Dropbox/Eclipse Projects/apatar_apostolis/Apatar/tempdb/application/temp_db  
+
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+2014-09-07 13:10:46.105 GMT:
+ Booting Derby version The Apache Software Foundation - Apache Derby - 10.5.1.1 - (764942): instance 601a400f-0148-503c-f3c9-000007c2e688
+on database directory /home/john/Dropbox/Eclipse Projects/apatar_apostolis/Apatar/systemdb  
+
+Database Class Loader started - derby.database.classpath=''
+
+2014-09-07 13:10:46.458 GMT:
+Shutting down instance 601a400f-0148-503c-f3c9-000007c2e688
+----------------------------------------------------------------
+----------------------------------------------------------------
+2014-09-07 13:15:36.495 GMT:
+ Booting Derby version The Apache Software Foundation - Apache Derby - 10.5.1.1 - (764942): instance 2057c01b-0148-503c-f3c9-000007c2e688
+on database directory /home/john/Dropbox/Eclipse Projects/apatar_apostolis/Apatar/systemdb  
+
+Database Class Loader started - derby.database.classpath=''
