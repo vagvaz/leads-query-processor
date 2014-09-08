@@ -9,6 +9,12 @@ import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.lifecycle.ComponentStatus;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
+<<<<<<< HEAD
+=======
+/*import org.infinispan.notifications.Converter;
+import org.infinispan.notifications.KeyFilter;
+import org.infinispan.notifications.KeyValueFilter;*/
+>>>>>>> ioakeim
 import org.infinispan.remoting.transport.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,6 +169,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
          } catch (ExecutionException e) {
          }
       }
+<<<<<<< HEAD
    }
 
    /**
@@ -209,6 +216,51 @@ public class ClusterInfinispanManager implements InfinispanManager {
       DistributedExecutorService des = new DefaultExecutorService(cache);
       List<Future<Void>> list = new LinkedList<Future<Void>>();
       for (Address a : getMembers()) {
+=======
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void addListener(Object listener, String name) {
+    Cache c = (Cache) this.getPersisentCache(name);
+    addListener(listener, c);
+  }
+
+  /** {@inheritDoc} */
+  /*@Override
+  public void addListener(Object listener, String name, KeyFilter filter) {
+    Cache c = (Cache) this.getPersisentCache(name);
+    c.addListener(listener, filter);
+  }*/
+
+  /** {@inheritDoc} */
+  /*@Override
+  public void addListener(Object listener, String name, KeyValueFilter filter, Converter converter) {
+    Cache c = (Cache) this.getPersisentCache(name);
+    c.addListener(listener, filter, converter);
+
+  }*/
+
+  /** {@inheritDoc} */
+  /*@Override
+  public void addListener(Object listener, Cache cache, KeyFilter filter) {
+    cache.addListener(listener, filter);
+  }*/
+
+  /** {@inheritDoc} */
+  /*@Override
+  public void addListener(Object listener, Cache cache, KeyValueFilter filter, Converter converter) {
+//        cache.addListener(listener,filter,converter);
+  }*/
+
+  /** {@inheritDoc} */
+  @Override
+  public void removeListener(Object listener, Cache cache) {
+    DistributedExecutorService des = new DefaultExecutorService(cache);
+    List<Future<Void>> list = new LinkedList<Future<Void>>();
+    for ( Address a : getMembers() ) {
+>>>>>>> ioakeim
 //            des.submitEverywhere(new AddListenerCallable(cache.getName(),listener));
          try {
             list.add(des.submit(a, new RemoveListenerCallable(cache.getName(), listener)));

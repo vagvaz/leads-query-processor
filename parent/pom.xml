@@ -30,10 +30,17 @@
       </dependency>
    </dependencies>
 
+<<<<<<< HEAD
    <properties>
       <infinispan.version>7.0.0.Alpha5</infinispan.version>
       <processor.version>1.0.0-SNAPSHOT</processor.version>
    </properties>
+=======
+    <properties>
+        <infinispan.version>7.0.0.Alpha4</infinispan.version>
+        <processor.version>1.0.0-SNAPSHOT</processor.version>
+    </properties>
+>>>>>>> ioakeim
 
    <build>
       <plugins>

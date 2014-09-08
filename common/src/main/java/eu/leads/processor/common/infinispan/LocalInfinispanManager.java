@@ -6,6 +6,12 @@ import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.lifecycle.ComponentStatus;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
+<<<<<<< HEAD
+=======
+/*import org.infinispan.notifications.Converter;
+import org.infinispan.notifications.KeyFilter;
+import org.infinispan.notifications.KeyValueFilter;*/
+>>>>>>> ioakeim
 import org.infinispan.remoting.transport.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,6 +117,7 @@ public class LocalInfinispanManager implements InfinispanManager {
       } catch (Exception e) {
          System.out.println("MSG: " + e.getMessage());
       }
+<<<<<<< HEAD
    }
 
    /**
@@ -198,4 +205,82 @@ public class LocalInfinispanManager implements InfinispanManager {
    public boolean isStarted() {
       return manager.getStatus().equals(ComponentStatus.RUNNING);
    }
+=======
+    } catch ( Exception e ) {
+      System.out.println("MSG: " + e.getMessage());
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void addListener(Object listener, Cache cache) {
+    cache.addListener(listener);
+  }
+
+
+  /** {@inheritDoc} */
+  @Override
+  public void addListener(Object listener, String name) {
+    Cache c = (Cache) this.getPersisentCache(name);
+    this.addListener(listener, c);
+  }
+
+  /** {@inheritDoc} */
+  /*@Override
+  public void addListener(Object listener, String name, KeyFilter filter) {
+    Cache c = (Cache) this.getPersisentCache(name);
+    this.addListener(listener, c, filter);
+  }*/
+
+  /** {@inheritDoc} */
+  /*@Override
+  public void addListener(Object listener, String name, KeyValueFilter filter, Converter converter) {
+    Cache c = (Cache) this.getPersisentCache(name);
+    c.addListener(listener, filter, converter);
+  }*/
+
+  /** {@inheritDoc} */
+  /*@Override
+  public void addListener(Object listener, Cache cache, KeyFilter filter) {
+    cache.addListener(listener, filter);
+  }*/
+
+  /** {@inheritDoc} */
+  /*@Override
+  public void addListener(Object listener, Cache cache, KeyValueFilter filter, Converter converter) {
+    cache.addListener(listener, filter, converter);
+  }*/
+
+  /** {@inheritDoc} */
+  @Override
+  public void removeListener(Object listener, Cache cache) {
+    cache.removeListener(listener);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void removeListener(Object listener, String cacheNane) {
+    Cache cache = (Cache) getPersisentCache(cacheNane);
+    removeListener(listener, cache);
+  }
+
+
+  /** {@inheritDoc} */
+  @Override
+  public List<Address> getMembers() {
+    return this.manager.getMembers();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Address getMemberName() {
+    return this.manager.getAddress();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean isStarted() {
+    return manager.getStatus().equals(ComponentStatus.RUNNING);
+  }
+>>>>>>> ioakeim
 }

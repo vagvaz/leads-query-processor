@@ -70,10 +70,16 @@ public class PagerankPlugin implements PluginInterface {
         System.exit(0);
     }*/
 
+<<<<<<< HEAD
    @Override
    public void cleanup() {
 
    }
+=======
+    @Override
+    public void cleanup() {
+    }
+>>>>>>> ioakeim
 
    @Override
    public void modified(Object key, Object value, Cache<Object, Object> objectObjectCache) {
