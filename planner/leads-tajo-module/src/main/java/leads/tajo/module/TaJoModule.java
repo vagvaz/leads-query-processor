@@ -105,6 +105,11 @@ public class TaJoModule {
 		} catch (PlanningException e) {
 			throw new PlanningException("Unable to Optimize Plan: " + e.getMessage());
 		}
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> lefteris
 		return CoreGsonHelper.getPrettyInstance().toJson(
 				newPlan.getRootBlock().getRoot());
    }

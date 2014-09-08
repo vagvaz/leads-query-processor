@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 **.iml
 **/target/*
 **/.idea
 
+=======
+*.iml
+*.project
+*.classpath
+*.prefs
+.idea/*
+>>>>>>> lefteris

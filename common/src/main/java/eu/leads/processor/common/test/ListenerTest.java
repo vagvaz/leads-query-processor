@@ -25,6 +25,7 @@ public class ListenerTest {
             cluster2.getManager().addListener(new TestListener(cache.getCacheManager().getAddress().toString(), new ComplexType(cache.getCacheManager().getAddress().toString())), cache);
 
       }
+
       for (int i = 0; i < size; i++) {
          cache.put(cache.getCacheManager().getAddress().toString().toString() + Integer.toString(i), cache.getCacheManager().getAddress().toString().toString());
          Thread.sleep(period);
