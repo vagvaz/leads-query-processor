@@ -66,12 +66,12 @@ public class PersistenceProxyTest extends TestVerticle implements LeadsMessageHa
       com.initialize(id,group,null,this,this,vertx);
       com.subscribe(id + ".serviceMonitor", this);
       com2 = new DefaultNode();
-//      com2.initialize(id+"@2",group,null,this,this,vertx);
+      com2.initialize(id+"@2",group,null,this,this,vertx);
       log = new LogProxy(logAddress,com);
       persist = new PersistenceProxy(persistenceAddress,com,getVertx());
-//      persist2 = new PersistenceProxy(persistenceAddress,com2,getVertx());
+      persist2 = new PersistenceProxy(persistenceAddress,com2,getVertx());
       persist.start();
-//      persist2.start();
+      persist2.start();
 
    }
 
@@ -276,9 +276,12 @@ public class PersistenceProxyTest extends TestVerticle implements LeadsMessageHa
       SQLQuery sql = new SQLQuery("testuser","SELECT * from testCache");
       sql.setId("1");
       persist.put("testCache",sql.getId(),sql.asJsonObject());
+      persist2.put("testCache",sql.getId(),sql.asJsonObject());
       JsonObject ob = persist.get("testCache",sql.getId());
+      JsonObject ob2 = persist2.get("testCache",sql.getId());
       if(ob.getString("status").equals("ok")){
          assertEquals(sql.asJsonObject().toString(),ob.getObject("result").toString());
+         assertEquals(sql.asJsonObject().toString(),ob2.getObject("result").toString());
          System.out.println("get successful");
       }
 //      tearDown();
@@ -300,9 +303,9 @@ public class PersistenceProxyTest extends TestVerticle implements LeadsMessageHa
       SQLQuery sql = new SQLQuery("testuser","SELECT * from testCache");
       sql.setId("2");
       persist.put("testCache", sql.getId(), sql.asJsonObject());
-//      persist2.put("testCache",sql.getId(),sql.asJsonObject());
+      persist2.put("testCache",sql.getId(),sql.asJsonObject());
       JsonObject ob = persist.get("testCache",sql.getId());
-//      JsonObject ob2 = persist2.get("testCache",sql.getId());
+      JsonObject ob2 = persist2.get("testCache",sql.getId());
       if(ob.getString("status").equals("ok")){
          assertEquals(sql.asJsonObject().toString(),ob.getObject("result").toString());
          System.out.println("put successful");
@@ -314,9 +317,9 @@ public class PersistenceProxyTest extends TestVerticle implements LeadsMessageHa
       SQLQuery sql = new SQLQuery("testuser","SELECT * from testCache");
       sql.setId("2");
       persist.store(sql.getId(), sql.asJsonObject());
-//      persist2.store(sql.getId(),sql.asJsonObject());
+      persist2.store(sql.getId(),sql.asJsonObject());
       JsonObject ob = persist.read(sql.getId());
-//      JsonObject ob2 = persist2.read(sql.getId());
+      JsonObject ob2 = persist2.read(sql.getId());
       if(ob.getString("status").equals("ok")){
          assertEquals(sql.asJsonObject().toString(),ob.getObject("result").toString());
          System.out.println("store successful");
@@ -334,14 +337,14 @@ public class PersistenceProxyTest extends TestVerticle implements LeadsMessageHa
          tmpObject.putString("valueValue",value+Integer.toString(i));
          data[i] = tmpObject;
          persist.put("resultCache",Integer.toString(i),tmpObject);
-//         persist2.put("resultCache",Integer.toString(i),tmpObject);
+         persist2.put("resultCache",Integer.toString(i),tmpObject);
          tmpObject = new JsonObject();
       }
 
       long min = 1;
       long max = 4;
       JsonArray testArray = persist.batchGet("resultCache",min,max);
-//      JsonArray testArray2 = persist2.batchGet("resultCache",min,max);
+      JsonArray testArray2 = persist2.batchGet("resultCache",min,max);
       for(int i = (int)min; i <= max; i++){
          assertEquals(testArray.get(i-1).toString(),data[i].toString());
       }
@@ -359,14 +362,14 @@ public class PersistenceProxyTest extends TestVerticle implements LeadsMessageHa
          tmpObject.putString("valueValue",value+Integer.toString(i));
          data[i] = tmpObject;
          persist.put("resultCache",Integer.toString(i),tmpObject);
-//         persist2.put("resultCache",Integer.toString(i),tmpObject);
+         persist2.put("resultCache",Integer.toString(i),tmpObject);
          tmpObject = new JsonObject();
       }
 
       long min = 1;
       long max = iterations;
       JsonArray testArray = persist.batchGet("resultCache",min);
-//      JsonArray testArray2 = persist2.batchGet("resultCache",min);
+      JsonArray testArray2 = persist2.batchGet("resultCache",min);
       for(int i = (int)min; i < max; i++){
          assertEquals(testArray.get(i-1).toString(),data[i].toString());
       }
@@ -378,12 +381,11 @@ public class PersistenceProxyTest extends TestVerticle implements LeadsMessageHa
       SQLQuery sql = new SQLQuery("testuser","SELECT * from testCache");
       sql.setId("1");
       persist.put("testCache", sql.getId(), sql.asJsonObject());
-//      persist2.put("testCache", sql.getId(), sql.asJsonObject());
+      persist2.put("testCache", sql.getId(), sql.asJsonObject());
       boolean ob = persist.contains("testCache", sql.getId());
-//      boolean ob2 = persist2.contains("testCache", sql.getId());
+      boolean ob2 = persist2.contains("testCache", sql.getId());
       assertEquals(ob,true);
       System.out.println("contains successful");
-
    }
 
 

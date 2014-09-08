@@ -2,15 +2,10 @@ package eu.leads.processor.common.infinispan;
 
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.Configuration;
+import org.infinispan.filter.Converter;
+import org.infinispan.filter.KeyValueFilter;
 import org.infinispan.manager.EmbeddedCacheManager;
-<<<<<<< HEAD
-=======
-/*
-import org.infinispan.notifications.Converter;
-import org.infinispan.notifications.KeyFilter;
-import org.infinispan.notifications.KeyValueFilter;
-*/
->>>>>>> ioakeim
+
 import org.infinispan.remoting.transport.Address;
 
 import java.util.List;
@@ -71,26 +66,6 @@ public interface InfinispanManager {
 
    public void addListener(Object listener, String name);
 
-<<<<<<< HEAD
-//  public void addListener(Object listener, String name, KeyFilter filter);
-//
-//  public void addListener(Object listener, String name, KeyValueFilter filter, Converter converter);
-//
-//  public void addListener(Object listener, Cache cache, KeyFilter filter);
-//
-//  public void addListener(Object listener, Cache cache, KeyValueFilter filter, Converter converter);
-=======
-  /*public void addListener(Object listener, String name, KeyFilter filter);
->>>>>>> ioakeim
-
-   public void removeListener(Object listener, Cache cache);
-
-   public void removeListener(Object listener, String cacheNane);
-
-<<<<<<< HEAD
-=======
-  public void addListener(Object listener, Cache cache, KeyValueFilter filter, Converter converter);*/
->>>>>>> ioakeim
 
    /**
     * Getter for property 'members'.

@@ -20,7 +20,6 @@ import java.util.Map;
 
 public class LocalTest {
 
-<<<<<<< HEAD
    public static void main(String[] args) {
 
       String webCacheName = "webpages";
@@ -86,7 +85,7 @@ public class LocalTest {
          System.out.println(my_entry.getKey() + "->" + (double) ((DSPMNode) my_entry.getValue()).getVisitCount() / (double) global_vc);
       }
    }
-=======
+
     public static void main(String[] args) {
 
         String webCacheName = "webpages";
@@ -132,6 +131,12 @@ public class LocalTest {
         Map cache2 = InfinispanClusterSingleton.getInstance().getManager().getPersisentCache("approx_sum_cache");
         printVCs(cache1, cache2);
 
+	try {
+            Thread.sleep(3 * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+	System.out.println("\n\n\n\n\n\n\nSTOP\n\n\n\n\n\n\n");
         PersistentCrawl.stop();
         InfinispanClusterSingleton.getInstance().getManager().stopManager();
         System.exit(0);
@@ -140,32 +145,5 @@ public class LocalTest {
     /**
      * Use of entrySet iteration, trust this operation only in local mode.
      */
-    private static void printVCs(Map cache1, Map cache2){
 
-        //int global_vc = (Integer) InfinispanClusterSingleton.getInstance().getManager().getPersisentCache("approx_sum_cache").get(Const.GLOBAL_SUM);
-        int realSum = 0;
-        Iterator<Map.Entry> my_iterator = cache1.entrySet().iterator();
-        Map.Entry my_entry;
-        while (my_iterator.hasNext()) {
-
-            my_entry = my_iterator.next();
-            realSum += ((DSPMNode) my_entry.getValue()).getVisitCount();
-            // System.out.println(my_entry.getKey()+"->"+(double) ((DSPMNode) my_entry.getValue()).getVisitCount()/* / (double) global_vc*/ );
-        }
-
-        // exchange messages with the coordinator in order to retrieve its global sum
-        my_iterator = cache2.entrySet().iterator();
-        my_entry = my_iterator.next();
-        Worker w = (Worker) my_entry.getValue();
-        w.getChannel().sentTo(Node.COORDINATOR, new Message(w.getId(),"requestGlobalSum",0));
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("Accurate global sum: "+realSum+", e-approximate global sum: "+w.getLatestReceivedGlobalSum());
-    }
->>>>>>> ioakeim
 }
