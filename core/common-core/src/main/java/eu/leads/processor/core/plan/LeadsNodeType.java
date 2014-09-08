@@ -35,7 +35,9 @@ public enum LeadsNodeType {
    ALTER_TABLESPACE (AlterTablespaceNode.class),
    ALTER_TABLE (AlterTableNode.class),
    TRUNCATE_TABLE (TruncateTableNode.class),
+   WGS_URL(WGSUrlDepthNode.class),
    OUTPUT_NODE(OutputNode.class);
+
 
    private final Class<? extends LogicalNode> baseClass;
 

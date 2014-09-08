@@ -69,6 +69,11 @@ public class TaJoModule {
 		}
 	}
 
+   public static Schema getTableSchema(String tableName){
+      TableDesc result = catalog.getTableDesc("default",tableName);
+      return result.getLogicalSchema();
+   }
+
 	public static Expr parseQuery(String sql) {
 		System.out.print(sql.length());
 		ANTLRInputStream input = new ANTLRInputStream(sql);
@@ -80,7 +85,7 @@ public class TaJoModule {
 		SqlContext context = parser.sql();
 		if (context.statement() != null)
 			return visitor.visitSql(context);
-		
+
 		return null;
 	}
 

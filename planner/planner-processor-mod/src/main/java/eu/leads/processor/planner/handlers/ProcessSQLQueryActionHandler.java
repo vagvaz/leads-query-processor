@@ -13,6 +13,8 @@ import eu.leads.processor.core.plan.SQLPlan;
 import eu.leads.processor.core.plan.SQLQuery;
 import leads.tajo.module.TaJoModule;
 import org.apache.tajo.algebra.Expr;
+import org.apache.tajo.engine.json.CoreGsonHelper;
+import org.apache.tajo.engine.planner.logical.LogicalRootNode;
 import org.apache.tajo.master.session.Session;
 import org.vertx.java.core.json.JsonObject;
 
@@ -62,7 +64,8 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
          result.setResult(createFailResult(e,sqlQuery));
          return result;
       }
-      SQLPlan plan = new SQLPlan(new JsonObject(planAsString));
+      LogicalRootNode n = CoreGsonHelper.fromJson(planAsString, LogicalRootNode.class);
+      SQLPlan plan = new SQLPlan(sqlQuery.getId(),n);
       Set<SQLPlan> candidatePlans = new HashSet<SQLPlan>();
       candidatePlans.add(plan);
       Set<SQLPlan> evaluatedPlans = evaluatePlansFromScheduler(candidatePlans);
@@ -73,6 +76,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
       actionResult.putString("status","ok");
       actionResult.putObject("query", sqlQuery.asJsonObject());
       result.setStatus(ActionStatus.COMPLETED.toString());
+      result.setResult(actionResult);
       return result;
    }
 

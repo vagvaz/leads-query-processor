@@ -1,5 +1,7 @@
 package eu.leads.processor.planner;
 
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.protobuf.TextFormat;
 
@@ -57,7 +59,8 @@ public class LogicalPlanVisitorTest {
       String res = TaJoModule.Optimize(session, line);
       Gson gson = new Gson();
       LogicalRootNode n = CoreGsonHelper.fromJson(res, LogicalRootNode.class);
-      SQLPlan plan = new SQLPlan(n);
+      SQLPlan plan = new SQLPlan("queryId-custom",n);
+      System.out.println(plan.asJsonObject().encodePrettily());
 
 
 //      List<LogicalPlan.QueryBlock> childblocks = plan.getChildBlocks(rootBlock);

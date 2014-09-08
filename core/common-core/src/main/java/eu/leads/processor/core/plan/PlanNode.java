@@ -66,6 +66,8 @@ public class PlanNode extends DataType {
 
    public void addInput(String input){
       JsonArray array = data.getArray("inputs");
+      if(array == null)
+         array = new JsonArray();
       array.add(input);
       data.putArray("inputs",array);
    }
@@ -90,7 +92,7 @@ public class PlanNode extends DataType {
    public Integer getPid(){
       String result = "";
       JsonObject conf = getConfiguration();
-      return conf.getInteger("pid");
+      return conf.getObject("body").getInteger("pid");
    }
 
    public String getNodeId(){
