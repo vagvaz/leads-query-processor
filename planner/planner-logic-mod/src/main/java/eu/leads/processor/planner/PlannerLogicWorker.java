@@ -95,6 +95,7 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
                        Action deployAction = createNewAction(action);
                        deployAction.setData(actionResult.getObject("query"));
                        deployAction.setLabel(DeployerConstants.DEPLOY_SQL_PLAN);
+                       com.sendTo(deployer,deployAction.asJsonObject());
                     }
                } else if (label.equals(QueryPlannerConstants.PROCESS_SPECIAL_QUERY)) {
 //                  com.sendTo(action.getData().getString("replyTo"),action.getResult());
@@ -103,6 +104,7 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
                      Action deployAction = createNewAction(action);
                      deployAction.setData(actionResult.getObject("query"));
                      deployAction.setLabel(DeployerConstants.DEPLOY_CUSTOM_PLAN);
+                     com.sendTo(deployer,deployAction.asJsonObject());
                   }
                } else {
                   log.error("Unknown COMPLETED OR INPROCESS Action received " + action.toString());
