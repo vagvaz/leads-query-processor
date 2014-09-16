@@ -8,7 +8,7 @@
    </parent>
 
    <modelVersion>4.0.0</modelVersion>
-	<groupId>gr.tuc.softnet</groupId>
+<!-- 	<groupId>gr.tuc.softnet</groupId> -->
 	<artifactId>leads-query-processor-tajo-catalog-server</artifactId>
 	<packaging>jar</packaging>
 	<version>0.0.1-SNAPSHOT</version>
@@ -150,6 +150,11 @@
          <groupId>gr.tuc.softnet</groupId>
          <artifactId>leads-query-processor-tajo-module</artifactId>
          <version>0.0.1-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+      	<groupId>org.apache.hadoop</groupId>
+      	<artifactId>hadoop-yarn-common</artifactId>
+      	<version>2.4.0</version>
       </dependency>
 	</dependencies>
 

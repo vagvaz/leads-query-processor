@@ -111,6 +111,8 @@ public class MapReduceActionHandler implements ActionHandler {
                 } else if (operation == NQEConstants.SORT_OP) {
                     Mapper = new SortMapper(configuration);
                     Reducer = new SortReducer(configuration);
+
+                    // else { //custom mapreduce process
                 } else {
                     actionResult.putString("error", operation + "  Not found");
                     result.setResult(actionResult);

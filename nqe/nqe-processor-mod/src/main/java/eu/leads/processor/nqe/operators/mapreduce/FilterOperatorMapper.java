@@ -8,7 +8,6 @@ import eu.leads.processor.core.plan.QueryContext;
 import eu.leads.processor.common.LeadsMapper;
 import eu.leads.processor.common.Tuple;
 import eu.leads.processor.common.utils.InfinispanUtils;
-import eu.leads.processor.common.utils.math.MathOperatorTree;
 import org.infinispan.distexec.mapreduce.Collector;
 
 import java.io.File;

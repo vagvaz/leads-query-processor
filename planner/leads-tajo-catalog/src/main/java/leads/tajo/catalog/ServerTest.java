@@ -25,8 +25,8 @@ import org.apache.tajo.catalog.proto.CatalogProtos.StoreType;
 import org.apache.tajo.common.TajoDataTypes.Type;
 import org.apache.tajo.conf.TajoConf;
 import org.apache.tajo.engine.function.builtin.SumInt;
-import org.apache.tajo.util.CommonTestingUtil;
 import org.apache.tajo.util.KeyValueSet;
+import org.apache.tajo.master.TajoMaster;
 
 /**
  * @author tr
@@ -86,17 +86,21 @@ public class ServerTest {
 	
 	public static void TestsetUp() throws Exception {
 
-//		mycatalogServer = new LeadsCatalog(null);
-//		mycatalogServer.StartServer();
+		mycatalogServer = new LeadsCatalog(null);
+		mycatalogServer.StartServer();
 
 		// connect to the server in order to create the schemas
 		TajoConf c = new TajoConf();
 
-		catalog = new CatalogClient(c, "147.27.14.80", 5998);
+		catalog = new CatalogClient(c, "localhost", 5998);
 		catalog.createTablespace(DEFAULT_TABLESPACE_NAME,
 				"leadsfs://localhost:5998/warehouse");
 		catalog.createDatabase(DEFAULT_DATABASE_NAME, DEFAULT_TABLESPACE_NAME);
 
+	    for (FunctionDesc funcDesc : TajoMaster.initBuiltinFunctions()) {
+	        catalog.createFunction(funcDesc);
+	      }
+		
 		Schema schema = new Schema();
 		schema.addColumn("name", Type.TEXT);
 		schema.addColumn("empid", Type.INT4);

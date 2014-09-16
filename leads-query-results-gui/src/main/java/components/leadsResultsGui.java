@@ -37,9 +37,11 @@ package components;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.DecimalFormat;
 import java.util.Random;
 import java.util.Vector;
 
@@ -76,16 +78,57 @@ public class leadsResultsGui extends JPanel {
         columnNames.add("avg(pagerank)");
         columnNames.add("avg(sentimentScore)");
 
-        Vector<Object> row = new Vector<Object>();
-        for(int i=0;i<rowsC;i++){
+        String [] domainnames = {"www.twitter.com",
+                "www.bbc.co.uk",
+                        "www.amazon.com",
+                "www.ebay.com",
+                "www.adidas-group.com",
+                "www.sportsdirect.com/adidas",
+                "www.jdsports.co.uk",
+                "www.size.co.uk",
+                "www.endclothing.co.uk",
+
+        };
+        double[] avgPageRank;
+        avgPageRank = new double[]{0.000010,
+                0.000009f,
+                0.000008f,
+                0.000008,
+                0.000006f,
+                0.000005,
+                0.000005f,
+                0.000004,
+                0.000004f};
+        double[] avgSentimentScore;
+        avgSentimentScore = new double[]{0.693,
+                0.725,
+                0.589,
+                0.658,
+                0.902,
+                0.962,
+                0.754,
+                0.854,
+                0.654};
+
+        Vector<Object> row;// = new Vector<Object>();
+
+//        for(int i=0;i<rowsC;i++){
+//            row = new Vector<Object>();
+//            row.addElement(getRandomDomain());
+//            row.addElement(new Float(nextFloat(0,0.01f)));
+//            row.addElement(new Float(nextFloat(-1f,1f)));
+//            data.add(row);
+//        }
+        for(int i=0;i<domainnames.length;i++){
             row = new Vector<Object>();
-            row.addElement(getRandomDomain());
-            row.addElement(new Float(nextFloat(0,1)));
-            row.addElement(new Float(nextFloat(0.04f,0.9f)));
+            row.addElement(domainnames[i]);
+            row.addElement(new Double(avgPageRank[i]));
+            row.addElement(new Double(avgSentimentScore[i]));
             data.add(row);
         }
 
         final JTable table = new JTable(data, columnNames);
+
         table.setPreferredScrollableViewportSize(new Dimension(500, 70));
         table.setFillsViewportHeight(true);
         table.setAutoCreateRowSorter(true);
@@ -96,7 +139,7 @@ public class leadsResultsGui extends JPanel {
                 }
             });
         }
-
+        table.getColumnModel().getColumn(1).setCellRenderer(new DecimalFormatRenderer() );
         //Create the scroll pane and add the table to it.
         JScrollPane scrollPane = new JScrollPane(table);
         JTextArea textField = new JTextArea(5, 20);
@@ -106,19 +149,34 @@ public class leadsResultsGui extends JPanel {
         c.gridwidth = GridBagConstraints.REMAINDER;
 
         c.fill = GridBagConstraints.HORIZONTAL;
-        add(textField, c);
+        //add(textField, c);
 
         c.fill = GridBagConstraints.BOTH;
         c.weightx = 1.0;
         c.weighty = 1.0;
         add(scrollPane, c);
-        textField.setText("QUERY: \"SELECT domainName, avg(pagerank), avg(sentimentScore) FROM\n" +
+        textField.setText("QUERY:\n \"SELECT domainName, avg(pagerank), avg(sentimentScore) FROM\n" +
                 "webpages JOIN entities on url=webpageURL WHERE entities.name\n" +
                 "like 'adidas' GROUP BY domainName HAVING avg(sentimentScore) >\n" +
                 "0.5 ORDER BY avg(pagerank) DESC;\"");
 
             // add(textField);
         // add(scrollPane);
+    }
+    static class DecimalFormatRenderer extends DefaultTableCellRenderer {
+        private static final DecimalFormat formatter = new DecimalFormat( "0.000000" );
+
+        public Component getTableCellRendererComponent(
+                JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            // First format the cell value as required
+
+            value = formatter.format((Number)value);
+
+            // And pass it on to parent class
+
+            return super.getTableCellRendererComponent(
+                    table, value, isSelected, hasFocus, row, column );
+        }
     }
 
     /**

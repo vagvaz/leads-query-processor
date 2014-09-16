@@ -2,7 +2,6 @@ package eu.leads.processor.nqe.operators;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import eu.leads.processor.common.utils.math.MathOperatorTree;
 import eu.leads.processor.plan.ExecutionPlanNode;
 import eu.leads.processor.sql.PlanNode;
 

@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
+import org.apache.tajo.algebra.Expr;
 import org.apache.tajo.engine.parser.SQLSyntaxError;
 import org.apache.tajo.master.session.Session;
 
@@ -21,7 +22,7 @@ public class TajoModuleTest {
 							DEFAULT_DATABASE_NAME);
 		
 		Mymodule = new TaJoModule();
-		Mymodule.init_connection("127.0.0.1", 5998);
+		Mymodule.init_connection("localhost", 5998);
 		BufferedReader in = null;
 		try {
 			
@@ -33,9 +34,14 @@ public class TajoModuleTest {
 					
 					try {
 						System.out.println(line);
-
-						String res = TaJoModule.Optimize(session, line);
+						Expr res_expr = TaJoModule.parseQuery(line);
+						if (res_expr != null)
+							System.out.println("Expr: "+res_expr.toJson() +" end");
+						else
+							System.out.println("No Expr");
+						String res = TaJoModule.Optimize(session, line);//res_expr.toJson();//;
 						if (res != null){
+							 
 							System.out.println(res);
 							try {
 //								PrintWriter writer = new PrintWriter("plan.json", "UTF-8");
