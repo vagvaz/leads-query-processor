@@ -115,5 +115,19 @@ public class Action  extends DataType{
       data.putObject("result",result);
    }
 
+   @Override
+   public int hashCode() {
+      return getId().hashCode();
+   }
+
+   @Override
+   public boolean equals(Object obj) {
+      if(obj instanceof Action){
+         Action other = (Action)obj;
+         return other.getId().equals(this.getId());
+      }
+      return false;
+
+   }
 }
 
