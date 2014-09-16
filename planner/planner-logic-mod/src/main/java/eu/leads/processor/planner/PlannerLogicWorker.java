@@ -9,6 +9,7 @@ import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.deployer.DeployerConstants;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
@@ -88,9 +89,21 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
             case INPROCESS: //  probably received an action from internal source (processors)
             case COMPLETED: // the action either a part of a multistep workflow (INPROCESSING) or it could be processed.
                if (label.equals(QueryPlannerConstants.PROCESS_QUERY)) {
-                  com.sendTo(action.getData().getString("replyTo"),action.getResult());
+//                  com.sendTo(action.getData().getString("replyTo"),action.getResult());
+                    JsonObject actionResult = action.getResult();
+                    if(actionResult != null && actionResult.getString("status").equals("ok")){
+                       Action deployAction = createNewAction(action);
+                       deployAction.setData(actionResult.getObject("query"));
+                       deployAction.setLabel(DeployerConstants.DEPLOY_SQL_PLAN);
+                    }
                } else if (label.equals(QueryPlannerConstants.PROCESS_SPECIAL_QUERY)) {
-                  com.sendTo(action.getData().getString("replyTo"),action.getResult());
+//                  com.sendTo(action.getData().getString("replyTo"),action.getResult());
+                  JsonObject actionResult = action.getResult();
+                  if(actionResult != null && actionResult.getString("status").equals("ok")){
+                     Action deployAction = createNewAction(action);
+                     deployAction.setData(actionResult.getObject("query"));
+                     deployAction.setLabel(DeployerConstants.DEPLOY_CUSTOM_PLAN);
+                  }
                } else {
                   log.error("Unknown COMPLETED OR INPROCESS Action received " + action.toString());
                   return;

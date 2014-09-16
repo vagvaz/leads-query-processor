@@ -18,6 +18,8 @@ import org.apache.tajo.engine.planner.LeadsLogicalOptimizer;
 import org.apache.tajo.engine.planner.LogicalPlan;
 import org.apache.tajo.engine.planner.LogicalPlanner;
 import org.apache.tajo.engine.planner.PlanningException;
+import org.apache.tajo.engine.planner.logical.LogicalNode;
+import org.apache.tajo.engine.planner.logical.NodeType;
 import org.apache.tajo.master.session.Session;
 import org.apache.tajo.catalog.*;
 import org.apache.tajo.conf.TajoConf;
@@ -67,6 +69,11 @@ public class TaJoModule {
 		}
 	}
 
+   public static Schema getTableSchema(String tableName){
+      TableDesc result = catalog.getTableDesc("default",tableName);
+      return result.getLogicalSchema();
+   }
+
 	public static Expr parseQuery(String sql) {
 		System.out.print(sql.length());
 		ANTLRInputStream input = new ANTLRInputStream(sql);
@@ -78,7 +85,7 @@ public class TaJoModule {
 		SqlContext context = parser.sql();
 		if (context.statement() != null)
 			return visitor.visitSql(context);
-		
+
 		return null;
 	}
 

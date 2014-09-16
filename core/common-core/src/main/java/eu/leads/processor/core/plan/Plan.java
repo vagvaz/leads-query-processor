@@ -1,6 +1,8 @@
 package eu.leads.processor.core.plan;
 
 import eu.leads.processor.core.DataType;
+import org.apache.tajo.engine.planner.logical.LogicalRootNode;
+import org.vertx.java.core.json.JsonObject;
 
 import java.util.Collection;
 
@@ -42,6 +44,20 @@ public interface Plan  {
    public PlanNode getNode(String nodeId);
 
    public Collection<String> getSources();
+
+   public JsonObject getRootNode();
+   public void setRootNode(LogicalRootNode rootNode);
+   public void setRootNode(JsonObject rootNode);
+   public JsonObject getPlanGraph();
+   public void setPlanGraph(JsonObject planGraph);
+   public String getQueryId();
+   public void setQueryId(String queryId);
+   public void addParentTo(String nodeId,PlanNode newNode);
+   public void addChildTo(String nodeId,PlanNode newNode);
+
+   public JsonObject getNodeById(String id);
+   public JsonObject getNodeByPid(int pid);
+
 
 
 }

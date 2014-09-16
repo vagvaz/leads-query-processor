@@ -1,5 +1,5 @@
-*.iml
-*.project
-*.classpath
-*.prefs
-.idea/*
+**/*.iml
+**/target/*
+**/.idea/
+**/.project
+**/.classpath

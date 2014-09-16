@@ -2,6 +2,8 @@ package eu.leads.processor.common.infinispan;
 
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.Configuration;
+import org.infinispan.filter.Converter;
+import org.infinispan.filter.KeyValueFilter;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.remoting.transport.Address;
 
@@ -70,6 +72,7 @@ public interface InfinispanManager {
 //  public void addListener(Object listener, Cache cache, KeyFilter filter);
 //
 //  public void addListener(Object listener, Cache cache, KeyValueFilter filter, Converter converter);
+//   public void addRemoteListener(Object listener, Cache cache, KeyValueFilter filter, Converter converter);
 
    public void removeListener(Object listener, Cache cache);
 
