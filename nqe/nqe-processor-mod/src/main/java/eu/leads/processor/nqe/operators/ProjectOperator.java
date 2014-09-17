@@ -1,12 +1,13 @@
 package eu.leads.processor.nqe.operators;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import eu.leads.processor.plan.ExecutionPlanNode;
-import eu.leads.processor.sql.PlanNode;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Table;
+import org.vertx.java.core.json.JsonObject;
+//import com.fasterxml.jackson.annotation.JsonCreator;
+//import com.fasterxml.jackson.annotation.JsonProperty;
+//import eu.leads.processor.plan.ExecutionPlanNode;
+//import eu.leads.processor.sql.PlanNode;
+//import net.sf.jsqlparser.schema.Column;
+//import net.sf.jsqlparser.schema.Table;
 
 import java.util.List;
 
@@ -18,7 +19,23 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 @JsonAutoDetect
-public class ProjectOperator extends ExecutionPlanNode {
+public class ProjectOperator extends BasicOperator{
+
+    @Override
+    public void init(JsonObject config) {
+        
+    }
+
+    @Override
+    public void execute() {
+
+    }
+
+    @Override
+    public void cleanup() {
+
+    }
+}/*extends ExecutionPlanNode {
     private List<Column> columns;
     private List<Table> tables;
 
@@ -66,3 +83,4 @@ public class ProjectOperator extends ExecutionPlanNode {
         return getType() + builder.toString();
     }
 }
+*/

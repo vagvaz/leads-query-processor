@@ -1,10 +1,11 @@
 package eu.leads.processor.nqe.operators;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import eu.leads.processor.plan.ExecutionPlanNode;
-import eu.leads.processor.sql.PlanNode;
+import org.vertx.java.core.json.JsonObject;
+//import com.fasterxml.jackson.annotation.JsonCreator;
+//import com.fasterxml.jackson.annotation.JsonProperty;
+//import eu.leads.processor.plan.ExecutionPlanNode;
+//import eu.leads.processor.sql.PlanNode;
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,7 +15,23 @@ import eu.leads.processor.sql.PlanNode;
  * To change this template use File | Settings | File Templates.
  */
 @JsonAutoDetect
-public class OutputOperator extends ExecutionPlanNode {
+public class OutputOperator extends BasicOperator{
+
+    @Override
+    public void init(JsonObject config) {
+
+    }
+
+    @Override
+    public void execute() {
+
+    }
+
+    @Override
+    public void cleanup() {
+
+    }
+}/* extends ExecutionPlanNode {
 
     @JsonCreator
     public OutputOperator(@JsonProperty("name") String name) {
@@ -30,4 +47,4 @@ public class OutputOperator extends ExecutionPlanNode {
     public String toString() {
         return "OUTPUT";
     }
-}
+}*/

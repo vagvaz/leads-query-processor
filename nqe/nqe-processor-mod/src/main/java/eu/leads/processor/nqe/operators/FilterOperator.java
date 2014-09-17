@@ -2,8 +2,8 @@ package eu.leads.processor.nqe.operators;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import eu.leads.processor.plan.ExecutionPlanNode;
-import eu.leads.processor.sql.PlanNode;
+import eu.leads.processor.common.utils.math.MathOperatorTree;
+import org.vertx.java.core.json.JsonObject;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,12 +19,12 @@ public class FilterOperator extends BasicOperator {
     private MathOperatorTree tree;
 
     public FilterOperator(String name) {
-        super(name, OperatorType.FILTER);
+        /*super(name, OperatorType.FILTER);*/
     }
 
-    public FilterOperator(PlanNode node) {
-        super(node, OperatorType.FILTER);
-    }
+  //  public FilterOperator(PlanNode node) {
+  //      super(node, OperatorType.FILTER);
+  //  }
 
     public MathOperatorTree getTree() {
         return tree;
@@ -36,13 +36,28 @@ public class FilterOperator extends BasicOperator {
 
     @JsonCreator
     public FilterOperator(@JsonProperty("name") String name, @JsonProperty("output") String output, @JsonProperty("tree") MathOperatorTree operatorTree) {
-        super(name, OperatorType.FILTER);
-        setOutput(output);
+      //  super(name, OperatorType.FILTER);
+       // setOutput(output);
         this.tree = operatorTree;
     }
 
     @Override
-    public String toString() {
-        return getType() + tree.toString();
+    public void init(JsonObject config) {
+
     }
+
+    @Override
+    public void execute() {
+
+    }
+
+    @Override
+    public void cleanup() {
+
+    }
+
+//    @Override
+//    public String toString() {
+//        return getType() + tree.toString();
+//    }
 }

@@ -25,8 +25,7 @@ public class NQEControlVerticle extends ComponentControlVerticle {
    @Override
    public void setup(JsonObject conf) {
       super.setup(conf);
-      this.logicConfig.putString("planner",plannerQueue);
-      this.logicConfig.putString("nqe",nqeQueue);
+       this.logicConfig.putString("nqe",nqeQueue);
       this.processorConfig.putString("planner",plannerQueue);
       //this.logicConfig.putString("nqe",nqeQueue);
    }

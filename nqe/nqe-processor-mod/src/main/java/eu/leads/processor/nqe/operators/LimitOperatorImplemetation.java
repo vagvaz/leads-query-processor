@@ -1,7 +1,7 @@
 package eu.leads.processor.nqe.operators;
 
-import eu.leads.processor.execute.Tuple;
-import eu.leads.processor.utils.InfinispanUtils;
+import eu.leads.processor.common.Tuple;
+import eu.leads.processor.common.utils.InfinispanUtils;
 import net.sf.jsqlparser.statement.select.Limit;
 
 import java.util.Map;

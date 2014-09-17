@@ -1,6 +1,7 @@
 package eu.leads.processor.nqe.operators;
 
-import eu.leads.processor.query.Query;
+//import eu.leads.processor.query.Query;
+import org.vertx.java.core.json.JsonObject;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,7 +12,7 @@ import eu.leads.processor.query.Query;
  */
 public class OperatorContext {
     String user;
-    Query query;
+    JsonObject query;
 
     public String getUser() {
         return user;
@@ -21,11 +22,11 @@ public class OperatorContext {
         this.user = user;
     }
 
-    public Query getQuery() {
+    public JsonObject getQuery() {
         return query;
     }
 
-    public void setQuery(Query query) {
+    public void setQuery(JsonObject query) {
         this.query = query;
     }
 }

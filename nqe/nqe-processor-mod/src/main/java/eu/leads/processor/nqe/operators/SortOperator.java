@@ -1,11 +1,12 @@
 package eu.leads.processor.nqe.operators;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
+/*import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.leads.processor.plan.ExecutionPlanNode;
 import eu.leads.processor.sql.PlanNode;
-import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Column;*/
+import org.vertx.java.core.json.JsonObject;
 
 import java.util.List;
 
@@ -17,7 +18,23 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 @JsonAutoDetect
-public class SortOperator extends ExecutionPlanNode {
+public class SortOperator extends BasicOperator{
+
+    @Override
+    public void init(JsonObject config) {
+
+    }
+
+    @Override
+    public void execute() {
+
+    }
+
+    @Override
+    public void cleanup() {
+
+    }
+}/*extends ExecutionPlanNode {
     List<Column> columns;
 
     public List<Boolean> getAscending() {
@@ -66,3 +83,4 @@ public class SortOperator extends ExecutionPlanNode {
         return getType() + builder.toString();
     }
 }
+*/

@@ -1,10 +1,15 @@
 package eu.leads.processor.nqe.operators;
 
 
+import org.vertx.java.core.json.JsonObject;
+
 import java.util.Properties;
 
 public interface Operator {
-    public Properties getConfiguration();
+    public JsonObject getConfiguration();
+    public void init(JsonObject config);
+    public void execute();
+    public void cleanup();
 
-    public void setConfiguration(Properties config);
+    public void setConfiguration(JsonObject config);
 }

@@ -1,20 +1,20 @@
 package eu.leads.processor.nqe;
 
-import com.fasterxml.jackson.databind.JsonNode;
+/*import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
-import eu.leads.processor.Module;
-import eu.leads.processor.execute.operators.*;
+import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.utils.InfinispanUtils;
+import eu.leads.processor.common.utils.StdOutputWriter;
+import eu.leads.processor.nqe.operators.OperatorType;
 import eu.leads.processor.query.QueryContext;
-import eu.leads.processor.utils.InfinispanUtils;
-import eu.leads.processor.utils.StdOutputWriter;
-import eu.leads.processor.utils.StringConstants;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.infinispan.Cache;
 import org.infinispan.distexec.mapreduce.MapReduceTask;
 import org.infinispan.distexec.mapreduce.Mapper;
 import org.infinispan.distexec.mapreduce.Reducer;
+import org.vertx.java.core.json.JsonObject;
 
 import javax.jms.Message;
 import javax.jms.TextMessage;
@@ -23,7 +23,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeUnit;*/
+
+//import eu.leads.processor.Module;
+//import eu.leads.processor.execute.operators.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,16 +35,16 @@ import java.util.concurrent.TimeUnit;
  * Time: 3:55 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NodeQueryExecutor extends Module {
+public class NodeQueryExecutor {/*extends Module {
     ConcurrentMap<String, String> queries;
-    Queue<Message> incoming;
+    Queue<JsonObject> incoming;
     private ObjectMapper mapper;
     private String executorQueue = StringConstants.NODEEXECUTORQUEUE;
     private final Object mutex = new Object();
 
     public NodeQueryExecutor(String url, String name) throws Exception {
         super(url, name);
-        incoming = new LinkedList<Message>();
+        incoming = new LinkedList<JsonObject>();
         queries = InfinispanUtils.getOrCreatePersistentMap(StringConstants.QUERIESCACHE);
         com.subscribeToQueue(executorQueue);
         com.createQueuePublisher(StringConstants.DEPLOYERQUEUE + ".monitor");
@@ -240,5 +243,5 @@ public class NodeQueryExecutor extends Module {
             mutex.notify();
         }
         super.triggerShutdown();
-    }
+    }*/
 }

@@ -59,6 +59,7 @@ public class MapReduceActionHandler implements ActionHandler {
         Action result = action;
         try {
             JsonObject q = action.getData();
+            // read monitor q.getString("monitor");
             if (q.containsField("sql")) {//SQL Query
                 String user = q.getString("user");
                 String sql = q.getString("sql");
@@ -82,7 +83,7 @@ public class MapReduceActionHandler implements ActionHandler {
             } else if (q.containsField("mapreduce")) {//
                 String user = q.getString("user");
                 //String sql = q.getString("mapreduce");
-                String operation = q.getString("operation");
+                String operation = q.getString("operator");
                 String uniqueId = generateNewQueryId(user);
                 JsonObject actionResult = new JsonObject();
 //             SQLQuery query = new SQLQuery(user, sql);
@@ -159,6 +160,9 @@ public class MapReduceActionHandler implements ActionHandler {
 //
 //                }
 //                actionResult.putObject("status", query.getQueryStatus().asJsonObject());
+
+                //send msg to monitor operator completed
+
                 result.setResult(actionResult);
                 result.setStatus(ActionStatus.COMPLETED.toString());
             }

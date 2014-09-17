@@ -1,11 +1,11 @@
 package eu.leads.processor.nqe.operators;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import eu.leads.processor.plan.ExecutionPlanNode;
-import eu.leads.processor.sql.PlanNode;
-import net.sf.jsqlparser.statement.select.Limit;
+import org.vertx.java.core.json.JsonObject;
+
+//import eu.leads.processor.plan.ExecutionPlanNode;
+//import eu.leads.processor.sql.PlanNode;
+//import net.sf.jsqlparser.statement.select.Limit;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,7 +15,23 @@ import net.sf.jsqlparser.statement.select.Limit;
  * To change this template use File | Settings | File Templates.
  */
 @JsonAutoDetect
-public class LimitOperator extends ExecutionPlanNode {
+public class LimitOperator extends BasicOperator{
+
+    @Override
+    public void init(JsonObject config) {
+
+    }
+
+    @Override
+    public void execute() {
+
+    }
+
+    @Override
+    public void cleanup() {
+
+    }
+}/*ExecutionPlanNode {
     private Limit limit;
 
     public Limit getLimit() {
@@ -46,4 +62,4 @@ public class LimitOperator extends ExecutionPlanNode {
     public String toString() {
         return getType() + " " + limit.getRowCount();
     }
-}
+}*/

@@ -1,11 +1,12 @@
 package eu.leads.processor.nqe.operators;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import eu.leads.processor.plan.ExecutionPlanNode;
-import eu.leads.processor.sql.PlanNode;
-import net.sf.jsqlparser.schema.Table;
+//import com.fasterxml.jackson.annotation.JsonCreator;
+//import com.fasterxml.jackson.annotation.JsonProperty;
+//import eu.leads.processor.plan.ExecutionPlanNode;
+//import eu.leads.processor.sql.PlanNode;
+//import net.sf.jsqlparser.schema.Table;
+import org.vertx.java.core.json.JsonObject;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,7 +16,23 @@ import net.sf.jsqlparser.schema.Table;
  * To change this template use File | Settings | File Templates.
  */
 @JsonAutoDetect
-public class ReadOperator extends ExecutionPlanNode {
+public class ReadOperator extends BasicOperator {
+
+    @Override
+    public void init(JsonObject config) {
+
+    }
+
+    @Override
+    public void execute() {
+
+    }
+
+    @Override
+    public void cleanup() {
+
+    }
+}/* extends ExecutionPlanNode {
     public Table getTable() {
         return table;
     }
@@ -46,5 +63,5 @@ public class ReadOperator extends ExecutionPlanNode {
     public String toString() {
         return getType() + " " + table.getWholeTableName();
     }
-//    public ReadOperator()
-}
+//    public ReadOperator()*/
+

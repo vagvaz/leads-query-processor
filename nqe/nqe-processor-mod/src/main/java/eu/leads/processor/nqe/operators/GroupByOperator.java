@@ -1,15 +1,7 @@
 package eu.leads.processor.nqe.operators;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import eu.leads.processor.plan.ExecutionPlanNode;
-import eu.leads.processor.sql.PlanNode;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.schema.Column;
-
-import java.util.List;
+import org.vertx.java.core.json.JsonObject;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,8 +11,25 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 @JsonAutoDetect
-@JsonDeserialize(converter = GroupByJsonDelegate.class)
-public class GroupByOperator extends ExecutionPlanNode {
+//@JsonDeserialize(converter = GroupByJsonDelegate.class)
+public class GroupByOperator extends BasicOperator{
+
+    @Override
+    public void init(JsonObject config) {
+
+    }
+
+    @Override
+    public void execute() {
+
+    }
+
+    @Override
+    public void cleanup() {
+
+    }
+}
+/* extends ExecutionPlanNode {
 
 
     private List<Column> columns;
@@ -77,3 +86,4 @@ public class GroupByOperator extends ExecutionPlanNode {
         return getType() + builder.toString();
     }
 }
+*/
