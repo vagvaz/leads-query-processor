@@ -22,10 +22,10 @@
          <artifactId>commons-configuration</artifactId>
          <version>1.7</version>
       </dependency>
-	  <dependency>
-     	<groupId>com.martiansoftware</groupId>
-     	<artifactId>jsap</artifactId>
-     	<version>2.1</version>
+      <dependency>
+         <groupId>com.martiansoftware</groupId>
+         <artifactId>jsap</artifactId>
+         <version>2.1</version>
       </dependency>
       <dependency>
          <groupId>org.infinispan</groupId>
@@ -77,20 +77,20 @@
       </dependency>
 
    </dependencies>
-   
-    <build>
-    
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
-        </configuration>
-      </plugin>
-    </plugins>
-     
-  </build>
+
+   <build>
+
+      <plugins>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.1</version>
+            <configuration>
+               <source>1.7</source>
+               <target>1.7</target>
+            </configuration>
+         </plugin>
+      </plugins>
+
+   </build>
 </project>

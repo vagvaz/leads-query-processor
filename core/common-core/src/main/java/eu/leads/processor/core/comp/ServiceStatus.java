@@ -14,12 +14,12 @@ package eu.leads.processor.core.comp;
  * STOPPED The service is inactive it cannot process things. This state should be used when the service should be paused.
  */
 public enum ServiceStatus {
-   IDLE,
-   INITIALIZING,
-   INITIALIZED,
-   RESETTING,
-   RUNNING,
-   STOPPING,
-   STOPPED,
-   FAILED
+    IDLE,
+    INITIALIZING,
+    INITIALIZED,
+    RESETTING,
+    RUNNING,
+    STOPPING,
+    STOPPED,
+    FAILED
 }

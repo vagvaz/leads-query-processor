@@ -22,47 +22,46 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class CqlStream extends UnaryOperator implements JsonSerializable {
-	@Expose
-	@SerializedName("CqlStream")
-	private Expr child;
-	@Expose
-	@SerializedName("exprStr")
-	private String exprStr;
+    @Expose
+    @SerializedName("CqlStream")
+    private Expr child;
+    @Expose
+    @SerializedName("exprStr")
+    private String exprStr;
 
 
-	public Expr getChild() {
-		return child;
-	}
+    public CqlStream(String str, Expr child) {
+        super(OpType.CqlStream);
+        this.exprStr = str;
+        this.child = child;
+    }
 
-	public void setChild(Expr child) {
-		this.child = child;
-	}
+    public Expr getChild() {
+        return child;
+    }
 
-	public CqlStream(String str,Expr child) {
-		super(OpType.CqlStream);
-		this.exprStr = str;
-		this.child = child;
-	}
+    public void setChild(Expr child) {
+        this.child = child;
+    }
 
-	public String getExprStr() {
-		return exprStr + child.toString();
-	}
+    public String getExprStr() {
+        return exprStr + child.toString();
+    }
 
-	@Override
-	public String toJson() {
-		return JsonHelper.toJson(this);
-	}
+    @Override
+    public String toJson() {
+        return JsonHelper.toJson(this);
+    }
 
-	public int hashCode() {
-		return exprStr.hashCode();
-	}
+    public int hashCode() {
+        return exprStr.hashCode();
+    }
 
-	@Override
-	boolean equalsTo(Expr expr) {
-		if (expr instanceof CqlStream) {
-			CqlStream another = (CqlStream) expr;
-			return exprStr.equals(another.exprStr);
-		}
-		return false;
-	}
+    @Override boolean equalsTo(Expr expr) {
+        if (expr instanceof CqlStream) {
+            CqlStream another = (CqlStream) expr;
+            return exprStr.equals(another.exprStr);
+        }
+        return false;
+    }
 }

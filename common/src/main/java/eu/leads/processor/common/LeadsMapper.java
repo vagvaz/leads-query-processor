@@ -1,10 +1,8 @@
 package eu.leads.processor.common;
 
-import org.infinispan.distexec.mapreduce.Collector;
 import org.infinispan.distexec.mapreduce.Mapper;
 
 import java.util.Properties;
-import java.util.Random;
 import java.util.Timer;
 
 /**
@@ -16,12 +14,12 @@ import java.util.Timer;
  */
 public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, vIN, kOut, vOut> {
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = -1040739216725664106L;
-	protected final Properties conf;
+     *
+     */
+    private static final long serialVersionUID = -1040739216725664106L;
+    protected final Properties conf;
     protected boolean isInitialized = false;
-    
+
     //    protected Cache<String,String> cache;
     protected long overall;
     protected Timer timer;
@@ -59,5 +57,5 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
     protected double getProgress() {
         return report.getReport();
     }
-    
+
 }

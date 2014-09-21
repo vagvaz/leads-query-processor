@@ -24,42 +24,38 @@ import com.google.gson.annotations.SerializedName;
 
 
 public class CqlTupleWindow extends Expr {
-  @Expose @SerializedName("CqlTupleWindow")
-  private String exprStr;
-  @Expose @SerializedName("rows")
-  private int rows;
+    @Expose @SerializedName("CqlTupleWindow")
+    private String exprStr;
+    @Expose @SerializedName("rows")
+    private int rows;
 
-  public int getRows() {
-	return rows;
-}
-
-
-public void setRows(int rows) {
-	this.rows = rows;
-}
-
-
-public CqlTupleWindow(String str, int rows) {
-    super(OpType.CqlTupleWindow);
-    this.exprStr = str;
-    this.rows = rows;
-  }
-
-
-  public String getExprStr() {
-    return exprStr + rows;
-  }
-
-  public int hashCode() {
-    return exprStr.hashCode();
-  }
-
-  @Override
-  boolean equalsTo(Expr expr) {
-    if (expr instanceof CqlTupleWindow) {
-      CqlTupleWindow another = (CqlTupleWindow) expr;
-      return exprStr.equals(another.exprStr);
+    public CqlTupleWindow(String str, int rows) {
+        super(OpType.CqlTupleWindow);
+        this.exprStr = str;
+        this.rows = rows;
     }
-    return false;
-  }
+
+    public int getRows() {
+        return rows;
+    }
+
+    public void setRows(int rows) {
+        this.rows = rows;
+    }
+
+    public String getExprStr() {
+        return exprStr + rows;
+    }
+
+    public int hashCode() {
+        return exprStr.hashCode();
+    }
+
+    @Override boolean equalsTo(Expr expr) {
+        if (expr instanceof CqlTupleWindow) {
+            CqlTupleWindow another = (CqlTupleWindow) expr;
+            return exprStr.equals(another.exprStr);
+        }
+        return false;
+    }
 }

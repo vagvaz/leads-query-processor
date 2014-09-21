@@ -6,18 +6,18 @@ import java.io.Serializable;
 
 public class Node implements Serializable {
 
-   protected THashSet neighbours;
+    protected THashSet neighbours;
 
-   public Node() {
-      neighbours = new THashSet();
-   }
+    public Node() {
+        neighbours = new THashSet();
+    }
 
-   public THashSet getNeighbours() {
-      return neighbours;
-   }
+    public THashSet getNeighbours() {
+        return neighbours;
+    }
 
-   public void setNeighbours(THashSet neighbours) {
-      this.neighbours = neighbours;
-   }
+    public void setNeighbours(THashSet neighbours) {
+        this.neighbours = neighbours;
+    }
 
 }

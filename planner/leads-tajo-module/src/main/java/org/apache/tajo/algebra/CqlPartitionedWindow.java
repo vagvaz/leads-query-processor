@@ -24,43 +24,42 @@ import com.google.gson.annotations.SerializedName;
 
 
 public class CqlPartitionedWindow extends Expr {
-  @Expose
-  @SerializedName("exprStr")
-  private String exprStr;
-  @Expose @SerializedName("data")
-  private BinaryOperator data;
+    @Expose
+    @SerializedName("exprStr")
+    private String exprStr;
+    @Expose @SerializedName("data")
+    private BinaryOperator data;
 
-  public CqlPartitionedWindow(String str, BinaryOperator a) {
-    super(OpType.CqlPartitionedWindow);
-    this.exprStr = str;
-    this.data = a;
-  }
-
-
-  public BinaryOperator getData() {
-	return data;
-}
-
-
-public void setData(BinaryOperator data) {
-	this.data = data;
-}
-
-
-public String getExprStr() {
-    return exprStr + data.toString();
-  }
-
-  public int hashCode() {
-    return exprStr.hashCode();
-  }
-
-  @Override
-  boolean equalsTo(Expr expr) {
-    if (expr instanceof CqlPartitionedWindow) {
-      CqlPartitionedWindow another = (CqlPartitionedWindow) expr;
-      return exprStr.equals(another.exprStr);
+    public CqlPartitionedWindow(String str, BinaryOperator a) {
+        super(OpType.CqlPartitionedWindow);
+        this.exprStr = str;
+        this.data = a;
     }
-    return false;
-  }
+
+
+    public BinaryOperator getData() {
+        return data;
+    }
+
+
+    public void setData(BinaryOperator data) {
+        this.data = data;
+    }
+
+
+    public String getExprStr() {
+        return exprStr + data.toString();
+    }
+
+    public int hashCode() {
+        return exprStr.hashCode();
+    }
+
+    @Override boolean equalsTo(Expr expr) {
+        if (expr instanceof CqlPartitionedWindow) {
+            CqlPartitionedWindow another = (CqlPartitionedWindow) expr;
+            return exprStr.equals(another.exprStr);
+        }
+        return false;
+    }
 }

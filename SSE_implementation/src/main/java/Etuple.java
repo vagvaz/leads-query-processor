@@ -3,34 +3,35 @@
  * and open the template in the editor.
  */
 
+
 /**
  * @author John Demertzis
  */
 public class Etuple {
-   private byte[] ciphertext;
-   private byte[] IV = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    private byte[] ciphertext;
+    private byte[] IV = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-   public Etuple(byte[] ciphertext, byte[] IV) {
-      this.ciphertext = ciphertext;
-      this.IV = IV;
-   }
+    public Etuple(byte[] ciphertext, byte[] IV) {
+        this.ciphertext = ciphertext;
+        this.IV = IV;
+    }
 
-   public Etuple() {
-   }
+    public Etuple() {
+    }
 
-   public byte[] getCiphertext() {
-      return this.ciphertext;
-   }
+    public byte[] getCiphertext() {
+        return this.ciphertext;
+    }
 
-   public void setCiphertext(byte[] ciphertext) {
-      this.ciphertext = ciphertext;
-   }
+    public void setCiphertext(byte[] ciphertext) {
+        this.ciphertext = ciphertext;
+    }
 
-   public byte[] getIV() {
-      return this.IV;
-   }
+    public byte[] getIV() {
+        return this.IV;
+    }
 
-   public void setIV(byte[] IV) {
-      this.IV = IV;
-   }
+    public void setIV(byte[] IV) {
+        this.IV = IV;
+    }
 }
