@@ -1,4 +1,4 @@
-package eu.leads.processor.nqe.operators;
+package eu.leads.processor.nqe.operators.testing;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 //import com.fasterxml.jackson.annotation.JsonCreator;
@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 //import eu.leads.processor.plan.ExecutionPlanNode;
 //import eu.leads.processor.sql.PlanNode;
 //import net.sf.jsqlparser.schema.Table;
+import eu.leads.processor.nqe.operators.BasicOperator;
+import eu.leads.processor.nqe.operators.OperatorType;
 import org.vertx.java.core.json.JsonObject;
 
 /**
@@ -17,6 +19,10 @@ import org.vertx.java.core.json.JsonObject;
  */
 @JsonAutoDetect
 public class ReadOperator extends BasicOperator {
+
+    public ReadOperator() {
+        super(OperatorType.READ);
+    }
 
     @Override
     public void init(JsonObject config) {

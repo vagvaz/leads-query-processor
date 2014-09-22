@@ -3,6 +3,8 @@ package eu.leads.processor.nqe.operators;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.leads.processor.common.utils.math.MathOperatorTree;
+import eu.leads.processor.nqe.operators.BasicOperator;
+import eu.leads.processor.nqe.operators.OperatorType;
 import org.vertx.java.core.json.JsonObject;
 
 /**
@@ -19,7 +21,7 @@ public class FilterOperator extends BasicOperator {
     private MathOperatorTree tree;
 
     public FilterOperator(String name) {
-        /*super(name, OperatorType.FILTER);*/
+       super( OperatorType.FILTER);
     }
 
   //  public FilterOperator(PlanNode node) {
@@ -34,12 +36,13 @@ public class FilterOperator extends BasicOperator {
         this.tree = tree;
     }
 
-    @JsonCreator
-    public FilterOperator(@JsonProperty("name") String name, @JsonProperty("output") String output, @JsonProperty("tree") MathOperatorTree operatorTree) {
-      //  super(name, OperatorType.FILTER);
-       // setOutput(output);
-        this.tree = operatorTree;
-    }
+//    @JsonCreator
+//    public FilterOperator(@JsonProperty("name") String name, @JsonProperty("output") String output, @JsonProperty("tree") MathOperatorTree operatorTree) {
+//      //  super(name, OperatorType.FILTER);
+//       // setOutput(output);
+//        super(operatorType);
+//        this.tree = operatorTree;
+//    }
 
     @Override
     public void init(JsonObject config) {

@@ -1,7 +1,20 @@
 package eu.leads.processor.nqe.operators;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import eu.leads.processor.common.LeadsMapperCallable;
+import eu.leads.processor.common.LeadsReduceCallable;
+import eu.leads.processor.nqe.operators.BasicOperator;
+import eu.leads.processor.nqe.operators.mapreduce.GroupByMapper;
+import eu.leads.processor.nqe.operators.mapreduce.GroupByReducer;
+import eu.leads.processor.nqe.operators.mapreduce.SortMapper;
+import eu.leads.processor.nqe.operators.mapreduce.SortReducer;
+import org.infinispan.distexec.DefaultExecutorService;
+import org.infinispan.distexec.DistributedExecutorService;
 import org.vertx.java.core.json.JsonObject;
+
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.Future;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,15 +25,42 @@ import org.vertx.java.core.json.JsonObject;
  */
 @JsonAutoDetect
 //@JsonDeserialize(converter = GroupByJsonDelegate.class)
-public class GroupByOperator extends BasicOperator{
+public class GroupByOperator extends MapReduceOperator {
+
+    protected LeadsMapperCallable<String, String, String, String> MapperCAll;
+    protected LeadsReduceCallable<String, String> ReducerCAll;
+
+    public GroupByOperator() {
+        super(OperatorType.GROUPBY);
+    }
 
     @Override
     public void init(JsonObject config) {
-
+        Properties configuration = null;
+        setMapper(new GroupByMapper(configuration));
+        setReducer(new GroupByReducer(configuration));
     }
 
     @Override
     public void execute() {
+        DistributedExecutorService des = new DefaultExecutorService(InCache);
+
+        List<Future<List<String>>> res = des.submitEverywhere(MapperCAll);
+        for (Future<?> f : res)
+            if (f.isDone())
+                System.out.println("a Mapper Execution is done");
+            else
+                System.out.println("Mapper Execution not done");
+
+
+        DistributedExecutorService des_inter = new DefaultExecutorService(
+                CollectorCache);
+        List<Future<String>> reducers_res=des_inter.submitEverywhere(ReducerCAll);
+        for (Future<?> f : reducers_res) {
+            if (f != null)
+                if (f.isDone())
+                    System.out.println("a Reducer Execution is done");
+        }
 
     }
 

@@ -1,4 +1,4 @@
-package eu.leads.processor.nqe.operators;
+package eu.leads.processor.nqe.operators.testing;
 
 /**
  * Created with IntelliJ IDEA.

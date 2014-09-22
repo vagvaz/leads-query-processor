@@ -6,7 +6,7 @@ import eu.leads.processor.common.LeadsReducer;
 import eu.leads.processor.common.Tuple;
 import eu.leads.processor.core.plan.QueryContext;
 import eu.leads.processor.common.utils.InfinispanUtils;
-import eu.leads.processor.common.utils.SQLUtils;
+//import eu.leads.processor.common.utils.SQLUtils;
 import eu.leads.processor.common.utils.math.MathUtils;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -77,8 +77,8 @@ public class GroupByReducer extends LeadsReducer<String, String> {
                 Iterator<JsonNode> iterator = root.elements();
                 while (iterator.hasNext()) {
                     JsonNode node = iterator.next();
-                    Function f = SQLUtils.extractFunction(node);
-                    functions.add(f);
+                    //Function f = SQLUtils.extractFunction(node);
+                    //functions.add(f);
                 }
                 for (Function func : functions) {
                     ExpressionList elist = func.getParameters();

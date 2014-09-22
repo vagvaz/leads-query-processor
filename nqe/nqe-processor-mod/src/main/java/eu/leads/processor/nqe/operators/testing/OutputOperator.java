@@ -1,6 +1,8 @@
-package eu.leads.processor.nqe.operators;
+package eu.leads.processor.nqe.operators.testing;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import eu.leads.processor.nqe.operators.BasicOperator;
+import eu.leads.processor.nqe.operators.OperatorType;
 import org.vertx.java.core.json.JsonObject;
 //import com.fasterxml.jackson.annotation.JsonCreator;
 //import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,7 +17,11 @@ import org.vertx.java.core.json.JsonObject;
  * To change this template use File | Settings | File Templates.
  */
 @JsonAutoDetect
-public class OutputOperator extends BasicOperator{
+public class OutputOperator extends BasicOperator {
+
+    public OutputOperator() {
+        super(OperatorType.OUTPUT);
+    }
 
     @Override
     public void init(JsonObject config) {

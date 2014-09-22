@@ -1,8 +1,8 @@
-package eu.leads.processor.nqe.operators;
+package eu.leads.processor.nqe.operators.testing;
 
-import eu.leads.processor.execute.Tuple;
-import eu.leads.processor.execute.TupleComparator;
-import eu.leads.processor.utils.InfinispanUtils;
+import eu.leads.processor.common.utils.InfinispanUtils;
+import eu.leads.processor.common.Tuple;
+import eu.leads.processor.common.TupleComparator;
 
 import java.util.Map;
 import java.util.Vector;

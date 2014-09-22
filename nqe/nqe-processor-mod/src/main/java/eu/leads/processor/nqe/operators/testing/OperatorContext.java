@@ -1,4 +1,4 @@
-package eu.leads.processor.nqe.operators;
+package eu.leads.processor.nqe.operators.testing;
 
 //import eu.leads.processor.query.Query;
 import org.vertx.java.core.json.JsonObject;

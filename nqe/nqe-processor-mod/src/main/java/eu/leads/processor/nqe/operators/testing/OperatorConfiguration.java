@@ -1,4 +1,7 @@
-package eu.leads.processor.nqe.operators;
+package eu.leads.processor.nqe.operators.testing;
+
+import eu.leads.processor.nqe.operators.OperatorSubType;
+import eu.leads.processor.nqe.operators.OperatorType;
 
 import java.util.Properties;
 

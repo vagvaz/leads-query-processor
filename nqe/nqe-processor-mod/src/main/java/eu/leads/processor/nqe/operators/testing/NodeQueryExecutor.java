@@ -1,4 +1,4 @@
-package eu.leads.processor.nqe;
+package eu.leads.processor.nqe.operators.testing;
 
 /*import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

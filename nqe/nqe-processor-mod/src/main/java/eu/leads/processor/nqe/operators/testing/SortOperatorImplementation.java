@@ -1,16 +1,14 @@
-package eu.leads.processor.nqe.operators;
+package eu.leads.processor.nqe.operators.testing;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.leads.processor.execute.TupleComparator;
+import eu.leads.processor.nqe.operators.SortOperator;
 import eu.leads.processor.nqe.operators.mapreduce.SortMapper;
 import eu.leads.processor.nqe.operators.mapreduce.SortReducer;
-import eu.leads.processor.query.QueryContext;
-import eu.leads.processor.utils.InfinispanUtils;
-import eu.leads.processor.utils.math.MathUtils;
-import net.sf.jsqlparser.schema.Column;
+import eu.leads.processor.common.utils.InfinispanUtils;
 import org.infinispan.Cache;
 import org.infinispan.distexec.mapreduce.MapReduceTask;
+import org.vertx.java.core.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -28,13 +26,13 @@ public class SortOperatorImplementation {
     private final String prefix;
     private final SortOperator sort;
     private final ConcurrentMap<String, String> inputMap;
-    private QueryContext context;
+    private JsonObject context;
 //    ConcurrentMap<String, String> data;
 //    Vector<Tuple> tuples;
 //    QueryContext context;
 final ArrayList<Boolean> arithmentic;
 
-    public SortOperatorImplementation(String input, String output, SortOperator operator, QueryContext context) {
+    public SortOperatorImplementation(String input, String output, SortOperator operator, JsonObject context) {
         this.prefix = output + ":";
         this.sort = operator;
         inputMap = InfinispanUtils.getOrCreatePersistentMap(input);
@@ -44,13 +42,14 @@ final ArrayList<Boolean> arithmentic;
 //        this.context = context;
         this.context = context;
         arithmentic = new ArrayList<Boolean>(operator.getColumns().size());
-        for (Column c : operator.getColumns()) {
-            if (c.getTable() == null)
-                arithmentic.add(true);
-            else
-                arithmentic.add(MathUtils.isArithmentic(context.getColumnType(c.getColumnName(), c.getTable().getName())));
-
-        }
+        //fix
+//        for (Column c : operator.getColumns()) {
+//            if (c.getTable() == null)
+//                arithmentic.add(true);
+//            else
+//               ;// arithmentic.add(MathUtils.isArithmentic(context.getColumnType(c.getColumnName(), c.getTable().getName())));
+//
+//        }
     }
 
     public void execute() {
@@ -73,11 +72,11 @@ final ArrayList<Boolean> arithmentic;
         ObjectMapper mapper = new ObjectMapper();
         try {
             configuration.setProperty("sortColumns", mapper.writeValueAsString(sort.getColumns()));
-            configuration.setProperty("ascending", mapper.writeValueAsString(sort.getAscending()));
+          ///  configuration.setProperty("ascending", mapper.writeValueAsString(sort.getAscending()));
             configuration.setProperty("arithmetic", mapper.writeValueAsString(arithmentic));
             configuration.setProperty("parts", Integer.toString(3 * InfinispanUtils.getMembers().size()));
             configuration.setProperty("workload", Integer.toString(inputMap.size() / InfinispanUtils.getMembers().size()));
-            configuration.setProperty("keysName",context.getQueryId()+".merge");
+          ///  configuration.setProperty("keysName",context.getQueryId()+".merge");
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -87,10 +86,10 @@ final ArrayList<Boolean> arithmentic;
         map = null;
         reduce = null;
         Map<String, String> caches = task.execute();
-        SortMerger merger = new SortMerger(caches, prefix, new TupleComparator(sort.getColumns(), sort.getAscending(), arithmentic));
-        merger.merge();
+       /// SortMerger merger = new SortMerger(caches, prefix, new TupleComparator(sort.getColumns(), sort.getAscending(), arithmentic));
+       // merger.merge();
         caches.clear();
-        InfinispanUtils.removeCache(context.getQueryId()+".merge");
+       /// InfinispanUtils.removeCache(context.getQueryId()+".merge");
 
 
 

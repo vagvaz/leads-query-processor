@@ -2,11 +2,11 @@ package eu.leads.processor.nqe.operators.mapreduce;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.leads.processor.common.Column;
 import eu.leads.processor.common.LeadsReducer;
 import eu.leads.processor.common.Tuple;
 import eu.leads.processor.common.TupleComparator;
 import eu.leads.processor.common.utils.InfinispanUtils;
-import net.sf.jsqlparser.schema.Column;
 
 import java.io.IOException;
 import java.util.*;

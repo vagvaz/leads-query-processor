@@ -9,7 +9,11 @@ import java.util.Properties;
  */
 public abstract class BasicOperator implements Operator{
     JsonObject conf;
-    OperatorType operatorType;
+    private OperatorType operatorType;
+
+    protected BasicOperator(OperatorType operatorType) {
+        this.operatorType = operatorType;
+    }
 
     @Override
     public JsonObject getConfiguration() {

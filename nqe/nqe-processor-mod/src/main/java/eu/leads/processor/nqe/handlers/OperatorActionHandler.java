@@ -1,6 +1,9 @@
 package eu.leads.processor.nqe.handlers;
 
-import eu.leads.processor.common.*;
+import eu.leads.processor.common.LeadsCollector;
+import eu.leads.processor.common.LeadsMapper;
+import eu.leads.processor.common.LeadsReducer;
+import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
@@ -13,6 +16,7 @@ import eu.leads.processor.core.plan.QueryState;
 import eu.leads.processor.core.plan.QueryStatus;
 import eu.leads.processor.core.plan.SQLQuery;
 import eu.leads.processor.nqe.NQEConstants;
+import eu.leads.processor.nqe.operators.*;
 import eu.leads.processor.nqe.operators.mapreduce.*;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DefaultExecutorService;
@@ -22,13 +26,11 @@ import org.vertx.java.core.json.JsonObject;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 /**
  * Created by vagvaz on 8/6/14.
  */
-public class MapReduceActionHandler implements ActionHandler {
+public class OperatorActionHandler implements ActionHandler {
     private final Node com;
     private final LogProxy log;
     private final PersistenceProxy persistence;
@@ -40,7 +42,7 @@ public class MapReduceActionHandler implements ActionHandler {
     private transient Cache<?, List<?>> CollectorCache;
     private transient Cache<?, ?> OutCache;
 
-    public MapReduceActionHandler(Node com, LogProxy log, PersistenceProxy persistence, String id) {
+    public OperatorActionHandler(Node com, LogProxy log, PersistenceProxy persistence, String id) {
         this.com = com;
         this.log = log;
         this.persistence = persistence;
@@ -80,45 +82,34 @@ public class MapReduceActionHandler implements ActionHandler {
             } else if (q.containsField("mapreduce")) {//
                 String user = q.getString("user");
                 //String sql = q.getString("mapreduce");
-                String operation = q.getString("operator");
+                String operatorName = q.getString("operator");
                 String uniqueId = generateNewQueryId(user);
                 JsonObject actionResult = new JsonObject();
 //             SQLQuery query = new SQLQuery(user, sql);
 //             query.setId(uniqueId);
                 QueryStatus status = new QueryStatus(uniqueId, QueryState.PENDING, "");
 
-                DistributedExecutorService des = new DefaultExecutorService(InCache);
+                Operator Op =null;
 
-                //Create Mapper
-                //Create Reducer
-                LeadsMapper<?, ?, ?, ?> Mapper;
-                LeadsCollector<?, ?> Collector=new LeadsCollector(0, CollectorCache);
-                LeadsReducer<?, ?> Reducer;
 
-                Properties configuration = new Properties();
+                JsonObject configuration = new JsonObject();
 
-                if (operation == NQEConstants.GROUPBY_OP) {
-                    Mapper = new GroupByMapper(configuration);
-                    Reducer = new GroupByReducer(configuration);
-                } else if (operation == NQEConstants.JOIN_OP) {
-                    Mapper = new JoinMapper(configuration);
-                    Reducer = new JoinReducer(configuration);
-                } else if (operation == NQEConstants.JOIN_OP) {
-                    Mapper = new JoinMapper(configuration);
-                    Reducer = new JoinReducer(configuration);
-                } else if (operation == NQEConstants.SORT_OP) {
-                    Mapper = new SortMapper(configuration);
-                    Reducer = new SortReducer(configuration);
-
-                    // else { //custom mapreduce process
+                if (operatorName == NQEConstants.LIMIT_OP) {
+                  Op = new LimitOperator();
+                } else if (operatorName == NQEConstants.JOIN_OP) {
+                  Op = new JoinOperator();
+                } else if (operatorName == NQEConstants.GROUPBY_OP) {
+                  Op = new GroupByOperator();
+                } else if (operatorName == NQEConstants.SORT_OP) {
+                    Op = new SortOperator();
                 } else {
-                    actionResult.putString("error", operation + "  Not found");
+                    actionResult.putString("error", "Operator  Not found");
                     result.setResult(actionResult);
                     return result;
                 }
+                Op.init(configuration);
 
-
-
+                Op.execute();
 
 
                 JsonObject mapreduceStatus = status.asJsonObject();
