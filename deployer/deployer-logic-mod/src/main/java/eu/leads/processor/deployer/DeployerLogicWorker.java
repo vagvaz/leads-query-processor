@@ -1,5 +1,9 @@
 package eu.leads.processor.deployer;
 
+import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
+import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.PersistenceProxy;
@@ -8,10 +12,8 @@ import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
-import eu.leads.processor.core.plan.LeadsNodeType;
-import eu.leads.processor.core.plan.NodeStatus;
-import eu.leads.processor.core.plan.PlanNode;
-import eu.leads.processor.core.plan.SQLPlan;
+import eu.leads.processor.core.plan.*;
+import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
@@ -32,11 +34,11 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
     Set<String> ignoredOperators;
     Map<String, ExecutionPlanMonitor> runningPlans;
     LogProxy log;
-    PersistenceProxy persistence;
     Node com;
     String id;
     String workQueueAddress;
-
+    InfinispanManager persistence;
+    Cache<String,String> queriesCache;
     @Override
     public void start() {
         super.start();
@@ -49,13 +51,14 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
         ignoredOperators = new HashSet<String>();
         workQueueAddress = config.getString("workqueue");
         runningPlans = new HashMap<String, ExecutionPlanMonitor>();
-
+         LQPConfiguration.initialize();
+        persistence = InfinispanClusterSingleton.getInstance().getManager();
+        queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
         id = config.getString("id");
         com = new DefaultNode();
         com.initialize(id, deployerGroup, null, this, null, vertx);
         log = new LogProxy(config.getString("log"), com);
-        persistence = new PersistenceProxy(config.getString("persistence"), com, vertx);
-        persistence.start();
+
     }
 
     @Override
@@ -180,7 +183,17 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
     }
 
     private void finalizeQuery(String queryId) {
-
+      String queryDoc = queriesCache.get(queryId);
+      if(queryDoc == null || queryDoc.equals("")){
+         //error
+      }
+      JsonObject queryJson = new JsonObject(queryDoc);
+       SQLQuery query = new SQLQuery(queryJson);
+       ExecutionPlanMonitor plan = runningPlans.get(queryId);
+       query.setPlan((Plan) plan.getLogicalPlan());
+       query.getQueryStatus().setStatus(QueryState.COMPLETED);
+       queriesCache.put(queryId,query.asJsonObject().toString());
+       //LATER TODO we could inform Interface Manager about the query completion to inform UIs
     }
 
     private void startExecution(ExecutionPlanMonitor executionPlan) {

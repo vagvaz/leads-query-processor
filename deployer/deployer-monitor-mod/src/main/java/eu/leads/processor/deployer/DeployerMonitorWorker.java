@@ -28,7 +28,6 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
     Map<String, Integer> actionToLevelMap;
     Map<Integer, Map<String, Action>> monitoredActions;
     LogProxy log;
-    PersistenceProxy persistence;
     Node com;
     String id;
     long timerID;
@@ -62,8 +61,6 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
         periodicHandler =
             new PeriodicCheckHandler(id, deployerLogic, nqeGroup, log, com, actionToLevelMap,
                                         monitoredActions);
-        persistence = new PersistenceProxy(config.getString("persistence"), com, vertx);
-        persistence.start();
         timerID = vertx.setPeriodic(period, periodicHandler);
 
     }

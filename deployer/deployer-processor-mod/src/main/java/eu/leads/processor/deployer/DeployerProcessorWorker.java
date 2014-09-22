@@ -1,5 +1,8 @@
 package eu.leads.processor.deployer;
 
+import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
+import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
@@ -30,7 +33,7 @@ public class DeployerProcessorWorker extends Verticle implements Handler<Message
     EventBus bus;
     LeadsMessageHandler leadsHandler;
     LogProxy log;
-    PersistenceProxy persistence;
+    InfinispanManager persistence;
     Map<String, ActionHandler> handlers;
 
     @Override
@@ -60,8 +63,8 @@ public class DeployerProcessorWorker extends Verticle implements Handler<Message
         com = new DefaultNode();
         com.initialize(id, gr, null, leadsHandler, leadsHandler, vertx);
         bus.registerHandler(id + ".process", this);
-        persistence = new PersistenceProxy(config.getString("persistence"), com, vertx);
-        persistence.start();
+        LQPConfiguration.initialize();
+        persistence = InfinispanClusterSingleton.getInstance().getManager();
         JsonObject msg = new JsonObject();
         msg.putString("processor", id + ".process");
         handlers = new HashMap<String, ActionHandler>();
