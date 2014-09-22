@@ -1,10 +1,12 @@
 package eu.leads.processor.imanager.handlers;
 
+import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
+import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 
 /**
@@ -14,10 +16,10 @@ public class GetObjectActionHandler implements ActionHandler {
 
     Node com;
     LogProxy log;
-    PersistenceProxy persistence;
+    InfinispanManager persistence;
     String id;
 
-    public GetObjectActionHandler(Node com, LogProxy log, PersistenceProxy persistence, String id) {
+    public GetObjectActionHandler(Node com, LogProxy log, InfinispanManager persistence, String id) {
         this.com = com;
         this.log = log;
         this.persistence = persistence;
@@ -30,10 +32,12 @@ public class GetObjectActionHandler implements ActionHandler {
         try {
             String cacheName = action.getData().getString("table");
             String key = action.getData().getString("key");
-            JsonObject actionResult = persistence.get(cacheName, key);
-            if (actionResult.getString("status").equals("ok")) {
+            Cache<String,String> cache = (Cache) persistence.getPersisentCache(cacheName);
+            String objectJson = cache.get(key);
+            JsonObject actionResult = new JsonObject();
+            if (objectJson == null || objectJson.equals("")) {
                 //               com.sendTo(from, result.getObject("result"));
-                result.setResult(actionResult.getObject("result"));
+                result.setResult(new JsonObject(objectJson));
             } else {
                 actionResult.putString("error", "");
                 result.setResult(actionResult);

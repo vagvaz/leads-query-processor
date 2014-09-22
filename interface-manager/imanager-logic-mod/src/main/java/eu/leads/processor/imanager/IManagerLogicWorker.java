@@ -30,7 +30,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
     String imanager;
     String planner;
     LogProxy log;
-    PersistenceProxy persistence;
+//    PersistenceProxy persistence;
     Node com;
     String id;
     String workQueueAddress;
@@ -47,8 +47,8 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
         com = new DefaultNode();
         com.initialize(id, imanager, null, this, null, vertx);
         log = new LogProxy(config.getString("log"), com);
-        persistence = new PersistenceProxy(config.getString("persistence"), com, vertx);
-        persistence.start();
+//        persistence = new PersistenceProxy(config.getString("persistence"), com, vertx);
+//        persistence.start();
         mapper = new ObjectMapper();
 
     }
@@ -199,9 +199,10 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
     private String generateNewQueryId(String prefix) {
 
         String candidateId = prefix + "." + UUID.randomUUID();
-        while (persistence.contains(StringConstants.QUERIESCACHE, candidateId)) {
-            candidateId = prefix + "." + UUID.randomUUID();
-        }
+       //TODO create action
+//        while (persistence.contains(StringConstants.QUERIESCACHE, candidateId)) {
+//            candidateId = prefix + "." + UUID.randomUUID();
+//        }
         return candidateId;
     }
 
@@ -231,6 +232,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                 readStatus.putBoolean("readFully", true);
         }
         queryStatus.putObject("read", readStatus);
-        persistence.put(StringConstants.QUERIESCACHE, queryId, queryStatus);
+//        persistence.put(StringConstants.QUERIESCACHE, queryId, queryStatus);
+       //TODO read through action inside  do it excluisvely in processor
     }
 }

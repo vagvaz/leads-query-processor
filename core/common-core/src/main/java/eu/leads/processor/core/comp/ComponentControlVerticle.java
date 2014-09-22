@@ -111,8 +111,8 @@ public class ComponentControlVerticle extends Verticle implements Component {
             componentPrefix + ".log"; //log Address, this will be used by all services for logging
         log = new LogProxy(logAddress, com);
 
-        persistenceAddress = componentPrefix + ".persit";
-        persistence = new PersistenceProxy(persistenceAddress, com);
+        persistenceAddress = componentPrefix + ".processor-0";
+//        persistence = new PersistenceProxy(persistenceAddress, com);
 
         workQueueAddress = componentPrefix + ".workQueue";
 
@@ -230,22 +230,22 @@ public class ComponentControlVerticle extends Verticle implements Component {
                                   });
 
         //deploy persistence module
-        container.deployModule(StringConstants.PERSIST_MOD_NAME, persistConfig, 1,
-                                  new Handler<AsyncResult<String>>() {
-
-                                      @Override
-                                      public void handle(AsyncResult<String> asyncResult) {
-                                          if (asyncResult.succeeded()) {
-                                              container.logger()
-                                                  .info("Persistence Module has been deployed ID "
-                                                            + asyncResult.result());
-                                              persistenceId = asyncResult.result();
-                                          } else {
-                                              container.logger()
-                                                  .fatal("Persistence Module failed to deploy");
-                                          }
-                                      }
-                                  });
+//        container.deployModule(StringConstants.PERSIST_MOD_NAME, persistConfig, 1,
+//                                  new Handler<AsyncResult<String>>() {
+//
+//                                      @Override
+//                                      public void handle(AsyncResult<String> asyncResult) {
+//                                          if (asyncResult.succeeded()) {
+//                                              container.logger()
+//                                                  .info("Persistence Module has been deployed ID "
+//                                                            + asyncResult.result());
+//                                              persistenceId = asyncResult.result();
+//                                          } else {
+//                                              container.logger()
+//                                                  .fatal("Persistence Module failed to deploy");
+//                                          }
+//                                      }
+//                                  });
 
         //deploy workqueue module.
         container.deployModule(StringConstants.WORKQUEUE_MOD_NAME, workQueueConfig, 1,

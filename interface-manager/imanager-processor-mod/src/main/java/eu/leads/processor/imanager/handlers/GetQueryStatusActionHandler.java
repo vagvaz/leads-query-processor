@@ -1,12 +1,14 @@
 package eu.leads.processor.imanager.handlers;
 
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
+import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 
 /**
@@ -15,32 +17,34 @@ import org.vertx.java.core.json.JsonObject;
 public class GetQueryStatusActionHandler implements ActionHandler {
     Node com;
     LogProxy log;
-    PersistenceProxy persistence;
+    InfinispanManager persistence;
     String id;
-
-    public GetQueryStatusActionHandler(Node com, LogProxy log, PersistenceProxy persistence,
+    Cache <String,String> queriesCache;
+    public GetQueryStatusActionHandler(Node com, LogProxy log, InfinispanManager persistence,
                                           String id) {
         this.com = com;
         this.log = log;
         this.persistence = persistence;
         this.id = id;
+       queriesCache = (Cache) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
     }
 
     @Override
     public Action process(Action action) {
         Action result = action;
-        try {
+       JsonObject actionResult = new JsonObject();
+       try {
             String queryId = action.getData().getString("queryId");
-            JsonObject actionResult = persistence.get(StringConstants.QUERIESCACHE, queryId);
-            if (actionResult.getString("status").equals("ok")) {
-                result.setResult(actionResult.getObject("result").getObject("status"));
-            } else {
-                actionResult.putString("error", "");
-                result.setResult(actionResult);
+//            JsonObject actionResult = persistence.get(StringConstants.QUERIESCACHE, queryId);
+
+            String queryJson = queriesCache.get(queryId);
+            JsonObject query = new JsonObject(queryJson);
+            result.setResult(query.getObject("result").getObject("status"));
+
+           }catch(Exception e){
+              actionResult.putString("error", "");
+              result.setResult(actionResult);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         result.setStatus(ActionStatus.COMPLETED.toString());
         return result;
     }

@@ -1,14 +1,20 @@
 package eu.leads.processor.imanager.handlers;
 
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.infinispan.RangeFilter;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
+import org.infinispan.Cache;
+import org.infinispan.commons.util.CloseableIterable;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
+
+import java.util.Map;
 
 /**
  * Created by vagvaz on 8/6/14.
@@ -16,15 +22,16 @@ import org.vertx.java.core.json.JsonObject;
 public class GetResultsActionHandler implements ActionHandler {
     private final Node com;
     private final LogProxy log;
-    private final PersistenceProxy persistence;
+    private final InfinispanManager persistence;
     private final String id;
-
-    public GetResultsActionHandler(Node com, LogProxy log, PersistenceProxy persistence,
+    private Cache<String,String> queriesCache;
+    public GetResultsActionHandler(Node com, LogProxy log, InfinispanManager persistence,
                                       String id) {
         this.com = com;
         this.log = log;
         this.persistence = persistence;
         this.id = id;
+        queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
     }
 
     @Override
@@ -39,26 +46,29 @@ public class GetResultsActionHandler implements ActionHandler {
                 actionResult.putString("error", "");
                 actionResult.putString("message", "negative minimum index parameter given");
             }
-            JsonObject queryStatus = persistence.get(StringConstants.QUERIESCACHE, queryId);
-            if (!queryStatus.getString("status").equals("COMPLETED")) {
+            String queryJson = queriesCache.get(queryId);
+            if(queryJson == null || queryJson.equals(""))
+            {
                 actionResult.putString("error", "");
                 actionResult
                     .putString("message", "query " + queryId + " has not been completed yet");
             } else {
+                JsonObject queryStatus = new JsonObject(queryJson);
                 String cacheName = queryStatus.getString("output");
 
-                JsonArray tuples = null;
+                JsonObject tuples = null;
                 if (max < 0) {
-                    tuples = persistence.batchGet(cacheName, min);
+                    tuples = batchGet(cacheName, min);
                 } else {
-                    tuples = persistence.batchGet(cacheName, min, max);
+                    tuples = batchGet(cacheName, min, max);
                 }
-                updateQueryReadStatus(queryId, queryStatus, min, max);
+//                updateQueryReadStatus(queryId, queryStatus, min, max);
                 actionResult.putString("id", queryId);
                 actionResult.putString("min", String.valueOf(min));
                 actionResult.putString("max", String.valueOf(max));
-                actionResult.putString("result", tuples.toString());
+                actionResult.putString("result", tuples.getArray("result").toString());
                 actionResult.putString("size", String.valueOf(tuples.size()));
+
 
             }
             result.setResult(actionResult);
@@ -69,8 +79,38 @@ public class GetResultsActionHandler implements ActionHandler {
         return result;
     }
 
+   private JsonObject batchGet(String cacheName, Long min, Long max) {
+      JsonObject result = new JsonObject();
+      JsonArray listOfValues = new JsonArray();
 
-    private void updateQueryReadStatus(String queryId, JsonObject queryStatus, Long min, Long max) {
+
+      Cache cache = (Cache) persistence.getPersisentCache(cacheName);
+      try {
+         CloseableIterable<Map.Entry<String, String>> iterable =
+                 cache.getAdvancedCache().filterEntries(new RangeFilter(min, max));
+         for (Map.Entry<String, String> entry : iterable) {
+            listOfValues.add(entry.getValue());
+         }
+      } catch (Exception e) {
+
+         log.error("Iterating over " + cacheName + " for batch resulted in Exception "
+                               + e.getMessage() + "\n from  " + cacheName);
+         result.putString("status", "failed");
+         result.putArray("result", new JsonArray());
+         return result;
+      }
+
+      result.putString("status", "ok");
+      result.putArray("result", listOfValues);
+      return result;
+   }
+
+   private JsonObject batchGet(String cacheName, Long min) {
+      return batchGet(cacheName,min,-1L);
+   }
+
+
+   private void updateQueryReadStatus(String queryId, JsonObject queryStatus, Long min, Long max) {
         JsonObject readStatus = queryStatus.getObject("read");
         if (readStatus.getLong("min") > min) {
             readStatus.putNumber("min", min);
@@ -84,6 +124,6 @@ public class GetResultsActionHandler implements ActionHandler {
                 readStatus.putBoolean("readFully", true);
         }
         queryStatus.putObject("read", readStatus);
-        persistence.put(StringConstants.QUERIESCACHE, queryId, queryStatus);
+        queriesCache.put(queryId, queryStatus.toString());
     }
 }
