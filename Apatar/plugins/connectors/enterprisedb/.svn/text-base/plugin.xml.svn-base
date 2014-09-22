@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="com.apatar.enterprisedb" version="0.0.1">
+	<requires>
+		<import plugin-id="com.apatar.core"/>
+		<import plugin-id="com.apatar.ui"/>
+	</requires>
+	<runtime>
+	    <library id="enterprisedb" path="bin/" type="code">
+	        <export prefix="*"/>
+	    </library>
+	
+	    <library id="lib_edbdriver" path="lib/edb-jdbc14.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+
+	</runtime>
+	<extension plugin-id="com.apatar.core" point-id="Node" id="EnterprisedbNode">
+		<parameter id="class" value="com.apatar.enterprisedb.EnterprisedbNodeFactory"/>
+	</extension>
+</plugin>

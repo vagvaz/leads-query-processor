@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+
+<plugin id="com.apatar.db2" version="0.0.1">
+  <requires>
+    <import plugin-id="com.apatar.core" match="compatible" exported="false" optional="false" />
+    <import plugin-id="com.apatar.ui" match="compatible" exported="false" optional="false" />
+  </requires>
+  <runtime>
+    <library id="sybase" path="bin/" type="code">
+      <export prefix="*" />
+    </library>
+    <library id="lib_driver" path="lib/db2jcc.jar" type="code">
+      <export prefix="*" />
+    </library>
+  </runtime>
+  <extension plugin-id="com.apatar.core" point-id="Node" id="DB2Node">
+    <parameter id="class" value="com.apatar.db2.DB2NodeFactory" />
+  </extension>
+</plugin>
+

@@ -26,6 +26,7 @@
       <module>crawler</module>
       <module>interface-manager</module>
       <module>leads-query-processor-interfaces</module>
+      <module>leads-query-results-gui</module>
    </modules>
 
 </project>

@@ -1,0 +1,16 @@
+----------------------------------------------------------------
+2014-09-08 10:34:35.511 GMT:
+ Booting Derby version The Apache Software Foundation - Apache Derby - 10.5.1.1 - (764942): instance a816c00e-0148-54d4-5757-0000044e0398
+on database directory /home/tr/Projects/LEADs/leads-query-processor/Apatar/tempdb/application/temp_db  
+
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+2014-09-08 10:34:37.211 GMT:
+ Booting Derby version The Apache Software Foundation - Apache Derby - 10.5.1.1 - (764942): instance 601a400f-0148-54d4-5757-0000044e0398
+on database directory /home/tr/Projects/LEADs/leads-query-processor/Apatar/systemdb  
+
+Database Class Loader started - derby.database.classpath=''
+
+2014-09-08 10:34:37.782 GMT:
+Shutting down instance 601a400f-0148-54d4-5757-0000044e0398
+----------------------------------------------------------------

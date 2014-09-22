@@ -1,6 +1,9 @@
 package eu.leads.processor.common.test;
 
 
+import java.util.Iterator;
+import java.util.Properties;
+
 import eu.leads.processor.common.LeadsReducer;
 
 import java.util.Iterator;
@@ -12,7 +15,7 @@ public class WordCountReducer extends LeadsReducer<String, Integer> {
 
     public WordCountReducer(Properties configuration) {
         super(configuration);
-        // TODO Auto-generated constructor stub
+
     }
 
     public Integer reduce(String key, Iterator<Integer> iter) {

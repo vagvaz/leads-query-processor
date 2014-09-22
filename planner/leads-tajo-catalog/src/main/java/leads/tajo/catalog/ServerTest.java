@@ -14,6 +14,7 @@ import org.apache.tajo.common.TajoDataTypes.Type;
 import org.apache.tajo.conf.TajoConf;
 import org.apache.tajo.engine.function.builtin.SumInt;
 import org.apache.tajo.util.KeyValueSet;
+import org.apache.tajo.master.TajoMaster;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -25,6 +26,7 @@ import static org.apache.tajo.TajoConstants.DEFAULT_TABLESPACE_NAME;
  * @author tr
  */
 public class ServerTest {
+<<<<<<< HEAD
     static TajoConf conf = null;
     private static CatalogService catalog = null;
     //private static MiniCatalogServer catalogServer;
