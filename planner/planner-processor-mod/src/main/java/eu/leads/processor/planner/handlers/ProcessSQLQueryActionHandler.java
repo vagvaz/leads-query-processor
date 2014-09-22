@@ -1,6 +1,7 @@
 package eu.leads.processor.planner.handlers;
 
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
@@ -16,6 +17,7 @@ import org.apache.tajo.algebra.Expr;
 import org.apache.tajo.engine.json.CoreGsonHelper;
 import org.apache.tajo.engine.planner.logical.LogicalRootNode;
 import org.apache.tajo.master.session.Session;
+import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.HashSet;
@@ -27,17 +29,18 @@ import java.util.Set;
 public class ProcessSQLQueryActionHandler implements ActionHandler {
     private final Node com;
     private final LogProxy log;
-    private final PersistenceProxy persistence;
+    private final InfinispanManager persistence;
     private final String id;
     private final TaJoModule module;
-
-    public ProcessSQLQueryActionHandler(Node com, LogProxy log, PersistenceProxy persistence,
+    private Cache<String,String> queriesCache;
+    public ProcessSQLQueryActionHandler(Node com, LogProxy log, InfinispanManager persistence,
                                            String id, TaJoModule module) {
         this.com = com;
         this.log = log;
         this.persistence = persistence;
         this.id = id;
         this.module = module;
+       queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
     }
 
     @Override
@@ -109,6 +112,6 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         status.setErrorMessage(e.getMessage());
         status.setStatus(QueryState.FAILED);
         sqlQuery.setQueryStatus(status);
-        persistence.put(StringConstants.QUERIESCACHE, sqlQuery.getId(), sqlQuery.asJsonObject());
+        queriesCache.put(sqlQuery.getId(), sqlQuery.asJsonObject().toString());
     }
 }

@@ -26,7 +26,7 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
     String deployer;
     String planner;
     LogProxy log;
-    PersistenceProxy persistence;
+
     Node com;
     String id;
     String workQueueAddress;
@@ -43,8 +43,7 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
         com = new DefaultNode();
         com.initialize(id, deployer, null, this, null, vertx);
         log = new LogProxy(config.getString("log"), com);
-        persistence = new PersistenceProxy(config.getString("persistence"), com, vertx);
-        persistence.start();
+
         mapper = new ObjectMapper();
 
     }
