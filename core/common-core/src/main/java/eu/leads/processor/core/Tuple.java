@@ -1,22 +1,18 @@
-package eu.leads.processor.common;
+package eu.leads.processor.core;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.infinispan.jmx.annotations.DataType;
+import org.vertx.java.core.json.JsonObject;
 
 import java.io.IOException;
 import java.util.*;
 
-public class Tuple {
-    private static final ObjectMapper mapper = new ObjectMapper();
-    private ObjectNode root;
+public class Tuple extends DataType {
 
     public Tuple(String value) {
-        try {
-            root = (ObjectNode) mapper.readTree(value);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            this.data = new JsonObject(value);
+
     }
 
     public Tuple(Tuple tl, Tuple tr, ArrayList<String> ignoreColumns) {

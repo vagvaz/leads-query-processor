@@ -9,7 +9,10 @@ import grammar.LeadsSQLParser.SqlContext;
 import grammar.SQLLexer;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.apache.tajo.algebra.BinaryOperator;
 import org.apache.tajo.algebra.Expr;
+import org.apache.tajo.algebra.OpType;
+import org.apache.tajo.algebra.UnaryOperator;
 import org.apache.tajo.catalog.CatalogClient;
 import org.apache.tajo.catalog.CatalogService;
 import org.apache.tajo.catalog.Schema;
@@ -24,6 +27,7 @@ import org.apache.tajo.engine.planner.PlanningException;
 import org.apache.tajo.master.session.Session;
 
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * @author tr
@@ -51,7 +55,10 @@ public class TaJoModule {
         }
         try {
             Expr expr = sqlAnalyzer.parse(sql);
-            return Optimize(session, expr);
+           if( (expr instanceof UnaryOperator) || expr instanceof BinaryOperator)
+               return Optimize(session, expr);
+           else
+              return expr.toJson();
         } catch (SQLSyntaxError e) {
             throw new SQLSyntaxError("Parse Error" + e.getMessage());
         }

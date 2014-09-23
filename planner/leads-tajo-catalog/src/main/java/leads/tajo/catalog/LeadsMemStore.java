@@ -57,7 +57,7 @@ public class LeadsMemStore implements CatalogStore {
 
     public LeadsMemStore(Configuration conf) {
         LQPConfiguration.initialize();
-        manager = CacheManagerFactory.createCacheManager();
+//        manager = CacheManagerFactory.createCacheManager();
         //     tablespaces = manager.getPersisentCache("leads.processor.catalog.tablespaces");
         //     databases = manager.getPersisentCache("leads.processor.catalog.databases");
         //     functions = manager.getPersisentCache("leads.processor.catalog.functions");

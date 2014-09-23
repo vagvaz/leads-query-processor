@@ -26,7 +26,6 @@ import static org.apache.tajo.TajoConstants.DEFAULT_TABLESPACE_NAME;
  * @author tr
  */
 public class ServerTest {
-<<<<<<< HEAD
     static TajoConf conf = null;
     private static CatalogService catalog = null;
     //private static MiniCatalogServer catalogServer;
@@ -87,7 +86,9 @@ public class ServerTest {
         catalog.createTablespace(DEFAULT_TABLESPACE_NAME,
                                     "leadsfs://localhost:5998/warehouse");
         catalog.createDatabase(DEFAULT_DATABASE_NAME, DEFAULT_TABLESPACE_NAME);
-
+        for(FunctionDesc func : TajoMaster.initBuiltinFunctions()){
+           catalog.createFunction(func);
+        }
         Schema schema = new Schema();
         schema.addColumn("name", Type.TEXT);
         schema.addColumn("empid", Type.INT4);

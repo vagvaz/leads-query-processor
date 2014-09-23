@@ -1,10 +1,15 @@
 package eu.leads.processor.planner;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import eu.leads.processor.core.plan.SQLPlan;
 import leads.tajo.module.TaJoModule;
 import org.apache.hadoop.fs.Path;
 import org.apache.tajo.TajoConstants;
+import org.apache.tajo.algebra.CreateTable;
+import org.apache.tajo.algebra.Expr;
+import org.apache.tajo.algebra.OpType;
 import org.apache.tajo.catalog.*;
 import org.apache.tajo.catalog.proto.CatalogProtos;
 import org.apache.tajo.common.TajoDataTypes;
@@ -44,8 +49,19 @@ public class LogicalPlanVisitorTest {
         String res = TaJoModule.Optimize(session, line);
         Gson gson = new Gson();
         LogicalRootNode n = CoreGsonHelper.fromJson(res, LogicalRootNode.class);
-        SQLPlan plan = new SQLPlan("queryId-custom", n);
-        System.out.println(plan.asJsonObject().encodePrettily());
+        SQLPlan plan = null;
+        if(n.getChild() != null)
+        {
+           plan = new SQLPlan("queryId-custom", n);
+           System.out.println(plan.asJsonObject().encodePrettily());
+        }
+        else
+        {
+           CreateTable table;
+           System.out.println(res);
+        }
+
+
 
 
         //      List<LogicalPlan.QueryBlock> childblocks = plan.getChildBlocks(rootBlock);
