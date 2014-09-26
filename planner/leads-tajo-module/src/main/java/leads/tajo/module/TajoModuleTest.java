@@ -1,6 +1,7 @@
 package leads.tajo.module;
 
 import org.apache.tajo.algebra.Expr;
+import org.apache.tajo.algebra.JsonHelper;
 import org.apache.tajo.engine.parser.SQLSyntaxError;
 import org.apache.tajo.master.session.Session;
 
@@ -24,18 +25,37 @@ public class TajoModuleTest {
 			
 			in = new BufferedReader(new InputStreamReader(System.in));
 			String line = "";
-			{	System.out.print("Please enter your SQL query: ");		
+			{	System.out.print("Please enter your SQL query OR expr Starting with {: ");
 				line =  in.readLine();
 				do {
 					
 					try {
-						System.out.println(line);
-						Expr res_expr = TaJoModule.parseQuery(line);
+                        Expr res_expr=null;
+                        if(line.contains("{")) {
+                            StringBuilder everything = new StringBuilder();
+                            everything.append(line);
+                            while((line = in.readLine()) != null && !line.equals("") ) {
+                                everything.append(line);
+                                if(line.equals("}") )
+                                    break;
+                            }
+
+                            System.out.println("END2");
+
+                            System.out.println(everything.toString());
+
+                             res_expr= JsonHelper.fromJson(everything.toString(), Expr.class);//
+                        }else{
+                             res_expr = TaJoModule.parseQuery(line);
+                        }
+                        System.out.println("END");
+
 						if (res_expr != null)
 							System.out.println("Expr: "+res_expr.toJson() +" end");
 						else
 							System.out.println("No Expr");
-						String res = TaJoModule.Optimize(session, line);//res_expr.toJson();//;
+						String res = TaJoModule.Optimize(session,res_expr );//.Optimize(session, line);//res_expr.toJson();//;
+
 						if (res != null){
 							 
 							System.out.println(res);

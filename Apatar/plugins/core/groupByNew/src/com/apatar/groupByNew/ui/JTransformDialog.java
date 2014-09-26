@@ -160,7 +160,7 @@ public class JTransformDialog extends JDialog {
 								false, SwingConstants.LEFT, new String[] {}));
 
 		// merge output schemas
-		node.MergeSchemas(GroupByNewNode.OUTPUT_CONN_POINT);
+		//node.MergeSchemas(GroupByNewNode.OUTPUT_CONN_POINT); @@GIANNIS_merge
 
 		outputPanel = new JOutputPanel(node
 				.getTiForConnection(GroupByNewNode.OUTPUT_CONN_POINT),

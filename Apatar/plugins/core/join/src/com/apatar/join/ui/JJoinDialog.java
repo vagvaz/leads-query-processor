@@ -206,7 +206,7 @@ public class JJoinDialog extends JDialog {
 		}
 
 		// Merge scheme with the output scheme
-		node.MergeSchemas(JoinNode.OUTPUT_CONN_POINT);
+		//node.MergeSchemas(JoinNode.OUTPUT_CONN_POINT); @@GIANNIS_merge
 
 		outputPanel = new JOutputPanel(node
 				.getTiForConnection(JoinNode.OUTPUT_CONN_POINT),
