@@ -28,6 +28,7 @@ public class DeployerControlVerticle extends ComponentControlVerticle {
         logicConfig.putString("nqe", nqeQueue);
         processorConfig.putString("planner", plannerQueue);
         logicConfig.putString("nqe", nqeQueue);
+        logicConfig.putString("monitor",id+".monitor");
     }
 
     @Override

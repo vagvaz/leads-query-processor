@@ -6,13 +6,13 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.*;
+import eu.leads.processor.nqe.NQEConstants;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -199,19 +199,19 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
     private void startExecution(ExecutionPlanMonitor executionPlan) {
        List<PlanNode> sources = executionPlan.getSources();
        for(PlanNode source : sources){
-          executionPlan.complete(source);
-          PlanNode next = executionPlan.getNextOperator(source);
-          if(next != null){
-             deployOperator(executionPlan,next);
+          if(source != null){
+             deployOperator(executionPlan,source);
           }
        }
     }
 
    private void deployOperator(ExecutionPlanMonitor executionPlan, PlanNode next) {
      Action deployAction = createNewAction(executionPlan.getAction());
-     deployAction.setData(next.asJsonObject());
-     deployAction.setLabel("deployOperator");
-     com.sendTo(nqeGroup,deployAction.asJsonObject());
+      deployAction.getData().putString("monitor",monitorAddress);
+      deployAction.getData().putObject("operator",next.asJsonObject());
+      deployAction.getData().putString("operatorType",next.getNodeType().toString());
+     deployAction.setLabel(NQEConstants.DEPLOY_OPERATOR);
+     com.sendTo(nqeGroup, deployAction.asJsonObject());
      deployAction.setLabel(DeployerConstants.OPERATOR_STARTED);
      com.sendTo(monitorAddress,deployAction.asJsonObject());
    }

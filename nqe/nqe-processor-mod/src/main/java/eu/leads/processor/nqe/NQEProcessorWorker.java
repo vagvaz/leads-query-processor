@@ -35,7 +35,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
    LogProxy log;
    InfinispanManager persistence;
    Map<String,ActionHandler> handlers;
-
+   
    @Override
    public void start() {
       super.start();
@@ -48,6 +48,16 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
                com.sendWithEventBus(workqueue + ".unregister", msg);
                stop();
             }
+            else if(event.getString("type").equals("action")){
+               Action action = new Action(event);
+               if(action.getStatus().equals(ActionStatus.COMPLETED)){
+                  com.sendTo(logic,action.asJsonObject());
+               }
+               else{
+                  log.warn("Received action \n" +  action.toString() + "\nbut its not COMPLETED");
+               }
+            }
+
          }
       };
       bus = vertx.eventBus();
@@ -66,7 +76,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
       handlers = new HashMap<String,ActionHandler>();
       handlers.put(NQEConstants.RUN_OPERATOR,new OperatorActionHandler(com,log,persistence,id));
       handlers.put(NQEConstants.DEPLOY_PLUGIN,new DeployPluginActionHandler(com,log,persistence,id));
-      handlers.put(NQEConstants.DEPLOY_PLUGIN,new UnDeployPluginActionHandler(com,log,persistence,id));
+      handlers.put(NQEConstants.UNDEPLOY_PLUGIN,new UnDeployPluginActionHandler(com,log,persistence,id));
       log = new LogProxy(config.getString("log"),com);
 
       bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {

@@ -84,6 +84,7 @@ public class SortOperator extends BasicOperator {
       for(String cacheName : addresses){
          manager.removePersistentCache(cacheName);
       }
+      cleanup();
 
    }
 
@@ -94,6 +95,7 @@ public class SortOperator extends BasicOperator {
 
     @Override
     public void cleanup() {
+       super.cleanup();
 
     }
 

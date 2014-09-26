@@ -60,6 +60,7 @@ public class ScanOperator extends BasicOperator {
       } catch (ExecutionException e) {
          e.printStackTrace();
       }
+      cleanup();
    }
 
    @Override
