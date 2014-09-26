@@ -90,7 +90,6 @@ public class ClusterInfinispanManager implements InfinispanManager {
      */
     @Override
     public void stopManager() {
-
         this.manager.stop();
     }
 

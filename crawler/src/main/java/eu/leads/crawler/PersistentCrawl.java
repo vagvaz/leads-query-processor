@@ -29,7 +29,7 @@ public class PersistentCrawl {
     static int depth = 0;
     static int ncrawlers = 1;
     static int ndays = 365;
-    static CrawlerController crawlerController;
+    static CrawlerController crawlerController = null;
     private static Log log = LogFactory.getLog(PersistentCrawl.class.getName());
 
     public static void main(String[] args) {
@@ -39,9 +39,9 @@ public class PersistentCrawl {
         try {
             seed = LQPConfiguration.getConf().getString("crawler.seed");
         } catch (NoSuchElementException e) {
-
+           seed = "http://news.yahoo.com";
         } finally {
-            seed = "http://news.yahoo.com";
+
         }
         log.info("Seed : " + seed);
 
@@ -123,7 +123,7 @@ public class PersistentCrawl {
 
     public static void stop() {
         try {
-            PersistentCrawl.crawlerController.stop();
+            crawlerController.stop();
             crawlerController.join();
         } catch (CrawlerException e) {
             e.printStackTrace();

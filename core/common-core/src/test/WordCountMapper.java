@@ -2,8 +2,7 @@ package eu.leads.processor.common.test;
 
 import eu.leads.processor.common.LeadsMapper;
 import org.infinispan.distexec.mapreduce.Collector;
-
-import java.util.Properties;
+import org.vertx.java.core.json.JsonObject;
 
 
 public class WordCountMapper extends LeadsMapper<String, String, String, Integer> {
@@ -11,7 +10,7 @@ public class WordCountMapper extends LeadsMapper<String, String, String, Integer
     private static int chunks = 0, words = 0;
 
 
-    public WordCountMapper(Properties configuration) {
+    public WordCountMapper(JsonObject configuration) {
         super(configuration);
     }
 

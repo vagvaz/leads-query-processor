@@ -1,8 +1,9 @@
 package eu.leads.processor.nqe.operators.mapreduce;
 
-import eu.leads.processor.common.LeadsReducer;
-import eu.leads.processor.common.Tuple;
+import eu.leads.processor.core.LeadsReducer;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.common.utils.InfinispanUtils;
+import org.vertx.java.core.json.JsonObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,7 +13,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Properties;
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,39 +25,18 @@ public class JoinReducer extends LeadsReducer<String, String> {
 
 
     String prefix;
-
+   public JoinReducer(JsonObject configuration) {
+      super(configuration);
+   }
     @Override
     public void initialize() {
         isInitialized = true;
         super.initialize();
-        prefix = conf.getProperty("output") + ":";
-        output = InfinispanUtils.getOrCreatePersistentMap(prefix);
-        String hostname = "";
-        try {
-            hostname = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        RandomAccessFile raf = null;
-        try {
-            String filename = System.getenv().get("HOME") + "/queryProcessor/" + hostname;
-            File f = new File(filename);
-            long fileLength = f.length();
-            raf = new RandomAccessFile(filename, "rw");
-            raf.seek(fileLength);
+        prefix = conf.getString("output") + ":";
 
-            raf.writeBytes("Running " + hostname + ": " + this.getClass().getCanonicalName() + "\n");
-            raf.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
-    public JoinReducer(Properties configuration) {
-        super(configuration);
-    }
+
 
     @Override
     public String reduce(String key, Iterator<String> iterator) {
@@ -66,7 +45,7 @@ public class JoinReducer extends LeadsReducer<String, String> {
         ArrayList<Tuple> left = new ArrayList<Tuple>();
         ArrayList<Tuple> right = new ArrayList<Tuple>();
 
-        String leftTable = conf.getProperty("left");
+        String leftTable = conf.getString("left");
 //        String rightTable = conf.getProperty("right");
         ArrayList<String> ignoreColumns = new ArrayList<String>();
         ignoreColumns.add("table");

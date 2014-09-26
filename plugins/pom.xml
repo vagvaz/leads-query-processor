@@ -41,6 +41,7 @@
          <artifactId>infinispan-server-hotrod</artifactId>
          <version>7.0.0-SNAPSHOT</version>
       </dependency>
+
    </dependencies>
 
 </project>

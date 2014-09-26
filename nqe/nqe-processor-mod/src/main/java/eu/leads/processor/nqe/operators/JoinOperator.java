@@ -1,20 +1,18 @@
 package eu.leads.processor.nqe.operators;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import eu.leads.processor.common.LeadsMapperCallable;
-import eu.leads.processor.common.LeadsReduceCallable;
-import eu.leads.processor.nqe.operators.BasicOperator;
-import eu.leads.processor.nqe.operators.OperatorType;
+import eu.leads.processor.core.LeadsMapperCallable;
+import eu.leads.processor.core.LeadsReduceCallable;
+import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.core.Action;
+import eu.leads.processor.core.net.Node;
 import eu.leads.processor.nqe.operators.mapreduce.JoinMapper;
 import eu.leads.processor.nqe.operators.mapreduce.JoinReducer;
-import eu.leads.processor.nqe.operators.mapreduce.SortMapper;
-import eu.leads.processor.nqe.operators.mapreduce.SortReducer;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.Future;
 
 /**
@@ -28,22 +26,22 @@ import java.util.concurrent.Future;
 public class JoinOperator extends MapReduceOperator {
     protected LeadsMapperCallable<String, String, String, String> MapperCAll;
     protected LeadsReduceCallable<String, String> ReducerCAll;
-    public JoinOperator() {
-        super(OperatorType.JOIN);
-    }
+    public JoinOperator(Node com, InfinispanManager persistence, Action action) {
+      super(com, persistence, action);
+   }
 
-    @Override
+   @Override
     public void init(JsonObject config) {
         super.init(config); //fix set correctly caches names
         //fix configuration
-        Properties configuration = null;
+        JsonObject configuration = null;
         setMapper(new JoinMapper(configuration));
         setReducer(new JoinReducer(configuration));
     }
 
     @Override
     public void execute() {
-        DistributedExecutorService des = new DefaultExecutorService(InCache);
+        DistributedExecutorService des = new DefaultExecutorService(inputCache);
 
         List<Future<List<String>>> res = des.submitEverywhere(MapperCAll);
         for (Future<?> f : res)
@@ -54,7 +52,7 @@ public class JoinOperator extends MapReduceOperator {
 
 
         DistributedExecutorService des_inter = new DefaultExecutorService(
-                CollectorCache);
+                                                                                 intermediateCache);
         List<Future<String>> reducers_res=des_inter.submitEverywhere(ReducerCAll);
         for (Future<?> f : reducers_res) {
             if (f != null)

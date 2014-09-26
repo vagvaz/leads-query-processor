@@ -15,8 +15,6 @@
 	<artifactId>leads-query-processor-common</artifactId>
 
 	<packaging>jar</packaging>
-
-<<<<<<< HEAD
    <dependencies>
       <dependency>
          <groupId>commons-configuration</groupId>

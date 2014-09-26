@@ -59,20 +59,24 @@ public class SQLPlan extends DataType implements Plan {
         LogicalNode current = rootNode;
         List<LogicalNode> toProcess = new ArrayList<>();
         toProcess.add(current);
+        result.putObject(String.valueOf(current.getPID()),cleanChilds(current));
         while (toProcess.size() > 0) {
             current = toProcess.remove(0);
             if (current instanceof UnaryNode) {
                 UnaryNode currentTmp = (UnaryNode) current;
                 LogicalNode n = currentTmp.getChild();
-                result.putObject(String.valueOf(n.getPID()), new JsonObject(n.toJson()));
+                JsonObject toadd = cleanChilds(n);
+                result.putObject(String.valueOf(n.getPID()), toadd);
                 toProcess.add(n);
             } else if (current instanceof BinaryNode) {
                 BinaryNode currentTmp = (BinaryNode) current;
                 LogicalNode l = currentTmp.getLeftChild();
                 LogicalNode r = currentTmp.getRightChild();
-                result.putObject(String.valueOf(l.getPID()), new JsonObject(l.toJson()));
+                JsonObject toaddLeft  = cleanChilds(l);
+                result.putObject(String.valueOf(l.getPID()), toaddLeft);
                 toProcess.add(l);
-                result.putObject(String.valueOf(r.getPID()), new JsonObject(r.toJson()));
+                JsonObject toaddRight = cleanChilds(r);
+                result.putObject(String.valueOf(r.getPID()), toaddRight);
                 toProcess.add(r);
 
             } else if (current instanceof RelationNode) {
@@ -82,7 +86,7 @@ public class SQLPlan extends DataType implements Plan {
                 } else if (current instanceof TableSubQueryNode) {
                     TableSubQueryNode tmp = (TableSubQueryNode) current;
                     LogicalNode n = tmp.getSubQuery();
-                    result.putObject(String.valueOf(tmp.getPID()), new JsonObject(tmp.toJson()));
+                    result.putObject(String.valueOf(n.getPID()), cleanChilds(n));
                     toProcess.add(n);
                 } else {
                     System.err.println("PROBLEM WITH PIDRELNODE TYPES");
@@ -92,7 +96,32 @@ public class SQLPlan extends DataType implements Plan {
         return result;
     }
 
-    private JsonObject generatePlan(LogicalRootNode rootNode) {
+   private JsonObject cleanChilds(LogicalNode current) {
+      JsonObject result  = new JsonObject(current.toJson());
+      if (current instanceof UnaryNode) {
+         result.getObject("body").removeField("child");
+      } else if (current instanceof BinaryNode) {
+
+         result.getObject("body").removeField("leftChild");
+         result.getObject("body").removeField("rightChild");
+      } else {
+         if (current instanceof RelationNode) {
+            if (current instanceof ScanNode)
+               ;
+            else if (current instanceof TableSubQueryNode) {
+               result.getObject("body").getObject("subQuery").getObject("body").removeField("child");
+            } else {
+               System.err.println("PROBLEM WITH RELNODE TYPES");
+            }
+         } else {
+            System.err.println("PROBLEM WITH NODE TYPES");
+         }
+
+      }
+      return result;
+   }
+
+   private JsonObject generatePlan(LogicalRootNode rootNode) {
         JsonObject result = new JsonObject();
         PlanNode planNode = new PlanNode(rootNode);
         PlanNode outputNode = new PlanNode();
@@ -120,6 +149,7 @@ public class SQLPlan extends DataType implements Plan {
             LogicalNode n = currentTmp.getChild();
             PlanNode currentNode = new PlanNode(n, getQueryId());
             top.addInput(currentNode.getNodeId());
+            top.asJsonObject().getObject("configuration").getObject("body").removeField("child");
             result.putObject(top.getNodeId(), top.asJsonObject());
             currentNode.setOutput(top.getNodeId());
             visit(currentNode, n, result);
@@ -133,18 +163,23 @@ public class SQLPlan extends DataType implements Plan {
             top.addInput(right.getNodeId());
             left.setOutput(top.getNodeId());
             right.setOutput(top.getNodeId());
+            top.asJsonObject().getObject("configuration").getObject("body").removeField("leftChild");
+            top.asJsonObject().getObject("configuration").getObject("body").removeField("rightChild");
             result.putObject(top.getNodeId(), top.asJsonObject());
             visit(left, l, result);
             visit(right, r, result);
         } else {
             if (current instanceof RelationNode) {
-                if (current instanceof ScanNode)
-                    result.putObject(top.getNodeId(), top.asJsonObject());
-                else if (current instanceof TableSubQueryNode) {
+                if (current instanceof ScanNode) {
+                   ScanNode sc = (ScanNode) current;
+                    top.addInput(sc.getCanonicalName());
+                   result.putObject(top.getNodeId(), top.asJsonObject());
+                }else if (current instanceof TableSubQueryNode) {
                     TableSubQueryNode tmp = (TableSubQueryNode) current;
                     LogicalNode n = tmp.getSubQuery();
                     PlanNode currentNode = new PlanNode(n, getQueryId());
                     top.addInput(currentNode.getNodeId());
+                    top.asJsonObject().getObject("configuration").getObject("body").getObject("subQuery").getObject("body").removeField("child");
                     result.putObject(top.getNodeId(), top.asJsonObject());
                     currentNode.setOutput(top.getNodeId());
                     visit(currentNode, n, result);

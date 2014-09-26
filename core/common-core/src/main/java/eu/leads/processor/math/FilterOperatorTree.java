@@ -1,7 +1,7 @@
-package eu.leads.processor.common.utils.math;
+package eu.leads.processor.math;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import eu.leads.processor.core.Tuple;
+import org.vertx.java.core.json.JsonObject;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,9 +15,26 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 //the we create a tree with three nodes the root keeps the expression for '>' node and has two children
 // the left one will read the value of the tuple for the pagerank and the right keeps the constant 0.2.
 //All the job is done into the MathOperatorTreeNode
-@JsonAutoDetect
-@JsonDeserialize(converter = MathTreeOperatorConverter.class)
-public class MathOperatorTree {
+
+public class FilterOperatorTree {
+   FilterOperatorNode root;
+   public FilterOperatorTree(String treeAsDoc){
+
+   }
+   public FilterOperatorTree(JsonObject tree){
+      JsonObject tm= new JsonObject();
+      tm.putObject("tree",tree);
+      org.vertx.java.core.json.JsonElement test = tm.getElement("tree");
+      root = new FilterOperatorNode(tm.getElement("tree"));
+   }
+
+   public FilterOperatorTree(org.vertx.java.core.json.JsonElement qual) {
+      root = new FilterOperatorNode(qual);
+   }
+
+   public boolean accept(Tuple tuple){
+      return root.accept(tuple);
+   }
 //    public MathOperatorTree(MathOperatorTreeNode root) {
 //        this.root = root;
 //    }

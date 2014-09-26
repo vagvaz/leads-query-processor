@@ -2,7 +2,6 @@ package eu.leads.processor.core;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.infinispan.jmx.annotations.DataType;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.IOException;
@@ -12,32 +11,22 @@ public class Tuple extends DataType {
 
     public Tuple(String value) {
             this.data = new JsonObject(value);
-
     }
 
     public Tuple(Tuple tl, Tuple tr, ArrayList<String> ignoreColumns) {
+       super(tl.asJsonObject());
 
-        try {
-            JsonNode foo = mapper.readTree(tl.asString());
-            this.root = (ObjectNode) foo;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         for (String field : ignoreColumns) {
-            if (root.has(field))
-                root.remove(field);
+            if (data.containsField(field))
+                data.removeField(field);
         }
-        Set<String> fields = tr.getFieldSet();
-        for (String field : fields) {
-            if (!ignoreColumns.contains(field)) {
-                this.setAttribute(field, tr.getAttribute(field));
-            }
-        }
-        fields.clear();
+        tr.removeAtrributes(ignoreColumns);
+
+       data.mergeIn(tr.asJsonObject());
     }
 
     public String asString() {
-        return root.toString();
+        return data.toString();
     }
 
     /**
@@ -46,62 +35,55 @@ public class Tuple extends DataType {
      * @return Value for property 'fieldSet'.
      */
     public Set<String> getFieldSet() {
-        HashSet<String> result = new HashSet<String>();
-        Iterator<String> iterator = root.fieldNames();
 
-        while (iterator.hasNext()) {
-            String field = iterator.next();
-            result.add(field);
-        }
-        return result;
+        return data.getFieldNames();
     }
 
     public void setAttribute(String attributeName, String value) {
-        root.put(attributeName, value);
+       data.putString(attributeName,value);
     }
+    public void setNumberAttribute(String attributeName, Number value){
+       data.putNumber(attributeName,value);
+    }
+    public void  setBooleanAttribute(String attributeName, boolean value){
+       data.putBoolean(attributeName,value);
+    }
+   public void setObjectAttribute(String attributeName, JsonObject value){
+      data.putObject(attributeName,value);
+   }
 
     public String getAttribute(String column) {
-        return root.path(column).asText();
+        return data.getString(column);
     }
-
+    public Number getNumberAttribute(String column){return data.getNumber(column);}
+    public boolean getBooleanAttribute(String column){return data.getBoolean(column);}
+   public JsonObject getObjectAttribute(String column){return data.getObject(column);}
     /**
      * {@inheritDoc}
      */
     @Override
     public String toString() {
-        return root.toString();
+        return  data.toString();
     }
 
     public void keepOnly(List<String> columns) {
-        Iterator<String> fields = root.fieldNames();
-
-        ArrayList<String> toRemove = new ArrayList<String>();
-        while (fields.hasNext()) {
-            String field = fields.next();
-            if (!columns.contains(field)) {
-                toRemove.add(field);
-            }
+        Set<String> fields = data.getFieldNames();
+        Set<String> keep = new HashSet<String>();
+        keep.addAll(columns);
+        for(String field : fields){
+           if(!keep.contains(field)){
+              data.removeField(field);
+           }
         }
-        for (String f : toRemove)
-            root.remove(f);
-        toRemove.clear();
-        toRemove = null;
     }
 
     public void removeAtrributes(List<String> columns) {
-        root.remove(columns);
+        for(String column : columns)
+           data.removeField(column);
     }
 
     public String toPresentString() {
-        Iterator<String> iterator = root.fieldNames();
-        StringBuilder builder = new StringBuilder();
-        while (iterator.hasNext()) {
-            String field = iterator.next();
-            builder.append(getAttribute(field) + ",");
-        }
-        String result = builder.toString();
-        builder = null;
-        return result.substring(0, result.length() - 1);
+       return data.toString();
     }
 
     /**
@@ -109,19 +91,37 @@ public class Tuple extends DataType {
      *
      * @return Value for property 'fieldNames'.
      */
-    public String getFieldNames() {
-        Iterator<String> iterator = root.fieldNames();
-        StringBuilder builder = new StringBuilder();
-        while (iterator.hasNext()) {
-            String field = iterator.next();
-            builder.append(field + ",");
-        }
-        String result = builder.toString();
-        builder = null;
-        return result.substring(0, result.length() - 1);
+    public Set<String> getFieldNames() {
+        return data.getFieldNames();
     }
 
     public boolean hasField(String attribute) {
-        return this.root.has(attribute);
+        return data.containsField(attribute);
     }
+
+   public void removeAttribute(String field) {
+      data.removeField(field);
+   }
+
+   public void renameAttribute(String oldName, String newName) {
+      if(oldName == newName)
+         return;
+      Object value = data.getValue(oldName);
+      data.removeField(oldName);
+      data.putValue(newName,value);
+   }
+
+   public Object getGenericAttribute(String attribute) {
+      return data.getValue(attribute);
+   }
+
+   public void setAttribute(String name, Object tupleValue) {
+      data.putValue(name,tupleValue);
+   }
+
+   public void renameAttributes(Map<String, String> toRename) {
+      for(Map.Entry<String,String> entry : toRename.entrySet()){
+         renameAttribute(entry.getKey(),entry.getValue());
+      }
+   }
 }

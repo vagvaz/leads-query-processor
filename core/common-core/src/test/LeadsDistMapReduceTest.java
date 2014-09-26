@@ -20,10 +20,15 @@ import eu.leads.processor.conf.LQPConfiguration;
 
 import org.infinispan.Cache;
 
+import org.infinispan.commons.util.Util;
+import org.infinispan.configuration.cache.CacheMode;
+import org.infinispan.configuration.cache.Configuration;
+import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.remoting.transport.Transport;
+import org.vertx.java.core.json.JsonObject;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -32,7 +37,6 @@ import java.nio.Buffer;
 import java.nio.CharBuffer;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.LockSupport;
@@ -169,7 +173,7 @@ public class LeadsDistMapReduceTest {
                         InCache);
 
                 long start = System.currentTimeMillis();
-                Properties configuration = new Properties();
+                JsonObject configuration = new JsonObject();
                 LeadsMapper<String, String, String, Integer> testMapper = new WordCountMapper(
 
                         configuration);

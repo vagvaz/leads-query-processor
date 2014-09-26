@@ -6,9 +6,10 @@ import eu.leads.crawler.model.Page;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.conf.LQPConfiguration;
-import net.htmlparser.jericho.Source;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -54,8 +55,10 @@ public class PersistentCrawler extends DefaultCrawler {
         log.info("Crawled: " + page.getUrl().toString());
 
         try {
-            Source src = new Source(page.getContent());
-            String body = src.getTextExtractor().setIncludeAttributes(false).toString();
+
+            String htmlString = new String(page.getContent());
+            Document doc = Jsoup.parse(htmlString);
+            String body = doc.body().text();
             Page page2 = new Page(page.getUrl(), page.getHeaders(), page.getResponseCode(),
                                      page.getCharset(), page.getResponseTime(), body.getBytes());
             page2.setLinks(page.getLinks());

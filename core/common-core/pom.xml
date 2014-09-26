@@ -111,6 +111,11 @@
          <artifactId>leads-query-processor-common</artifactId>
          <version>1.0-SNAPSHOT</version>
       </dependency>
+      <dependency>
+         <groupId>org.infinispan</groupId>
+         <artifactId>infinispan-core</artifactId>
+         <version>7.0.0.Alpha5</version>
+      </dependency>
    </dependencies>
 
    <build>

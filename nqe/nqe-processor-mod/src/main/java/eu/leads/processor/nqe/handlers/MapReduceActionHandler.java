@@ -31,122 +31,92 @@ import java.util.concurrent.Future;
 public class MapReduceActionHandler implements ActionHandler {
     private final Node com;
     private final LogProxy log;
-    private final PersistenceProxy persistence;
+    private final InfinispanManager persistence;
     private final String id;
-
-    protected InfinispanManager iman;
     private String textFile;
     private transient Cache<?, ?> InCache;
     private transient Cache<?, List<?>> CollectorCache;
     private transient Cache<?, ?> OutCache;
 
-    public MapReduceActionHandler(Node com, LogProxy log, PersistenceProxy persistence, String id) {
+    public MapReduceActionHandler(Node com, LogProxy log, InfinispanManager persistence, String id) {
         this.com = com;
         this.log = log;
         this.persistence = persistence;
         this.id = id;
-
-
-
-
     }
 
     @Override
     public Action process(Action action) {
         Action result = action;
-        try {
-            JsonObject q = action.getData();
-            // read monitor q.getString("monitor");
-            if (q.containsField("sql")) {//SQL Query
-                String user = q.getString("user");
-                String sql = q.getString("sql");
-                String uniqueId = generateNewQueryId(user);
-                JsonObject actionResult = new JsonObject();
-                SQLQuery query = new SQLQuery(user, sql);
-                query.setId(uniqueId);
-                QueryStatus status = new QueryStatus(uniqueId, QueryState.PENDING, "");
-                query.setQueryStatus(status);
-                QueryContext context = new QueryContext(uniqueId);
-                query.setContext(context);
-                JsonObject queryStatus = status.asJsonObject();
-                if (!persistence.put(StringConstants.QUERIESCACHE, uniqueId, query.asJsonObject())) {
-                    actionResult.putString("error", "");
-                    actionResult.putString("message", "Failed to add query " + sql + " from user " + user + " to the queries cache");
-
-                }
-                actionResult.putObject("status", query.getQueryStatus().asJsonObject());
-                result.setResult(actionResult);
-                result.setStatus(ActionStatus.COMPLETED.toString());
-            } else if (q.containsField("mapreduce")) {//
-                String user = q.getString("user");
-                //String sql = q.getString("mapreduce");
-                String operation = q.getString("operator");
-                String uniqueId = generateNewQueryId(user);
-                JsonObject actionResult = new JsonObject();
-//             SQLQuery query = new SQLQuery(user, sql);
-//             query.setId(uniqueId);
-                QueryStatus status = new QueryStatus(uniqueId, QueryState.PENDING, "");
-
-                DistributedExecutorService des = new DefaultExecutorService(InCache);
-
-                //Create Mapper
-                //Create Reducer
-                LeadsMapper<?, ?, ?, ?> Mapper;
-                LeadsCollector<?, ?> Collector=new LeadsCollector(0, CollectorCache);
-                LeadsReducer<?, ?> Reducer;
-
-                Properties configuration = new Properties();
-
-                if (operation == NQEConstants.GROUPBY_OP) {
-                    Mapper = new GroupByMapper(configuration);
-                    Reducer = new GroupByReducer(configuration);
-                } else if (operation == NQEConstants.JOIN_OP) {
-                    Mapper = new JoinMapper(configuration);
-                    Reducer = new JoinReducer(configuration);
-                } else if (operation == NQEConstants.JOIN_OP) {
-                    Mapper = new JoinMapper(configuration);
-                    Reducer = new JoinReducer(configuration);
-                } else if (operation == NQEConstants.SORT_OP) {
-                    Mapper = new SortMapper(configuration);
-                    Reducer = new SortReducer(configuration);
-
-                    // else { //custom mapreduce process
-                } else {
-                    actionResult.putString("error", operation + "  Not found");
-                    result.setResult(actionResult);
-                    return result;
-                }
-
-
-
-
-
-                JsonObject mapreduceStatus = status.asJsonObject();
-//                if (!persistence.put(StringConstants.QUERIESCACHE, uniqueId, query.asJsonObject())) {
-//                    actionResult.putString("error", "");
-//                    actionResult.putString("message", "Failed to add query " + sql + " from user " + user + " to the queries cache");
+//        try {
+//            JsonObject q = action.getData();
+//            // read monitor q.getString("monitor");
+//            if (action.getLabel().equals(NQEConstants.OPERATOR)) {//SQL Query
 //
+//            } else if (q.containsField("mapreduce")) {//
+//                String user = q.getString("user");
+//                //String sql = q.getString("mapreduce");
+//                String operation = q.getString("operator");
+//
+//                JsonObject actionResult = new JsonObject();
+////             SQLQuery query = new SQLQuery(user, sql);
+////             query.setId(uniqueId);
+//                QueryStatus status = new QueryStatus(uniqueId, QueryState.PENDING, "");
+//
+//                DistributedExecutorService des = new DefaultExecutorService(InCache);
+//
+//                //Create Mapper
+//                //Create Reducer
+//                LeadsMapper<?, ?, ?, ?> Mapper;
+//                LeadsCollector<?, ?> Collector=new LeadsCollector(0, CollectorCache);
+//                LeadsReducer<?, ?> Reducer;
+//
+//                Properties configuration = new Properties();
+//
+//                if (operation == NQEConstants.GROUPBY_OP) {
+//                    Mapper = new GroupByMapper(configuration);
+//                    Reducer = new GroupByReducer(configuration);
+//                } else if (operation == NQEConstants.JOIN_OP) {
+//                    Mapper = new JoinMapper(configuration);
+//                    Reducer = new JoinReducer(configuration);
+//                } else if (operation == NQEConstants.JOIN_OP) {
+//                    Mapper = new JoinMapper(configuration);
+//                    Reducer = new JoinReducer(configuration);
+//                } else if (operation == NQEConstants.SORT_OP) {
+//                    Mapper = new SortMapper(configuration);
+//                    Reducer = new SortReducer(configuration);
+//
+//                    // else { //custom mapreduce process
+//                } else {
+//                    actionResult.putString("error", operation + "  Not found");
+//                    result.setResult(actionResult);
+//                    return result;
 //                }
-//                actionResult.putObject("status", query.getQueryStatus().asJsonObject());
-
-                //send msg to monitor operator completed
-
-                result.setResult(actionResult);
-                result.setStatus(ActionStatus.COMPLETED.toString());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//
+//
+//
+//
+//
+//                JsonObject mapreduceStatus = status.asJsonObject();
+////                if (!persistence.put(StringConstants.QUERIESCACHE, uniqueId, query.asJsonObject())) {
+////                    actionResult.putString("error", "");
+////                    actionResult.putString("message", "Failed to add query " + sql + " from user " + user + " to the queries cache");
+////
+////                }
+////                actionResult.putObject("status", query.getQueryStatus().asJsonObject());
+//
+//                //send msg to monitor operator completed
+//
+//                result.setResult(actionResult);
+//                result.setStatus(ActionStatus.COMPLETED.toString());
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         return result;
     }
 
-    private String generateNewQueryId(String prefix) {
-        String candidateId = prefix + "." + UUID.randomUUID();
-        while (persistence.contains(StringConstants.QUERIESCACHE, candidateId)) {
-            candidateId = prefix + "." + UUID.randomUUID();
-        }
-        return candidateId;
-    }
+
 }
 
 

@@ -1,14 +1,17 @@
 package eu.leads.processor.nqe.operators.mapreduce;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.leads.processor.common.LeadsMapper;
+import eu.leads.processor.core.LeadsMapper;
+import eu.leads.processor.core.Tuple;
+import eu.leads.processor.core.TupleComparator;
 import net.sf.jsqlparser.schema.Column;
 import org.infinispan.distexec.mapreduce.Collector;
+import org.vertx.java.core.json.JsonObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,11 +22,13 @@ import java.util.Properties;
  */
 public class SortMapper extends LeadsMapper<String, String, String, String> {
 
-    transient public List<Column> sortColumns;
+    transient protected String[] sortColumns;
+    transient protected Boolean[] asceding;
+    transient protected String[] types;
     Integer counter = 0;
     Integer numParts = 0;
 
-    public SortMapper(Properties configuration) {
+    public SortMapper(JsonObject configuration) {
         super(configuration);
     }
 
@@ -31,25 +36,25 @@ public class SortMapper extends LeadsMapper<String, String, String, String> {
         counter = 0;
         isInitialized = true;
         super.initialize();
-        String columns = conf.getProperty("sortColumns");
-        numParts = Integer.parseInt(conf.getProperty("parts"));
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            sortColumns = mapper.readValue(columns, new TypeReference<List<Column>>() {
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String columns = conf.getString("sortColumns");
+
     }
 
     @Override
     public void map(String key, String value, Collector<String, String> collector) {
-        if (!isInitialized)
-            initialize();
-        progress();
-//        Tuple tuple = new Tuple(value);
-        Integer outkey = counter % numParts;
-        collector.emit(outkey.toString(), value);
-        counter = counter + 1;
-    }
+//        if (!isInitialized)
+//            initialize();
+//        progress();
+////        Tuple tuple = new Tuple(value);
+//       ArrayList<Tuple> tuples = new ArrayList<>();
+//       Comparator<Tuple> comparator = new TupleComparator(sortColumns,asceding,types);
+//       Collections.sort(tuples,comparator);
+//       for (Tuple t : tuples) {
+//          handlePagerank(t);
+//          out.put(key + ":" + counter, t.asString());
+//          counter++;
+//       }
+//       tuples.clear();
+//       return output + key;
+     }
 }

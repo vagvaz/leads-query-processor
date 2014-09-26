@@ -1,5 +1,6 @@
-package eu.leads.processor.common;
+package eu.leads.processor.core;
 
+import eu.leads.processor.common.LeadsCollector;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DistributedCallable;
 
@@ -44,6 +45,7 @@ public class LeadsMapperCallable<K, V, kOut, vOut> implements
 		if (mapper == null) {
 			System.out.println(" Mapper not initialized ");
 		} else {
+         mapper.setCacheManager(cache.getCacheManager());
 			List<K> result = new ArrayList<K>();
 
 			for (Entry< K, V  > entry : cache.entrySet()){

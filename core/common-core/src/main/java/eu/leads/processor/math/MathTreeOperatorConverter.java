@@ -1,4 +1,4 @@
-package eu.leads.processor.common.utils.math;
+package eu.leads.processor.math;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.util.StdConverter;
@@ -10,9 +10,9 @@ import com.fasterxml.jackson.databind.util.StdConverter;
  * Time: 9:49 AM
  * To change this template use File | Settings | File Templates.
  */
-public class MathTreeOperatorConverter extends StdConverter<JsonNode, MathOperatorTree> {
+public class MathTreeOperatorConverter extends StdConverter<JsonNode, FilterOperatorTree> {
     @Override
-    public MathOperatorTree convert(JsonNode value) {
+    public FilterOperatorTree convert(JsonNode value) {
         return null;
     }
 

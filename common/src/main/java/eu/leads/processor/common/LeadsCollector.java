@@ -76,12 +76,4 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
         return emitCount.get() > maxCollectorSize;
     }
 
-    private void writeObject(java.io.ObjectOutputStream stream)
-            throws IOException {
-    }
-
-    private void readObject(java.io.ObjectInputStream stream)
-            throws IOException, ClassNotFoundException {
-
-    }
 }

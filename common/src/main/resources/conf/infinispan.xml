@@ -46,7 +46,8 @@
          <state-transfer enabled="false" await-initial-transfer="false"/>
 
          <persistence passivation="true">
-            <file-store path="${java.io.tmpdir}" shared="false" preload="true"/>
+            <!--<file-store path="${java.io.tmpdir}" shared="false" preload="true"/>-->
+            <file-store path="/home/vagvaz/test/" shared="false" preload="true"/>
          </persistence>
 
       </distributed-cache>

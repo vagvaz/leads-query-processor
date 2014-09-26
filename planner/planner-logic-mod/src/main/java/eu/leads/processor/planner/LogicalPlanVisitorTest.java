@@ -43,8 +43,8 @@ public class LogicalPlanVisitorTest {
                                          DEFAULT_DATABASE_NAME);
         Mymodule = new TaJoModule();
         Mymodule.init_connection("127.0.0.1", 5998);
-        String line =
-            "select dept.deptname,dept.tmsp from dept join ( select score,phone,deptname,sumtest(score) as tmsp from score group by score,phone, deptname) s on dept.deptname = s.deptname and s.tmsp = dept.tmsp";
+        String line = "select deptname from dept where deptname like '%ffoo' and  tmsp > 5 ";
+           // "select dept.deptname,dept.tmsp from dept join ( select score,phone,deptname,sumtest(score) as tmsp from score group by score,phone, deptname) s on dept.deptname = s.deptname and s.tmsp = dept.tmsp";
         System.out.println(line);
         String res = TaJoModule.Optimize(session, line);
         Gson gson = new Gson();

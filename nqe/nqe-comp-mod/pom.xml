@@ -92,6 +92,12 @@
          <scope>test</scope>
       </dependency>
 
+      <dependency>
+         <groupId>gr.tuc.softnet</groupId>
+         <artifactId>common-core</artifactId>
+         <version>1.0-SNAPSHOT</version>
+      </dependency>
+
       <!-- Add any other dependencies that you want packaged into your module (in the lib dir) here
     as 'compile' dependencies. Here is an example
     <dependency>
@@ -101,7 +107,11 @@
       <scope>compile</scope>
     </dependency>
     -->
-
+      <dependency>
+         <groupId>gr.tuc.softnet</groupId>
+         <artifactId>common-core</artifactId>
+         <version>1.0-SNAPSHOT</version>
+      </dependency>
    </dependencies>
 
    <build>

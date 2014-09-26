@@ -2,18 +2,14 @@ package eu.leads.processor.common.test;
 
 
 import java.util.Iterator;
-import java.util.Properties;
 
-import eu.leads.processor.common.LeadsReducer;
-
-import java.util.Iterator;
-import java.util.Properties;
+import org.vertx.java.core.json.JsonObject;
 
 public class WordCountReducer extends LeadsReducer<String, Integer> {
 
     private static final long serialVersionUID = 1901016598354633256L;
 
-    public WordCountReducer(Properties configuration) {
+    public WordCountReducer(JsonObject configuration) {
         super(configuration);
 
     }

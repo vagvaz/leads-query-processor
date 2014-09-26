@@ -1,25 +1,17 @@
 package eu.leads.processor.nqe.operators;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-/*import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import eu.leads.processor.plan.ExecutionPlanNode;
-import eu.leads.processor.sql.PlanNode;
-import net.sf.jsqlparser.schema.Column;*/
-import eu.leads.processor.common.Column;
-import eu.leads.processor.common.LeadsMapperCallable;
-import eu.leads.processor.common.LeadsReduceCallable;
-import eu.leads.processor.nqe.operators.BasicOperator;
-import eu.leads.processor.nqe.operators.MapReduceOperator;
-import eu.leads.processor.nqe.operators.OperatorType;
-import eu.leads.processor.nqe.operators.mapreduce.SortReducer;
-import eu.leads.processor.nqe.operators.mapreduce.SortMapper;
+import eu.leads.processor.core.*;
+import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.core.net.Node;
+import org.infinispan.Cache;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
+import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -30,47 +22,74 @@ import java.util.concurrent.Future;
  * Time: 1:12 AM
  * To change this template use File | Settings | File Templates.
  */
-@JsonAutoDetect
-public class SortOperator extends MapReduceOperator {
-    List<Column> columns;
-    private List<Boolean> ascending;
-    protected LeadsMapperCallable<String, String, String, String> MapperCAll;
-    protected LeadsReduceCallable<String, String>  ReducerCAll;
-    public SortOperator() {
-        super(OperatorType.SORT);
-    }
+public class SortOperator extends BasicOperator {
+//    List<Column> columns;
+   transient protected String[] sortColumns;
+   transient protected Boolean[] asceding;
+   transient protected String[] types;
+    private LeadsMapper<String,String,String,String> mapper;
 
-    @Override
+
+   public SortOperator(Node com, InfinispanManager persistence, Action action) {
+      super(com, persistence, action);
+      JsonArray sortKeys = conf.getObject("body").getArray("sortKeys");
+      Iterator<Object> sortKeysIterator = sortKeys.iterator();
+      sortColumns = new String[sortKeys.size()];
+      asceding = new Boolean[sortKeys.size()];
+      types = new  String[sortKeys.size()];
+      int counter = 0;
+      while(sortKeysIterator.hasNext()){
+         JsonObject sortKey = (JsonObject) sortKeysIterator.next();
+         sortColumns[counter] = sortKey.getObject("sortKey").getString("name");
+         asceding[counter] = sortKey.getBoolean("ascending");
+         types[counter] = sortKey.getObject("sortKey").getObject("dataType").getString("type");
+         counter++;
+      }
+   }
+
+   @Override
     public void init(JsonObject config) {
-        super.init(config); //fix set correctly caches names
+//        super.init(config); //fix set correctly caches names
         //fix configuration
-        Properties configuration = null;
-        setMapper(new SortMapper(configuration)); //set and initialize mapper fix it
-        setReducer(new SortReducer(configuration));
     }
 
-    @Override
+   @Override
+   public void run() {
+      Cache inputCache = (Cache) this.manager.getPersisentCache(getInput());
+      Cache beforeMerge = (Cache)this.manager.getPersisentCache(getName()+".merge");
+      DistributedExecutorService des = new DefaultExecutorService(inputCache);
+      SortCallable callable = new SortCallable(sortColumns,asceding,types,getName()+".merge");
+      List<Future<String>> res = des.submitEverywhere(callable);
+      List<String> addresses = new ArrayList<String>();
+      try {
+         if (res != null) {
+            for (Future<?> result : res) {
+               addresses.add((String) result.get());
+            }
+            System.out.println("mapper Execution is done");
+         }
+         else
+         {
+            System.out.println("mapper Execution not done");
+         }
+      } catch (InterruptedException e) {
+         e.printStackTrace();
+      } catch (ExecutionException e) {
+         e.printStackTrace();
+      }
+      //Merge outputs
+      TupleComparator comparator = new TupleComparator(sortColumns,asceding,types);
+      SortMerger merger = new SortMerger(addresses, getOutput(),comparator,manager,conf);
+      merger.merge();
+      for(String cacheName : addresses){
+         manager.removePersistentCache(cacheName);
+      }
+
+   }
+
+   @Override
     public void execute() {  //Need Heavy testing
-        DistributedExecutorService des = new DefaultExecutorService(InCache);
-
-        List<Future<List<String>>> res = des.submitEverywhere(MapperCAll);
-        for (Future<?> f : res)
-            if (f.isDone())
-               System.out.println("a Mapper Execution is done");
-            else
-                System.out.println("Mapper Execution not done");
-
-
-        DistributedExecutorService des_inter = new DefaultExecutorService(
-                CollectorCache);
-        List<Future<String>> reducers_res=des_inter.submitEverywhere(ReducerCAll);
-        for (Future<?> f : reducers_res) {
-                   if (f != null)
-                        if (f.isDone())
-                            System.out.println("a Reducer Execution is done");
-                }
-
-
+        super.execute();
     }
 
     @Override
@@ -79,21 +98,15 @@ public class SortOperator extends MapReduceOperator {
     }
 
 
-    public List<Boolean> getAscending() {
-        return ascending;
+    public Boolean[] getAscending() {
+        return this.asceding;
     }
 
-    public void setAscending(List<Boolean> ascending) {
-        this.ascending = ascending;
+    public void setAscending(Boolean[] ascending) {
+        this.asceding = ascending;
     }
 
-    public List<Column> getColumns() {
-        return columns;
-    }
 
-    public void setColumns(List<Column> columns) {
-        this.columns = columns;
-    }
 /*
     List<Boolean> ascending;
 
