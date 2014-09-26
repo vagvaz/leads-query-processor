@@ -1,9 +1,11 @@
 package eu.leads.processor.nqe;
 
+import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
+import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
@@ -31,7 +33,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
    EventBus bus;
    LeadsMessageHandler leadsHandler;
    LogProxy log;
-   PersistenceProxy persistence;
+   InfinispanManager persistence;
    Map<String,ActionHandler> handlers;
 
    @Override
@@ -57,13 +59,14 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
       com = new DefaultNode();
       com.initialize(id, gr, null, leadsHandler, leadsHandler, vertx);
       bus.registerHandler(id + ".process", this);
-      persistence = new PersistenceProxy(config.getString("persistence"),com,vertx);
-      persistence.start();
+      LQPConfiguration.initialize();
+      persistence = InfinispanClusterSingleton.getInstance().getManager();
       JsonObject msg = new JsonObject();
       msg.putString("processor", id + ".process");
       handlers = new HashMap<String,ActionHandler>();
-      handlers.put(NQEConstants.MAPREDUCE_OPERATOR,new MapReduceActionHandler(com,log,persistence,id));
-
+      handlers.put(NQEConstants.RUN_OPERATOR,new OperatorActionHandler(com,log,persistence,id));
+      handlers.put(NQEConstants.DEPLOY_PLUGIN,new DeployPluginActionHandler(com,log,persistence,id));
+      handlers.put(NQEConstants.DEPLOY_PLUGIN,new UnDeployPluginActionHandler(com,log,persistence,id));
       log = new LogProxy(config.getString("log"),com);
 
       bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {

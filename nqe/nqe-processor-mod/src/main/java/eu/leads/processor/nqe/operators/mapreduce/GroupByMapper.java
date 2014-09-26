@@ -1,17 +1,19 @@
 package eu.leads.processor.nqe.operators.mapreduce;
 
-import eu.leads.processor.common.LeadsMapper;
-import eu.leads.processor.common.Tuple;
+import eu.leads.processor.core.LeadsMapper;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.common.utils.InfinispanUtils;
 import org.infinispan.distexec.mapreduce.Collector;
+import org.vertx.java.core.json.JsonArray;
+import org.vertx.java.core.json.JsonObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.StringTokenizer;
 
 import static java.lang.System.getProperties;
@@ -27,15 +29,19 @@ import static java.lang.System.getProperties;
  */
 public class GroupByMapper extends LeadsMapper<String, String, String, String> {
 
-    final List<String> columns;
+    transient List<String> columns;
 
-    public GroupByMapper(Properties configuration) {
+    public GroupByMapper(JsonObject configuration) {
         super(configuration);
         columns = new ArrayList<String>();
     }
 
+   public GroupByMapper(String configString) {
+      super(configString);
+   }
 
-    @Override
+
+   @Override
     public void map(String key, String value, Collector<String, String> collector) {
         if (!isInitialized)
             intialize();
@@ -44,37 +50,22 @@ public class GroupByMapper extends LeadsMapper<String, String, String, String> {
         Tuple t = new Tuple(value);
         progress();
         for (String c : columns) {
-            builder.append(t.getAttribute(c) + ",");
+            builder.append(t.getGenericAttribute(c).toString() + ",");
         }
-//        t.setAttribute("LEADSTUPLEID",tupleId);
         collector.emit(builder.toString(), t.asString());
     }
 
     private void intialize() {
-        isInitialized = true;
-        super.initialize();
-        StringTokenizer tokenizer = new StringTokenizer(conf.getProperty("columns").trim(), ",");
-        while (tokenizer.hasMoreTokens()) {
-            String token = tokenizer.nextToken();
-            columns.add(token);
-        }
+       isInitialized = true;
+       super.initialize();
+       JsonArray columnArray = conf.getObject("body").getArray("groupingColumns");
+       Iterator<Object> columnsIterator = columnArray.iterator();
+       columns = new ArrayList<String>(columnArray.size());
+       while(columnsIterator.hasNext()){
+          JsonObject current = (JsonObject) columnsIterator.next();
+          columns.add(current.getString("name"));
+       }
 
-
-        RandomAccessFile raf = null;
-        try {
-            String filename = getProperties().getProperty("java.io.tmpdir") + "/queryProcessor." + InfinispanUtils.getMemberName();
-            File f = new File(filename);
-            long fileLength = f.length();
-            raf = new RandomAccessFile(filename, "rw");
-            raf.seek(fileLength);
-
-            raf.writeBytes("Running " + InfinispanUtils.getMemberName() + ": " + this.getClass().getCanonicalName() + "\n");
-            raf.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
 

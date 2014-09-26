@@ -1,13 +1,14 @@
 package eu.leads.processor.common;
 
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
+
 
 import org.infinispan.Cache;
 import org.infinispan.distexec.mapreduce.Collector;
@@ -75,12 +76,4 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
         return emitCount.get() > maxCollectorSize;
     }
 
-    private void writeObject(java.io.ObjectOutputStream stream)
-            throws IOException {
-    }
-
-    private void readObject(java.io.ObjectInputStream stream)
-            throws IOException, ClassNotFoundException {
-
-    }
 }

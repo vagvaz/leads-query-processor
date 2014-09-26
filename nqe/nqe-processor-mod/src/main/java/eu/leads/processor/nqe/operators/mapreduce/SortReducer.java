@@ -2,11 +2,10 @@ package eu.leads.processor.nqe.operators.mapreduce;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.leads.processor.common.Column;
-import eu.leads.processor.common.LeadsReducer;
-import eu.leads.processor.common.Tuple;
-import eu.leads.processor.common.TupleComparator;
+import eu.leads.processor.core.LeadsReducer;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.common.utils.InfinispanUtils;
+import org.vertx.java.core.json.JsonObject;
 
 import java.io.IOException;
 import java.util.*;
@@ -20,13 +19,13 @@ import java.util.concurrent.ConcurrentMap;
  * To change this template use File | Settings | File Templates.
  */
 public class SortReducer extends LeadsReducer<String, String> {
-    transient private List<Column> sortColumns;
+    transient private List<String> sortColumns;
     private List<Boolean> isAscending;
     private List<Boolean> arithmetic;
     private String output;
     ConcurrentMap<String, String> out;
 
-    public SortReducer(Properties configuration) {
+    public SortReducer(JsonObject configuration) {
         super(configuration);
     }
 
@@ -34,12 +33,12 @@ public class SortReducer extends LeadsReducer<String, String> {
     public void initialize() {
         isInitialized = true;
         super.initialize();
-        String columns = conf.getProperty("sortColumns");
-        String ascending = conf.getProperty("ascending");
-        String arithm = conf.getProperty("arithmetic");
+        String columns = conf.getString("sortColumns");
+        String ascending = conf.getString("ascending");
+        String arithm = conf.getString("arithmetic");
         ObjectMapper mapper = new ObjectMapper();
         try {
-            sortColumns = mapper.readValue(columns, new TypeReference<List<Column>>() {
+            sortColumns = mapper.readValue(columns, new TypeReference<List<String>>() {
             });
             isAscending = mapper.readValue(ascending, new TypeReference<List<Boolean>>() {
             });
@@ -48,7 +47,7 @@ public class SortReducer extends LeadsReducer<String, String> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        output = conf.getProperty("keysName");
+        output = conf.getString("keysName");
 
     }
 
@@ -59,13 +58,13 @@ public class SortReducer extends LeadsReducer<String, String> {
 
         out = InfinispanUtils.getOrCreatePersistentMap(output + key);
         ArrayList<Tuple> tuples = new ArrayList<Tuple>();
-        Comparator<Tuple> comparator = new TupleComparator(sortColumns, isAscending, arithmetic);
+//        Comparator<Tuple> comparator = new TupleComparator(sortColumns, isAscending, arithmetic);
         while (iterator.hasNext()) {
             String tmp = iterator.next();
             tuples.add(new Tuple(tmp));
             progress();
         }
-        Collections.sort(tuples, comparator);
+//        Collections.sort(tuples, comparator);
         int counter = 0;
         for (Tuple t : tuples) {
             out.put(key + ":" + counter, t.asString());
@@ -73,7 +72,7 @@ public class SortReducer extends LeadsReducer<String, String> {
         }
         tuples.clear();
         tuples = null;
-        comparator = null;
+//        comparator = null;
         return output + key;
     }
 }

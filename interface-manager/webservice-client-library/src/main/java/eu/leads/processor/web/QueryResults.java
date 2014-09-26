@@ -9,84 +9,87 @@ import java.util.List;
  */
 @JsonAutoDetect
 public class QueryResults {
-   private String id;
-   private long min;
-   private long max;
-   private long size;
-   private List<String> tuples;
-   private String message;
+    private String id;
+    private long min;
+    private long max;
+    private long size;
+    private List<String> tuples;
+    private String message;
 
 
 
-   public QueryResults(){
-      id = "";
-      min = -1;
-      max = -1;
-      tuples = null;
-   }
-   public QueryResults(String queryId) {
-      id = queryId;
-      min = -1;
-      max = -1;
-      tuples = null;
-   }
+    public QueryResults() {
+        id = "";
+        min = -1;
+        max = -1;
+        tuples = null;
+    }
 
-   public String getId() {
-      return id;
-   }
+    public QueryResults(String queryId) {
+        id = queryId;
+        min = -1;
+        max = -1;
+        tuples = null;
+    }
 
-   public void setId(String id) {
-      this.id = id;
-   }
+    public String getId() {
+        return id;
+    }
 
-   public long getMin() {
-      return min;
-   }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-   public void setMin(long min) {
-      this.min = min;
-   }
+    public long getMin() {
+        return min;
+    }
 
-   public long getMax() {
-      return max;
-   }
+    public void setMin(long min) {
+        this.min = min;
+    }
 
-   public void setMax(long max) {
-      this.max = max;
-   }
+    public long getMax() {
+        return max;
+    }
 
-   public List<String> getTuples() {
-      return tuples;
-   }
+    public void setMax(long max) {
+        this.max = max;
+    }
 
-   public void setTuples(List<String> tuples) {
-      this.tuples = tuples;
-   }
+    public List<String> getTuples() {
+        return tuples;
+    }
 
-   public String getMessage() {
-      return message;
-   }
+    public void setTuples(List<String> tuples) {
+        this.tuples = tuples;
+    }
 
-   public void setMessage(String message) {
-      this.message = message;
-   }
-   @Override
-   public String toString(){
-      String result = id+"["+Long.toString(min)+":"+Long.toString(max)+"]\n"+message+"\n";
-      StringBuilder builder = new StringBuilder();
-      int counter = 0;
-      for(String tuple : tuples){
-         builder.append(Integer.toString(counter++)+ tuple+"\n");
-      }
-      result += builder.toString();
-      return result;
-   }
+    public String getMessage() {
+        return message;
+    }
 
-   public long getSize() {
-      return size;
-   }
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
-   public void setSize(long size) {
-      this.size = size;
-   }
+    @Override
+    public String toString() {
+        String result =
+            id + "[" + Long.toString(min) + ":" + Long.toString(max) + "]\n" + message + "\n";
+        StringBuilder builder = new StringBuilder();
+        int counter = 0;
+        for (String tuple : tuples) {
+            builder.append(Integer.toString(counter++) + tuple + "\n");
+        }
+        result += builder.toString();
+        return result;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
+    }
 }

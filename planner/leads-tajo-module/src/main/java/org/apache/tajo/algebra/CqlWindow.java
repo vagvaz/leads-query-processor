@@ -24,31 +24,30 @@ import com.google.gson.annotations.SerializedName;
 
 
 public class CqlWindow extends Expr {
-  @Expose @SerializedName("CqlWindow")
-  private String exprStr;
-  private WindowType type;
+    @Expose @SerializedName("CqlWindow")
+    private String exprStr;
+    private WindowType type;
 
-  public CqlWindow(String str, WindowType type) {
-    super(OpType.CqlWindow);
-    this.exprStr = str;
-    this.type = type;
-  }
-
-
-  public String getExprStr() {
-    return exprStr;
-  }
-
-  public int hashCode() {
-    return exprStr.hashCode();
-  }
-
-  @Override
-  boolean equalsTo(Expr expr) {
-    if (expr instanceof CqlWindow) {
-      CqlWindow another = (CqlWindow) expr;
-      return exprStr.equals(another.exprStr);
+    public CqlWindow(String str, WindowType type) {
+        super(OpType.CqlWindow);
+        this.exprStr = str;
+        this.type = type;
     }
-    return false;
-  }
+
+
+    public String getExprStr() {
+        return exprStr;
+    }
+
+    public int hashCode() {
+        return exprStr.hashCode();
+    }
+
+    @Override boolean equalsTo(Expr expr) {
+        if (expr instanceof CqlWindow) {
+            CqlWindow another = (CqlWindow) expr;
+            return exprStr.equals(another.exprStr);
+        }
+        return false;
+    }
 }

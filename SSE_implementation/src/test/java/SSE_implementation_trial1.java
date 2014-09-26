@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+<
 
 
 public class SSE_implementation_trial1 {
@@ -66,5 +67,6 @@ public class SSE_implementation_trial1 {
         
         HashMap<String, ArrayList<Etuple>> resultDB = serverDB.TSetRetrieve(storeDB, tokenDB);
         clientDB.Decrypt_Answer(resultDB);*/
+
     }
 }

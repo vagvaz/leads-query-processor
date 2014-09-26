@@ -2,6 +2,8 @@ package eu.leads.processor.nqe.operators;
 
 import eu.leads.processor.common.*;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.core.*;
+import eu.leads.processor.core.net.Node;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
@@ -15,81 +17,97 @@ import java.util.concurrent.Future;
  * Created by tr on 19/9/2014.
  */
 public abstract class MapReduceOperator extends BasicOperator{
-    protected transient Cache<?, ?> InCache;
-    protected transient Cache<?, List<?>> CollectorCache;
-    protected transient Cache<?, ?> OutCache;
+    protected transient Cache<?, ?> inputCache;
+    protected transient Cache<?, List<?>> intermediateCache;
+    protected transient Cache<?, ?> outputCache;
+    protected String inputCacheName;
+    protected String outputCacheName;
+    protected String intermediateCacheName;
+    protected LeadsMapper<?, ?, ?, ?> mapper;
+    protected LeadsCollector<?, ?> collector;
+    protected LeadsReducer<?,?> reducer;
 
-    public MapReduceOperator(OperatorType operatorType) {
-        super(operatorType);
+
+    public MapReduceOperator(Node com, InfinispanManager persistence, Action action) {
+
+       super(com,persistence,action);
+       inputCacheName = getInput();
+       outputCacheName = getName();
+       intermediateCacheName = getName()+".intermediate";
     }
 
     public void setMapper(LeadsMapper<?, ?, ?, ?> mapper) {
-        Mapper = mapper;
-        Mapper.initialize();
-    }
+        this.mapper = mapper;
 
-    private LeadsMapper<?, ?, ?, ?> Mapper;
-    private LeadsCollector<?, ?> Collector;
+    }
 
     public void setReducer(LeadsReducer<?, ?> reducer) {
-        Reducer = reducer;
-        Reducer.initialize();
+        this.reducer = reducer;
     }
-
-    private LeadsReducer<?, ?> Reducer;
-    protected InfinispanManager iman;
-
 
     @Override
     public void init(JsonObject config) {
-
-
-        InCache = (Cache<?, ?>) iman.getPersisentCache("InCache");
-        CollectorCache = (Cache<?, List<?>>) iman
-                .getPersisentCache("CollectorCache");
-        OutCache = (Cache<?, ?>) iman.getPersisentCache("OutCache");
-
-        Collector =new LeadsCollector(0, CollectorCache);
-
-
-
+       conf.putString("output",getOutput());
+        inputCache = (Cache<?, ?>) manager.getPersisentCache(inputCacheName);
+        intermediateCache = (Cache<?, List<?>>) manager
+                                                          .getPersisentCache(intermediateCacheName);
+          outputCache = (Cache<?, ?>) manager.getPersisentCache(outputCacheName);
+          collector = new LeadsCollector(0, intermediateCache);
     }
+
+    @Override
+    public void run() {
+       DistributedExecutorService des = new DefaultExecutorService(inputCache);
+       LeadsMapperCallable mapperCallable = new LeadsMapperCallable(inputCache,collector,mapper);
+       List<Future<?>> res = des.submitEverywhere(mapperCallable);
+       try {
+            if (res != null) {
+               for (Future<?> result : res) {
+                  result.get();
+               }
+               System.out.println("mapper Execution is done");
+            }
+            else
+            {
+               System.out.println("mapper Execution not done");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+       if(reducer != null) {
+          LeadsReduceCallable reducerCacllable = new LeadsReduceCallable(outputCache, reducer);
+          DistributedExecutorService des_inter = new DefaultExecutorService(intermediateCache);
+          List<Future<?>> reducers_res;
+          res = des_inter
+                        .submitEverywhere(reducerCacllable);
+          try {
+             if (res != null) {
+                for (Future<?> result : res) {
+                   result.get();
+                }
+                System.out.println("reducer Execution is done");
+             } else {
+                System.out.println("reducer Execution not done");
+             }
+          } catch (InterruptedException e) {
+             e.printStackTrace();
+          } catch (ExecutionException e) {
+             e.printStackTrace();
+          }
+       }
+       cleanup();
+    }
+
 
     @Override /// Example do not use
     public void execute() {
-
-//        DistributedExecutorService des = new DefaultExecutorService(InCache);
-//
-//        Future<? extends List<?>> res = des.submit(MapperCAll);
-//
-//        try {
-//            if (res.get() != null)
-//                System.out.println("Mapper Execution is done");
-//            else
-//                System.out.println("Mapper Execution not done");
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        } catch (ExecutionException e) {
-//            e.printStackTrace();
-//        }
-//        // System.out.println("testCollector Cache Size:"
-//        //         + Collector.getCache().size());
-//
-//        DistributedExecutorService des_inter = new DefaultExecutorService(
-//                CollectorCache);
-//        List<Future<?>> reducers_res;
-//        // reducers_res = des_inter
-////                        .submitEverywhere(testReducerCAll);
-////                for (Future<?> f : reducers_res) {
-////                    if (f != null)
-////                        if (f.get() != null)
-////                            System.out.println("Reducer Execution is done");
-////                }
-
+      super.start();
     }
 
     @Override
     public void cleanup() {
-
+        intermediateCache.stop();
     }
 }

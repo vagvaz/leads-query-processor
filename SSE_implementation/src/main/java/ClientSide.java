@@ -69,7 +69,7 @@ public class ClientSide {
     public int getSvalue(){
         return Svalue;
     }
-    
+
     public byte[] xor(byte[] key, byte[] plaintext) {
         byte[] retVal = new byte[plaintext.length];
         int keySize = key.length; // in bytes
@@ -219,7 +219,7 @@ public class ClientSide {
         String strDataToEncrypt = new String();
         String strCipherText = new String();
         String strDecryptedText = new String();
-        
+       
         try {
             FileReader fileReaderCount = new FileReader(fileName);
             BufferedReader bufferedReaderCount = new BufferedReader(fileReaderCount);
@@ -468,7 +468,7 @@ public class ClientSide {
                 sb.append(ch);
                 ret = sb.toString();
                 line = ret;
-                
+             
                 int AES_KEYLENGTH = 128;
                 byte[] iv = new byte[AES_KEYLENGTH / 8];
                 SecureRandom prng = new SecureRandom();
@@ -588,12 +588,14 @@ public class ClientSide {
                     bint = Math.abs(java.nio.ByteBuffer.wrap(b).getInt());
                     bint = (bint + 1) % Bvalue;
 
+
                     //if Free[b] is empty 
                     if (Free[bint].isEmpty()) {
                         return TSetSetup(index);
                     }
                     //Unifrom from free[b]
                     RandomEngine generator = new cern.jet.random.engine.MersenneTwister64(java.nio.ByteBuffer.wrap(Arrays.copyOfRange(PRFBytes, 0, 32)).getInt());
+
                     Uniform unif = new Uniform(generator);
                     int coin = unif.nextIntFromTo(0, Free[bint].size() - 1);
                     int Sindex = Integer.parseInt(Free[bint].get(coin).toString());
@@ -641,6 +643,7 @@ public class ClientSide {
         this.secretKey_tuple = sk.getSk_DB();
         this.sk_T = sk.getSk_Index();
         
+
         try {
             Cipher aesCipherForEncryption = Cipher.getInstance("AES/CBC/PKCS5Padding");
             aesCipherForEncryption.init(Cipher.ENCRYPT_MODE, sk_T, ivspec);
@@ -681,6 +684,7 @@ public class ClientSide {
             Cipher aesCipherForDecryption = Cipher.getInstance("AES/CBC/PKCS5Padding");
             String strDecryptedText = new String();
             for (int i = 0; i < result.size(); i++) {
+
                 aesCipherForDecryption.init(Cipher.DECRYPT_MODE, secretKey_tuple, new IvParameterSpec(result.get(i).getIV()));
                 byte[] byteDecryptedText;
                 byteDecryptedText = aesCipherForDecryption.doFinal(result.get(i).getCiphertext());
@@ -705,5 +709,4 @@ public class ClientSide {
         output.put("Decrypted Result", DecResult);
         return output;
     }
- 
-}
+

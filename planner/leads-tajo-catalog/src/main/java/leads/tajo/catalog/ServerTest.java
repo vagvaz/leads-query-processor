@@ -15,6 +15,8 @@ import org.apache.tajo.conf.TajoConf;
 import org.apache.tajo.engine.function.builtin.SumInt;
 import org.apache.tajo.master.TajoMaster;
 import org.apache.tajo.util.KeyValueSet;
+import org.apache.tajo.master.TajoMaster;
+import org.apache.tajo.util.KeyValueSet;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -27,6 +29,7 @@ import static org.apache.tajo.TajoConstants.DEFAULT_TABLESPACE_NAME;
  * 
  */
 public class ServerTest {
+    static TajoConf conf = null;
 	private static CatalogService catalog = null;
 	//private static MiniCatalogServer catalogServer;
 	private static LeadsCatalog mycatalogServer = null;
@@ -90,11 +93,9 @@ public class ServerTest {
 		catalog.createTablespace(DEFAULT_TABLESPACE_NAME,
 				"leadsfs://localhost:5998/warehouse");
 		catalog.createDatabase(DEFAULT_DATABASE_NAME, DEFAULT_TABLESPACE_NAME);
-
-	    for (FunctionDesc funcDesc : TajoMaster.initBuiltinFunctions()) {
-	        catalog.createFunction(funcDesc);
+        for(FunctionDesc func : TajoMaster.initBuiltinFunctions()){
+           catalog.createFunction(func);
 	      }
-		
 		Schema schema = new Schema();
 		schema.addColumn("webpageurl", Type.TEXT);
 		schema.addColumn("name", Type.TEXT);
@@ -124,31 +125,63 @@ public class ServerTest {
 		schema5.addColumn("phone", Type.INT4);
 
 
+<<<<<<< HEAD
 		TableMeta meta = CatalogUtil.newTableMeta(StoreType.MEM);
 	    TableDesc Entities = new TableDesc(
 	            CatalogUtil.buildFQName(TajoConstants.DEFAULT_DATABASE_NAME, "entities"), schema, meta,
+=======
+
+        TableMeta meta = CatalogUtil.newTableMeta(StoreType.MEM);
+        TableDesc people = new TableDesc(
+                                            CatalogUtil
+                                                .buildFQName(TajoConstants.DEFAULT_DATABASE_NAME,
+                                                                "employee"), schema, meta,
+>>>>>>> origin/prototype
 	            getTestDir());
 	        catalog.createTable(Entities);
 
 	   	
+<<<<<<< HEAD
 		TableDesc Webpages = new org.apache.tajo.catalog.TableDesc(
 				CatalogUtil.buildFQName(DEFAULT_DATABASE_NAME, "webpages"),
 				schema2, StoreType.MEM, new KeyValueSet(), getTestDir("webpages"));
 		catalog.createTable(Webpages);
+=======
+        TableDesc student = new org.apache.tajo.catalog.TableDesc(
+                                                                     CatalogUtil
+                                                                         .buildFQName(DEFAULT_DATABASE_NAME,
+                                                                                         "dept"),
+                                                                     schema2, StoreType.MEM,
+                                                                     new KeyValueSet(),
+                                                                     getTestDir("student"));
+        catalog.createTable(student);
+>>>>>>> origin/prototype
 
 		TableDesc score = new org.apache.tajo.catalog.TableDesc(
-				CatalogUtil.buildFQName(DEFAULT_DATABASE_NAME, "score"),
-				schema3, StoreType.MEM, new KeyValueSet(), getTestDir("score"));
+                                                                   CatalogUtil
+                                                                       .buildFQName(DEFAULT_DATABASE_NAME,
+                                                                                       "score"),
+                                                                   schema3, StoreType.MEM,
+                                                                   new KeyValueSet(),
+                                                                   getTestDir("score"));
 		catalog.createTable(score);
 
 		TableDesc score2 = new org.apache.tajo.catalog.TableDesc(
-				CatalogUtil.buildFQName(DEFAULT_DATABASE_NAME, "score2"),
-				schema4, StoreType.MEM, new KeyValueSet(), getTestDir("score2"));
+                                                                    CatalogUtil
+                                                                        .buildFQName(DEFAULT_DATABASE_NAME,
+                                                                                        "score2"),
+                                                                    schema4, StoreType.MEM,
+                                                                    new KeyValueSet(),
+                                                                    getTestDir("score2"));
 		catalog.createTable(score2);
 
 		TableDesc score3 = new org.apache.tajo.catalog.TableDesc(
-				CatalogUtil.buildFQName(DEFAULT_DATABASE_NAME, "score3"),
-				schema5, StoreType.MEM, new KeyValueSet(), getTestDir("score3"));
+                                                                    CatalogUtil
+                                                                        .buildFQName(DEFAULT_DATABASE_NAME,
+                                                                                        "score3"),
+                                                                    schema5, StoreType.MEM,
+                                                                    new KeyValueSet(),
+                                                                    getTestDir("score3"));
 		catalog.createTable(score3);
 
 	    FunctionDesc funcDesc = new FunctionDesc("sumtest", SumInt.class, FunctionType.AGGREGATION,

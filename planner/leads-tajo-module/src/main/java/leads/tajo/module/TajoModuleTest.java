@@ -99,5 +99,4 @@ public class TajoModuleTest {
 			e1.printStackTrace();
 		}   
 	}
-
 }

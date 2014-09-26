@@ -117,6 +117,7 @@ public class ServerSide {
             i++;
         }
         HashMap<String, ArrayList<Etuple>> result = new HashMap<String, ArrayList<Etuple>>();
+
         result.put("Encrypted Result", result_list);
         return result;
     }

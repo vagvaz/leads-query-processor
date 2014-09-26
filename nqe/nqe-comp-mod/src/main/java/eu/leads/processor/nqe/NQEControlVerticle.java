@@ -10,12 +10,12 @@ import org.vertx.java.core.json.JsonObject;
 public class NQEControlVerticle extends ComponentControlVerticle {
 
    protected final String componentType = "nqe";
-   private String plannerQueue;
+   private String deployerQueue;
    private String nqeQueue;
 
    @Override
    public void start() {
-      plannerQueue = StringConstants.PLANNERQUEUE;
+      deployerQueue = StringConstants.PLANNERQUEUE;
       nqeQueue = StringConstants.NODEEXECUTORQUEUE;
       super.start();
       setup(container.config());
@@ -26,7 +26,7 @@ public class NQEControlVerticle extends ComponentControlVerticle {
    public void setup(JsonObject conf) {
       super.setup(conf);
        this.logicConfig.putString("nqe",nqeQueue);
-      this.processorConfig.putString("planner",plannerQueue);
+      this.processorConfig.putString("planner",deployerQueue);
       //this.logicConfig.putString("nqe",nqeQueue);
    }
 

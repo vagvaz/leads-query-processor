@@ -1,9 +1,11 @@
 package eu.leads.processor.nqe.operators;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import eu.leads.processor.common.Tuple;
-import eu.leads.processor.nqe.operators.BasicOperator;
-import eu.leads.processor.nqe.operators.OperatorType;
+import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.core.Tuple;
+import eu.leads.processor.core.Action;
+import eu.leads.processor.core.net.Node;
+import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.Map;
@@ -23,16 +25,29 @@ import java.util.concurrent.ConcurrentMap;
 @JsonAutoDetect
 public class LimitOperator extends BasicOperator {
     boolean sorted = false;
-    final ConcurrentMap<String, String> inputMap=null;
-    final ConcurrentMap<String, String> data=null;
-    public LimitOperator() {
-        super(OperatorType.LIMIT);
-    }
+    Cache<String, String> inputMap=null;
+    ConcurrentMap<String, String> data=null;
     public String prefix;
+    public long rowCount;
+   public LimitOperator(Action action) {
+      super(action);
+   }
 
-    @Override
+   public LimitOperator(Node com, InfinispanManager persistence, Action action) {
+
+      super(com, persistence, action);
+      rowCount = conf.getObject("body").getLong("fetchFirstNum");
+      sorted = conf.getBoolean("sorted",false);
+      prefix =   getOutput() + ":";
+      inputMap = (Cache<String, String>) persistence.getPersisentCache(getInput());
+      data = persistence.getPersisentCache(getOutput());
+   }
+
+   @Override
     public void init(JsonObject config) {
         ///How to initialize what ?
+       rowCount = conf.getObject("body").getLong("fetchFirstNum");
+
     }
 
     @Override
@@ -40,15 +55,15 @@ public class LimitOperator extends BasicOperator {
         int counter = 0;
         if (sorted) {
             int sz = inputMap.size();
-            for (counter = 0; counter < limit.getRowCount() && counter < sz; counter++) {
-                String tupleValue = inputMap.get(input + counter);
+            for (counter = 0; counter < rowCount && counter < sz; counter++) {
+                String tupleValue = inputMap.get(prefix + counter);
                 Tuple t = new Tuple(tupleValue);
                 handlePagerank(t);
                 data.put(prefix + Integer.toString(counter), t.asString());
             }
         } else {
             for (Map.Entry<String, String> entry : inputMap.entrySet()) {
-                if (counter >= limit.getRowCount())
+                if (counter >= rowCount)
                     break;
                 String tupleId = entry.getKey().substring(entry.getKey().indexOf(":") + 1);
                 Tuple t = new Tuple(entry.getValue());
@@ -80,7 +95,7 @@ public class LimitOperator extends BasicOperator {
 
     @Override
     public void cleanup() {
-
+      super.cleanup();
     }
 }/*ExecutionPlanNode {
     private Limit limit;

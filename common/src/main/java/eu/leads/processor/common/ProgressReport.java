@@ -1,6 +1,9 @@
 package eu.leads.processor.common;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.TimerTask;
 
 /**
@@ -9,10 +12,10 @@ import java.util.TimerTask;
 public class ProgressReport extends TimerTask implements Serializable {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 8736657557946095498L;
-	private long ticks;
+     *
+     */
+    private static final long serialVersionUID = 8736657557946095498L;
+    private long ticks;
     private long overall;
     private boolean maxed;
     private String prefix;
@@ -28,16 +31,16 @@ public class ProgressReport extends TimerTask implements Serializable {
     public void run() {
         if (maxed) {
             this.cancel();
-           //////// StdOutputWriter.getInstance().println("");
+            //////// StdOutputWriter.getInstance().println("");
             return;
         }
         double report = getReport();
         printReport(report);
-//        try {
+        //        try {
 
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        //        } catch (IOException e) {
+        //            e.printStackTrace();
+        //        }
 
     }
 
@@ -46,12 +49,12 @@ public class ProgressReport extends TimerTask implements Serializable {
             maxed = true;
         String tmp = "";
         if (!maxed)
-//            tmp  = prefix + " processed: " + Integer.toString((int)(Math.ceil(report*100))) + "%\r";
+            //            tmp  = prefix + " processed: " + Integer.toString((int)(Math.ceil(report*100))) + "%\r";
             tmp = prefix + " processed: " + Long.toString(ticks) + " tuples\r";
         else
-//            tmp  = prefix + " processed: " + Integer.toString((int)(Math.ceil(report*100))) + "%\n";
+            //            tmp  = prefix + " processed: " + Integer.toString((int)(Math.ceil(report*100))) + "%\n";
             tmp = prefix + " processed: " + Long.toString(ticks) + " tuples\n";
-      //////////////////  StdOutputWriter.getInstance().write(tmp);
+        //////////////////  StdOutputWriter.getInstance().write(tmp);
     }
 
     public void tick() {
