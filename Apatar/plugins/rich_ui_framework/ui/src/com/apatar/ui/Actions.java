@@ -364,7 +364,6 @@ public class Actions {
 					String jarname = "resultsDisplayWindow.jar";
 					File jar = new File(jarname);
 					if (jar.exists()) {
-
 						Process proc = Runtime.getRuntime().exec(
 								"java -jar  "+jarname+ " " + ApplicationData.PROJECT_PATH);
 						
