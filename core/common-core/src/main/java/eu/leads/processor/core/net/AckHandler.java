@@ -12,45 +12,45 @@ import org.vertx.java.core.logging.Logger;
  */
 public class AckHandler implements Handler<AsyncResult<Message<JsonObject>>> {
 
-   Node owner;
-   Logger logger;
-   int retries;
-   long msgId;
-   LeadsMessageHandler handler;
+    Node owner;
+    Logger logger;
+    int retries;
+    long msgId;
+    LeadsMessageHandler handler;
 
-   public AckHandler(Node owner, Logger logger, long msgId) {
-      this.owner = owner;
-      this.logger = logger;
-      retries = owner.getRetries();
-      this.msgId = msgId;
-      handler = null;
-   }
+    public AckHandler(Node owner, Logger logger, long msgId) {
+        this.owner = owner;
+        this.logger = logger;
+        retries = owner.getRetries();
+        this.msgId = msgId;
+        handler = null;
+    }
 
-   public AckHandler(Node owner, Logger logger, long msgId, LeadsMessageHandler handler) {
-      this.owner = owner;
-      this.logger = logger;
-      retries = owner.getRetries();
-      this.msgId = msgId;
-      this.handler = handler;
-   }
+    public AckHandler(Node owner, Logger logger, long msgId, LeadsMessageHandler handler) {
+        this.owner = owner;
+        this.logger = logger;
+        retries = owner.getRetries();
+        this.msgId = msgId;
+        this.handler = handler;
+    }
 
 
-   @Override
-   public void handle(AsyncResult<Message<JsonObject>> result) {
-      if (result.succeeded()) {
-         owner.succeed(msgId);
-//         if (handler != null)
-//            handler.handle(result.result().body());
-      } else {
-         //IF maximum number of retries reached then fail the message
-         if (retries == 0) {
-            owner.fail(msgId);
-         } else {
-            //RETRY Sending
-            retries--;
-            owner.retry(msgId, this);
-         }
+    @Override
+    public void handle(AsyncResult<Message<JsonObject>> result) {
+        if (result.succeeded()) {
+            owner.succeed(msgId);
+            //         if (handler != null)
+            //            handler.handle(result.result().body());
+        } else {
+            //IF maximum number of retries reached then fail the message
+            if (retries == 0) {
+                owner.fail(msgId);
+            } else {
+                //RETRY Sending
+                retries--;
+                owner.retry(msgId, this);
+            }
 
-      }
-   }
+        }
+    }
 }

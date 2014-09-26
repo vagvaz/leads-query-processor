@@ -2,7 +2,6 @@ package eu.leads.processor.common;
 
 import org.infinispan.distexec.mapreduce.Reducer;
 
-import java.util.Iterator;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.concurrent.ConcurrentMap;
@@ -16,10 +15,10 @@ import java.util.concurrent.ConcurrentMap;
  */
 public abstract class LeadsReducer<kOut, vOut> implements Reducer<kOut, vOut> {
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = -402082107893975415L;
-	protected final Properties conf;
+     *
+     */
+    private static final long serialVersionUID = -402082107893975415L;
+    protected final Properties conf;
     protected ConcurrentMap<String, String> output;
     protected boolean isInitialized = false;
 
@@ -44,7 +43,7 @@ public abstract class LeadsReducer<kOut, vOut> implements Reducer<kOut, vOut> {
     @Override
     protected void finalize() {
         report.printReport(report.getReport());
-       
+
         timer.cancel();
     }
 

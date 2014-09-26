@@ -22,40 +22,39 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class CqlTimeWindow extends Expr {
-	@Expose
-	@SerializedName("CqlTimeWindow")
-	private String exprStr;
-	@Expose @SerializedName("TimeDate")
-	private Expr TimeDate; //null means NOW
+    @Expose
+    @SerializedName("CqlTimeWindow")
+    private String exprStr;
+    @Expose @SerializedName("TimeDate")
+    private Expr TimeDate; //null means NOW
 
-	public Expr getTimeDate() {
-		return TimeDate;
-	}
+    public CqlTimeWindow(String str, Expr TimeDate) {
+        super(OpType.CqlTimeWindow);
+        this.exprStr = str;
+        this.TimeDate = TimeDate;
+    }
 
-	public void setTimeDate(Expr timeDate) {
-		TimeDate = timeDate;
-	}
+    public Expr getTimeDate() {
+        return TimeDate;
+    }
 
-	public CqlTimeWindow(String str, Expr TimeDate) {
-		super(OpType.CqlTimeWindow);
-		this.exprStr = str;
-		this.TimeDate = TimeDate;
-	}
+    public void setTimeDate(Expr timeDate) {
+        TimeDate = timeDate;
+    }
 
-	public String getExprStr() {
-		return exprStr+TimeDate.toString();
-	}
+    public String getExprStr() {
+        return exprStr + TimeDate.toString();
+    }
 
-	public int hashCode() {
-		return exprStr.hashCode();
-	}
+    public int hashCode() {
+        return exprStr.hashCode();
+    }
 
-	@Override
-	boolean equalsTo(Expr expr) {
-		if (expr instanceof CqlTimeWindow) {
-			CqlTimeWindow another = (CqlTimeWindow) expr;
-			return exprStr.equals(another.exprStr);
-		}
-		return false;
-	}
+    @Override boolean equalsTo(Expr expr) {
+        if (expr instanceof CqlTimeWindow) {
+            CqlTimeWindow another = (CqlTimeWindow) expr;
+            return exprStr.equals(another.exprStr);
+        }
+        return false;
+    }
 }

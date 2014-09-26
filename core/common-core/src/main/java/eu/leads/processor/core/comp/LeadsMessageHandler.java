@@ -1,6 +1,5 @@
 package eu.leads.processor.core.comp;
 
-import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonObject;
 
 /**
@@ -8,7 +7,7 @@ import org.vertx.java.core.json.JsonObject;
  */
 public interface LeadsMessageHandler {
 
-   public void handle(JsonObject message);
+    public void handle(JsonObject message);
 
 
 }

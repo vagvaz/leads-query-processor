@@ -24,196 +24,202 @@ import java.lang.reflect.Type;
 
 public enum OpType {
 
-  // relational operators
-  Projection(Projection.class),
-  Limit(Limit.class),
-  Sort(Sort.class),
-  Having(Having.class),
-  Aggregation(Aggregation.class),
-  Join(Join.class),
-  Filter(Selection.class),
-  Union(SetOperation.class),
-  Except(SetOperation.class),
-  Intersect(SetOperation.class),
-  SimpleTableSubQuery(SimpleTableSubQuery.class),
-  TablePrimaryTableSubQuery(TablePrimarySubQuery.class),
-  RelationList(RelationList.class),
-  Relation(Relation.class),
-  ScalarSubQuery(ScalarSubQuery.class),
-  Explain(Explain.class),
-  Window(Window.class),
+    // relational operators
+    Projection(Projection.class),
+    Limit(Limit.class),
+    Sort(Sort.class),
+    Having(Having.class),
+    Aggregation(Aggregation.class),
+    Join(Join.class),
+    Filter(Selection.class),
+    Union(SetOperation.class),
+    Except(SetOperation.class),
+    Intersect(SetOperation.class),
+    SimpleTableSubQuery(SimpleTableSubQuery.class),
+    TablePrimaryTableSubQuery(TablePrimarySubQuery.class),
+    RelationList(RelationList.class),
+    Relation(Relation.class),
+    ScalarSubQuery(ScalarSubQuery.class),
+    Explain(Explain.class),
+    Window(Window.class),
 
-  // Data definition language
-  CreateDatabase(CreateDatabase.class),
-  DropDatabase(DropDatabase.class),
-  CreateTable(CreateTable.class),
-  DropTable(DropTable.class),
-  AlterTablespace(AlterTablespace.class),
-  AlterTable(AlterTable.class),
-  TruncateTable(TruncateTable.class),
+    // Data definition language
+    CreateDatabase(CreateDatabase.class),
+    DropDatabase(DropDatabase.class),
+    CreateTable(CreateTable.class),
+    DropTable(DropTable.class),
+    AlterTablespace(AlterTablespace.class),
+    AlterTable(AlterTable.class),
+    TruncateTable(TruncateTable.class),
 
-  // Insert or Update
-  Insert(Insert.class),
+    // Insert or Update
+    Insert(Insert.class),
 
-  // Logical Operators
-  And(BinaryOperator.class),
-  Or(BinaryOperator.class),
-  Not(NotExpr.class),
+    // Logical Operators
+    And(BinaryOperator.class),
+    Or(BinaryOperator.class),
+    Not(NotExpr.class),
 
-  // Comparison Predicates
-  Equals(BinaryOperator.class),
-  NotEquals(BinaryOperator.class),
-  LessThan(BinaryOperator.class),
-  LessThanOrEquals(BinaryOperator.class),
-  GreaterThan(BinaryOperator.class),
-  GreaterThanOrEquals(BinaryOperator.class),
+    // Comparison Predicates
+    Equals(BinaryOperator.class),
+    NotEquals(BinaryOperator.class),
+    LessThan(BinaryOperator.class),
+    LessThanOrEquals(BinaryOperator.class),
+    GreaterThan(BinaryOperator.class),
+    GreaterThanOrEquals(BinaryOperator.class),
 
-  // Other predicates
-  Between(BetweenPredicate.class),
-  CaseWhen(CaseWhenPredicate.class),
-  IsNullPredicate(IsNullPredicate.class),
-  InPredicate(InPredicate.class),
-  ValueList(ValueListExpr.class),
-  ExistsPredicate(ExistsPredicate.class),
+    // Other predicates
+    Between(BetweenPredicate.class),
+    CaseWhen(CaseWhenPredicate.class),
+    IsNullPredicate(IsNullPredicate.class),
+    InPredicate(InPredicate.class),
+    ValueList(ValueListExpr.class),
+    ExistsPredicate(ExistsPredicate.class),
 
-  // String Operator or Pattern Matching Predicates
-  LikePredicate(PatternMatchPredicate.class),
-  SimilarToPredicate(PatternMatchPredicate.class),
-  Regexp(PatternMatchPredicate.class),
-  Concatenate(BinaryOperator.class),
+    // String Operator or Pattern Matching Predicates
+    LikePredicate(PatternMatchPredicate.class),
+    SimilarToPredicate(PatternMatchPredicate.class),
+    Regexp(PatternMatchPredicate.class),
+    Concatenate(BinaryOperator.class),
 
-  // Arithmetic Operators
-  Plus(BinaryOperator.class),
-  Minus(BinaryOperator.class),
-  Multiply(BinaryOperator.class),
-  Divide(BinaryOperator.class),
-  Modular(BinaryOperator.class),
+    // Arithmetic Operators
+    Plus(BinaryOperator.class),
+    Minus(BinaryOperator.class),
+    Multiply(BinaryOperator.class),
+    Divide(BinaryOperator.class),
+    Modular(BinaryOperator.class),
 
-  // Other Expressions
-  Sign(SignedExpr.class),
-  Column(ColumnReferenceExpr.class),
-  Target(NamedExpr.class),
-  Function(FunctionExpr.class),
-  Asterisk(QualifiedAsteriskExpr.class),
+    // Other Expressions
+    Sign(SignedExpr.class),
+    Column(ColumnReferenceExpr.class),
+    Target(NamedExpr.class),
+    Function(FunctionExpr.class),
+    Asterisk(QualifiedAsteriskExpr.class),
 
-  // Set Functions
-  WindowFunction(WindowFunctionExpr.class),
-  CountRowsFunction(CountRowsFunctionExpr.class),
-  GeneralSetFunction(GeneralSetFunctionExpr.class),
+    // Set Functions
+    WindowFunction(WindowFunctionExpr.class),
+    CountRowsFunction(CountRowsFunctionExpr.class),
+    GeneralSetFunction(GeneralSetFunctionExpr.class),
 
-  // Literal
-  DataType(DataTypeExpr.class),
-  Cast(CastExpr.class),
-  Literal(LiteralValue.class),
-  NullLiteral(NullLiteral.class),
-  TimeLiteral(TimeLiteral.class),
-  DateLiteral(DateLiteral.class),
-  TimestampLiteral(TimestampLiteral.class),
-  IntervalLiteral(IntervalLiteral.class),
-  
-  //A stream S is a (possibly infinite) bag (multiset) of elements s, τ ,
-  //where s is a tuple belonging to the schema of S and τ ∈ T is the timestamp of the element.
-  CqlStream(CqlStream.class),
-  CqlTimeWindow(CqlTimeWindow.class),
-  CqlTupleWindow(CqlTupleWindow.class),
-  CqlPartitionedWindow(CqlPartitionedWindow.class)  ,
-  
-  CqlWindow(CqlWindow.class);
-  
-  private Class baseClass;
+    // Literal
+    DataType(DataTypeExpr.class),
+    Cast(CastExpr.class),
+    Literal(LiteralValue.class),
+    NullLiteral(NullLiteral.class),
+    TimeLiteral(TimeLiteral.class),
+    DateLiteral(DateLiteral.class),
+    TimestampLiteral(TimestampLiteral.class),
+    IntervalLiteral(IntervalLiteral.class),
 
-  OpType() {
-    this.baseClass = Expr.class;
-  }
-  OpType(Class clazz) {
-    this.baseClass = clazz;
-  }
+    //A stream S is a (possibly infinite) bag (multiset) of elements s, τ ,
+    //where s is a tuple belonging to the schema of S and τ ∈ T is the timestamp of the element.
+    CqlStream(CqlStream.class),
+    CqlTimeWindow(CqlTimeWindow.class),
+    CqlTupleWindow(CqlTupleWindow.class),
+    CqlPartitionedWindow(CqlPartitionedWindow.class),
 
-  public Class getBaseClass() {
-    return this.baseClass;
-  }
+    CqlWindow(CqlWindow.class);
 
-  public static class JsonSerDer implements JsonSerializer<OpType>,
-                                            JsonDeserializer<OpType> {
+    private Class baseClass;
 
-    @Override
-    public JsonElement serialize(OpType src, Type typeOfSrc,
-                                 JsonSerializationContext context) {
-      return new JsonPrimitive(src.name());
+    OpType() {
+        this.baseClass = Expr.class;
     }
 
-    @Override
-    public OpType deserialize(JsonElement json, Type typeOfT,
-                                      JsonDeserializationContext context)
-        throws JsonParseException {
-      return OpType.valueOf(json.getAsString());
+    OpType(Class clazz) {
+        this.baseClass = clazz;
     }
-  }
 
-  public static boolean isLogicalType(OpType type) {
-    return type == Not || type == And || type == Or;
-  }
+    public static boolean isLogicalType(OpType type) {
+        return type == Not || type == And || type == Or;
+    }
 
-  public static boolean isComparisonType(OpType type) {
-    return
-        type == OpType.Equals ||
-        type == OpType.NotEquals ||
-        type == OpType.LessThan ||
-        type == OpType.GreaterThan ||
-        type == OpType.LessThanOrEquals ||
-        type == OpType.GreaterThanOrEquals;
-  }
+    public static boolean isComparisonType(OpType type) {
+        return
+            type == OpType.Equals ||
+                type == OpType.NotEquals ||
+                type == OpType.LessThan ||
+                type == OpType.GreaterThan ||
+                type == OpType.LessThanOrEquals ||
+                type == OpType.GreaterThanOrEquals;
+    }
 
-  public static boolean isArithmeticType(OpType type) {
-    return
-        type == Plus ||
-        type == Minus ||
-        type == Multiply ||
-        type == Divide ||
-        type == Modular;
-  }
+    public static boolean isArithmeticType(OpType type) {
+        return
+            type == Plus ||
+                type == Minus ||
+                type == Multiply ||
+                type == Divide ||
+                type == Modular;
+    }
 
-  /**
-   * Check if it is one of the literal types.
-   *
-   * @param type The type to be checked
-   * @return True if it is one of the literal types. Otherwise, it returns False.
-   */
-  public static boolean isLiteralType(OpType type) {
-    return  type == Literal ||
-            type == NullLiteral ||
-            type == TimeLiteral ||
-            type == DateLiteral ||
-            type == TimestampLiteral;
-  }
+    /**
+     * Check if it is one of the literal types.
+     *
+     * @param type The type to be checked
+     *
+     * @return True if it is one of the literal types. Otherwise, it returns False.
+     */
+    public static boolean isLiteralType(OpType type) {
+        return type == Literal ||
+                   type == NullLiteral ||
+                   type == TimeLiteral ||
+                   type == DateLiteral ||
+                   type == TimestampLiteral;
+    }
 
-  /**
-   * Check if it is one of function types.
-   *
-   * @param type The type to be checked
-   * @return True if it is aggregation function type. Otherwise, it returns False.
-   */
-  public static boolean isFunction(OpType type) {
-    return type == Function || isAggregationFunction(type) || isWindowFunction(type);
-  }
+    /**
+     * Check if it is one of function types.
+     *
+     * @param type The type to be checked
+     *
+     * @return True if it is aggregation function type. Otherwise, it returns False.
+     */
+    public static boolean isFunction(OpType type) {
+        return type == Function || isAggregationFunction(type) || isWindowFunction(type);
+    }
 
-  /**
-   * Check if it is an aggregation function type.
-   *
-   * @param type The type to be checked
-   * @return True if it is aggregation function type. Otherwise, it returns False.
-   */
-  public static boolean isAggregationFunction(OpType type) {
-    return type == GeneralSetFunction || type == CountRowsFunction;
-  }
+    /**
+     * Check if it is an aggregation function type.
+     *
+     * @param type The type to be checked
+     *
+     * @return True if it is aggregation function type. Otherwise, it returns False.
+     */
+    public static boolean isAggregationFunction(OpType type) {
+        return type == GeneralSetFunction || type == CountRowsFunction;
+    }
 
-  /**
-   * Check if it is an window function type.
-   *
-   * @param type The type to be checked
-   * @return True if it is window function type. Otherwise, it returns False.
-   */
-  public static boolean isWindowFunction(OpType type) {
-    return type == WindowFunction;
-  }
+    /**
+     * Check if it is an window function type.
+     *
+     * @param type The type to be checked
+     *
+     * @return True if it is window function type. Otherwise, it returns False.
+     */
+    public static boolean isWindowFunction(OpType type) {
+        return type == WindowFunction;
+    }
+
+    public Class getBaseClass() {
+        return this.baseClass;
+    }
+
+
+    public static class JsonSerDer implements JsonSerializer<OpType>,
+                                                  JsonDeserializer<OpType> {
+
+        @Override
+        public JsonElement serialize(OpType src, Type typeOfSrc,
+                                        JsonSerializationContext context) {
+            return new JsonPrimitive(src.name());
+        }
+
+        @Override
+        public OpType deserialize(JsonElement json, Type typeOfT,
+                                     JsonDeserializationContext context)
+            throws JsonParseException {
+            return OpType.valueOf(json.getAsString());
+        }
+    }
 }

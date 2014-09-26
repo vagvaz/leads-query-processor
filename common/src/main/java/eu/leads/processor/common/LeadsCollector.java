@@ -1,6 +1,8 @@
 package eu.leads.processor.common;
 
-import java.io.IOException;
+import org.infinispan.Cache;
+import org.infinispan.distexec.mapreduce.Collector;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,27 +11,21 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.infinispan.Cache;
-import org.infinispan.distexec.mapreduce.Collector;
-import org.infinispan.manager.EmbeddedCacheManager;
-
 public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
-        Serializable {
+                                                       Serializable {
 
-    private static final long serialVersionUID = -602082107893975415L;
     private final AtomicInteger emitCount;
     private final int maxCollectorSize;
-    private transient Cache<KOut, List<VOut>> store_cache;
-    private String cache_name;
-
+    // private Map<KOut, List<VOut>> store;
+    private Cache<KOut, List<VOut>> store_cache;
     public LeadsCollector(int maxCollectorSize,
-                          Cache<KOut, List<VOut>> collectorCache) {
+                             Cache<KOut, List<VOut>> collectorCache) {
         super();
 
+        // store = new HashMap<KOut, List<VOut>>(1024, 0.75f);
         emitCount = new AtomicInteger();
         this.maxCollectorSize = maxCollectorSize;
         store_cache = collectorCache;
-        cache_name = collectorCache.getName();
     }
 
     public Cache<KOut, List<VOut>> getCache() {
@@ -38,10 +34,11 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
 
     public void emit(KOut key, VOut value) {
 
-
+        // List<VOut> list = store.get(key);
         List<VOut> list = store_cache.get(key);
         if (list == null) {
             list = new ArrayList<VOut>(128);
+            // store.put(key, list);
             store_cache.put(key, list);
         }
         list.add(value);
@@ -51,12 +48,12 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
         // }
     }
 
-
-    public void initialize_cache(EmbeddedCacheManager manager) {
-        store_cache = manager.getCache(cache_name);
-    }
+    // public Map<KOut, List<VOut>> collectedValues() {
+    // return store;
+    // }
 
     public void reset() {
+        // store.clear();
         store_cache.clear();
         emitCount.set(0);
     }
@@ -75,12 +72,4 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
         return emitCount.get() > maxCollectorSize;
     }
 
-    private void writeObject(java.io.ObjectOutputStream stream)
-            throws IOException {
-    }
-
-    private void readObject(java.io.ObjectInputStream stream)
-            throws IOException, ClassNotFoundException {
-
-    }
 }

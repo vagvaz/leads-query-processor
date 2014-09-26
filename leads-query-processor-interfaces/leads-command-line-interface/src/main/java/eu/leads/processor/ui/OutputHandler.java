@@ -8,15 +8,15 @@ import java.util.List;
  * Created by vagvaz on 8/22/14.
  */
 public class OutputHandler extends Thread {
-   public OutputHandler() {
+    public OutputHandler() {
 
-   }
+    }
 
-   public void quit() {
+    public void quit() {
 
-   }
+    }
 
-   public void printResults(List<Tuple> resultSet) {
+    public void printResults(List<Tuple> resultSet) {
 
-   }
+    }
 }

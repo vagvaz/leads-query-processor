@@ -9,11 +9,12 @@ import org.vertx.java.core.json.JsonObject;
  */
 public class DefaultFailHandler implements LeadsMessageHandler {
 
-   public DefaultFailHandler(ComponentControlVerticle componentControlVerticle, Node com, LogProxy log, PersistenceProxy persitence) {
-   }
+    public DefaultFailHandler(ComponentControlVerticle componentControlVerticle, Node com,
+                                 LogProxy log, PersistenceProxy persitence) {
+    }
 
-   @Override
-   public void handle(JsonObject jsonObject) {
+    @Override
+    public void handle(JsonObject jsonObject) {
 
-   }
+    }
 }

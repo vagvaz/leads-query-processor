@@ -7,23 +7,23 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
  */
 @JsonAutoDetect
 public class WebServiceQuery {
-   private String user;
-   private String sql;
+    private String user;
+    private String sql;
 
-   public String getUser() {
-      return user;
-   }
+    public String getUser() {
+        return user;
+    }
 
-   public void setUser(String user) {
-      this.user = user;
-   }
+    public void setUser(String user) {
+        this.user = user;
+    }
 
-   public String getSql() {
-      return sql;
-   }
+    public String getSql() {
+        return sql;
+    }
 
-   public void setSql(String sql) {
-      this.sql = sql;
-   }
+    public void setSql(String sql) {
+        this.sql = sql;
+    }
 }
 
