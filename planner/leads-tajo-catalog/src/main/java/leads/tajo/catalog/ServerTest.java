@@ -1,32 +1,26 @@
 package leads.tajo.catalog;
 
 
-import static org.apache.tajo.TajoConstants.DEFAULT_DATABASE_NAME;
-import static org.apache.tajo.TajoConstants.DEFAULT_TABLESPACE_NAME;
-
-import java.io.IOException;
-import java.util.UUID;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.tajo.TajoConstants;
-import org.apache.tajo.catalog.CatalogClient;
-import org.apache.tajo.catalog.CatalogService;
-import org.apache.tajo.catalog.CatalogUtil;
-import org.apache.tajo.catalog.FunctionDesc;
-import org.apache.tajo.catalog.Schema;
-import org.apache.tajo.catalog.TableDesc;
-import org.apache.tajo.catalog.TableMeta;
+import org.apache.tajo.catalog.*;
 import org.apache.tajo.catalog.proto.CatalogProtos.FunctionType;
 import org.apache.tajo.catalog.proto.CatalogProtos.StoreType;
 import org.apache.tajo.common.TajoDataTypes.Type;
 import org.apache.tajo.conf.TajoConf;
 import org.apache.tajo.engine.function.builtin.SumInt;
-import org.apache.tajo.util.KeyValueSet;
 import org.apache.tajo.master.TajoMaster;
+import org.apache.tajo.util.KeyValueSet;
+
+import java.io.IOException;
+import java.util.UUID;
+
+import static org.apache.tajo.TajoConstants.DEFAULT_DATABASE_NAME;
+import static org.apache.tajo.TajoConstants.DEFAULT_TABLESPACE_NAME;
 
 /**
  * @author tr
@@ -102,17 +96,19 @@ public class ServerTest {
 	      }
 		
 		Schema schema = new Schema();
+		schema.addColumn("webpageurl", Type.TEXT);
 		schema.addColumn("name", Type.TEXT);
-		schema.addColumn("empid", Type.INT4);
-		schema.addColumn("deptname", Type.TEXT);
+		schema.addColumn("sentimentscore", Type.INT4);
 
 		Schema schema2 = new Schema();
-		schema2.addColumn("deptname", Type.TEXT);
-		schema2.addColumn("manager", Type.TEXT);
-		schema2.addColumn("tmsp", Type.INT4);
-		
+		schema2.addColumn("body ", Type.TEXT);
+		schema2.addColumn("sentiment", Type.TEXT);
+		schema2.addColumn("pagerank", Type.INT4);
+        schema2.addColumn("domainname", Type.TEXT);
+        schema2.addColumn("links", Type.TEXT);
+        schema2.addColumn("url", Type.TEXT);
 
-		Schema schema3 = new Schema();
+        Schema schema3 = new Schema();
 		schema3.addColumn("deptname", Type.TEXT);
 		schema3.addColumn("score", Type.INT4);
 		schema3.addColumn("phone", Type.INT4);
@@ -127,21 +123,18 @@ public class ServerTest {
 		schema5.addColumn("score", Type.INT4);
 		schema5.addColumn("phone", Type.INT4);
 
-		
-		
-		
-		
+
 		TableMeta meta = CatalogUtil.newTableMeta(StoreType.MEM);
-	    TableDesc people = new TableDesc(
-	            CatalogUtil.buildFQName(TajoConstants.DEFAULT_DATABASE_NAME, "employee"), schema, meta,
+	    TableDesc Entities = new TableDesc(
+	            CatalogUtil.buildFQName(TajoConstants.DEFAULT_DATABASE_NAME, "entities"), schema, meta,
 	            getTestDir());
-	        catalog.createTable(people);
+	        catalog.createTable(Entities);
 
 	   	
-		TableDesc student = new org.apache.tajo.catalog.TableDesc(
-				CatalogUtil.buildFQName(DEFAULT_DATABASE_NAME, "dept"),
-				schema2, StoreType.MEM, new KeyValueSet(), getTestDir("student"));
-		catalog.createTable(student);
+		TableDesc Webpages = new org.apache.tajo.catalog.TableDesc(
+				CatalogUtil.buildFQName(DEFAULT_DATABASE_NAME, "webpages"),
+				schema2, StoreType.MEM, new KeyValueSet(), getTestDir("webpages"));
+		catalog.createTable(Webpages);
 
 		TableDesc score = new org.apache.tajo.catalog.TableDesc(
 				CatalogUtil.buildFQName(DEFAULT_DATABASE_NAME, "score"),

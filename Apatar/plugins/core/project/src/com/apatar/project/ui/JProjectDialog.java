@@ -159,7 +159,7 @@ public class JProjectDialog extends JDialog {
 								false, SwingConstants.LEFT, new String[] {}));
 
 		// merge output schemas
-		node.MergeSchemas(ProjectNode.OUTPUT_CONN_POINT);
+		//node.MergeSchemas(ProjectNode.OUTPUT_CONN_POINT); @@GIANNIS_merge
 
 		outputPanel = new JOutputPanel(node
 				.getTiForConnection(ProjectNode.OUTPUT_CONN_POINT),

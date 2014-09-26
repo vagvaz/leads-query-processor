@@ -224,7 +224,7 @@ public class JAggregateDialog extends JDialog {
 			}
 		});
 		// merge output schemas
-		node.MergeSchemas(AggregateNode.OUTPUT_CONN_POINT);
+		//node.MergeSchemas(AggregateNode.OUTPUT_CONN_POINT); @@GIANNIS_merge
 
 		setOutputPanel(new JOutputPanel(node
 				.getTiForConnection(AggregateNode.OUTPUT_CONN_POINT),

@@ -3,15 +3,18 @@
  */
 package leads.tajo.module;
 
+import com.google.protobuf.TextFormat.ParseException;
 import grammar.LeadsSQLParser;
 import grammar.LeadsSQLParser.SqlContext;
 import grammar.SQLLexer;
-
-import java.io.IOException;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.apache.tajo.algebra.Expr;
+import org.apache.tajo.catalog.CatalogClient;
 import org.apache.tajo.catalog.CatalogService;
+import org.apache.tajo.catalog.Schema;
+import org.apache.tajo.catalog.TableDesc;
+import org.apache.tajo.conf.TajoConf;
 import org.apache.tajo.engine.json.CoreGsonHelper;
 import org.apache.tajo.engine.parser.SQLSyntaxError;
 import org.apache.tajo.engine.planner.LeadsLogicalOptimizer;
@@ -19,12 +22,9 @@ import org.apache.tajo.engine.planner.LogicalPlan;
 import org.apache.tajo.engine.planner.LogicalPlanner;
 import org.apache.tajo.engine.planner.PlanningException;
 import org.apache.tajo.engine.planner.logical.LogicalNode;
-import org.apache.tajo.engine.planner.logical.NodeType;
 import org.apache.tajo.master.session.Session;
-import org.apache.tajo.catalog.*;
-import org.apache.tajo.conf.TajoConf;
 
-import com.google.protobuf.TextFormat.ParseException;
+import java.io.IOException;
 
 /**
  * @author tr
@@ -104,15 +104,16 @@ public class TaJoModule {
 		} catch (PlanningException e) {
 			throw new PlanningException("Unable to Create Plan: " + e.getMessage());
 		}
-		
+       LogicalNode newPlanNode;
 		try {
-			optimizer.optimize(newPlan);
+              newPlanNode=optimizer.optimize(newPlan);
 		} catch (PlanningException e) {
 			throw new PlanningException("Unable to Optimize Plan: " + e.getMessage());
 		}
 
 
-		return CoreGsonHelper.getPrettyInstance().toJson(
-				newPlan.getRootBlock().getRoot());
+		//return CoreGsonHelper.getPrettyInstance().toJson(
+		//		newPlan.getRootBlock().getRoot());
+       return CoreGsonHelper.getPrettyInstance().toJson(newPlanNode);
    }
 }
