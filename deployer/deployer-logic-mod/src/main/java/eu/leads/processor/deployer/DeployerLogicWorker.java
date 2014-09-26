@@ -51,7 +51,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
         ignoredOperators = new HashSet<String>();
         workQueueAddress = config.getString("workqueue");
         runningPlans = new HashMap<String, ExecutionPlanMonitor>();
-         LQPConfiguration.initialize();
+        LQPConfiguration.initialize();
         persistence = InfinispanClusterSingleton.getInstance().getManager();
         queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
         id = config.getString("id");

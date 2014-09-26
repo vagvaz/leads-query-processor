@@ -45,7 +45,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
     protected JsonObject logicConfig; //logig module configuration
     protected Node com;
     protected LogProxy log;
-    protected PersistenceProxy persistence;
+//   protected PersistenceProxy persistence;
     protected LeadsComponentHandler componentHandler;
     protected JsonObject config; //components deployment configuration
     protected String id; //The unique id for this deployment (uuid)
@@ -127,8 +127,8 @@ public class ComponentControlVerticle extends Verticle implements Component {
         servicesIds = new HashSet<>();
 
         internalGroup = componentPrefix + ".servicesGroup";
-        failHandler = new DefaultFailHandler(this, com, log, persistence);
-        componentHandler = new LeadsComponentHandler(this, com, log, persistence);
+        failHandler = new DefaultFailHandler(this, com, log);
+        componentHandler = new LeadsComponentHandler(this, com, log);
 
         //TODO check that messages will not be lost between controlverticle and logic (cause id)
         com.initialize(id + ".control", group, secondaryGroups, componentHandler, failHandler,
@@ -199,7 +199,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
             JsonObject s = (JsonObject) serviceIterator.next();
             arrayServices.add(id + "." + s.getString("type") + ".manage");
         }
-        serviceController = new ServiceController(arrayServices, this, com, log, persistence);
+        serviceController = new ServiceController(arrayServices, this, com, log);
         com.subscribe(id + ".serviceMonitor", serviceController);
         this.state = ComponentState.INITIALIZED;
         if (callStart)

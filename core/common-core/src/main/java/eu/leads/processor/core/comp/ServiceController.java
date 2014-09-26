@@ -22,16 +22,14 @@ public class ServiceController implements LeadsMessageHandler {
     Component owner;
     Node com;
     LogProxy log;
-    PersistenceProxy persistence;
 
-    public ServiceController(Set<String> services, Component owner, Node com, LogProxy log,
-                                PersistenceProxy persistence) {
+    public ServiceController(Set<String> services, Component owner, Node com, LogProxy log) {
         this.services = new HashSet<>(services.size());
         this.services.addAll(services);
         this.owner = owner;
         this.com = com;
         this.log = log;
-        this.persistence = persistence;
+
         this.serviceStatus = new HashMap<String, ServiceStatus>(services.size());
         for (String service : services) {
             this.serviceStatus.put(service, ServiceStatus.IDLE);
