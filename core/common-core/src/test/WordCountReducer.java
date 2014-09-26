@@ -5,6 +5,9 @@ import java.util.Iterator;
 
 import org.vertx.java.core.json.JsonObject;
 
+import java.util.Iterator;
+import java.util.Properties;
+
 public class WordCountReducer extends LeadsReducer<String, Integer> {
 
     private static final long serialVersionUID = 1901016598354633256L;

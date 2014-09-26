@@ -3,16 +3,22 @@ package eu.leads.processor.core;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DistributedCallable;
 
+import org.infinispan.Cache;
+import org.infinispan.distexec.DistributedCallable;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
 public class LeadsReduceCallable<kOut, vOut> implements
-        DistributedCallable<kOut, List<vOut>, vOut>, Serializable {
+    DistributedCallable<kOut, vOut, List<vOut>>, Serializable {
+
+
 
     /**
-     * tr
+     *
      */
     private static final long serialVersionUID = 3724554288677416505L;
     transient private Cache<kOut, vOut> outCache;
@@ -31,7 +37,10 @@ public class LeadsReduceCallable<kOut, vOut> implements
         this.reducer = reducer;
     }
 
-    public vOut call() throws Exception {
+    //private Cache<kOut, vOut> cache;
+
+    public List<vOut> call() throws Exception {
+        // TODO Auto-generated method stub
         if (reducer == null) {
             System.out.println(" Reducer not initialized ");
         } else {
@@ -42,6 +51,7 @@ public class LeadsReduceCallable<kOut, vOut> implements
 //                    + this.inputCache.size());
             for (Entry<kOut, List<vOut>> entry : inputCache.entrySet()) {
                 kOut key = entry.getKey();
+
                 vOut res = reducer.reduce(key, entry.getValue().iterator());
                 outCache.put(key, res);
             }
@@ -51,8 +61,8 @@ public class LeadsReduceCallable<kOut, vOut> implements
         return null;
     }
 
-    public void setEnvironment(Cache<kOut, List<vOut>> inputCache,
-                               Set<kOut> inputKeys) {
+    public void setEnvironment(Cache<kOut, vOut> cache, Set<kOut> inputKeys) {
+        //this.OutCache = cache; // fix it
         this.keys = inputKeys;
         this.inputCache = inputCache;
         outCache = inputCache.getCacheManager().getCache(outputCacheName);

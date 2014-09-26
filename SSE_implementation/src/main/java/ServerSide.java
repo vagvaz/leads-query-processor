@@ -2,8 +2,15 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package sse_implementation_trial1;
 
+import sun.misc.BASE64Encoder;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -12,27 +19,20 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import sun.misc.BASE64Encoder;
 
 /**
- *
  * @author John Demertzis
  */
 public class ServerSide {
 
     private int Bvalue;
-    private int Svalue;
-    
+    private int Svalue = 6000;
+    private double k = 1.1;
 
-    public ServerSide(int Svalue,int Bvalue) {
-        this.Svalue=Svalue;
-        this.Bvalue = Bvalue;
+    public ServerSide(int Svalue, double k, int N) {
+        this.Svalue = Svalue;
+        this.k = k;
+        this.Bvalue = (int) Math.ceil(k * N / Svalue);
     }
 
     public byte[] xor(byte[] key, byte[] plaintext) {
@@ -51,16 +51,14 @@ public class ServerSide {
         return retVal;
     }
 
-    public HashMap<String, ArrayList<Etuple>> TSetRetrieve(CStore cs, String token) throws UnsupportedEncodingException, InvalidAlgorithmParameterException {
-        HashMap<String, Etuple> EDB = cs.getEDB(); //The encrypted Database
-        HashMap<Integer, Record[]> TSet = cs.getTSet(); //the inverted index
-        
-        ArrayList<Etuple> result_list = new ArrayList<Etuple>();
+    public HashMap<String, ArrayList<String>> TSetRetrieve(String token,
+                                                              HashMap<Integer, Record[]> TSet)
+        throws UnsupportedEncodingException, InvalidAlgorithmParameterException {
+        ArrayList<String> result_list = new ArrayList<String>();
         byte[] iv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         IvParameterSpec ivspec = new IvParameterSpec(iv);
         char beta = '1';
         int i = 0;
-        boolean flag = false;
         while (beta == '1') {
             try {
                 byte[] KeyBytes = token.getBytes("UTF-8");
@@ -94,14 +92,9 @@ public class ServerSide {
                     if (tmp_rcd[j].getLabel().equals(Ls)) {
                         byte[] plaintext = xor(K, tmp_rcd[j].getValue());
                         String res = new String(plaintext);
-                        result_list.add(EDB.get(res.substring(1)));
-                        //result_list.add(res.substring(1));
+                        result_list.add(res.substring(1));
                         beta = res.charAt(0);
-                        flag = true;
                     }
-                }
-                if(flag == false){
-                    return null;
                 }
             } catch (NoSuchAlgorithmException noSuchAlgo) {
                 System.out.println(" No Such Algorithm exists " + noSuchAlgo);
