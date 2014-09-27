@@ -5,7 +5,6 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.QueryState;
@@ -63,7 +62,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         String planAsString = null;
         try {
             Session session =
-                new Session(sqlQuery.getId(), sqlQuery.getUser(), StringConstants.DEFAULT_DB_NAME);
+                new Session(sqlQuery.getId(), sqlQuery.getUser(),StringConstants.DEFAULT_DATABASE_NAME);
             planAsString = module.Optimize(session, expr);
         } catch (Exception e) {
             failQuery(e, sqlQuery);

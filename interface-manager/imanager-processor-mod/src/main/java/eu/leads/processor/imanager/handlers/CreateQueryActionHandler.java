@@ -55,6 +55,7 @@ public class CreateQueryActionHandler implements ActionHandler {
                 JsonObject queryStatus = status.asJsonObject();
                 queriesCache.put(uniqueId, query.asJsonObject().toString());
                 actionResult.putObject("status", query.getQueryStatus().asJsonObject());
+                actionResult.putObject("query",query.asJsonObject());
                 result.setResult(actionResult);
                 result.setStatus(ActionStatus.COMPLETED.toString());
             }

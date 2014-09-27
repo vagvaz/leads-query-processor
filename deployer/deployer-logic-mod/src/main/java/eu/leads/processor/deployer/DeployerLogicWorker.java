@@ -141,7 +141,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                     //
                     //               }
                     //               else
-                    if (label.equals(DeployerConstants.OPERATOR_COMPLETED)) {
+                    if (label.equals(NQEConstants.OPERATOR_COMPLETE)) {
                         PlanNode node = new PlanNode(action.getData().getObject("operator"));
                         String queryId = action.getData().getString("queryId");
                         ExecutionPlanMonitor plan = runningPlans.get(queryId);
@@ -158,7 +158,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                         else{
                            deployOperator(plan,tobeDeployed);
                         }
-                    } else if (label.equals(DeployerConstants.OPERATOR_FAILED)) {
+                    } else if (label.equals(NQEConstants.OPERATOR_FAILED)) {
                         PlanNode node = new PlanNode(action.getData().getObject("operator"));
                         String queryId = action.getData().getString("queryId");
                         ExecutionPlanMonitor plan = runningPlans.get(queryId);
@@ -212,7 +212,6 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
       deployAction.getData().putString("operatorType",next.getNodeType().toString());
      deployAction.setLabel(NQEConstants.DEPLOY_OPERATOR);
      com.sendTo(nqeGroup, deployAction.asJsonObject());
-     deployAction.setLabel(DeployerConstants.OPERATOR_STARTED);
      com.sendTo(monitorAddress,deployAction.asJsonObject());
    }
 
@@ -241,8 +240,8 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
         result.setOwnerId(this.id);
         result.setProcessedBy("");
         result.setDestination("");
-        result.setData(null);
-        result.setResult(null);
+        result.setData(new JsonObject());
+        result.setResult(new JsonObject());
         result.setLabel("");
         result.setCategory("");
         return result;

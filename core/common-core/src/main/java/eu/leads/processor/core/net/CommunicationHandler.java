@@ -33,7 +33,7 @@ public class CommunicationHandler implements Handler<Message> {
         String to = incoming.getString(MessageUtils.TO);
         String type = incoming.getString(MessageUtils.COMTYPE);
         JsonObject object = new JsonObject();
-        message.reply(MessageUtils.createLeadsMessage(object, from, to));
+        message.reply(MessageUtils.createLeadsMessage(object, to, from));
         LeadsMessageHandler handler = handlers.get(to);
         if (requests.remove(to)) {
             owner.unsubscribe(to);

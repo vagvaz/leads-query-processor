@@ -66,7 +66,6 @@ public class PersistenceManageVerticle extends ManageVerticle {
     @Override
     public void initialize(JsonObject config) {
         super.initialize(config);
-        persistenceProxy.cleanup();
         persistAddress = id;
         JsonObject persistConfig = new JsonObject();
         persistConfig.putString("id", persistAddress);

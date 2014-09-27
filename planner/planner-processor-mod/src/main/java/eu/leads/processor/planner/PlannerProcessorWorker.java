@@ -107,6 +107,9 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
                               + message.toString());
             }
         } catch (Exception e) {
+          JsonObject msg =  message.body();
+          msg.putString("status",ActionStatus.FAILED.toString());
+           com.sendTo(logic,msg);
             e.printStackTrace();
         }
     }

@@ -47,7 +47,7 @@ public class WebServiceClientTest {
         }
 
         QueryStatus status = WebServiceClient.submitQuery("vagvaz",
-                                                             "SELECT url,domainName from webpages where sentiment=0.8 group by group order by url limit 5");
+                                                             "SELECT deptname from dept");
         QueryStatus currentStatus = WebServiceClient.getQueryStatus(status.getId());
         System.out.println("s: " + status.toString());
         System.out.println("o: " + currentStatus.toString());

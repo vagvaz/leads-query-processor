@@ -41,7 +41,7 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
         workQueueAddress = config.getString("workqueue");
         id = config.getString("id");
         com = new DefaultNode();
-        com.initialize(id, deployer, null, this, null, vertx);
+        com.initialize(id, planner, null, this, null, vertx);
         log = new LogProxy(config.getString("log"), com);
 
         mapper = new ObjectMapper();
@@ -68,7 +68,7 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
 
             switch (ActionStatus.valueOf(action.getStatus())) {
                 case PENDING: //probably received an action from an external source
-                    if (label.equals(QueryPlannerConstants.PROCESS_QUERY)) {
+                    if (label.equals(QueryPlannerConstants.PROCESS_SQL_QUERY)) {
                         action.getData().putString("replyTo", msg.getString("from"));
                         com.sendWithEventBus(workQueueAddress, action.asJsonObject());
                     } else if (label.equals(QueryPlannerConstants.PROCESS_SPECIAL_QUERY)) {
@@ -87,7 +87,7 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
                     break;
                 case INPROCESS: //  probably received an action from internal source (processors)
                 case COMPLETED: // the action either a part of a multistep workflow (INPROCESSING) or it could be processed.
-                    if (label.equals(QueryPlannerConstants.PROCESS_QUERY)) {
+                    if (label.equals(QueryPlannerConstants.PROCESS_SQL_QUERY)) {
                         //                  com.sendTo(action.getData().getString("replyTo"),action.getResult());
                         JsonObject actionResult = action.getResult();
                         if (actionResult != null && actionResult.getString("status").equals("ok")) {
