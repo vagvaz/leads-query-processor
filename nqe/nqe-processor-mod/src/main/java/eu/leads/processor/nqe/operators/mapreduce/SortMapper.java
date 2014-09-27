@@ -3,7 +3,7 @@ package eu.leads.processor.nqe.operators.mapreduce;
 import eu.leads.processor.core.LeadsMapper;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.TupleComparator;
-import net.sf.jsqlparser.schema.Column;
+//import net.sf.jsqlparser.schema.Column;
 import org.infinispan.distexec.mapreduce.Collector;
 import org.vertx.java.core.json.JsonObject;
 

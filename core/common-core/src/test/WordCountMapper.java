@@ -12,12 +12,9 @@ public class WordCountMapper extends LeadsMapper<String, String, String, Integer
 
     public WordCountMapper(JsonObject configuration) {
         super(configuration);
-        // TODO Auto-generated constructor stub
     }
 
     public void map(String key, String value, Collector<String, Integer> c) {
-        //  System.out.printf("Analyzed %s words in %s lines%n", words, chunks);
-        // chunks++;
       /*
        * Split on punctuation or whitespace, except for ' and - to catch contractions and hyphenated
        * words

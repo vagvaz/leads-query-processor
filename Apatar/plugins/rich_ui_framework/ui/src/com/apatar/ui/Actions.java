@@ -365,8 +365,9 @@ public class Actions {
 					File jar = new File(jarname);
 					if (jar.exists()) {
 						Process proc = Runtime.getRuntime().exec(
-								"java -jar  "+jarname+ " " + ApplicationData.PROJECT_PATH);
-						
+								"java -jar  " + jarname + " "
+										+ ApplicationData.PROJECT_PATH);
+
 						JOptionPane.showMessageDialog(ApatarUiMain.MAIN_FRAME,
 								"Please Wait for the results");
 					} else {

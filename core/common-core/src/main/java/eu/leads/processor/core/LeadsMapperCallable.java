@@ -4,9 +4,6 @@ import eu.leads.processor.common.LeadsCollector;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DistributedCallable;
 
-import org.infinispan.Cache;
-import org.infinispan.distexec.DistributedCallable;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

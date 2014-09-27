@@ -32,10 +32,6 @@ import static org.apache.tajo.TajoConstants.DEFAULT_TABLESPACE_NAME;
  * @author tr
  */
 public class ServerTest {
-<<<<<<< HEAD
-    static TajoConf conf = null;
-=======
->>>>>>> origin/prototype
 	private static CatalogService catalog = null;
 	//private static MiniCatalogServer catalogServer;
 	private static LeadsCatalog mycatalogServer = null;
