@@ -24,10 +24,14 @@ public class DeployerControlVerticle extends ComponentControlVerticle {
     @Override
     public void setup(JsonObject conf) {
         super.setup(conf);
-        logicConfig.putString("planner", plannerQueue);
+        logicConfig.putString("deployer", StringConstants.DEPLOYERQUEUE);
         logicConfig.putString("nqe", nqeQueue);
-        processorConfig.putString("planner", plannerQueue);
-        logicConfig.putString("nqe", nqeQueue);
+        logicConfig.putString("monitor",id+".monitor");
+
+       processorConfig.putString("deployer", StringConstants.DEPLOYERQUEUE);
+      processorConfig.putString("nqe",nqeQueue);
+       processorConfig.putString("monitor",id+".monitor");
+
     }
 
     @Override

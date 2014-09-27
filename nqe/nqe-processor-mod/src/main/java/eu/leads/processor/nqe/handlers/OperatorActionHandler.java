@@ -34,7 +34,7 @@ public class OperatorActionHandler implements ActionHandler {
 
     @Override
     public Action process(Action action) {
-        Action result = action;
+       Action result = action;
        result.getData().putString("owner",id);
        com.sendTo(action.getData().getString("monitor"),result.asJsonObject());
        Operator operator = OperatorFactory.createOperator(com,persistence,result);

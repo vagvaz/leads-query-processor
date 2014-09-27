@@ -26,6 +26,10 @@ public class StringConstants {
     public static final String GROUP_ID = "gr.tuc.softnet";
     public static final String VERSION = "1.0-SNAPSHOT";
     public static final String ACTION = "action";
-    public static final String DEFAULT_DB_NAME = "DefaultLeadsDB";
+    public static final String DEFAULT_DATABASE_NAME = "default";
 
+   public static final String DEFAULT_TABLE_SPACE = "defaultTableSpace";
+   public static final String DEFAULT_PATH =  "defaultPath";
+
+   public static final String DEFAULT_TABLESPACE_NAME = "defaultTableSpace";
 }

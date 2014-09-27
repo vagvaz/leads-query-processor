@@ -68,6 +68,6 @@ public class GroupByOperator extends MapReduceOperator {
 
     @Override
     public void cleanup() {
-
+      super.cleanup();
     }
 }

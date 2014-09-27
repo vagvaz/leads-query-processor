@@ -17,7 +17,7 @@ public abstract class ManageVerticle extends Verticle implements LeadsService {
     protected String group;
     protected JsonObject config;
     protected ServiceStatus status = ServiceStatus.IDLE;
-    protected PersistenceProxy persistenceProxy;
+//    protected PersistenceProxy persistenceProxy;
     protected LogProxy logProxy;
     protected ServiceHandler serviceHandler;
     protected String parent;
@@ -45,15 +45,10 @@ public abstract class ManageVerticle extends Verticle implements LeadsService {
         System.err.println("\nthis.config " + this.config.toString());
         System.err.println("\nPARAMETER->" + configuration.toString());
         logProxy = new LogProxy(configuration.getString("log"), com);
-        persistenceProxy = new PersistenceProxy(configuration.getString("persistence"), com, vertx);
-        serviceHandler = new ServiceHandler(this, com, logProxy, persistenceProxy);
+//        persistenceProxy = new PersistenceProxy(configuration.getString("persistence"), com, vertx);
+        serviceHandler = new ServiceHandler(this, com, logProxy);
         com.initialize(id + ".manage", group, null, serviceHandler, serviceHandler,
                           this.getVertx());
-
-
-
-        persistenceProxy.start();
-
         setStatus(ServiceStatus.INITIALIZED);
 
 
@@ -95,8 +90,6 @@ public abstract class ManageVerticle extends Verticle implements LeadsService {
         setStatus(ServiceStatus.FAILED);
         JsonObject errorMessage = new JsonObject();
         errorMessage.putString("status.message", message);
-        persistenceProxy.store("status.message", errorMessage);
-
     }
 
 }

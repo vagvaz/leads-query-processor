@@ -1,6 +1,6 @@
 package eu.leads.processor.ui;
 
-import eu.leads.processor.common.Tuple;
+import eu.leads.processor.core.Tuple;
 
 import java.util.List;
 

@@ -3,11 +3,7 @@ package eu.leads.processor.core;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DistributedCallable;
 
-import org.infinispan.Cache;
-import org.infinispan.distexec.DistributedCallable;
-
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -55,8 +51,9 @@ public class LeadsReduceCallable<kOut, vOut> implements
                 vOut res = reducer.reduce(key, entry.getValue().iterator());
                 outCache.put(key, res);
             }
-
-            return result;
+           // List<vOut> ret = java.util.ArrayList<vOut>(1) ;
+           // ret.add(result);
+            return null;
         }
         return null;
     }

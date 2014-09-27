@@ -8,6 +8,7 @@ import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.nqe.NQEConstants;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
@@ -85,18 +86,18 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
 
             switch (ActionStatus.valueOf(action.getStatus())) {
                 case PENDING: //probably received an action from an external source
-                    if (label.equals(DeployerConstants.OPERATOR_STARTED)) {
+                    if (label.equals(NQEConstants.DEPLOY_OPERATOR)) {
                         action.getData().putString("replyTo", msg.getString("from"));
                         actionToLevelMap.put(action.getId(), -1);
                         monitoredActions.get(-1).put(action.getId(), action);
 
-                    } else if (label.equals(DeployerConstants.OPERATOR_COMPLETED)) {
+                    } else if (label.equals(NQEConstants.OPERATOR_COMPLETE)) {
                         log.error("Received Completed OPERATOR Action " + action.toString()
                                       + " with status PENDING");
-                    } else if (label.equals(DeployerConstants.OPERATOR_OWNER)) {
+                    } else if (label.equals(NQEConstants.OPERATOR_OWNER)) {
                         log.error("Received OWNER OPERATOR Action " + action.toString()
                                       + " with status PENDING");
-                    } else if (label.equals(DeployerConstants.OPERATOR_RUNNING_STATUS)) {
+                    } else if (label.equals(NQEConstants.OPERATOR_RUNNING_STATUS)) {
                         log.error("Received RUNNING STATUS OPERATOR Action " + action.toString()
                                       + " with status PENDING");
                     } else {
@@ -111,15 +112,15 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
                     logAction(action);
                     break;
                 case INPROCESS:
-                    if (label.equals(DeployerConstants.OPERATOR_STARTED)) {
+                    if (label.equals(NQEConstants.DEPLOY_OPERATOR)) {
                         log.error("Received OPERATOR STARTED Action " + action.toString()
                                       + " with status INPROCESS");
                         return;
-                    } else if (label.equals(DeployerConstants.OPERATOR_COMPLETED)) {
+                    } else if (label.equals(NQEConstants.OPERATOR_COMPLETE)) {
                         log.error("Received Completed OPERATOR Action " + action.toString()
                                       + " with status INPROCESS");
                         return;
-                    } else if (label.equals(DeployerConstants.OPERATOR_OWNER)) {
+                    } else if (label.equals(NQEConstants.OPERATOR_OWNER)) {
                         Action claimedAction = monitoredActions.get(-1).remove(action.getId());
                         if (claimedAction == null) {
                             Integer currentLevel = actionToLevelMap.get(action.getId());
@@ -130,7 +131,7 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
                         monitoredActions.get(1).put(action.getId(), action);
                         actionToLevelMap.put(action.getId(), 1);
 
-                    } else if (label.equals(DeployerConstants.OPERATOR_RUNNING_STATUS)) {
+                    } else if (label.equals(NQEConstants.OPERATOR_RUNNING_STATUS)) {
                         Integer currentLevel = actionToLevelMap.get(action.getId());
                         if (currentLevel == null) {
                             log.error("Received OPERATOR STATUS but action " + action.toString()
@@ -149,17 +150,17 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
                     logAction(action);
                     break;
                 case COMPLETED: // the action either a part of a multistep workflow (INPROCESSING) or it could be processed.
-                    if (label.equals(DeployerConstants.OPERATOR_STARTED)) {
+                    if (label.equals(NQEConstants.DEPLOY_OPERATOR)) {
                         log.error("Received OPERATOR STARTED Action " + action.toString()
                                       + " with status COMPLETED");
                         return;
-                    } else if (label.equals(DeployerConstants.OPERATOR_COMPLETED)) {
+                    } else if (label.equals(NQEConstants.OPERATOR_COMPLETE)) {
                         completeOperator(action);
-                    } else if (label.equals(DeployerConstants.OPERATOR_OWNER)) {
+                    } else if (label.equals(NQEConstants.OPERATOR_OWNER)) {
                         log.error("Received OPERATOR OWNER but action " + action.toString()
                                       + " with status COMPLETED");
                         return;
-                    } else if (label.equals(DeployerConstants.OPERATOR_RUNNING_STATUS)) {
+                    } else if (label.equals(NQEConstants.OPERATOR_RUNNING_STATUS)) {
                         log.error("Received OPERATOR STATUS but action " + action.toString()
                                       + " with status COMPLETED");
                         return;

@@ -4,6 +4,7 @@ import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.nqe.NQEConstants;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -50,7 +51,7 @@ public class PeriodicCheckHandler implements Handler<Long> {
         Map<String, Action> actions = monitoredActions.get(-1);
         for (Map.Entry<String, Action> action : actions.entrySet()) {
             Action requestOwner = createNewAction(action.getValue());
-            requestOwner.setLabel(DeployerConstants.OPERATOR_GET_OWNER);
+            requestOwner.setLabel(NQEConstants.OPERATOR_GET_OWNER);
             com.sendToAllGroup(nqeGroup, requestOwner.asJsonObject());
             moveActionToLevel(action.getValue(), 1);
         }
@@ -79,7 +80,7 @@ public class PeriodicCheckHandler implements Handler<Long> {
             Action timedOutAction = action.getValue();
             String owner = timedOutAction.getData().getString("owner");
             Action requestStatus = createNewAction(timedOutAction);
-            requestStatus.setLabel(DeployerConstants.OPERATOR_GET_RUNNING_STATUS);
+            requestStatus.setLabel(NQEConstants.OPERATOR_GET_RUNNING_STATUS);
             com.sendTo(owner, requestStatus.asJsonObject());
             moveActionToLevel(action.getValue(), 2);
         }
@@ -92,7 +93,7 @@ public class PeriodicCheckHandler implements Handler<Long> {
             Action timedOutAction = action.getValue();
             String owner = timedOutAction.getData().getString("owner");
             Action requestStatus = createNewAction(timedOutAction);
-            requestStatus.setLabel(DeployerConstants.OPERATOR_GET_RUNNING_STATUS);
+            requestStatus.setLabel(NQEConstants.OPERATOR_GET_RUNNING_STATUS);
             com.sendTo(owner, requestStatus.asJsonObject());
             moveActionToLevel(action.getValue(), 3);
         }
@@ -105,7 +106,7 @@ public class PeriodicCheckHandler implements Handler<Long> {
             Action failedAction = action.getValue();
             String owner = failedAction.getData().getString("owner");
             Action failed = createNewAction(failedAction);
-            failedAction.setLabel(DeployerConstants.OPERATOR_FAILED);
+            failedAction.setLabel(NQEConstants.OPERATOR_FAILED);
             failed.getData().putObject("failedAction", failedAction.asJsonObject());
             com.sendTo(deployerId, failedAction.asJsonObject());
         }

@@ -16,5 +16,5 @@
   "keywords": ["gerbils", "cars", "cheese", "chocolate", "underpants", "herring"],
   "homepage": "url to your project page",
 
-  "auto-redeploy": true
+  "auto-redeploy": false
 }

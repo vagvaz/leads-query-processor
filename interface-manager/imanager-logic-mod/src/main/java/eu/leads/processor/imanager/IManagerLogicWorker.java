@@ -136,8 +136,9 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                         if (!action.getResult().containsField("error")) {
                             Action plannerAction = createNewAction(action);
                             plannerAction.setCategory(ActionCategory.ACTION.toString());
-                            plannerAction.setLabel(QueryPlannerConstants.PROCESS_QUERY);
+                            plannerAction.setLabel(QueryPlannerConstants.PROCESS_SQL_QUERY);
                             plannerAction.setDestination(StringConstants.PLANNERQUEUE);
+                            plannerAction.setData(action.getResult());
                             com.sendTo(plannerAction.getDestination(),
                                           plannerAction.asJsonObject());
                         }
@@ -151,6 +152,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                             plannerAction.setCategory(ActionCategory.ACTION.toString());
                             plannerAction.setLabel(QueryPlannerConstants.PROCESS_SPECIAL_QUERY);
                             plannerAction.setDestination(StringConstants.PLANNERQUEUE);
+                            plannerAction.setData(action.getResult());
                             com.sendTo(plannerAction.getDestination(),
                                           plannerAction.asJsonObject());
                         }

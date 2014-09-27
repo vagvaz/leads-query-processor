@@ -108,6 +108,7 @@ public abstract class MapReduceOperator extends BasicOperator{
 
     @Override
     public void cleanup() {
-        intermediateCache.stop();
+       super.cleanup();
+       intermediateCache.stop();
     }
 }

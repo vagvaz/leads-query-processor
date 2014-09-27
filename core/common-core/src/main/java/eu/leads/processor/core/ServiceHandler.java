@@ -14,15 +14,12 @@ import org.vertx.java.core.json.JsonObject;
 public class ServiceHandler implements LeadsMessageHandler {
     LeadsService owner;
     LogProxy log;
-    PersistenceProxy persitence;
         // Calls to this proxy should be avoided in ManageVertice cause will freeze the vertx event loop
     Node com;
 
-    public ServiceHandler(LeadsService owner, Node com, LogProxy logProxy,
-                             PersistenceProxy persistence) {
+    public ServiceHandler(LeadsService owner, Node com, LogProxy logProxy) {
         this.owner = owner;
         this.log = logProxy;
-        this.persitence = persistence;
         this.com = com;
     }
 

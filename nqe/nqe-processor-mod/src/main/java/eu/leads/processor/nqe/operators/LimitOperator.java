@@ -72,6 +72,7 @@ public class LimitOperator extends BasicOperator {
                 counter++;
             }
         }
+       cleanup();
     }
     private void handlePagerank(Tuple t) {
         if (t.hasField("pagerank")) {

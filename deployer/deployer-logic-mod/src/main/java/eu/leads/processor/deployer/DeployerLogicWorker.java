@@ -6,13 +6,13 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.*;
+import eu.leads.processor.nqe.NQEConstants;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -51,7 +51,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
         ignoredOperators = new HashSet<String>();
         workQueueAddress = config.getString("workqueue");
         runningPlans = new HashMap<String, ExecutionPlanMonitor>();
-         LQPConfiguration.initialize();
+        LQPConfiguration.initialize();
         persistence = InfinispanClusterSingleton.getInstance().getManager();
         queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
         id = config.getString("id");
@@ -141,7 +141,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                     //
                     //               }
                     //               else
-                    if (label.equals(DeployerConstants.OPERATOR_COMPLETED)) {
+                    if (label.equals(NQEConstants.OPERATOR_COMPLETE)) {
                         PlanNode node = new PlanNode(action.getData().getObject("operator"));
                         String queryId = action.getData().getString("queryId");
                         ExecutionPlanMonitor plan = runningPlans.get(queryId);
@@ -158,7 +158,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                         else{
                            deployOperator(plan,tobeDeployed);
                         }
-                    } else if (label.equals(DeployerConstants.OPERATOR_FAILED)) {
+                    } else if (label.equals(NQEConstants.OPERATOR_FAILED)) {
                         PlanNode node = new PlanNode(action.getData().getObject("operator"));
                         String queryId = action.getData().getString("queryId");
                         ExecutionPlanMonitor plan = runningPlans.get(queryId);
@@ -199,20 +199,19 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
     private void startExecution(ExecutionPlanMonitor executionPlan) {
        List<PlanNode> sources = executionPlan.getSources();
        for(PlanNode source : sources){
-          executionPlan.complete(source);
-          PlanNode next = executionPlan.getNextOperator(source);
-          if(next != null){
-             deployOperator(executionPlan,next);
+          if(source != null){
+             deployOperator(executionPlan,source);
           }
        }
     }
 
    private void deployOperator(ExecutionPlanMonitor executionPlan, PlanNode next) {
      Action deployAction = createNewAction(executionPlan.getAction());
-     deployAction.setData(next.asJsonObject());
-     deployAction.setLabel("deployOperator");
-     com.sendTo(nqeGroup,deployAction.asJsonObject());
-     deployAction.setLabel(DeployerConstants.OPERATOR_STARTED);
+      deployAction.getData().putString("monitor",monitorAddress);
+      deployAction.getData().putObject("operator",next.asJsonObject());
+      deployAction.getData().putString("operatorType",next.getNodeType().toString());
+     deployAction.setLabel(NQEConstants.DEPLOY_OPERATOR);
+     com.sendTo(nqeGroup, deployAction.asJsonObject());
      com.sendTo(monitorAddress,deployAction.asJsonObject());
    }
 
@@ -241,8 +240,8 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
         result.setOwnerId(this.id);
         result.setProcessedBy("");
         result.setDestination("");
-        result.setData(null);
-        result.setResult(null);
+        result.setData(new JsonObject());
+        result.setResult(new JsonObject());
         result.setLabel("");
         result.setCategory("");
         return result;

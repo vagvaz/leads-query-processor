@@ -1,4 +1,4 @@
-import eu.leads.processor.common.Tuple;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.common.utils.PrettyPrinter;
 import eu.leads.processor.web.QueryResults;
 import eu.leads.processor.web.QueryStatus;
@@ -95,7 +95,7 @@ public class leadsCli {
 
         try {
             WebServiceClient.initialize(host, port);
-            System.err.println("Connected at " + host + ":" + port + " . Exiting");
+            System.err.println("Connected at " + host + ":" + port );
         } catch (MalformedURLException e) {
             System.err.println("Unable to connect at " + host + ":" + port + " . Exiting");
             e.printStackTrace();

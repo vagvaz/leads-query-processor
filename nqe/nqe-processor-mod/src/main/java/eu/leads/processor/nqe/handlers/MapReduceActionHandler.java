@@ -51,7 +51,7 @@ public class MapReduceActionHandler implements ActionHandler {
 //        try {
 //            JsonObject q = action.getData();
 //            // read monitor q.getString("monitor");
-//            if (action.getLabel().equals(NQEConstants.OPERATOR)) {//SQL Query
+//            if (action.getLabel().equals(NQEConstants.DEPLOY_OPERATOR)) {//SQL Query
 //
 //            } else if (q.containsField("mapreduce")) {//
 //                String user = q.getString("user");

@@ -28,6 +28,8 @@ public class DeployerLogicManage extends ManageVerticle {
         plannerAddress = config.getString("planner");
         nqeAddress = config.getString("nqe");
         workerConfig = new JsonObject();
+        workerConfig.putString("monitor",config.getString("monitor"));
+       workerConfig.putString("deployer",config.getString("deployer"));
         workerConfig.putString("planner", plannerAddress);
         workerConfig.putString("nqe", nqeAddress);
         workerConfig.putString("log", config.getString("log"));

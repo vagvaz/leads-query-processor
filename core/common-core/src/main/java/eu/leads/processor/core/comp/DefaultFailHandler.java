@@ -10,7 +10,7 @@ import org.vertx.java.core.json.JsonObject;
 public class DefaultFailHandler implements LeadsMessageHandler {
 
     public DefaultFailHandler(ComponentControlVerticle componentControlVerticle, Node com,
-                                 LogProxy log, PersistenceProxy persitence) {
+                              LogProxy log) {
     }
 
     @Override

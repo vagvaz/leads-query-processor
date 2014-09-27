@@ -87,7 +87,7 @@ public class DeployerRecoveryWorker extends Verticle implements LeadsMessageHand
                     break;
                 case INPROCESS: //  probably received an action from internal source (processors)
                 case COMPLETED: // the action either a part of a multistep workflow (INPROCESSING) or it could be processed.
-                    if (label.equals(QueryPlannerConstants.PROCESS_QUERY)) {
+                    if (label.equals(QueryPlannerConstants.PROCESS_SQL_QUERY)) {
                         com.sendTo(action.getData().getString("replyTo"), action.getResult());
                     } else if (label.equals(QueryPlannerConstants.PROCESS_SPECIAL_QUERY)) {
                         com.sendTo(action.getData().getString("replyTo"), action.getResult());

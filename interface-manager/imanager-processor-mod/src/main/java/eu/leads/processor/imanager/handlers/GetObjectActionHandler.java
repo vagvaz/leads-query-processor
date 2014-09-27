@@ -35,7 +35,7 @@ public class GetObjectActionHandler implements ActionHandler {
             Cache<String,String> cache = (Cache) persistence.getPersisentCache(cacheName);
             String objectJson = cache.get(key);
             JsonObject actionResult = new JsonObject();
-            if (objectJson == null || objectJson.equals("")) {
+            if (!(objectJson == null || objectJson.equals(""))) {
                 //               com.sendTo(from, result.getObject("result"));
                 result.setResult(new JsonObject(objectJson));
             } else {

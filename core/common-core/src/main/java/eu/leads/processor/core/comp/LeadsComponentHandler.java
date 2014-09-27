@@ -15,12 +15,10 @@ public class LeadsComponentHandler implements LeadsMessageHandler {
     PersistenceProxy persitence;
     Node com;
 
-    public LeadsComponentHandler(Component owner, Node com, LogProxy log,
-                                    PersistenceProxy persistence) {
+    public LeadsComponentHandler(Component owner, Node com, LogProxy log) {
         this.owner = owner;
         this.com = com;
         this.log = log;
-        this.persitence = persistence;
     }
 
     @Override
