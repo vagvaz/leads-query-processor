@@ -5,7 +5,6 @@ import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionCategory;
 import eu.leads.processor.core.ActionStatus;
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
@@ -65,8 +64,6 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
         String from = msg.getString(MessageUtils.FROM);
         String to = msg.getString(MessageUtils.TO);
 
-
-
         if (type.equals("action")) {
             Action action = new Action(msg);
             String label = action.getLabel();
@@ -92,6 +89,14 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                         newAction = createNewAction(action);
                         newAction.setCategory(ActionCategory.ACTION.toString());
                         newAction.setLabel(IManagerConstants.CREATE_NEW_QUERY);
+                        newAction.setProcessedBy(id);
+                        newAction.setData(action.getData());
+                        newAction.getData().putString("replyTo", msg.getString("from"));
+                        com.sendWithEventBus(workQueueAddress, newAction.asJsonObject());
+                    } else if (label.equals(IManagerConstants.SUBMIT_WORKFLOW)) {
+                        newAction = createNewAction(action);
+                        newAction.setCategory(ActionCategory.ACTION.toString());
+                        newAction.setLabel(IManagerConstants.CREATE_NEW_WORKFLOW);
                         newAction.setProcessedBy(id);
                         newAction.setData(action.getData());
                         newAction.getData().putString("replyTo", msg.getString("from"));
@@ -141,6 +146,20 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                             plannerAction.setData(action.getResult());
                             com.sendTo(plannerAction.getDestination(),
                                           plannerAction.asJsonObject());
+                        }
+                    } else if (label.equals(IManagerConstants.CREATE_NEW_WORKFLOW)) {
+                        JsonObject webServiceReply = action.getResult().getObject("status");
+                        //Reply to the SUBMIT Query Action to the webservice
+                        com.sendTo(action.getData().getString("replyTo"), webServiceReply);
+                        //Create Action for the QueryPlanner to create the plan for the new Query.
+                        if (!action.getResult().containsField("error")) {
+                            Action plannerAction = createNewAction(action);
+                            plannerAction.setCategory(ActionCategory.ACTION.toString());
+                            plannerAction.setLabel(QueryPlannerConstants.PROCESS_WORKFLOW_QUERY);
+                            plannerAction.setDestination(StringConstants.PLANNERQUEUE);
+                            plannerAction.setData(action.getResult());
+                            com.sendTo(plannerAction.getDestination(),
+                                    plannerAction.asJsonObject());
                         }
                     } else if (label.equals(IManagerConstants.CREATE_NEW_SPECIAL_QUERY)) {
                         JsonObject webServiceReply = action.getResult().getObject("status");

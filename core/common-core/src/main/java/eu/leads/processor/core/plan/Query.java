@@ -44,4 +44,5 @@ public interface Query {
     ReadStatus getReadStatus();
 
     void setReadStatus(ReadStatus readStatus);
+
 }

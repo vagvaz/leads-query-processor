@@ -175,6 +175,21 @@ public class WebServiceClient {
         return result;
     }
 
+    public static QueryStatus submitWorkflow(String username, String workflow) throws IOException {
+        QueryStatus result = null;
+        WebServiceWorkflow query = new WebServiceWorkflow();
+        query.setWorkflow(workflow);
+        query.setUser(username);
+        address = new URL(host + ":" + port + prefix + "workflow/submit");
+        HttpURLConnection connection = (HttpURLConnection) address.openConnection();
+        connection = setUp(connection, "POST", MediaType.APPLICATION_JSON, true, true);
+        setBody(connection, query);
+        String response = getResult(connection);
+        result = mapper.readValue(response, QueryStatus.class);
+        return result;
+    }
+
+
     public static Map<String, String> submitSpecialQuery(String username, String type,
                                                             Map<String, String> parameters)
         throws IOException {
