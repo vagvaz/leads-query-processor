@@ -38,12 +38,12 @@ public class DeployerProcessorManage extends ManageVerticle {
                     public void handle(AsyncResult<String> event) {
                         if (event.succeeded()) {
                             workerId = event.result();
-                            logProxy.info("PlannerProcessorWorker " + config.getString("id")
+                            logProxy.info("DeployerProcessorWorker " + config.getString("id")
                                               + " has been deployed");
                             com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id,
                                                                                           serviceType));
                         } else {
-                            logProxy.info("PlannerProcessorWorker " + config.getString("id")
+                            logProxy.info("DeployerProcessorWorker " + config.getString("id")
                                               + " failed to deploy");
                             stopService();
                         }
@@ -61,7 +61,7 @@ public class DeployerProcessorManage extends ManageVerticle {
     @Override
     public void stopService() {
         super.stopService();
-        if (workerId != null)
+        if (workerId != null && !workerId.equals(""))
             container.undeployModule(workerId);
         workerId = null;
         com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id, serviceType));

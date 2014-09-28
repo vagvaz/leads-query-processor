@@ -52,6 +52,7 @@ public class PeriodicCheckHandler implements Handler<Long> {
         for (Map.Entry<String, Action> action : actions.entrySet()) {
             Action requestOwner = createNewAction(action.getValue());
             requestOwner.setLabel(NQEConstants.OPERATOR_GET_OWNER);
+            requestOwner.getData().putString("replyTo",com.getId());
             com.sendToAllGroup(nqeGroup, requestOwner.asJsonObject());
             moveActionToLevel(action.getValue(), 1);
         }
@@ -81,6 +82,7 @@ public class PeriodicCheckHandler implements Handler<Long> {
             String owner = timedOutAction.getData().getString("owner");
             Action requestStatus = createNewAction(timedOutAction);
             requestStatus.setLabel(NQEConstants.OPERATOR_GET_RUNNING_STATUS);
+            requestStatus.getData().putString("replyTo",com.getId());
             com.sendTo(owner, requestStatus.asJsonObject());
             moveActionToLevel(action.getValue(), 2);
         }
@@ -94,6 +96,7 @@ public class PeriodicCheckHandler implements Handler<Long> {
             String owner = timedOutAction.getData().getString("owner");
             Action requestStatus = createNewAction(timedOutAction);
             requestStatus.setLabel(NQEConstants.OPERATOR_GET_RUNNING_STATUS);
+           requestStatus.getData().putString("replyTo",com.getId());
             com.sendTo(owner, requestStatus.asJsonObject());
             moveActionToLevel(action.getValue(), 3);
         }

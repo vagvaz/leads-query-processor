@@ -81,14 +81,14 @@ public class DeployerLogicManage extends ManageVerticle {
             container.undeployModule(workerId);
             workerId = null;
         }
-        com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id, serviceType));
+        com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id+".manage", serviceType));
 
     }
 
     @Override
     public void fail(String message) {
         super.fail(message);
-        JsonObject msg = MessageUtils.createServiceStatusMessage(status, id, serviceType);
+        JsonObject msg = MessageUtils.createServiceStatusMessage(status, id+".manage", serviceType);
         msg.putString("message", message);
         com.sendTo(parent, msg);
     }

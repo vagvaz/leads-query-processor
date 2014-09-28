@@ -64,7 +64,8 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
     @Override
     public void stop() {
         super.stop();
-        com.unsubscribeFromAll();
+       if(com != null)
+         com.unsubscribeFromAll();
     }
 
     @Override
@@ -141,12 +142,17 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                     //
                     //               }
                     //               else
-                    if (label.equals(NQEConstants.OPERATOR_COMPLETE)) {
+                    if (label.equals(NQEConstants.OPERATOR_COMPLETE) || label.equals(NQEConstants.DEPLOY_OPERATOR)) {
                         PlanNode node = new PlanNode(action.getData().getObject("operator"));
                         String queryId = action.getData().getString("queryId");
                         ExecutionPlanMonitor plan = runningPlans.get(queryId);
                         plan.complete(node);
                         PlanNode tobeDeployed = plan.getNextOperator(node);
+                       if(tobeDeployed.getNodeType().equals(LeadsNodeType.ROOT))
+                       {
+                          plan.complete(tobeDeployed);
+                          tobeDeployed = plan.getNextOperator(tobeDeployed);
+                       }
                        if(tobeDeployed.getNodeType().equals(LeadsNodeType.OUTPUT_NODE)){
                           plan.complete(tobeDeployed);
                           tobeDeployed = plan.getNextOperator(tobeDeployed);
@@ -192,6 +198,8 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
        ExecutionPlanMonitor plan = runningPlans.get(queryId);
        query.setPlan((Plan) plan.getLogicalPlan());
        query.getQueryStatus().setStatus(QueryState.COMPLETED);
+       String outputCacheName = plan.getCacheName();
+       query.asJsonObject().putString("output",outputCacheName);
        queriesCache.put(queryId,query.asJsonObject().toString());
        //LATER TODO we could inform Interface Manager about the query completion to inform UIs
     }
@@ -210,6 +218,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
       deployAction.getData().putString("monitor",monitorAddress);
       deployAction.getData().putObject("operator",next.asJsonObject());
       deployAction.getData().putString("operatorType",next.getNodeType().toString());
+      deployAction.getData().putString("queryId",executionPlan.getQueryId());
      deployAction.setLabel(NQEConstants.DEPLOY_OPERATOR);
      com.sendTo(nqeGroup, deployAction.asJsonObject());
      com.sendTo(monitorAddress,deployAction.asJsonObject());

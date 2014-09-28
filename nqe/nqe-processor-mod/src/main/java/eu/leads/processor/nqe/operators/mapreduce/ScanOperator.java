@@ -35,9 +35,15 @@ public class ScanOperator extends BasicOperator {
 
    @Override
    public void run() {
+      System.err.println("RUNNNING SCAN OPERATOR");
       inputCache = (Cache) manager.getPersisentCache(getInput());
+
       Cache outputCache = (Cache)manager.getPersisentCache(getOutput());
 
+      if(inputCache.size() == 0){
+         cleanup();
+         return;
+      }
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
 
       ScanCallable callable = new ScanCallable(conf.toString(),getOutput());
@@ -60,11 +66,13 @@ public class ScanOperator extends BasicOperator {
       } catch (ExecutionException e) {
          e.printStackTrace();
       }
+      System.err.println("FINISHED RUNNING SCAN");
       cleanup();
    }
 
    @Override
    public void init(JsonObject config) {
+      String inputCacheName = getInput();
       inputCache = (Cache) manager.getPersisentCache(getInput());
    }
 
@@ -75,6 +83,8 @@ public class ScanOperator extends BasicOperator {
 
    @Override
    public void cleanup() {
+
+      System.err.println("CLEANING UP");
       super.cleanup();
    }
 
