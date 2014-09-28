@@ -21,7 +21,7 @@ import java.util.Vector;
 
 import static java.lang.Thread.sleep;
 
-public class leadsResultsGui extends JPanel {
+public class LeadsResultsGui extends JPanel {
     transient protected static Random r;
     private static String host;
     private static int port;
@@ -33,7 +33,7 @@ public class leadsResultsGui extends JPanel {
     protected String[] loc = {"a", "b", "c", "d"};
     private boolean DEBUG = false;
 
-    public leadsResultsGui(Vector<Vector> data, Vector<String> columnNames) {
+    public LeadsResultsGui(Vector<Vector> data, Vector<String> columnNames) {
         super(new GridBagLayout());
 
 
@@ -148,7 +148,7 @@ public class leadsResultsGui extends JPanel {
 
         //Create and set up the content pane.
         JPanel p = new JPanel(new BorderLayout()); //PREFERRED!
-        leadsResultsGui newContentPane = new leadsResultsGui(data, columnNames);
+        LeadsResultsGui newContentPane = new LeadsResultsGui(data, columnNames);
         newContentPane.setOpaque(true); //content panes must be opaque
         frame.setContentPane(newContentPane);
 
@@ -222,7 +222,7 @@ public class leadsResultsGui extends JPanel {
 
     static QueryResults send_query_and_wait(String json) throws IOException, InterruptedException {
 
-        QueryStatus status = WebServiceClient.submitQuery("LeadsGui", json);
+        QueryStatus status = WebServiceClient.submitWorkflow("LeadsGui", json);
         QueryStatus currentStatus;
         do {
             sleep(3000);

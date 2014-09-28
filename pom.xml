@@ -26,8 +26,8 @@
       <module>crawler</module>
       <module>interface-manager</module>
       <module>leads-query-processor-interfaces</module>
-      <module>leads-query-results-gui</module>
-      <module>leads-query-cli</module>
+      <module>leads-gui</module>
+      <module>leads-cli</module>
    </modules>
 
 </project>

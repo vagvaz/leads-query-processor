@@ -23,7 +23,7 @@
         <maven.vertx.plugin.version>2.0.4-final</maven.vertx.plugin.version>
     </properties>
 
-    <artifactId>leads-query-cli</artifactId>
+    <artifactId>leads-cli</artifactId>
 
 
     <repositories>
