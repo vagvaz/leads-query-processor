@@ -33,7 +33,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
     protected String logAddress; //prefix used for all id services
     protected JsonObject logConfig;
     protected String persistenceId; //persistence module deployment id, used for undeployment
-    protected String persistenceAddress;
+//    protected String persistenceAddress;
         //The persistence address, that services can read/write state/data
     protected JsonObject persistConfig;
     protected Set<String> processorIds; // processors modules deployment id, used for undeployment
@@ -111,7 +111,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
             componentPrefix + ".log"; //log Address, this will be used by all services for logging
         log = new LogProxy(logAddress, com);
 
-        persistenceAddress = componentPrefix + ".processor-0";
+//        persistenceAddress = componentPrefix + ".processor-0";
 //        persistence = new PersistenceProxy(persistenceAddress, com);
 
         workQueueAddress = componentPrefix + ".workQueue";
@@ -139,20 +139,20 @@ public class ComponentControlVerticle extends Verticle implements Component {
         logConfig.putString("id", logAddress);
         logConfig.putString("group", internalGroup);
         logConfig.putString("log", logAddress);
-        logConfig.putString("persistence", persistenceAddress);
+        logConfig.putString("persistence", "persistence");
         logConfig.putString("parent", id + ".serviceMonitor");
         logConfig.putString("componentType", getComponentType());
         logConfig.putString("componentId", getId());
 
 
-        persistConfig = new JsonObject();
-        persistConfig.putString("id", persistenceAddress);
-        persistConfig.putString("group", internalGroup);
-        persistConfig.putString("log", logAddress);
-        persistConfig.putString("persistence", persistenceAddress);
-        persistConfig.putString("parent", id + ".serviceMonitor");
-        persistConfig.putString("componentType", getComponentType());
-        persistConfig.putString("componentId", getId());
+//        persistConfig = new JsonObject();
+//        persistConfig.putString("id", persistenceAddress);
+//        persistConfig.putString("group", internalGroup);
+//        persistConfig.putString("log", logAddress);
+//        persistConfig.putString("persistence", persistenceAddress);
+//        persistConfig.putString("parent", id + ".serviceMonitor");
+//        persistConfig.putString("componentType", getComponentType());
+//        persistConfig.putString("componentId", getId());
 
         workQueueConfig = new JsonObject();
         workQueueConfig.putString("address", workQueueAddress);
@@ -162,7 +162,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
         logicConfig.putString("id", logicAddress);
         logicConfig.putString("group", internalGroup);
         logicConfig.putString("log", logAddress);
-        logicConfig.putString("persistence", persistenceAddress);
+        logicConfig.putString("persistence", "persistence");
         logicConfig.putString("parent", id + ".serviceMonitor");
         logicConfig.putString("componentType", componentType);
         logicConfig.putString("workqueue", workQueueAddress);
@@ -177,27 +177,27 @@ public class ComponentControlVerticle extends Verticle implements Component {
         processorConfig.putString("group", internalGroup);
         processorConfig.putString("workqueue", workQueueAddress);
         processorConfig.putString("log", logAddress);
-        processorConfig.putString("persistence", persistenceAddress);
+        processorConfig.putString("persistence", "persistence");
         processorConfig.putString("logic", logicAddress);
         processorConfig.putString("parent", id + ".serviceMonitor");
         processorConfig.putString("componentType", getComponentType());
         processorConfig.putString("componentId", getId());
         if (config.containsField("processor")) {
-            processorConfig.mergeIn(config.getObject("processor"));
+            processorConfig = processorConfig.mergeIn(config.getObject("processor"));
         }
 
 
         //Create An array of the services that must be managed by this component at least log,persistence,logic,processors
         Set<String> arrayServices = new HashSet<>();
         arrayServices.add(logAddress + ".manage");
-        arrayServices.add(persistenceAddress + ".manage");
+//        arrayServices.add(persistenceAddress + ".manage");
         arrayServices.add(logicAddress + ".manage");
         for (String proc : processorAddresses)
             arrayServices.add(proc + ".manage");
         Iterator<Object> serviceIterator = services.iterator();
         while (serviceIterator.hasNext()) {
             JsonObject s = (JsonObject) serviceIterator.next();
-            arrayServices.add(id + "." + s.getString("type") + ".manage");
+            arrayServices.add(componentPrefix + "." + s.getString("type") + ".manage");
         }
         serviceController = new ServiceController(arrayServices, this, com, log);
         com.subscribe(id + ".serviceMonitor", serviceController);
@@ -329,7 +329,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
                 }
             }
             //merge into the service configuration the basic Configuration
-            conf.mergeIn(basicConf);
+            conf = basicConf.mergeIn(conf);
             container
                 .deployModule(config.getString("groupId") + "~" + componentType + "-" + serviceType
                                   + "-mod~" + config.getString("version"), conf, 1,

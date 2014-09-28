@@ -46,7 +46,9 @@ public class ServiceController implements LeadsMessageHandler {
         if (message.getString("type").equals(MessageTypeConstants.SERVICE_STATUS_REPLY)) {
             String service = message.getString(MessageUtils.FROM);
             ServiceStatus serviceStatus = ServiceStatus.valueOf(message.getString("status"));
+
             switch (owner.getState()) {
+                case INITIALIZED:
                 case INITIALIZING:
                 case STARTING:
                 case RUNNING:
@@ -70,6 +72,7 @@ public class ServiceController implements LeadsMessageHandler {
                             reportFail(service, message.getString("status.message"));
                             break;
                     }
+                   break;
                 case RESETTING:
                     switch (serviceStatus) {
                         case IDLE:
@@ -116,6 +119,7 @@ public class ServiceController implements LeadsMessageHandler {
                             reportFail(service, message.getString("status.message"));
                             break;
                     }
+                   break;
                 case STOPPED:
                 case KILLED:
                     switch (serviceStatus) {
@@ -141,7 +145,7 @@ public class ServiceController implements LeadsMessageHandler {
                     }
                     break;
                 default:
-                    log.error("Unknown state received by service " + service);
+                    log.error("Unknown state received by service " + service + " " + message.toString());
                     break;
             }
 

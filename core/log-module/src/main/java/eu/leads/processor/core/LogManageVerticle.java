@@ -40,7 +40,7 @@ public class LogManageVerticle extends ManageVerticle {
                                                     logVertcileId = asyncResult.result();
                                                     com.sendTo(parent, MessageUtils
                                                                            .createServiceStatusMessage(ServiceStatus.RUNNING,
-                                                                                                          id,
+                                                                                                          id+".manage",
                                                                                                           serviceType));
 
                                                 } else {
@@ -60,7 +60,7 @@ public class LogManageVerticle extends ManageVerticle {
         logAddress = id;//".log";
         logConfig = new JsonObject();
         logConfig.putString("id", logAddress);
-        com.sendTo(parent, MessageUtils.createServiceStatusMessage(ServiceStatus.INITIALIZED, id,
+        com.sendTo(parent, MessageUtils.createServiceStatusMessage(ServiceStatus.INITIALIZED, id+".manage",
                                                                       serviceType));
     }
 
@@ -81,7 +81,7 @@ public class LogManageVerticle extends ManageVerticle {
                     container.logger()
                         .info("Log Vertice has been deployed ID " + asyncResult.result());
                     com.sendTo(parent, MessageUtils
-                                           .createServiceStatusMessage(ServiceStatus.STOPPED, id,
+                                           .createServiceStatusMessage(ServiceStatus.STOPPED, id+".manage",
                                                                           serviceType));
                     logVertcileId = null;
                     if (shouldStop)
