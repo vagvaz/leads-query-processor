@@ -57,6 +57,17 @@ public class GetResultsActionHandler implements ActionHandler {
                 String cacheName = queryStatus.getString("output");
                 boolean isSorted = queryStatus.getBoolean("isSorted");
                 JsonObject tuples = null;
+                if(cacheName == null || cacheName.equals("")){
+                    actionResult.putString("id", queryId);
+                    actionResult.putString("min", String.valueOf("-1"));
+                    actionResult.putString("max", "-1");
+                    actionResult.putString("result", new JsonArray().toString());
+                    actionResult.putString("size", "0");
+                    result.setStatus(ActionStatus.FAILED.toString());
+                    actionResult.putString("message","output was either null or the empty string");
+                    result.setResult(actionResult);
+                    return result;
+                }
                 if (max < 0) {
                     tuples = batchGet(cacheName,isSorted, min);
                 } else {

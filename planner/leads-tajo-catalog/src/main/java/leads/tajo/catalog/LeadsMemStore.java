@@ -47,22 +47,21 @@ import static org.apache.tajo.catalog.proto.CatalogProtos.TablespaceProto;
  * So, we don't need to consider concurrency problem here.
  */
 public class LeadsMemStore implements CatalogStore {
-    private final Map<String, String> tablespaces = Maps.newHashMap();
-    private final Map<String, Map<String, CatalogProtos.TableDescProto>> databases =
-        Maps.newHashMap();
-    private final Map<String, CatalogProtos.FunctionDescProto> functions = Maps.newHashMap();
-    private final Map<String, Map<String, IndexDescProto>> indexes = Maps.newHashMap();
-    private final Map<String, Map<String, IndexDescProto>> indexesByColumn = Maps.newHashMap();
+    private final Map<String, String> tablespaces ;
+    private final Map<String, Map<String, CatalogProtos.TableDescProto>> databases  ;
+    private final Map<String, CatalogProtos.FunctionDescProto> functions ;
+    private final Map<String, Map<String, IndexDescProto>> indexes ;
+    private final Map<String, Map<String, IndexDescProto>> indexesByColumn ;
     private InfinispanManager manager;
 
     public LeadsMemStore(Configuration conf) {
         LQPConfiguration.initialize();
-//        manager = CacheManagerFactory.createCacheManager();
-        //     tablespaces = manager.getPersisentCache("leads.processor.catalog.tablespaces");
-        //     databases = manager.getPersisentCache("leads.processor.catalog.databases");
-        //     functions = manager.getPersisentCache("leads.processor.catalog.functions");
-        //     indexes = manager.getPersisentCache("leads.processor.catalog.indexes");
-        //     indexesByColumn = manager.getPersisentCache("leads.processor.catalog.indexesByColumn");
+        manager = CacheManagerFactory.createCacheManager();
+             tablespaces = manager.getPersisentCache("leads.processor.catalog.tablespaces");
+             databases = manager.getPersisentCache("leads.processor.catalog.databases");
+             functions = manager.getPersisentCache("leads.processor.catalog.functions");
+             indexes = manager.getPersisentCache("leads.processor.catalog.indexes");
+             indexesByColumn = manager.getPersisentCache("leads.processor.catalog.indexesByColumn");
 
     }
 
