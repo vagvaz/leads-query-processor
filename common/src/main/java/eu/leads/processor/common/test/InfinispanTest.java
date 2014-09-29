@@ -23,23 +23,27 @@ public class InfinispanTest {
         //        cluster.initialize();
         InfinispanManager man = cluster.getManager();
 
-        ConcurrentMap map = man.getPersisentCache("queries:");
+        ConcurrentMap map = man.getPersisentCache("queriesfoo");
         map.put("1", "11");
         map.put("2", "22");
         InfinispanCluster cluster2 =
             new InfinispanCluster(CacheManagerFactory.createCacheManager());
 
         PrintUtilities.printMap(map);
-        ConcurrentMap map2 = cluster2.getManager().getPersisentCache("queries:");
+        ConcurrentMap map2 = cluster2.getManager().getPersisentCache("queriesfoo");
         map2.put("4", "33");
         PrintUtilities.printMap(map2);
         System.out.println("cl");
         PrintUtilities.printList(cluster.getManager().getMembers());
         System.out.println("cl2");
         PrintUtilities.printList(cluster2.getManager().getMembers());
-
+        boolean output = false;
+        if(map.get("4").equals("33") && map2.get("2").equals("22"))
+            output = true;
         cluster2.shutdown();
         cluster.shutdown();
+        if(output)
+            System.err.println("SUCCESS");
         System.exit(0);
     }
 }

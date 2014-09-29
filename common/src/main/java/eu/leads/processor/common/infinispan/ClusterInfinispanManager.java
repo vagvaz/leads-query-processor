@@ -4,12 +4,17 @@ import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.utils.PrintUtilities;
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.Configuration;
+import org.infinispan.configuration.cache.ConfigurationBuilder;
+import org.infinispan.configuration.parsing.ConfigurationBuilderHolder;
+import org.infinispan.configuration.parsing.ParserRegistry;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.lifecycle.ComponentStatus;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.remoting.transport.Address;
+import org.infinispan.server.hotrod.HotRodServer;
+import org.infinispan.server.hotrod.configuration.HotRodServerConfigurationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +40,20 @@ public class ClusterInfinispanManager implements InfinispanManager {
     private Logger log = LoggerFactory.getLogger(this.getClass());
     private EmbeddedCacheManager manager;
     private String configurationFile;
+    private HotRodServer server;
+    private int serverPort;
+    private String host;
 
     /**
      * Constructs a new ClusterInfinispanManager.
      */
     public ClusterInfinispanManager() {
+        host = "0.0.0.0";
+        serverPort = 11000;
+    }
+
+    public ClusterInfinispanManager(EmbeddedCacheManager manager) {
+        this.manager = manager;
     }
 
     /**
@@ -54,26 +68,73 @@ public class ClusterInfinispanManager implements InfinispanManager {
      * {@inheritDoc}
      */
     @Override
-    public void startManager(String configurationFile) {
+    public void startManager(String configurationFile)  {
+
+        server = new HotRodServer();
+        ParserRegistry registry = new ParserRegistry();
+        ConfigurationBuilderHolder holder = null;
+        ConfigurationBuilder builder = null;
         try {
             if (configurationFile != null && !configurationFile.equals("")) {
-                manager = new DefaultCacheManager(configurationFile);
+                holder = registry.parseFile(configurationFile);
+
             } else {
-                manager = new DefaultCacheManager(StringConstants.ISPN_CLUSTER_FILE);
-                manager.start();
-                getPersisentCache("clustered");
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                PrintUtilities.printList(manager.getMembers());
-                System.out.println("---- La La -----------");
-                PrintUtilities
-                    .printList(manager.getCache().getAdvancedCache().getRpcManager().getMembers());
+                holder = registry.parseFile(StringConstants.ISPN_CLUSTER_FILE);
             }
-        } catch (IOException e) {
+        }catch(IOException e){
             e.printStackTrace();
+        }
+
+        manager = new DefaultCacheManager(holder, true);
+        getPersisentCache("clustered");
+        //I might want to sleep here for a little while
+        PrintUtilities.printList(manager.getMembers());
+//        startHotRodServer(manager,host, serverPort);
+
+        System.out.println("We have started");
+
+    }
+
+    public HotRodServer getServer() {
+        return server;
+    }
+
+    public void setServer(HotRodServer server) {
+        this.server = server;
+    }
+
+    public int getServerPort() {
+        return serverPort;
+    }
+
+    public void setServerPort(int serverPort) {
+        this.serverPort = serverPort;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    private void startHotRodServer(EmbeddedCacheManager targetManager, String localhost, int port) {
+        serverPort = port;
+        boolean isStarted = false;
+        while (!isStarted) {
+            HotRodServerConfigurationBuilder serverConfigurationBuilder =
+                new HotRodServerConfigurationBuilder();
+            serverConfigurationBuilder.host(localhost).port(serverPort).keyValueFilterFactory("leads-processor-filter-factory",new LeadsProcessorKeyValueFilterFactory(manager))
+            .converterFactory("leads-processor-converter-factory",new LeadsProcessorConverterFactory());
+            try {
+                server.start(serverConfigurationBuilder.build(), targetManager);
+                isStarted = true;
+            } catch (Exception e) {
+                System.out.println("Exception e " + e.getLocalizedMessage());
+                serverPort++;
+                isStarted = false;
+            }
         }
     }
 
