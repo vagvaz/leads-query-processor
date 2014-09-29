@@ -142,14 +142,13 @@ public class leadsCli {
             System.out.println(", o: " + currentStatus.toString());
         } ; //currentStatus.getStatus()!= QueryState.COMPLETED
         System.out.println("Bye Bye" +currentStatus.toString());
-//        QueryResults res =WebServiceClient.getQueryResults(currentStatus.getId(),0,-1);
-          QueryResults res= new QueryResults(currentStatus.getId());
-        res.setTuples(new ArrayList<String>());
+        QueryResults res =WebServiceClient.getQueryResults(currentStatus.getId(),0,-1);
+        print_results(res);
     }
 
     private static void print_results(QueryResults data){
         ArrayList<Tuple> resultSet = new ArrayList<Tuple> ();
-        for (String s : data.getTuples())
+        for (String s : data.getResult())
             resultSet.add(new Tuple(s));
         printResults(resultSet);
 

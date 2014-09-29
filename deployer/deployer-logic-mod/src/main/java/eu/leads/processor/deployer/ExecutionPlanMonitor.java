@@ -23,6 +23,16 @@ public class ExecutionPlanMonitor {
     private Set<LeadsNodeType> groupingCandidate;
     private Action action;
     String outputCacheName;
+
+    public boolean isSorted() {
+        return isSorted;
+    }
+
+    public void setSorted(boolean isSorted) {
+        this.isSorted = isSorted;
+    }
+
+    boolean isSorted = false;
     public ExecutionPlanMonitor(SQLPlan plan) {
         this.queryId = plan.getQueryId();
         this.plan = plan;
@@ -40,6 +50,8 @@ public class ExecutionPlanMonitor {
        PlanNode node = plan.getNode(nodeId.getNodeId());
        node.setStatus(NodeStatus.COMPLETED);
        LeadsNodeType currentType = node.getNodeType();
+        if(currentType.equals(LeadsNodeType.SORT))
+            isSorted = true;
        if(currentType != LeadsNodeType.OUTPUT_NODE && currentType != LeadsNodeType.ROOT){
           outputCacheName = node.getNodeId();
        }

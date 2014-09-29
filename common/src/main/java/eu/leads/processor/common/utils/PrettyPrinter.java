@@ -90,7 +90,7 @@ public final class PrettyPrinter {
                 builder.append("\n");
             }
         }
-        StdOutputWriter.getInstance().printlnAndClear(builder.toString());
+        System.out.println(builder.toString());
     }
 
     private String getHorizontalBorder(int[] widths) {

@@ -200,6 +200,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
        query.getQueryStatus().setStatus(QueryState.COMPLETED);
        String outputCacheName = plan.getCacheName();
        query.asJsonObject().putString("output",outputCacheName);
+        query.asJsonObject().putBoolean("isSorted",plan.isSorted());
        queriesCache.put(queryId,query.asJsonObject().toString());
        //LATER TODO we could inform Interface Manager about the query completion to inform UIs
     }
