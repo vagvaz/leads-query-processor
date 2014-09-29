@@ -1,95 +1,105 @@
 package eu.leads.processor.web;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import eu.leads.processor.core.DataType;
+import org.vertx.java.core.json.JsonArray;
+import org.vertx.java.core.json.JsonElement;
+import org.vertx.java.core.json.JsonObject;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * Created by vagvaz on 3/7/14.
  */
-@JsonAutoDetect
-public class QueryResults {
-    private String id;
-    private long min;
-    private long max;
-    private long size;
-    private List<String> tuples;
-    private String message;
-
-
+public class QueryResults  extends DataType {
 
     public QueryResults() {
-        id = "";
-        min = -1;
-        max = -1;
-        tuples = null;
+     super();
+        setId("");
+        setMax(-1);
+        setMin(-1);
+        setResult(new ArrayList<String>());
+
     }
 
+
+
     public QueryResults(String queryId) {
-        id = queryId;
-        min = -1;
-        max = -1;
-        tuples = null;
+        setId(queryId);
+        setMax(-1);
+        setMin(-1);
+        setResult(new ArrayList<String>());
+
+    }
+
+    public QueryResults(JsonObject jsonObject) {
+        super(jsonObject);
     }
 
     public String getId() {
-        return id;
+        return data.getString("id");
     }
 
     public void setId(String id) {
-        this.id = id;
+        data.putString("id",id);
     }
 
     public long getMin() {
-        return min;
+        return data.getLong("min");
     }
 
     public void setMin(long min) {
-        this.min = min;
+        data.putNumber("min",min);
     }
 
     public long getMax() {
-        return max;
+        return data.getLong("max");
     }
 
     public void setMax(long max) {
-        this.max = max;
+        data.putNumber("max",max);
     }
 
-    public List<String> getTuples() {
-        return tuples;
+    public List<String> getResult() {
+        List<String> result = new ArrayList<String>();
+        JsonArray array = new JsonArray(data.getString("result"));
+
+        Iterator<Object> iterator = array.iterator();
+        while(iterator.hasNext()){
+            result.add((String) iterator.next());
+        }
+        return result;
     }
 
-    public void setTuples(List<String> tuples) {
-        this.tuples = tuples;
+    public void setResult(List<String> result) {
+
+        JsonArray resultArray = new JsonArray();
+
+        for(String t : result){
+            resultArray.add(t);
+        }
+        data.putArray("result",resultArray);
     }
 
     public String getMessage() {
-        return message;
+        return data.getString("message");
     }
 
     public void setMessage(String message) {
-        this.message = message;
+        data.putString("message",message);
     }
 
     @Override
     public String toString() {
-        String result =
-            id + "[" + Long.toString(min) + ":" + Long.toString(max) + "]\n" + message + "\n";
-        StringBuilder builder = new StringBuilder();
-        int counter = 0;
-        for (String tuple : tuples) {
-            builder.append(Integer.toString(counter++) + tuple + "\n");
-        }
-        result += builder.toString();
-        return result;
+       return  data.encodePrettily();
     }
 
     public long getSize() {
-        return size;
+      return  data.getLong("size");
     }
 
     public void setSize(long size) {
-        this.size = size;
+        data.putNumber("size",size);
     }
 }

@@ -22,10 +22,11 @@ public abstract class BasicOperator extends Thread implements Operator{
         this.action = action;
     }
     protected BasicOperator(Node com, InfinispanManager manager,Action action){
+       super(com.getId()+"-operator-thread");
        this.com = com;
        this.manager = manager;
        this.action = action;
-       this.conf = action.getData().getObject("configuration");
+       this.conf = action.getData().getObject("operator").getObject("configuration");
     }
 
 
@@ -36,17 +37,11 @@ public abstract class BasicOperator extends Thread implements Operator{
 
    @Override
    public void execute() {
-      this.start();
+      start();
    }
 
    @Override
    public void cleanup() {
-      this.stop();
-      try {
-         this.join();
-      } catch (InterruptedException e) {
-         e.printStackTrace();
-      }
       action.setStatus(ActionStatus.COMPLETED.toString());
       if(com != null)
          com.sendTo(action.getData().getString("owner"),action.asJsonObject());
@@ -66,7 +61,7 @@ public abstract class BasicOperator extends Thread implements Operator{
 
    @Override
    public String getInput() {
-      return action.getData().getArray("inputs").iterator().next().toString();
+      return action.getData().getObject("operator").getArray("inputs").iterator().next().toString();
    }
 
    @Override
@@ -76,7 +71,7 @@ public abstract class BasicOperator extends Thread implements Operator{
 
    @Override
    public String getOutput() {
-      return action.getData().getString("id");
+      return action.getData().getObject("operator").getString("id");
    }
 
    @Override

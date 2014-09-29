@@ -16,7 +16,7 @@ public class SQLOperatorFactory {
    public static Operator getOperator(Node com, InfinispanManager persistence, Action action) {
       Operator result = null;
       String implemenationType = action.getData().getString("implementation");
-      LeadsNodeType operatorType = LeadsNodeType.valueOf(action.getData().getObject("operator").getString("nodeType"));
+      LeadsNodeType operatorType = LeadsNodeType.valueOf(action.getData().getString("operatorType"));
       switch(operatorType){
          case ROOT:
             break;

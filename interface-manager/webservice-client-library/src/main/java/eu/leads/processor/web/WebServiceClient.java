@@ -157,7 +157,7 @@ public class WebServiceClient {
         HttpURLConnection connection = (HttpURLConnection) address.openConnection();
         connection = setUp(connection, "GET", MediaType.APPLICATION_JSON, true, true);
         String response = getResult(connection);
-        result = mapper.readValue(response, QueryResults.class);
+        result = new QueryResults(new JsonObject(response));
         return result;
     }
 

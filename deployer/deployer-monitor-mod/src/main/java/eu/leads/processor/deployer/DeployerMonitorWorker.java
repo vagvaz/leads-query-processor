@@ -21,7 +21,7 @@ import java.util.UUID;
  * Created by vagvaz on 8/27/14.
  */
 public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandler {
-    private final String componentType = "deployer";
+    private final String componentType = "deployer-monitor";
     JsonObject config;
     String deployerLogic;
     String nqeGroup;
@@ -77,11 +77,14 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
         String type = msg.getString("type");
         String from = msg.getString(MessageUtils.FROM);
         String to = msg.getString(MessageUtils.TO);
+        if(type == null && type.equals("")){
+           log.error(msg.toString());
+           return;
+        }
         if (type.equals("action")) {
             Action action = new Action(msg);
             String label = action.getLabel();
             Action newAction = null;
-            action.setProcessedBy(id);
             //         action.setStatus(ActionStatus.INPROCESS.toString());
 
             switch (ActionStatus.valueOf(action.getStatus())) {
@@ -104,7 +107,7 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
                         log.error("Unknown PENDING Action received " + action.toString());
                         return;
                     }
-                    action.setStatus(ActionStatus.INPROCESS.toString());
+//                    action.setStatus(ActionStatus.INPROCESS.toString());
                     if (newAction != null) {
                         action.addChildAction(newAction.getId());
                         logAction(newAction);
@@ -151,7 +154,8 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
                     break;
                 case COMPLETED: // the action either a part of a multistep workflow (INPROCESSING) or it could be processed.
                     if (label.equals(NQEConstants.DEPLOY_OPERATOR)) {
-                        log.error("Received OPERATOR STARTED Action " + action.toString()
+                       completeOperator(action);
+                       log.error("Received OPERATOR STARTED Action " + action.toString()
                                       + " with status COMPLETED");
                         return;
                     } else if (label.equals(NQEConstants.OPERATOR_COMPLETE)) {

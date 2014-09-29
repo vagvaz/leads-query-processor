@@ -68,8 +68,7 @@ public class leadsCli {
                         e.printStackTrace();
                     }
 
-
-                    print_results(send_query_and_wait(sql));
+                    send_query_and_wait(sql);
 
                     System.out.print("\nPlease enter your SQL query: ");
                 } while ((line = in.readLine()) != null);
@@ -104,29 +103,7 @@ public class leadsCli {
 
 
     }
-    static QueryResults send_query_and_wait(String sql) throws IOException, InterruptedException {
 
-        QueryStatus status = WebServiceClient.submitQuery(username,sql);
-        QueryStatus currentStatus;
-        do {
-            sleep(3000);
-            currentStatus = WebServiceClient.getQueryStatus(status.getId());
-            System.out.print("s: " + status.toString());
-            System.out.println(", o: " + currentStatus.toString());
-        }while (currentStatus.getStatus().toLowerCase().contains("completed")); //currentStatus.getStatus()!= QueryState.COMPLETED
-        QueryResults res =WebServiceClient.getQueryResults(currentStatus.getId(),0,-1);
-        return res;
-    }
-
-    private static void print_results(QueryResults data){
-        ArrayList<Tuple> resultSet = new ArrayList<Tuple> ();
-        for (String s : data.getTuples())
-            resultSet.add(new Tuple(s));
-        printResults(resultSet);
-
-
-
-    }
     public float nextFloat(float min, float max) {
         return min + r.nextFloat() * (max - min);
     }
@@ -155,7 +132,29 @@ public class leadsCli {
         System.out.println("--------------------------");
     }
 
+    static void send_query_and_wait(String sql) throws IOException, InterruptedException {
 
+        QueryStatus currentStatus = WebServiceClient.submitQuery(username,sql);
+        while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")) {
+            sleep(3000);
+            currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
+            System.out.print("s: " + currentStatus.toString());
+            System.out.println(", o: " + currentStatus.toString());
+        } ; //currentStatus.getStatus()!= QueryState.COMPLETED
+        System.out.println("Bye Bye" +currentStatus.toString());
+        QueryResults res =WebServiceClient.getQueryResults(currentStatus.getId(),0,-1);
+        print_results(res);
+    }
+
+    private static void print_results(QueryResults data){
+        ArrayList<Tuple> resultSet = new ArrayList<Tuple> ();
+        for (String s : data.getResult())
+            resultSet.add(new Tuple(s));
+        printResults(resultSet);
+
+
+
+    }
 
     //Print the results of the query
     private static void printResults(ArrayList<Tuple> resultSet) {

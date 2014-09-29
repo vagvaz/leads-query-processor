@@ -1,5 +1,5 @@
 *********************************
-Start date Mon Sep 08 13:34:34 EEST 2014
+Start date Sun Sep 28 15:31:05 EEST 2014
 Version Apatar_v1.12.12
 JRE Version 1.7.0_65
 JRE Vendor Oracle Corporation
@@ -7,7 +7,7 @@ log4j.configuration = `file:/home/tr/Projects/LEADs/leads-query-processor/Apatar
 user.dir= `/home/tr/Projects/LEADs/leads-query-processor/Apatar`
 jdbc:derby:tempdb/application/temp_db;create=true
 *********************************
-Start date Mon Sep 08 13:34:35 EEST 2014
+Start date Sun Sep 28 15:31:06 EEST 2014
 Version Apatar_v1.12.12
 JRE Version 1.7.0_65
 JRE Vendor Oracle Corporation
@@ -17,33 +17,5 @@ user.dir= `/home/tr/Projects/LEADs/leads-query-processor/Apatar`
 getSystemLookAndFeelClassName=`javax.swing.plaf.metal.MetalLookAndFeel`
 Project path=
 Configuration database closed.
-nodeClassParameter = `com.apatar.read.READNode`
-nodeClassParameter = `com.apatar.output.OutputNode`
-nodeClassParameter = `com.apatar.hadoop.HDFSNode`
-nodeClassParameter = `com.apatar.hadoop.HDFSNode`
-nodeClassParameter = `com.apatar.hadoopJoin.HDJoinNode`
-nodeClassParameter = `com.apatar.hadoop.HDFSNode`
-nodeClassParameter = `com.apatar.hadoop.HDFSNode`
-nodeClassParameter = `com.apatar.hadoopJoin.HDJoinNode`
-nodeClassParameter = `com.apatar.hadoop.HDFSNode`
-nodeClassParameter = `com.apatar.read.READNode`
-nodeClassParameter = `com.apatar.read.READNode`
-nodeClassParameter = `com.apatar.join.JoinNode`
-nodeClassParameter = `com.apatar.groupByNew.GroupByNewNode`
-nodeClassParameter = `com.apatar.core.ColumnNode`
-nodeClassParameter = `com.apatar.core.ColumnNode`
-nodeClassParameter = `com.apatar.functions.FunctionNode`
-nodeClassParameter = `com.apatar.functions.FunctionNode`
-nodeClassParameter = `com.apatar.core.ColumnNode`
-nodeClassParameter = `com.apatar.core.ColumnNode`
-nodeClassParameter = `com.apatar.core.ColumnNode`
-nodeClassParameter = `com.apatar.validate.FilterNode`
-nodeClassParameter = `com.apatar.core.ColumnNode`
-nodeClassParameter = `com.apatar.functions.FunctionNode`
-nodeClassParameter = `com.apatar.core.ColumnNode`
-nodeClassParameter = `com.apatar.functions.FunctionNode`
-nodeClassParameter = `com.apatar.project.ProjectNode`
-nodeClassParameter = `com.apatar.limit.OrderByNode`
-nodeClassParameter = `com.apatar.core.ColumnNode`
-nodeClassParameter = `com.apatar.functions.FunctionNode`
-nodeClassParameter = `com.apatar.output.OutputNode`
+Project path=
+Project path=

@@ -28,7 +28,7 @@ public class DeployerMonitorManage extends ManageVerticle {
     @Override
     public void initialize(JsonObject config) {
         super.initialize(config);
-        monitorAddress = config.getString("monitor");
+        monitorAddress = id;
         deployerAddress = config.getString("deployer");
         nqeAddress = config.getString("nqe");
         workerConfig = new JsonObject();

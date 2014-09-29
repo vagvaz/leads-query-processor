@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class CachePutter {
     private final int period;
-    private final ConcurrentMap cache;
+    private final ConcurrentMap<String,String> cache;
     private final int size;
 
     public CachePutter(String cacheName, int size, int period) {

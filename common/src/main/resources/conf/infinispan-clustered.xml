@@ -31,19 +31,20 @@
       <jmx domain="eu.leads.processor" duplicate-domains="true"></jmx>
       <distributed-cache name="default" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
                          statistics="true">
+         <compatibility></compatibility>
          <eviction max-entries="10000"/>
          <locking concurrency-level="2000"/>
          <state-transfer enabled="false" await-initial-transfer="false"/>
 
-         <persistence passivation="true">
-            <file-store path="${java.io.tmpdir}" shared="false" preload="true"/>
-         </persistence>
+         <!--<persistence passivation="true">-->
+            <!--<file-store path="${java.io.tmpdir}" shared="false" preload="true"/>-->
+         <!--</persistence>-->
 
       </distributed-cache>
 
       <distributed-cache name="testCache" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
                          statistics="true">
-
+         <compatibility></compatibility>
          <eviction max-entries="10000"/>
          <locking concurrency-level="2000"/>
          <state-transfer enabled="true" await-initial-transfer="true"/>
@@ -56,45 +57,49 @@
 
       <distributed-cache name="clustered" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
                          statistics="true">
-
+         <compatibility></compatibility>
          <eviction max-entries="10000"/>
          <locking concurrency-level="2000"/>
          <state-transfer enabled="true" await-initial-transfer="true"/>
 
-         <persistence passivation="true">
-            <file-store path="${java.io.tmpdir}" shared="false" preload="true"/>
-         </persistence>
+         <!--<persistence passivation="true">-->
+            <!--<file-store path="${java.io.tmpdir}" shared="false" preload="true"/>-->
+         <!--</persistence>-->
 
       </distributed-cache>
       <distributed-cache name="active_plugins_cache" mode="SYNC" owners="3" l1-lifespan="600000"
                          start="true"
                          statistics="true">
-
+         <compatibility></compatibility>
          <eviction max-entries="10000"/>
          <locking concurrency-level="2000"/>
-         <persistence passivation="true">
-            <file-store path="${java.io.tmpdir}" shared="false" preload="true"/>
-         </persistence>
+         <!--<persistence passivation="true">-->
+            <!--<file-store path="${java.io.tmpdir}" shared="false" preload="true"/>-->
+         <!--</persistence>-->
 
       </distributed-cache>
       <distributed-cache name="processor_plugins" mode="SYNC" owners="2" l1-lifespan="600000"
                          start="true"
                          statistics="true">
          <state-transfer enabled="true" await-initial-transfer="true"/>
+
          <eviction max-entries="10000"/>
          <locking concurrency-level="2000"/>
          <state-transfer enabled="true" await-initial-transfer="true"/>
-
-         <persistence passivation="true">
-            <file-store path="${java.io.tmpdir}" shared="false" preload="true"/>
-         </persistence>
+         <compatibility></compatibility>
+         <!--<persistence passivation="true">-->
+            <!--<file-store path="${java.io.tmpdir}" shared="false" preload="true"/>-->
+         <!--</persistence>-->
 
       </distributed-cache>
 
       <distributed-cache name="queries" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
-                         statistics="true"></distributed-cache>
+                         statistics="true">
+         <compatibility></compatibility>
+                         </distributed-cache>
       <distributed-cache name="tables" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
                          statistics="true">
+         <compatibility></compatibility>
       </distributed-cache>
    </cache-container>
 

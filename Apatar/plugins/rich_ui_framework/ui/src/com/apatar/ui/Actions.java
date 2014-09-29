@@ -376,7 +376,7 @@ public class Actions {
 										+ jarname);
 					}
 
-					// proc.waitFor();
+					//proc.waitFor();
 					// System.out.println("Process Status: "+proc.exitValue());
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block

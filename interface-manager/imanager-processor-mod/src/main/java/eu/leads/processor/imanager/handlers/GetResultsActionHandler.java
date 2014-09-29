@@ -1,12 +1,12 @@
 package eu.leads.processor.imanager.handlers;
 
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.infinispan.RangeFilter;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import org.infinispan.Cache;
@@ -55,12 +55,12 @@ public class GetResultsActionHandler implements ActionHandler {
             } else {
                 JsonObject queryStatus = new JsonObject(queryJson);
                 String cacheName = queryStatus.getString("output");
-
+                boolean isSorted = queryStatus.getBoolean("isSorted");
                 JsonObject tuples = null;
                 if (max < 0) {
-                    tuples = batchGet(cacheName, min);
+                    tuples = batchGet(cacheName,isSorted, min);
                 } else {
-                    tuples = batchGet(cacheName, min, max);
+                    tuples = batchGet(cacheName,isSorted, min, max);
                 }
 //                updateQueryReadStatus(queryId, queryStatus, min, max);
                 actionResult.putString("id", queryId);
@@ -79,25 +79,34 @@ public class GetResultsActionHandler implements ActionHandler {
         return result;
     }
 
-   private JsonObject batchGet(String cacheName, Long min, Long max) {
+   private JsonObject batchGet(String cacheName, boolean isSorted, Long min) {
       JsonObject result = new JsonObject();
       JsonArray listOfValues = new JsonArray();
 
 
       Cache cache = (Cache) persistence.getPersisentCache(cacheName);
-      try {
-         CloseableIterable<Map.Entry<String, String>> iterable =
-                 cache.getAdvancedCache().filterEntries(new RangeFilter(min, max));
-         for (Map.Entry<String, String> entry : iterable) {
-            listOfValues.add(entry.getValue());
-         }
-      } catch (Exception e) {
+        if(isSorted) {
+            long cacheSize = cache.size();
+            for (long index = 0; index < cacheSize; index++) {
+                String value = (String) cache.get(String.valueOf(index));
+                listOfValues.add(value);
+            }
+        }
+        else{
+            try {
+                CloseableIterable<Map.Entry<String, String>> iterable =
+                    cache.getAdvancedCache().filterEntries(new AcceptAllFilter());
+                for (Map.Entry<String, String> entry : iterable) {
+                    listOfValues.add(entry.getValue());
+                }
+            } catch (Exception e) {
 
-         log.error("Iterating over " + cacheName + " for batch resulted in Exception "
-                               + e.getMessage() + "\n from  " + cacheName);
-         result.putString("status", "failed");
-         result.putArray("result", new JsonArray());
-         return result;
+                log.error("Iterating over " + cacheName + " for batch resulted in Exception "
+                              + e.getMessage() + "\n from  " + cacheName);
+                result.putString("status", "failed");
+                result.putArray("result", new JsonArray());
+                return result;
+            }
       }
 
       result.putString("status", "ok");
@@ -105,8 +114,8 @@ public class GetResultsActionHandler implements ActionHandler {
       return result;
    }
 
-   private JsonObject batchGet(String cacheName, Long min) {
-      return batchGet(cacheName,min,-1L);
+   private JsonObject batchGet(String cacheName, boolean isSorted, Long min, Long max) {
+      return batchGet(cacheName,isSorted,min,max);
    }
 
 

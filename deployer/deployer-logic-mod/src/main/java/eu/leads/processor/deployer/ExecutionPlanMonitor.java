@@ -22,6 +22,17 @@ public class ExecutionPlanMonitor {
     private ExecutionPlan executionPlan;
     private Set<LeadsNodeType> groupingCandidate;
     private Action action;
+    String outputCacheName;
+
+    public boolean isSorted() {
+        return isSorted;
+    }
+
+    public void setSorted(boolean isSorted) {
+        this.isSorted = isSorted;
+    }
+
+    boolean isSorted = false;
     public ExecutionPlanMonitor(SQLPlan plan) {
         this.queryId = plan.getQueryId();
         this.plan = plan;
@@ -38,10 +49,18 @@ public class ExecutionPlanMonitor {
     public void complete(PlanNode nodeId) {
        PlanNode node = plan.getNode(nodeId.getNodeId());
        node.setStatus(NodeStatus.COMPLETED);
+       LeadsNodeType currentType = node.getNodeType();
+        if(currentType.equals(LeadsNodeType.SORT))
+            isSorted = true;
+       if(currentType != LeadsNodeType.OUTPUT_NODE && currentType != LeadsNodeType.ROOT){
+          outputCacheName = node.getNodeId();
+       }
     }
 
     public PlanNode getNextOperator(PlanNode node) {
        PlanNode result = null;
+       if(node.getNodeType().equals(LeadsNodeType.OUTPUT_NODE))
+          return result;
        PlanNode next = plan.getNode(node.getOutput());
        if(canBeExecuted(next)){
          if(groupingCandidate.contains(next.getNodeType())){
@@ -82,7 +101,7 @@ public class ExecutionPlanMonitor {
       boolean result = true;
       for(String input : inputs){
          PlanNode inputNode = plan.getNode(input);
-         if(!inputNode.getStatus().equals(NodeStatus.COMPLETED));
+         if(!(inputNode.getStatus().equals(NodeStatus.COMPLETED)))
          {
             result = false;
          }
@@ -136,5 +155,9 @@ public class ExecutionPlanMonitor {
    }
    public Action getAction(){
       return action;
+   }
+
+   public String getCacheName() {
+      return outputCacheName;
    }
 }

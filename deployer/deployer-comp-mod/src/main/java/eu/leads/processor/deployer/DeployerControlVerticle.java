@@ -8,7 +8,7 @@ import org.vertx.java.core.json.JsonObject;
  * Created by vagvaz on 8/27/14.
  */
 public class DeployerControlVerticle extends ComponentControlVerticle {
-    protected final String componentType = "planner";
+    protected final String componentType = "deployer";
     private String plannerQueue;
     private String nqeQueue;
 
@@ -26,11 +26,11 @@ public class DeployerControlVerticle extends ComponentControlVerticle {
         super.setup(conf);
         logicConfig.putString("deployer", StringConstants.DEPLOYERQUEUE);
         logicConfig.putString("nqe", nqeQueue);
-        logicConfig.putString("monitor",id+".monitor");
+        logicConfig.putString("monitor","deployer."+id+".monitor");
 
        processorConfig.putString("deployer", StringConstants.DEPLOYERQUEUE);
-      processorConfig.putString("nqe",nqeQueue);
-       processorConfig.putString("monitor",id+".monitor");
+       processorConfig.putString("nqe",nqeQueue);
+       processorConfig.putString("monitor","deployer."+id+".monitor");
 
     }
 

@@ -20,6 +20,9 @@ import org.vertx.java.platform.Verticle;
 import java.util.HashMap;
 import java.util.Map;
 
+import static eu.leads.processor.core.ActionStatus.*;
+import static eu.leads.processor.core.ActionStatus.COMPLETED;
+
 /**
  * Created by vagvaz on 8/6/14.
  */
@@ -35,10 +38,11 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
    LogProxy log;
    InfinispanManager persistence;
    Map<String,ActionHandler> handlers;
-   
+   Map<String,Action> activeActions;
    @Override
    public void start() {
       super.start();
+      activeActions = new HashMap<String,Action>();
       leadsHandler = new LeadsMessageHandler() {
          @Override
          public void handle(JsonObject event) {
@@ -50,11 +54,50 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
             }
             else if(event.getString("type").equals("action")){
                Action action = new Action(event);
-               if(action.getStatus().equals(ActionStatus.COMPLETED)){
-                  com.sendTo(logic,action.asJsonObject());
-               }
-               else{
-                  log.warn("Received action \n" +  action.toString() + "\nbut its not COMPLETED");
+               switch(valueOf(action.getStatus())){
+                  case COMPLETED:
+                     if(action.getLabel().equals(NQEConstants.DEPLOY_OPERATOR)){
+                       log.info("Operator: " + action.getData().getString("operatorType") + " is completed");
+                       com.sendTo(action.getData().getString("monitor"),action.asJsonObject());
+                       activeActions.remove(action.getId());
+                     }
+                     else{
+                        log.error("COMPLETED Action " + action.toString() + "Received by NQEProcessor but cannot be handled" );
+                     }
+                     break;
+                  case PENDING:
+                     if(action.getLabel().equals(NQEConstants.OPERATOR_GET_RUNNING_STATUS)){
+                        Action runningAction = new Action(action.asJsonObject().copy());
+                        runningAction.setLabel(NQEConstants.OPERATOR_RUNNING_STATUS);
+                        com.sendTo(action.getData().getString("replyTo"),runningAction.asJsonObject());
+                     }
+                     else if(action.getLabel().equals(NQEConstants.OPERATOR_GET_OWNER)){
+                        Action runningAction = new Action(action.asJsonObject().copy());
+                        runningAction.setLabel(NQEConstants.OPERATOR_OWNER);
+                        runningAction.getData().putString("owner",com.getId());
+                        runningAction.setStatus(INPROCESS.toString());
+                        com.sendTo(action.getData().getString("replyTo"),runningAction.asJsonObject());
+                     }
+                     else{
+                        log.error("PENDING Action " + action.toString() + "Received by NQEProcessor but cannot be handled" );
+                     }
+                     break;
+                  case INPROCESS:
+                     log.error("INPROCESS Action " + action.toString() + "Received by NQEProcessor but cannot be handled" );
+                     break;
+                  case FAILED:
+                     if(action.getLabel().equals(NQEConstants.DEPLOY_OPERATOR)){
+                        log.info("Operator: " + action.getData().getString("operatorType") + " failed");
+                        com.sendTo(logic,action.asJsonObject());
+                        activeActions.remove(action.getId());
+                     }
+                     else{
+                        log.error("FAILED Action " + action.toString() + "Received by NQEProcessor but cannot be handled" );
+                     }
+                     break;
+                  default:
+                     break;
+
                }
             }
 
@@ -96,8 +139,8 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
                Action action = new Action(body);
                ActionHandler ac = handlers.get(action.getLabel());
                Action result = ac.process(action);
-               result.setStatus(ActionStatus.COMPLETED.toString());
-               com.sendTo(logic,result.asJsonObject());
+//               result.setStatus(ActionStatus.COMPLETED.toString());
+//               com.sendTo(logic,result.asJsonObject());
                message.reply();
             }
          } else {

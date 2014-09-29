@@ -85,7 +85,9 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
                 case COMPLETED: // the action either a part of a multistep workflow (INPROCESSING) or it could be processed.
                     if (label.equals(NQEConstants.DEPLOY_OPERATOR)) {
                         com.sendTo(action.getData().getString("replyTo"), action.getResult());
-                    }   else {
+                    }
+
+                    else {
                         log.error("Unknown COMPLETED OR INPROCESS Action received " + action.toString());
                         return;
                     }

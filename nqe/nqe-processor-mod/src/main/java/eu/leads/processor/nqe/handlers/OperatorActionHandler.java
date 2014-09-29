@@ -3,8 +3,10 @@ package eu.leads.processor.nqe.handlers;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
+import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.nqe.NQEConstants;
 import eu.leads.processor.nqe.operators.*;
 import org.infinispan.Cache;
 
@@ -36,7 +38,10 @@ public class OperatorActionHandler implements ActionHandler {
     public Action process(Action action) {
        Action result = action;
        result.getData().putString("owner",id);
-       com.sendTo(action.getData().getString("monitor"),result.asJsonObject());
+       Action ownerAction = new Action(result.asJsonObject().copy());
+       ownerAction.setLabel(NQEConstants.OPERATOR_OWNER);
+       ownerAction.setStatus(ActionStatus.INPROCESS.toString());
+       com.sendTo(action.getData().getString("monitor"),ownerAction.asJsonObject());
        Operator operator = OperatorFactory.createOperator(com,persistence,result);
        operator.init(result.getData());
        operator.execute();

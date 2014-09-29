@@ -27,7 +27,7 @@ public class FilterOperator extends BasicOperator {
 
 
     private FilterOperatorTree tree;
-    private Cache inputCache = (Cache) manager.getPersisentCache(getInput());
+    private Cache inputCache;
 
 
     public FilterOperator(Node com, InfinispanManager persistence, Action action) {
@@ -35,6 +35,7 @@ public class FilterOperator extends BasicOperator {
        super(com, persistence, action);
        JsonElement qual = conf.getObject("body").getElement("qual");
        tree = new FilterOperatorTree(qual);
+        inputCache = (Cache) manager.getPersisentCache(getInput());
     }
 
   //  public FilterOperator(PlanNode node) {
