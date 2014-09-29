@@ -66,7 +66,7 @@ public class ScanOperator extends BasicOperator {
       } catch (ExecutionException e) {
          e.printStackTrace();
       }
-      System.err.println("FINISHED RUNNING SCAN");
+      System.err.println("FINISHED RUNNING SCAN " + outputCache.size());
       cleanup();
    }
 
@@ -84,7 +84,7 @@ public class ScanOperator extends BasicOperator {
    @Override
    public void cleanup() {
 
-      System.err.println("CLEANING UP");
+      System.err.println("CLEANING UP " );
       super.cleanup();
    }
 

@@ -36,7 +36,7 @@ public class ScanCallable <K,V> implements
 
    @Override
    public void setEnvironment(Cache<K, V> cache, Set<K> inputKeys) {
-      inputCache = cache.getCacheManager().getCache(StringConstants.CRAWLER_DEFAULT_CACHE);
+      inputCache = cache;
       outputCache = cache.getCacheManager().getCache(output);
 
 
@@ -67,6 +67,7 @@ public class ScanCallable <K,V> implements
          String key = (String) entry.getKey();
          String value = (String) entry.getValue();
          Tuple tuple = new Tuple(value);
+          renameAllTupleAttributes(tuple);
          if (tree != null) {
             if(tree.accept(tuple)) {
                tuple = prepareOutput(tuple);
@@ -82,7 +83,22 @@ public class ScanCallable <K,V> implements
       return inputCache.getCacheManager().getAddress().toString();
    }
 
-   protected Tuple prepareOutput(Tuple tuple) {
+    private void renameAllTupleAttributes(Tuple tuple) {
+       JsonArray fields = inputSchema.getArray("fields");
+        Iterator<Object> iterator = fields.iterator();
+        String columnName = null;
+        while(iterator.hasNext()){
+            JsonObject tmp = (JsonObject) iterator.next();
+            columnName = tmp.getString("name");
+            int lastPeriod = columnName.lastIndexOf(".");
+            String attributeName = columnName.substring(lastPeriod+1);
+            tuple.renameAttribute(attributeName,columnName);
+        }
+
+        handlePagerank(columnName.substring(0,columnName.lastIndexOf(".")),tuple);
+    }
+
+    protected Tuple prepareOutput(Tuple tuple) {
       if (outputSchema.toString().equals(inputSchema.toString())) {
          return tuple;
       }
@@ -102,12 +118,18 @@ public class ScanCallable <K,V> implements
       return tuple;
    }
 
-   protected void handlePagerank(Tuple t) {
+   protected void handlePagerank(String substring, Tuple t) {
+       if(conf.getObject("body").getObject("tableDesc").getString("tableName").equals("default.webpages")){
+           //READ PAGERANK FROM PAGERANK CACHE;
+           //READ TOTAL ONCE
+           //compute value update it to tuple
 
-      if (t.hasField("default.webpages.pagerank")) {
-         if (!t.hasField("url"))
-            return;
-         String pagerankStr = t.getAttribute("pagerank");
+
+
+//      if (t.hasField("default.webpages.pagerank")) {
+//         if (!t.hasField("url"))
+//            return;
+//         String pagerankStr = t.getAttribute("pagerank");
 //            Double d = Double.parseDouble(pagerankStr);
 //            if (d < 0.0) {
 //
