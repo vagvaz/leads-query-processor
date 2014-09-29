@@ -73,18 +73,17 @@ public class Actions {
 
 	private Action newPrj, open, save, saveAs, publishToApatar, runScheduling,
 			run, options, exit;
-	
-	//apon
+
+	// apon
 	private Action newWebService;
-	
+
 	private Action windowsLookAndFeel, metalLookAndFeel, motifLookAndFeel;
 	private Action debugOutput, errorOutput;
-	private Action catalogOfApatars,demos,forums,wiki;
-	private Action about, featureRequest,submitBug,tutorials;
+	private Action catalogOfApatars, demos, forums, wiki;
+	private Action about, featureRequest, submitBug, tutorials;
 
-
-	private static final JFileChooser fileChooser = new JFileChooser(System
-			.getProperty("user.dir"));
+	private static final JFileChooser fileChooser = new JFileChooser(
+			System.getProperty("user.dir"));
 	private static ApatarFileFilter FF = new ApatarFileFilter();
 
 	private static List<RegisterRunnable> runnabelClasses = new ArrayList<RegisterRunnable>();
@@ -117,47 +116,44 @@ public class Actions {
 		fileMenu.add(save);
 		fileMenu.add(saveAs);
 		fileMenu.addSeparator();
-		//fileMenu.add(publishToApatar);@@
-		//fileMenu.add(runScheduling);@@
-		//fileMenu.addSeparator();@@
+		// fileMenu.add(publishToApatar);@@
+		// fileMenu.add(runScheduling);@@
+		// fileMenu.addSeparator();@@
 		fileMenu.add(run);
-		//fileMenu.addSeparator();
-		//apon
-		//fileMenu.add(newWebService);@@
-		//fileMenu.addSeparator();@@
-		
-		//fileMenu.add(options);@@
-		//fileMenu.addSeparator();@@
+		// fileMenu.addSeparator();
+		// apon
+		// fileMenu.add(newWebService);@@
+		// fileMenu.addSeparator();@@
+
+		// fileMenu.add(options);@@
+		// fileMenu.addSeparator();@@
 		fileMenu.add(exit);
 
-		//JMenu viewMenu = new JMenu("View");//@@
-		//viewMenu.add(windowsLookAndFeel);//@@
-		//viewMenu.add(metalLookAndFeel); //@@
-		//viewMenu.add(motifLookAndFeel); //@@
+		// JMenu viewMenu = new JMenu("View");//@@
+		// viewMenu.add(windowsLookAndFeel);//@@
+		// viewMenu.add(metalLookAndFeel); //@@
+		// viewMenu.add(motifLookAndFeel); //@@
 
-		//JMenu debugMenu = new JMenu("Debug");//@@
-		//debugMenu.add(debugOutput);//@@
-		//debugMenu.add(errorOutput);//@@
+		// JMenu debugMenu = new JMenu("Debug");//@@
+		// debugMenu.add(debugOutput);//@@
+		// debugMenu.add(errorOutput);//@@
 
-		//JMenu communityMenu = new JMenu("Community");//@@
-		//communityMenu.add(catalogOfApatars);//@@
-		//communityMenu.add(demos);//@@
-		//communityMenu.add(forums);//@@
-		//communityMenu.add(wiki);//@@
+		// JMenu communityMenu = new JMenu("Community");//@@
+		// communityMenu.add(catalogOfApatars);//@@
+		// communityMenu.add(demos);//@@
+		// communityMenu.add(forums);//@@
+		// communityMenu.add(wiki);//@@
 
-		/* @@
-		JMenu helpMenu = new JMenu("Help");
-		helpMenu.add(about);
-		helpMenu.addSeparator();
-		helpMenu.add(featureRequest);
-		helpMenu.add(submitBug);
-		helpMenu.add(tutorials);
-		*/
+		/*
+		 * @@ JMenu helpMenu = new JMenu("Help"); helpMenu.add(about);
+		 * helpMenu.addSeparator(); helpMenu.add(featureRequest);
+		 * helpMenu.add(submitBug); helpMenu.add(tutorials);
+		 */
 		menubar.add(fileMenu);
-		//menubar.add(viewMenu);//@@
-		//menubar.add(debugMenu);//@@
-		//menubar.add(communityMenu);//@@
-		//menubar.add(helpMenu);//@@
+		// menubar.add(viewMenu);//@@
+		// menubar.add(debugMenu);//@@
+		// menubar.add(communityMenu);//@@
+		// menubar.add(helpMenu);//@@
 	}
 
 	private void createToolbar() {
@@ -167,16 +163,17 @@ public class Actions {
 	@SuppressWarnings("serial")
 	private void createActions() {
 
-		//apon
+		// apon
 		newWebService = new AbstractAction() {
 			public void actionPerformed(ActionEvent arg0) {
 				JwsdlLocationDialog wsdlDiag = new JwsdlLocationDialog();
-				wsdlDiag.setVisible(true);	
+				wsdlDiag.setVisible(true);
 			}
 		};
 		newWebService.putValue(Action.NAME, "New Web Service");
-		newWebService.putValue(Action.SHORT_DESCRIPTION, "create a Web Service dynamic client");
-		
+		newWebService.putValue(Action.SHORT_DESCRIPTION,
+				"create a Web Service dynamic client");
+
 		// new progect
 		newPrj = new AbstractAction() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -352,15 +349,35 @@ public class Actions {
 		errorOutput.putValue(Action.NAME, "Show Error");
 		errorOutput
 				.putValue(Action.SHORT_DESCRIPTION, "Show Error Information");
-		
-		
-		run = new AbstractAction() { //@@ TODO Send the aptr file to Lefteri 
+
+		run = new AbstractAction() { // @@ TODO Send the aptr file to Lefteri
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Project Path"+ApplicationData.PROJECT_PATH);
-				System.out.println("Saved Status"+ApplicationData.SAVED_STATUS);
-				
+				System.out.println("Project Path"
+						+ ApplicationData.PROJECT_PATH);
+				System.out.println("Saved Status"
+						+ ApplicationData.SAVED_STATUS);
+
 				try {
 					saveProject();
+					final String dir = System.getProperty("user.dir");
+					System.out.println("current dir = " + dir);
+					String jarname = "resultsDisplayWindow.jar";
+					File jar = new File(jarname);
+					if (jar.exists()) {
+						Process proc = Runtime.getRuntime().exec(
+								"java -jar  " + jarname + " "
+										+ ApplicationData.PROJECT_PATH);
+
+						JOptionPane.showMessageDialog(ApatarUiMain.MAIN_FRAME,
+								"Please Wait for the results");
+					} else {
+						JOptionPane.showMessageDialog(ApatarUiMain.MAIN_FRAME,
+								"Unable to find executable: " + dir + "/"
+										+ jarname);
+					}
+
+					// proc.waitFor();
+					// System.out.println("Process Status: "+proc.exitValue());
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -368,17 +385,17 @@ public class Actions {
 				ApplicationData.STATUS_APPLICATION = ApplicationData.SAVED_STATUS;
 
 				ApplicationData.clearLogsBeforeRun();
-				
-				//Runnable rn = new Runnable();
-				//rn.Run(ApplicationData.getProject().getNodes().values(), null,
-						//new ProcessingProgressActions());
+
+				// Runnable rn = new Runnable();
+				// rn.Run(ApplicationData.getProject().getNodes().values(),
+				// null,
+				// new ProcessingProgressActions());
 			}
 		};
 
 		run.putValue(Action.NAME, "Run");
 		run.putValue(Action.SHORT_DESCRIPTION, "Run");
-		
-		
+
 		submitBug = new AbstractAction() {
 
 			public void actionPerformed(ActionEvent arg0) {
@@ -502,8 +519,8 @@ public class Actions {
 			fileSrc = fileChooser.getSelectedFile();
 			ReadWriteXMLDataUi rwXMLdata = new ReadWriteXMLDataUi();
 
-			rwXMLdata.writeXMLData(fileSrc.toString(), ApplicationData
-					.getProject(), false);
+			rwXMLdata.writeXMLData(fileSrc.toString(),
+					ApplicationData.getProject(), false);
 			ApplicationData.PROJECT_PATH = fileSrc.getPath();
 		}
 		ApatarUiMain.MAIN_FRAME.setTitle(String.format(
@@ -583,8 +600,8 @@ public class Actions {
 					+ dlg.getDataMapName().replaceAll("[|/\\:*?\"<> ]", "_")
 					+ ".aptr";
 			ReadWriteXMLDataUi rwXMLdata = new ReadWriteXMLDataUi();
-			file = rwXMLdata.writeXMLData(fileName.toString(), ApplicationData
-					.getProject(), true);
+			file = rwXMLdata.writeXMLData(fileName.toString(),
+					ApplicationData.getProject(), true);
 		}
 
 		Part[] parts = new Part[14];
@@ -610,16 +627,17 @@ public class Actions {
 				.getParams()));
 
 		HttpClient client = new HttpClient();
-		client.getHttpConnectionManager().getParams().setConnectionTimeout(
-				10000);
+		client.getHttpConnectionManager().getParams()
+				.setConnectionTimeout(10000);
 		int status = client.executeMethod(method);
 		if (status != HttpStatus.SC_OK) {
-			JOptionPane.showMessageDialog(ApatarUiMain.MAIN_FRAME,
+			JOptionPane.showMessageDialog(
+					ApatarUiMain.MAIN_FRAME,
 					"Upload failed, response="
 							+ HttpStatus.getStatusText(status));
 		} else {
-			StringBuffer buff = new StringBuffer(method
-					.getResponseBodyAsString());
+			StringBuffer buff = new StringBuffer(
+					method.getResponseBodyAsString());
 
 			try {
 				Matcher matcher = ApatarRegExp
@@ -668,10 +686,9 @@ public class Actions {
 			ReadWriteXMLDataUi rwXMLdata = new ReadWriteXMLDataUi();
 			try {
 				ApatarUiMain.MAIN_FRAME.setTitle(String.format(
-						JApatarMainUIFrame.FRAME_TITLE, rwXMLdata.readXMLData(
-								fileSrc.toString(), ApplicationData
-										.getProject())
-								+ " - "));
+						JApatarMainUIFrame.FRAME_TITLE,
+						rwXMLdata.readXMLData(fileSrc.toString(),
+								ApplicationData.getProject()) + " - "));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

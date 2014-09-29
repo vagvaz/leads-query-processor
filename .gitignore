@@ -5,3 +5,5 @@ common/conf
 **/.idea/
 **/.project
 **/.classpath
+**/.settings/*
+

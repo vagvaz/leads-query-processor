@@ -6,7 +6,6 @@ import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
@@ -76,6 +75,8 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
                         new GetResultsActionHandler(com, log, persistence, id));
         handlers.put(IManagerConstants.CREATE_NEW_QUERY,
                         new CreateQueryActionHandler(com, log, persistence, id));
+        handlers.put(IManagerConstants.CREATE_NEW_WORKFLOW,
+                        new CreateWorkflowActionHandler(com, log, persistence, id));
         handlers.put(IManagerConstants.CREATE_NEW_SPECIAL_QUERY,
                         new CreateSpecialQueryActionHandler(com, log, persistence, id));
         log = new LogProxy(config.getString("log"), com);

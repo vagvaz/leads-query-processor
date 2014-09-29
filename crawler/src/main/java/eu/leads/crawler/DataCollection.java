@@ -18,7 +18,7 @@ public class DataCollection {
 
    public static void main(String[] args) {
       long sleepingPeriod = 5;
-      String webCacheName = StringConstants.CRAWLER_DEFAULT_CACHE;
+      String webCacheName = "default.webpages";//StringConstants.CRAWLER_DEFAULT_CACHE;
 
       //Important Call to initialize System Configuration
       LQPConfiguration.initialize();
@@ -33,7 +33,6 @@ public class DataCollection {
       //Create Infinispan Cluster of 3 infinispan local nodes...
       ArrayList<InfinispanManager> clusters = new ArrayList<InfinispanManager>();
 
-     clusters.add(CacheManagerFactory.createCacheManager());
      clusters.add(CacheManagerFactory.createCacheManager());
 
       for (InfinispanManager cluster : clusters) {

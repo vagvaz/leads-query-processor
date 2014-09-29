@@ -91,7 +91,7 @@
          <version>${vertx.testtools.version}</version>
          <scope>test</scope>
       </dependency>
-
+   
        <dependency>
            <groupId>org.infinispan</groupId>
            <artifactId>infinispan-core</artifactId>

@@ -19,21 +19,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static eu.leads.processor.common.StringConstants.IMANAGERQUEUE;
-
 /**
  * Created by vagvaz on 8/4/14.
  */
-public class SubmitQueryHandler implements Handler<HttpServerRequest> {
-
+public class SubmitWorkflowHandler implements Handler<HttpServerRequest> {
 
     Node com;
     Logger log;
-    Map<String, SubmitQueryBodyHandler> bodyHandlers;
-    Map<String, SubmitQueryReplyHandler> replyHandlers;
+    Map<String, SubmitWorkflowBodyHandler> bodyHandlers;
+    Map<String, SubmitWorkflowReplyHandler> replyHandlers;
 
-
-    public SubmitQueryHandler(final Node com, Logger log) {
+    public SubmitWorkflowHandler(final Node com, Logger log) {
         this.com = com;
         this.log = log;
         replyHandlers = new HashMap<>();
@@ -44,28 +40,27 @@ public class SubmitQueryHandler implements Handler<HttpServerRequest> {
     public void handle(HttpServerRequest request) {
         request.response().setStatusCode(200);
         request.response().putHeader(WebStrings.CONTENT_TYPE, WebStrings.APP_JSON);
-        log.info("Submit Query ");
+        log.info("Submit Workflow ");
         String reqId = UUID.randomUUID().toString();
-        SubmitQueryReplyHandler replyHandler = new SubmitQueryReplyHandler(reqId, request);
-        SubmitQueryBodyHandler bodyHanlder = new SubmitQueryBodyHandler(reqId, replyHandler);
+        SubmitWorkflowReplyHandler replyHandler = new SubmitWorkflowReplyHandler(reqId, request);
+        SubmitWorkflowBodyHandler bodyHanlder = new SubmitWorkflowBodyHandler(reqId, replyHandler);
         replyHandlers.put(reqId, replyHandler);
         bodyHandlers.put(reqId, bodyHanlder);
         request.bodyHandler(bodyHanlder);
     }
 
     public void cleanup(String id) {
-        SubmitQueryReplyHandler rh = replyHandlers.remove(id);
-        SubmitQueryBodyHandler bh = bodyHandlers.remove(id);
+        SubmitWorkflowReplyHandler rh = replyHandlers.remove(id);
+        SubmitWorkflowBodyHandler bh = bodyHandlers.remove(id);
         rh = null;
         bh = null;
     }
 
-
-    private class SubmitQueryReplyHandler implements LeadsMessageHandler {
+    private class SubmitWorkflowReplyHandler implements LeadsMessageHandler {
         HttpServerRequest request;
         String requestId;
 
-        public SubmitQueryReplyHandler(String requestId, HttpServerRequest request) {
+        public SubmitWorkflowReplyHandler(String requestId, HttpServerRequest request) {
             this.request = request;
             this.requestId = requestId;
         }
@@ -88,7 +83,7 @@ public class SubmitQueryHandler implements Handler<HttpServerRequest> {
                 log.error(message.getString("message"));
                 request.response().end("{}");
             } else {
-                log.error("No Query to submit");
+                log.error("No Workflow to submit");
                 request.response().setStatusCode(400);
             }
             cleanup(requestId);
@@ -96,21 +91,21 @@ public class SubmitQueryHandler implements Handler<HttpServerRequest> {
     }
 
 
-    private class SubmitQueryBodyHandler implements Handler<Buffer> {
+    private class SubmitWorkflowBodyHandler implements Handler<Buffer> {
 
 
-        private final SubmitQueryReplyHandler replyHandler;
+        private final SubmitWorkflowReplyHandler replyHandler;
         private final String requestId;
 
-        public SubmitQueryBodyHandler(String requestId, SubmitQueryReplyHandler replyHandler) {
+        public SubmitWorkflowBodyHandler(String requestId, SubmitWorkflowReplyHandler replyHandler) {
             this.replyHandler = replyHandler;
             this.requestId = requestId;
         }
 
         @Override
         public void handle(Buffer body) {
-            String query = body.getString(0, body.length());
-            if (Strings.isNullOrEmpty(query) || query.equals("{}")) {
+            String workflow = body.getString(0, body.length());
+            if (Strings.isNullOrEmpty(workflow) || workflow.equals("{}")) {
                 replyHandler.replyForError(null);
             }
             JsonObject object = new JsonObject();
@@ -118,16 +113,16 @@ public class SubmitQueryHandler implements Handler<HttpServerRequest> {
             Action action = new Action();
             action.setId(requestId);
             action.setCategory(StringConstants.ACTION);
-            action.setLabel(IManagerConstants.SUBMIT_QUERY);
+            action.setLabel(IManagerConstants.SUBMIT_WORKFLOW);
             action.setOwnerId(com.getId());
             action.setComponentType("webservice");
             action.setTriggered("");
             action.setTriggers(new JsonArray());
-            JsonObject queryRequest = new JsonObject(query);
+            JsonObject queryRequest = new JsonObject(workflow);
             action.setData(queryRequest);
-            action.setDestination(IMANAGERQUEUE);
+            action.setDestination(StringConstants.IMANAGERQUEUE);
             action.setStatus(ActionStatus.PENDING.toString());
-            com.sendRequestTo(IMANAGERQUEUE, action.asJsonObject(), replyHandler);
+            com.sendRequestTo(StringConstants.IMANAGERQUEUE, action.asJsonObject(), replyHandler);
         }
     }
 }
