@@ -237,7 +237,7 @@ public class LeadsResultsGui extends JPanel {
 
     private static void convert_results(QueryResults data) {
         ArrayList<Tuple> resultSet = new ArrayList<Tuple>();
-        for (String s : data.getTuples())
+        for (String s : data.getResult())
             resultSet.add(new Tuple(s));
 
 

@@ -69,8 +69,6 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             String label = action.getLabel();
             Action newAction = null;
             action.setProcessedBy(id);
-            //         action.setStatus(ActionStatus.INPROCESS.toString());
-
             switch (ActionStatus.valueOf(action.getStatus())) {
                 case PENDING: //probably received an action from an external source
                     if (label.equals(IManagerConstants.GET_OBJECT)) {
@@ -100,6 +98,15 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                         newAction.setProcessedBy(id);
                         newAction.setData(action.getData());
                         newAction.getData().putString("replyTo", msg.getString("from"));
+                        com.sendWithEventBus(workQueueAddress, newAction.asJsonObject());
+                    } else if (label.equals(IManagerConstants.SUBMIT_PLUGIN)) {
+                        newAction = createNewAction(action);
+                        newAction.setCategory(ActionCategory.ACTION.toString());
+                        newAction.setLabel(IManagerConstants.REGISTER_PLUGIN);
+                        newAction.setProcessedBy(id);
+                        newAction.setData(action.getData());
+                        newAction.getData().putString("replyTo", msg.getString("from"));
+                        System.out.println("Plugin send " + newAction.asJsonObject().toString());
                         com.sendWithEventBus(workQueueAddress, newAction.asJsonObject());
                     } else if (label.equals(IManagerConstants.SUBMIT_SPECIAL)) {
                         newAction = createNewAction(action);
@@ -175,7 +182,13 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                             com.sendTo(plannerAction.getDestination(),
                                           plannerAction.asJsonObject());
                         }
-                    } else {
+                    } else if (label.equals(IManagerConstants.REGISTER_PLUGIN)) {
+                        System.out.println(action.toString());
+                        JsonObject webServiceReply = action.getResult().getObject("status");
+                        //Reply to the SUBMIT Query Action to the webservice
+                        com.sendTo(action.getData().getString("replyTo"), webServiceReply);
+                        //Create Action for the QueryPlanner to create the plan for the new Query.
+                    }else {
                         log.error("Unknown COMPLETED OR INPROCESS Action received " + action
                                                                                           .toString());
                         return;

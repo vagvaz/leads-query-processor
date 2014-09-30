@@ -27,7 +27,7 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
                                                                                               8080)
                                                                                 .toString();
         LQPConfiguration.initialize(true);
-        container.logger().info("Leads Processor REST service is starting...");
+        container.logger().info("Leads Processor REST service is starting..");
         com = new DefaultNode();
 
         log = container.logger();
@@ -41,11 +41,12 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         PutObjectHandler putObjectHandler = new PutObjectHandler(com, log);
         GetQueryStatusHandler getQueryStatusHandler = new GetQueryStatusHandler(com, log);
         GetResultsHandler getResultsHandler = new GetResultsHandler(com, log);
-
         Handler<HttpServerRequest> submitWorkflowHandler = new SubmitWorkflowHandler(com, log);
+        Handler<HttpServerRequest> submitDataHandler = new SubmitDataHandler(com, log);
 
         SubmitQueryHandler submitQueryHandler = new SubmitQueryHandler(com, log);
         SubmitSpecialCallHandler submitSpecialCallHandler = new SubmitSpecialCallHandler(com, log);
+
         //object
         failHandler = new Handler<HttpServerRequest>() {
             @Override
@@ -69,8 +70,12 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         matcher.get("/rest/query/results/:id/min/:min/max/:max", getResultsHandler);
         matcher.post("/rest/query/submit", submitQueryHandler);
         matcher.post("/rest/workflow/submit", submitWorkflowHandler);
+        matcher.post("/rest/data/submit", submitDataHandler);
         matcher.post("/rest/query/wgs/:type", submitSpecialCallHandler);
         //
+
+        //matcher.post("/rest/deploy/plugin/:pluginname/:cachename", submitDataHandler);
+
         matcher.get("/rest/checkOnline", new Handler<HttpServerRequest>() {
             @Override
             public void handle(HttpServerRequest httpServerRequest) {
@@ -84,6 +89,7 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         });
         vertx.createHttpServer().requestHandler(matcher)
             .listen((Integer) config.getNumber("port", 8080));
+
         container.logger().info("Webserver started");
     }
 

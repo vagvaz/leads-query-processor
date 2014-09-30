@@ -13,5 +13,7 @@ public class IManagerConstants {
     public static final String SUBMIT_SPECIAL = "submitSpecial";
     public static final String CREATE_NEW_QUERY = "createNewQuery";
     public static final String CREATE_NEW_WORKFLOW = "createNewWorkflow";
+    public static final String REGISTER_PLUGIN = "createNewPlugin";
     public static final String CREATE_NEW_SPECIAL_QUERY = "createNewSpecialQuery";
+    public static final String SUBMIT_PLUGIN = "submitPlugin";
 }

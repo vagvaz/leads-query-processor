@@ -1,6 +1,5 @@
-import eu.leads.processor.web.QueryStatus;
+import eu.leads.processor.plugins.PluginPackage;
 import eu.leads.processor.web.WebServiceClient;
-import org.vertx.java.core.json.JsonObject;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -21,36 +20,65 @@ public class WebServiceClientTest {
         }
 
         try {
-            WebServiceClient.initialize(host, port);
+            if(WebServiceClient.initialize(host, port))
+                System.out.println("Server is Up");
+
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
 
-        JsonObject object = new JsonObject();
-        object.putString("name", "vag");
-        object.putString("surname", "vaz");
-        object.putString("age", "18");
-        object.putString("id", "91818111");
-        try {
-            WebServiceClient.putObject("testCache", object.getString("id"), object);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        JsonObject mapObject =
-            WebServiceClient.getObject("testCache", object.getString("id"), null);
-        if (mapObject.toString().equals(object.toString())) {
-            System.out.println("Equals " + object.toString() + "\n" + mapObject.toString());
-        } else {
-            System.out.println("PROBLEM");
-            System.out.println(object.toString());
-            System.out.println(mapObject.toString());
-        }
+//        JsonObject object = new JsonObject();
+//        object.putString("name", "vag");
+//        object.putString("surname", "vaz");
+//        object.putString("age", "18");
+//        object.putString("id", "91818111");
+//        try {
+//            WebServiceClient.putObject("testCache", object.getString("id"), object);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        JsonObject mapObject =
+//            WebServiceClient.getObject("testCache", object.getString("id"), null);
+//        if (mapObject.toString().equals(object.toString())) {
+//            System.out.println("Equals " + object.toString() + "\n" + mapObject.toString());
+//        } else {
+//            System.out.println("PROBLEM");
+//            System.out.println(object.toString());
+//            System.out.println(mapObject.toString());
+//        }
 
-        QueryStatus status = WebServiceClient.submitQuery("vagvaz",
-                                                             "SELECT deptname from dept");
-        QueryStatus currentStatus = WebServiceClient.getQueryStatus(status.getId());
-        System.out.println("s: " + status.toString());
-        System.out.println("o: " + currentStatus.toString());
+        String Example =  " SELECT deptname from dept" + "\r\n";
+
+        byte [] barray = new byte[2000];
+
+        for(int i =0; i < barray.length; i++)
+            barray[i]=120;
+        String Query=new String(barray,0,barray.length);
+        System.out.println("Query Size " + Query.length());
+
+        PluginPackage testpackage = new PluginPackage("56", "aclass");
+        testpackage.setJar(barray);
+
+
+        System.out.print("Serialized size: " + barray.length);
+        WebServiceClient.submitPlugin("vagvaz", testpackage);
+        barray=null;
+//        WebServiceClient.submitQuery("vagvaz",
+//                Example);
+       // QueryStatus currentStatus = WebServiceClient.getQueryStatus(status.getId());
+        //System.out.println("s: " + status.toString());
+       // System.out.println("o: " + currentStatus.toString());
 
     }
+
+    private static String createDataSize(int msgSize) {
+    // Java chars are 2 bytes
+    msgSize = msgSize/2;
+    msgSize = msgSize * 1024;
+    StringBuilder sb = new StringBuilder(msgSize);
+    for (int i=0; i<msgSize; i++) {
+        sb.append('a');
+    }
+    return sb.toString();
+  }
 }

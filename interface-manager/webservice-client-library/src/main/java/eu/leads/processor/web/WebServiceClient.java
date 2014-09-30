@@ -1,6 +1,8 @@
 package eu.leads.processor.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.leads.processor.plugins.PluginPackage;
+import org.apache.commons.lang.SerializationUtils;
 import org.vertx.java.core.json.JsonObject;
 
 import javax.ws.rs.core.MediaType;
@@ -70,6 +72,7 @@ public class WebServiceClient {
     }
 
     private static String getResult(HttpURLConnection connection) throws IOException {
+        System.out.println("getResult");
         InputStream is = connection.getInputStream();
         BufferedReader rd = new BufferedReader(new InputStreamReader(is));
         StringBuffer response = new StringBuffer();
@@ -85,9 +88,22 @@ public class WebServiceClient {
 
     private static void setBody(HttpURLConnection connection, Object body) throws IOException {
         String output = mapper.writeValueAsString(body);
-        System.out.println("sending... " + output);
+        System.out.println("Size: " + output.getBytes().length);
         DataOutputStream os = new DataOutputStream(connection.getOutputStream());
         os.writeBytes(output);
+        os.flush();
+        os.close();
+    }
+
+    private static void setDataBody(HttpURLConnection connection, byte[] data) throws IOException {
+        //String output = mapper.writeValueAsString(body);
+       // System.out.println("Size: " + output.getBytes().length);
+        DataOutputStream os = new DataOutputStream(connection.getOutputStream());
+        //byte[] data = SerializationUtils.serialize(body);
+        System.out.println("setDataBody length: " + data.length);
+
+        os.write(data,0,data.length);
+
         os.flush();
         os.close();
     }
@@ -189,6 +205,38 @@ public class WebServiceClient {
         return result;
     }
 
+    public static String submitPlugin(String username, PluginPackage pluginPackage) throws IOException {
+        QueryStatus result = null;
+        WebServiceWorkflow query = new WebServiceWorkflow();
+
+        pluginPackage.putString("user",username);
+
+        byte[] data = SerializationUtils.serialize(pluginPackage);
+
+        address = new URL(host + ":" + port + prefix + "data/submit");
+        HttpURLConnection connection = (HttpURLConnection) address.openConnection();
+        connection = setUp(connection, "POST", MediaType.MULTIPART_FORM_DATA, true, true);
+
+        setDataBody(connection, data);
+        String response = getResult(connection);
+        result = mapper.readValue(response, QueryStatus.class);
+        return response;
+    }
+
+
+    public static QueryStatus submitData(String username, byte[] data) throws IOException {
+        QueryStatus result = null;
+        WebServiceWorkflow query = new WebServiceWorkflow();
+
+        address = new URL(host + ":" + port + prefix + "data/submit");
+        HttpURLConnection connection = (HttpURLConnection) address.openConnection();
+        connection = setUp(connection, "POST", MediaType.MULTIPART_FORM_DATA, true, true);
+
+        setDataBody(connection, data);
+        String response = getResult(connection);
+        //result = mapper.readValue(response, QueryStatus.class);
+        return null;//result;
+    }
 
     public static Map<String, String> submitSpecialQuery(String username, String type,
                                                             Map<String, String> parameters)
