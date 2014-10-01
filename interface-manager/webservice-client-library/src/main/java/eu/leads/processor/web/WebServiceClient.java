@@ -1,7 +1,9 @@
 package eu.leads.processor.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.plugins.PluginPackage;
+import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang.SerializationUtils;
 import org.vertx.java.core.json.JsonObject;
 
@@ -205,7 +207,44 @@ public class WebServiceClient {
         return result;
     }
 
-    public static String submitPlugin(String username, PluginPackage pluginPackage) throws IOException {
+    public static QueryStatus deployPlugin(String username, String pluginId, XMLConfiguration config, String cacheName,
+                                           EventType[] events) throws IOException {
+        QueryStatus result = null;
+        byte[] data = SerializationUtils.serialize(config);
+        JsonObject req = new JsonObject();
+        req.putString("pluginid",pluginId);
+        req.putString("cachename",cacheName);
+        req.putString("user",username);
+        req.putBinary("config",data);
+
+
+        if(events == EventType.ALL)
+        req.putString("eventType","ALL");
+        else if(events == EventType.ALL)
+        req.putString("eventType","CREATEANDMODIFY");
+
+        address = new URL(host + ":" + port + prefix + "deploy/plugin/"+pluginId+"/"+cacheName);
+        HttpURLConnection connection = (HttpURLConnection) address.openConnection();
+        connection = setUp(connection, "POST", MediaType.MULTIPART_FORM_DATA, true, true);
+
+        setBody(connection, req);
+        String response = getResult(connection);
+        result = mapper.readValue(response, QueryStatus.class);
+        return result;
+    }
+
+
+    public static QueryResults undeployPlugin(String username, String pluginId, String cacheName) throws IOException {
+        QueryResults result = new QueryResults();
+        address = new URL(host + ":" + port + prefix + "undeploy/plugin/"+pluginId+"/"+cacheName);
+        HttpURLConnection connection = (HttpURLConnection) address.openConnection();
+        connection = setUp(connection, "GET", MediaType.APPLICATION_JSON, true, true);
+        String response = getResult(connection);
+        result = new QueryResults(new JsonObject(response));
+        return result;
+    }
+
+    public static QueryStatus submitPlugin(String username, PluginPackage pluginPackage) throws IOException {
         QueryStatus result = null;
         WebServiceWorkflow query = new WebServiceWorkflow();
 
@@ -220,8 +259,22 @@ public class WebServiceClient {
         setDataBody(connection, data);
         String response = getResult(connection);
         result = mapper.readValue(response, QueryStatus.class);
-        return response;
+        return result;
     }
+
+    public static QueryStatus submitData(String username, JsonObject data) throws IOException {
+         QueryStatus result = null;
+        data.putString("user",username);
+        address = new URL(host + ":" + port + prefix + "data/submit");
+        HttpURLConnection connection = (HttpURLConnection) address.openConnection();
+        connection = setUp(connection, "POST", MediaType.MULTIPART_FORM_DATA, true, true);
+
+        setBody(connection, data.toString());
+        String response = getResult(connection);
+        result = mapper.readValue(response, QueryStatus.class);
+        return result;
+    }
+
 
 
     public static QueryStatus submitData(String username, byte[] data) throws IOException {

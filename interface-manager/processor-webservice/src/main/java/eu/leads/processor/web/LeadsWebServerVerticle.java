@@ -42,7 +42,10 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         GetQueryStatusHandler getQueryStatusHandler = new GetQueryStatusHandler(com, log);
         GetResultsHandler getResultsHandler = new GetResultsHandler(com, log);
         Handler<HttpServerRequest> submitWorkflowHandler = new SubmitWorkflowHandler(com, log);
-        Handler<HttpServerRequest> submitDataHandler = new SubmitDataHandler(com, log);
+        Handler<HttpServerRequest> submitDataHandler = new SubmitPluginHandler(com, log);
+
+        Handler<HttpServerRequest> deployPluginHandler  = new DeployPluginHandler(com, log);
+        Handler<HttpServerRequest> undeployPluginHandler = new UndeployPluginHandler(com, log);
 
         SubmitQueryHandler submitQueryHandler = new SubmitQueryHandler(com, log);
         SubmitSpecialCallHandler submitSpecialCallHandler = new SubmitSpecialCallHandler(com, log);
@@ -74,7 +77,9 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         matcher.post("/rest/query/wgs/:type", submitSpecialCallHandler);
         //
 
-        //matcher.post("/rest/deploy/plugin/:pluginname/:cachename", submitDataHandler);
+        matcher.post("/rest/deploy/plugin/:pluginname/:cachename", deployPluginHandler);
+        matcher.get("/rest/undeploy/plugin/:pluginname/:cachename", undeployPluginHandler);
+
 
         matcher.get("/rest/checkOnline", new Handler<HttpServerRequest>() {
             @Override

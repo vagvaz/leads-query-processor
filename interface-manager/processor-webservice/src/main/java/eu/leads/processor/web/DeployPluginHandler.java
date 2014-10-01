@@ -1,5 +1,6 @@
 package eu.leads.processor.web;
 
+import com.google.common.base.Strings;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
@@ -7,8 +8,6 @@ import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.imanager.IManagerConstants;
-import eu.leads.processor.plugins.PluginPackage;
-import org.apache.commons.lang.SerializationUtils;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpServerRequest;
@@ -23,14 +22,14 @@ import java.util.UUID;
 /**
  * Created by vagvaz on 8/4/14.
  */
-public class SubmitDataHandler implements Handler<HttpServerRequest> {
+public class DeployPluginHandler implements Handler<HttpServerRequest> {
 
     Node com;
     Logger log;
     Map<String, SubmitDataBodyHandler> bodyHandlers;
     Map<String, SubmitDataReplyHandler> replyHandlers;
 
-    public SubmitDataHandler(final Node com, Logger log) {
+    public DeployPluginHandler(final Node com, Logger log) {
         this.com = com;
         this.log = log;
         replyHandlers = new HashMap<>();
@@ -46,10 +45,10 @@ public class SubmitDataHandler implements Handler<HttpServerRequest> {
         request.response().setStatusCode(200);
         request.response().putHeader(WebStrings.CONTENT_TYPE, WebStrings.APP_JSON);
 
-        log.info("Submit Data ");
+        log.info("DeployPlugin Submit Data ");
         String reqId = UUID.randomUUID().toString();
         SubmitDataReplyHandler replyHandler = new SubmitDataReplyHandler(reqId, request);
-        SubmitDataBodyHandler bodyHanlder = new SubmitDataBodyHandler(reqId, replyHandler);
+        SubmitDataBodyHandler bodyHanlder = new SubmitDataBodyHandler(reqId, replyHandler, request);
         replyHandlers.put(reqId, replyHandler);
         bodyHandlers.put(reqId, bodyHanlder);
         request.bodyHandler(bodyHanlder);
@@ -102,53 +101,45 @@ public class SubmitDataHandler implements Handler<HttpServerRequest> {
 
         private final SubmitDataReplyHandler replyHandler;
         private final String requestId;
+        private final HttpServerRequest request;
 
-        public SubmitDataBodyHandler(String requestId, SubmitDataReplyHandler replyHandler) {
+        public SubmitDataBodyHandler(String requestId, SubmitDataReplyHandler replyHandler, HttpServerRequest request) {
             this.replyHandler = replyHandler;
             this.requestId = requestId;
+            this.request = request;
         }
 
         @Override
         public void handle(Buffer body) {
             // String data = body..getString(0, body.length());
-            System.out.println(" handle 4");
-            int endbyte = 4;
+            String Request = body.getString(0, body.length());
 
-            byte[] receivedData = body.getBytes() ;
-            int numofbytes = body.getBytes().length;
-            if (numofbytes <=0) {
+            JsonObject deployRequest = new JsonObject(Request);
+            String pluginname = request.params().get("pluginname");
+            String cachename = request.params().get("cachename");
+
+            if (Strings.isNullOrEmpty(Request) || Request.equals("{}")
+                    || Strings.isNullOrEmpty(pluginname) || pluginname.equals("{}")
+                    || Strings.isNullOrEmpty(cachename) || cachename.equals("{}")) {
                 replyHandler.replyForError(null);
+                return;
             }
-            System.out.println("Data receivedfull_: " + numofbytes);
+            deployRequest.putString("pluginname", pluginname);
+            deployRequest.putString("cachename", cachename);
 
-            System.out.println("Data received1: " + receivedData.length + " SizeofString byte: " + endbyte);
-//
-            PluginPackage pluginRegister = (PluginPackage) SerializationUtils.deserialize(receivedData);
-
-            System.out.print("Received size of jar: " + pluginRegister.getJar().length);
-            receivedData = null;
-            System.gc();
-            pluginRegister.putBinary("jar",pluginRegister.getJar());
-            pluginRegister.setJar(null);
-            System.gc();
-
-            pluginRegister.putString("classname",pluginRegister.getClassName());
-            pluginRegister.putBinary("config",pluginRegister.getConfig());
-            pluginRegister.putString("id",pluginRegister.getId());
             Action action = new Action();
             action.setId(requestId);
+
             action.setCategory(StringConstants.ACTION);
-            action.setLabel(IManagerConstants.SUBMIT_PLUGIN);
+            action.setLabel(IManagerConstants.DEPLOY_PLUGIN);
             action.setOwnerId(com.getId());
             action.setComponentType("webservice");
             action.setTriggered("");
             action.setTriggers(new JsonArray());
-            action.setData(pluginRegister);
-             System.out.println("Plugin received: " + pluginRegister.toString() + " plugin: " +
-                      pluginRegister.getClassName()+ "  " + pluginRegister.getId() );
+            action.setData(deployRequest);
+            System.out.println("Deploy plugin: " + deployRequest.toString());
             action.setDestination(StringConstants.IMANAGERQUEUE);
             action.setStatus(ActionStatus.PENDING.toString());
-            System.out.println(action.toString());
             com.sendRequestTo(StringConstants.IMANAGERQUEUE, action.asJsonObject(), replyHandler);
         }
     }
