@@ -45,13 +45,16 @@ public class LimitOperator extends BasicOperator {
 
    @Override
     public void init(JsonObject config) {
+       super.init(config);
         ///How to initialize what ?
        rowCount = conf.getObject("body").getLong("fetchFirstNum");
+       init_statistics(this.getClass().getCanonicalName());
 
     }
 
     @Override
     public void execute() {
+        long startTime = System.nanoTime();
         int counter = 0;
         if (sorted) {
             int sz = inputMap.size();
@@ -73,6 +76,8 @@ public class LimitOperator extends BasicOperator {
             }
         }
        cleanup();
+        //Store Values for statistics
+        UpdateStatistics(inputMap.size(),data.size(),System.nanoTime()-startTime);
     }
     private void handlePagerank(Tuple t) {
         if (t.hasField("pagerank")) {

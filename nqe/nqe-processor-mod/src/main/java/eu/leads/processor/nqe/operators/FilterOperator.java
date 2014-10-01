@@ -1,9 +1,9 @@
 package eu.leads.processor.nqe.operators;
 
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.math.FilterOperatorTree;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.math.FilterOperatorTree;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
@@ -53,6 +53,7 @@ public class FilterOperator extends BasicOperator {
 
    @Override
    public void run() {
+       long startTime = System.nanoTime();
       inputCache = (Cache) manager.getPersisentCache(getInput());
       Cache outputCache = (Cache)manager.getPersisentCache(getOutput());
 
@@ -76,13 +77,20 @@ public class FilterOperator extends BasicOperator {
       } catch (ExecutionException e) {
          e.printStackTrace();
       }
+
+       // inputCache.size() , outputCache.size() , DT
+
       cleanup();
+      //Store Values for statistics
+      UpdateStatistics(inputCache.size(),outputCache.size(),System.nanoTime()-startTime);
    }
 
    @Override
     public void init(JsonObject config) {
-      inputCache = (Cache) manager.getPersisentCache(getInput());
-      conf.putString("output",getOutput());
+        super.init(config);
+        inputCache = (Cache) manager.getPersisentCache(getInput());
+        conf.putString("output",getOutput());
+        init_statistics(this.getClass().getCanonicalName());
     }
 
     @Override

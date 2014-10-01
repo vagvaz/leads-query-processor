@@ -27,6 +27,7 @@ public class ProjectOperator extends MapReduceOperator {
       LeadsMapper projectMapper = new ProjectMapper(conf.toString());
       setMapper(projectMapper);
       setReducer(null);
+      init_statistics(this.getClass().getCanonicalName());
     }
 
     @Override

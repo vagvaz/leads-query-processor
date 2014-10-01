@@ -1,22 +1,17 @@
 package eu.leads.processor.nqe.operators;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import eu.leads.processor.core.LeadsMapperCallable;
-import eu.leads.processor.core.LeadsReduceCallable;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.nqe.operators.mapreduce.GroupByMapper;
 import eu.leads.processor.nqe.operators.mapreduce.GroupByReducer;
-import org.infinispan.distexec.DefaultExecutorService;
-import org.infinispan.distexec.DistributedExecutorService;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Future;
 
 /**
  * Created with IntelliJ IDEA.
@@ -58,6 +53,7 @@ public class GroupByOperator extends MapReduceOperator {
         super.init(config);
         setMapper(new GroupByMapper(conf.toString()));
         setReducer(new GroupByReducer(conf.toString()));
+        init_statistics(this.getClass().getCanonicalName());
     }
 
     @Override
