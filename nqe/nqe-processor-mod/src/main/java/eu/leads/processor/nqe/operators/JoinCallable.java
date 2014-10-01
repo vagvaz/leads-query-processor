@@ -1,11 +1,11 @@
 package eu.leads.processor.nqe.operators;
 
+import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.math.FilterOperatorTree;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.distexec.DistributedCallable;
-import org.infinispan.iteration.EntryIterable;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
@@ -39,17 +39,20 @@ public class JoinCallable<K,V> implements
 
     public JoinCallable(String configString, String outputCacheName, String outerCacheName,boolean left) {
         this.configString = configString;
-        this.output = output;
+        this.output = outputCacheName;
         this.outerCacheName = outerCacheName;
         this.left = left;
     }
 
     @Override public void setEnvironment(Cache<K, V> cache, Set<K> set) {
+      conf = new JsonObject(configString);
         this.inputCache = cache;
-        outputCache = cache.getCacheManager().getCache(output);
-        outerCache = cache.getCacheManager().getCache(outerCacheName);
-        JsonObject object = new JsonObject(qualString);
-        conf = new JsonObject(configString);
+        ClusterInfinispanManager manager = new ClusterInfinispanManager(cache.getCacheManager());
+        outputCache = (Cache) manager.getPersisentCache(output);
+        outerCache = (Cache) manager.getPersisentCache(outerCacheName);
+
+        JsonObject object = conf.getObject("body").getObject("joinQual");
+
         tree = new FilterOperatorTree(object);
         outputSchema = conf.getObject("body").getObject("outputSchema");
         inputSchema = conf.getObject("body").getObject("inputSchema");
@@ -73,38 +76,44 @@ public class JoinCallable<K,V> implements
     }
 
     @Override public String call() throws Exception {
-        Map<String,List<Tuple>> buffer = new HashMap<String,List<Tuple>>();
+      try {
+        Map<String, List<Tuple>> buffer = new HashMap<String, List<Tuple>>();
         int size = 0;
         ArrayList<String> ignoreColumns = new ArrayList<>();
-        ignoreColumns.add(innerColumn);
-        ignoreColumns.add(outerColumn);
+//        ignoreColumns.add(innerColumn);
+//        ignoreColumns.add(outerColumn);
         String prefix = output + ":";
-        for(Map.Entry<K,V> entry : inputCache.entrySet()){
-            Tuple current = new Tuple((String) entry.getValue());
-            String columnValue = current.getGenericAttribute(innerColumn).toString();
-            String key = (String)entry.getKey();
-            String currentKey = key.substring(key.indexOf(":") + 1);
+        for (Map.Entry<K, V> entry : inputCache.entrySet()) {
+          Tuple current = new Tuple((String) entry.getValue());
+          String columnValue = current.getGenericAttribute(innerColumn).toString();
+          String key = (String) entry.getKey();
+          String currentKey = key.substring(key.indexOf(":") + 1);
 
-            try {
-                CloseableIterable<Map.Entry<String, String>> iterable =
-                    outerCache.getAdvancedCache().filterEntries(new AttributeFilter(outerColumn,
-                                                                                       columnValue));
-                for (Map.Entry<String, String> outerEntry : iterable) {
-                    Tuple outerTuple = new Tuple(outerEntry.getValue());
-                    Tuple resultTuple = new Tuple(current, outerTuple, ignoreColumns);
-                    String outerKey = outerEntry.getKey().substring(outerEntry.getKey().indexOf(":")+1);
-                    String combinedKey = prefix+ outerKey+"-"+currentKey;
-                    resultTuple = prepareOutput(resultTuple);
-                    outputCache.put(combinedKey,resultTuple.asJsonObject().toString());
-                }
-            } catch (Exception e) {
+
+          CloseableIterable<Map.Entry<String, String>> iterable =
+            outerCache.getAdvancedCache().filterEntries(new AttributeFilter(outerColumn,
+                                                                             columnValue));
+          for (Map.Entry<String, String> outerEntry : iterable) {
+            Tuple outerTuple = new Tuple(outerEntry.getValue());
+            Tuple resultTuple = new Tuple(current, outerTuple, ignoreColumns);
+            String outerKey = outerEntry.getKey().substring(outerEntry.getKey().indexOf(":") + 1);
+            String combinedKey = prefix + outerKey + "-" + currentKey;
+            resultTuple = prepareOutput(resultTuple);
+            outputCache.put(combinedKey, resultTuple.asJsonObject().toString());
+          }
+
+        }
+      }catch (Exception e) {
 
                 System.err.println("Iterating over " + outerCacheName
                                        + " for batch resulted in Exception "
                                        + e.getMessage() + "\n from  " + outerCacheName);
+              return "Iterating over " + outerCacheName
+                       + " for batch resulted in Exception "
+                       + e.getMessage() + "\n from  " + outerCacheName;
             }
-          }
-        return inputCache.getCacheManager().getAddress().toString();
+
+        return "Successful run over " + inputCache.getCacheManager().getAddress().toString();
     }
 
     protected Tuple prepareOutput(Tuple tuple){

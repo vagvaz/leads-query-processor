@@ -25,7 +25,7 @@ public class PlannerCatalogManage extends ManageVerticle {
     public void initialize(JsonObject config) {
         super.initialize(config);
         workerConfig = new JsonObject();
-        workerConfig.mergeIn(config);
+        workerConfig =  workerConfig.mergeIn(config);
         com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id, serviceType));
 
     }

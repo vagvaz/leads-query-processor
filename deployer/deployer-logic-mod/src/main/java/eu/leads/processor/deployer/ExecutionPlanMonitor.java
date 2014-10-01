@@ -57,7 +57,14 @@ public class ExecutionPlanMonitor {
        }
     }
 
-    public PlanNode getNextOperator(PlanNode node) {
+    public PlanNode getNextOperator(PlanNode node){
+      PlanNode result = null;
+      if(node.getNodeType().equals(LeadsNodeType.OUTPUT_NODE))
+        return result;
+      result = plan.getNode(node.getOutput());
+      return result;
+    }
+    public PlanNode getNextExecutableOperator(PlanNode node) {
        PlanNode result = null;
        if(node.getNodeType().equals(LeadsNodeType.OUTPUT_NODE))
           return result;

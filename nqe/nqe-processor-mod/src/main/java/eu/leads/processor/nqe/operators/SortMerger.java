@@ -3,7 +3,7 @@ package eu.leads.processor.nqe.operators;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.TupleComparator;
-import org.vertx.java.core.json.JsonArray;
+import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.*;
@@ -46,24 +46,30 @@ public class SortMerger {
         keys = new Vector<String>(inputCaches.size());
         comparator = comp;
         for (String entry : inputCaches) {
+            Cache cache  = (Cache) manager.getPersisentCache((entry));
+            if(cache.size() == 0)
+            {
+              manager.removePersistentCache(entry);
+              continue;
+            }
             counters.add(0);
             keys.add(entry);
-            caches.add(manager.getPersisentCache((entry)));
+            caches.add(cache);
             Tuple t = getCurrentValue(keys.size() - 1);
             values.add(t);
             cacheNames.add(entry);
 
         }
-       outputSchema = conf.getObject("body").getObject("outputSchema");
-       inputSchema = conf.getObject("body").getObject("inputSchema");
-       targetsMap = new HashMap();
-       outputMap = new HashMap<>();
-       JsonArray targets = conf.getObject("body").getArray("targets");
-       Iterator<Object> targetIterator = targets.iterator();
-       while (targetIterator.hasNext()) {
-          JsonObject target = (JsonObject) targetIterator.next();
-          targetsMap.put(target.getObject("expr").getObject("body").getObject("column").getString("name"), target);
-       }
+//      outputSchema = conf.getObject("body").getObject("outputSchema");
+//      inputSchema = conf.getObject("body").getObject("inputSchema");
+//      targetsMap = new HashMap();
+//      outputMap = new HashMap<>();
+//      JsonArray targets = conf.getObject("body").getArray("targets");
+//      Iterator<Object> targetIterator = targets.iterator();
+//      while (targetIterator.hasNext()) {
+//        JsonObject target = (JsonObject) targetIterator.next();
+//        targetsMap.put(target.getObject("expr").getObject("body").getObject("column").getString("name"), target);
+//      }
     }
 
     private Tuple getCurrentValue(int cacheIndex) {
@@ -98,7 +104,7 @@ public class SortMerger {
             int minIndex = findMinIndex(values);
 
             t = values.get(minIndex);
-            t = prepareOutput(t);
+//            t = prepareOutput(t);
             outputCache.put(prefix + outputCache.size(), t.asString());
 
             nextValue = getNextValue(minIndex);

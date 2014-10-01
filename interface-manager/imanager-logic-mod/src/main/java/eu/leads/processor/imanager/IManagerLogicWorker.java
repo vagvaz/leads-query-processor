@@ -121,6 +121,8 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                     logAction(action);
                     break;
                 case INPROCESS: //  probably received an action from internal source (processors)
+                  log.error("Received INPROCESS action that should not" + action.toString());
+                  break;
                 case COMPLETED: // the action either a part of a multistep workflow (INPROCESSING) or it could be processed.
                     if (label.equals(IManagerConstants.GET_OBJECT)) {
                         com.sendTo(action.getData().getString("replyTo"), action.getResult());

@@ -4,10 +4,12 @@ import eu.leads.processor.core.Tuple;
 import org.infinispan.filter.KeyValueFilter;
 import org.infinispan.metadata.Metadata;
 
+import java.io.Serializable;
+
 /**
  * Created by vagvaz on 9/28/14.
  */
-public class AttributeFilter implements KeyValueFilter {
+public class AttributeFilter implements KeyValueFilter,Serializable {
     String columnValue;
     String columnKey;
     public AttributeFilter(String columnKey,String columnValue) {

@@ -148,9 +148,12 @@ public class leadsCli {
 
     private static void print_results(QueryResults data){
         ArrayList<Tuple> resultSet = new ArrayList<Tuple> ();
-        for (String s : data.getResult())
-            resultSet.add(new Tuple(s));
-        printResults(resultSet);
+        for (String s : data.getResult()) {
+          if (s== null || s.equals("") )
+            continue;
+          resultSet.add(new Tuple(s));
+        }
+       printResults(resultSet);
 
 
 
@@ -180,7 +183,11 @@ public class leadsCli {
             rowCount++;
             colCount = 0;
             for (String field : fields) {
-                outputTable[rowCount][colCount] = t.getAttribute(field);
+                Object value = t.getGenericAttribute(field);
+                if(value != null )
+                outputTable[rowCount][colCount] = value.toString();
+                else
+                outputTable[rowCount][colCount] = "(NULL)";
                 colCount++;
             }
         }

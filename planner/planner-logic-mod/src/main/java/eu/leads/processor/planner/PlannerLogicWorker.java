@@ -3,7 +3,6 @@ package eu.leads.processor.planner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
@@ -74,7 +73,10 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
                     } else if (label.equals(QueryPlannerConstants.PROCESS_SPECIAL_QUERY)) {
                         action.getData().putString("replyTo", msg.getString("from"));
                         com.sendWithEventBus(workQueueAddress, action.asJsonObject());
-                    } else {
+                    }else if(label.equals(QueryPlannerConstants.PROCESS_WORKFLOW_QUERY)){
+                      action.getData().putString("replyTo",msg.getString("from"));
+                      com.sendWithEventBus(workQueueAddress,action.asJsonObject());
+                    }else {
                         log.error("Unknown PENDING Action received " + action.toString());
                         return;
                     }
@@ -96,7 +98,16 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
                             deployAction.setLabel(DeployerConstants.DEPLOY_SQL_PLAN);
                             com.sendTo(deployer, deployAction.asJsonObject());
                         }
-                    } else if (label.equals(QueryPlannerConstants.PROCESS_SPECIAL_QUERY)) {
+                    }else if(label.equals(QueryPlannerConstants.PROCESS_WORKFLOW_QUERY)){
+                      JsonObject actionResult = action.getResult();
+                      if (actionResult != null && actionResult.getString("status").equals("ok")) {
+                        Action deployAction = createNewAction(action);
+                        deployAction.setData(actionResult.getObject("query"));
+                        deployAction.setLabel(DeployerConstants.DEPLOY_SQL_PLAN);
+                        com.sendTo(deployer, deployAction.asJsonObject());
+                      }
+                    }
+                    else if (label.equals(QueryPlannerConstants.PROCESS_SPECIAL_QUERY)) {
                         //                  com.sendTo(action.getData().getString("replyTo"),action.getResult());
                         JsonObject actionResult = action.getResult();
                         if (actionResult != null && actionResult.getString("status").equals("ok")) {

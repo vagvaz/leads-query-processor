@@ -1,6 +1,5 @@
 package eu.leads.processor.nqe.operators.mapreduce;
 
-import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.math.FilterOperatorTree;
 import org.infinispan.Cache;
@@ -67,6 +66,7 @@ public class ScanCallable <K,V> implements
          String key = (String) entry.getKey();
          String value = (String) entry.getValue();
          Tuple tuple = new Tuple(value);
+          namesToLowerCase(tuple);
           renameAllTupleAttributes(tuple);
          if (tree != null) {
             if(tree.accept(tuple)) {
@@ -83,7 +83,14 @@ public class ScanCallable <K,V> implements
       return inputCache.getCacheManager().getAddress().toString();
    }
 
-    private void renameAllTupleAttributes(Tuple tuple) {
+  private void namesToLowerCase(Tuple tuple) {
+    Set<String> fieldNames  =  new HashSet<>(tuple.getFieldNames());
+    for(String field : fieldNames){
+      tuple.renameAttribute(field,field.toLowerCase());
+    }
+  }
+
+  private void renameAllTupleAttributes(Tuple tuple) {
        JsonArray fields = inputSchema.getArray("fields");
         Iterator<Object> iterator = fields.iterator();
         String columnName = null;

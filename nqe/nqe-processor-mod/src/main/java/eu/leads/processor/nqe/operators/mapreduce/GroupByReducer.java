@@ -1,25 +1,15 @@
 package eu.leads.processor.nqe.operators.mapreduce;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.leads.processor.core.LeadsReducer;
 import eu.leads.processor.core.Tuple;
-import eu.leads.processor.core.plan.QueryContext;
-import eu.leads.processor.common.utils.InfinispanUtils;
-//import eu.leads.processor.common.utils.SQLUtils;
 import eu.leads.processor.math.MathUtils;
-import org.apache.tajo.catalog.FunctionDesc;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.*;
 
-import static java.lang.System.getProperties;
+//import eu.leads.processor.common.utils.SQLUtils;
 
 /**
  * Created with IntelliJ IDEA.
@@ -42,6 +32,9 @@ public class GroupByReducer extends LeadsReducer<String, String> {
     transient  private ArrayList<JsonObject> aggregates;
     transient Map<String,Integer> typesOfaggregates;
     transient List<String> aggregateNames;
+  transient Set<String> inputFields;
+  transient ArrayList<String> aggregateInferred;
+
 
    public GroupByReducer(JsonObject configuration) {
         super(configuration);
@@ -99,12 +92,37 @@ public class GroupByReducer extends LeadsReducer<String, String> {
          Object object = MathUtils.getInitialValue(parameter.getString("type"),current.getObject("funcDesc").getString("signature"));
          aggregateValues.add(object);
       }
-
+      aggregateInferred = inferFinalAggNames();
     }
 
-    @Override
+  private ArrayList<String> inferFinalAggNames() {
+    ArrayList<String> result = new ArrayList<>(aggregateNames.size());
+    Iterator<Object> inputIterator = conf.getObject("body").getObject("inputSchema").getArray("fields").iterator();
+    Set<String> inputColumns = new HashSet<String>();
+    while(inputIterator.hasNext()){
+      JsonObject field = (JsonObject) inputIterator.next();
+      inputColumns.add(field.getString("name"));
+    }
+    Iterator<Object> targetIterator = conf.getObject("body").getArray("targets").iterator();
+    int counter = 0;
+    while(targetIterator.hasNext()){
+      JsonObject target = (JsonObject) targetIterator.next();
+      String targetName = target.getObject("expr").getObject("body").getObject("column").getString("name");
+
+      if(!inputColumns.contains(targetName)){
+        result.add(targetName);
+        counter++;
+      }
+    }
+
+    return result;
+  }
+
+  @Override
     public String reduce(String key, Iterator<String> iterator) {
        //Reduce takes all the grouped Typles per key
+      if(key == null || key.equals(""))
+        return "";
         if (!isInitialized) initialize();
         resetValues();
         Tuple t = null;
@@ -133,7 +151,7 @@ public class GroupByReducer extends LeadsReducer<String, String> {
 
         }
 
-       Iterator<String> nameIterator= aggregateNames.iterator();
+       Iterator<String> nameIterator= aggregateInferred.iterator();
        Iterator<Object> aggValuesIterator = aggregateValues.iterator();
        Iterator<String> funcTypeIterator = functionType.iterator();
 
@@ -152,7 +170,9 @@ public class GroupByReducer extends LeadsReducer<String, String> {
           t.setAttribute(name,tupleValue);
        }
        //prepare output
+//        System.err.println("t: " + t.toString());
         t = prepareOutput(t);
+//        System.err.println("tout: " + t.toString());
         data.put(prefix + key, t.asString());
         return "";
     }

@@ -6,8 +6,6 @@ import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.net.Node;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.Properties;
-
 /**
  * Created by tr on 30/8/2014.
  */
@@ -73,6 +71,7 @@ public abstract class BasicOperator extends Thread implements Operator{
    public String getOutput() {
       return action.getData().getObject("operator").getString("id");
    }
+
 
    @Override
    public void setOutput(String output) {

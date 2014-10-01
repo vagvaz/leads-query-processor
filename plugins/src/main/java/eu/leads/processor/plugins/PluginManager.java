@@ -153,8 +153,8 @@ public class PluginManager {
             }
         }
         addPluginToCache(plugin, eventmask, configCache);
-//        deployPluginListener(plugin.getId(), cacheName,
-//                                InfinispanClusterSingleton.getInstance().getManager());
+        deployPluginListener(plugin.getId(), cacheName,
+                                InfinispanClusterSingleton.getInstance().getManager());
         return result;
     }
 
@@ -203,8 +203,8 @@ public class PluginManager {
 
         int eventmask = computeEventMask(events);
         addPluginToCache(plugin, eventmask, configCache);
-//        deployPluginListener(plugin.getId(), cacheName,
-//                                InfinispanClusterSingleton.getInstance().getManager());
+        deployPluginListener(plugin.getId(), cacheName,
+                                InfinispanClusterSingleton.getInstance().getManager());
         return true;
     }
 

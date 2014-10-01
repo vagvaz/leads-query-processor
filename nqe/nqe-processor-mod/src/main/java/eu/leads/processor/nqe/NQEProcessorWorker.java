@@ -5,12 +5,11 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
-import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.Node;
-import eu.leads.processor.nqe.handlers.*;
+import eu.leads.processor.nqe.handlers.OperatorActionHandler;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.eventbus.Message;
@@ -20,8 +19,8 @@ import org.vertx.java.platform.Verticle;
 import java.util.HashMap;
 import java.util.Map;
 
-import static eu.leads.processor.core.ActionStatus.*;
-import static eu.leads.processor.core.ActionStatus.COMPLETED;
+import static eu.leads.processor.core.ActionStatus.INPROCESS;
+import static eu.leads.processor.core.ActionStatus.valueOf;
 
 /**
  * Created by vagvaz on 8/6/14.
@@ -128,6 +127,8 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
             log.info("Registration " + event.toString());
          }
       });
+
+     log.info("started ....");
    }
 
    @Override

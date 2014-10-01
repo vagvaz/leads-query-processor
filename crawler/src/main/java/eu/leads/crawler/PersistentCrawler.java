@@ -64,7 +64,7 @@ public class PersistentCrawler extends DefaultCrawler {
             page2.setLinks(page.getLinks());
             page2.setTitle(page.getTitle());
             preprocessingMap
-                .putIfAbsent(page.getUrl().toString(), mapper.writeValueAsString(page2));
+                .putIfAbsent(StringConstants.CRAWLER_DEFAULT_CACHE+":"+page2.getUrl().toString(), mapper.writeValueAsString(page2));
         } catch (IOException e) {
             e.printStackTrace();  // TODO: Customise this generated block
         }

@@ -6,7 +6,6 @@ import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
@@ -76,6 +75,8 @@ public class DeployerProcessorWorker extends Verticle implements Handler<Message
                 log.info("Registration " + event.toString());
             }
         });
+
+      log.info(" started...");
     }
 
     @Override

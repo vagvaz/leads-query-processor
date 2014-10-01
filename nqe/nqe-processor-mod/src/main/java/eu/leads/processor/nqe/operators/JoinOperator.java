@@ -48,7 +48,8 @@ public class JoinOperator extends BasicOperator {
 
     @Override public void run() {
         Cache innerCache = (Cache) manager.getPersisentCache(innerCacheName);
-        Cache outerCache = (Cache) manager.getPersisentCache(getOutput());
+        Cache outerCache = (Cache) manager.getPersisentCache(outerCacheName);
+        Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
         DistributedExecutorService des = new DefaultExecutorService(innerCache);
         JoinCallable joinCallable = new JoinCallable(conf.toString(),getOutput(),outerCache.getName(),isLeft);
         List<Future<String>> res  =  des.submitEverywhere(joinCallable);
@@ -57,6 +58,7 @@ public class JoinOperator extends BasicOperator {
             if(res != null){
                 for(Future<String> result : res){
                     addresses.add(result.get());
+                  System.err.println(addresses.get(addresses.size()-1));
                 }
                 //TODO log
                 System.err.println("Join Callable successfully run");
@@ -75,7 +77,7 @@ public class JoinOperator extends BasicOperator {
 
     @Override
     public void init(JsonObject config) {
-        super.init(config); //fix set correctly caches names
+//        super.init(config); //fix set correctly caches names
         //fix configuration
         JsonArray inputsArray = action.getData().getObject("operator").getArray("inputs");
        Iterator<Object> inputIterator = inputsArray.iterator();

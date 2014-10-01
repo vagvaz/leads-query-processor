@@ -1,12 +1,10 @@
 package eu.leads.processor.math;
 
 import org.vertx.java.core.json.JsonObject;
-import sun.misc.Regexp;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.
@@ -120,8 +118,8 @@ public class MathUtils {
          return leftValue.compareTo(rightValue) < 0;
       }
       else if (type.startsWith("INT")){
-         Integer leftValue = left.getObject("body").getObject("datum").getObject("body").getInteger("val");
-         Integer rightValue = right.getObject("body").getObject("datum").getObject("body").getInteger("val");
+         Long leftValue = left.getObject("body").getObject("datum").getObject("body").getLong("val");
+         Long rightValue = right.getObject("body").getObject("datum").getObject("body").getLong("val");
          return leftValue.compareTo(rightValue) < 0;
       }
       else if (type.startsWith("FLOAT") || type.startsWith("DOUBLE")){
@@ -144,8 +142,8 @@ public class MathUtils {
          String rightValue = right.getObject("body").getObject("datum").getObject("body").getString("val");
          return leftValue.compareTo(rightValue) <= 0;
       } else if (type.startsWith("INT")) {
-         Integer leftValue = left.getObject("body").getObject("datum").getObject("body").getInteger("val");
-         Integer rightValue = right.getObject("body").getObject("datum").getObject("body").getInteger("val");
+         Long leftValue = left.getObject("body").getObject("datum").getObject("body").getLong("val");
+         Long rightValue = right.getObject("body").getObject("datum").getObject("body").getLong("val");
          return leftValue.compareTo(rightValue) <= 0;
       } else if (type.startsWith("FLOAT") || type.startsWith("DOUBLE")) {
          Number leftValue = left.getObject("body").getObject("datum").getObject("body").getNumber("val");
@@ -169,26 +167,71 @@ public class MathUtils {
 
    public static boolean like(JsonObject leftValue, JsonObject rightValue, JsonObject value) {
       boolean result = false;
-      String pattern = value.getObject("body").getString("pattern");
-      pattern = pattern.replace("%","*");
-      Pattern regex = Pattern.compile(pattern);
+      byte[] patternBytes = null;
+      if(leftValue.getString("type").equals("CONST")){
+        JsonObject body = leftValue.getObject("body").getObject("datum").getObject("body");
+        org.vertx.java.core.json.JsonArray bytes = body.getArray("bytes");
+        int size = body.getInteger("size");
+        patternBytes = new byte[size];
+        for (int i = 0; i < size; i++) {
+          patternBytes[i] = bytes.get(i);
+        }
+
+
+      }
+     if(rightValue.getString("type").equals("CONST")){
+       JsonObject body = rightValue.getObject("body").getObject("datum").getObject("body");
+       org.vertx.java.core.json.JsonArray bytes = body.getArray("bytes");
+       int size = body.getInteger("size");
+       patternBytes = new byte[size+1];
+       patternBytes[patternBytes.length-1]=0;
+       if(bytes != null) {
+         for (int i = 0; i < size; i++) {
+           int intByte = bytes.get(i);
+           patternBytes[i] = (byte)intByte;
+         }
+
+       }
+     }
+     String pattern = new String(patternBytes);
+      pattern = pattern.replaceAll("%", "*");
+      pattern.trim();
+      pattern = "[" + pattern + "]";
+//      Pattern regex = Pattern.compile(pattern);
       if(leftValue.getString("type").equals("FIELD"))
       {
          String testString = leftValue.getObject("body").getObject("datum").getObject("body").getString("val");
-         result =regex.matcher(testString).matches();
+//         result =regex.matcher(testString).matches();
+        if(pattern.startsWith("*") && pattern.endsWith("*"))
+        result = testString.contains(pattern);
+        else if(pattern.startsWith("*")){
+          result = testString.startsWith(pattern);
+        }
+        else{
+          result = testString.endsWith(pattern);
+        }
+
 
       }
       if(rightValue.getString("type").equals("FIELD"))
       {
          String testString = rightValue.getObject("body").getObject("datum").getObject("body").getString("val");
-         result =regex.matcher(testString).matches();
+//         result =regex.matcher(testString).matches();
+        if(pattern.startsWith("*") && pattern.endsWith("*"))
+          result = testString.contains(pattern);
+        else if(pattern.startsWith("*")){
+          result = testString.startsWith(pattern);
+        }
+        else{
+          result = testString.endsWith(pattern);
+        }
 
       }
 
-      if(value.getObject("body").getBoolean("not"))
-      {
-         return !result;
-      }
+//      if(value.getObject("body").getBoolean("not"))
+//      {
+//         return !result;
+//      }
       return result;
    }
 
@@ -198,18 +241,18 @@ public class MathUtils {
          result = new String();
       } else if (type.startsWith("INT")) {
          if(function.equals("sum")  || function.equals("count")){
-            result = new Integer(0);
+            result = new Long(0);
          }
          else if(function.equals("max")){
-            result = new Integer(Integer.MIN_VALUE);
+            result = new Long(Long.MIN_VALUE);
          }
          else if (function.equals("min")){
-            result = new Integer(Integer.MAX_VALUE);
+            result = new Long(Long.MAX_VALUE);
          }
          else if (function.equals("avg")){
             Map<String,Object> tmp  = new HashMap<String,Object>();
-            tmp.put("sum", new Integer(0));
-            tmp.put("count",new Integer(0));
+            tmp.put("sum", new Long(0));
+            tmp.put("count",new Long(0));
             result = tmp;
          }
       } else if (type.startsWith("FLOAT") || type.startsWith("DOUBLE")) {
@@ -225,7 +268,7 @@ public class MathUtils {
          else if (function.equals("avg")){
             Map<String,Object> tmp  = new HashMap<String,Object>();
             tmp.put("sum",new Double(0.0));
-            tmp.put("count",new Integer(0));
+            tmp.put("count",new Long(0));
             result = tmp;
          }
       }else if (type.startsWith("LONG")){
@@ -241,13 +284,13 @@ public class MathUtils {
          else if (function.equals("avg")){
             Map<String,Object> tmp  = new HashMap<String,Object>();
             tmp.put("sum",new Long(0));
-            tmp.put("count",new Integer(0));
+            tmp.put("count",new Long(0));
             result = tmp;
          }
       }
       else {
          System.out.println("Unknonw type " + type);
-         result = new Integer(0);
+         result = new Long(0);
       }
 
       return result;
@@ -284,22 +327,23 @@ public class MathUtils {
          result = currentValue;
       }
       else if (type.startsWith("INT")){
+         int currentValueInt = (int)currentValue;
          Map<String,Object> oldMap = (Map<String, Object>) oldValue;
-         oldMap.put("count",(Integer)oldMap.get("count")+1);
-         oldMap.put("sum",(Integer)oldMap.get("sum")+(Integer)currentValue);
+         oldMap.put("count",(Long)oldMap.get("count")+1);
+         oldMap.put("sum",(Long)oldMap.get("sum")+currentValueInt);
          result = oldMap;
       }
       else if (type.startsWith("FLOAT") || type.startsWith("DOUBLE")){
          Map<String,Object> oldMap = (Map<String, Object>) oldValue;
-         oldMap.put("count",(Integer)oldMap.get("count")+1);
+         oldMap.put("count",(Long)oldMap.get("count")+1);
          oldMap.put("sum",(Double)oldMap.get("sum")+(Double)currentValue);
          result = oldMap;
       }
       else{
          System.out.println("Unknonw type " + type);
          Map<String,Object> oldMap = (Map<String, Object>) oldValue;
-         oldMap.put("count",(Integer)oldMap.get("count")+1);
-         oldMap.put("sum",(Integer)oldMap.get("sum")+(Integer)currentValue);
+         oldMap.put("count",(Long)oldMap.get("count")+1);
+         oldMap.put("sum",(Long)oldMap.get("sum")+((int)currentValue));
          result = oldMap;
       }
       return result;
@@ -315,10 +359,10 @@ public class MathUtils {
          }
       }
       else if (type.startsWith("INT")){
-         Integer old = (Integer) oldValue;
-         Integer current = (Integer) currentValue;
-         if(old.compareTo(current) > 0){
-            result = current;
+         Long old = (Long) oldValue;
+         int current = (int) currentValue;
+         if(current < old){
+            result = new Long(current);
          }
       }
       else if (type.startsWith("FLOAT") || type.startsWith("DOUBLE")){
@@ -330,11 +374,11 @@ public class MathUtils {
       }
       else{
          System.out.println("Unknonw type " + type);
-         Integer old = (Integer) oldValue;
-         Integer current = (Integer) currentValue;
-         if(old.compareTo(current) > 0){
-            result = current;
-         }
+        Long old = (Long) oldValue;
+        int current = (int) currentValue;
+        if(current < old){
+          result = new Long(current);
+        }
       }
       return result;
    }
@@ -349,11 +393,11 @@ public class MathUtils {
          }
       }
       else if (type.startsWith("INT")){
-         Integer old = (Integer) oldValue;
-         Integer current = (Integer) currentValue;
-         if(old.compareTo(current) < 0){
-            result = current;
-         }
+        Long old = (Long) oldValue;
+        int current = (int) currentValue;
+        if(current > old){
+          result = new Long(current);
+        }
       }
       else if (type.startsWith("FLOAT") || type.startsWith("DOUBLE")){
          Double old = (Double) oldValue;
@@ -364,11 +408,11 @@ public class MathUtils {
       }
       else{
          System.out.println("Unknonw type " + type);
-         Integer old = (Integer) oldValue;
-         Integer current = (Integer) currentValue;
-         if(old.compareTo(current) < 0){
-            result = current;
-         }
+         Long old = (Long) oldValue;
+        int current = (int) currentValue;
+        if(current > old){
+          result = new Long(current);
+        }
       }
       return result;
 
@@ -386,8 +430,8 @@ public class MathUtils {
          result = oldValue.toString().concat(currentValue.toString());
       }
       else if (type.startsWith("INT")){
-         Integer old = (Integer) oldValue;
-         Integer current = (Integer) currentValue;
+         Long old = (Long) oldValue;
+         int current = (int)currentValue;
          result = current + old;
 
       }
@@ -398,18 +442,21 @@ public class MathUtils {
       }
       else{
          System.out.println("Unknonw type " + type);
-         Integer old = (Integer) oldValue;
-         Integer current = (Integer) currentValue;
-         result = current + old;
+        Long old = (Long) oldValue;
+        int current = (int)currentValue;
+        result = current + old;
       }
       return result;
    }
 
    public static Double computeAvg(Map<String, Object> avgMap) {
-      int count = (int) avgMap.get("count");
+      long count = (long) avgMap.get("count");
       double sum = 0;
-      if(avgMap.get("sum") instanceof Integer){
-         sum += ((Integer)avgMap.get("sum")).doubleValue();
+      if(avgMap.get("sum") instanceof Long){
+         sum += ((Long)avgMap.get("sum")).doubleValue();
+      }
+      else if (avgMap.get("sum") instanceof Double){
+        sum+= ((Double)avgMap.get("sum")).doubleValue();
       }
       else{
          sum += (Double)avgMap.get("sum");

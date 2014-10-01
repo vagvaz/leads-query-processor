@@ -3,7 +3,6 @@ package eu.leads.processor.imanager.handlers;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.common.infinispan.RangeFilter;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
@@ -37,8 +36,9 @@ public class GetResultsActionHandler implements ActionHandler {
     @Override
     public Action process(Action action) {
         Action result = action;
+      String queryId = action.getData().getString("queryId");
         try {
-            String queryId = action.getData().getString("queryId");
+            queryId = action.getData().getString("queryId");
             Long min = Long.parseLong(action.getData().getString("min"));
             Long max = Long.parseLong(action.getData().getString("max"));
             JsonObject actionResult = new JsonObject();
@@ -54,6 +54,7 @@ public class GetResultsActionHandler implements ActionHandler {
                     .putString("message", "query " + queryId + " has not been completed yet");
             } else {
                 JsonObject queryStatus = new JsonObject(queryJson);
+
                 String cacheName = queryStatus.getString("output");
                 boolean isSorted = queryStatus.getBoolean("isSorted");
                 JsonObject tuples = null;
@@ -68,11 +69,14 @@ public class GetResultsActionHandler implements ActionHandler {
                     result.setResult(actionResult);
                     return result;
                 }
-                if (max < 0) {
-                    tuples = batchGet(cacheName,isSorted, min);
-                } else {
-                    tuples = batchGet(cacheName,isSorted, min, max);
-                }
+
+                  if (max < 0) {
+                    tuples = batchGet(cacheName, isSorted, min);
+                  } else {
+                    tuples = batchGet(cacheName, isSorted, min, max);
+                  }
+
+
 //                updateQueryReadStatus(queryId, queryStatus, min, max);
                 actionResult.putString("id", queryId);
                 actionResult.putString("min", String.valueOf(min));
@@ -80,11 +84,19 @@ public class GetResultsActionHandler implements ActionHandler {
                 actionResult.putString("result", tuples.getArray("result").toString());
                 actionResult.putString("size", String.valueOf(tuples.size()));
 
-
             }
             result.setResult(actionResult);
         } catch (Exception e) {
-            e.printStackTrace();
+//            log.error("Problem when reading results action " + action.toString() );
+          JsonObject actionResult = new JsonObject();
+          actionResult.putString("id", queryId);
+          actionResult.putString("min", String.valueOf("-1"));
+          actionResult.putString("max", String.valueOf("-1"));
+          actionResult.putString("result", new JsonArray().toString());
+          actionResult.putString("size", String.valueOf("0"));
+          result.setResult(actionResult);
+          result.setStatus(ActionStatus.COMPLETED.toString());
+          return result;
         }
         result.setStatus(ActionStatus.COMPLETED.toString());
         return result;
@@ -97,9 +109,10 @@ public class GetResultsActionHandler implements ActionHandler {
 
       Cache cache = (Cache) persistence.getPersisentCache(cacheName);
         if(isSorted) {
+            String prefix = cache.getName() + ":";
             long cacheSize = cache.size();
             for (long index = 0; index < cacheSize; index++) {
-                String value = (String) cache.get(String.valueOf(index));
+                String value = (String) cache.get(prefix+String.valueOf(index));
                 listOfValues.add(value);
             }
         }

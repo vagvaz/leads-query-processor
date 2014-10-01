@@ -1,12 +1,14 @@
-package eu.leads.crawler;
+package eu.leads.processor.test;
 
+import eu.leads.crawler.PersistentCrawl;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.CacheManagerFactory;
-import eu.leads.processor.common.infinispan.InfinispanCluster;
-import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.plugins.EventType;
+import eu.leads.processor.plugins.PluginManager;
+import eu.leads.processor.plugins.PluginPackage;
 import org.infinispan.Cache;
 
 import java.util.ArrayList;
@@ -28,6 +30,10 @@ public class DataCollection {
       LQPConfiguration.getConf().setProperty("crawler.seed",
                                                     "http://www.bbc.co.uk"); //For some reason it is ignored news.yahoo.com is used by default
       LQPConfiguration.getConf().setProperty("crawler.depth", 3);
+     String sentimentPluginClassName = "eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin";
+     String jarFile = "/home/vagvaz/Projects/idea/leads-query-processor/plugin-examples/sentiment-plugin/target/sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
+     String confFile = "/home/vagvaz/Projects/idea/leads-query-processor/plugin-examples/sentiment-plugin/sentiment-conf.xml";
+
       //Set desired target cache
       LQPConfiguration.getConf().setProperty(StringConstants.CRAWLER_DEFAULT_CACHE, webCacheName);
       //Create Infinispan Cluster of 3 infinispan local nodes...
@@ -35,10 +41,13 @@ public class DataCollection {
 
      clusters.add(CacheManagerFactory.createCacheManager());
 
-      for (InfinispanManager cluster : clusters) {
-         cluster.getPersisentCache(StringConstants.CRAWLER_DEFAULT_CACHE);
-      }
-      Cache pages = (Cache) clusters.get(0).getPersisentCache(StringConstants.CRAWLER_DEFAULT_CACHE);
+//      for (InfinispanManager cluster : clusters) {
+//         cluster.getPersisentCache(StringConstants.CRAWLER_DEFAULT_CACHE);
+//      }
+     PluginPackage sentimentPlugin = new PluginPackage(sentimentPluginClassName,sentimentPluginClassName,jarFile,confFile);
+     PluginManager.uploadPlugin(sentimentPlugin);
+     PluginManager.deployPlugin(sentimentPluginClassName,webCacheName, EventType.CREATEANDMODIFY);
+      Cache pages = (Cache) clusters.get(0).getPersisentCache(webCacheName);
       System.out.println("pages size is " + pages.size());
 
       //start crawler

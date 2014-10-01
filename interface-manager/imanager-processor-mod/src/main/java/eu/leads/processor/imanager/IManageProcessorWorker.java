@@ -87,6 +87,7 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
                 log.info("Registration " + event.toString());
             }
         });
+      log.info(" started....");
     }
 
     @Override

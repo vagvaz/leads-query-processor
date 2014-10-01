@@ -25,7 +25,11 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
      */
     @Override
     public Void call() throws Exception {
-        cache.getCacheManager().removeCache(cacheName);
+      if(cache.getCacheManager().cacheExists(cacheName))
+      {
+        if(cache.getAdvancedCache().getRpcManager().getMembers().contains(cache.getCacheManager().getAddress()))
+          cache.getCacheManager().removeCache(cacheName);
+      }
         return null;
     }
 

@@ -1,5 +1,8 @@
-package eu.leads.processor.core;
+package eu.leads.processor.nqe.operators;
 
+import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
+import eu.leads.processor.core.Tuple;
+import eu.leads.processor.core.TupleComparator;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DistributedCallable;
 
@@ -36,7 +39,8 @@ public class SortCallable<K,V> implements
       this.cache = cache;
       keys = inputKeys;
       address = this.cache.getCacheManager().getAddress().toString();
-      out = this.cache.getCacheManager().getCache(address+":");
+      ClusterInfinispanManager manager = new ClusterInfinispanManager(cache.getCacheManager());
+      out = (Cache) manager.getPersisentCache(address);
    }
 
    @Override
@@ -44,13 +48,16 @@ public class SortCallable<K,V> implements
       ArrayList<Tuple> tuples =  new ArrayList<Tuple>();
       for(V value : cache.values())
       {
-         tuples.add(new Tuple((String)value));
+        String valueString = (String)value;
+        if(valueString.equals(""))
+          continue;
+         tuples.add(new Tuple(valueString));
       }
       Comparator<Tuple> comparator = new TupleComparator(sortColumns,asceding,types);
       Collections.sort(tuples, comparator);
       int counter = 0;
       for (Tuple t : tuples) {
-         out.put(address + ":" + counter, t.asString());
+         out.put(address  + counter, t.asString());
          counter++;
       }
       tuples.clear();

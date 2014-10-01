@@ -147,22 +147,46 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                         String queryId = action.getData().getString("queryId");
                         ExecutionPlanMonitor plan = runningPlans.get(queryId);
                         plan.complete(node);
-                        PlanNode tobeDeployed = plan.getNextOperator(node);
-                       if(tobeDeployed.getNodeType().equals(LeadsNodeType.ROOT))
-                       {
-                          plan.complete(tobeDeployed);
-                          tobeDeployed = plan.getNextOperator(tobeDeployed);
-                       }
-                       if(tobeDeployed.getNodeType().equals(LeadsNodeType.OUTPUT_NODE)){
-                          plan.complete(tobeDeployed);
-                          tobeDeployed = plan.getNextOperator(tobeDeployed);
-                       }
+                        PlanNode next = plan.getNextOperator(node);
+
+                      boolean useNode = true;
+                      if(next.getNodeType().equals(LeadsNodeType.ROOT))
+                      {
+                        plan.complete(next);
+                        next = plan.getNextExecutableOperator(next);
+                        useNode = false;;
+                      }
+                      if(next.getNodeType().equals(LeadsNodeType.OUTPUT_NODE)){
+                        plan.complete(next);
+                        next = plan.getNextExecutableOperator(next);
+                        useNode = false;
+                      }
+                      PlanNode tobeDeployed =null;
+                      if(useNode)
+                       tobeDeployed = plan.getNextExecutableOperator(node);
+                      else {
+                        if(next != null)
+                          tobeDeployed = plan.getNextExecutableOperator(next);
+                        else
+                          tobeDeployed = null;
+                      }
+
+
+//                      if(tobeDeployed.getNodeType().equals(LeadsNodeType.ROOT))
+//                       {
+//                          plan.complete(tobeDeployed);
+//                          tobeDeployed = plan.getNextExecutableOperator(tobeDeployed);
+//                       }
+//                       if(tobeDeployed.getNodeType().equals(LeadsNodeType.OUTPUT_NODE)){
+//                          plan.complete(tobeDeployed);
+//                          tobeDeployed = plan.getNextExecutableOperator(tobeDeployed);
+//                       }
 
                         if ( tobeDeployed == null && plan.isFullyExecuted()){
                             finalizeQuery(plan.getQueryId());
                         }
                         else{
-                           deployOperator(plan,tobeDeployed);
+                           deployOperator(plan, tobeDeployed);
                         }
                     } else if (label.equals(NQEConstants.OPERATOR_FAILED)) {
                         PlanNode node = new PlanNode(action.getData().getObject("operator"));

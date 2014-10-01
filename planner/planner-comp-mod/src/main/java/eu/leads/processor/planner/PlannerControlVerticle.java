@@ -2,7 +2,10 @@ package eu.leads.processor.planner;
 
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.core.comp.ComponentControlVerticle;
+import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
+
+import java.util.Iterator;
 
 /**
  * Created by vagvaz on 8/18/14.
@@ -28,6 +31,18 @@ public class PlannerControlVerticle extends ComponentControlVerticle {
         logicConfig.putString("deployer", deployerManageQueue);
         processorConfig.putString("planner", plannerQueue);
         logicConfig.putString("deployer", deployerManageQueue);
+      JsonArray servicesArray = conf.getArray("services");
+      Iterator<Object> servicesIterator = servicesArray.iterator();
+      while(servicesIterator.hasNext())
+      {
+        JsonObject service = (JsonObject) servicesIterator.next();
+        if(service.getString("type").equals("catalog")){
+          String ip = service.getObject("conf").getString("ip");
+          int port = service.getObject("conf").getInteger("port");
+          processorConfig.putString("catalog_ip",ip);
+          processorConfig.putNumber("catalog_port",port);
+        }
+      }
     }
 
     @Override

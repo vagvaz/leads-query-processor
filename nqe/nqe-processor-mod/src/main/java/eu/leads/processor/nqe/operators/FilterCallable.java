@@ -4,7 +4,6 @@ import eu.leads.processor.core.Tuple;
 import eu.leads.processor.math.FilterOperatorTree;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DistributedCallable;
-import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.Serializable;
@@ -44,12 +43,12 @@ public class FilterCallable<K,V> implements
       inputSchema = conf.getObject("body").getObject("inputSchema");
       targetsMap = new HashMap();
       outputMap = new HashMap<>();
-      JsonArray targets = conf.getObject("body").getArray("targets");
-      Iterator<Object> targetIterator = targets.iterator();
-      while (targetIterator.hasNext()) {
-         JsonObject target = (JsonObject) targetIterator.next();
-         targetsMap.put(target.getObject("expr").getObject("body").getObject("column").getString("name"), target);
-      }
+//      JsonArray targets = conf.getObject("body").getArray("targets");
+//      Iterator<Object> targetIterator = targets.iterator();
+//      while (targetIterator.hasNext()) {
+//         JsonObject target = (JsonObject) targetIterator.next();
+//         targetsMap.put(target.getObject("expr").getObject("body").getObject("column").getString("name"), target);
+//      }
    }
 
    @Override
@@ -59,7 +58,7 @@ public class FilterCallable<K,V> implements
          String value = (String) entry.getValue();
          Tuple tuple = new Tuple(value);
          if(tree.accept(tuple)){
-            tuple = prepareOutput(tuple);
+//            tuple = prepareOutput(tuple);
             outputCache.put(key,tuple.asString());
          }
 

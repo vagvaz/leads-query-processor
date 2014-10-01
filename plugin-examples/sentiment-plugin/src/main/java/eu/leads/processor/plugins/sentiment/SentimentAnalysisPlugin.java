@@ -1,6 +1,6 @@
 package eu.leads.processor.plugins.sentiment;
 
-import eu.leads.processor.common.Tuple;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.plugins.PluginInterface;
 import org.apache.commons.configuration.Configuration;
@@ -8,6 +8,8 @@ import org.infinispan.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.System;
+import java.util.Date;
 import java.util.Set;
 
 /**
@@ -58,15 +60,16 @@ public class SentimentAnalysisPlugin implements PluginInterface {
 
     private void processTuple(String key, Tuple value) {
 
-        String url = key;
+        String url = value.getAttribute("url");
         String body = value.getAttribute("content");
         Set<Entity> entities = module.getEntities(body);
         for (Entity e : entities) {
             Tuple tuple = new Tuple("{}"); //create a tuple with no attributes
             Sentiment s = module.getSentimentForEntity(e.getName(), body);
             tuple.setAttribute("name", e.getName());
-            tuple.setAttribute("sentimentScore", Double.toString(s.getValue()));
-            tuple.setAttribute("webpageURL", url);
+          tuple.setAttribute("sentiment",s.getValue());
+            tuple.setAttribute("webpageurl", url);
+            tuple.setNumberAttribute("version", System.currentTimeMillis());
             this.targetCache.put(url + ":" + e.getName(), tuple.asString());
             if (debug)
                 log.debug(url + ":" + e.getName() + "\n" + tuple.asString());

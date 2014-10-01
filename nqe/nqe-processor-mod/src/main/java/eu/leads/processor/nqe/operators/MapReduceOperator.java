@@ -32,8 +32,8 @@ public abstract class MapReduceOperator extends BasicOperator{
 
        super(com,persistence,action);
        inputCacheName = getInput();
-       outputCacheName = getName();
-       intermediateCacheName = getName()+".intermediate";
+       outputCacheName = action.getData().getObject("operator").getString("id");
+       intermediateCacheName = action.getData().getObject("operator").getString("id")+".intermediate";
     }
 
     public void setMapper(LeadsMapper<?, ?, ?, ?> mapper) {

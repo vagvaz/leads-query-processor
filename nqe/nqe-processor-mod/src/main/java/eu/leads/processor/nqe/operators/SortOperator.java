@@ -56,9 +56,9 @@ public class SortOperator extends BasicOperator {
    @Override
    public void run() {
       Cache inputCache = (Cache) this.manager.getPersisentCache(getInput());
-      Cache beforeMerge = (Cache)this.manager.getPersisentCache(getName()+".merge");
+      Cache beforeMerge = (Cache)this.manager.getPersisentCache(getOutput()+".merge");
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
-      SortCallable callable = new SortCallable(sortColumns,asceding,types,getName()+".merge");
+      SortCallable callable = new SortCallable(sortColumns,asceding,types,getOutput()+".merge");
       List<Future<String>> res = des.submitEverywhere(callable);
       List<String> addresses = new ArrayList<String>();
       try {
@@ -81,9 +81,10 @@ public class SortOperator extends BasicOperator {
       TupleComparator comparator = new TupleComparator(sortColumns,asceding,types);
       SortMerger merger = new SortMerger(addresses, getOutput(),comparator,manager,conf);
       merger.merge();
-      for(String cacheName : addresses){
-         manager.removePersistentCache(cacheName);
-      }
+//      for(String cacheName : addresses){
+//         manager.removePersistentCache(cacheName);
+//      }
+      manager.removePersistentCache(beforeMerge.getName());
       cleanup();
 
    }

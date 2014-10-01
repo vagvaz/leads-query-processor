@@ -175,10 +175,8 @@ public class SentimentAnalysisModule implements SentimentAnalysis {
                 s2 = s3;
                 s3 = sentence;
             }
-            System.err.println(targetEntity + "\n " + sentence);
-            if (sentence.toString().toUpperCase()
-                    .contains(targetEntity.toUpperCase())) {
-                System.err.println(targetEntity + "was Found ");
+
+
                 if (tempCount == 1) {
                     //               if (s1 != null) {
                     //                  // System.out.print(s1 + " --> ");
@@ -187,14 +185,14 @@ public class SentimentAnalysisModule implements SentimentAnalysis {
                     if (s2 != null) {
 
                         s.value += outputTree(System.out, s2, outputFormats);
-                        System.err.println(targetEntity + "\n " + s2 + "  --> " + s.value);
+//                        System.err.println(targetEntity + "\n " + s2 + "  --> " + s.value);
                     }
                     if (s3 != null) {
                         //                  System.out.print(s3 + " --> ");
                         s.value += outputTree(System.out, s3, outputFormats);
-                        System.err.println(targetEntity + "\n " + s3 + "  --> " + s.value);
+//                        System.err.println(targetEntity + "\n " + s3 + "  --> " + s.value);
                     }
-                }
+
                 // System.out.print(sentence + " --> ");
                 s.value += outputTree(System.out, sentence, outputFormats);
 
