@@ -57,6 +57,7 @@ public abstract class MapReduceOperator extends BasicOperator{
 
     @Override
     public void run() {
+        long startTime = System.nanoTime();
        DistributedExecutorService des = new DefaultExecutorService(inputCache);
        LeadsMapperCallable mapperCallable = new LeadsMapperCallable(inputCache,collector,mapper);
        List<Future<?>> res = des.submitEverywhere(mapperCallable);
@@ -97,6 +98,8 @@ public abstract class MapReduceOperator extends BasicOperator{
              e.printStackTrace();
           }
        }
+        //Store Values for statistics
+       UpdateStatistics(inputCache.size(),outputCache.size(),System.nanoTime()-startTime);
        cleanup();
     }
 

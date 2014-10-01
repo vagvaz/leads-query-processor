@@ -1,6 +1,8 @@
+import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.plugins.PluginPackage;
 import eu.leads.processor.web.QueryStatus;
 import eu.leads.processor.web.WebServiceClient;
+import org.apache.commons.configuration.XMLConfiguration;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -8,7 +10,7 @@ import java.net.MalformedURLException;
 /**
  * Created by vagvaz on 8/23/14.
  */
-public class WebServiceClientTest {
+public class WebServiceClientTestPlugins {
     private static String host;
     private static int port;
 
@@ -62,12 +64,23 @@ public class WebServiceClientTest {
 
 
         System.out.print("Serialized size: " + barray.length);
-        QueryStatus currentStatus = WebServiceClient.submitPlugin("vagvaz", testpackage);
-        barray=null;
+       QueryStatus currentStatus = WebServiceClient.submitPlugin("vagvaz", testpackage);
+
+
+
 //        WebServiceClient.submitQuery("vagvaz",
 //                Example);
        // QueryStatus currentStatus = WebServiceClient.getQueryStatus(status.getId());
         //System.out.println("s: " + status.toString());
+        System.out.println("o: " + currentStatus.toString());
+        XMLConfiguration config = new XMLConfiguration();
+
+        System.out.println("Query Size " + Query.length());
+
+
+        System.out.print("Serialized size: " + barray.length);
+
+        currentStatus = WebServiceClient.deployPlugin("vagvaz", testpackage.getId(),config,"webpages", EventType.CREATEANDMODIFY);
         System.out.println("o: " + currentStatus.toString());
 
     }

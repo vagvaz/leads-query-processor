@@ -32,4 +32,5 @@ public class StringConstants {
    public static final String DEFAULT_PATH =  "defaultPath";
 
    public static final String DEFAULT_TABLESPACE_NAME = "defaultTableSpace";
+   public static final String STATISTICS_CACHE = "statisticsCache";
 }

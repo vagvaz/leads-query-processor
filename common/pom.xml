@@ -78,13 +78,14 @@
       <dependency>
          <groupId>org.infinispan</groupId>
          <artifactId>infinispan-server-hotrod</artifactId>
-         <version>7.0.0.Alpha5</version>
+         <version>${infinispan.version}</version>
       </dependency>
       <dependency>
          <groupId>org.infinispan</groupId>
          <artifactId>infinispan-client-hotrod</artifactId>
-         <version>7.0.0.Alpha5</version>
+         <version>${infinispan.version}</version>
       </dependency>
+
    </dependencies>
 
    <build>

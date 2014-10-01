@@ -26,6 +26,7 @@ public class WGSOperator extends MapReduceOperator {
    @Override
    public void init(JsonObject config) {
       super.init(config);
+      init_statistics(this.getClass().getCanonicalName());
    }
 
    @Override

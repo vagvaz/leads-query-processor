@@ -155,15 +155,16 @@ public class PluginManager {
         addPluginToCache(plugin, eventmask, configCache);
         deployPluginListener(plugin.getId(), cacheName,
                                 InfinispanClusterSingleton.getInstance().getManager());
+ 
         return result;
     }
 
-    private static void addPluginToCache(PluginPackage plugin, int eventmask, Cache configCache) {
+    private static void addPluginToCache(PluginPackage plugin, int eventmask, Cache configCache,String prefix) {
 
-        configCache.put(plugin.getId() + ":jar", plugin.getJar());
-        configCache.put(plugin.getId() + ":conf", plugin.getConfig());
-        configCache.put(plugin.getId() + ":events", eventmask);
-        configCache.put(plugin.getId() + ":className", plugin.getClassName());
+        configCache.put(prefix+":"+plugin.getId() + ":jar", plugin.getJar());
+        configCache.put(prefix+":"+plugin.getId() + ":conf", plugin.getConfig());
+        configCache.put(prefix+":"+plugin.getId() + ":events", eventmask);
+        configCache.put(prefix+":"+plugin.getId() + ":className", plugin.getClassName());
     }
 
     private static void deployPluginListener(String pluginId, String cacheName,
@@ -205,6 +206,7 @@ public class PluginManager {
         addPluginToCache(plugin, eventmask, configCache);
         deployPluginListener(plugin.getId(), cacheName,
                                 InfinispanClusterSingleton.getInstance().getManager());
+
         return true;
     }
 

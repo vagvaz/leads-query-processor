@@ -51,10 +51,12 @@ public class SortOperator extends BasicOperator {
     public void init(JsonObject config) {
 //        super.init(config); //fix set correctly caches names
         //fix configuration
+       init_statistics(this.getClass().getCanonicalName());
     }
 
    @Override
    public void run() {
+       long startTime = System.nanoTime();
       Cache inputCache = (Cache) this.manager.getPersisentCache(getInput());
       Cache beforeMerge = (Cache)this.manager.getPersisentCache(getOutput()+".merge");
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
@@ -86,7 +88,8 @@ public class SortOperator extends BasicOperator {
 //      }
       manager.removePersistentCache(beforeMerge.getName());
       cleanup();
-
+      //Store Values for statistics
+      UpdateStatistics(inputCache.size(), manager.getPersisentCache(getOutput()).size(),System.nanoTime()-startTime);
    }
 
    @Override

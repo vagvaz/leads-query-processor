@@ -10,6 +10,7 @@ import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.nqe.NQEConstants;
 import eu.leads.processor.planner.QueryPlannerConstants;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -69,8 +70,6 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             String label = action.getLabel();
             Action newAction = null;
             action.setProcessedBy(id);
-            //         action.setStatus(ActionStatus.INPROCESS.toString());
-
             switch (ActionStatus.valueOf(action.getStatus())) {
                 case PENDING: //probably received an action from an external source
                     if (label.equals(IManagerConstants.GET_OBJECT)) {
@@ -101,6 +100,15 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                         newAction.setData(action.getData());
                         newAction.getData().putString("replyTo", msg.getString("from"));
                         com.sendWithEventBus(workQueueAddress, newAction.asJsonObject());
+                    } else if (label.equals(IManagerConstants.SUBMIT_PLUGIN)) {
+                        newAction = createNewAction(action);
+                        newAction.setCategory(ActionCategory.ACTION.toString());
+                        newAction.setLabel(IManagerConstants.REGISTER_PLUGIN);
+                        newAction.setProcessedBy(id);
+                        newAction.setData(action.getData());
+                        newAction.getData().putString("replyTo", msg.getString("from"));
+                        System.out.println("Plugin send " + newAction.asJsonObject().toString());
+                        com.sendWithEventBus(workQueueAddress, newAction.asJsonObject());
                     } else if (label.equals(IManagerConstants.SUBMIT_SPECIAL)) {
                         newAction = createNewAction(action);
                         newAction.setCategory(ActionCategory.ACTION.toString());
@@ -109,6 +117,28 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                         newAction.setData(action.getData());
                         newAction.getData().putString("replyTo", msg.getString("from"));
                         com.sendWithEventBus(workQueueAddress, newAction.asJsonObject());
+                    }else if (label.equals(IManagerConstants.DEPLOY_PLUGIN)) {
+//                        newAction = createNewAction(action);
+//                        newAction.setCategory(ActionCategory.ACTION.toString());
+//                        newAction.setLabel(IManagerConstants.REGISTER_PLUGIN);
+//                        newAction.setProcessedBy(id);
+//                        newAction.setData(action.getData());
+//                        newAction.getData().putString("replyTo", msg.getString("from"));
+//                        System.out.println("Plugin send " + newAction.asJsonObject().toString());
+//                        com.sendWithEventBus(workQueueAddress, newAction.asJsonObject());
+                        action.getData().putString("replyTo", msg.getString("from"));
+                        com.sendWithEventBus(workQueueAddress, action.asJsonObject());
+                    }else if (label.equals(IManagerConstants.UNDEPLOY_PLUGIN)) {
+//                        newAction = createNewAction(action);
+//                        newAction.setCategory(ActionCategory.ACTION.toString());
+//                        newAction.setLabel(IManagerConstants.REGISTER_PLUGIN);
+//                        newAction.setProcessedBy(id);
+//                        newAction.setData(action.getData());
+//                        newAction.getData().putString("replyTo", msg.getString("from"));
+//                        System.out.println("Plugin send " + newAction.asJsonObject().toString());
+//                        com.sendWithEventBus(workQueueAddress, newAction.asJsonObject());
+                        action.getData().putString("replyTo", msg.getString("from"));
+                        com.sendWithEventBus(workQueueAddress, action.asJsonObject());
                     } else {
                         log.error("Unknown PENDING Action received " + action.toString());
                         return;
@@ -133,6 +163,24 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                         com.sendTo(action.getData().getString("replyTo"), action.getResult());
                     } else if (label.equals(IManagerConstants.GET_QUERY_STATUS)) {
                         com.sendTo(action.getData().getString("replyTo"), action.getResult());
+                    }
+                    else if (label.equals(IManagerConstants.DEPLOY_PLUGIN)) {
+                        com.sendTo(action.getData().getString("replyTo"), action.getResult());
+                        newAction = new Action(action.asJsonObject());
+                        newAction.setLabel(NQEConstants.DEPLOY_PLUGIN);
+                        newAction.setStatus(ActionStatus.PENDING.toString());
+
+                        com.sendTo(StringConstants.NODEEXECUTORQUEUE,newAction.asJsonObject());
+                    }
+                    else if (label.equals(IManagerConstants.UNDEPLOY_PLUGIN)) {
+                        JsonObject result = action.getResult();
+                        if(result.getString("status").equals("COMPLETED")){
+                            Action undeployAction = createNewAction(action);
+                            undeployAction.setData(result.getObject("undeployAction"));
+                            com.sendTo(undeployAction.getData().getString("owner"),undeployAction.asJsonObject());
+                        }
+
+                        com.sendTo(action.getData().getString("replyTo"), new JsonObject().putString("status",result.getString("status")));
                     } else if (label.equals(IManagerConstants.GET_RESULTS)) {
                         com.sendTo(action.getData().getString("replyTo"), action.getResult());
                     } else if (label.equals(IManagerConstants.CREATE_NEW_QUERY)) {
@@ -177,7 +225,13 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                             com.sendTo(plannerAction.getDestination(),
                                           plannerAction.asJsonObject());
                         }
-                    } else {
+                    } else if (label.equals(IManagerConstants.REGISTER_PLUGIN)) {
+                        System.out.println(action.toString());
+                        JsonObject webServiceReply = action.getResult().getObject("status");
+                        //Reply to the SUBMIT Query Action to the webservice
+                        com.sendTo(action.getData().getString("replyTo"), webServiceReply);
+                        //Create Action for the QueryPlanner to create the plan for the new Query.
+                    }else {
                         log.error("Unknown COMPLETED OR INPROCESS Action received " + action
                                                                                           .toString());
                         return;

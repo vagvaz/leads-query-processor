@@ -47,6 +47,7 @@ public class JoinOperator extends BasicOperator {
 
 
     @Override public void run() {
+        long startTime = System.nanoTime();
         Cache innerCache = (Cache) manager.getPersisentCache(innerCacheName);
         Cache outerCache = (Cache) manager.getPersisentCache(outerCacheName);
         Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
@@ -73,6 +74,8 @@ public class JoinOperator extends BasicOperator {
             e.printStackTrace();
         }
         cleanup();
+        //Store Values for statistics
+        UpdateStatistics(innerCache.size(),outerCache.size(),System.nanoTime()-startTime);
     }
 
     @Override
@@ -98,6 +101,7 @@ public class JoinOperator extends BasicOperator {
            isLeft = false;
        }
        conf.putString("output",getOutput());
+       init_statistics(this.getClass().getCanonicalName());
     }
 
     @Override

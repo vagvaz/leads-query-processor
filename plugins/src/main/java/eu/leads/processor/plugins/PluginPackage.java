@@ -2,13 +2,14 @@ package eu.leads.processor.plugins;
 
 import com.google.common.base.Strings;
 import eu.leads.processor.common.utils.FSUtilities;
+import org.vertx.java.core.json.JsonObject;
 
 import java.io.Serializable;
 
 /**
  * Created by vagvaz on 6/3/14. This class packages a plugin in order to upload it to the system
  */
-public class PluginPackage implements Serializable {
+public class PluginPackage extends JsonObject implements Serializable {
     private byte[] jar;
     private String className;
     private String id;

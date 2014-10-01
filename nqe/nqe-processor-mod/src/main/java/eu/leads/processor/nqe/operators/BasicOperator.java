@@ -1,9 +1,12 @@
 package eu.leads.processor.nqe.operators;
 
+import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.net.Node;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 
 /**
@@ -14,6 +17,9 @@ public abstract class BasicOperator extends Thread implements Operator{
     protected Action action;
     protected InfinispanManager manager;
     protected Node com;
+    protected Cache statisticsCache;
+    private String finalOperatorName, statInputSizeKey, statOutputSizeKey, statExecTimeKey;
+
 
     protected BasicOperator(Action action) {
         conf = action.getData();
@@ -21,12 +27,19 @@ public abstract class BasicOperator extends Thread implements Operator{
     }
     protected BasicOperator(Node com, InfinispanManager manager,Action action){
        super(com.getId()+"-operator-thread");
+
        this.com = com;
        this.manager = manager;
        this.action = action;
        this.conf = action.getData().getObject("operator").getObject("configuration");
+       this.statisticsCache = (Cache) manager.getPersisentCache(StringConstants.STATISTICS_CACHE);
     }
-
+    protected void init_statistics(String finalOperatorName ){
+        this.finalOperatorName=finalOperatorName;
+        this.statInputSizeKey = finalOperatorName+"inputSize";
+        this.statOutputSizeKey = finalOperatorName+"outputSize";
+        this.statExecTimeKey = finalOperatorName+"timeSize";
+    }
 
    @Override
    public void init(JsonObject config) {
@@ -46,6 +59,24 @@ public abstract class BasicOperator extends Thread implements Operator{
       else
          System.err.println("PROBLEM Uninitialized com");
    }
+
+    public void UpdateStatistics(double inputSize, double outputSize, double executionTime){
+        UpdateSpecificStatistic(statInputSizeKey, inputSize);
+        UpdateSpecificStatistic(statOutputSizeKey, outputSize);
+        UpdateSpecificStatistic(statExecTimeKey, executionTime);
+    }
+
+    public void UpdateSpecificStatistic(String StatNameKey, double NewValue){
+        DescriptiveStatistics  stats;
+        if(!statisticsCache.containsKey(StatNameKey)) {
+             stats = new DescriptiveStatistics();
+            //stats.setWindowSize(1000);
+        }
+        else
+            stats=(DescriptiveStatistics)statisticsCache.get(StatNameKey);
+        stats.addValue(NewValue);
+        statisticsCache.put(StatNameKey,stats);
+    }
 
    @Override
     public JsonObject getConfiguration() {
