@@ -13,10 +13,7 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by vagvaz on 8/21/14.
@@ -60,7 +57,7 @@ public class LeadsProcessorBootstrapper2 {
         List Components2 = xmlConfiguration.getList("processor.component");
         for (HierarchicalConfiguration c : nodes) {
             ConfigurationNode node = c.getRootNode();
-            System.out.println("Name: " + c.getString("name") + " Processors " + c.getString("numberOfProcessors"));
+            logger.info("Loading configuration, Name: " + c.getString("name") + " Processors " + c.getString("numberOfProcessors"));
             componentsXml.put(c.getString("name"), c);
             if (c.containsKey("configurationFile")) {
                 LQPConfiguration.getInstance().loadFile(c.getString("configurationFile"));
@@ -69,7 +66,7 @@ public class LeadsProcessorBootstrapper2 {
                 JsonObject modjson = convertConf2Json(subconf);
                 modjson.putString("processors", c.getString("numberOfProcessors"));
                 if (c.containsKey("Modname")) {
-                    modjson.putString("id", c.getString("Modname") + "-default-uuid");
+                    modjson.putString("id", c.getString("Modname") + "-default-" + UUID.randomUUID().toString());
                     modjson.putString("Modname", c.getString("Modname"));
 
                 }
@@ -78,18 +75,15 @@ public class LeadsProcessorBootstrapper2 {
 
                 System.out.println("Final ModJson: " + modjson.encodePrettily().toString());
             }
-
         }
 
-
-//        for (String configuration : configurationFiles) {
-//            LQPConfiguration.getInstance().loadFile(configuration);
-//        }
         int ip = 0;
-        for(Map.Entry<String,JsonObject> e : componentsJson.entrySet())
-        {//for (int component = 0; component < components.length; component++) {
+
+        for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
             deployComponent(e.getKey(), ips[ip]);
             ip = (ip + 1) % ips.length;
+            break;
+
         }
     }
 
@@ -100,7 +94,7 @@ public class LeadsProcessorBootstrapper2 {
 
         if (subconf.containsKey("componentType")) {
             String componentType = subconf.getString("componentType");
-            ret.putString("id", componentType + "-default-uuid");
+            ret.putString("id", componentType + "-default-" + UUID.randomUUID().toString());
             ret.putString("group", componentType);
             ret.putString("version", LQPConfiguration.getInstance().getConf().getString("processor.version"));
             ret.putString("groupId", LQPConfiguration.getConf().getString("processor.groupId"));
@@ -171,16 +165,22 @@ public class LeadsProcessorBootstrapper2 {
             try {
                 //System.out.println(" key found  " + key + " value Int " + conf.getInt(key));
                 in.putNumber(key, conf.getInt(key));
-            } catch (ConversionException e) {
+            } catch (ConversionException eInt) {
                 try {
                     //System.out.println(" key found  " + key + " value Double " + conf.getDouble(key));
-                    in.putNumber(key, conf.getInt(key));
-                } catch (ConversionException e2) {
+                    in.putNumber(key, conf.getDouble(key));
+                } catch (ConversionException eDouble) {
                     try {
                         //System.out.println(" key found  " + key + " value String " + conf.getString(key));
-                        in.putString(key, conf.getString(key));
-                    } catch (ConversionException e3) {
-                        System.err.print("Cannot parse Value");
+                        in.putBoolean(key, conf.getBoolean(key));
+                    } catch (ConversionException eBoolean) {
+                        try {
+                            //System.out.println(" key found  " + key + " value String " + conf.getString(key));
+                            in.putString(key, conf.getString(key));
+                        } catch (ConversionException eString) {
+                            System.err.print("Cannot parse Value");
+                        }
+
                     }
                 }
             }
@@ -190,91 +190,142 @@ public class LeadsProcessorBootstrapper2 {
 
     private static void deployComponent(String component, String ip) {
         JsonObject modJson = componentsJson.get(component); //generateConfiguration(component);
+
         sendConfigurationTo(modJson, ip);
-        String prefixCommand =
-                LQPConfiguration.getInstance().getConf().getString("processor.ssh.username") + "@" + ip;
-        String group = LQPConfiguration.getInstance().getConf().getString("processor.group");
+
+
+        String group = LQPConfiguration.getInstance().getConf().getString("processor.groupId");
         String version = LQPConfiguration.getInstance().getConf().getString("processor.version");
         //      String command = "vertx runMod " + group +"~"+ component + "-mod~" + version + " -conf /tmp/"+config.getString("id")+".json";
-        String basedir = LQPConfiguration.getInstance().getConf().getString("processor.baseDir");
+        String remotedir = LQPConfiguration.getInstance().getConf().getString("processor.ssh.remoteDir");
         String vertxComponent = null;
-        if (!component.equals("webservice")) {
+        if (modJson.containsField("modName"))
+            vertxComponent = group + "~" + modJson.getString("modName") + version;
+        else
             vertxComponent = group + "~" + component + "-comp-mod~" + version;
-        } else {
-            vertxComponent = group + "~" + "processor-webservice~" + version;
-        }
 
-//        String command = " 'source ~/.bashrc; java -cp " + basedir
-//                + "/lib/component-deployer.jar eu.leads.processor.system.LeadsComponentRunner "
-//                + vertxComponent + " " + config.getString("group") + " /tmp/" + config
-//                .getString("id")
-//                + ".json '";
-//        command = "/home/vagvaz/touchafile.sh ";
-//        try {
-//            ProcessBuilder builder =
-//                    new ProcessBuilder("ssh", prefixCommand, command, vertxComponent,
-//                            config.getString("group"),
-//                            "/tmp/" + config.getString("id") + ".json");
-//            Process p = builder.start();
-//            //         Process p = Runtime.getRuntime().exec(prefixCommand+" "+command);
-//            //         p.waitFor();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        String command = "vertx runMod " + vertxComponent + " -cluster h -ha -conf " + remotedir + modJson.getString("id") + ".json";
+
+        System.out.println(command);
+
+        runRemotely(modJson.getString("id"), ip, command);
+        
+    }
+
+
+    public static void runRemotely(String id, String ip, String command) {
+        String command0 = "screen -AmdS shell_" + id + " bash";
+        // run top within that bash session
+        String command1 = command0 + " && " + "screen -S shell_" + id + " -p 0 -X stuff $\"" + command + "\\r\"";//ping 147.27.18.1";
+        //System.out.print("Cmd" + command1);
+        logger.info("Execution command: " + command1);
+         try {
+            JSch jsch = new JSch();
+
+             String username = LQPConfiguration.getInstance().getConf()
+                     .getString("processor.ssh.username");
+            Session session = jsch.getSession(username, ip, 22);
+             if (LQPConfiguration.getInstance().getConf()
+                     .containsKey("processor.ssh.password"))
+                 session.setPassword(LQPConfiguration.getInstance().getConf()
+                         .getString("processor.ssh.password"));
+             else
+                 session.setPassword("12121212"); //just for me
+            session.setConfig("StrictHostKeyChecking", "no");
+            session.connect();
+            System.out.println("Connected");
+
+            Channel channel = session.openChannel("exec");
+            ((ChannelExec) channel).setCommand(command1);
+            channel.setInputStream(null);
+            ((ChannelExec) channel).setErrStream(System.err);
+
+            InputStream in = channel.getInputStream();
+            channel.connect();
+            byte[] tmp = new byte[1024];
+            while (true) {
+                while (in.available() > 0) {
+                    int i = in.read(tmp, 0, 1024);
+                    if (i < 0) break;
+                    System.out.print(new String(tmp, 0, i));
+                }
+                if (channel.isClosed()) {
+                    logger.info("exit-status: " + channel.getExitStatus());
+                    break;
+                }
+                try {
+                    Thread.sleep(200);
+                } catch (Exception ee) {
+                }
+            }
+            channel.disconnect();
+            session.disconnect();
+            logger.info("Remote execution DONE");
+        } catch (Exception e) {
+            logger.error("Remote execution error: " + e.getMessage());
+
+        }
 
     }
 
-    private static void sendConfigurationTo(JsonObject config, String ip) {
+
+    private static boolean sendConfigurationTo(JsonObject config, String ip) {
         RandomAccessFile file = null;
         String tmpFile = "/tmp/" + config.getString("id") + ".json";
         try {
             file = new RandomAccessFile(tmpFile, "rw");
             file.writeBytes(config.encodePrettily().toString());
             file.close();
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            logger.error("FileNotFoundException error: " + e.getMessage());
+            return false;
         } catch (IOException e) {
             e.printStackTrace();
+            logger.error("IOException error: " + e.getMessage());
+            return false;
         }
-        String command = "scp " + tmpFile + " " + LQPConfiguration.getInstance().getConf()
-                .getString("processor.ssh.username") + "@"
-                + ip + ":" + tmpFile;
 
-        System.out.println("Command Send: " + command);
-//        try {
-//            Process p = Runtime.getRuntime().exec(command);
-//            p.waitFor();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+        String username = LQPConfiguration.getInstance().getConf()
+                .getString("processor.ssh.username");
 
         JSch jsch = new JSch();
         Session session = null;
         try {
-            session = jsch.getSession("tr",ip,22);
-            session.setPassword("12121212");
+            session = jsch.getSession(username, ip, 22);
+            if (LQPConfiguration.getInstance().getConf()
+                    .containsKey("processor.ssh.password"))
+                session.setPassword(LQPConfiguration.getInstance().getConf()
+                        .getString("processor.ssh.password"));
+            else
+                session.setPassword("12121212"); //just for me
+
             session.setConfig("StrictHostKeyChecking", "no");
             session.connect();
             ChannelSftp channel = null;
-            channel = (ChannelSftp)session.openChannel("sftp");
+            channel = (ChannelSftp) session.openChannel("sftp");
             channel.connect();
             File localFile = new File(tmpFile);
             //If you want you can change the directory using the following line.
-            channel.cd("/tmp/");
-            channel.put(new FileInputStream(localFile),localFile.getName());
+            channel.cd(LQPConfiguration.getInstance().getConf().getString("processor.ssh.remoteDir"));
+            channel.put(new FileInputStream(localFile), localFile.getName());
             channel.disconnect();
             session.disconnect();
-            System.out.println("File successfull uploaded: " + localFile );
+            logger.info("File successful uploaded: " + localFile);
+            return true;
 
         } catch (JSchException e) {
             e.printStackTrace();
+            logger.error("Ssh error: " + e.getMessage());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            logger.error("File not found : " + e.getMessage());
         } catch (SftpException e) {
+            logger.error("Sftp error: " + e.getMessage());
             e.printStackTrace();
         }
+        return false;
 
     }
 
