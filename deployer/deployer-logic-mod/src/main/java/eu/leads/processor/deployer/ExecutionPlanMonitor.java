@@ -99,6 +99,12 @@ public class ExecutionPlanMonitor {
             arrayList.add(inputName);
          }
       }
+     if(result != null && !result.getNodeType().equals(LeadsNodeType.OUTPUT_NODE)
+                       && !result.getNodeType().equals(LeadsNodeType.ROOT)
+                       && !result.getNodeType().equals(LeadsNodeType.TABLE_SUBQUERY))
+     {
+       result.getConfiguration().putBoolean("isSorted",isSorted());
+     }
       return result;
    }
 

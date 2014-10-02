@@ -8,6 +8,7 @@
       <module>nqe-comp-mod</module>
       <module>nqe-logic-mod</module>
       <module>nqe-processor-mod</module>
+      <module>system-plugins</module>
    </modules>
 
    <parent>

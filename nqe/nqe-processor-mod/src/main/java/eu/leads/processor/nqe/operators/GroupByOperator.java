@@ -50,7 +50,7 @@ public class GroupByOperator extends MapReduceOperator {
 
    @Override
     public void init(JsonObject config) {
-        super.init(config);
+        super.init(conf);
         setMapper(new GroupByMapper(conf.toString()));
         setReducer(new GroupByReducer(conf.toString()));
         init_statistics(this.getClass().getCanonicalName());

@@ -87,7 +87,7 @@ public class FilterOperator extends BasicOperator {
 
    @Override
     public void init(JsonObject config) {
-        super.init(config);
+        super.init(conf);
         inputCache = (Cache) manager.getPersisentCache(getInput());
         conf.putString("output",getOutput());
         init_statistics(this.getClass().getCanonicalName());

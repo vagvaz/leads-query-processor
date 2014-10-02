@@ -1,11 +1,13 @@
 package eu.leads.processor.nqe.operators;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.Action;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.net.Node;
 import org.infinispan.Cache;
+import org.infinispan.commons.util.CloseableIterable;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.Map;
@@ -25,11 +27,12 @@ import java.util.concurrent.ConcurrentMap;
 @JsonAutoDetect
 public class LimitOperator extends BasicOperator {
     boolean sorted = false;
-    Cache<String, String> inputMap=null;
+    Cache inputMap=null;
     ConcurrentMap<String, String> data=null;
     public String prefix;
+    public String inputPrefix;
     public long rowCount;
-   public LimitOperator(Action action) {
+    public LimitOperator(Action action) {
       super(action);
    }
 
@@ -37,15 +40,16 @@ public class LimitOperator extends BasicOperator {
 
       super(com, persistence, action);
       rowCount = conf.getObject("body").getLong("fetchFirstNum");
-      sorted = conf.getBoolean("sorted",false);
+      sorted = conf.getBoolean("isSorted");
       prefix =   getOutput() + ":";
       inputMap = (Cache<String, String>) persistence.getPersisentCache(getInput());
       data = persistence.getPersisentCache(getOutput());
+     inputPrefix = inputMap.getName()+":";
    }
 
    @Override
     public void init(JsonObject config) {
-       super.init(config);
+       super.init(conf);
         ///How to initialize what ?
        rowCount = conf.getObject("body").getLong("fetchFirstNum");
        init_statistics(this.getClass().getCanonicalName());
@@ -58,22 +62,32 @@ public class LimitOperator extends BasicOperator {
         int counter = 0;
         if (sorted) {
             int sz = inputMap.size();
+          CloseableIterable<Map.Entry<String, String>> iterable =
+            inputMap.getAdvancedCache().filterEntries(new AcceptAllFilter());
+          for (Map.Entry<String, String> entry : iterable) {
+              System.err.println("e: " + entry.getKey().toString() + " ---> " + entry.getValue().toString());
+            }
             for (counter = 0; counter < rowCount && counter < sz; counter++) {
-                String tupleValue = inputMap.get(prefix + counter);
+                String tupleValue = (String) inputMap.get(inputPrefix + counter);
+                System.err.println("Read " + inputPrefix + counter + " --> " +tupleValue);
                 Tuple t = new Tuple(tupleValue);
                 handlePagerank(t);
+                System.err.println(prefix+counter);
                 data.put(prefix + Integer.toString(counter), t.asString());
             }
         } else {
-            for (Map.Entry<String, String> entry : inputMap.entrySet()) {
-                if (counter >= rowCount)
-                    break;
-                String tupleId = entry.getKey().substring(entry.getKey().indexOf(":") + 1);
-                Tuple t = new Tuple(entry.getValue());
-                handlePagerank(t);
-                data.put(prefix + tupleId, t.asString());
-                counter++;
-            }
+          CloseableIterable<Map.Entry<String, String>> iterable =
+            inputMap.getAdvancedCache().filterEntries(new AcceptAllFilter());
+          for (Map.Entry<String, String> entry : iterable) {
+            if (counter >= rowCount)
+              break;
+            String tupleId = entry.getKey().substring(entry.getKey().indexOf(":") + 1);
+            Tuple t = new Tuple(entry.getValue());
+            handlePagerank(t);
+            data.put(prefix + tupleId, t.asString());
+            counter++;
+          }
+
         }
        cleanup();
         //Store Values for statistics

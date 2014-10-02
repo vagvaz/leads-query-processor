@@ -22,7 +22,7 @@ public class ProjectOperator extends MapReduceOperator {
 
    @Override
     public void init(JsonObject config) {
-      super.init(config);
+      super.init(conf);
       conf.putString("output",getOutput());
       LeadsMapper projectMapper = new ProjectMapper(conf.toString());
       setMapper(projectMapper);

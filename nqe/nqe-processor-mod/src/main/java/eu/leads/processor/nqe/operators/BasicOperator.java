@@ -27,6 +27,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     }
     protected BasicOperator(Node com, InfinispanManager manager,Action action){
        super(com.getId()+"-operator-thread");
+       System.err.println(this.getClass().getCanonicalName());
 
        this.com = com;
        this.manager = manager;
