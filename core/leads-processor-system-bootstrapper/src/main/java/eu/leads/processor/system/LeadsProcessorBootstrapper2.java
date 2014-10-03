@@ -42,9 +42,7 @@ public class LeadsProcessorBootstrapper2 {
             configurationFiles = LQPConfiguration.getInstance().getConf()
                     .getStringArray("processor.configurationFiles");
         }
-        //CompositeConfiguration xmlConfiguration  = (CompositeConfiguration) LQPConfiguration.getConf();
         XMLConfiguration xmlConfiguration = (XMLConfiguration) LQPConfiguration.getInstance().getConfigurations().get(filename);
-
 
         List<HierarchicalConfiguration> nodes = xmlConfiguration.configurationsAt("processor.component");
 
@@ -70,21 +68,18 @@ public class LeadsProcessorBootstrapper2 {
                     modjson.putString("Modname", c.getString("Modname"));
 
                 }
-
                 componentsJson.put(c.getString("name"), modjson);
-
-                System.out.println("Final ModJson: " + modjson.encodePrettily().toString());
             }
         }
-
+        //runRemotely("test","localhost","vertx");
         int ip = 0;
 
-        for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
+       for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
             deployComponent(e.getKey(), ips[ip]);
             ip = (ip + 1) % ips.length;
             break;
 
-        }
+       }
     }
 
     private static JsonObject convertConf2Json(XMLConfiguration subconf) {
@@ -158,9 +153,9 @@ public class LeadsProcessorBootstrapper2 {
     }
 
     public static JsonObject checkNumberInsert(JsonObject in, String key, Configuration conf) {
-        if (in == null) {
+        if (in == null)
             in = new JsonObject();
-        }
+
         if (conf.containsKey(key))
             try {
                 //System.out.println(" key found  " + key + " value Int " + conf.getInt(key));
@@ -180,7 +175,6 @@ public class LeadsProcessorBootstrapper2 {
                         } catch (ConversionException eString) {
                             System.err.print("Cannot parse Value");
                         }
-
                     }
                 }
             }
@@ -204,7 +198,7 @@ public class LeadsProcessorBootstrapper2 {
         else
             vertxComponent = group + "~" + component + "-comp-mod~" + version;
 
-        String command = "vertx runMod " + vertxComponent + " -cluster h -ha -conf " + remotedir + modJson.getString("id") + ".json";
+        String command = "vertx runMod " + vertxComponent + " -cluster h -ha -conf " + remotedir +"R"+ modJson.getString("id") + ".json";
 
         System.out.println(command);
 
@@ -214,11 +208,12 @@ public class LeadsProcessorBootstrapper2 {
 
 
     public static void runRemotely(String id, String ip, String command) {
-        String command0 = "screen -AmdS shell_" + id + " bash";
+        String command0 = "screen -AmdS shell_" + id + " bash -l";
         // run top within that bash session
         String command1 = command0 + " && " + "screen -S shell_" + id + " -p 0 -X stuff $\"" + command + "\\r\"";//ping 147.27.18.1";
         //System.out.print("Cmd" + command1);
         logger.info("Execution command: " + command1);
+        //command1 =command;
          try {
             JSch jsch = new JSch();
 
@@ -261,6 +256,9 @@ public class LeadsProcessorBootstrapper2 {
             channel.disconnect();
             session.disconnect();
             logger.info("Remote execution DONE");
+             //if(channel.getExitStatus()==-1)
+
+
         } catch (Exception e) {
             logger.error("Remote execution error: " + e.getMessage());
 
@@ -271,7 +269,9 @@ public class LeadsProcessorBootstrapper2 {
 
     private static boolean sendConfigurationTo(JsonObject config, String ip) {
         RandomAccessFile file = null;
-        String tmpFile = "/tmp/" + config.getString("id") + ".json";
+        String remoteDir = LQPConfiguration.getInstance().getConf().getString("processor.ssh.remoteDir");
+        String tmpFile = remoteDir + config.getString("id") + ".json";
+        //System.out.println("Write " + tmpFile +" Final ModJson: " + config.encodePrettily().toString());
         try {
             file = new RandomAccessFile(tmpFile, "rw");
             file.writeBytes(config.encodePrettily().toString());
@@ -308,8 +308,8 @@ public class LeadsProcessorBootstrapper2 {
             channel.connect();
             File localFile = new File(tmpFile);
             //If you want you can change the directory using the following line.
-            channel.cd(LQPConfiguration.getInstance().getConf().getString("processor.ssh.remoteDir"));
-            channel.put(new FileInputStream(localFile), localFile.getName());
+            channel.cd(remoteDir);
+            channel.put(new FileInputStream(localFile), "R"+localFile.getName());
             channel.disconnect();
             session.disconnect();
             logger.info("File successful uploaded: " + localFile);
@@ -332,11 +332,10 @@ public class LeadsProcessorBootstrapper2 {
 
     private static boolean checkArguments(String[] args) {
         boolean result = false;
-        if (args.length == 1) {
-            if (args[0].endsWith(".xml") || args[0].endsWith(".properties")) {
+        if (args.length == 1)
+            if (args[0].endsWith(".xml") || args[0].endsWith(".properties"))
                 result = true;
-            }
-        }
+
         return result;
     }
 }
