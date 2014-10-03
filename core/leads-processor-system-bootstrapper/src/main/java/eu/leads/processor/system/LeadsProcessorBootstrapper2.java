@@ -63,9 +63,9 @@ public class LeadsProcessorBootstrapper2 {
                 componentsConf.put(c.getString("name"), subconf);
                 JsonObject modjson = convertConf2Json(subconf);
                 modjson.putString("processors", c.getString("numberOfProcessors"));
-                if (c.containsKey("Modname")) {
-                    modjson.putString("id", c.getString("Modname") + "-default-" + UUID.randomUUID().toString());
-                    modjson.putString("Modname", c.getString("Modname"));
+                if (c.containsKey("modName")) {
+                    modjson.putString("id", c.getString("modName") + "-default-" + UUID.randomUUID().toString());
+                    modjson.putString("modName", c.getString("modName"));
 
                 }
                 componentsJson.put(c.getString("name"), modjson);
@@ -128,9 +128,9 @@ public class LeadsProcessorBootstrapper2 {
                 conf.putString("id", componentType + ".$id." + type);
                 conf.putString("group", "$group");
 
-                JsonArray confa = new JsonArray();
-                confa.addObject(conf);
-                service.putArray("conf", confa);
+                //JsonArray confa = new JsonArray();
+                //confa.addObject(conf);
+                service.putObject("conf", conf);
 
                 serviceA = new JsonArray();
                 serviceA.addObject(service);
@@ -186,21 +186,23 @@ public class LeadsProcessorBootstrapper2 {
         JsonObject modJson = componentsJson.get(component); //generateConfiguration(component);
 
         sendConfigurationTo(modJson, ip);
+        Configuration c = LQPConfiguration.getInstance().getConf();
 
-
-        String group = LQPConfiguration.getInstance().getConf().getString("processor.groupId");
-        String version = LQPConfiguration.getInstance().getConf().getString("processor.version");
+        String group = c.getString("processor.groupId");
+        String version = c.getString("processor.version");
         //      String command = "vertx runMod " + group +"~"+ component + "-mod~" + version + " -conf /tmp/"+config.getString("id")+".json";
-        String remotedir = LQPConfiguration.getInstance().getConf().getString("processor.ssh.remoteDir");
+        String remotedir = c.getString("processor.ssh.remoteDir");
         String vertxComponent = null;
         if (modJson.containsField("modName"))
-            vertxComponent = group + "~" + modJson.getString("modName") + version;
+            vertxComponent = group + "~" + modJson.getString("modName") + "~" + version;
         else
             vertxComponent = group + "~" + component + "-comp-mod~" + version;
 
-        String command = "vertx runMod " + vertxComponent + " -cluster h -ha -conf " + remotedir +"R"+ modJson.getString("id") + ".json";
+        String command = "vertx runMod " + vertxComponent + " -conf " + remotedir +"R"+ modJson.getString("id") + ".json";
+        if(c.containsKey("processor.vertxArg"))
+            command +=" -"+c.getString("processor.vertxArg");
 
-        System.out.println(command);
+        //System.out.println(command);
 
         runRemotely(modJson.getString("id"), ip, command);
         
