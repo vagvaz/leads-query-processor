@@ -77,7 +77,7 @@ public class LeadsProcessorBootstrapper2 {
        for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
             deployComponent(e.getKey(), ips[ip]);
             ip = (ip + 1) % ips.length;
-            break;
+            //break;
 
        }
     }

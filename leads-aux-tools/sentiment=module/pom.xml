@@ -11,17 +11,31 @@
 
    <artifactId>sentiment-module</artifactId>
 
-<dependencies>
-   <dependency>
-      <groupId>edu.stanford.nlp</groupId>
-      <artifactId>stanford-corenlp</artifactId>
-      <version>3.3.1</version>
-   </dependency>
-   <dependency>
-      <groupId>edu.stanford.nlp</groupId>
-      <artifactId>stanford-corenlp</artifactId>
-      <version>3.3.1</version>
-      <classifier>models</classifier>
-   </dependency>
-</dependencies>
+    <dependencies>
+       <dependency>
+          <groupId>edu.stanford.nlp</groupId>
+          <artifactId>stanford-corenlp</artifactId>
+          <version>3.3.1</version>
+       </dependency>
+       <dependency>
+          <groupId>edu.stanford.nlp</groupId>
+          <artifactId>stanford-corenlp</artifactId>
+          <version>3.3.1</version>
+          <classifier>models</classifier>
+       </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

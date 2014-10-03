@@ -25,7 +25,8 @@ public class leadsCli {
 
     public static void main(String[] args) {
         InitializeWebClient(args);
-        System.out.print("=== Leads Command Line Interface ===");
+        System.out.println("=== Leads Command Line Interface ===");
+
         String sql = "";
         BufferedReader in = null;
         try {
@@ -140,7 +141,7 @@ public class leadsCli {
             currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
             System.out.print("s: " + currentStatus.toString());
             System.out.println(", o: " + currentStatus.toString());
-        } ; //currentStatus.getStatus()!= QueryState.COMPLETED
+        }  //currentStatus.getStatus()!= QueryState.COMPLETED
         System.out.println("Bye Bye" +currentStatus.toString());
         QueryResults res =WebServiceClient.getQueryResults(currentStatus.getId(),0,-1);
         print_results(res);
