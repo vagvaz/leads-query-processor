@@ -29,4 +29,7 @@ public class WGSUrlDepthNode extends LogicalRootNode {
     public void setDepth(int depth) {
         this.depth = depth;
     }
+  public void setDepth(String depthAsString) {
+    this.depth = Integer.parseInt(depthAsString);
+  }
 }

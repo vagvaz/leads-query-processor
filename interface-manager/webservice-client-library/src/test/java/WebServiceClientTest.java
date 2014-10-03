@@ -1,9 +1,12 @@
-import eu.leads.processor.plugins.PluginPackage;
+import eu.leads.processor.core.Tuple;
+import eu.leads.processor.web.QueryResults;
 import eu.leads.processor.web.QueryStatus;
 import eu.leads.processor.web.WebServiceClient;
+import org.vertx.java.core.json.JsonObject;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 
 /**
  * Created by vagvaz on 8/23/14.
@@ -28,58 +31,75 @@ public class WebServiceClientTest {
             e.printStackTrace();
         }
 
-//        JsonObject object = new JsonObject();
-//        object.putString("name", "vag");
-//        object.putString("surname", "vaz");
-//        object.putString("age", "18");
-//        object.putString("id", "91818111");
-//        try {
-//            WebServiceClient.putObject("testCache", object.getString("id"), object);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        JsonObject mapObject =
-//            WebServiceClient.getObject("testCache", object.getString("id"), null);
-//        if (mapObject.toString().equals(object.toString())) {
-//            System.out.println("Equals " + object.toString() + "\n" + mapObject.toString());
-//        } else {
-//            System.out.println("PROBLEM");
-//            System.out.println(object.toString());
-//            System.out.println(mapObject.toString());
-//        }
+        JsonObject object = new JsonObject();
+        object.putString("name", "vag");
+        object.putString("surname", "vaz");
+        object.putString("age", "18");
+        object.putString("id", "91818111");
+        try {
+            WebServiceClient.putObject("testCache", object.getString("id"), object);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        JsonObject mapObject =
+            WebServiceClient.getObject("testCache", object.getString("id"), null);
+        if (mapObject.toString().equals(object.toString())) {
+            System.out.println("Equals " + object.toString() + "\n" + mapObject.toString());
+        } else {
+            System.out.println("PROBLEM");
+            System.out.println(object.toString());
+            System.out.println(mapObject.toString());
+        }
 
-        String Example =  " SELECT deptname from dept" + "\r\n";
+        String sampleQuery =  " SELECT url from webpages order by url";
 
-        byte [] barray = new byte[2000];
+        QueryStatus currentStatus = WebServiceClient.submitQuery("webServiceTest",sampleQuery);
+        while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")){
+          try {
+            Thread.sleep(2000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+          currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
+        }
+        if(currentStatus.getStatus().equals("COMPLETED")){
+          QueryResults results = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
+          String firstUrl = results.getResult().get(0);
+          results.getResult().clear();
+          results = null;
+          Tuple t = new Tuple(firstUrl);
+          HashMap<String,String> properties = new HashMap<>();
+          properties.put("url",t.getAttribute("default.webpages.url"));
+          properties.put("depth","3");
+          JsonObject wgsreply =  WebServiceClient.submitSpecialQuery("webServiceTest","rec_call",properties);
+          QueryStatus wgsStatus = WebServiceClient.getQueryStatus(wgsreply.getString("id"));
+          while(!wgsStatus.getStatus().equals("COMPLETED") && !wgsStatus.getStatus().equals("FAILED")){
+            try {
+              Thread.sleep(2000);
+            } catch (InterruptedException e) {
+              e.printStackTrace();
+            }
+            wgsStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
+          }
+          if(wgsStatus.getStatus().equals("COMPLETED")){
+            JsonObject level0 = WebServiceClient.getObject(wgsreply.getString("output"),"0",null);
+            JsonObject level1 = WebServiceClient.getObject(wgsreply.getString("output"),"1",null);
+            JsonObject level2 = WebServiceClient.getObject(wgsreply.getString("output"),"2",null);
+            JsonObject level3 = WebServiceClient.getObject(wgsreply.getString("output"),"3",null);
+            System.out.println("===========    0   ================= \n"+level0.encodePrettily());
+            System.out.println("===========    1   ================= \n"+level1.encodePrettily());
+            System.out.println("===========    2   ================= \n"+level2.encodePrettily());
+            System.out.println("===========    3   ================= \n"+level3.encodePrettily());
+          }
+          else{
+            System.err.println("WGS Operator FAILED");
+          }
+        }
+        else{
+          System.out.println("Query FAILED so I cannot test Web Graph Service Operator");
+        }
 
-        for(int i =0; i < barray.length; i++)
-            barray[i]=120;
-        String Query=new String(barray,0,barray.length);
-        System.out.println("Query Size " + Query.length());
-
-        PluginPackage testpackage = new PluginPackage("56", "aclass");
-        testpackage.setJar(barray);
-
-
-        System.out.print("Serialized size: " + barray.length);
-        QueryStatus currentStatus = WebServiceClient.submitPlugin("vagvaz", testpackage);
-        barray=null;
-//        WebServiceClient.submitQuery("vagvaz",
-//                Example);
-       // QueryStatus currentStatus = WebServiceClient.getQueryStatus(status.getId());
-        //System.out.println("s: " + status.toString());
-        System.out.println("o: " + currentStatus.toString());
 
     }
 
-    private static String createDataSize(int msgSize) {
-    // Java chars are 2 bytes
-    msgSize = msgSize/2;
-    msgSize = msgSize * 1024;
-    StringBuilder sb = new StringBuilder(msgSize);
-    for (int i=0; i<msgSize; i++) {
-        sb.append('a');
-    }
-    return sb.toString();
-  }
 }

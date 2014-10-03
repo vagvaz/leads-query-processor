@@ -1,4 +1,4 @@
-package eu.leads.processor.plugins.sentiment;
+package eu.leads.processor.sentiment;
 
 import java.util.Set;
 

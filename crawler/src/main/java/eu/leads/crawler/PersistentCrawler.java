@@ -6,15 +6,17 @@ import eu.leads.crawler.model.Page;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.sentiment.Sentiment;
+import eu.leads.processor.sentiment.SentimentAnalysisModule;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.vertx.java.core.json.JsonObject;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.concurrent.ConcurrentMap;
-
 
 /**
  * @author P.Sutra
@@ -22,11 +24,13 @@ import java.util.concurrent.ConcurrentMap;
 public class PersistentCrawler extends DefaultCrawler {
 
     private static ConcurrentMap preprocessingMap;
-
+    private static String prefix;
     private static ObjectMapper mapper;
 
     private static Log log = LogFactory.getLog(PersistentCrawler.class.getName());
 
+//  private static JavaLanguageDetection det = JavaLanguageDetection.getInstance();
+   private SentimentAnalysisModule sentimentAnalysisModule;
     /**
      * Constructs a new PersistentCrawler.
      */
@@ -35,7 +39,10 @@ public class PersistentCrawler extends DefaultCrawler {
         preprocessingMap = InfinispanClusterSingleton.getInstance().getManager()
                                .getPersisentCache(LQPConfiguration.getConf()
                                                       .getString(StringConstants.CRAWLER_DEFAULT_CACHE));
+      prefix = LQPConfiguration.getConf()
+                 .getString(StringConstants.CRAWLER_DEFAULT_CACHE);
         mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+      sentimentAnalysisModule = new SentimentAnalysisModule("classifiers/english.all.3class.distsim.crf.ser.gz");
     }
 
     /**
@@ -63,15 +70,27 @@ public class PersistentCrawler extends DefaultCrawler {
                                      page.getCharset(), page.getResponseTime(), body.getBytes());
             page2.setLinks(page.getLinks());
             page2.setTitle(page.getTitle());
+            JsonObject object = new JsonObject(mapper.writeValueAsString(page2));
+            additionalAttributes(object);
             preprocessingMap
-                .putIfAbsent(StringConstants.CRAWLER_DEFAULT_CACHE+":"+page2.getUrl().toString(), mapper.writeValueAsString(page2));
+                .putIfAbsent(prefix+ ":" + page2.getUrl()
+                                                                             .toString(),
+                              object.toString());
         } catch (IOException e) {
             e.printStackTrace();  // TODO: Customise this generated block
         }
 
     }
 
-    /**
+  private void additionalAttributes(JsonObject object) {
+    object.putNumber("pagerank", -1);
+    Sentiment sentiment = sentimentAnalysisModule.getOverallSentiment(object.getString("content"));
+    object.putValue("sentiment",sentiment.getValue());
+//    String language = det.detectLanguage(object.getString("content"));
+//    object.putString("language",language);
+  }
+
+  /**
      * {@inheritDoc}
      */
     @Override

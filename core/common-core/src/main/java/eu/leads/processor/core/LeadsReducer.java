@@ -1,8 +1,6 @@
 package eu.leads.processor.core;
 
 import eu.leads.processor.common.ProgressReport;
-import eu.leads.processor.common.infinispan.CacheManagerFactory;
-import org.apache.derby.iapi.services.cache.CacheManager;
 import org.infinispan.distexec.mapreduce.Reducer;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.vertx.java.core.json.JsonArray;
@@ -52,17 +50,20 @@ public abstract class LeadsReducer<kOut, vOut> implements Reducer<kOut, vOut> {
    public void initialize() {
       conf = new JsonObject(configString);
       outputCacheName = conf.getString("output");
-      outputSchema = conf.getObject("body").getObject("outputSchema");
-      inputSchema = conf.getObject("body").getObject("inputSchema");
-      targetsMap = new HashMap();
-      outputMap = new HashMap<>();
-      JsonArray targets = conf.getObject("body").getArray("targets");
-      Iterator<Object> targetIterator = targets.iterator();
-      while (targetIterator.hasNext()) {
+     if(conf.containsField("body") && conf.getObject("body").containsField("outputSchema")) {
+       outputSchema = conf.getObject("body").getObject("outputSchema");
+       inputSchema = conf.getObject("body").getObject("inputSchema");
+       targetsMap = new HashMap();
+       outputMap = new HashMap<>();
+       JsonArray targets = conf.getObject("body").getArray("targets");
+       Iterator<Object> targetIterator = targets.iterator();
+       while (targetIterator.hasNext()) {
          JsonObject target = (JsonObject) targetIterator.next();
-         targetsMap.put(target.getObject("expr").getObject("body").getObject("column").getString("name"), target);
-      }
-
+         targetsMap
+           .put(target.getObject("expr").getObject("body").getObject("column").getString("name"),
+                 target);
+       }
+     }
       overall = this.conf.getLong("workload",100);
       timer = new Timer();
       report = new ProgressReport(this.getClass().toString(), 0, overall);

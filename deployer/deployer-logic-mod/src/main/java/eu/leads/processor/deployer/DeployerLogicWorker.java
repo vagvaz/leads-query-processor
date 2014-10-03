@@ -90,10 +90,33 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                         startExecution(executionPlan);
 
                     } else if (label.equals(DeployerConstants.DEPLOY_CUSTOM_PLAN)) {
+                        String queryType = action.getData().getString("specialQueryType");
                         SQLPlan plan = new SQLPlan(action.getData().getObject("plan"));
                         ExecutionPlanMonitor executionPlan = new ExecutionPlanMonitor(plan);
+                        executionPlan.setAction(action);
+                        executionPlan.setSpecial(true);
                         runningPlans.put(plan.getQueryId(), executionPlan);
-                        startExecution(executionPlan);
+                        List<PlanNode> source = executionPlan.getSources();
+                      if(source.size() > 1){
+                        log.error("SPECIAL PLAN " + action.toString() + "\n has more than on sources " + source.size());
+                      }
+                      PlanNode scan = source.get(0);
+                      String input = scan.getInputs().get(0);
+                      executionPlan.complete(scan);
+                      PlanNode specialNode = executionPlan.getNextExecutableOperator(scan);
+                      if(queryType.equals("rec_call"))
+                      {
+                        specialNode.setNodeType(LeadsNodeType.WGS_URL);
+                        specialNode.getConfiguration().putString("type", LeadsNodeType.WGS_URL.toString());
+
+                      }
+                      else if(queryType.equals("epq_call")){
+                        specialNode.setNodeType(LeadsNodeType.EPQ);
+                        specialNode.getConfiguration().putString("type",LeadsNodeType.EPQ.toString());
+                      }
+                      specialNode.getConfiguration().putString("realOutput",executionPlan.getQueryId());
+                      specialNode.getInputs().set(0,input);
+                      deployOperator(executionPlan,specialNode);
                     }
                     //               else if (label.equals(DeployerConstants.OPERATOR_COMPLETED)) {
                     //
@@ -223,7 +246,12 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
        query.setPlan((Plan) plan.getLogicalPlan());
        query.getQueryStatus().setStatus(QueryState.COMPLETED);
        String outputCacheName = plan.getCacheName();
-       query.asJsonObject().putString("output",outputCacheName);
+      if(!plan.isSpecial()) {
+        query.asJsonObject().putString("output", outputCacheName);
+      }
+      else{
+        query.asJsonObject().putString("output",query.getId());
+      }
         query.asJsonObject().putBoolean("isSorted",plan.isSorted());
        queriesCache.put(queryId,query.asJsonObject().toString());
        //LATER TODO we could inform Interface Manager about the query completion to inform UIs

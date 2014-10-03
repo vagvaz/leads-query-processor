@@ -75,7 +75,7 @@ public class PlannerCatalogWorker extends Verticle {
       if (container.config().containsField("generateSchemas"))
         createInitialTables();
     } catch (Exception e) {
-      e.printStackTrace();
+      container.logger().error("Problem Encountered when tried to create Initial Schemas " + e.getMessage());
     }
 
   }
@@ -113,6 +113,8 @@ public class PlannerCatalogWorker extends Verticle {
     webPagesSchema.addColumn("links",Type.TEXT_ARRAY);
     webPagesSchema.addColumn("title",Type.TEXT);
     webPagesSchema.addColumn("version",Type.DATE);
+    webPagesSchema.addColumn("pagerank",Type.FLOAT8);
+    webPagesSchema.addColumn("sentiment",Type.FLOAT8);
 
     Schema entitiesSchema = new Schema();
     entitiesSchema.addColumn("webpageurl",Type.TEXT);

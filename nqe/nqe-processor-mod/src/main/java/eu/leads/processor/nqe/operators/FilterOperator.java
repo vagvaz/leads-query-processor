@@ -78,7 +78,7 @@ public class FilterOperator extends BasicOperator {
          e.printStackTrace();
       }
 
-       // inputCache.size() , outputCache.size() , DT
+       // webCache.size() , outputCache.size() , DT
 
       cleanup();
       //Store Values for statistics

@@ -138,6 +138,7 @@ public class MathUtils {
    public static boolean lessEqualThan(JsonObject left, JsonObject right) {
       String type = left.getObject("body").getObject("datum").getString("type");
       if (type.startsWith("TEXT")) {
+
          String leftValue = left.getObject("body").getObject("datum").getObject("body").getString("val");
          String rightValue = right.getObject("body").getObject("datum").getObject("body").getString("val");
          return leftValue.compareTo(rightValue) <= 0;
@@ -194,7 +195,7 @@ public class MathUtils {
        }
      }
      String pattern = new String(patternBytes);
-      pattern = pattern.replaceAll("%", "*");
+      pattern = pattern.replaceAll("%", "__");
       pattern.trim();
       pattern = "[" + pattern + "]";
 //      Pattern regex = Pattern.compile(pattern);
@@ -202,12 +203,15 @@ public class MathUtils {
       {
          String testString = leftValue.getObject("body").getObject("datum").getObject("body").getString("val");
 //         result =regex.matcher(testString).matches();
-        if(pattern.startsWith("*") && pattern.endsWith("*"))
-        result = testString.contains(pattern);
-        else if(pattern.startsWith("*")){
+        if(pattern.startsWith("__") && pattern.endsWith("__")) {
+          pattern = pattern.replaceAll("__", "");
+          result = testString.contains(pattern);
+        }else if(pattern.startsWith("*")){
+          pattern = pattern.replaceAll("__","");
           result = testString.startsWith(pattern);
         }
         else{
+          pattern = pattern.replaceAll("__","");
           result = testString.endsWith(pattern);
         }
 

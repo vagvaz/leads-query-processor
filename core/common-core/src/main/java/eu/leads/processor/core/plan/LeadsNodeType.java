@@ -36,7 +36,8 @@ public enum LeadsNodeType {
     ALTER_TABLE(AlterTableNode.class),
     TRUNCATE_TABLE(TruncateTableNode.class),
     WGS_URL(WGSUrlDepthNode.class),
-    OUTPUT_NODE(OutputNode.class);
+    OUTPUT_NODE(OutputNode.class),
+  EPQ(EncryptedPointQueryNode.class);
 
 
     private final Class<? extends LogicalNode> baseClass;

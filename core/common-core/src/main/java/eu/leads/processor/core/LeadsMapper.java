@@ -2,11 +2,10 @@ package eu.leads.processor.core;
 
 import eu.leads.processor.common.ProgressReport;
 import org.infinispan.distexec.mapreduce.Mapper;
-
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
-import eu.leads.processor.core.Tuple;
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -46,17 +45,20 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
    }
     public void initialize() {
        conf = new JsonObject(configString);
-       outputSchema = conf.getObject("body").getObject("outputSchema");
-       inputSchema = conf.getObject("body").getObject("inputSchema");
-       targetsMap = new HashMap();
-       outputMap = new HashMap<>();
-       JsonArray targets = conf.getObject("body").getArray("targets");
-       Iterator<Object> targetIterator = targets.iterator();
-       while (targetIterator.hasNext()) {
-          JsonObject target = (JsonObject) targetIterator.next();
-          targetsMap.put(target.getObject("expr").getObject("body").getObject("column").getString("name"), target);
-       }
-
+        if(conf.containsField("body") && conf.getObject("body").containsField("outputSchema")) {
+          outputSchema = conf.getObject("body").getObject("outputSchema");
+          inputSchema = conf.getObject("body").getObject("inputSchema");
+          targetsMap = new HashMap();
+          outputMap = new HashMap<>();
+          JsonArray targets = conf.getObject("body").getArray("targets");
+          Iterator<Object> targetIterator = targets.iterator();
+          while (targetIterator.hasNext()) {
+            JsonObject target = (JsonObject) targetIterator.next();
+            targetsMap
+              .put(target.getObject("expr").getObject("body").getObject("column").getString("name"),
+                    target);
+          }
+        }
 //       JsonArray fields = outputSchema.getArray("fields");
 //       Iterator<Object> fieldIterator = fields.iterator();
 //       while(fieldIterator.hasNext()){

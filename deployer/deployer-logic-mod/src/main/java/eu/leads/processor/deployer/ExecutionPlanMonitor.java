@@ -23,8 +23,50 @@ public class ExecutionPlanMonitor {
     private Set<LeadsNodeType> groupingCandidate;
     private Action action;
     String outputCacheName;
+    private boolean isSpecial;
 
-    public boolean isSorted() {
+
+  public SQLPlan getPlan() {
+    return plan;
+  }
+
+  public void setPlan(SQLPlan plan) {
+    this.plan = plan;
+  }
+
+  public ExecutionPlan getExecutionPlan() {
+    return executionPlan;
+  }
+
+  public void setExecutionPlan(ExecutionPlan executionPlan) {
+    this.executionPlan = executionPlan;
+  }
+
+  public Set<LeadsNodeType> getGroupingCandidate() {
+    return groupingCandidate;
+  }
+
+  public void setGroupingCandidate(Set<LeadsNodeType> groupingCandidate) {
+    this.groupingCandidate = groupingCandidate;
+  }
+
+  public String getOutputCacheName() {
+    return outputCacheName;
+  }
+
+  public void setOutputCacheName(String outputCacheName) {
+    this.outputCacheName = outputCacheName;
+  }
+
+  public boolean isSpecial() {
+    return isSpecial;
+  }
+
+  public void setSpecial(boolean isSpecial) {
+    this.isSpecial = isSpecial;
+  }
+
+  public boolean isSorted() {
         return isSorted;
     }
 

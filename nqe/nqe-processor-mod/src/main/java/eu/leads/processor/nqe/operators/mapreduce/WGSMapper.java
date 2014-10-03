@@ -19,24 +19,28 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
       super(configString);
    }
 
+  protected transient String prefix;
    protected transient List<String> attributes;
-   protected transient Cache inputCache;
+   protected transient Cache webCache;
    protected transient Cache outputCache;
    protected transient int depth;
    protected transient int iteration;
-   private void intialize() {
+
+  public  void initialize() {
       isInitialized = true;
       super.initialize();
+
       iteration = conf.getInteger("iteration");
       depth = conf.getInteger("depth");
-      inputCache = manager.getCache(conf.getString("inputCache"));
+      webCache = manager.getCache(conf.getString("webCache"));
+
       if(iteration < depth){
          outputCache = manager.getCache(conf.getString("outputCache"));
       }
       else{
          outputCache = null;
       }
-
+      prefix = webCache.getName()+":";
       JsonArray array = conf.getArray("attributes");
       Iterator<Object> iterator = array.iterator();
       attributes = new ArrayList<String>(array.size());
@@ -47,7 +51,9 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
 
    @Override
    public void map(String key, String value, Collector<String, String> collector) {
-      String jsonString = (String) inputCache.get(key);
+     if(!isInitialized)
+       this.initialize();
+      String jsonString = (String) webCache.get(prefix+key);
       if (jsonString==null || jsonString.equals("")){
          return;
       }
@@ -55,8 +61,8 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
       handlePagerank(t);
       JsonObject result = new JsonObject();
       result.putString("url", t.getAttribute("url"));
-      result.putString("pagerank", t.getAttribute("pagerank"));
-      result.putString("sentiment", t.getAttribute("sentiment"));
+      result.putString("pagerank", t.getGenericAttribute("pagerank").toString());
+      result.putString("sentiment", t.getGenericAttribute("sentiment").toString());
       result.putValue("links",t.getGenericAttribute("links"));
       collector.emit(String.valueOf(iteration),result.toString());
       if(outputCache != null){

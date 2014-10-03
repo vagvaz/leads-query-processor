@@ -19,11 +19,11 @@ public class OperatorFactory {
          JsonObject actionData = action.getData();
          // read monitor q.getString("monitor");
          String operatorType = actionData.getString("operatorType");
-         if (operatorType.equals(LeadsNodeType.WGS_URL)) {//SQL Query
+         if (operatorType.equals(LeadsNodeType.WGS_URL.toString())) {//SQL Query
             result = new WGSOperator(com,persistence,action);
 
          }
-         else if(operatorType.equals(NQEConstants.PPPQ_OPERATOR)){
+         else if(operatorType.equals(NQEConstants.PPPQ_OPERATOR.toString())){
 
          }
          else{

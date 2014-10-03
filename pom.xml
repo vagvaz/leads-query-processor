@@ -28,6 +28,7 @@
       <module>leads-query-processor-interfaces</module>
       <module>leads-results-gui</module>
       <module>leads-cli</module>
+      <module>leads-aux-tools</module>
    </modules>
 
 </project>

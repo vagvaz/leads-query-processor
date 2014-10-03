@@ -5,7 +5,6 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.QueryContext;
@@ -42,11 +41,11 @@ public class CreateSpecialQueryActionHandler implements ActionHandler {
        JsonObject actionResult = new JsonObject();
         try {
             JsonObject q = action.getData().getObject("query");
-            String queryType = action.getData().getString("queryType");
+            String queryType = action.getData().getString("type");
             if (queryType.equals("rec_call")) {
                 String url = q.getString("url");
                 String user = q.getString("user");
-                int depth = Integer.parseInt("depth");
+                int depth = Integer.parseInt(q.getString("depth"));
                 String uniqueId = generateNewQueryId(user);
                 RecursiveCallQuery query = new RecursiveCallQuery(user, url, depth);
                 query.setId(uniqueId);
@@ -55,7 +54,13 @@ public class CreateSpecialQueryActionHandler implements ActionHandler {
                 QueryContext context = new QueryContext(uniqueId);
                 query.setContext(context);
                 JsonObject queryStatus = status.asJsonObject();
+                query.asJsonObject().putString("queryType",queryType);
                 queriesCache.put(uniqueId, query.asJsonObject().toString());
+                actionResult.putObject("query",query.asJsonObject());
+                JsonObject webServiceReply = new JsonObject();
+              webServiceReply.putString("id",query.getId());
+              webServiceReply.putString("output",query.getId());
+                actionResult.putObject("status",webServiceReply);
                 result.setResult(actionResult);
                 result.setStatus(ActionStatus.COMPLETED.toString());
             }

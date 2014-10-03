@@ -1,4 +1,4 @@
-package eu.leads.processor.plugins.sentiment;
+package eu.leads.processor.sentiment;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.CRFClassifier;

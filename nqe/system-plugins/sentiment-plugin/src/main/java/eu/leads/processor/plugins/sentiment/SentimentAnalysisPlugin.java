@@ -1,16 +1,19 @@
 package eu.leads.processor.plugins.sentiment;
 
-import eu.leads.processor.core.Tuple;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.PluginInterface;
+import eu.leads.processor.sentiment.Entity;
+import eu.leads.processor.sentiment.Sentiment;
+import eu.leads.processor.sentiment.SentimentAnalysis;
+import eu.leads.processor.sentiment.SentimentAnalysisModule;
 import org.apache.commons.configuration.Configuration;
 import org.infinispan.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.System;
-import java.util.Date;
 import java.util.Set;
+
 
 /**
  * Created by vagvaz on 6/6/14.

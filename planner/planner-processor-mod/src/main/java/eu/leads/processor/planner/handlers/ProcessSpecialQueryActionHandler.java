@@ -5,7 +5,6 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.RecursiveCallQuery;
@@ -13,7 +12,12 @@ import eu.leads.processor.core.plan.SQLPlan;
 import eu.leads.processor.core.plan.SpecialQuery;
 import eu.leads.processor.core.plan.WGSUrlDepthNode;
 import leads.tajo.module.TaJoModule;
+import org.apache.hadoop.fs.Path;
+import org.apache.tajo.catalog.TableDesc;
+import org.apache.tajo.catalog.TableMeta;
+import org.apache.tajo.catalog.proto.CatalogProtos;
 import org.apache.tajo.engine.planner.logical.ScanNode;
+import org.apache.tajo.util.KeyValueSet;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 
@@ -46,9 +50,13 @@ public class ProcessSpecialQueryActionHandler implements ActionHandler {
         SpecialQuery specialQuery = new SpecialQuery(action.getData().getObject("query"));
         if (specialQuery.getSpecialQueryType().equals("rec_call")) {
             RecursiveCallQuery query = new RecursiveCallQuery(specialQuery);
+
             ScanNode node = new ScanNode(0);
-            node.setInSchema(module.getTableSchema("webpages"));
-            node.setOutSchema(node.getInSchema());
+
+            Path testPath = new Path("test-webpages-path");
+            TableMeta meta = new TableMeta(CatalogProtos.StoreType.SEQUENCEFILE,new KeyValueSet());
+            TableDesc desc = new TableDesc("default.webpages",module.getTableSchema("webpages"),meta, testPath );
+            node.init(desc);
             WGSUrlDepthNode rootNode = new WGSUrlDepthNode(1);
             rootNode.setUrl(query.getUrl());
             rootNode.setDepth(query.getDepth());

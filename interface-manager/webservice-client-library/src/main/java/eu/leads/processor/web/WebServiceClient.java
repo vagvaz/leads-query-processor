@@ -13,7 +13,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -291,11 +290,13 @@ public class WebServiceClient {
         return null;//result;
     }
 
-    public static Map<String, String> submitSpecialQuery(String username, String type,
+    public static JsonObject submitSpecialQuery(String username, String type,
                                                             Map<String, String> parameters)
         throws IOException {
-        Map<String, String> result = new HashMap<String, String>();
-        if (type.equals("rec_call")) {
+//       Map<String,String> result = new HashMap<>();
+      JsonObject result = new JsonObject();
+      if (type.equals("rec_call")) {
+
             RecursiveCallRestQuery query = new RecursiveCallRestQuery();
             query.setUser(username);
             query.setDepth(parameters.get("depth"));
@@ -305,8 +306,10 @@ public class WebServiceClient {
             connection = setUp(connection, "POST", MediaType.APPLICATION_JSON, true, true);
             setBody(connection, query);
             String response = getResult(connection);
-            result = mapper.readValue(response, Map.class);
-            return result;
+            JsonObject reply = new JsonObject(response);
+//            result.put("id",reply.getString("id"));
+//            result.put("output",reply.getString("output"));
+            result = reply;
         }
         return result;
     }
