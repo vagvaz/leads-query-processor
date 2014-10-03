@@ -5,7 +5,7 @@ package eu.leads.processor.system;
  */
 public class LeadsProcessorBootstrapperTest {
     public static void main(String[] args) {
-        String xmlConfiguration = "/tmp/leads-processor3.xml";
+        String xmlConfiguration = "/tmp/leads-processor3.xml"; //boot-configuration.xml
         LeadsProcessorBootstrapper2.main(new String[] {xmlConfiguration});
     }
 }
