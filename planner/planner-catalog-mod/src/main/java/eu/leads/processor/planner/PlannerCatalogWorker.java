@@ -93,7 +93,10 @@ public class PlannerCatalogWorker extends Verticle {
       .createDatabase(StringConstants.DEFAULT_DATABASE_NAME, StringConstants.DEFAULT_TABLE_SPACE);
 
     try {
+      if(initBuiltinFunctions().size() == 0)
+        container.logger().error("\n\n\n\n\n\n\n SIZE 0 \n\n\n\n\n");
       for (FunctionDesc funcDesc : initBuiltinFunctions()) {
+        container.logger().error("\n"+funcDesc.toString());
         catalog.createFunction(funcDesc);
       }
     } catch (ServiceException e) {
