@@ -27,36 +27,50 @@ public class READTableList {
 		
 		putAttributeList(returns, 
 				new String[]{
-				"sentiment",
-				"body",
-				"pagerank",
-				"links",
-				"domainName",
-				"published",
-				"url"
+				"url",
+                "domainname",
+                "headers",
+                "content",
+                "responsecode",
+                "language",
+                "charset",
+                "responsetime",
+                "links",
+                "title",
+                "version",
+                "pagerank",
+                "sentiment"
 				}, 
 				new String[]{
+				"TEXT",
+				"TEXT",
+				"TEXT",
+				"TEXT",
 				"NUMERIC",
+				"TEXT",
 				"TEXT",
 				"NUMERIC",
 				"TEXT",
 				"TEXT",
 				"DATE",
-				"TEXT",
+				"NUMERIC",
+				"NUMERIC"
 				});
 		
 		readTables.put("Webpages", new READTable("Webpages",arguments,returns));
 		
 		putAttributeList(returns, 
 				new String[]{
-				"name",
 				"webpageurl",
-				"sentimentscore"
+				"name",
+				"sentiment",
+				"version"
 				}, 
 				new String[]{
 				"TEXT",
 				"TEXT",
-				"NUMERIC"
+				"NUMERIC",
+				"DATE"
 				});
 		readTables.put("Entities", new READTable("Entities",arguments,returns));
 		

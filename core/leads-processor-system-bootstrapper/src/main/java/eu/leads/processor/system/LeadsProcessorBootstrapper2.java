@@ -74,12 +74,12 @@ public class LeadsProcessorBootstrapper2 {
         //runRemotely("test","localhost","vertx");
         int ip = 0;
 
-       for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
+        for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
             deployComponent(e.getKey(), ips[ip]);
             ip = (ip + 1) % ips.length;
             //break;
 
-       }
+        }
     }
 
     private static JsonObject convertConf2Json(XMLConfiguration subconf) {
@@ -136,7 +136,7 @@ public class LeadsProcessorBootstrapper2 {
                 serviceA.addObject(service);
             }
             if (otherGroups != null)
-                ret.putArray("otherGrouops", otherGroups);
+                ret.putArray("otherGroups", otherGroups);
 
             ret.putArray("services", serviceA);
 
@@ -198,14 +198,14 @@ public class LeadsProcessorBootstrapper2 {
         else
             vertxComponent = group + "~" + component + "-comp-mod~" + version;
 
-        String command = "vertx runMod " + vertxComponent + " -conf " + remotedir +"R"+ modJson.getString("id") + ".json";
-        if(c.containsKey("processor.vertxArg"))
-            command +=" -"+c.getString("processor.vertxArg");
+        String command = "vertx runMod " + vertxComponent + " -conf " + remotedir + "R" + modJson.getString("id") + ".json";
+        if (c.containsKey("processor.vertxArg"))
+            command += " -" + c.getString("processor.vertxArg");
 
         //System.out.println(command);
 
         runRemotely(modJson.getString("id"), ip, command);
-        
+
     }
 
 
@@ -216,18 +216,31 @@ public class LeadsProcessorBootstrapper2 {
         //System.out.print("Cmd" + command1);
         logger.info("Execution command: " + command1);
         //command1 =command;
-         try {
+        try {
             JSch jsch = new JSch();
 
-             String username = LQPConfiguration.getInstance().getConf()
-                     .getString("processor.ssh.username");
+            String username = LQPConfiguration.getInstance().getConf()
+                    .getString("processor.ssh.username");
             Session session = jsch.getSession(username, ip, 22);
-             if (LQPConfiguration.getInstance().getConf()
-                     .containsKey("processor.ssh.password"))
-                 session.setPassword(LQPConfiguration.getInstance().getConf()
-                         .getString("processor.ssh.password"));
-             else
-                 session.setPassword("12121212"); //just for me
+
+            if (LQPConfiguration.getInstance().getConf()
+                    .containsKey("processor.ssh.rsa")) {
+                String privateKey = LQPConfiguration.getInstance().getConf().getString("processor.ssh.rda");
+                jsch.addIdentity(privateKey);
+                logger.info("ssh identity added ");
+            } else if (LQPConfiguration.getInstance().getConf()
+                    .containsKey("processor.ssh.password"))
+                session.setPassword(LQPConfiguration.getInstance().getConf()
+                        .getString("processor.ssh.password"));
+            else
+            {
+                logger.info("No ssh credentials, no password either key ");
+            }
+                //session.setPassword("12121212"); //just for me;//                 String privateKey = "~/.ssh/id_rsa";
+//
+//             jsch.addIdentity(privateKey);
+//
+
             session.setConfig("StrictHostKeyChecking", "no");
             session.connect();
             System.out.println("Connected");
@@ -258,7 +271,7 @@ public class LeadsProcessorBootstrapper2 {
             channel.disconnect();
             session.disconnect();
             logger.info("Remote execution DONE");
-             //if(channel.getExitStatus()==-1)
+            //if(channel.getExitStatus()==-1)
 
 
         } catch (Exception e) {
@@ -311,7 +324,7 @@ public class LeadsProcessorBootstrapper2 {
             File localFile = new File(tmpFile);
             //If you want you can change the directory using the following line.
             channel.cd(remoteDir);
-            channel.put(new FileInputStream(localFile), "R"+localFile.getName());
+            channel.put(new FileInputStream(localFile), "R" + localFile.getName());
             channel.disconnect();
             session.disconnect();
             logger.info("File successful uploaded: " + localFile);

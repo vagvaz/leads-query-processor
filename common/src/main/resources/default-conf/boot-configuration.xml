@@ -40,6 +40,8 @@
             <username>tr</username>
             <baseDir>/tmp/</baseDir>
             <remoteDir>/tmp/</remoteDir>
+            <password>testpass</password>
+            <!-- <rsa>/tmp/id_rsa</rsa>  a filename -->
         </ssh>
     </processor>
 </leads-processor-bootstrap>

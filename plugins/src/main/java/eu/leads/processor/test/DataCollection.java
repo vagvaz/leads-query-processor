@@ -4,7 +4,6 @@ import eu.leads.crawler.PersistentCrawl;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.CacheManagerFactory;
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.Cache;
 
@@ -27,9 +26,9 @@ public class DataCollection {
       LQPConfiguration.getConf().setProperty("crawler.seed",
                                                     "http://www.bbc.co.uk"); //For some reason it is ignored news.yahoo.com is used by default
       LQPConfiguration.getConf().setProperty("crawler.depth", 3);
-     String sentimentPluginClassName = "eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin";
-     String jarFile = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/sentiment-plugin/target/sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
-     String confFile = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/sentiment-plugin/sentiment-conf.xml";
+    // String sentimentPluginClassName = "eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin";
+    // String jarFile = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/sentiment-plugin/target/sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
+    // String confFile = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/sentiment-plugin/sentiment-conf.xml";
 
       //Set desired target cache
       LQPConfiguration.getConf().setProperty(StringConstants.CRAWLER_DEFAULT_CACHE, webCacheName);
@@ -69,7 +68,7 @@ public class DataCollection {
       }
 
 
-      PrintUtilities.saveMapToFile(pages,"/home/vagvaz/test/webpagesdata.json");
+      //PrintUtilities.saveMapToFile(pages,"/home/vagvaz/test/webpagesdata.json");
 //      for(InfinispanManager cluster : clusters){
 //         cluster.stopManager();
 //      }

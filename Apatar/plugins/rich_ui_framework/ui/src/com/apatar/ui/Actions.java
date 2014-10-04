@@ -361,12 +361,18 @@ public class Actions {
 					saveProject();
 					final String dir = System.getProperty("user.dir");
 					System.out.println("current dir = " + dir);
+				 
+					
+					String projectPath = ApplicationData.PROJECT_PATH;
+					projectPath= projectPath.replace(" " ,"/ ");
+					System.out.println("Project = " + projectPath);
 					String jarname = "resultsDisplayWindow.jar";
 					File jar = new File(jarname);
 					if (jar.exists()) {
+						
 						Process proc = Runtime.getRuntime().exec(
 								"java -jar  " + jarname + " "
-										+ ApplicationData.PROJECT_PATH);
+										+ projectPath);
 
 						JOptionPane.showMessageDialog(ApatarUiMain.MAIN_FRAME,
 								"Please Wait for the results");
