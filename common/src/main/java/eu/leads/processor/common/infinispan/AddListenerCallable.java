@@ -30,7 +30,7 @@ public class AddListenerCallable<K, V> implements DistributedCallable<K, V, Void
     public Void call() throws Exception {
         if (listner instanceof LeadsListener) {
             LeadsListener leadsListener = (LeadsListener) listner;
-            leadsListener.initialize(new LocalInfinispanManager(cache.getCacheManager()));
+            leadsListener.initialize(new ClusterInfinispanManager((cache.getCacheManager())));
 
         }
         cache.getCacheManager().getCache(cacheName).addListener(listner);

@@ -36,9 +36,9 @@
          <locking concurrency-level="2000"/>
          <state-transfer enabled="false" await-initial-transfer="false"/>
 
-         <!--<persistence passivation="true">-->
-            <!--<file-store path="${java.io.tmpdir}" shared="false" preload="true"/>-->
-         <!--</persistence>-->
+         <persistence passivation="true">
+            <file-store path="${java.io.tmpdir}" shared="false" preload="true"/>
+         </persistence>
 
       </distributed-cache>
 
@@ -49,9 +49,9 @@
          <locking concurrency-level="2000"/>
          <state-transfer enabled="true" await-initial-transfer="true"/>
 
-         <!--<persistence passivation="true">-->
-         <!--<file-store path="${java.io.tmpdir}" shared="false" preload="true"/>-->
-         <!--</persistence>-->
+         <persistence passivation="true">
+         <file-store path="${java.io.tmpdir}" shared="false" preload="true"/>
+         </persistence>
 
       </distributed-cache>
 
@@ -62,9 +62,9 @@
          <locking concurrency-level="2000"/>
          <state-transfer enabled="true" await-initial-transfer="true"/>
 
-         <!--<persistence passivation="true">-->
-            <!--<file-store path="${java.io.tmpdir}" shared="false" preload="true"/>-->
-         <!--</persistence>-->
+         <persistence passivation="true">
+            <file-store path="${java.io.tmpdir}" shared="false" preload="true"/>
+         </persistence>
 
       </distributed-cache>
       <distributed-cache name="active_plugins_cache" mode="SYNC" owners="3" l1-lifespan="600000"
@@ -73,9 +73,9 @@
          <compatibility></compatibility>
          <eviction max-entries="10000"/>
          <locking concurrency-level="2000"/>
-         <!--<persistence passivation="true">-->
-            <!--<file-store path="${java.io.tmpdir}" shared="false" preload="true"/>-->
-         <!--</persistence>-->
+         <persistence passivation="true">
+            <file-store path="${java.io.tmpdir}" shared="false" preload="true"/>
+         </persistence>
 
       </distributed-cache>
       <distributed-cache name="processor_plugins" mode="SYNC" owners="2" l1-lifespan="600000"
@@ -87,9 +87,9 @@
          <locking concurrency-level="2000"/>
          <state-transfer enabled="true" await-initial-transfer="true"/>
          <compatibility></compatibility>
-         <!--<persistence passivation="true">-->
-            <!--<file-store path="${java.io.tmpdir}" shared="false" preload="true"/>-->
-         <!--</persistence>-->
+         <persistence passivation="true">
+            <file-store path="${java.io.tmpdir}" shared="false" preload="true"/>
+         </persistence>
 
       </distributed-cache>
 

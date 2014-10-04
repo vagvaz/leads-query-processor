@@ -59,7 +59,30 @@ public class Page {
     private
     @JsonIgnore
     Map<String, Object> parseResults = new HashMap<String, Object>();
+    private
+    @JsonProperty("pagerank")
+    double pagerank;
 
+    public double getSentiment() {
+        return sentiment;
+    }
+
+    public void setSentiment(double sentiment) {
+        this.sentiment = sentiment;
+    }
+
+    public double getPagerank() {
+        return pagerank;
+    }
+
+    public void setPagerank(double pagerank) {
+        this.pagerank = pagerank;
+    }
+
+    private
+
+    @JsonProperty("sentiment")
+    double sentiment;
 
     /**
      * Constructs a new Page.
