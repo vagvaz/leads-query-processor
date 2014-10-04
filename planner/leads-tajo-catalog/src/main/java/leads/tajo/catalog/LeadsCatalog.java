@@ -31,7 +31,7 @@ public class LeadsCatalog {
 
     public LeadsCatalog(TajoConf inconf) {
         if (inconf != null)
-            LeadsCatalog.conf = inconf;
+            LeadsCatalog.conf = new TajoConf(inconf);
         else {
             conf = new TajoConf();
             LQPConfiguration.initialize(true);
