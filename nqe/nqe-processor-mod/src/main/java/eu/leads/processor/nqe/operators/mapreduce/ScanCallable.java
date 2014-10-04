@@ -3,6 +3,7 @@ package eu.leads.processor.nqe.operators.mapreduce;
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.math.FilterOperatorTree;
+import eu.leads.processor.plugins.pagerank.node.DSPMNode;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.distexec.DistributedCallable;
@@ -136,13 +137,13 @@ public class ScanCallable <K,V> implements
                 computeTotalSum();
             }
             String url = t.getAttribute("default.webpages.url");
-            Integer currentPagerank = (Integer) pageRankCache.get(url);
+           DSPMNode currentPagerank = (eu.leads.processor.plugins.pagerank.node.DSPMNode) pageRankCache.get(url);
             if(currentPagerank == null)
             {
                 t.setAttribute("default.webpages.pagerank",0f);
                 return;
             }
-            t.setAttribute("default.webpages.pagerank",currentPagerank/totalSum);
+            t.setAttribute("default.webpages.pagerank",currentPagerank.getVisitCount()/totalSum);
 
            //READ PAGERANK FROM PAGERANK CACHE;
            //READ TOTAL ONCE
