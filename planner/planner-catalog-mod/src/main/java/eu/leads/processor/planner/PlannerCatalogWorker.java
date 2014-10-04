@@ -50,7 +50,8 @@ public class PlannerCatalogWorker extends Verticle {
 
     conf.setInt(TajoConf.ConfVars.WORKER_RESOURCE_AVAILABLE_MEMORY_MB.varname,
                  config.getInteger("memory", 1024));
-    float disks = Float.parseFloat(config.getString("disks", "1.0"));
+    float disks =config.getNumber("disks", 1).floatValue();
+
     conf.setFloat(TajoConf.ConfVars.WORKER_RESOURCE_AVAILABLE_DISKS.varname, disks);
 
     Object clusterTestBuildDir = LeadsCatalog.setupClusterRandBuildDir();
