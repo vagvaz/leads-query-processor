@@ -36,7 +36,9 @@ public abstract class RandomizedGraph {
     //protected int accurateLocalSum;
 
     protected ComChannel channel;
-    protected Coordinator coord;
+//    protected Coordinator coord;
+    protected long localValue;
+    private Worker w;
 
     public RandomizedGraph(int R, Configuration configuration, InfinispanManager infinispanManager, int seed) {
 
@@ -51,8 +53,12 @@ public abstract class RandomizedGraph {
 
         //Setup the communication enabled via Infinispan KVS
         //The communication channel between coordinator and the workers
-        channel = new ComChannel(infinispanManager.getCacheManager().<String, Message>getCache()/*(Cache) infinispanManager.getPersisentCache("PageRankComCache")*/);
-        coord = new Coordinator(channel);
+//        channel = new ComChannel(infinispanManager.getCacheManager().<String, Message>getCache()/*(Cache) infinispanManager.getPersisentCache("PageRankComCache")*/);
+
+        channel = new ComChannel(approx_sum_cache);
+        w = new Worker(nodeName, 0, channel);
+//        coord = new Coordinator(channel);
+
 	}
 
     private void initCacheAndAttrs(Configuration configuration, InfinispanManager infinispanManager){
@@ -71,13 +77,13 @@ public abstract class RandomizedGraph {
     }
 
 
-    public Coordinator getCoord() {
-        return coord;
-    }
-
-    public void setCoord(Coordinator coord) {
-        this.coord = coord;
-    }
+//    public Coordinator getCoord() {
+//        return coord;
+//    }
+//
+//    public void setCoord(Coordinator coord) {
+//        this.coord = coord;
+//    }
 
 
     public Cache getApprox_sum_cache(){
@@ -108,12 +114,14 @@ public abstract class RandomizedGraph {
     public void sendVisitDriftIfNeeded(int drift){
 
         //accurateLocalSum += drift;
-
+        if(w.update(drift))
+            approx_sum_cache.put(nodeName,w.getLocalValue()+drift);
         //VCperCloud[tmpNode.getMyCloud()] += drift;
 
-        if ( approx_sum_cache.containsKey(nodeName) ){
+//        if ( approx_sum_cache.containsKey(nodeName) ){
 
-            ((Worker) approx_sum_cache.get(nodeName)).update(drift);
+//            ((Worker) approx_sum_cache.get(nodeName)).update(drift);
+//            w.update(drift);
             /*int old_estimate = ((Worker) approx_sum_cache.get(nodeName)).getPrevReported();
 
             if ( Math.abs( accurateLocalSum - old_estimate ) >
@@ -122,15 +130,15 @@ public abstract class RandomizedGraph {
                 approx_sum_cache.put(nodeName, accurateLocalSum);
                 approx_sum_cache.put(Const.GLOBAL_SUM, (Integer) approx_sum_cache.get(Const.GLOBAL_SUM) +  (accurateLocalSum - old_estimate)  );
             }*/
-        }
-        else{
+//        }
+//        else{
 
-            Worker w = new Worker(nodeName, 0, channel);
-            w.update(drift);
-            approx_sum_cache.put(nodeName, w);
+
+//            w.update(drift);
+//            approx_sum_cache.put(nodeName, w);
 
             // approx_sum_cache.put(Const.GLOBAL_SUM, (Integer) approx_sum_cache.get(Const.GLOBAL_SUM) +  accurateLocalSum  );
-        }
+//        }
 
         /*if ( Math.abs( VCperCloud[tmpNode.getMyCloud()] - estVCperCloud[tmpNode.getMyCloud()] ) >
                 ( Main.VIS_COUNT_DRIFT * VCperCloud[tmpNode.getMyCloud()] ) ){

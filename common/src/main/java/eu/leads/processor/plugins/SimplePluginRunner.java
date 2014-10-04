@@ -31,7 +31,7 @@ import static eu.leads.processor.plugins.EventType.*;
  * infinsipan listeners that registeres to create,modify,remove events is asynchronous and NOT
  * clustered.
  */
-@Listener(clustered = false, sync = false)
+@Listener(clustered = false, sync = false, primaryOnly = true)
 public class SimplePluginRunner implements LeadsListener {
 
     transient protected Configuration configuration;

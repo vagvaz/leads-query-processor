@@ -20,7 +20,7 @@ public abstract class Node {
 
     public Node(String i, ComChannel channel){
         id = i;
-        channel.register(id,this);
+//        channel.register(id,this);
     }
 
     public abstract void receiveMessage(Message msg);

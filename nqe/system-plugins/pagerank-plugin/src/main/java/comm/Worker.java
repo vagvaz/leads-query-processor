@@ -23,7 +23,7 @@ public class Worker extends Node {
     private int prevReported;
 
     // private Constrain constrain; //worker constrain
-    private ComChannel channel;  //communication channel.
+//    private ComChannel channel;  //communication channel.
 
     public Worker(String ID, int initialValue/*, Constrain c*/, ComChannel com) {
         super(ID,com);
@@ -31,7 +31,7 @@ public class Worker extends Node {
         localValue = initialValue;
         prevReported = 0;
         // constrain =  c;
-        this.channel = com;
+//        this.channel = com;
 
         latestReceivedGlobalSum = 0;
     }
@@ -41,10 +41,11 @@ public class Worker extends Node {
         localValue += newvalue;
         if ( Math.abs( localValue - prevReported ) > ( Const.VIS_COUNT_DRIFT * localValue ) ){
 
-            channel.sentTo(Node.COORDINATOR, new Message(id,"update",localValue));
+//            channel.sentTo(Node.COORDINATOR, new Message(id,"update",localValue));
             prevReported = localValue;
             return true;
         }
+
         return false;
     }
 
@@ -56,13 +57,13 @@ public class Worker extends Node {
         this.latestReceivedGlobalSum = latestReceivedGlobalSum;
     }
 
-    public ComChannel getChannel() {
-        return channel;
-    }
-
-    public void setChannel(ComChannel channel) {
-        this.channel = channel;
-    }
+//    public ComChannel getChannel() {
+//        return channel;
+//    }
+//
+//    public void setChannel(ComChannel channel) {
+//        this.channel = channel;
+//    }
 
     public int getPrevReported() {
         return prevReported;
@@ -116,11 +117,11 @@ public class Worker extends Node {
         return constrain;
     }*/
 
-    /**
-     * Setter for property 'constrain'.
-     *
-     * @param constrain Value to set for property 'constrain'.
-     */
+//    /**
+//     * Setter for property 'constrain'.
+//     *
+//     * @param constrain Value to set for property 'constrain'.
+//     */
     /*public void setConstrain(Constrain constrain) {
         this.constrain = constrain;
     }*/

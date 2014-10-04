@@ -90,7 +90,7 @@ public class LocalTest {
         my_iterator = cache2.entrySet().iterator();
         my_entry = my_iterator.next();
         Worker w = (Worker) my_entry.getValue();
-        w.getChannel().sentTo(Node.COORDINATOR, new Message(w.getId(),"requestGlobalSum",0));
+//        w.getChannel().sentTo(Node.COORDINATOR, new Message(w.getId(),"requestGlobalSum",0));
 
         try {
             Thread.sleep(1000);

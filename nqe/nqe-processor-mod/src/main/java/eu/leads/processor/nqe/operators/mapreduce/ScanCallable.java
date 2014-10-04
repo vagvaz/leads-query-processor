@@ -1,8 +1,10 @@
 package eu.leads.processor.nqe.operators.mapreduce;
 
+import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.math.FilterOperatorTree;
 import org.infinispan.Cache;
+import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.distexec.DistributedCallable;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -18,12 +20,14 @@ public class ScanCallable <K,V> implements
         DistributedCallable<K, V, String>, Serializable {
    transient protected Cache<K, V> inputCache;
    transient protected Cache outputCache;
+    transient  protected Cache pageRankCache;
    transient protected FilterOperatorTree tree;
    transient protected JsonObject inputSchema;
    transient protected JsonObject outputSchema;
    transient protected Map<String, String> outputMap;
    transient protected Map<String, JsonObject> targetsMap;
    transient protected JsonObject conf;
+   transient protected double totalSum;
    protected String configString;
    protected String output;
    protected String qualString;
@@ -37,7 +41,8 @@ public class ScanCallable <K,V> implements
    public void setEnvironment(Cache<K, V> cache, Set<K> inputKeys) {
       inputCache = cache;
       outputCache = cache.getCacheManager().getCache(output);
-
+      pageRankCache = cache.getCacheManager().getCache("pagerankCache");
+      totalSum = -1f;
 
       conf = new JsonObject(configString);
       if(conf.getObject("body").containsField("qual"))
@@ -127,6 +132,18 @@ public class ScanCallable <K,V> implements
 
    protected void handlePagerank(String substring, Tuple t) {
        if(conf.getObject("body").getObject("tableDesc").getString("tableName").equals("default.webpages")){
+            if(totalSum < 0){
+                computeTotalSum();
+            }
+            String url = t.getAttribute("default.webpages.url");
+            Integer currentPagerank = (Integer) pageRankCache.get(url);
+            if(currentPagerank == null)
+            {
+                t.setAttribute("default.webpages.pagerank",0f);
+                return;
+            }
+            t.setAttribute("default.webpages.pagerank",currentPagerank/totalSum);
+
            //READ PAGERANK FROM PAGERANK CACHE;
            //READ TOTAL ONCE
            //compute value update it to tuple
@@ -151,4 +168,17 @@ public class ScanCallable <K,V> implements
 //        }
       }
    }
+
+    private void computeTotalSum() {
+        Cache approxSumCache = inputCache.getCacheManager().getCache("approx_sum_cache");
+        CloseableIterable<Map.Entry<String, Integer>> iterable =
+                approxSumCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
+
+        for (Map.Entry<String, Integer> outerEntry : iterable) {
+            totalSum += outerEntry.getValue() ;
+        }
+        if(totalSum > 0){
+            totalSum+=1;
+        }
+    }
 }
