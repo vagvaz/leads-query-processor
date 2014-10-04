@@ -4,7 +4,7 @@
             bind_addr="${jgroups.tcp.address:147.27.14.80}"
             port_range="30"
             recv_buf_size="50m"
-            send_buf_size="640k"
+            send_buf_size="1240k"
             max_bundle_size="256k"
             use_send_queues="true"
             enable_diagnostics="true"
@@ -45,15 +45,15 @@
             return_entire_cache="false"
             mcast_port="45700"
             break_on_coord_rsp="true"
-            use_disk_cache="true"
+            use_disk_cache="false"
             stagger_timeout="0"
             name="MPING"
-            timeout="10000"
-            ip_ttl="4"/>
-    <MERGE2 max_interval="100000" min_interval="15000"/>
+            timeout="3000"
+            ip_ttl="2"/>
+    <MERGE2 max_interval="30000" min_interval="10000"/>
     <FD_SOCK/>
     <FD timeout="3000" max_tries="3"/>
-    <VERIFY_SUSPECT timeout="3000"/>
+    <VERIFY_SUSPECT timeout="1500"/>
     <pbcast.NAKACK2 use_mcast_xmit="false"
                     xmit_interval="1000"
                     xmit_table_num_rows="100"
