@@ -1,5 +1,5 @@
-import eu.leads.processor.core.Tuple;
 import eu.leads.processor.common.utils.PrettyPrinter;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.web.QueryResults;
 import eu.leads.processor.web.QueryStatus;
 import eu.leads.processor.web.WebServiceClient;
@@ -7,7 +7,6 @@ import eu.leads.processor.web.WebServiceClient;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
@@ -36,7 +35,7 @@ public class leadsCli {
             {
                 System.out.print("Please enter your username: ");
                 username = in.readLine();
-                System.out.print("Please enter your SQL query: ");
+                System.out.print("\nPlease enter your SQL query: ");
                 line = in.readLine();
 
                 do {
@@ -94,13 +93,22 @@ public class leadsCli {
         }
 
         try {
-            WebServiceClient.initialize(host, port);
-            System.err.println("Connected at " + host + ":" + port );
-        } catch (MalformedURLException e) {
-            System.err.println("Unable to connect at " + host + ":" + port + " . Exiting");
-            e.printStackTrace();
-            System.exit(-1);
+            if(WebServiceClient.initialize(host, port))
+                System.out.println("Connected at " + host + ":" + port);
+            else
+                System.exit(-1);
+
+        }catch (Exception e1) {
+                System.err.println("Unable to connect at " + host + ":" + port + " . Exiting");
+                e1.printStackTrace();
+                System.exit(-1);
+
         }
+//        catch (MalformedURLException e) {
+//            System.err.println("Unable to connect at " + host + ":" + port + " . Exiting");
+//            e.printStackTrace();
+//            System.exit(-1);
+//        }
 
 
     }

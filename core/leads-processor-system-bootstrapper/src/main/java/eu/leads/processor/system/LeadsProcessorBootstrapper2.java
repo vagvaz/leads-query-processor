@@ -63,9 +63,9 @@ public class LeadsProcessorBootstrapper2 {
                 componentsConf.put(c.getString("name"), subconf);
                 JsonObject modjson = convertConf2Json(subconf);
                 modjson.putString("processors", c.getString("numberOfProcessors"));
-                if (c.containsKey("Modname")) {
-                    modjson.putString("id", c.getString("Modname") + "-default-" + UUID.randomUUID().toString());
-                    modjson.putString("Modname", c.getString("Modname"));
+                if (c.containsKey("modName")) {
+                    modjson.putString("id", c.getString("modName") + "-default-" + UUID.randomUUID().toString());
+                    modjson.putString("modName", c.getString("modName"));
 
                 }
                 componentsJson.put(c.getString("name"), modjson);
@@ -74,12 +74,12 @@ public class LeadsProcessorBootstrapper2 {
         //runRemotely("test","localhost","vertx");
         int ip = 0;
 
-       for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
+        for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
             deployComponent(e.getKey(), ips[ip]);
             ip = (ip + 1) % ips.length;
             //break;
 
-       }
+        }
     }
 
     private static JsonObject convertConf2Json(XMLConfiguration subconf) {
@@ -128,15 +128,15 @@ public class LeadsProcessorBootstrapper2 {
                 conf.putString("id", componentType + ".$id." + type);
                 conf.putString("group", "$group");
 
-                JsonArray confa = new JsonArray();
-                confa.addObject(conf);
-                service.putArray("conf", confa);
+                //JsonArray confa = new JsonArray();
+                //confa.addObject(conf);
+                service.putObject("conf", conf);
 
                 serviceA = new JsonArray();
                 serviceA.addObject(service);
             }
             if (otherGroups != null)
-                ret.putArray("otherGrouops", otherGroups);
+                ret.putArray("otherGroups", otherGroups);
 
             ret.putArray("services", serviceA);
 
@@ -186,24 +186,26 @@ public class LeadsProcessorBootstrapper2 {
         JsonObject modJson = componentsJson.get(component); //generateConfiguration(component);
 
         sendConfigurationTo(modJson, ip);
+        Configuration c = LQPConfiguration.getInstance().getConf();
 
-
-        String group = LQPConfiguration.getInstance().getConf().getString("processor.groupId");
-        String version = LQPConfiguration.getInstance().getConf().getString("processor.version");
+        String group = c.getString("processor.groupId");
+        String version = c.getString("processor.version");
         //      String command = "vertx runMod " + group +"~"+ component + "-mod~" + version + " -conf /tmp/"+config.getString("id")+".json";
-        String remotedir = LQPConfiguration.getInstance().getConf().getString("processor.ssh.remoteDir");
+        String remotedir = c.getString("processor.ssh.remoteDir");
         String vertxComponent = null;
         if (modJson.containsField("modName"))
-            vertxComponent = group + "~" + modJson.getString("modName") + version;
+            vertxComponent = group + "~" + modJson.getString("modName") + "~" + version;
         else
             vertxComponent = group + "~" + component + "-comp-mod~" + version;
 
-        String command = "vertx runMod " + vertxComponent + " -cluster h -ha -conf " + remotedir +"R"+ modJson.getString("id") + ".json";
+        String command = "vertx runMod " + vertxComponent + " -conf " + remotedir + "R" + modJson.getString("id") + ".json";
+        if (c.containsKey("processor.vertxArg"))
+            command += " -" + c.getString("processor.vertxArg");
 
-        System.out.println(command);
+        //System.out.println(command);
 
         runRemotely(modJson.getString("id"), ip, command);
-        
+
     }
 
 
@@ -214,18 +216,31 @@ public class LeadsProcessorBootstrapper2 {
         //System.out.print("Cmd" + command1);
         logger.info("Execution command: " + command1);
         //command1 =command;
-         try {
+        try {
             JSch jsch = new JSch();
 
-             String username = LQPConfiguration.getInstance().getConf()
-                     .getString("processor.ssh.username");
+            String username = LQPConfiguration.getInstance().getConf()
+                    .getString("processor.ssh.username");
             Session session = jsch.getSession(username, ip, 22);
-             if (LQPConfiguration.getInstance().getConf()
-                     .containsKey("processor.ssh.password"))
-                 session.setPassword(LQPConfiguration.getInstance().getConf()
-                         .getString("processor.ssh.password"));
-             else
-                 session.setPassword("12121212"); //just for me
+
+            if (LQPConfiguration.getInstance().getConf()
+                    .containsKey("processor.ssh.rsa")) {
+                String privateKey = LQPConfiguration.getInstance().getConf().getString("processor.ssh.rda");
+                jsch.addIdentity(privateKey);
+                logger.info("ssh identity added ");
+            } else if (LQPConfiguration.getInstance().getConf()
+                    .containsKey("processor.ssh.password"))
+                session.setPassword(LQPConfiguration.getInstance().getConf()
+                        .getString("processor.ssh.password"));
+            else
+            {
+                logger.info("No ssh credentials, no password either key ");
+            }
+                //session.setPassword("12121212"); //just for me;//                 String privateKey = "~/.ssh/id_rsa";
+//
+//             jsch.addIdentity(privateKey);
+//
+
             session.setConfig("StrictHostKeyChecking", "no");
             session.connect();
             System.out.println("Connected");
@@ -256,7 +271,7 @@ public class LeadsProcessorBootstrapper2 {
             channel.disconnect();
             session.disconnect();
             logger.info("Remote execution DONE");
-             //if(channel.getExitStatus()==-1)
+            //if(channel.getExitStatus()==-1)
 
 
         } catch (Exception e) {
@@ -309,7 +324,7 @@ public class LeadsProcessorBootstrapper2 {
             File localFile = new File(tmpFile);
             //If you want you can change the directory using the following line.
             channel.cd(remoteDir);
-            channel.put(new FileInputStream(localFile), "R"+localFile.getName());
+            channel.put(new FileInputStream(localFile), "R" + localFile.getName());
             channel.disconnect();
             session.disconnect();
             logger.info("File successful uploaded: " + localFile);

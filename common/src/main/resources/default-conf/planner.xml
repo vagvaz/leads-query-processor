@@ -4,12 +4,12 @@
     <service>
         <type>catalog</type>
         <conf>
-            <ip>localhost</ip>
+            <ip>0.0.0.0</ip>
             <port>5998</port>
             <memory>1024</memory>
             <disks>1.0</disks>
             <store>leads.tajo.catalog.LeadsMemStore</store>
-            <uri>jdbc:derby:leads_catalog/db</uri>
+            <uri>jdbc:derby:leads_processor_catalog/db</uri>
             <generateSchemas>true</generateSchemas>
         </conf>
     </service>

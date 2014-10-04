@@ -165,9 +165,9 @@ public class LeadsResultsGui extends JPanel {
             return;
         }
 
-        File xmlFile = new File(args[1]);
+        File xmlFile = new File(args[0]);
 
-        System.out.println("Trying to open file " + args[1]);
+        System.out.println("Trying to open file " + args[0]);
         if(xmlFile.exists()){
             System.out.println("File Exists");
         }
@@ -221,7 +221,8 @@ public class LeadsResultsGui extends JPanel {
     }
 
     static QueryResults send_query_and_wait(String json) throws IOException, InterruptedException {
-
+        System.out.print("json: " + json.toString());
+        InitializeWebClient(new String[]{});
         QueryStatus status = WebServiceClient.submitWorkflow("LeadsGui", json);
         QueryStatus currentStatus;
         do {

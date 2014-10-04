@@ -16,6 +16,7 @@ import org.vertx.java.platform.Verticle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by vagvaz on 8/27/14.
@@ -45,8 +46,8 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
         nqeGroup = config.getString("nqe");
         period = config.getLong("period", 600000);
         deployerMonitor = id;
-        actionToLevelMap = new HashMap<String, Integer>();
-        monitoredActions = new HashMap<Integer, Map<String, Action>>();
+        actionToLevelMap = new ConcurrentHashMap<String, Integer>();
+        monitoredActions = new ConcurrentHashMap<Integer, Map<String, Action>>();
         for (int i = -1; i < 4; i++) {
             //-1: Action is unclaimed (there is no NQE that started executing the operator.
             //0 : Action is monitored and it is ok

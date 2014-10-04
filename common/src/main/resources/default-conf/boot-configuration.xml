@@ -4,6 +4,7 @@
         <ips>localhost</ips>
         <version>1.0-SNAPSHOT</version>
         <groupId>gr.tuc.softnet</groupId>
+        <vertxArg>ha</vertxArg>
         <component>
             <name>imanager</name>
             <configurationFile>imanager.xml</configurationFile>
@@ -33,12 +34,14 @@
             <configurationFile>webservice.xml</configurationFile>
             <numberOfProcessors>1</numberOfProcessors>
             <instances>1</instances>
-            <Modname>processor-webservice</Modname>
+            <modName>processor-webservice</modName>
         </component>
         <ssh>
             <username>tr</username>
             <baseDir>/tmp/</baseDir>
             <remoteDir>/tmp/</remoteDir>
+            <password>testpass</password>
+            <!-- <rsa>/tmp/id_rsa</rsa>  a filename -->
         </ssh>
     </processor>
 </leads-processor-bootstrap>

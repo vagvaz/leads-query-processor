@@ -5,7 +5,6 @@ import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.CacheManagerFactory;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.plugins.PluginManager;
@@ -34,6 +33,7 @@ public class DataCollection {
      String sentimentPluginClassName = "eu.leads.processor.plugins.pagerank.PagerankPlugin";
      String jarFile = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/pagerank-plugin/target/pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
      String confFile = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/pagerank-plugin/pagerank-conf.xml";
+
 
       //Set desired target cache
       LQPConfiguration.getConf().setProperty(StringConstants.CRAWLER_DEFAULT_CACHE, webCacheName);
@@ -73,7 +73,7 @@ public class DataCollection {
       }
 
 
-      PrintUtilities.saveMapToFile(pages,"/home/vagvaz/test/webpagesdata.json");
+      //PrintUtilities.saveMapToFile(pages,"/home/vagvaz/test/webpagesdata.json");
 //      for(InfinispanManager cluster : clusters){
 //         cluster.stopManager();
 //      }
