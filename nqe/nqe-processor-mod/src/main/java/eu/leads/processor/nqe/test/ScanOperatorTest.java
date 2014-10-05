@@ -1,14 +1,13 @@
 package eu.leads.processor.nqe.test;
 
 import eu.leads.processor.common.StringConstants;
-import eu.leads.processor.common.infinispan.InfinispanCluster;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
-import eu.leads.processor.nqe.operators.mapreduce.ScanOperator;
+import eu.leads.processor.infinispan.operators.mapreduce.ScanOperator;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
