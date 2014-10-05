@@ -2,8 +2,10 @@ package test;
 
 import eu.leads.crawler.PersistentCrawl;
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.infinispan.CacheManagerFactory;
 import eu.leads.processor.common.infinispan.InfinispanCluster;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
+import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.plugins.EventType;
@@ -32,13 +34,14 @@ public class ClusteredTest {
         //Set desired target cache
         LQPConfiguration.getConf().setProperty(StringConstants.CRAWLER_DEFAULT_CACHE, webCacheName);
         //Create Infinispan Cluster of 3 infinispan local nodes...
-        ArrayList<InfinispanCluster> clusters = new ArrayList<InfinispanCluster>();
+        ArrayList<InfinispanManager> clusters = new ArrayList<InfinispanManager>();
         clusters.add(InfinispanClusterSingleton.getInstance()
-                         .getCluster());  //must add because it is used from the rest of the system
+                .getManager());  //must add because it is used from the rest of the system
+        clusters.add(CacheManagerFactory.createCacheManager());
         //        clusters.add(new InfinispanCluster(CacheManagerFactory.createCacheManager()));
 
-        for (InfinispanCluster cluster : clusters) {
-            cluster.getManager().getPersisentCache("clustered");
+        for (InfinispanManager cluster : clusters) {
+            cluster.getPersisentCache("clustered");
         }
 
 

@@ -50,7 +50,8 @@ public class CacheManagerFactory {
             case LOCAL:
                 System.out.println("Creatting ISPN manager loc");
                 logger.info("Starting local Infinispan Manager");
-                result = new LocalInfinispanManager();
+//                result = new LocalInfinispanManager();
+                result = new ClusterInfinispanManager();
                 break;
             case CLUSTER:
 

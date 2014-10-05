@@ -33,8 +33,9 @@ public class leadsCli {
             in = new BufferedReader(new InputStreamReader(System.in));
             String line = "";
             {
-                System.out.print("Please enter your username: ");
-                username = in.readLine();
+                System.out.print("Using default username leads ");
+//                username = in.readLine();
+                username = "leads";
                 System.out.print("\nPlease enter your SQL query: ");
                 line = in.readLine();
 
@@ -57,7 +58,7 @@ public class leadsCli {
                         }
 
                         String[] parts = sql.split(";");
-                        System.out.println("#Sql commands: " + parts.length);
+//                        System.out.println("#Sql commands: " + parts.length);
 
                         //Get first command
 
@@ -147,12 +148,21 @@ public class leadsCli {
         while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")) {
             sleep(3000);
             currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
-            System.out.print("s: " + currentStatus.toString());
-            System.out.println(", o: " + currentStatus.toString());
+//            System.out.print("s: " + currentStatus.toString());
+//            System.out.println(", o: " + currentStatus.toString());
+            System.out.println("The query with id " + currentStatus.getId() + " is " + currentStatus.getStatus());
+
         }  //currentStatus.getStatus()!= QueryState.COMPLETED
-        System.out.println("Bye Bye" +currentStatus.toString());
-        QueryResults res =WebServiceClient.getQueryResults(currentStatus.getId(),0,-1);
-        print_results(res);
+        System.out.println("The query with id " + currentStatus.getId() + " " + currentStatus.getStatus());
+        if(currentStatus.getStatus().equals("COMPLETED")) {
+            System.out.println("Wait while we fetching your result...");
+            QueryResults res = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
+            print_results(res);
+        }
+        else{
+            System.out.println("because " + currentStatus.getErrorMessage());
+        }
+
     }
 
     private static void print_results(QueryResults data){

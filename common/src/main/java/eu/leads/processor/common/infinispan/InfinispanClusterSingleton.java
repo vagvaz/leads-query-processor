@@ -12,14 +12,14 @@ package eu.leads.processor.common.infinispan;
  */
 public class InfinispanClusterSingleton {
     private static final InfinispanClusterSingleton instance = new InfinispanClusterSingleton();
-    private InfinispanCluster cluster;
+    protected InfinispanManager cluster;
 
     /**
      * Do not instantiate InfinispanClusterSingleton.
      */
     private InfinispanClusterSingleton() {
-        cluster = new InfinispanCluster(CacheManagerFactory.createCacheManager());
-        cluster.getManager().getPersisentCache("clustered");
+//        cluster = new InfinispanCluster(CacheManagerFactory.createCacheManager());
+        cluster = CacheManagerFactory.createCacheManager();
     }
 
     /**
@@ -37,7 +37,7 @@ public class InfinispanClusterSingleton {
      * @return Value for property 'manager'.
      */
     public InfinispanManager getManager() {
-        return instance.getCluster().getManager();
+        return instance.cluster;
     }
 
     /**
@@ -45,7 +45,7 @@ public class InfinispanClusterSingleton {
      *
      * @return Value for property 'cluster'.
      */
-    public InfinispanCluster getCluster() {
-        return this.cluster;
-    }
+//    public InfinispanCluster getCluster() {
+//        return this.cluster;
+//    }
 }
