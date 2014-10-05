@@ -1,4 +1,3 @@
-
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.web.QueryResults;
 import eu.leads.processor.web.QueryStatus;
@@ -19,8 +18,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
 
-import static java.lang.Thread.sleep;
-
 public class LeadsResultsGui extends JPanel {
     transient protected static Random r;
     private static String host;
@@ -39,9 +36,11 @@ public class LeadsResultsGui extends JPanel {
 
         final JTable table = new JTable(data, columnNames);
 
-        table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+        table.setPreferredScrollableViewportSize(new Dimension(1000, 220));
+        //table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         table.setFillsViewportHeight(true);
         table.setAutoCreateRowSorter(true);
+
         if (DEBUG) {
             table.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
@@ -49,7 +48,7 @@ public class LeadsResultsGui extends JPanel {
                 }
             });
         }
-        table.getColumnModel().getColumn(1).setCellRenderer(new DecimalFormatRenderer());
+        //table.getColumnModel().getColumn(1).setCellRenderer(new DecimalFormatRenderer());
         //Create the scroll pane and add the table to it.
         JScrollPane scrollPane = new JScrollPane(table);
         JTextArea textField = new JTextArea(5, 20);
@@ -65,7 +64,7 @@ public class LeadsResultsGui extends JPanel {
         c.weightx = 1.0;
         c.weighty = 1.0;
         add(scrollPane, c);
-
+        table.setAutoResizeMode(JTable.WIDTH);
     }
 
     static Vector<String> TestColumnNames() {
@@ -188,6 +187,7 @@ public class LeadsResultsGui extends JPanel {
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
         //
+        if(rowdata!=null)
         if(rowdata.size()>0)
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -206,7 +206,7 @@ public class LeadsResultsGui extends JPanel {
             host = args[0];
             port = Integer.parseInt(args[1]);
         }
-
+       
         try {
             WebServiceClient.initialize(host, port);
 
@@ -223,23 +223,33 @@ public class LeadsResultsGui extends JPanel {
     static QueryResults send_query_and_wait(String json) throws IOException, InterruptedException {
         System.out.print("json: " + json.toString());
         InitializeWebClient(new String[]{});
-        QueryStatus status = WebServiceClient.submitWorkflow("LeadsGui", json);
-        QueryStatus currentStatus;
-        do {
-            sleep(3000);
-            currentStatus = WebServiceClient.getQueryStatus(status.getId());
-            System.out.print("s: " + status.toString());
-            System.out.println(", o: " + currentStatus.toString());
+
+        QueryStatus  currentStatus = WebServiceClient.submitWorkflow("LeadsGui", json);
+        System.out.print("Waiting for results: ");
+        while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")){
+            try {
+                Thread.sleep(2000);
+                System.out.print(" - ");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
         }
-        while (currentStatus.getStatus().toLowerCase().contains("completed")); //currentStatus.getStatus()!= QueryState.COMPLETED
-        QueryResults res = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
-        return res;
+        if(currentStatus.getStatus().equals("COMPLETED")) {
+            QueryResults results = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
+            System.out.println("Workflow query results size: " + results.getResult().size());
+            return results;
+        }
+        return null;
     }
 
     private static void convert_results(QueryResults data) {
         ArrayList<Tuple> resultSet = new ArrayList<Tuple>();
-        for (String s : data.getResult())
+        for (String s : data.getResult()) {
+            if (s== null || s.equals("") )
+                continue;
             resultSet.add(new Tuple(s));
+        }
 
 
         boolean firstTuple = true;
@@ -254,18 +264,30 @@ public class LeadsResultsGui extends JPanel {
         columnNames = new Vector<String>();
 
         //Read fields
-        for (String field : fields)
-            columnNames.add(field);
+        for (String field : fields) {
+             String[] splField = field.split("\\.");
 
+            columnNames.add(splField[splField.length-1]);
+            System.out.println("Collumn:" + splField[splField.length-1]) ;
+        }
 
         rowdata = new Vector<Vector>();
         Vector<Object> row;
 
         for (Tuple t : resultSet) {
             row = new Vector<Object>();
-            for (String field : fields)
-                row.addElement(t.getAttribute(field));
+            for (String field : fields){
+                Object value = t.getGenericAttribute(field);
+                if(value != null ) {
+                    System.out.print("| " + value.toString()) ;
+                    row.addElement(new String(value.toString()));
+
+                }
+                else
+                    row.addElement("(NULL)");
+            }
             rowdata.add(row);
+            System.out.println("| " ) ;
         }
 
     }
@@ -305,11 +327,8 @@ public class LeadsResultsGui extends JPanel {
         public Component getTableCellRendererComponent(
                 JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             // First format the cell value as required
-
             value = formatter.format((Number) value);
-
             // And pass it on to parent class
-
             return super.getTableCellRendererComponent(
                     table, value, isSelected, hasFocus, row, column);
         }
