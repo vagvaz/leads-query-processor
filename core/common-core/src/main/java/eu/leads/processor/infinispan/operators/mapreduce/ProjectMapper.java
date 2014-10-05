@@ -1,5 +1,7 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
+import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
+import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.LeadsMapper;
 import eu.leads.processor.core.Tuple;
 import org.infinispan.Cache;
@@ -24,12 +26,14 @@ public class ProjectMapper extends LeadsMapper<String, String, String, String> i
         super(configuration);
     }
    public ProjectMapper(String configString){super(configString);}
+    transient protected InfinispanManager imanager;
     @Override
     public void initialize() {
         isInitialized = true;
         super.initialize();
+        imanager = new ClusterInfinispanManager(manager);
         prefix = conf.getString("output") + ":";
-        output =  manager.getCache(conf.getString("output"));
+        output = (Cache<String, String>) imanager.getPersisentCache(conf.getString("output"));
     }
 
     @Override

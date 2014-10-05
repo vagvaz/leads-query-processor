@@ -1,6 +1,8 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
+import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
+import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.math.FilterOperatorTree;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
@@ -32,7 +34,7 @@ public class ScanCallable <K,V> implements
    protected String configString;
    protected String output;
    protected String qualString;
-
+   transient protected InfinispanManager manager;
    public ScanCallable(String configString, String output) {
       this.configString = configString;
       this.output = output;
@@ -41,8 +43,9 @@ public class ScanCallable <K,V> implements
    @Override
    public void setEnvironment(Cache<K, V> cache, Set<K> inputKeys) {
       inputCache = cache;
-      outputCache = cache.getCacheManager().getCache(output);
-      pageRankCache = cache.getCacheManager().getCache("pagerankCache");
+      manager =  new ClusterInfinispanManager(cache.getCacheManager());
+      outputCache = (Cache) manager.getPersisentCache(output);
+      pageRankCache = (Cache) manager.getPersisentCache("pagerankCache");
       totalSum = -1f;
 
       conf = new JsonObject(configString);
@@ -77,12 +80,12 @@ public class ScanCallable <K,V> implements
          if (tree != null) {
             if(tree.accept(tuple)) {
                tuple = prepareOutput(tuple);
-               outputCache.put(key, tuple.asString());
+               outputCache.putIfAbsent(key, tuple.asString());
             }
          }
          else{
             tuple = prepareOutput(tuple);
-            outputCache.put(key,tuple.asString());
+            outputCache.putIfAbsent(key, tuple.asString());
          }
 
       }
@@ -138,12 +141,13 @@ public class ScanCallable <K,V> implements
             }
             String url = t.getAttribute("default.webpages.url");
            DSPMNode currentPagerank = (DSPMNode) pageRankCache.get(url);
-            if(currentPagerank == null)
+            if(currentPagerank == null || totalSum <= 0)
             {
                 t.setAttribute("default.webpages.pagerank",0f);
                 return;
             }
-            t.setAttribute("default.webpages.pagerank",currentPagerank.getVisitCount()/totalSum);
+//            t.setNumberAttribute("default.webpages.pagerank",0.032342);
+            t.setNumberAttribute("default.webpages.pagerank",currentPagerank.getVisitCount()/totalSum);
 
            //READ PAGERANK FROM PAGERANK CACHE;
            //READ TOTAL ONCE
@@ -171,7 +175,7 @@ public class ScanCallable <K,V> implements
    }
 
     private void computeTotalSum() {
-        Cache approxSumCache = inputCache.getCacheManager().getCache("approx_sum_cache");
+        Cache approxSumCache = (Cache) manager.getPersisentCache("approx_sum_cache");
         CloseableIterable<Map.Entry<String, Integer>> iterable =
                 approxSumCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
 

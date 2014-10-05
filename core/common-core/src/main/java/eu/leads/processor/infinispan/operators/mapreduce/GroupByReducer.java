@@ -1,5 +1,7 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
+import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
+import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.LeadsReducer;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.math.MathUtils;
@@ -34,7 +36,7 @@ public class GroupByReducer extends LeadsReducer<String, String> {
     transient List<String> aggregateNames;
   transient Set<String> inputFields;
   transient ArrayList<String> aggregateInferred;
-
+ transient InfinispanManager imanager;
 
    public GroupByReducer(JsonObject configuration) {
         super(configuration);
@@ -49,9 +51,9 @@ public class GroupByReducer extends LeadsReducer<String, String> {
 
         isInitialized = true;
         super.initialize();
-
+        imanager = new ClusterInfinispanManager(manager);
       prefix = outputCacheName+":";
-      data = manager.getCache(outputCacheName);
+      data = (Cache<String, String>) imanager.getPersisentCache(outputCacheName);
       aggregateValues = new ArrayList<>();
       functionType = new ArrayList<>();
       columnTypes = new ArrayList<>();
