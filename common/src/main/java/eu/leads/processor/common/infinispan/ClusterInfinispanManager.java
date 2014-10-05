@@ -208,9 +208,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
         DistributedExecutorService des = new DefaultExecutorService(cache);
         List<Future<Void>> list = new LinkedList<Future<Void>>();
         for (Address a : getMembers()) {
-            //            des.submitEverywhere(new AddListenerCallable(cache.getName(),listener));
+
             try {
-                list.add(des.submit(a, new AddListenerCallable(cache.getName(), listener)));
+                des.submitEverywhere(new AddListenerCallable(cache.getName(),listener));
+//                list.add(des.submit(a, new AddListenerCallable(cache.getName(), listener)));
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }

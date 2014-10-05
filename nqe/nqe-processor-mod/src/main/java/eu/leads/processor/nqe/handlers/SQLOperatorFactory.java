@@ -4,10 +4,10 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.LeadsNodeType;
-import eu.leads.processor.nqe.operators.*;
-import eu.leads.processor.nqe.operators.mapreduce.IntersectOperator;
-import eu.leads.processor.nqe.operators.mapreduce.ScanOperator;
-import eu.leads.processor.nqe.operators.mapreduce.UnionOperator;
+import eu.leads.processor.infinispan.operators.*;
+import eu.leads.processor.infinispan.operators.mapreduce.IntersectOperator;
+import eu.leads.processor.infinispan.operators.mapreduce.ScanOperator;
+import eu.leads.processor.infinispan.operators.mapreduce.UnionOperator;
 
 /**
  * Created by vagvaz on 9/23/14.

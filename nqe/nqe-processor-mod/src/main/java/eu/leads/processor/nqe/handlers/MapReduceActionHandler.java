@@ -1,29 +1,13 @@
 package eu.leads.processor.nqe.handlers;
 
-import eu.leads.processor.common.*;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
-import eu.leads.processor.core.ActionStatus;
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
-import eu.leads.processor.core.plan.QueryContext;
-import eu.leads.processor.core.plan.QueryState;
-import eu.leads.processor.core.plan.QueryStatus;
-import eu.leads.processor.core.plan.SQLQuery;
-import eu.leads.processor.nqe.NQEConstants;
-import eu.leads.processor.nqe.operators.mapreduce.*;
 import org.infinispan.Cache;
-import org.infinispan.distexec.DefaultExecutorService;
-import org.infinispan.distexec.DistributedExecutorService;
-import org.vertx.java.core.json.JsonObject;
 
 import java.util.List;
-import java.util.Properties;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 /**
  * Created by vagvaz on 8/6/14.

@@ -190,8 +190,9 @@ public class PluginManager {
         configCache.put(plugin.getId() + ":jar", plugin.getJar());
 
       configCache.put(plugin.getId() + ":conf", plugin.getConfig());
+
       configCache.put(plugin.getId() + ":events", eventmask);
-//      configCache.put(plugin.getId() + ":className", plugin.getClassName().getBytes());
+      configCache.put(plugin.getId() + ":className", plugin.getClassName());
     }
 
     private static void deployPluginListener(String pluginId, String cacheName,
