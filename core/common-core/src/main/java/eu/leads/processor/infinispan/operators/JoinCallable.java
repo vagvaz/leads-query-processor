@@ -1,6 +1,7 @@
 package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
+import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.math.FilterOperatorTree;
 import org.infinispan.Cache;
@@ -29,6 +30,7 @@ public class JoinCallable<K,V> implements
     transient protected Map<String,String> outputMap;
     transient protected Map<String,JsonObject> targetsMap;
     transient protected JsonObject conf;
+
     protected String configString;
     protected String output;
     protected String qualString;
@@ -36,6 +38,7 @@ public class JoinCallable<K,V> implements
     protected String innerColumn;
     protected String outerColumn;
     protected final String outerCacheName;
+
 
     public JoinCallable(String configString, String outputCacheName, String outerCacheName,boolean left) {
         this.configString = configString;
