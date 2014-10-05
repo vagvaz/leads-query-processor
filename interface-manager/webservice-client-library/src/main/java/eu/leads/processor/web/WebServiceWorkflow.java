@@ -18,7 +18,7 @@ public class WebServiceWorkflow {
         this.user = user;
     }
 
-    public String getSql() {
+    public String getWorkflow() {
         return workflow;
     }
 

@@ -16,7 +16,7 @@ public class WebServiceClientTest {
     private static int port;
 
     public static void main(String[] args) throws IOException {
-        host = "http://5.147.254.198";
+        host = "http://localhost";
         port = 8080;
         if (args.length == 2) {
             host = args[0];
@@ -121,11 +121,11 @@ public class WebServiceClientTest {
             JsonObject level0 = WebServiceClient.getObject(wgsreply.getString("output"),"0",null);
             JsonObject level1 = WebServiceClient.getObject(wgsreply.getString("output"),"1",null);
             JsonObject level2 = WebServiceClient.getObject(wgsreply.getString("output"),"2",null);
-            JsonObject level3 = WebServiceClient.getObject(wgsreply.getString("output"),"3",null);
+//            JsonObject level3 = WebServiceClient.getObject(wgsreply.getString("output"),"3",null);
             System.out.println("===========    0   ================= \n"+level0.encodePrettily());
             System.out.println("===========    1   ================= \n"+level1.encodePrettily());
             System.out.println("===========    2   ================= \n"+level2.encodePrettily());
-            System.out.println("===========    3   ================= \n"+level3.encodePrettily());
+//            System.out.println("===========    3   ================= \n"+level3.encodePrettily());
           }
           else{
             System.err.println("WGS Operator FAILED");
