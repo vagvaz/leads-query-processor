@@ -1,4 +1,4 @@
-package eu.leads.processor.test;
+package eu.leads.processor.data;
 
 import eu.leads.crawler.PersistentCrawl;
 import eu.leads.processor.common.StringConstants;
@@ -30,10 +30,13 @@ public class DataCollection {
       LQPConfiguration.getConf().setProperty("crawler.seed",
                                                     "http://www.bbc.co.uk"); //For some reason it is ignored news.yahoo.com is used by default
       LQPConfiguration.getConf().setProperty("crawler.depth", 3);
-     String sentimentPluginClassName = "eu.leads.processor.plugins.pagerank.PagerankPlugin";
-     String jarFile = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/pagerank-plugin/target/pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
-     String confFile = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/pagerank-plugin/pagerank-conf.xml";
+     String pagerankPluginClassName = "eu.leads.processor.plugins.pagerank.PagerankPlugin";
+     String sentimentPluginClassName = "eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin";
 
+     String pagerankJar = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/pagerank-plugin/target/pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
+     String pagerankConf = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/pagerank-plugin/pagerank-conf.xml";
+     String sentimentConf = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/sentiment-plugin/sentiment-conf.xml";
+     String sentimentJar = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/sentiment-plugin/target/sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
 
       //Set desired target cache
       LQPConfiguration.getConf().setProperty(StringConstants.CRAWLER_DEFAULT_CACHE, webCacheName);
@@ -45,9 +48,12 @@ public class DataCollection {
 //      for (InfinispanManager cluster : clusters) {
 //         cluster.getPersisentCache(StringConstants.CRAWLER_DEFAULT_CACHE);
 //      }
-     PluginPackage sentimentPlugin = new PluginPackage(sentimentPluginClassName,sentimentPluginClassName,jarFile,confFile);
-     PluginManager.uploadPlugin(sentimentPlugin);
-     PluginManager.deployPlugin(sentimentPluginClassName,webCacheName, EventType.CREATEANDMODIFY);
+     PluginPackage pagerankPlugin = new PluginPackage(pagerankPluginClassName,pagerankPluginClassName,pagerankJar,pagerankConf);
+     PluginPackage sentimentPlugin = new PluginPackage(sentimentPluginClassName,sentimentPluginClassName,sentimentJar,sentimentConf);
+//     PluginManager.uploadPlugin(pagerankPlugin);
+//     PluginManager.deployPlugin(pagerankPluginClassName,webCacheName, EventType.CREATEANDMODIFY);
+//       PluginManager.uploadPlugin(sentimentPlugin);
+//     PluginManager.deployPlugin(sentimentPluginClassName,webCacheName, EventType.CREATEANDMODIFY);
       Cache pages = (Cache) clusters.get(0).getPersisentCache(webCacheName);
       System.out.println("pages size is " + pages.size());
 

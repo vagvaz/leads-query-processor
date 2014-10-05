@@ -111,7 +111,7 @@ public class LQPConfiguration {
             XMLConfiguration jgroups = new XMLConfiguration("conf/jgroups.tmpl");
             String ip = instance.getConfiguration().getString("node.ip");
             jgroups.setProperty("TCP[@bind_addr]", "${jgroups.tcp.address:" + ip + "}");
-            jgroups.setProperty("MPING[@bind_addr]", ip);
+            //jgroups.setProperty("MPING[@bind_addr]", ip);
             String broadcast =
                 instance.getConfiguration().getString("node.ip").substring(0, ip.lastIndexOf("."))
                     + ".255";
