@@ -28,12 +28,16 @@ public class AddListenerCallable<K, V> implements DistributedCallable<K, V, Void
      */
     @Override
     public Void call() throws Exception {
-        if (listner instanceof LeadsListener) {
-            LeadsListener leadsListener = (LeadsListener) listner;
-            leadsListener.initialize(new ClusterInfinispanManager((cache.getCacheManager())));
+        if(cache.getCacheManager().cacheExists(cacheName)) {
+            if (cache.getAdvancedCache().getRpcManager().getMembers().contains(cache.getCacheManager().getAddress())) {
+                if (listner instanceof LeadsListener) {
+                    LeadsListener leadsListener = (LeadsListener) listner;
+                    leadsListener.initialize(new ClusterInfinispanManager((cache.getCacheManager())));
 
+                }
+                cache.getCacheManager().getCache(cacheName).addListener(listner);
+            }
         }
-        cache.getCacheManager().getCache(cacheName).addListener(listner);
         return null;
     }
 

@@ -7,6 +7,7 @@ import eu.leads.processor.common.utils.FSUtilities;
 import eu.leads.processor.common.utils.FileLockWrapper;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.infinispan.Cache;
+import org.infinispan.context.Flag;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.remoting.transport.Address;
@@ -31,14 +32,26 @@ public class PluginManager {
     private static Logger log = LoggerFactory.getLogger(PluginManager.class);
 
     public static boolean uploadPlugin(PluginPackage plugin) {
-        if (validatePlugin(plugin)) {
-            upload(StringConstants.PLUGIN_CACHE, plugin);
-            return true;
+        if(!plugin.getId().equals("eu.leads.processor.plugins.pagerank.PagerankPlugin") &&  !plugin.getId().equals("eu.leads.processor.plugins.sentiment")) {
+            if (validatePlugin(plugin)) {
+                upload(StringConstants.PLUGIN_CACHE, plugin);
+                return true;
+            }
+            return false;
         }
-        return false;
+        else{
+            PluginPackage systemPlugin = new PluginPackage(plugin.getId(),plugin.getId());
+            systemPlugin.setJar(new byte[1]);
+            systemPlugin.setConfig(plugin.getConfig());
+            systemPlugin.setId(plugin.getId());
+            upload(StringConstants.PLUGIN_CACHE, systemPlugin);
+        }
+        return true;
     }
 
     private static boolean validatePlugin(PluginPackage plugin) {
+        if(plugin.getId().equals("eu.leads.processor.plugins.pagerank.PagerankPlugin")  ||  plugin.getId().equals("eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin"))
+            return true;
         if (plugin.getJar().length == 0) {
             log.error("Tried to upload plugin " + plugin.getId() + " without a jar file");
             return false;
@@ -59,7 +72,14 @@ public class PluginManager {
     private static void upload(String pluginCache, PluginPackage plugin) {
         Cache cache = (Cache) InfinispanClusterSingleton.getInstance().getManager()
                                   .getPersisentCache(pluginCache);
-        cache.put(plugin.getId(), plugin);
+        if(!plugin.getId().equals("eu.leads.processor.plugins.pagerank.PagerankPlugin") &&  ! plugin.getId().equals("eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin")) {
+            cache.put(plugin.getId(), plugin);
+        }
+        else
+        {
+            plugin.setJar( new byte[1]);
+            cache.put(plugin.getId(),plugin);
+        }
     }
 
     private static boolean checkPluginName(String className, byte[] jar) {
@@ -161,14 +181,17 @@ public class PluginManager {
 
     private static void addPluginToCache(PluginPackage plugin, int eventmask, Cache configCache,String prefix) {
 
-//        configCache.put(prefix+":"+plugin.getId() + ":jar", plugin.getJar());
+//        configCache.put(prefix+":"+plugin.getId() + ":conf", plugin.getConfig());
 //        configCache.put(prefix+":"+plugin.getId() + ":conf", plugin.getConfig());
 //        configCache.put(prefix+":"+plugin.getId() + ":events", eventmask);
 //        configCache.put(prefix+":"+plugin.getId() + ":className", plugin.getClassName());
-      configCache.put(plugin.getId() + ":jar", plugin.getJar());
+        configCache.getAdvancedCache().withFlags(Flag.FORCE_ASYNCHRONOUS,Flag.SKIP_LISTENER_NOTIFICATION,Flag.SKIP_LOCKING,Flag.SKIP_STATISTICS,Flag.IGNORE_RETURN_VALUES);
+        if(!plugin.getId().equals("eu.leads.processor.plugins.pagerank.PagerankPlugin") &&  ! plugin.getId().equals("eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin"))
+        configCache.put(plugin.getId() + ":jar", plugin.getJar());
+
       configCache.put(plugin.getId() + ":conf", plugin.getConfig());
       configCache.put(plugin.getId() + ":events", eventmask);
-      configCache.put(plugin.getId() + ":className", plugin.getClassName());
+//      configCache.put(plugin.getId() + ":className", plugin.getClassName().getBytes());
     }
 
     private static void deployPluginListener(String pluginId, String cacheName,

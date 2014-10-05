@@ -173,12 +173,21 @@ public class SimplePluginRunner implements LeadsListener {
     }
 
     private void initializePlugin(Cache cache, String plugin) {
-        byte[] jarAsBytes = (byte[]) cache.get(plugin + ":jar");
-        FSUtilities.flushPluginToDisk(plugin + ".jar", jarAsBytes);
+        if(plugin.equals("eu.leads.processor.plugins.pagerank.PagerankPlugin")){
+            ConfigurationUtilities
+                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar");
+        }else if(plugin.equals("eu.leads.processor.plugins.sentiment")){
+            ConfigurationUtilities
+                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar");
+        }
+        else {
+            byte[] jarAsBytes = (byte[]) cache.get(plugin + ":jar");
+            FSUtilities.flushPluginToDisk(plugin + ".jar", jarAsBytes);
 
-        ConfigurationUtilities
-            .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugin
-                                + ".jar");
+            ConfigurationUtilities
+                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugin
+                            + ".jar");
+        }
         byte[] config = (byte[]) cache.get(plugin + ":conf");
         FSUtilities.flushToTmpDisk("/leads/tmp/" + plugin + "-conf.xml", config);
         XMLConfiguration pluginConfig = null;

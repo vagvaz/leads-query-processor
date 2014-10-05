@@ -51,9 +51,44 @@ public class WebServiceClientTest {
             System.out.println(mapObject.toString());
         }
 
+        String workflow = "{\n" +
+                "  \"IsDistinct\": false,\n" +
+                "  \"Projections\": [\n" +
+                "    {\n" +
+                "      \"Expr\": {\n" +
+                "        \"OpType\": \"Asterisk\"\n" +
+                "      },\n" +
+                "      \"OpType\": \"Target\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"Expr\": {\n" +
+                "    \"Relations\": [\n" +
+                "      {\n" +
+                "        \"TableName\": \"webpages\",\n" +
+                "        \"OpType\": \"Relation\"\n" +
+                "      }\n" +
+                "    ],\n" +
+                "    \"OpType\": \"RelationList\"\n" +
+                "  },\n" +
+                "  \"OpType\": \"Projection\"\n" +
+                "}";
+        QueryStatus  currentStatus = WebServiceClient.submitWorkflow("testUser", workflow);
+
+        while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")){
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
+        }
+        if(currentStatus.getStatus().equals("COMPLETED")) {
+            QueryResults results = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
+            System.out.println("worflow query results size " + results.getResult().size());
+        }
         String sampleQuery =  " SELECT url from webpages order by url";
 
-        QueryStatus currentStatus = WebServiceClient.submitQuery("webServiceTest",sampleQuery);
+        currentStatus = WebServiceClient.submitQuery("webServiceTest",sampleQuery);
         while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")){
           try {
             Thread.sleep(2000);
@@ -62,6 +97,7 @@ public class WebServiceClientTest {
           }
           currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
         }
+
         if(currentStatus.getStatus().equals("COMPLETED")){
           QueryResults results = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
           String firstUrl = results.getResult().get(0);
