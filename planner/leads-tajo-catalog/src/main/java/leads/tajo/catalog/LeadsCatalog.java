@@ -111,7 +111,7 @@ public class LeadsCatalog {
 
     ;
 
-    public void StartServer() throws Exception {
+    public boolean StartServer() throws Exception {
         try {
             catalogServer = new MiniCatalogServer(conf);
             CatalogServer catServer = catalogServer.getCatalogServer();
@@ -119,7 +119,9 @@ public class LeadsCatalog {
             conf.setVar(ConfVars.CATALOG_ADDRESS, NetUtils.normalizeInetSocketAddress(sockAddr));
         } catch (Exception e) {
             System.err.println("Unable to Start Server" + e.getMessage());
+            return false;
         }
+        return true;
     }
 
 }

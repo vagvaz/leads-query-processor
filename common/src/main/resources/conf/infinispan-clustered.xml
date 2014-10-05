@@ -33,7 +33,7 @@
                          statistics="true">
          <compatibility></compatibility>
          <eviction max-entries="10000"/>
-         <locking concurrency-level="2000"/>
+         <locking concurrency-level="2000" acquire-timeout="3000"/>
          <state-transfer enabled="false" await-initial-transfer="false"/>
 
          <persistence passivation="true">
@@ -46,7 +46,7 @@
                          statistics="true">
          <compatibility></compatibility>
          <eviction max-entries="10000"/>
-         <locking concurrency-level="2000"/>
+                  <locking concurrency-level="2000" acquire-timeout="3000"/>
          <state-transfer enabled="true" await-initial-transfer="true"/>
 
          <persistence passivation="true">
@@ -59,7 +59,7 @@
                          statistics="true">
          <compatibility></compatibility>
          <eviction max-entries="10000"/>
-         <locking concurrency-level="2000"/>
+                  <locking concurrency-level="2000" acquire-timeout="3000"/>
          <state-transfer enabled="true" await-initial-transfer="true"/>
 
          <persistence passivation="true">
@@ -72,8 +72,8 @@
                          statistics="false">
           <state-transfer enabled="false" await-initial-transfer="false"/>
          <compatibility></compatibility>
-         <eviction max-entries="1"/>
-         <locking concurrency-level="2000"/>
+          <eviction strategy="LIRS" max-entries="1"/>
+                  <locking concurrency-level="2000" acquire-timeout="3000"/>
          <persistence passivation="true">
             <file-store path="${java.io.tmpdir}" shared="false" preload="false"/>
          </persistence>
@@ -84,8 +84,8 @@
                          statistics="false">
          <state-transfer enabled="false" await-initial-transfer="false"/>
 
-         <eviction max-entries="11"/>
-         <locking concurrency-level="2000"/>
+          <eviction strategy="LIRS" max-entries="11"/>
+                  <locking concurrency-level="2000" acquire-timeout="3000"/>
          <state-transfer enabled="false" await-initial-transfer="false"/>
          <compatibility></compatibility>
          <persistence passivation="true">
@@ -96,10 +96,15 @@
 
       <distributed-cache name="queries" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
                          statistics="true">
-         <compatibility></compatibility>
-                         </distributed-cache>
-      <distributed-cache name="tables" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
+          <locking concurrency-level="2000" acquire-timeout="3000"/>
+          <state-transfer enabled="false" await-initial-transfer="false"/>
+          <eviction strategy="LIRS" max-entries="11"/>
+     </distributed-cache>
+     <distributed-cache name="tables" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
                          statistics="true">
+         <eviction strategy="LIRS" max-entries="11"/>
+         <locking concurrency-level="2000" acquire-timeout="3000"/>
+         <state-transfer enabled="false" await-initial-transfer="false"/>
          <compatibility></compatibility>
       </distributed-cache>
    </cache-container>

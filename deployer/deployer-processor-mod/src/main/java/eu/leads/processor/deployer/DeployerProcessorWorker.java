@@ -32,7 +32,7 @@ public class DeployerProcessorWorker extends Verticle implements Handler<Message
     EventBus bus;
     LeadsMessageHandler leadsHandler;
     LogProxy log;
-    InfinispanManager persistence;
+//    InfinispanManager persistence;
     Map<String, ActionHandler> handlers;
 
     @Override
@@ -63,7 +63,7 @@ public class DeployerProcessorWorker extends Verticle implements Handler<Message
         com.initialize(id, gr, null, leadsHandler, leadsHandler, vertx);
         bus.registerHandler(id + ".process", this);
         LQPConfiguration.initialize();
-        persistence = InfinispanClusterSingleton.getInstance().getManager();
+//        persistence = InfinispanClusterSingleton.getInstance().getManager();
         JsonObject msg = new JsonObject();
         msg.putString("processor", id + ".process");
         handlers = new HashMap<String, ActionHandler>();

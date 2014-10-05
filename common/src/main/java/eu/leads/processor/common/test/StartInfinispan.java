@@ -16,11 +16,11 @@ public class StartInfinispan {
     public static void main(String[] args) throws InterruptedException {
 
         LQPConfiguration.initialize();
-        InfinispanCluster cluster = InfinispanClusterSingleton.getInstance().getCluster();
+
 
         //        cluster.initialize();
 
-        InfinispanManager man = cluster.getManager();
+        InfinispanManager man = InfinispanClusterSingleton.getInstance().getManager();
         PrintUtilities.printList(man.getMembers());
 
         man.getPersisentCache("testCache").put("1", "2");

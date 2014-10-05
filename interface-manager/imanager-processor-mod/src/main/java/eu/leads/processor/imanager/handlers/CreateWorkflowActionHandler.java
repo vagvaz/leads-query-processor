@@ -62,7 +62,7 @@ public class CreateWorkflowActionHandler implements ActionHandler {
         } catch (Exception e) {
             actionResult.putString("error", "");
             actionResult.putString("message",
-                    "Failed to add query " + action.getData().toString() + "\n"
+                    "Failed to add Workflow " + action.getData().toString() + "\n"
                             + " to the queries cache");
         }
         return result;

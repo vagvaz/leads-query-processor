@@ -33,6 +33,7 @@ public class GetObjectActionHandler implements ActionHandler {
             String cacheName = action.getData().getString("table");
             String key = action.getData().getString("key");
             Cache<String,String> cache = (Cache) persistence.getPersisentCache(cacheName);
+            System.err.println(cache.getName() + " sz " + cache.size());
             String objectJson = cache.get(key);
             JsonObject actionResult = new JsonObject();
             if (!(objectJson == null || objectJson.equals(""))) {

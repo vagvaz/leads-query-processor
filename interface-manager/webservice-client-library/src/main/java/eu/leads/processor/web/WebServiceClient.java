@@ -73,7 +73,7 @@ public class WebServiceClient {
     }
 
     private static String getResult(HttpURLConnection connection) throws IOException {
-        System.out.println("getResult");
+//        System.out.println("getResult");
         InputStream is = connection.getInputStream();
         BufferedReader rd = new BufferedReader(new InputStreamReader(is));
         StringBuffer response = new StringBuffer();
@@ -83,13 +83,13 @@ public class WebServiceClient {
         }
         rd.close();
         response.trimToSize();
-        System.out.println("received: " + response);
+//        System.out.println("received: " + response);
         return response.toString();
     }
 
     private static void setBody(HttpURLConnection connection, Object body) throws IOException {
         String output = mapper.writeValueAsString(body);
-        System.out.println("Size: " + output.getBytes().length);
+//        System.out.println("Size: " + output.getBytes().length);
         DataOutputStream os = new DataOutputStream(connection.getOutputStream());
         os.writeBytes(output);
         os.flush();
@@ -111,6 +111,7 @@ public class WebServiceClient {
 
     public static JsonObject getObject(String table, String key, List<String> attributes)
         throws IOException {
+
         ObjectQuery ob = new ObjectQuery();
         ob.setAttributes(attributes);
         ob.setKey(key);
