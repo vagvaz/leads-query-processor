@@ -13,7 +13,8 @@
    <artifactId>leads-aux-tools</artifactId>
    <packaging>pom</packaging>
    <modules>
-      <module>sentiment=module</module>
+      <module>sentiment-module</module>
+       <module>data-collection</module>
    </modules>
 
 

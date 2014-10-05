@@ -7,6 +7,7 @@ import eu.leads.processor.common.utils.FSUtilities;
 import eu.leads.processor.common.utils.FileLockWrapper;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.infinispan.Cache;
+import org.infinispan.context.Flag;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.remoting.transport.Address;
@@ -161,7 +162,7 @@ public class PluginManager {
 
     private static void addPluginToCache(PluginPackage plugin, int eventmask, Cache configCache,String prefix) {
 
-//        configCache.put(prefix+":"+plugin.getId() + ":jar", plugin.getJar());
+//        configCache.put(prefix+":"+plugin.getId() + ":conf", plugin.getConfig());
 //        configCache.put(prefix+":"+plugin.getId() + ":conf", plugin.getConfig());
 //        configCache.put(prefix+":"+plugin.getId() + ":events", eventmask);
 //        configCache.put(prefix+":"+plugin.getId() + ":className", plugin.getClassName());

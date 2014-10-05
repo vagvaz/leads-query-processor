@@ -173,6 +173,11 @@ public class SimplePluginRunner implements LeadsListener {
     }
 
     private void initializePlugin(Cache cache, String plugin) {
+        if(plugin.equals("eu.leads.processor.plugins.pagerank.PageranPlugin")){
+
+        }else if(plugin.equals("eu.leads.processor.plugins.sentiment")){
+
+        }
         byte[] jarAsBytes = (byte[]) cache.get(plugin + ":jar");
         FSUtilities.flushPluginToDisk(plugin + ".jar", jarAsBytes);
 
