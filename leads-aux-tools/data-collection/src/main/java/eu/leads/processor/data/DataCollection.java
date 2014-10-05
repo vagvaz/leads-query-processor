@@ -28,7 +28,7 @@ public class DataCollection {
 
       //Put some configuration properties for crawler
       LQPConfiguration.getConf().setProperty("crawler.seed",
-                                                    "http://www.bbc.co.uk"); //For some reason it is ignored news.yahoo.com is used by default
+                                                    "http://www.yahoo.com"); //For some reason it is ignored news.yahoo.com is used by default
       LQPConfiguration.getConf().setProperty("crawler.depth", 3);
      String pagerankPluginClassName = "eu.leads.processor.plugins.pagerank.PagerankPlugin";
      String sentimentPluginClassName = "eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin";
@@ -48,26 +48,30 @@ public class DataCollection {
 //      for (InfinispanManager cluster : clusters) {
 //         cluster.getPersisentCache(StringConstants.CRAWLER_DEFAULT_CACHE);
 //      }
-     PluginPackage pagerankPlugin = new PluginPackage(pagerankPluginClassName,pagerankPluginClassName,pagerankJar,pagerankConf);
-     PluginPackage sentimentPlugin = new PluginPackage(sentimentPluginClassName,sentimentPluginClassName,sentimentJar,sentimentConf);
-//     PluginManager.uploadPlugin(pagerankPlugin);
-//     PluginManager.deployPlugin(pagerankPluginClassName,webCacheName, EventType.CREATEANDMODIFY);
-//       PluginManager.uploadPlugin(sentimentPlugin);
-//     PluginManager.deployPlugin(sentimentPluginClassName,webCacheName, EventType.CREATEANDMODIFY);
-      Cache pages = (Cache) clusters.get(0).getPersisentCache(webCacheName);
-      System.out.println("pages size is " + pages.size());
+       try {
+           PluginPackage pagerankPlugin = new PluginPackage(pagerankPluginClassName, pagerankPluginClassName, pagerankJar, pagerankConf);
+           PluginPackage sentimentPlugin = new PluginPackage(sentimentPluginClassName, sentimentPluginClassName, sentimentJar, sentimentConf);
+           PluginManager.uploadPlugin(pagerankPlugin);
+           PluginManager.deployPlugin(pagerankPluginClassName, webCacheName, EventType.CREATEANDMODIFY);
+           PluginManager.uploadPlugin(sentimentPlugin);
+           PluginManager.deployPlugin(sentimentPluginClassName, webCacheName, EventType.CREATEANDMODIFY);
 
+
+       }catch(Exception e){
+           System.err.println(e.getMessage());
+       }
       //start crawler
-
+       Cache pages = (Cache) clusters.get(0).getPersisentCache(webCacheName);
+       System.out.println("pages size is " + pages.size());
       //Sleep for an amount of time to test if everything is working fine
-      boolean stop = pages.size() >= 5;
+      boolean stop = pages.size() >= 15;
       PersistentCrawl.main(null);
       try {
          while(!stop)
          {
             Thread.sleep(sleepingPeriod * 1000);
             System.out.println("pages size is " + pages.size());
-            if(pages.size() >= 5)
+            if(pages.size() >= 15)
             {
                PersistentCrawl.stop();
                stop = true;

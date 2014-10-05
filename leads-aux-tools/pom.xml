@@ -15,6 +15,7 @@
    <modules>
       <module>sentiment-module</module>
        <module>data-collection</module>
+       <module>pagerank-node</module>
    </modules>
 
 

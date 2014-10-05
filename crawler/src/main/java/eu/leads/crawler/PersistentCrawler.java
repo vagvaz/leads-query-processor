@@ -83,7 +83,8 @@ public class PersistentCrawler extends DefaultCrawler {
     }
 
   private void additionalAttributes(JsonObject object) {
-    object.putNumber("pagerank", -1);
+     Double minusOne = new Double(-1.9);
+    object.putNumber("pagerank", minusOne);
     Sentiment sentiment = sentimentAnalysisModule.getOverallSentiment(object.getString("content"));
     object.putValue("sentiment",sentiment.getValue());
 //    String language = det.detectLanguage(object.getString("content"));

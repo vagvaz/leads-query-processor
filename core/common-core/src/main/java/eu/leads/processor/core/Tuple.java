@@ -53,7 +53,7 @@ public class Tuple extends DataType {
    }
 
     public String getAttribute(String column) {
-        return data.getString(column);
+        return data.getString(column).toString();
     }
     public Number getNumberAttribute(String column){return data.getNumber(column);}
     public boolean getBooleanAttribute(String column){return data.getBoolean(column);}
