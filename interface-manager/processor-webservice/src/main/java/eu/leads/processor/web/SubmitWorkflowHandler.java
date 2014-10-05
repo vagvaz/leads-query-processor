@@ -108,7 +108,6 @@ public class SubmitWorkflowHandler implements Handler<HttpServerRequest> {
             if (Strings.isNullOrEmpty(workflow) || workflow.equals("{}")) {
                 replyHandler.replyForError(null);
             }
-            JsonObject object = new JsonObject();
 
             Action action = new Action();
             action.setId(requestId);

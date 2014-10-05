@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static java.lang.Thread.sleep;
+
 /**
  * Created by vagvaz on 8/25/14.
  */
@@ -61,23 +63,36 @@ public class PlannerCatalogWorker extends Verticle {
                                                              "leads.tajo.catalog.LeadsMemStore"));//
     conf.set(CatalogConstants.CATALOG_URI, config
                                              .getString("uri",
-                                                         "jdbc:derby:"
-                                                           + clusterTestBuildDir
-                                                           + "/db"));
+                                                     "jdbc:derby:"
+                                                             + clusterTestBuildDir
+                                                             + "/db"));
 
     conf.setVar(TajoConf.ConfVars.CATALOG_ADDRESS,
                  config.getString("ip", "0.0.0.0")
                    + ":" +
                    config
                      .getNumber("port"));
-    catalogServer = new LeadsCatalog(conf);
-    try {
-      catalogServer.StartServer();
-      if (container.config().containsField("generateSchemas"))
-        createInitialTables();
-    } catch (Exception e) {
-      container.logger().error("Problem Encountered when tried to create Initial Schemas " + e.getMessage());
-    }
+      //Start Catalog Server
+      boolean catalogServerStarted = false;
+      while (!catalogServerStarted){
+          container.logger().info("Trying to start CatalogServer.");
+          catalogServer = new LeadsCatalog(conf);
+          try {
+              catalogServerStarted=catalogServer.StartServer();
+              catalogServerStarted=true;
+              if (container.config().containsField("generateSchemas"))
+                  createInitialTables();
+          } catch (Exception e) {
+              catalogServer=null;
+              container.logger().error("Problem Encountered when tried to create Initial Schemas " + e.getMessage());
+              try {
+                  sleep(1000);
+                  container.logger().error("\n\n\n\n\n\n\n SIZE 0 \n\n\n\n\n");
+              } catch (InterruptedException e1) {
+                  e1.printStackTrace();
+              }
+          }
+      }
 
   }
 
