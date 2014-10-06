@@ -1,4 +1,9 @@
 *****Preliminaries
+// Remote debug config...
+
+1. export VERTX_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"
+2. vertx runMod modulename -conf jsonconf -ha -hagroup optional 
+3. run remote debug in IDE (intelij is preferred multiple tabs concurrently)
 
 Geia sas to kainourio project gia to query processor einai etoimo opws epishs 
 kai ta plugins.

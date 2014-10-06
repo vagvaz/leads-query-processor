@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document version="Apatar_v1.12.23">
+  <DateAndTime createWithApplication="false" dateFormat="" dateSeparator="" timeFormat="" timeStandart="">
+    <pattern>d/M/yyyy h:mm a</pattern>
+  </DateAndTime>
+  <node id="1" posX="68" posY="113" width="60" height="60" nodeClass="com.apatar.hadoop.HDFSNode" title="Apply">
+    <OutputConnectionPoints>
+      <ConnectionPoint inbound="false" name="output" isMultipleConnection="true" positionNumber="1">
+        <tableInfo>
+          <tableName>temp2569305193299687239</tableName>
+          <records>
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="sID" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="cName" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="major" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="decision" primaryKey="false" signed="false" nullable="false" readonly="false" />
+          </records>
+        </tableInfo>
+      </ConnectionPoint>
+    </OutputConnectionPoints>
+    <InputConnectionPoints>
+      <ConnectionPoint inbound="true" name="input" isMultipleConnection="false" positionNumber="1" />
+    </InputConnectionPoints>
+    <ExtConnectionPoints />
+    <com.apatar.core.RDBTable tableName="table" isView="false" mode="ReadWrite" />
+    <mode>0</mode>
+    <isDelete>false</isDelete>
+    <conID>8666209190918402488</conID>
+    <iFields />
+  </node>
+  <node id="2" posX="79" posY="275" width="60" height="60" nodeClass="com.apatar.hadoop.HDFSNode" title="Student">
+    <OutputConnectionPoints>
+      <ConnectionPoint inbound="false" name="output" isMultipleConnection="true" positionNumber="1">
+        <tableInfo>
+          <tableName>temp5042632685800699508</tableName>
+          <records>
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="sID" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="sName" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="GPA" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="sizeHS" primaryKey="false" signed="false" nullable="false" readonly="false" />
+          </records>
+        </tableInfo>
+      </ConnectionPoint>
+    </OutputConnectionPoints>
+    <InputConnectionPoints>
+      <ConnectionPoint inbound="true" name="input" isMultipleConnection="false" positionNumber="1" />
+    </InputConnectionPoints>
+    <ExtConnectionPoints />
+    <com.apatar.core.RDBTable tableName="table" isView="false" mode="ReadWrite" />
+    <mode>0</mode>
+    <isDelete>false</isDelete>
+    <conID>7311639757226620054</conID>
+    <iFields />
+  </node>
+  <node id="3" posX="221" posY="201" width="60" height="60" nodeClass="com.apatar.hadoopJoin.HDJoinNode" title="Apply-Student Join" subProject="&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;&#xD;&#xA;&amp;lt;document version=&amp;quot;Apatar_v1.12.23&amp;quot;&amp;gt;&#xD;&#xA;  &amp;lt;DateAndTime createWithApplication=&amp;quot;false&amp;quot; dateFormat=&amp;quot;&amp;quot; dateSeparator=&amp;quot;&amp;quot; timeFormat=&amp;quot;&amp;quot; timeStandart=&amp;quot;&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;pattern&amp;gt;d/M/yyyy h:mm a&amp;lt;/pattern&amp;gt;&#xD;&#xA;  &amp;lt;/DateAndTime&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;17&amp;quot; posX=&amp;quot;225&amp;quot; posY=&amp;quot;175&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;Student.sName&amp;quot; inbound=&amp;quot;false&amp;quot; connectionName=&amp;quot;input2&amp;quot; category=&amp;quot;Student&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;true&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;LongText&amp;quot; originalType=&amp;quot;LONGVARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;sName&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;21&amp;quot; posX=&amp;quot;252&amp;quot; posY=&amp;quot;461&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;Apply.decision&amp;quot; inbound=&amp;quot;false&amp;quot; connectionName=&amp;quot;input1&amp;quot; category=&amp;quot;Apply&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;true&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;LongText&amp;quot; originalType=&amp;quot;LONGVARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;decision&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;23&amp;quot; posX=&amp;quot;271&amp;quot; posY=&amp;quot;356&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;Apply.cName&amp;quot; inbound=&amp;quot;false&amp;quot; connectionName=&amp;quot;input1&amp;quot; category=&amp;quot;Apply&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;true&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;LongText&amp;quot; originalType=&amp;quot;LONGVARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;cName&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;25&amp;quot; posX=&amp;quot;407&amp;quot; posY=&amp;quot;84&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;Apply-Student Join.sID&amp;quot; inbound=&amp;quot;true&amp;quot; connectionName=&amp;quot;output&amp;quot; category=&amp;quot;Apply-Student Join&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;true&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/InputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;LongText&amp;quot; originalType=&amp;quot;LONG VARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;sID&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;27&amp;quot; posX=&amp;quot;450&amp;quot; posY=&amp;quot;313&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;Apply-Student Join.cName&amp;quot; inbound=&amp;quot;true&amp;quot; connectionName=&amp;quot;output&amp;quot; category=&amp;quot;Apply-Student Join&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;true&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/InputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;LongText&amp;quot; originalType=&amp;quot;LONG VARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;cName&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;26&amp;quot; posX=&amp;quot;412&amp;quot; posY=&amp;quot;205&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;Apply-Student Join.sName&amp;quot; inbound=&amp;quot;true&amp;quot; connectionName=&amp;quot;output&amp;quot; category=&amp;quot;Apply-Student Join&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;true&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/InputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;LongText&amp;quot; originalType=&amp;quot;LONG VARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;sName&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;28&amp;quot; posX=&amp;quot;362&amp;quot; posY=&amp;quot;479&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;Apply-Student Join.decision&amp;quot; inbound=&amp;quot;true&amp;quot; connectionName=&amp;quot;output&amp;quot; category=&amp;quot;Apply-Student Join&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;true&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/InputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;LongText&amp;quot; originalType=&amp;quot;LONG VARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;decision&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;15&amp;quot; posX=&amp;quot;142&amp;quot; posY=&amp;quot;48&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;Student.sID&amp;quot; inbound=&amp;quot;false&amp;quot; connectionName=&amp;quot;input2&amp;quot; category=&amp;quot;Student&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;true&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;LongText&amp;quot; originalType=&amp;quot;LONGVARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;sID&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;arrow id=&amp;quot;1&amp;quot; begin_id=&amp;quot;15&amp;quot; begin_conn_name=&amp;quot;point&amp;quot; end_id=&amp;quot;25&amp;quot; end_conn_name=&amp;quot;point&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;arrow id=&amp;quot;2&amp;quot; begin_id=&amp;quot;17&amp;quot; begin_conn_name=&amp;quot;point&amp;quot; end_id=&amp;quot;26&amp;quot; end_conn_name=&amp;quot;point&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;arrow id=&amp;quot;3&amp;quot; begin_id=&amp;quot;23&amp;quot; begin_conn_name=&amp;quot;point&amp;quot; end_id=&amp;quot;27&amp;quot; end_conn_name=&amp;quot;point&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;arrow id=&amp;quot;4&amp;quot; begin_id=&amp;quot;21&amp;quot; begin_conn_name=&amp;quot;point&amp;quot; end_id=&amp;quot;28&amp;quot; end_conn_name=&amp;quot;point&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;ProjectDatas /&amp;gt;&#xD;&#xA;&amp;lt;/document&amp;gt;&#xD;&#xA;&#xD;&#xA;">
+    <OutputConnectionPoints>
+      <ConnectionPoint inbound="false" name="output" isMultipleConnection="true" positionNumber="1">
+        <tableInfo>
+          <tableName>temp921328696495130054</tableName>
+          <records>
+            <com.apatar.core.Record type="LongText" originalType="LONG VARCHAR" lengthMin="1" length="255" fieldName="sID" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONG VARCHAR" lengthMin="1" length="255" fieldName="sName" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONG VARCHAR" lengthMin="1" length="255" fieldName="cName" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONG VARCHAR" lengthMin="1" length="255" fieldName="decision" primaryKey="false" signed="false" nullable="false" readonly="false" />
+          </records>
+        </tableInfo>
+      </ConnectionPoint>
+    </OutputConnectionPoints>
+    <InputConnectionPoints>
+      <ConnectionPoint inbound="true" name="input1" isMultipleConnection="false" positionNumber="1">
+        <Comment>Table 1</Comment>
+      </ConnectionPoint>
+      <ConnectionPoint inbound="true" name="input2" isMultipleConnection="false" positionNumber="2">
+        <Comment>Table 2</Comment>
+      </ConnectionPoint>
+    </InputConnectionPoints>
+    <ExtConnectionPoints />
+    <tableJoinType>inner</tableJoinType>
+    <Condition column1="sID" column2="sID" />
+  </node>
+  <node id="5" posX="353" posY="201" width="60" height="60" nodeClass="com.apatar.hadoop.HDFSNode" title="T2">
+    <OutputConnectionPoints>
+      <ConnectionPoint inbound="false" name="output" isMultipleConnection="true" positionNumber="1">
+        <tableInfo>
+          <tableName>temp888186434658418479</tableName>
+          <records>
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="sID" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="sName" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="cName" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="decision" primaryKey="false" signed="false" nullable="false" readonly="false" />
+          </records>
+        </tableInfo>
+      </ConnectionPoint>
+    </OutputConnectionPoints>
+    <InputConnectionPoints>
+      <ConnectionPoint inbound="true" name="input" isMultipleConnection="false" positionNumber="1" />
+    </InputConnectionPoints>
+    <ExtConnectionPoints />
+    <com.apatar.core.RDBTable tableName="table" isView="false" mode="ReadWrite" />
+    <mode>0</mode>
+    <isDelete>false</isDelete>
+    <conID>2665424824717232356</conID>
+    <iFields />
+  </node>
+  <node id="6" posX="337" posY="38" width="60" height="60" nodeClass="com.apatar.hadoop.HDFSNode" title="College">
+    <OutputConnectionPoints>
+      <ConnectionPoint inbound="false" name="output" isMultipleConnection="true" positionNumber="1">
+        <tableInfo>
+          <tableName>temp1261345837509359691</tableName>
+          <records>
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="cName" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="state" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="enrollment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+          </records>
+        </tableInfo>
+      </ConnectionPoint>
+    </OutputConnectionPoints>
+    <InputConnectionPoints>
+      <ConnectionPoint inbound="true" name="input" isMultipleConnection="false" positionNumber="1" />
+    </InputConnectionPoints>
+    <ExtConnectionPoints />
+    <com.apatar.core.RDBTable tableName="table" isView="false" mode="ReadWrite" />
+    <mode>0</mode>
+    <isDelete>false</isDelete>
+    <conID>1413704935803305481</conID>
+    <iFields />
+  </node>
+  <node id="7" posX="510" posY="191" width="60" height="60" nodeClass="com.apatar.hadoopJoin.HDJoinNode" title="College-T1 Join" subProject="&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;&#xD;&#xA;&amp;lt;document version=&amp;quot;Apatar_v1.12.23&amp;quot;&amp;gt;&#xD;&#xA;  &amp;lt;DateAndTime createWithApplication=&amp;quot;false&amp;quot; dateFormat=&amp;quot;&amp;quot; dateSeparator=&amp;quot;&amp;quot; timeFormat=&amp;quot;&amp;quot; timeStandart=&amp;quot;&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;pattern&amp;gt;d/M/yyyy h:mm a&amp;lt;/pattern&amp;gt;&#xD;&#xA;  &amp;lt;/DateAndTime&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;3&amp;quot; posX=&amp;quot;128&amp;quot; posY=&amp;quot;71&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;T2.sID&amp;quot; inbound=&amp;quot;false&amp;quot; connectionName=&amp;quot;input2&amp;quot; category=&amp;quot;T2&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;true&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;LongText&amp;quot; originalType=&amp;quot;LONG VARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;sID&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;4&amp;quot; posX=&amp;quot;126&amp;quot; posY=&amp;quot;159&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;T2.sName&amp;quot; inbound=&amp;quot;false&amp;quot; connectionName=&amp;quot;input2&amp;quot; category=&amp;quot;T2&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;true&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;LongText&amp;quot; originalType=&amp;quot;LONG VARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;sName&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;5&amp;quot; posX=&amp;quot;125&amp;quot; posY=&amp;quot;315&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;College.enrollment&amp;quot; inbound=&amp;quot;false&amp;quot; connectionName=&amp;quot;input1&amp;quot; category=&amp;quot;College&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;true&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;LongText&amp;quot; originalType=&amp;quot;LONGVARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;enrollment&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;6&amp;quot; posX=&amp;quot;122&amp;quot; posY=&amp;quot;223&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;T2.cName&amp;quot; inbound=&amp;quot;false&amp;quot; connectionName=&amp;quot;input2&amp;quot; category=&amp;quot;T2&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;true&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;LongText&amp;quot; originalType=&amp;quot;LONG VARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;cName&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;10&amp;quot; posX=&amp;quot;321&amp;quot; posY=&amp;quot;247&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;College-T1 Join.cName&amp;quot; inbound=&amp;quot;true&amp;quot; connectionName=&amp;quot;output&amp;quot; category=&amp;quot;College-T1 Join&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;true&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/InputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;LongText&amp;quot; originalType=&amp;quot;LONG VARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;cName&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;11&amp;quot; posX=&amp;quot;391&amp;quot; posY=&amp;quot;357&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;College-T1 Join.enrollment&amp;quot; inbound=&amp;quot;true&amp;quot; connectionName=&amp;quot;output&amp;quot; category=&amp;quot;College-T1 Join&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;true&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/InputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;LongText&amp;quot; originalType=&amp;quot;LONG VARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;enrollment&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;12&amp;quot; posX=&amp;quot;298&amp;quot; posY=&amp;quot;76&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;College-T1 Join.sID&amp;quot; inbound=&amp;quot;true&amp;quot; connectionName=&amp;quot;output&amp;quot; category=&amp;quot;College-T1 Join&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;true&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/InputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;LongText&amp;quot; originalType=&amp;quot;LONG VARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;sID&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;13&amp;quot; posX=&amp;quot;288&amp;quot; posY=&amp;quot;155&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;College-T1 Join.sName&amp;quot; inbound=&amp;quot;true&amp;quot; connectionName=&amp;quot;output&amp;quot; category=&amp;quot;College-T1 Join&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;true&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/InputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;LongText&amp;quot; originalType=&amp;quot;LONG VARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;sName&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;arrow id=&amp;quot;1&amp;quot; begin_id=&amp;quot;6&amp;quot; begin_conn_name=&amp;quot;point&amp;quot; end_id=&amp;quot;10&amp;quot; end_conn_name=&amp;quot;point&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;arrow id=&amp;quot;2&amp;quot; begin_id=&amp;quot;5&amp;quot; begin_conn_name=&amp;quot;point&amp;quot; end_id=&amp;quot;11&amp;quot; end_conn_name=&amp;quot;point&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;arrow id=&amp;quot;3&amp;quot; begin_id=&amp;quot;3&amp;quot; begin_conn_name=&amp;quot;point&amp;quot; end_id=&amp;quot;12&amp;quot; end_conn_name=&amp;quot;point&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;arrow id=&amp;quot;4&amp;quot; begin_id=&amp;quot;4&amp;quot; begin_conn_name=&amp;quot;point&amp;quot; end_id=&amp;quot;13&amp;quot; end_conn_name=&amp;quot;point&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;ProjectDatas /&amp;gt;&#xD;&#xA;&amp;lt;/document&amp;gt;&#xD;&#xA;&#xD;&#xA;">
+    <OutputConnectionPoints>
+      <ConnectionPoint inbound="false" name="output" isMultipleConnection="true" positionNumber="1">
+        <tableInfo>
+          <tableName>temp6327053075289979220</tableName>
+          <records>
+            <com.apatar.core.Record type="LongText" originalType="LONG VARCHAR" lengthMin="1" length="255" fieldName="sID" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONG VARCHAR" lengthMin="1" length="255" fieldName="sName" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONG VARCHAR" lengthMin="1" length="255" fieldName="cName" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONG VARCHAR" lengthMin="1" length="255" fieldName="enrollment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+          </records>
+        </tableInfo>
+      </ConnectionPoint>
+    </OutputConnectionPoints>
+    <InputConnectionPoints>
+      <ConnectionPoint inbound="true" name="input1" isMultipleConnection="false" positionNumber="1">
+        <Comment>Table 1</Comment>
+      </ConnectionPoint>
+      <ConnectionPoint inbound="true" name="input2" isMultipleConnection="false" positionNumber="2">
+        <Comment>Table 2</Comment>
+      </ConnectionPoint>
+    </InputConnectionPoints>
+    <ExtConnectionPoints />
+    <tableJoinType>inner</tableJoinType>
+    <Condition column1="cName" column2="cName" />
+  </node>
+  <node id="8" posX="674" posY="191" width="60" height="60" nodeClass="com.apatar.hadoop.HDFSNode" title="Hadoop Node">
+    <OutputConnectionPoints>
+      <ConnectionPoint inbound="false" name="output" isMultipleConnection="true" positionNumber="1">
+        <tableInfo>
+          <tableName>temp6752935633346804585</tableName>
+          <records>
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="sID" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="sName" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="cName" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="LongText" originalType="LONGVARCHAR" lengthMin="1" length="255" fieldName="enrollment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+          </records>
+        </tableInfo>
+      </ConnectionPoint>
+    </OutputConnectionPoints>
+    <InputConnectionPoints>
+      <ConnectionPoint inbound="true" name="input" isMultipleConnection="false" positionNumber="1" />
+    </InputConnectionPoints>
+    <ExtConnectionPoints />
+    <com.apatar.core.RDBTable tableName="table" isView="false" mode="ReadWrite" />
+    <mode>0</mode>
+    <isDelete>false</isDelete>
+    <conID>809144947148869520</conID>
+    <iFields />
+  </node>
+  <arrow id="1" begin_id="1" begin_conn_name="output" end_id="3" end_conn_name="input1" />
+  <arrow id="2" begin_id="2" begin_conn_name="output" end_id="3" end_conn_name="input2" />
+  <arrow id="3" begin_id="3" begin_conn_name="output" end_id="5" end_conn_name="input" />
+  <arrow id="4" begin_id="6" begin_conn_name="output" end_id="7" end_conn_name="input1" />
+  <arrow id="5" begin_id="5" begin_conn_name="output" end_id="7" end_conn_name="input2" />
+  <arrow id="6" begin_id="7" begin_conn_name="output" end_id="8" end_conn_name="input" />
+  <ProjectDatas>
+    <com.apatar.core.ProjectData id="7311639757226620054" type="db_connector" subtype="loadNode" name="default connection">
+      <com.apatar.hadoop.HDFSParams>
+        <namenode>clu26.softnet.tuc.gr</namenode>
+        <port>54310</port>
+        <filepath>/user/karetakis/db/Student/</filepath>
+        <filename>student.csv</filename>
+        <username>karetakis</username>
+        <jobtracker>clu26.softnet.tuc.gr</jobtracker>
+        <jobtrackerport>clu26.softnet.tuc.gr</jobtrackerport>
+        <transferToRDB>false</transferToRDB>
+        <fileFormat>TextFile</fileFormat>
+        <serde />
+        <serdeproperties />
+        <serdeclasspath>./</serdeclasspath>
+        <sqlquery><![CDATA[Select * From "table"]]></sqlquery>
+      </com.apatar.hadoop.HDFSParams>
+    </com.apatar.core.ProjectData>
+    <com.apatar.core.ProjectData id="4432180288422691002" type="" subtype="" name="default connection" />
+    <com.apatar.core.ProjectData id="8666209190918402488" type="db_connector" subtype="loadNode" name="default connection">
+      <com.apatar.hadoop.HDFSParams>
+        <namenode>clu26.softnet.tuc.gr</namenode>
+        <port>54310</port>
+        <filepath>/user/karetakis/db/Apply/</filepath>
+        <filename>apply.csv</filename>
+        <username>karetakis</username>
+        <jobtracker>clu26.softnet.tuc.gr</jobtracker>
+        <jobtrackerport>clu26.softnet.tuc.gr</jobtrackerport>
+        <transferToRDB>false</transferToRDB>
+        <fileFormat>TextFile</fileFormat>
+        <serde />
+        <serdeproperties />
+        <serdeclasspath>./</serdeclasspath>
+        <sqlquery><![CDATA[Select * From "table"]]></sqlquery>
+        <workflow>29576175.xml</workflow>
+      </com.apatar.hadoop.HDFSParams>
+    </com.apatar.core.ProjectData>
+    <com.apatar.core.ProjectData id="809144947148869520" type="db_connector" subtype="loadNode" name="default connection">
+      <com.apatar.hadoop.HDFSParams>
+        <namenode>clu26.softnet.tuc.gr</namenode>
+        <port>54310</port>
+        <filepath>/user/karetakis/db/Result2</filepath>
+        <filename />
+        <username>karetakis</username>
+        <jobtracker>clu26.softnet.tuc.gr</jobtracker>
+        <jobtrackerport>clu26.softnet.tuc.gr</jobtrackerport>
+        <transferToRDB>false</transferToRDB>
+        <fileFormat>TextFile</fileFormat>
+        <serde />
+        <serdeproperties />
+        <serdeclasspath>./</serdeclasspath>
+        <sqlquery><![CDATA[Select * From "table"]]></sqlquery>
+        <workflow>29576175.xml</workflow>
+      </com.apatar.hadoop.HDFSParams>
+    </com.apatar.core.ProjectData>
+    <com.apatar.core.ProjectData id="1413704935803305481" type="db_connector" subtype="loadNode" name="default connection">
+      <com.apatar.hadoop.HDFSParams>
+        <namenode>clu26.softnet.tuc.gr</namenode>
+        <port>54310</port>
+        <filepath>/user/karetakis/db/College/</filepath>
+        <filename>college.csv</filename>
+        <username>karetakis</username>
+        <jobtracker>clu26.softnet.tuc.gr</jobtracker>
+        <jobtrackerport>clu26.softnet.tuc.gr</jobtrackerport>
+        <transferToRDB>false</transferToRDB>
+        <fileFormat>TextFile</fileFormat>
+        <serde />
+        <serdeproperties />
+        <serdeclasspath>./</serdeclasspath>
+        <sqlquery><![CDATA[Select * From "table"]]></sqlquery>
+        <workflow>29576175.xml</workflow>
+      </com.apatar.hadoop.HDFSParams>
+    </com.apatar.core.ProjectData>
+    <com.apatar.core.ProjectData id="2665424824717232356" type="db_connector" subtype="loadNode" name="default connection">
+      <com.apatar.hadoop.HDFSParams>
+        <namenode>clu26.softnet.tuc.gr</namenode>
+        <port>54310</port>
+        <filepath>/user/karetakis/db/Result</filepath>
+        <filename />
+        <username>karetakis</username>
+        <jobtracker>clu26.softnet.tuc.gr</jobtracker>
+        <jobtrackerport>clu26.softnet.tuc.gr</jobtrackerport>
+        <transferToRDB>false</transferToRDB>
+        <fileFormat>TextFile</fileFormat>
+        <serde />
+        <serdeproperties />
+        <serdeclasspath>./</serdeclasspath>
+        <sqlquery><![CDATA[Select * From "table"]]></sqlquery>
+        <workflow>29576175.xml</workflow>
+      </com.apatar.hadoop.HDFSParams>
+    </com.apatar.core.ProjectData>
+  </ProjectDatas>
+</document>
+

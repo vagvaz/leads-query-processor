@@ -2,6 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
+package sse_implementation_trial1;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
@@ -26,13 +27,12 @@ import sun.misc.BASE64Encoder;
 public class ServerSide {
 
     private int Bvalue;
-    private int Svalue = 6000;
-    private double k = 1.1;
+    private int Svalue;
+    
 
-    public ServerSide(int Svalue,double k,int N) {
+    public ServerSide(int Svalue,int Bvalue) {
         this.Svalue=Svalue;
-        this.k=k;
-        this.Bvalue = (int) Math.ceil(k * N / Svalue);
+        this.Bvalue = Bvalue;
     }
 
     public byte[] xor(byte[] key, byte[] plaintext) {
@@ -51,12 +51,16 @@ public class ServerSide {
         return retVal;
     }
 
-    public HashMap<String, ArrayList<String>> TSetRetrieve(String token, HashMap<Integer, Record[]> TSet) throws UnsupportedEncodingException, InvalidAlgorithmParameterException {
-        ArrayList<String> result_list = new ArrayList<String>();
+    public HashMap<String, ArrayList<Etuple>> TSetRetrieve(CStore cs, String token) throws UnsupportedEncodingException, InvalidAlgorithmParameterException {
+        HashMap<String, Etuple> EDB = cs.getEDB(); //The encrypted Database
+        HashMap<Integer, Record[]> TSet = cs.getTSet(); //the inverted index
+        
+        ArrayList<Etuple> result_list = new ArrayList<Etuple>();
         byte[] iv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         IvParameterSpec ivspec = new IvParameterSpec(iv);
         char beta = '1';
         int i = 0;
+        boolean flag = false;
         while (beta == '1') {
             try {
                 byte[] KeyBytes = token.getBytes("UTF-8");
@@ -90,9 +94,14 @@ public class ServerSide {
                     if (tmp_rcd[j].getLabel().equals(Ls)) {
                         byte[] plaintext = xor(K, tmp_rcd[j].getValue());
                         String res = new String(plaintext);
-                        result_list.add(res.substring(1));
+                        result_list.add(EDB.get(res.substring(1)));
+                        //result_list.add(res.substring(1));
                         beta = res.charAt(0);
+                        flag = true;
                     }
+                }
+                if(flag == false){
+                    return null;
                 }
             } catch (NoSuchAlgorithmException noSuchAlgo) {
                 System.out.println(" No Such Algorithm exists " + noSuchAlgo);
@@ -107,7 +116,8 @@ public class ServerSide {
             }
             i++;
         }
-        HashMap<String, ArrayList<String>> result = new HashMap<String, ArrayList<String>>();
+        HashMap<String, ArrayList<Etuple>> result = new HashMap<String, ArrayList<Etuple>>();
+
         result.put("Encrypted Result", result_list);
         return result;
     }

@@ -1,15 +1,13 @@
 package leads.tajo.module;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 
+import org.apache.tajo.algebra.Expr;
+import org.apache.tajo.algebra.JsonHelper;
 import org.apache.tajo.engine.parser.SQLSyntaxError;
 import org.apache.tajo.master.session.Session;
 
-import static org.apache.tajo.TajoConstants.DEFAULT_DATABASE_NAME;
+import java.io.*;
 
-import java.io.IOException;
+import static org.apache.tajo.TajoConstants.DEFAULT_DATABASE_NAME;
 
 
 public class TajoModuleTest {
@@ -21,21 +19,45 @@ public class TajoModuleTest {
 							DEFAULT_DATABASE_NAME);
 		
 		Mymodule = new TaJoModule();
-		Mymodule.init_connection("127.0.0.1", 5998);
+		Mymodule.init_connection("localhost", 5998);
 		BufferedReader in = null;
 		try {
 			
 			in = new BufferedReader(new InputStreamReader(System.in));
 			String line = "";
-			{	System.out.print("Please enter your SQL query: ");		
+			{	System.out.print("Please enter your SQL query OR expr Starting with {: ");
 				line =  in.readLine();
 				do {
 					
 					try {
-						System.out.println(line);
+                        Expr res_expr=null;
+                        if(line.contains("{")) {
+                            StringBuilder everything = new StringBuilder();
+                            everything.append(line);
+                            while((line = in.readLine()) != null && !line.equals("") ) {
+                                everything.append(line);
+                                if(line.equals("}") )
+                                    break;
+                            }
 
-						String res = TaJoModule.Optimize(session, line);
+                            System.out.println("END2");
+
+                            System.out.println(everything.toString());
+
+                             res_expr= JsonHelper.fromJson(everything.toString(), Expr.class);//
+                        }else{
+                             res_expr = TaJoModule.parseQuery(line);
+                        }
+                        System.out.println("END");
+
+						if (res_expr != null)
+							System.out.println("Expr: "+res_expr.toJson() +" end");
+						else
+							System.out.println("No Expr");
+						String res = TaJoModule.Optimize(session,res_expr );//.Optimize(session, line);//res_expr.toJson();//;
+
 						if (res != null){
+							 
 							System.out.println(res);
 							try {
 //								PrintWriter writer = new PrintWriter("plan.json", "UTF-8");
@@ -77,5 +99,4 @@ public class TajoModuleTest {
 			e1.printStackTrace();
 		}   
 	}
-
 }
