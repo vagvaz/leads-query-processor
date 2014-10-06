@@ -70,7 +70,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     @Override
     public void startManager(String configurationFile)  {
 
-        server = new HotRodServer();
+//        server = new HotRodServer();
         ParserRegistry registry = new ParserRegistry();
         ConfigurationBuilderHolder holder = null;
         ConfigurationBuilder builder = null;
@@ -79,6 +79,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
                 holder = registry.parseFile(configurationFile);
 
             } else {
+                System.err.println("\n\n\nUSING DEFAULT FILE ERROR\n\n");
                 holder = registry.parseFile(StringConstants.ISPN_CLUSTER_FILE);
             }
         }catch(IOException e){
@@ -87,6 +88,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
         manager = new DefaultCacheManager(holder, true);
         getPersisentCache("clustered");
+        getPersisentCache("defaultCache");
         //I might want to sleep here for a little while
         PrintUtilities.printList(manager.getMembers());
 //        startHotRodServer(manager,host, serverPort);
@@ -151,6 +153,12 @@ public class ClusterInfinispanManager implements InfinispanManager {
      */
     @Override
     public void stopManager() {
+        for(String cacheName : this.manager.getCacheNames())
+        {
+            Cache cache= this.manager.getCache(cacheName,false);
+            if(cache != null && cache.getAdvancedCache().getStatus().equals(ComponentStatus.RUNNING))
+                cache.stop();
+        }
         this.manager.stop();
     }
 
@@ -160,7 +168,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
     @Override
     public ConcurrentMap getPersisentCache(String name) {
         if (manager.cacheExists(name))
-            manager.getCache(name);
+//            manager.getCache(name);
+            createCache(name,manager.getDefaultCacheConfiguration());
         else {
             createCache(name, manager.getDefaultCacheConfiguration());
         }
@@ -324,7 +333,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     private void createCache(String cacheName, Configuration cacheConfiguration) {
         if (!cacheConfiguration.clustering().cacheMode().isClustered()) {
-            log.error("Configuration given for " + cacheName
+            log.warn("Configuration given for " + cacheName
                           + " is not clustered so using default cluster configuration");
             //            cacheConfiguration = new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_ASYNC).async().l1().lifespan(100000L).hash().numOwners(3).build();
         }

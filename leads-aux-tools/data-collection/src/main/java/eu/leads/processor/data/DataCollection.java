@@ -19,6 +19,17 @@ import java.util.ArrayList;
 public class DataCollection {
 
    public static void main(String[] args) {
+      String seed = "";
+      int numOfPages = 20;
+       if(args.length >= 1){
+           seed = args[0];
+       }
+       if(args.length >= 2){
+           numOfPages = Integer.parseInt(args[1]);
+       }
+      if(seed == null || seed.equals("")){
+          seed = "http://www.bbc.co.uk/";
+      }
       long sleepingPeriod = 5;
       String webCacheName = "default.webpages";//StringConstants.CRAWLER_DEFAULT_CACHE;
 
@@ -28,15 +39,15 @@ public class DataCollection {
 
       //Put some configuration properties for crawler
       LQPConfiguration.getConf().setProperty("crawler.seed",
-                                                    "http://www.yahoo.com"); //For some reason it is ignored news.yahoo.com is used by default
+                                                    seed); //For some reason it is ignored news.yahoo.com is used by default
       LQPConfiguration.getConf().setProperty("crawler.depth", 3);
      String pagerankPluginClassName = "eu.leads.processor.plugins.pagerank.PagerankPlugin";
      String sentimentPluginClassName = "eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin";
 
-     String pagerankJar = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/pagerank-plugin/target/pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
-     String pagerankConf = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/pagerank-plugin/pagerank-conf.xml";
-     String sentimentConf = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/sentiment-plugin/sentiment-conf.xml";
-     String sentimentJar = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/sentiment-plugin/target/sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
+     String pagerankJar = "/tmp/leads/plugins/pagerank-plugin/pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
+     String pagerankConf = "/tmp/leads/plugins/pagerank-conf.xml";
+     String sentimentConf = "/tmp/leads/plugins/sentiment-conf.xml";
+     String sentimentJar = "/tmp/leads/plugins/sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
 
       //Set desired target cache
       LQPConfiguration.getConf().setProperty(StringConstants.CRAWLER_DEFAULT_CACHE, webCacheName);
@@ -64,14 +75,14 @@ public class DataCollection {
        Cache pages = (Cache) clusters.get(0).getPersisentCache(webCacheName);
        System.out.println("pages size is " + pages.size());
       //Sleep for an amount of time to test if everything is working fine
-      boolean stop = pages.size() >= 15;
+      boolean stop = pages.size() >= numOfPages;
       PersistentCrawl.main(null);
       try {
          while(!stop)
          {
             Thread.sleep(sleepingPeriod * 1000);
             System.out.println("pages size is " + pages.size());
-            if(pages.size() >= 15)
+            if(pages.size() >= numOfPages)
             {
                PersistentCrawl.stop();
                stop = true;
@@ -82,11 +93,8 @@ public class DataCollection {
          e.printStackTrace();
       }
 
+    InfinispanClusterSingleton.getInstance().getManager().stopManager();
 
-      //PrintUtilities.saveMapToFile(pages,"/home/vagvaz/test/webpagesdata.json");
-//      for(InfinispanManager cluster : clusters){
-//         cluster.stopManager();
-//      }
 
    }
 

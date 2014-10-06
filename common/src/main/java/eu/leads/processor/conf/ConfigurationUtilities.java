@@ -82,6 +82,7 @@ public class ConfigurationUtilities {
                 while (addresses.hasMoreElements()) {
                     InetAddress addr = addresses.nextElement();
                     ip = addr.getHostAddress();
+
                     System.out.println(iface.getDisplayName() + " " + ip);
                 }
             }
@@ -128,5 +129,39 @@ public class ConfigurationUtilities {
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
+    }
+
+    public static String resolveBroadCast(String ip) {
+        String result = ip.substring(0, ip.lastIndexOf("."))
+                + ".255";
+        Enumeration<NetworkInterface> interfaces =
+                null;
+        try {
+            interfaces = NetworkInterface.getNetworkInterfaces();
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+        while (interfaces.hasMoreElements()) {
+            NetworkInterface networkInterface = interfaces.nextElement();
+            try {
+                if (networkInterface.isLoopback())
+                    continue;    // Don't want to broadcast to the loopback interface
+            } catch (SocketException e) {
+                e.printStackTrace();
+            }
+            for (InterfaceAddress interfaceAddress :
+                    networkInterface.getInterfaceAddresses()) {
+                if (interfaceAddress.getAddress().toString().endsWith(ip)) {
+                    InetAddress broadcast = interfaceAddress.getBroadcast();
+
+                    if (broadcast == null)
+                        continue;
+                    else
+                        result = broadcast.toString().substring(1);
+                    // Use the address
+                }
+            }
+        }
+        return result;
     }
 }

@@ -32,7 +32,8 @@ import static eu.leads.processor.plugins.EventType.*;
  * clustered.
  */
 @Listener(clustered = false, sync = false, primaryOnly = true)
-public class SimplePluginRunner implements LeadsListener {
+public class
+        SimplePluginRunner implements LeadsListener {
 
     transient protected Configuration configuration;
     transient protected Set<PluginInterface> deployedPlugins;
@@ -176,7 +177,7 @@ public class SimplePluginRunner implements LeadsListener {
         if(plugin.equals("eu.leads.processor.plugins.pagerank.PagerankPlugin")){
             ConfigurationUtilities
                     .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar");
-        }else if(plugin.equals("eu.leads.processor.plugins.sentiment")){
+        }else if(plugin.equals("eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin")){
             ConfigurationUtilities
                     .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar");
         }

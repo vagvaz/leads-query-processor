@@ -313,8 +313,6 @@ public class LeadsProcessorBootstrapper2 {
                     .containsKey("processor.ssh.password"))
                 session.setPassword(LQPConfiguration.getInstance().getConf()
                         .getString("processor.ssh.password"));
-            else
-                session.setPassword("12121212"); //just for me
 
             session.setConfig("StrictHostKeyChecking", "no");
             session.connect();

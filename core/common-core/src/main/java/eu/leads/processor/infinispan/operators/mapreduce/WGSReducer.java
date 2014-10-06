@@ -4,6 +4,7 @@ package eu.leads.processor.infinispan.operators.mapreduce;
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.core.LeadsReducer;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonArray;
@@ -47,8 +48,15 @@ public class WGSReducer extends LeadsReducer<String, String> {
       result.putArray("result",resultArray);
 
          outputCache.put(Integer.toString(iteration),result.toString());
+      System.err.println(Integer.toString(iteration) + " ------------------------- cache mememres ------------------------ ");
+       PrintUtilities.printList(outputCache.getAdvancedCache().getRpcManager().getMembers());
 
-      System.out.println("new depths " + outputCache.size() + " with " + resultArray.size() + "links");
+       System.err.println(Integer.toString(iteration) + " -++++++++++++++++++++++++++++man mememres ------------------------ ");
+        PrintUtilities.printList(imanager.getMembers());
+
+       System.err.println(Integer.toString(iteration) + " ==========================================");
+       System.err.println("Just written " + outputCache.get(Integer.toString(iteration)));
+      System.out.println(outputCache.getName() + " new depths " + outputCache.size() + " with " + resultArray.size() + "links");
       return null;
    }
 }

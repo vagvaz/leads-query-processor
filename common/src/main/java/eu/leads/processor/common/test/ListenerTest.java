@@ -15,19 +15,19 @@ public class ListenerTest {
         int mode = Integer.parseInt(args[0]);
         int period = Integer.parseInt(args[2]);
         LQPConfiguration.initialize();
-        InfinispanCluster cluster2 = InfinispanClusterSingleton.getInstance().getCluster();
-        Cache cache = (Cache) cluster2.getManager().getPersisentCache("testCache");
+//        InfinispanCluster cluster2 = InfinispanClusterSingleton.getInstance().getManager();
+        Cache cache = (Cache) InfinispanClusterSingleton.getInstance().getManager().getPersisentCache("testCache");
         switch (mode) {
             case 1:
-                cluster2.getManager()
+                InfinispanClusterSingleton.getInstance().getManager()
                     .addListener(new TestListener(cache.getCacheManager().getAddress().toString(),
                                                      new ComplexType(cache.getCacheManager()
                                                                          .getAddress().toString())),
                                     cache);
                 break;
             default:
-                cluster2.getManager()
-                    .addListener(new TestListener(cache.getCacheManager().getAddress().toString(),
+                InfinispanClusterSingleton.getInstance().getManager()
+                        .addListener(new TestListener(cache.getCacheManager().getAddress().toString(),
                                                      new ComplexType(cache.getCacheManager()
                                                                          .getAddress().toString())),
                                     cache);
@@ -41,14 +41,14 @@ public class ListenerTest {
 
         }
 
-        for (Address a : cluster2.getManager().getMembers()) {
+        for (Address a : InfinispanClusterSingleton.getInstance().getManager().getMembers()) {
             System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" + a.toString());
             for (int i = 0; i < size; i++) {
                 String key = a.toString() + Integer.toString(i);
                 System.out.println(Boolean.toString(cache.get(key) != null));
             }
         }
-        cluster2.getManager().stopManager();
+        InfinispanClusterSingleton.getInstance().getManager().stopManager();
         System.out.println("Bye Bye ");
     }
 }
