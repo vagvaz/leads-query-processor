@@ -31,7 +31,7 @@ public class LeadsProcessorBootstrapper2 {
     static Map<String, JsonObject> componentsJson;
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args){
         if (checkArguments(args)) {
             LQPConfiguration.initialize(true);
             filename = args[0];
@@ -75,6 +75,8 @@ public class LeadsProcessorBootstrapper2 {
         int ip = 0;
 
         for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
+            //JSch jsch = new JSch();
+           // Session session = createSession( jsch,  ips[ip] );
             deployComponent(e.getKey(), ips[ip]);
             ip = (ip + 1) % ips.length;
             //break;
@@ -219,32 +221,7 @@ public class LeadsProcessorBootstrapper2 {
         try {
             JSch jsch = new JSch();
 
-            String username = LQPConfiguration.getInstance().getConf()
-                    .getString("processor.ssh.username");
-            Session session = jsch.getSession(username, ip, 22);
-
-            if (LQPConfiguration.getInstance().getConf()
-                    .containsKey("processor.ssh.rsa")) {
-                String privateKey = LQPConfiguration.getInstance().getConf().getString("processor.ssh.rda");
-                jsch.addIdentity(privateKey);
-                logger.info("ssh identity added ");
-            } else if (LQPConfiguration.getInstance().getConf()
-                    .containsKey("processor.ssh.password"))
-                session.setPassword(LQPConfiguration.getInstance().getConf()
-                        .getString("processor.ssh.password"));
-            else
-            {
-                logger.info("No ssh credentials, no password either key ");
-            }
-                //session.setPassword("12121212"); //just for me;//                 String privateKey = "~/.ssh/id_rsa";
-//
-//             jsch.addIdentity(privateKey);
-//
-
-            session.setConfig("StrictHostKeyChecking", "no");
-            session.connect();
-            System.out.println("Connected");
-
+            Session session = createSession( jsch,  ip );
             Channel channel = session.openChannel("exec");
             ((ChannelExec) channel).setCommand(command1);
             channel.setInputStream(null);
@@ -308,14 +285,7 @@ public class LeadsProcessorBootstrapper2 {
         JSch jsch = new JSch();
         Session session = null;
         try {
-            session = jsch.getSession(username, ip, 22);
-            if (LQPConfiguration.getInstance().getConf()
-                    .containsKey("processor.ssh.password"))
-                session.setPassword(LQPConfiguration.getInstance().getConf()
-                        .getString("processor.ssh.password"));
-
-            session.setConfig("StrictHostKeyChecking", "no");
-            session.connect();
+            session = createSession( jsch,  ip );
             ChannelSftp channel = null;
             channel = (ChannelSftp) session.openChannel("sftp");
             channel.connect();
@@ -341,6 +311,37 @@ public class LeadsProcessorBootstrapper2 {
         return false;
 
     }
+
+    private static Session createSession(JSch jsch, String ip ) throws JSchException {
+
+        String username = LQPConfiguration.getInstance().getConf()
+                .getString("processor.ssh.username");
+        Session session = jsch.getSession(username, ip, 22);
+
+        if (LQPConfiguration.getInstance().getConf()
+                .containsKey("processor.ssh.rsa")) {
+            String privateKey = LQPConfiguration.getInstance().getConf().getString("processor.ssh.rsa");
+            logger.info("ssh identity added: " + privateKey);
+            jsch.addIdentity(privateKey);
+            session = jsch.getSession(username, ip, 22);
+
+        } else if (LQPConfiguration.getInstance().getConf()
+                .containsKey("processor.ssh.password"))
+            session.setPassword(LQPConfiguration.getInstance().getConf()
+                    .getString("processor.ssh.password"));
+        else
+        {
+            logger.error("No ssh credentials, no password either key ");
+            System.out.println("No ssh credentials, no password either key ");
+        }
+        session.setConfig("StrictHostKeyChecking", "no");
+
+        session.connect();
+        System.out.println("Connected");
+        return session;
+
+    }
+
 
 
     private static boolean checkArguments(String[] args) {
