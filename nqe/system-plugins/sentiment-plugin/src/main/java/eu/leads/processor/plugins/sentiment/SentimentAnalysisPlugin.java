@@ -66,16 +66,20 @@ public class SentimentAnalysisPlugin implements PluginInterface {
         String url = value.getAttribute("url");
         String body = value.getAttribute("content");
         Set<Entity> entities = module.getEntities(body);
+        int counter = 5;
         for (Entity e : entities) {
+            counter--;
             Tuple tuple = new Tuple("{}"); //create a tuple with no attributes
             Sentiment s = module.getSentimentForEntity(e.getName(), body);
             tuple.setAttribute("name", e.getName());
-          tuple.setAttribute("sentimentscore",s.getValue());
+           tuple.setAttribute("sentimentscore",s.getValue());
             tuple.setAttribute("webpageurl", url);
             tuple.setNumberAttribute("version", System.currentTimeMillis());
             this.targetCache.put(url + ":" + e.getName(), tuple.asString());
             if (debug)
                 log.debug(url + ":" + e.getName() + "\n" + tuple.asString());
+            if(counter == 0)
+                break;
         }
     }
 
