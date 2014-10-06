@@ -85,9 +85,14 @@ public class LQPConfiguration {
     }
 
     private static void resolveDyanmicParameters() {
+        String hostname = ConfigurationUtilities.resolveHostname();
         instance.getConfiguration()
-            .setProperty("node.hostname", ConfigurationUtilities.resolveHostname());
-        instance.getConfiguration().setProperty("node.ip", ConfigurationUtilities.resolveIp());
+            .setProperty("node.hostname", hostname);
+        String ip = ConfigurationUtilities.resolveIp();
+        instance.getConfiguration().setProperty("node.ip", ip);
+        String broadcast = ConfigurationUtilities.resolveBroadCast(ip);
+        instance.getConfiguration().setProperty("node.broadcast",broadcast);
+        log.info("HOST:  " + hostname +  " IP " + ip + " BRCD " + broadcast);
     }
 
     private static void loadSystemPropertiesFile() {
@@ -112,9 +117,9 @@ public class LQPConfiguration {
             String ip = instance.getConfiguration().getString("node.ip");
             jgroups.setProperty("TCP[@bind_addr]", "${jgroups.tcp.address:" + ip + "}");
             //jgroups.setProperty("MPING[@bind_addr]", ip);
-            String broadcast =
-                instance.getConfiguration().getString("node.ip").substring(0, ip.lastIndexOf("."))
-                    + ".255";
+            String broadcast = instance.getConfiguration().getString("node.broadcast");
+//                instance.getConfiguration().getString("node.ip").substring(0, ip.lastIndexOf("."))
+//                    + ".255";
             jgroups.setProperty("BPING[@dest]", broadcast);
             jgroups.save(System.getProperty("user.dir") + "/" + instance.getBaseDir()
                              + "jgroups-tcp.xml");
