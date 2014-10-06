@@ -113,8 +113,11 @@ public class MathUtils {
    public static boolean lessThan(JsonObject left, JsonObject right) {
       String type = left.getObject("body").getObject("datum").getString("type");
       if(type.startsWith("TEXT")){
-         String leftValue = left.getObject("body").getObject("datum").getObject("body").getString("val");
-         String rightValue = right.getObject("body").getObject("datum").getObject("body").getString("val");
+         String leftValue = getTextFrom(left);
+
+                 //left.getObject("body").getObject("datum").getObject("body").getString("val");
+         String rightValue = getTextFrom(right);
+         //right.getObject("body").getObject("datum").getObject("body").getString("val");
          return leftValue.compareTo(rightValue) < 0;
       }
       else if (type.startsWith("INT")){
@@ -135,12 +138,35 @@ public class MathUtils {
       }
    }
 
-   public static boolean lessEqualThan(JsonObject left, JsonObject right) {
+    private static String getTextFrom(JsonObject value) {
+
+        String result = null;
+        if(value.getString("type").equals("FIELD"))
+        {
+            result = value.getObject("body").getObject("datum").getObject("body").getString("val");
+        }
+        else if(value.getString("type").equals("CONST") ){
+            byte[] patternBytes = null;
+            JsonObject body = value.getObject("body").getObject("datum").getObject("body");
+            org.vertx.java.core.json.JsonArray bytes = body.getArray("bytes");
+            int size = body.getInteger("size");
+            patternBytes = new byte[size];
+            for (int i = 0; i < size; i++) {
+                patternBytes[i] = bytes.get(i);
+            }
+            result = new String(patternBytes);
+        }
+
+        return result;
+    }
+
+    public static boolean lessEqualThan(JsonObject left, JsonObject right) {
       String type = left.getObject("body").getObject("datum").getString("type");
       if (type.startsWith("TEXT")) {
+          String leftValue = getTextFrom(left);
 
-         String leftValue = left.getObject("body").getObject("datum").getObject("body").getString("val");
-         String rightValue = right.getObject("body").getObject("datum").getObject("body").getString("val");
+          //left.getObject("body").getObject("datum").getObject("body").getString("val");
+          String rightValue = getTextFrom(right);
          return leftValue.compareTo(rightValue) <= 0;
       } else if (type.startsWith("INT")) {
          Long leftValue = left.getObject("body").getObject("datum").getObject("body").getLong("val");
@@ -184,8 +210,7 @@ public class MathUtils {
        JsonObject body = rightValue.getObject("body").getObject("datum").getObject("body");
        org.vertx.java.core.json.JsonArray bytes = body.getArray("bytes");
        int size = body.getInteger("size");
-       patternBytes = new byte[size+1];
-       patternBytes[patternBytes.length-1]=0;
+       patternBytes = new byte[size];
        if(bytes != null) {
          for (int i = 0; i < size; i++) {
            int intByte = bytes.get(i);
@@ -195,24 +220,24 @@ public class MathUtils {
        }
      }
      String pattern = new String(patternBytes);
-      pattern = pattern.replaceAll("%", "__");
+//      pattern = pattern.replaceAll("%", "__");
       pattern.trim();
-      pattern = "[" + pattern + "]";
+//      pattern = "[" + pattern + "]";
 //      Pattern regex = Pattern.compile(pattern);
       if(leftValue.getString("type").equals("FIELD"))
       {
          String testString = leftValue.getObject("body").getObject("datum").getObject("body").getString("val");
 //         result =regex.matcher(testString).matches();
-        if(pattern.startsWith("__") && pattern.endsWith("__")) {
-          pattern = pattern.replaceAll("__", "");
+        if(pattern.startsWith("%") && pattern.endsWith("%")) {
+          pattern = pattern.replaceAll("%", "");
           result = testString.contains(pattern);
-        }else if(pattern.startsWith("*")){
-          pattern = pattern.replaceAll("__","");
-          result = testString.startsWith(pattern);
+        }else if(pattern.startsWith("%")){
+          pattern = pattern.replaceAll("%","");
+          result = testString.endsWith(pattern);
         }
         else{
-          pattern = pattern.replaceAll("__","");
-          result = testString.endsWith(pattern);
+          pattern = pattern.replaceAll("%","");
+          result = testString.startsWith(pattern);
         }
 
 
@@ -221,21 +246,19 @@ public class MathUtils {
       {
          String testString = rightValue.getObject("body").getObject("datum").getObject("body").getString("val");
 //         result =regex.matcher(testString).matches();
-        if(pattern.startsWith("*") && pattern.endsWith("*"))
-          result = testString.contains(pattern);
-        else if(pattern.startsWith("*")){
-          result = testString.startsWith(pattern);
+        if(pattern.startsWith("%") && pattern.endsWith("%")) {
+            pattern = pattern.replaceAll("%", "");
+            result = testString.contains(pattern);
+        }else if(pattern.startsWith("%")){
+            pattern = pattern.replaceAll("%","");
+            result = testString.endsWith(pattern);
         }
         else{
-          result = testString.endsWith(pattern);
+          pattern = pattern.replaceAll("%","");
+          result = testString.startsWith(pattern);
         }
 
       }
-
-//      if(value.getObject("body").getBoolean("not"))
-//      {
-//         return !result;
-//      }
       return result;
    }
 
