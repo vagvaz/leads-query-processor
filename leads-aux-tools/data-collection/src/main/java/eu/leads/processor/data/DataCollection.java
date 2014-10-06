@@ -21,10 +21,10 @@ public class DataCollection {
    public static void main(String[] args) {
       String seed = "";
       int numOfPages = 20;
-       if(args.length > 1){
+       if(args.length >= 1){
            seed = args[0];
        }
-       if(args.length > 2){
+       if(args.length >= 2){
            numOfPages = Integer.parseInt(args[1]);
        }
       if(seed == null || seed.equals("")){
@@ -44,10 +44,10 @@ public class DataCollection {
      String pagerankPluginClassName = "eu.leads.processor.plugins.pagerank.PagerankPlugin";
      String sentimentPluginClassName = "eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin";
 
-     String pagerankJar = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/pagerank-plugin/target/pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
-     String pagerankConf = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/pagerank-plugin/pagerank-conf.xml";
-     String sentimentConf = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/sentiment-plugin/sentiment-conf.xml";
-     String sentimentJar = "/home/vagvaz/Projects/idea/leads-query-processor/nqe/system-plugins/sentiment-plugin/target/sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
+     String pagerankJar = "/tmp/leads/plugins/pagerank-plugin/pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
+     String pagerankConf = "/tmp/leads/plugins/pagerank-conf.xml";
+     String sentimentConf = "/tmp/leads/plugins/sentiment-conf.xml";
+     String sentimentJar = "/tmp/leads/plugins/sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
 
       //Set desired target cache
       LQPConfiguration.getConf().setProperty(StringConstants.CRAWLER_DEFAULT_CACHE, webCacheName);
