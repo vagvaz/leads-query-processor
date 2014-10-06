@@ -11,6 +11,7 @@ import eu.leads.processor.plugins.PluginManager;
 import eu.leads.processor.plugins.PluginPackage;
 import org.infinispan.Cache;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -28,7 +29,7 @@ public class DataCollection {
            numOfPages = Integer.parseInt(args[1]);
        }
       if(seed == null || seed.equals("")){
-          seed = "http://www.bbc.co.uk/";
+          seed = "http://www.economist.com/";
       }
       long sleepingPeriod = 5;
       String webCacheName = "default.webpages";//StringConstants.CRAWLER_DEFAULT_CACHE;
@@ -44,7 +45,7 @@ public class DataCollection {
      String pagerankPluginClassName = "eu.leads.processor.plugins.pagerank.PagerankPlugin";
      String sentimentPluginClassName = "eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin";
 
-     String pagerankJar = "/tmp/leads/plugins/pagerank-plugin/pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
+     String pagerankJar = "/tmp/leads/plugins/pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
      String pagerankConf = "/tmp/leads/plugins/pagerank-conf.xml";
      String sentimentConf = "/tmp/leads/plugins/sentiment-conf.xml";
      String sentimentJar = "/tmp/leads/plugins/sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
@@ -93,9 +94,13 @@ public class DataCollection {
          e.printStackTrace();
       }
 
-    InfinispanClusterSingleton.getInstance().getManager().stopManager();
-
-
+    System.out.println("Press Enter to stop infinispan node and Exit...");
+       try {
+           System.in.read();
+       } catch (IOException e) {
+           e.printStackTrace();
+       }
+       InfinispanClusterSingleton.getInstance().getManager().stopManager();
    }
 
 }

@@ -41,7 +41,7 @@
 
       </distributed-cache>
 
-      <distributed-cache name="webpages:" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
+      <distributed-cache name="default.webpages" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
                          statistics="true">
          <eviction max-entries="10000"/>
          <locking concurrency-level="2000"/>

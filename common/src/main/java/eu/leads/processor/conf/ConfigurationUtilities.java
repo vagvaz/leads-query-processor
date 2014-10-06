@@ -131,6 +131,19 @@ public class ConfigurationUtilities {
         }
     }
 
+    public static ClassLoader getClassLoaderFor(String filename) throws URISyntaxException {
+        ClassLoader result = null;
+        URL[] urls = null;
+        try{
+            File file = new File(filename);
+            urls = new URL[]{file.toURI().toURL()};
+        }catch(MalformedURLException e){
+
+        }
+        result = new URLClassLoader(urls,ClassLoader.getSystemClassLoader());
+        return result;
+    }
+
     public static String resolveBroadCast(String ip) {
         String result = ip.substring(0, ip.lastIndexOf("."))
                 + ".255";

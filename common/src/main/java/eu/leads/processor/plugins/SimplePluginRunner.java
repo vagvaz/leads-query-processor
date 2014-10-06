@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.util.*;
 
 import static eu.leads.processor.plugins.EventType.*;
@@ -95,12 +96,12 @@ public class
     }
 
     private void writeObject(java.io.ObjectOutputStream out)
-        throws IOException {
+            throws IOException {
         out.defaultWriteObject();
     }
 
     private void readObject(java.io.ObjectInputStream in)
-        throws IOException, ClassNotFoundException {
+            throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         //        Cache cache = (Cache) InfinispanClusterSingleton.getInstance().getManager().getPersisentCache(configCacheName);
     }
@@ -150,9 +151,9 @@ public class
                 SimplePluginRunner runner = (SimplePluginRunner) listener;
                 if (runner.id.equals(this.id)) {
                     log.info("There is already a SimplePluginRunner running on "
-                                 + InfinispanClusterSingleton.getInstance().getManager()
-                                       .getMemberName().toString() + " for  cache "
-                                 + targetCacheName);
+                            + InfinispanClusterSingleton.getInstance().getManager()
+                            .getMemberName().toString() + " for  cache "
+                            + targetCacheName);
                 }
 
             }
@@ -174,28 +175,39 @@ public class
     }
 
     private void initializePlugin(Cache cache, String plugin) {
-        if(plugin.equals("eu.leads.processor.plugins.pagerank.PagerankPlugin")){
-            ConfigurationUtilities
-                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar");
-        }else if(plugin.equals("eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin")){
-            ConfigurationUtilities
-                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar");
-        }
-        else {
+        String jarFileName = null;
+        if (plugin.equals("eu.leads.processor.plugins.pagerank.PagerankPlugin")) {
+//            ConfigurationUtilities
+//                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar");
+            jarFileName = System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
+        } else if (plugin.equals("eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin")) {
+//            ConfigurationUtilities
+//                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar");
+            jarFileName = System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
+        } else {
             byte[] jarAsBytes = (byte[]) cache.get(plugin + ":jar");
             FSUtilities.flushPluginToDisk(plugin + ".jar", jarAsBytes);
 
-            ConfigurationUtilities
-                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugin
-                            + ".jar");
+//            ConfigurationUtilities
+//                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugin
+//                            + ".jar");
+            jarFileName = System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugin
+                    + ".jar";
         }
+        ClassLoader classLoader = null;
+        try {
+            classLoader = ConfigurationUtilities.getClassLoaderFor(jarFileName);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
         byte[] config = (byte[]) cache.get(plugin + ":conf");
         FSUtilities.flushToTmpDisk("/leads/tmp/" + plugin + "-conf.xml", config);
         XMLConfiguration pluginConfig = null;
         try {
             pluginConfig =
-                new XMLConfiguration(System.getProperty("java.io.tmpdir") + "/leads/tmp/" + plugin
-                                         + "-conf.xml");
+                    new XMLConfiguration(System.getProperty("java.io.tmpdir") + "/leads/tmp/" + plugin
+                            + "-conf.xml");
         } catch (ConfigurationException e) {
             e.printStackTrace();
         }
@@ -203,7 +215,7 @@ public class
         if (className != null && !className.equals("")) {
             try {
                 Class<?> plugClass =
-                    Class.forName(className, true, this.getClass().getClassLoader());
+                        Class.forName(className, true, classLoader);
                 Constructor<?> con = plugClass.getConstructor();
                 PluginInterface plug = (PluginInterface) con.newInstance();
                 plug.initialize(pluginConfig, manager);
