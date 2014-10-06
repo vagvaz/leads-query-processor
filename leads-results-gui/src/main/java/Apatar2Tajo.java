@@ -153,6 +153,7 @@ public class Apatar2Tajo {
         Element node, subnode;
         boolean projectnodeFound = false;
         Expr projectExpr = new Projection();
+        Projection Project = null;
 
         if (ArrowMap.get(InputNodeId).equals(OutputNodeId)) {
             List<String> from = new ArrayList<>();
@@ -267,7 +268,7 @@ public class Apatar2Tajo {
 
                 } else if (Attrb.contains("ProjectNode")) {
                     projectnodeFound = true;
-                    Projection Project = new Projection();
+                    Project = new Projection();
 
                     String TargetName = "";
 
@@ -294,9 +295,9 @@ public class Apatar2Tajo {
 
                     }
                     //Project.setNamedExprs(from);
-                    Project.setChild(Curr);
+                    //Project.setChild(Curr);
                     //Project = visitSelect_list_expr()
-                    Curr = Project;
+                    //Curr = Project;
 
                 } else if (Attrb.contains("OrderByNode")) {
 
@@ -318,7 +319,10 @@ public class Apatar2Tajo {
                 curNodeId = ArrowMap.get(curNodeId);
             }
 
-
+            if(Project!=null) {
+                Project.setChild(Curr);
+                projectExpr = Project;
+            }
         }
 
         return projectExpr;

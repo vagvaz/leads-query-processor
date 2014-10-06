@@ -2,6 +2,8 @@ import eu.leads.processor.core.Tuple;
 import eu.leads.processor.web.QueryResults;
 import eu.leads.processor.web.QueryStatus;
 import eu.leads.processor.web.WebServiceClient;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.XMLConfiguration;
 import org.jdom.JDOMException;
 
 import javax.swing.*;
@@ -25,10 +27,13 @@ public class LeadsResultsGui extends JPanel {
     private static String username;
     private static Vector<Vector> rowdata;
     private static Vector<String> columnNames;
-    private static Apatar2Tajo converter;
+
     protected long rowsC = 60;
     protected String[] loc = {"a", "b", "c", "d"};
     private boolean DEBUG = false;
+
+    static XMLConfiguration config =null;
+
 
     public LeadsResultsGui(Vector<Vector> data, Vector<String> columnNames) {
         super(new GridBagLayout());
@@ -140,9 +145,13 @@ public class LeadsResultsGui extends JPanel {
      */
     private static void createAndShowGUI(Vector<Vector> data, Vector<String> columnNames) {
         r = new Random(0);
+        String title =" LEADS - RESULTS ";
+
+                    title +="user: " + username;
+
 
         //Create and set up the window.
-        JFrame frame = new JFrame(" LEADS - RESULTS");
+        JFrame frame = new JFrame(title);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //Create and set up the content pane.
@@ -157,16 +166,25 @@ public class LeadsResultsGui extends JPanel {
     }
 
     public static void main(String[] args) throws JDOMException, InterruptedException {
-        converter = new Apatar2Tajo();
-        //Read xml
+        username ="Leads-gui";
+         //Read xml
         if(args.length<1) {
             System.err.println("Not enought arguments Exiting");
+
             return;
         }
+        try {
+            config = new XMLConfiguration("leads-results-gui-settings.xml");
+            System.err.println("FoundXml settings file");
+
+        } catch (ConfigurationException e) {
+           System.err.print("Xml error: " + e.getMessage());
+        }
+
 
         File xmlFile = new File(args[0]);
 
-        System.out.println("Trying to open file " + args[0]);
+        System.out.println("Trying to open file: " + args[0]);
         if(xmlFile.exists()){
             System.out.println("File Exists");
         }
@@ -200,17 +218,32 @@ public class LeadsResultsGui extends JPanel {
     }
 
     private static void InitializeWebClient(String args[]) {
-        String host = "http://localhost";
-        int port = 8080;
+        host = "http://localhost";
+        port = 8080;
+
         if (args.length == 2) {
             host = args[0];
             port = Integer.parseInt(args[1]);
         }
-       
+
+        if(config!=null){
+            System.err.print("Xml file ");
+
+            if(config.containsKey("server.host"))
+                host = "http://"+config.getString("server.host");
+
+            if(config.containsKey("server.port"))
+                port = config.getInt("server.port");
+
+            if(config.containsKey("server.username"))
+                    if(config.getString("server.username").length()>0)
+                        username =config.getString("server.username");
+        }
+
+
         try {
             WebServiceClient.initialize(host, port);
-
-            System.err.println("Connected at " + host + ":" + port + " . Exiting");
+            System.out.println("Connected at " + host + ":" + port + " Successful");
         } catch (MalformedURLException e) {
             System.err.println("Unable to connect at " + host + ":" + port + " . Exiting");
             e.printStackTrace();
@@ -224,7 +257,7 @@ public class LeadsResultsGui extends JPanel {
         System.out.print("json: " + json.toString());
         InitializeWebClient(new String[]{});
 
-        QueryStatus  currentStatus = WebServiceClient.submitWorkflow("LeadsGui", json);
+        QueryStatus  currentStatus = WebServiceClient.submitWorkflow(username, json);
         System.out.print("Waiting for results: ");
         while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")){
             try {
