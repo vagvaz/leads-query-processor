@@ -153,12 +153,12 @@ public class ClusterInfinispanManager implements InfinispanManager {
      */
     @Override
     public void stopManager() {
-        for(String cacheName : this.manager.getCacheNames())
-        {
-            Cache cache= this.manager.getCache(cacheName,false);
-            if(cache != null && cache.getAdvancedCache().getStatus().equals(ComponentStatus.RUNNING))
-                cache.stop();
-        }
+       // for(String cacheName : this.manager.getCacheNames())
+        //{
+        //    Cache cache= this.manager.getCache(cacheName,false);
+        //    if(cache != null && cache.getAdvancedCache().getStatus().equals(ComponentStatus.RUNNING))
+       //         cache.stop();
+       // }
         this.manager.stop();
     }
 
