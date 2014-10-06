@@ -16,6 +16,7 @@
       <module>sentiment-module</module>
        <module>data-collection</module>
        <module>pagerank-node</module>
+       <module>data-snapshot</module>
    </modules>
 
     <build>
