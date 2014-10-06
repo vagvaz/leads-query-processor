@@ -50,7 +50,7 @@
            <state-transfer enabled="true" await-initial-transfer="true"/>
 
            <persistence passivation="true">
-               <file-store path="${java.io.tmpdir}" shared="false" passivation="true" preload="true"/>
+               <file-store path="${java.io.tmpdir}" shared="false" preload="true"/>
            </persistence>
        </distributed-cache>
 
@@ -62,7 +62,7 @@
            <state-transfer enabled="true" await-initial-transfer="true"/>
 
            <persistence passivation="true">
-               <file-store path="${java.io.tmpdir}" shared="false" passivation="true" preload="true"/>
+               <file-store path="${java.io.tmpdir}" shared="false"  preload="true"/>
            </persistence>
        </distributed-cache>
 
