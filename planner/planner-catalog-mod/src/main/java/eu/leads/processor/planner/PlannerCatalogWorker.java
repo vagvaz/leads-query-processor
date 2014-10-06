@@ -14,7 +14,6 @@ import org.apache.tajo.engine.function.annotation.Description;
 import org.apache.tajo.engine.function.annotation.ParamOptionTypes;
 import org.apache.tajo.engine.function.annotation.ParamTypes;
 import org.apache.tajo.master.rm.TajoWorkerResourceManager;
-import org.apache.tajo.util.ClassUtil;
 import org.apache.tajo.util.KeyValueSet;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
@@ -107,12 +106,18 @@ public class PlannerCatalogWorker extends Verticle {
                               "leadsfs://localhost:"+container.config().getInteger("port")+"/warehouse");
     catalog
       .createDatabase(StringConstants.DEFAULT_DATABASE_NAME, StringConstants.DEFAULT_TABLE_SPACE);
-
+      System.out.println("Loading functions");
     try {
-      if(initBuiltinFunctions().size() == 0)
-        container.logger().error("\n\n\n\n\n\n\n SIZE 0 \n\n\n\n\n");
-      for (FunctionDesc funcDesc : initBuiltinFunctions()) {
-        container.logger().error("\n"+funcDesc.toString());
+        int k=-29;
+        List<FunctionDesc> builtin = initBuiltinFunctions();
+      if((k =builtin.size()) == 0){
+            container.logger().error("\n\n\n\n\n\n\n SIZE 0 \n\n\n\n\n");
+        }else{
+          System.out.println("Found Builtin Functions  = " + k );
+      }
+      for (FunctionDesc funcDesc : builtin) {
+        container.logger().info(funcDesc.toString());
+        System.out.println(funcDesc.toString());
         catalog.createFunction(funcDesc);
       }
     } catch (ServiceException e) {
