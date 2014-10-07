@@ -98,7 +98,7 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
                 return Double.toString(0.0f);
             }
             result = currentPagerank.getVisitCount()/totalSum;
-            return Double.toHexString(result);
+            return Double.toString(result);
 
     }
 
