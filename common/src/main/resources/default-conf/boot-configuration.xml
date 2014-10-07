@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <leads-processor-bootstrap>
     <processor>
-        <ips>5.147.254.198</ips> <!-- localhost-->
+        <!--ips>5.147.254.198</ips--> 
+        <ips>localhost</ips>
         <version>1.0-SNAPSHOT</version>
         <groupId>gr.tuc.softnet</groupId>
         <vertxArg>ha</vertxArg>
@@ -37,11 +38,11 @@
             <modName>processor-webservice</modName>
         </component>
         <ssh>
-            <username>ubuntu</username>
+            <username>vagvaz</username>
             <baseDir>/tmp/</baseDir>
             <remoteDir>/tmp/</remoteDir>
             <!--<password>testpass</password> -->
-            <!-- <rsa>/tmp/id_rsa</rsa>  a filename -->
+            <rsa>/home/vagvaz/.ssh/id_rsa</rsa>
         </ssh>
     </processor>
 </leads-processor-bootstrap>

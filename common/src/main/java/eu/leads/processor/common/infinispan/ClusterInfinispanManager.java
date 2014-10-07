@@ -91,7 +91,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         getPersisentCache("defaultCache");
         //I might want to sleep here for a little while
         PrintUtilities.printList(manager.getMembers());
-//        startHotRodServer(manager,host, serverPort);
+        startHotRodServer(manager,host, serverPort);
 
         System.out.println("We have started");
 
@@ -127,11 +127,13 @@ public class ClusterInfinispanManager implements InfinispanManager {
         while (!isStarted) {
             HotRodServerConfigurationBuilder serverConfigurationBuilder =
                 new HotRodServerConfigurationBuilder();
-            serverConfigurationBuilder.host(localhost).port(serverPort).keyValueFilterFactory("leads-processor-filter-factory",new LeadsProcessorKeyValueFilterFactory(manager))
-            .converterFactory("leads-processor-converter-factory",new LeadsProcessorConverterFactory());
+            serverConfigurationBuilder.host(localhost).port(serverPort);
             try {
                 server.start(serverConfigurationBuilder.build(), targetManager);
                 isStarted = true;
+                server.addConverterFactory("leads-processor-converter-factory",new LeadsProcessorConverterFactory());
+                server.addKeyValueFilterFactory("leads-processor-filter-factory",new LeadsProcessorKeyValueFilterFactory(manager));
+
             } catch (Exception e) {
                 System.out.println("Exception e " + e.getLocalizedMessage());
                 serverPort++;

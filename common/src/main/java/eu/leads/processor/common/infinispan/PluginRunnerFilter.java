@@ -18,6 +18,7 @@ import org.vertx.java.core.json.JsonObject;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -105,31 +106,52 @@ public class PluginRunnerFilter implements KeyValueFilter {
     }
 
     private void initializePlugin(Cache cache, String plugName) {
-        byte[] jarAsBytes = (byte[]) cache.get(plugName + ":jar");
-        FSUtilities.flushPluginToDisk(plugName + ".jar", jarAsBytes);
+        String jarFileName = null;
+        if (plugin.equals("eu.leads.processor.plugins.pagerank.PagerankPlugin")) {
+//            ConfigurationUtilities
+//                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar");
+            jarFileName = System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
+        } else if (plugin.equals("eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin")) {
+//            ConfigurationUtilities
+//                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar");
+            jarFileName = System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
+        } else {
+            byte[] jarAsBytes = (byte[]) cache.get(plugin + ":jar");
+            FSUtilities.flushPluginToDisk(plugin + ".jar", jarAsBytes);
 
-        ConfigurationUtilities
-            .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugName
-                                + ".jar");
-        byte[] config = (byte[]) cache.get(plugName + ":conf");
-        FSUtilities.flushToTmpDisk("/leads/tmp/" + plugName + "-conf.xml", config);
+//            ConfigurationUtilities
+//                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugin
+//                            + ".jar");
+            jarFileName = System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugin
+                    + ".jar";
+        }
+        ClassLoader classLoader = null;
+        try {
+            classLoader = ConfigurationUtilities.getClassLoaderFor(jarFileName);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        byte[] config = (byte[]) cache.get(plugin + ":conf");
+        FSUtilities.flushToTmpDisk("/leads/tmp/" + plugin + "-conf.xml", config);
         XMLConfiguration pluginConfig = null;
         try {
             pluginConfig =
-                new XMLConfiguration(System.getProperty("java.io.tmpdir") + "/leads/tmp/" + plugName
-                                         + "-conf.xml");
+                    new XMLConfiguration(System.getProperty("java.io.tmpdir") + "/leads/tmp/" + plugin
+                            + "-conf.xml");
         } catch (ConfigurationException e) {
             e.printStackTrace();
         }
-        String className = (String) cache.get(plugName + ":className");
+        String className = (String) cache.get(plugin + ":className");
         if (className != null && !className.equals("")) {
             try {
                 Class<?> plugClass =
-                    Class.forName(className, true, this.getClass().getClassLoader());
+                        Class.forName(className, true, classLoader);
                 Constructor<?> con = plugClass.getConstructor();
                 plugin = (PluginInterface) con.newInstance();
                 plugin.initialize(pluginConfig, imanager);
-
+                Integer events = (Integer) cache.get(plugin + ":events");
+//                addToEvents(plug, events);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             } catch (NoSuchMethodException e) {
@@ -142,14 +164,18 @@ public class PluginRunnerFilter implements KeyValueFilter {
                 e.printStackTrace();
             }
         } else {
-            log.error("Could not find the name for " + plugName);
+            log.error("Could not find the name for " + plugin);
         }
+
     }
 
     @Override public boolean accept(Object key, Object value, Metadata metadata) {
 //        String o1 = (String)key;
 //        String o2 = (String)value;
 //        accept2(o1,o2,metadata);
+        accept2((String)key, (String)value,metadata);
         return false;
     }
+
+
 }

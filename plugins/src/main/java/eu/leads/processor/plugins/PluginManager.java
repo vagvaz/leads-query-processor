@@ -3,10 +3,14 @@ package eu.leads.processor.plugins;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.infinispan.PluginHandlerListener;
 import eu.leads.processor.common.utils.FSUtilities;
 import eu.leads.processor.common.utils.FileLockWrapper;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.infinispan.Cache;
+import org.infinispan.client.hotrod.RemoteCache;
+import org.infinispan.client.hotrod.RemoteCacheManager;
+import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.context.Flag;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
@@ -203,9 +207,34 @@ public class PluginManager {
         LinkedList<String> alist = new LinkedList<String>();
         alist.add(pluginId);
         conf.put("pluginNames", alist);
-        SimplePluginRunner runner = new SimplePluginRunner("TestSimplePluginDeployer", conf);
-        manager.addListener(runner, cacheName);
+//        SimplePluginRunner runner = new SimplePluginRunner("TestSimplePluginDeployer", conf);
+        PluginHandlerListener listener = new PluginHandlerListener();
 
+//        manager.addListener(listener, cacheName);
+        RemoteCacheManager remoteCacheManager = createRemoteCacheManager();
+        RemoteCache<Object, Object> remoteCache = remoteCacheManager.getCache(cacheName);
+
+        System.out.println("Using cache " + cacheName);
+
+        if (remoteCache == null) {
+            System.err.println("Cache " + cacheName + " not found!");
+            System.exit(1);
+        }
+        if (remoteCache == null) {
+            System.err.println("Cache " + cacheName + " not found!");
+            return;
+        }
+
+        remoteCache.addClientListener(listener, new Object[]{conf.toString()}, new Object[0]);
+
+
+
+    }
+
+    private static RemoteCacheManager createRemoteCacheManager() {
+            ConfigurationBuilder builder = new ConfigurationBuilder();
+            builder.addServer().host("localhost").port(11000);
+            return new RemoteCacheManager(builder.build());
     }
 
     public static boolean deployPlugin(String pluginId, XMLConfiguration config, String cacheName,

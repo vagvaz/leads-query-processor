@@ -32,7 +32,7 @@
    </dependencies>
 
    <properties>
-      <infinispan.version>7.0.0.Alpha5</infinispan.version>
+      <infinispan.version>7.0.0.Beta2</infinispan.version>
       <processor.version>1.0-SNAPSHOT</processor.version>
    </properties>
 
