@@ -66,6 +66,7 @@ public class Snapshot {
             keyOut.write(entry.getKey()+"\n");
             valueOut.write(entry.getValue()+"\n");
             counter++;
+	    System.out.println("counter: " + counter);
         }
         keyOut.close();
         valueOut.close();
@@ -109,10 +110,11 @@ public class Snapshot {
                     if(valueLine != null && !valueLine.trim().equals("")) {
                         JsonObject ob = new JsonObject(valueLine);
                         cache.put(keyLine.trim(), valueLine.trim());
+	               System.out.println("counter: " + counter);
+                counter++;
                     }
                 }
 
-                counter++;
                 keyLine = keyReader.readLine();
                 valueLine = valueReader.readLine();
             }
