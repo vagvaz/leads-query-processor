@@ -9,15 +9,17 @@ import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by vagvaz on 9/16/14.
  */
 public class PeriodicCheckHandler implements Handler<Long> {
-    Map<String, Integer> actionToLevelMap;
-    Map<Integer, Map<String, Action>> monitoredActions;
+    ConcurrentMap<String, Integer> actionToLevelMap;
+    ConcurrentMap<Integer, Map<String, Action>> monitoredActions;
     String ownerId;
     String nqeGroup;
     LogProxy log;
@@ -26,8 +28,8 @@ public class PeriodicCheckHandler implements Handler<Long> {
 
     public PeriodicCheckHandler(String ownerId, String deployerId, String nqeGroup, LogProxy log,
                                    Node com,
-                                   Map<String, Integer> actionToLevelMap,
-                                   Map<Integer, Map<String, Action>> monitoredActions) {
+                                   ConcurrentMap<String, Integer> actionToLevelMap,
+                                   ConcurrentMap<Integer, Map<String, Action>> monitoredActions) {
         this.actionToLevelMap = actionToLevelMap;
         this.monitoredActions = monitoredActions;
         this.ownerId = ownerId;
@@ -49,13 +51,18 @@ public class PeriodicCheckHandler implements Handler<Long> {
 
     private void handleLevel_1() {
         Map<String, Action> actions = monitoredActions.get(-1);
+        Map<Action,Integer> tobeMoved = new HashMap<Action,Integer>();
         for (Map.Entry<String, Action> action : actions.entrySet()) {
             Action requestOwner = createNewAction(action.getValue());
             requestOwner.setLabel(NQEConstants.OPERATOR_GET_OWNER);
             requestOwner.getData().putString("replyTo",com.getId());
             com.sendToAllGroup(nqeGroup, requestOwner.asJsonObject());
-            moveActionToLevel(action.getValue(), 1);
+            tobeMoved.put(action.getValue(), 1);
         }
+        for(Map.Entry<Action,Integer> entry : tobeMoved.entrySet()){
+            moveActionToLevel(entry.getKey(),entry.getValue());
+        }
+        tobeMoved.clear();
         actions.clear();
     }
 
@@ -69,14 +76,20 @@ public class PeriodicCheckHandler implements Handler<Long> {
 
     private void handleLevel0() {
         Map<String, Action> actions = monitoredActions.get(0);
+        Map<Action,Integer> tobeMoved = new HashMap<Action,Integer>();
         for (Map.Entry<String, Action> action : actions.entrySet()) {
             moveActionToLevel(action.getValue(), 0);
         }
+        for(Map.Entry<Action,Integer> entry : tobeMoved.entrySet()){
+            moveActionToLevel(entry.getKey(),entry.getValue());
+        }
+        tobeMoved.clear();
         actions.clear();
     }
 
     private void handleLevel1() {
         Map<String, Action> actions = monitoredActions.get(1);
+        HashMap<Action,Integer> tobeMoved = new HashMap<>();
         for (Map.Entry<String, Action> action : actions.entrySet()) {
             Action timedOutAction = action.getValue();
             String owner = timedOutAction.getData().getString("owner");
@@ -84,13 +97,18 @@ public class PeriodicCheckHandler implements Handler<Long> {
             requestStatus.setLabel(NQEConstants.OPERATOR_GET_RUNNING_STATUS);
             requestStatus.getData().putString("replyTo",com.getId());
             com.sendTo(owner, requestStatus.asJsonObject());
-            moveActionToLevel(action.getValue(), 2);
+            tobeMoved.put(action.getValue(), 2);
         }
+        for(Map.Entry<Action,Integer> entry : tobeMoved.entrySet()){
+            moveActionToLevel(entry.getKey(),entry.getValue());
+        }
+        tobeMoved.clear();
         actions.clear();
     }
 
     private void handleLevel2() {
         Map<String, Action> actions = monitoredActions.get(2);
+        Map<Action,Integer> tobeMoved = new HashMap<Action,Integer>();
         for (Map.Entry<String, Action> action : actions.entrySet()) {
             Action timedOutAction = action.getValue();
             String owner = timedOutAction.getData().getString("owner");
@@ -98,8 +116,12 @@ public class PeriodicCheckHandler implements Handler<Long> {
             requestStatus.setLabel(NQEConstants.OPERATOR_GET_RUNNING_STATUS);
            requestStatus.getData().putString("replyTo",com.getId());
             com.sendTo(owner, requestStatus.asJsonObject());
-            moveActionToLevel(action.getValue(), 3);
+            tobeMoved.put(action.getValue(), 3);
         }
+        for(Map.Entry<Action,Integer> entry : tobeMoved.entrySet()){
+            moveActionToLevel(entry.getKey(),entry.getValue());
+        }
+        tobeMoved.clear();
         actions.clear();
     }
 
