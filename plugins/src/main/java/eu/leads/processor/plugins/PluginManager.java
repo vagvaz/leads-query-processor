@@ -17,7 +17,10 @@ import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.remoting.transport.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vertx.java.core.json.JsonArray;
+import org.vertx.java.core.json.JsonObject;
 
+import java.awt.*;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
@@ -26,6 +29,7 @@ import java.net.URLClassLoader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -201,12 +205,20 @@ public class PluginManager {
 
     private static void deployPluginListener(String pluginId, String cacheName,
                                                 InfinispanManager manager) {
-        Properties conf = new Properties();
-        conf.put("target", cacheName);
-        conf.put("config", StringConstants.PLUGIN_ACTIVE_CACHE);
-        LinkedList<String> alist = new LinkedList<String>();
-        alist.add(pluginId);
-        conf.put("pluginNames", alist);
+//        Properties conf = new Properties();
+//        conf.put("target", cacheName);
+//        conf.put("config", StringConstants.PLUGIN_ACTIVE_CACHE);
+//        LinkedList<String> alist = new LinkedList<String>();
+//        alist.add(pluginId);
+//        conf.put("pluginName", alist);
+        JsonObject configuration = new JsonObject();
+        configuration.putString("targetCache",cacheName);
+        configuration.putString("activePluginCache",StringConstants.PLUGIN_ACTIVE_CACHE);
+        configuration.putString("pluginName", pluginId);
+        configuration.putArray("types", new JsonArray());
+        configuration.putString("id", UUID.randomUUID().toString());
+//        configuration.getArray("types").add(EventType.CREATED);
+//        configuration.getArray("types").add(EventType.MODIFIED);
 //        SimplePluginRunner runner = new SimplePluginRunner("TestSimplePluginDeployer", conf);
         PluginHandlerListener listener = new PluginHandlerListener();
 
@@ -225,7 +237,7 @@ public class PluginManager {
             return;
         }
 
-        remoteCache.addClientListener(listener, new Object[]{conf.toString()}, new Object[0]);
+        remoteCache.addClientListener(listener, new Object[]{configuration.toString()}, new Object[0]);
 
 
 

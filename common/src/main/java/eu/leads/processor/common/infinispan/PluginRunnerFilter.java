@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
@@ -31,11 +32,15 @@ import static eu.leads.processor.plugins.EventType.REMOVED;
 /**
  * Created by vagvaz on 9/29/14.
  */
-public class PluginRunnerFilter implements KeyValueFilter {
-    private final EmbeddedCacheManager manager;
-    private JsonObject conf;
-    private ClusterInfinispanManager imanager;
-    private Cache pluginsCache;
+public class PluginRunnerFilter implements KeyValueFilter, Serializable {
+
+    private String configString;
+
+    transient private final EmbeddedCacheManager manager;
+
+    transient private JsonObject conf;
+    transient private ClusterInfinispanManager imanager;
+    transient private Cache pluginsCache;
     transient Cache targetCache;
     transient String targetCacheName;
     transient Logger log ;
@@ -43,23 +48,31 @@ public class PluginRunnerFilter implements KeyValueFilter {
     transient String pluginsCacheName;
     transient String pluginName;
     transient List<EventType> type;
+    transient boolean isInitialized = false;
+
     public PluginRunnerFilter(EmbeddedCacheManager manager,String confString){
+        System.err.println("Plugin Runner --- Initialized for ");
+        System.err.println("manager " + manager.getAddress().toString());
+        this.configString = confString;
         this.manager = manager;
-        this.conf = new JsonObject(confString);
+
         imanager = new ClusterInfinispanManager(manager);
+
         initialize();
     }
 
     private void initialize() {
-
+        this.conf = new JsonObject(this.configString);
         pluginsCacheName = conf.getString("activePluginCache");
         pluginName = conf.getString("pluginName");
         JsonArray types = conf.getArray("types");
         //InferTypes
         type = new ArrayList<EventType>(3);
-        Iterator<Object> iterator = types.iterator();
-        if(iterator.hasNext()){
-            type.add(valueOf((String) iterator.next()));
+        if(types != null ) {
+            Iterator<Object> iterator = types.iterator();
+            if (iterator.hasNext()) {
+                type.add((EventType)iterator.next());
+            }
         }
         if(type.size() == 0){
             type.add(CREATED);
@@ -77,6 +90,8 @@ public class PluginRunnerFilter implements KeyValueFilter {
 
 
      public boolean accept2(String key, String value, Metadata metadata) {
+        System.err.println("RUNNING "+ conf.getString("id") + " for pluging" + this.plugin.getClassName() );
+
         EventType actionType = inferEventType(targetCache,key,value,metadata);
         switch (actionType) {
             case CREATED:
@@ -107,22 +122,22 @@ public class PluginRunnerFilter implements KeyValueFilter {
 
     private void initializePlugin(Cache cache, String plugName) {
         String jarFileName = null;
-        if (plugin.equals("eu.leads.processor.plugins.pagerank.PagerankPlugin")) {
+        if (plugName.equals("eu.leads.processor.plugins.pagerank.PagerankPlugin")) {
 //            ConfigurationUtilities
 //                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar");
             jarFileName = System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
-        } else if (plugin.equals("eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin")) {
+        } else if (plugName.equals("eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin")) {
 //            ConfigurationUtilities
 //                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar");
             jarFileName = System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
         } else {
-            byte[] jarAsBytes = (byte[]) cache.get(plugin + ":jar");
-            FSUtilities.flushPluginToDisk(plugin + ".jar", jarAsBytes);
+            byte[] jarAsBytes = (byte[]) cache.get(plugName + ":jar");
+            FSUtilities.flushPluginToDisk(plugName + ".jar", jarAsBytes);
 
 //            ConfigurationUtilities
 //                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugin
 //                            + ".jar");
-            jarFileName = System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugin
+            jarFileName = System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugName
                     + ".jar";
         }
         ClassLoader classLoader = null;
@@ -132,17 +147,17 @@ public class PluginRunnerFilter implements KeyValueFilter {
             e.printStackTrace();
         }
 
-        byte[] config = (byte[]) cache.get(plugin + ":conf");
-        FSUtilities.flushToTmpDisk("/leads/tmp/" + plugin + "-conf.xml", config);
+        byte[] config = (byte[]) cache.get(plugName + ":conf");
+        FSUtilities.flushToTmpDisk("/leads/tmp/" + plugName + "-conf.xml", config);
         XMLConfiguration pluginConfig = null;
         try {
             pluginConfig =
-                    new XMLConfiguration(System.getProperty("java.io.tmpdir") + "/leads/tmp/" + plugin
+                    new XMLConfiguration(System.getProperty("java.io.tmpdir") + "/leads/tmp/" + plugName
                             + "-conf.xml");
         } catch (ConfigurationException e) {
             e.printStackTrace();
         }
-        String className = (String) cache.get(plugin + ":className");
+        String className = (String) cache.get(plugName + ":className");
         if (className != null && !className.equals("")) {
             try {
                 Class<?> plugClass =
@@ -150,7 +165,7 @@ public class PluginRunnerFilter implements KeyValueFilter {
                 Constructor<?> con = plugClass.getConstructor();
                 plugin = (PluginInterface) con.newInstance();
                 plugin.initialize(pluginConfig, imanager);
-                Integer events = (Integer) cache.get(plugin + ":events");
+                Integer events = (Integer) cache.get(plugName + ":events");
 //                addToEvents(plug, events);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
@@ -173,6 +188,8 @@ public class PluginRunnerFilter implements KeyValueFilter {
 //        String o1 = (String)key;
 //        String o2 = (String)value;
 //        accept2(o1,o2,metadata);
+        if(!isInitialized)
+            initialize();
         accept2((String)key, (String)value,metadata);
         return false;
     }

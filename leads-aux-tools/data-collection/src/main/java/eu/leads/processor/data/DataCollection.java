@@ -21,7 +21,7 @@ public class DataCollection {
 
    public static void main(String[] args) {
       String seed = "";
-      int numOfPages = 100;
+       int numOfPages = 100;
        if(args.length >= 1){
            seed = args[0];
        }

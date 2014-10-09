@@ -24,14 +24,14 @@
       <scheduled-thread-pool name="infinispan-eviction" thread-factory="infinispan-factory"/>
       <scheduled-thread-pool name="infinispan-repl-queue" thread-factory="infinispan-factory"/>
    </threads>
-   <cache-container name="defaultContainer" statistics="true" default-cache="defaultCache"
+   <cache-container name="defaultContainer" statistics="true" default-cache="default"
                     start="true">
       <transport stack="tcp"/>
       <serialization version="70"/>
       <jmx domain="eu.leads.processor" duplicate-domains="true"></jmx>
       <distributed-cache name="default" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
                          statistics="true">
-         <eviction max-entries="10000"/>
+         <eviction max-entries="2"/>
          <locking concurrency-level="2000"/>
          <state-transfer enabled="false" await-initial-transfer="false"/>
 
@@ -69,12 +69,12 @@
       <distributed-cache name="clustered" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
                          statistics="true">
 
-         <eviction max-entries="10000"/>
+         <eviction max-entries="2"/>
          <locking concurrency-level="2000"/>
          <state-transfer enabled="true" await-initial-transfer="true"/>
 
          <persistence passivation="true">
-            <file-store path="${java.io.tmpdir}" shared="false" preload="true"/>
+            <file-store path="${java.io.tmpdir}/" shared="false" preload="true"/>
          </persistence>
 
       </distributed-cache>

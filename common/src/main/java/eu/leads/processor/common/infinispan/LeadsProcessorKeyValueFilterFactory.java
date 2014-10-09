@@ -25,6 +25,7 @@ public class LeadsProcessorKeyValueFilterFactory implements KeyValueFilterFactor
         if(objects.length != 1){
             throw new IllegalArgumentException();
         }
+
         JsonObject conf = new JsonObject((String)objects[0]);
         return new PluginRunnerFilter(manager,conf.toString());
     }

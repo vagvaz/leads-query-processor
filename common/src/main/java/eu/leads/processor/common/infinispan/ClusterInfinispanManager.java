@@ -124,6 +124,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     private void startHotRodServer(EmbeddedCacheManager targetManager, String localhost, int port) {
         serverPort = port;
         boolean isStarted = false;
+        server = new HotRodServer();
         while (!isStarted) {
             HotRodServerConfigurationBuilder serverConfigurationBuilder =
                 new HotRodServerConfigurationBuilder();
