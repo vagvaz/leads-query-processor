@@ -27,8 +27,8 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
     String deployerLogic;
     String nqeGroup;
     String deployerMonitor;
-    Map<String, Integer> actionToLevelMap;
-    Map<Integer, Map<String, Action>> monitoredActions;
+    ConcurrentHashMap<String, Integer> actionToLevelMap;
+    ConcurrentHashMap<Integer, Map<String, Action>> monitoredActions;
     LogProxy log;
     Node com;
     String id;

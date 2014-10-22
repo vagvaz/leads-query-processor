@@ -128,12 +128,12 @@ public class ClusterInfinispanManager implements InfinispanManager {
         while (!isStarted) {
             HotRodServerConfigurationBuilder serverConfigurationBuilder =
                 new HotRodServerConfigurationBuilder();
-            serverConfigurationBuilder.host(localhost).port(serverPort);
+//            serverConfigurationBuilder.host(localhost).port(serverPort);
             try {
-                server.start(serverConfigurationBuilder.build(), targetManager);
+//                server.start(serverConfigurationBuilder.build(), targetManager);
                 isStarted = true;
-                server.addConverterFactory("leads-processor-converter-factory",new LeadsProcessorConverterFactory());
-                server.addKeyValueFilterFactory("leads-processor-filter-factory",new LeadsProcessorKeyValueFilterFactory(manager));
+//                server.addConverterFactory("leads-processor-converter-factory",new LeadsProcessorConverterFactory());
+//                server.addKeyValueFilterFactory("leads-processor-filter-factory",new LeadsProcessorKeyValueFilterFactory(manager));
 
             } catch (Exception e) {
                 System.out.println("Exception e " + e.getLocalizedMessage());

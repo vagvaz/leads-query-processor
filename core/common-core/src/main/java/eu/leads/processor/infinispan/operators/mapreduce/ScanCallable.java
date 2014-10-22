@@ -1,5 +1,6 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
+import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.InfinispanManager;
@@ -9,6 +10,12 @@ import eu.leads.processor.plugins.pagerank.node.DSPMNode;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.distexec.DistributedCallable;
+import org.infinispan.versioning.VersionedCache;
+import org.infinispan.versioning.impl.VersionedCacheTreeMapImpl;
+import org.infinispan.versioning.impl.VersionedCacheashMapImpl;
+import org.infinispan.versioning.utils.version.Version;
+import org.infinispan.versioning.utils.version.VersionScalar;
+import org.infinispan.versioning.utils.version.VersionScalarGenerator;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
@@ -22,6 +29,7 @@ public class ScanCallable <K,V> implements
 
         DistributedCallable<K, V, String>, Serializable {
    transient protected Cache<K, V> inputCache;
+    transient protected VersionedCache versionedCache;
    transient protected Cache outputCache;
     transient  protected Cache pageRankCache;
    transient protected FilterOperatorTree tree;
@@ -39,10 +47,14 @@ public class ScanCallable <K,V> implements
       this.configString = configString;
       this.output = output;
    }
+   boolean shouldConvert = false;
 
    @Override
    public void setEnvironment(Cache<K, V> cache, Set<K> inputKeys) {
       inputCache = cache;
+      if(inputCache.equals("default.webpages"))
+          shouldConvert = true;
+      versionedCache = new VersionedCacheTreeMapImpl(cache,new VersionScalarGenerator(),cache.getName());
       manager =  new ClusterInfinispanManager(cache.getCacheManager());
       outputCache = (Cache) manager.getPersisentCache(output);
       pageRankCache = (Cache) manager.getPersisentCache("pagerankCache");
@@ -72,9 +84,32 @@ public class ScanCallable <K,V> implements
    @Override
    public String call() throws Exception {
       for (Map.Entry<K, V> entry : inputCache.entrySet()) {
-         String key = (String) entry.getKey();
-         String value = (String) entry.getValue();
-         Tuple tuple = new Tuple(value);
+         String versionedKey = (String) entry.getKey();
+         String key = pruneVersion(versionedKey);
+         Version latestVersion = versionedCache.getLatestVersion(key);
+         if(latestVersion == null){
+             continue;
+         }
+         Version currentVersion = getVersion(versionedKey);
+
+//         if(!latestVersion.equals(currentVersion))
+//             continue;
+          if(latestVersion.compareTo(currentVersion) != 0)
+              continue;
+//         String value = (String) entry.getValue();
+          Object objectValue = versionedCache.get(key);
+          String value = null;
+          Tuple tuple = null;
+//          if(shouldConvert){
+//              byte[] bytes = (byte[])objectValue;
+//              tuple = AvroConverter.getTuple(objectValue,inputSchema);
+//          }
+//          else{
+              tuple = new Tuple((String)objectValue);
+//          }
+
+
+
           namesToLowerCase(tuple);
           renameAllTupleAttributes(tuple);
          if (tree != null) {
@@ -92,7 +127,19 @@ public class ScanCallable <K,V> implements
       return inputCache.getCacheManager().getAddress().toString();
    }
 
-  private void namesToLowerCase(Tuple tuple) {
+    private Version getVersion(String versionedKey) {
+        Version result = null;
+        String stringVersion = versionedKey.substring(versionedKey.lastIndexOf(":") + 1);
+        result = new VersionScalar(Long.parseLong(stringVersion));
+        return result;
+    }
+
+    private String pruneVersion(String versionedKey) {
+        String result = versionedKey.substring(0,versionedKey.lastIndexOf(":"));
+        return result;
+    }
+
+    private void namesToLowerCase(Tuple tuple) {
     Set<String> fieldNames  =  new HashSet<>(tuple.getFieldNames());
     for(String field : fieldNames){
       tuple.renameAttribute(field,field.toLowerCase());

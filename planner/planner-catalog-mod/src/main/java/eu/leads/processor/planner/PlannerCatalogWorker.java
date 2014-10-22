@@ -107,6 +107,7 @@ public class PlannerCatalogWorker extends Verticle {
     catalog
       .createDatabase(StringConstants.DEFAULT_DATABASE_NAME, StringConstants.DEFAULT_TABLE_SPACE);
       System.out.println("Loading functions");
+
     try {
         int k=-29;
         List<FunctionDesc> builtin = initBuiltinFunctions();

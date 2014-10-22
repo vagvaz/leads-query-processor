@@ -7,7 +7,8 @@ import org.apache.tajo.engine.planner.logical.LogicalRootNode;
  * Created by vagvaz on 9/8/14.
  */
 public class WGSUrlDepthNode extends LogicalRootNode {
-    @Expose String url;
+    @Expose
+    String url;
     @Expose int depth;
 
     public WGSUrlDepthNode(int pid) {

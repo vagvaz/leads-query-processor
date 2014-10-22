@@ -13,12 +13,12 @@
    <artifactId>leads-query-processor-tajo-module</artifactId>
    <packaging>jar</packaging>
    <version>0.0.1-SNAPSHOT</version>
-   <scm>
-      <url>https://git-wip-us.apache.org/repos/asf/tajo.git</url>
-      <connection>scm:git:https://git-wip-us.apache.org/repos/asf/tajo.git</connection>
-      <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/tajo.git
-      </developerConnection>
-   </scm>
+   <!--<scm>-->
+      <!--<url>https://git-wip-us.apache.org/repos/asf/tajo.git</url>-->
+      <!--<connection>scm:git:https://git-wip-us.apache.org/repos/asf/tajo.git</connection>-->
+      <!--<developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/tajo.git-->
+      <!--</developerConnection>-->
+   <!--</scm>-->
    <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -156,6 +156,12 @@
          <version>0.9.0-SNAPSHOT</version>
          <type>pom</type-->
 <!--       </dependency> -->
+
+       <dependency>
+           <groupId>gr.tuc.softnet</groupId>
+           <artifactId>leads-query-processor-common</artifactId>
+           <version>1.0-SNAPSHOT</version>
+       </dependency>
    </dependencies>
 
 

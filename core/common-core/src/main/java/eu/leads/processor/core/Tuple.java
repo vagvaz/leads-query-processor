@@ -25,6 +25,10 @@ public class Tuple extends DataType {
        data.mergeIn(tr.asJsonObject());
     }
 
+    public Tuple() {
+        super();
+    }
+
     public String asString() {
         return data.toString();
     }

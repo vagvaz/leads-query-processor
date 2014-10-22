@@ -4,6 +4,7 @@
 package leads.tajo.module;
 
 import com.google.protobuf.TextFormat.ParseException;
+import eu.leads.processor.common.StringConstants;
 import grammar.LeadsSQLParser;
 import grammar.LeadsSQLParser.SqlContext;
 import grammar.SQLLexer;
@@ -67,7 +68,7 @@ public class TaJoModule {
     }
 
     public static Schema getTableSchema(String tableName) {
-        TableDesc result = catalog.getTableDesc("default", tableName);
+        TableDesc result = catalog.getTableDesc(StringConstants.DEFAULT_DATABASE_NAME, tableName);
         return result.getLogicalSchema();
     }
 
