@@ -39,7 +39,7 @@ public class LogicalPlanVisitorTest {
                                          DEFAULT_DATABASE_NAME);
         Mymodule = new TaJoModule();
         Mymodule.init_connection("127.0.0.1", 5998);
-        String line = "select count(sentiment) as pipo,links,url as lala,pagerank as foobar,count(domainname) as papari   from webpages where lala = 'ddsaf' and foobar =9 group by links,lala, foobar having papari > 5 order by papari";
+        String line = "select domainname,avg(entities.sentiment) as avg_sentiment,avg(pagerank) as avg_pagerank from webpages join entities on url=webpageurl";
            // "select dept.deptname,dept.tmsp from dept join ( select score,phone,deptname,sumtest(score) as tmsp from score group by score,phone, deptname) s on dept.deptname = s.deptname and s.tmsp = dept.tmsp";
         System.out.println(line);
         String res = TaJoModule.Optimize(session, line);

@@ -248,7 +248,7 @@ public class WebServiceClient {
         QueryStatus result = null;
         WebServiceWorkflow query = new WebServiceWorkflow();
 
-        pluginPackage.putString("user",username);
+//        pluginPackage.putString("user",username);
 
         byte[] data = SerializationUtils.serialize(pluginPackage);
 

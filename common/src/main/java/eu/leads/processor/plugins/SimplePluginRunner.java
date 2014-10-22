@@ -214,8 +214,8 @@ public class
         String className = (String) cache.get(plugin + ":className");
         if (className != null && !className.equals("")) {
             try {
-                Class<?> plugClass =
-                        Class.forName(className, true, classLoader);
+                Class<? extends PluginInterface> plugClass =
+                        (Class<? extends PluginInterface>) Class.forName(className, true, classLoader);
                 Constructor<?> con = plugClass.getConstructor();
                 PluginInterface plug = (PluginInterface) con.newInstance();
                 plug.initialize(pluginConfig, manager);

@@ -6,7 +6,9 @@ import org.vertx.java.core.json.JsonObject;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by vagvaz on 8/23/14.
@@ -16,8 +18,8 @@ public class WebServiceClientTest {
     private static int port;
 
     public static void main(String[] args) throws IOException {
-        host = "http://localhost";
-//        host = "http://5.147.254.198";
+//        host = "http://localhost";
+        host = "http://5.147.254.198";
         port = 8080;
         if (args.length == 2) {
             host = args[0];
@@ -73,6 +75,124 @@ public class WebServiceClientTest {
                 "  },\n" +
                 "  \"OpType\": \"Projection\"\n" +
                 "}";
+//        String workflow = "{\n" +
+//                "  \"IsDistinct\": false,\n" +
+//                "  \"Projections\": [\n" +
+//                "    {\n" +
+//                "      \"Expr\": {\n" +
+//                "        \"ColumnName\": \"domainname\",\n" +
+//                "        \"OpType\": \"Column\"\n" +
+//                "      },\n" +
+//                "      \"OpType\": \"Target\"\n" +
+//                "    },\n" +
+//                "    {\n" +
+//                "      \"AliasName\": \"avg_pagerank\",\n" +
+//                "      \"Expr\": {\n" +
+//                "        \"IsDistinct\": false,\n" +
+//                "        \"Signature\": \"avg\",\n" +
+//                "        \"FuncParams\": [\n" +
+//                "          {\n" +
+//                "            \"ColumnName\": \"pagerank\",\n" +
+//                "            \"OpType\": \"Column\"\n" +
+//                "          }\n" +
+//                "        ],\n" +
+//                "        \"OpType\": \"GeneralSetFunction\"\n" +
+//                "      },\n" +
+//                "      \"OpType\": \"Target\"\n" +
+//                "    },\n" +
+//                "    {\n" +
+//                "      \"AliasName\": \"avg_sentiment\",\n" +
+//                "      \"Expr\": {\n" +
+//                "        \"IsDistinct\": false,\n" +
+//                "        \"Signature\": \"avg\",\n" +
+//                "        \"FuncParams\": [\n" +
+//            "          {\n" + "\"Qualifier\":\"entities\","+
+//                "            \"ColumnName\": \"sentiment\",\n" +
+//                "            \"OpType\": \"Column\"\n" +
+//                "          }\n" +
+//                "        ],\n" +
+//                "        \"OpType\": \"GeneralSetFunction\"\n" +
+//                "      },\n" +
+//                "      \"OpType\": \"Target\"\n" +
+//                "    }\n" +
+//                "  ],\n" +
+//                "  \"Expr\": {\n" +
+//                "    \"SortSpecs\": [\n" +
+//                "      {\n" +
+//                "        \"SortKey\": {\n" +
+//                "          \"IsDistinct\": false,\n" +
+//                "          \"Signature\": \"avg\",\n" +
+//                "          \"FuncParams\": [\n" +
+//                "            {\n" +
+//                "              \"ColumnName\": \"pagerank\",\n" +
+//                "              \"OpType\": \"Column\"\n" +
+//                "            }\n" +
+//                "          ],\n" +
+//                "          \"OpType\": \"GeneralSetFunction\"\n" +
+//                "        },\n" +
+//                "        \"IsAsc\": false,\n" +
+//                "        \"IsNullFirst\": false\n" +
+//                "      }\n" +
+//                "    ],\n" +
+//                "    \"Expr\": {\n" +
+//                "      \"SelectCondition\": {\n" +
+//                "        \"IsNot\": false,\n" +
+//                "        \"IsCaseInsensitive\": false,\n" +
+//                "        \"LeftExpr\": {\n" +
+//                "          \"ColumnName\": \"name\",\n" +
+//                "          \"OpType\": \"Column\"\n" +
+//                "        },\n" +
+//                "        \"RightExpr\": {\n" +
+//                "          \"Value\": \"%Travel%\",\n" +
+//                "          \"ValueType\": \"String\",\n" +
+//                "          \"OpType\": \"Literal\"\n" +
+//                "        },\n" +
+//                "        \"OpType\": \"LikePredicate\"\n" +
+//                "      },\n" +
+//                "      \"Expr\": {\n" +
+//                "        \"Groups\": [\n" +
+//                "          {\n" +
+//                "            \"GroupType\": \"OrdinaryGroup\",\n" +
+//                "            \"Dimensions\": [\n" +
+//                "              {\n" +
+//                "                \"ColumnName\": \"domainname\",\n" +
+//                "                \"OpType\": \"Column\"\n" +
+//                "              }\n" +
+//                "            ]\n" +
+//                "          }\n" +
+//                "        ],\n" +
+//                "        \"Expr\": {\n" +
+//                "          \"JoinType\": \"INNER\",\n" +
+//                "          \"JoinCondition\": {\n" +
+//                "            \"LeftExpr\": {\n" +
+//                "              \"ColumnName\": \"url\",\n" +
+//                "              \"OpType\": \"Column\"\n" +
+//                "            },\n" +
+//                "            \"RightExpr\": {\n" +
+//                "              \"ColumnName\": \"webpageurl\",\n" +
+//                "              \"OpType\": \"Column\"\n" +
+//                "            },\n" +
+//                "            \"OpType\": \"Equals\"\n" +
+//                "          },\n" +
+//                "          \"IsNatural\": false,\n" +
+//                "          \"LeftExpr\": {\n" +
+//                "            \"TableName\": \"webpages\",\n" +
+//                "            \"OpType\": \"Relation\"\n" +
+//                "          },\n" +
+//                "          \"RightExpr\": {\n" +
+//                "            \"TableName\": \"entities\",\n" +
+//                "            \"OpType\": \"Relation\"\n" +
+//                "          },\n" +
+//                "          \"OpType\": \"Join\"\n" +
+//                "        },\n" +
+//                "        \"OpType\": \"Aggregation\"\n" +
+//                "      },\n" +
+//                "      \"OpType\": \"Filter\"\n" +
+//                "    },\n" +
+//                "    \"OpType\": \"Sort\"\n" +
+//                "  },\n" +
+//                "  \"OpType\": \"Projection\"\n" +
+//                "}";
         QueryStatus  currentStatus = WebServiceClient.submitWorkflow("testUser", workflow);
 
         while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")){
@@ -119,8 +239,10 @@ public class WebServiceClientTest {
             wgsStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
           }
           if(wgsStatus.getStatus().equals("COMPLETED")){
-            JsonObject level0 = WebServiceClient.getObject(wgsreply.getString("output"),"0",null);
-            JsonObject level1 = WebServiceClient.getObject(wgsreply.getString("output"),"1",null);
+            List<String> atlist = new ArrayList<String>();
+                    atlist.add("result");
+            JsonObject level0 = WebServiceClient.getObject(wgsreply.getString("output"),"0",new ArrayList<String>());
+            JsonObject level1 = WebServiceClient.getObject(wgsreply.getString("output"),"1",atlist);
             JsonObject level2 = WebServiceClient.getObject(wgsreply.getString("output"),"2",null);
             JsonObject level3 = WebServiceClient.getObject(wgsreply.getString("output"),"3",null);
             System.out.println("===========    0   ================= \n"+level0.encodePrettily());

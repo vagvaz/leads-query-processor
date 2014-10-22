@@ -140,7 +140,7 @@ public class ConfigurationUtilities {
         }catch(MalformedURLException e){
 
         }
-        result = new URLClassLoader(urls,ClassLoader.getSystemClassLoader());
+        result = new URLClassLoader(urls);
         return result;
     }
 

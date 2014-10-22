@@ -30,7 +30,7 @@ public class PersistentCrawler extends DefaultCrawler {
     private static Log log = LogFactory.getLog(PersistentCrawler.class.getName());
 
 //  private static JavaLanguageDetection det = JavaLanguageDetection.getInstance();
-   private SentimentAnalysisModule sentimentAnalysisModule;
+   private static SentimentAnalysisModule sentimentAnalysisModule;
     /**
      * Constructs a new PersistentCrawler.
      */
