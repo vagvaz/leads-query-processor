@@ -17,6 +17,7 @@
        <module>data-collection</module>
        <module>pagerank-node</module>
        <module>data-snapshot</module>
+       <module>wp4-rest-client</module>
    </modules>
 
     <build>

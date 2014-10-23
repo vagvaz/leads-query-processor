@@ -8,7 +8,7 @@
    <packaging>jar</packaging>
    <name>Project - planner-logic-mod</name>
    <url>http://maven.apache.org</url>
-
+    <version>${processor.version}</version>
    <parent>
       <groupId>gr.tuc.softnet</groupId>
       <artifactId>leads-query-processor-planner</artifactId>
