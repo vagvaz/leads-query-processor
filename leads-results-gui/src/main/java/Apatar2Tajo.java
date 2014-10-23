@@ -1,5 +1,7 @@
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimaps;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.tajo.algebra.*;
 import org.jdom.Document;
@@ -7,10 +9,7 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
 
@@ -27,6 +26,7 @@ public class Apatar2Tajo {
 
     private static HashMap<String, Element> nodesMap = new HashMap<String, Element>();
     private static HashMap<String, String> ArrowMap = new HashMap<String, String>();
+    private int funtionsCount = 0;
 
     public static Expr xml2tajo(File xmlFile) throws JDOMException, IOException {
         Expr ApatarExpr = null;
@@ -72,7 +72,7 @@ public class Apatar2Tajo {
         System.out.println(" Appatar Parsing xml");
 
 
-        File xmlFile = new File(args[1]);// "QUERY 2/XML_output.aptr");//"QUERY 3/XML_output_1.aptr");// "QUERY 1/XML-OUTPUT.aptr");//+
+        File xmlFile = new File(args[0]);// "QUERY 2/XML_output.aptr");//"QUERY 3/XML_output_1.aptr");// "QUERY 1/XML-OUTPUT.aptr");//+
         //
         //"/home/tr/Projects/LEADs/xml/Leuteris/Example3.aptr");
 
@@ -312,7 +312,6 @@ public class Apatar2Tajo {
                             Curr = asort;
                         }
                     }
-
                 }
 
                 projectExpr = Curr;
@@ -327,7 +326,32 @@ public class Apatar2Tajo {
 
         return projectExpr;
     }
+    static void  test_conf(String xmlWithSpecial){
+        File temp;
+    try {
+        // Create temp file.
+        temp = File.createTempFile("pattern", ".suffix");
 
+        // Delete temp file when program exits.
+        temp.deleteOnExit();
+
+        // Write to temp file
+        BufferedWriter out = new BufferedWriter(new FileWriter(temp));
+        out.write(xmlWithSpecial);
+        out.close();
+        System.out.println("Subproject Config");
+        XMLConfiguration subxml = new XMLConfiguration(temp);
+
+        Iterator <String> it = subxml.getKeys();
+        while(it.hasNext()){
+            System.out.println(it.next()+" ");
+        }
+
+    } catch (IOException e) {
+    } catch (ConfigurationException e) {
+        e.printStackTrace();
+    }
+    }
 
     static void visit_subproject(String xmlWithSpecial, String ParentNode) {
         Element subrootNode;
@@ -335,7 +359,7 @@ public class Apatar2Tajo {
         List<Element> sublist, recordslist;
         String Attrb;
         System.out.println(xmlWithSpecial);
-
+        test_conf( xmlWithSpecial);
         HashMap<String, String> SubArrowMap = new HashMap<String, String>();
         //HashMap<String, List<String>> SubReverseArrowMap = new HashMap<String, List<String>>();
         HashMap<String, String> SubReverseArrowMap = new HashMap<String, String>();
@@ -407,30 +431,8 @@ public class Apatar2Tajo {
                             NamedExpr[] targets = new NamedExpr[1];
                             targets[0] = tmpNE;
                             Expr tmpGF = null;
-                            if (Attrb.contains("GreaterThanValidateFunction")) {
-                                String numValue = subnode.getChild("com.apatar.functions.Logic.GreaterThanValidateFunction").getAttributeValue("Value");
-                                Expr value = new LiteralValue(numValue, LiteralValue.getLiteralType(numValue));
 
-                                tmpGF = new BinaryOperator(OpType.GreaterThan, Column, value);//new GeneralSetFunctionExpr("GTH", false, targets);
-                            } else if (Attrb.contains("AvgFunction")) {
-                                ColumnReferenceExpr[] params = new ColumnReferenceExpr[1];
-                                params[0] = (ColumnReferenceExpr) Column;
-                                tmpGF = new GeneralSetFunctionExpr("avg", false, params);
-                            } else if (Attrb.contains("LikeValidateFunction")) {
-                                Expr pattern = new LiteralValue(subnode.getChild("com.apatar.functions.Logic.LikeValidateFunction").getAttributeValue("Value"),
-                                        LiteralValue.LiteralType.String);
-                                tmpGF = new PatternMatchPredicate(OpType.LikePredicate, false, Column, pattern);
-                                alias = "like.";
-                            } else if (Attrb.contains("DescFunction")) {
-                                Sort.SortSpec specs[] = new Sort.SortSpec[1];
-                                specs[0] = new Sort.SortSpec(Column);
-                                specs[0].setDescending();
-                                alias = "sort.";
-                                tmpGF = new Sort(specs);
-                            } else {
-                                System.out.println("Unknown field name");
-                            }
-                            tmpNE = new NamedExpr(tmpGF);
+                            tmpNE = new NamedExpr(get_function( subnode, Column)); //named or not ?
 
                             //output alias
                             if (subnodesMap.containsKey(SubArrowMap.get(subnode.getAttributeValue("id")))) {
@@ -445,7 +447,6 @@ public class Apatar2Tajo {
                                 System.out.println("Artificial field name: " + fieldName);
                                 tmpNE.setAlias(fieldName);
                             }
-
                             System.out.println("Save function   " + tmpNE.toJson());
                             FunctionMap.put(ParentNode + alias + fieldName, tmpNE);
 
@@ -454,19 +455,7 @@ public class Apatar2Tajo {
                         System.out.println("Found function  no arrows " + subnode.getAttributeValue("nodeClass"));
                         //Now arrow to this function
                         if ((Attrb = subnode.getAttributeValue("classFunction")) != null) {
-                            if (Attrb.contains("LimitFunction")) {
-                                subnode = subnode.getChild("com.apatar.functions.constant.LimitFunction");
-                                System.out.println("limit " + subnode.getAttributeValue("value"));
-                                //ApatarExpr = visitLimit_clause(node.getAttributeValue("value"), ApatarExpr);
-                                NamedExpr tmpNE = new NamedExpr(visitLimit_clause(subnode.getAttributeValue("value"), null));
-                                FunctionMap.put("limit", tmpNE);
-                            } else if (Attrb.contains("CountStarFunction")) {
-                                System.out.println("Count*  ");
-                                Expr func = new CountRowsFunctionExpr();
-                                UnconnectedFunctionMap.add(func);
-                            } else {
-                                System.out.println("Unknown no arrows field name: " + Attrb);
-                            }
+                            get_function(subnode);
                             // FunctionMap.put(ParentNode, tmpNE);
                         }
                     }
@@ -476,6 +465,112 @@ public class Apatar2Tajo {
 
         }
     }
+
+    static void get_function(Element subnode){
+       String Attrb = subnode.getAttributeValue("classFunction");
+        if (Attrb.contains("LimitFunction")) {
+            subnode = subnode.getChild("com.apatar.functions.constant.LimitFunction");
+            System.out.println("limit " + subnode.getAttributeValue("value"));
+            //ApatarExpr = visitLimit_clause(node.getAttributeValue("value"), ApatarExpr);
+            NamedExpr tmpNE = new NamedExpr(visitLimit_clause(subnode.getAttributeValue("value"), null));
+            FunctionMap.put("limit", tmpNE);
+        } else if (Attrb.contains("CountStarFunction")) {
+            System.out.println("Count*  ");
+            Expr func = new CountRowsFunctionExpr();
+            UnconnectedFunctionMap.add(func);
+        }
+        else if (Attrb.contains("CountFunction")) {
+            System.out.println("Count  ");
+            Expr func = new CountRowsFunctionExpr();
+            UnconnectedFunctionMap.add(func);
+        }
+        else if (Attrb.contains("MaxFunction")) {
+            System.out.println("MaxFunction*  ");
+            //Expr func = new  ();
+            //UnconnectedFunctionMap.add(func);
+        }else {
+            System.out.println("Unknown no arrows field name: " + Attrb);
+        }
+    }
+
+
+    static Expr get_function( Element subnode, Expr Column){
+       String Attrb = subnode.getAttributeValue("classFunction");
+        Expr tmpGF=null;
+        if (Attrb.contains("GreaterThanValidateFunction")) {
+            String numValue = subnode.getChild("com.apatar.functions.Logic.GreaterThanValidateFunction").getAttributeValue("Value");
+            Expr value = new LiteralValue(numValue, LiteralValue.getLiteralType(numValue));
+
+            tmpGF = new BinaryOperator(OpType.GreaterThan, Column, value);//new GeneralSetFunctionExpr("GTH", false, targets);
+        } else if (Attrb.contains("AvgFunction")) {
+            ColumnReferenceExpr[] params = new ColumnReferenceExpr[1];
+            params[0] = (ColumnReferenceExpr) Column;
+            tmpGF = new GeneralSetFunctionExpr("avg", false, params);
+        } else if (Attrb.contains("EqualToValidateFunction")) {
+            String numValue = subnode.getChild("com.apatar.functions.Logic.EqualToValidateFunction").getAttributeValue("Value");
+            //check if does not contain value
+            Expr value = new LiteralValue(numValue, LiteralValue.getLiteralType(numValue));
+
+            tmpGF = new BinaryOperator(OpType.Equals, Column, value);
+        }else if (Attrb.contains("ContainValidateFunction")) {
+            System.err.println("Not yet implemmented");
+            //ColumnReferenceExpr[] params = new ColumnReferenceExpr[1];
+            //params[0] = (ColumnReferenceExpr) Column;
+            //tmpGF = new GeneralSetFunctionExpr("avg", false, params);
+        }else if (Attrb.contains("FindRegExpFunction")) {
+            System.err.println("Not yet implemmented");
+            //ColumnReferenceExpr[] params = new ColumnReferenceExpr[1];
+            //params[0] = (ColumnReferenceExpr) Column;
+            //tmpGF = new GeneralSetFunctionExpr("avg", false, params);
+        }else if (Attrb.contains("AndValidateFunction")) {
+
+            //ColumnReferenceExpr[] params = new ColumnReferenceExpr[1];
+            //params[0] = (ColumnReferenceExpr) Column;
+            //tmpGF = new GeneralSetFunctionExpr("avg", false, params);
+        }else if (Attrb.contains("IsNullValidateFunction")) {
+            ColumnReferenceExpr[] params = new ColumnReferenceExpr[1];
+            params[0] = (ColumnReferenceExpr) Column;
+            tmpGF = new GeneralSetFunctionExpr("avg", false, params);
+        }else if (Attrb.contains("IsNotNullValidateFunction")) {
+            //ColumnReferenceExpr[] params = new ColumnReferenceExpr[1];
+            //params[0] = (ColumnReferenceExpr) Column;
+            //tmpGF = new GeneralSetFunctionExpr("avg", false, params);
+        }else if (Attrb.contains("GreaterOrEqualValidateFunction")) {
+            String numValue = subnode.getChild("com.apatar.functions.Logic.GreaterThan").getAttributeValue("Value");
+            Expr value = new LiteralValue(numValue, LiteralValue.getLiteralType(numValue));
+
+            tmpGF = new BinaryOperator(OpType.GreaterThanOrEquals, Column, value);
+        }else if (Attrb.contains("LessOrEqualValidateFunction")) {
+            String numValue = subnode.getChild("com.apatar.functions.Logic.LessOrEqualValidateFunction").getAttributeValue("Value");
+            Expr value = new LiteralValue(numValue, LiteralValue.getLiteralType(numValue));
+
+            tmpGF = new BinaryOperator(OpType.LessThanOrEquals, Column, value);
+        }else if (Attrb.contains("NotValidateFunction")) {
+            //ColumnReferenceExpr[] params = new ColumnReferenceExpr[1];
+            //params[0] = (ColumnReferenceExpr) Column;
+            //tmpGF = new GeneralSetFunctionExpr("avg", false, params);
+        }else if (Attrb.contains("TESTFunction")) {
+            //ColumnReferenceExpr[] params = new ColumnReferenceExpr[1];
+            //params[0] = (ColumnReferenceExpr) Column;
+            //tmpGF = new GeneralSetFunctionExpr("avg", false, params);
+        }
+        else if (Attrb.contains("LikeValidateFunction")) {
+            Expr pattern = new LiteralValue(subnode.getChild("com.apatar.functions.Logic.LikeValidateFunction").getAttributeValue("Value"),
+                    LiteralValue.LiteralType.String);
+            tmpGF = new PatternMatchPredicate(OpType.LikePredicate, false, Column, pattern);
+            //alias = "like."; betteruserOpType
+        } else if (Attrb.contains("DescFunction")) {
+            Sort.SortSpec specs[] = new Sort.SortSpec[1];
+            specs[0] = new Sort.SortSpec(Column);
+            specs[0].setDescending();
+            //alias = "sort."; betteruserOpType
+            tmpGF = new Sort(specs);
+        } else {
+            System.out.println("Unknown field name");
+        }
+        return  tmpGF;
+    }
+
 
     static Element get_root(String xml) {
         Element rootNode = null;
