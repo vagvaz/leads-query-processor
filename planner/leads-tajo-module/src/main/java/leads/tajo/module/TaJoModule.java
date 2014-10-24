@@ -12,7 +12,6 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.apache.tajo.algebra.BinaryOperator;
 import org.apache.tajo.algebra.Expr;
-import org.apache.tajo.algebra.OpType;
 import org.apache.tajo.algebra.UnaryOperator;
 import org.apache.tajo.catalog.CatalogClient;
 import org.apache.tajo.catalog.CatalogService;
@@ -25,11 +24,9 @@ import org.apache.tajo.engine.planner.LeadsLogicalOptimizer;
 import org.apache.tajo.engine.planner.LogicalPlan;
 import org.apache.tajo.engine.planner.LogicalPlanner;
 import org.apache.tajo.engine.planner.PlanningException;
-
 import org.apache.tajo.master.session.Session;
 
 import java.io.IOException;
-import java.util.Set;
 
 
 /**
@@ -73,7 +70,9 @@ public class TaJoModule {
     }
 
     public static Expr parseQuery(String sql) {
+
         System.out.print(sql.length());
+        sql=check_insert(  sql);
         ANTLRInputStream input = new ANTLRInputStream(sql);
         SQLLexer lexer = new SQLLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -86,6 +85,19 @@ public class TaJoModule {
 
         return null;
     }
+
+    private static String check_insert(String sql){
+        sql = sql.trim();
+        final String[] arr = sql.split(" ", 2);
+        if(arr[0].equalsIgnoreCase("insert"))
+            if(sql.toLowerCase().contains(" values")) {
+                String[] newsql = sql.split("(?i)VALUES");
+                sql = newsql[0] + " select " + newsql[1].replaceAll("\\(|\\)", "");
+            }
+
+        return sql;
+    }
+
 
     public static String Optimize(Session session, Expr expr) throws PlanningException {
         if (catalog == null) {
