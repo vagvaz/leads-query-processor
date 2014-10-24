@@ -36,42 +36,55 @@
          <artifactId>infinispan-commons</artifactId>
          <version>${infinispan.version}</version>
       </dependency>
-
-      <dependency>
-         <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-atomic-factory</artifactId>
-         <version>${infinispan.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-versioning</artifactId>
-         <version>${infinispan.version}</version>
-      </dependency>
+       <dependency>
+           <groupId>org.infinispan</groupId>
+           <artifactId>infinispan-remote-query-server</artifactId>
+           <version>${infinispan.version}</version>
+       </dependency>
+       <dependency>
+           <groupId>org.infinispan</groupId>
+           <artifactId>infinispan-versioning</artifactId>
+           <version>${infinispan.version}</version>
+       </dependency>
+       <dependency>
+           <groupId>org.infinispan</groupId>
+           <artifactId>infinispan-query-dsl</artifactId>
+           <version>${infinispan.version}</version>
+       </dependency>
        <dependency>
            <groupId>org.infinispan</groupId>
            <artifactId>infinispan-query</artifactId>
            <version>${infinispan.version}</version>
        </dependency>
-
        <dependency>
            <groupId>org.infinispan</groupId>
-           <artifactId>infinispan-remote-query-server</artifactId>
-           <version>7.0.0-SNAPSHOT</version>
+           <artifactId>infinispan-client-hotrod</artifactId>
+           <version>${infinispan.version}</version>
        </dependency>
        <dependency>
            <groupId>org.infinispan</groupId>
-           <artifactId>infinispan-lucene-v4</artifactId>
-           <version>7.0.0-SNAPSHOT</version>
+           <artifactId>infinispan-remote-query-client</artifactId>
+           <version>${infinispan.version}</version>
        </dependency>
        <dependency>
-           <groupId>org.hibernate</groupId>
-           <artifactId>hibernate-search-serialization-avro</artifactId>
-           <version>5.0.0.Alpha4</version>
+           <groupId>org.infinispan</groupId>
+           <artifactId>infinispan-client-hotrod</artifactId>
+           <version>${infinispan.version}</version>
        </dependency>
        <dependency>
-           <groupId>org.hibernate</groupId>
-           <artifactId>hibernate-search-engine</artifactId>
-           <version>5.0.0.Alpha4</version>
+           <groupId>org.infinispan</groupId>
+           <artifactId>infinispan-server-core</artifactId>
+           <version>${infinispan.version}</version>
+       </dependency>
+       <dependency>
+           <groupId>org.infinispan</groupId>
+           <artifactId>infinispan-server-hotrod</artifactId>
+           <version>${infinispan.version}</version>
+       </dependency>
+       <dependency>
+           <groupId>org.infinispan</groupId>
+           <artifactId>infinispan-server-hotrod</artifactId>
+           <version>${infinispan.version}</version>
        </dependency>
        <!--<dependency>-->
            <!--<groupId>org.apache.lucene</groupId>-->

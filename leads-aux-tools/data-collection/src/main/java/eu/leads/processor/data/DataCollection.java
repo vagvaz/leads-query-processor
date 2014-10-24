@@ -5,6 +5,7 @@ import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.CacheManagerFactory;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.plugins.PluginManager;
@@ -13,6 +14,7 @@ import org.infinispan.Cache;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Created by vagvaz on 9/25/14.
@@ -83,6 +85,7 @@ public class DataCollection {
          {
             Thread.sleep(sleepingPeriod * 1000);
             System.out.println("pages size is " + pages.size());
+            PrintUtilities.printIterable((Iterator)clusters.get(0).getCacheManager().getCacheNames().iterator());
             if(pages.size() >= numOfPages)
             {
                PersistentCrawl.stop();
