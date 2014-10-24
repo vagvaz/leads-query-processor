@@ -49,7 +49,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
      */
     public ClusterInfinispanManager() {
         host = "0.0.0.0";
-        serverPort = 11000;
+        serverPort = 11222;
     }
 
     public ClusterInfinispanManager(EmbeddedCacheManager manager) {
@@ -128,9 +128,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
         while (!isStarted) {
             HotRodServerConfigurationBuilder serverConfigurationBuilder =
                 new HotRodServerConfigurationBuilder();
-//            serverConfigurationBuilder.host(localhost).port(serverPort);
+            serverConfigurationBuilder.host(localhost).port(serverPort).defaultCacheName("default");
             try {
-//                server.start(serverConfigurationBuilder.build(), targetManager);
+                server.start(serverConfigurationBuilder.build(), targetManager);
                 isStarted = true;
 //                server.addConverterFactory("leads-processor-converter-factory",new LeadsProcessorConverterFactory());
 //                server.addKeyValueFilterFactory("leads-processor-filter-factory",new LeadsProcessorKeyValueFilterFactory(manager));
