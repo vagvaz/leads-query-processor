@@ -1,7 +1,8 @@
 package eu.leads.processor.common.infinispan;
 
 import org.infinispan.filter.Converter;
-import org.infinispan.filter.ConverterFactory;
+import org.infinispan.server.hotrod.event.ConverterFactory;
+//import org.infinispan.filter.ConverterFactory;
 
 
 /**

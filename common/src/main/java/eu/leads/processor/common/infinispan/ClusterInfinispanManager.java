@@ -132,8 +132,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
             try {
                 server.start(serverConfigurationBuilder.build(), targetManager);
                 isStarted = true;
-                server.addConverterFactory("leads-processor-converter-factory",new LeadsProcessorConverterFactory());
-                server.addKeyValueFilterFactory("leads-processor-filter-factory",new LeadsProcessorKeyValueFilterFactory(manager));
+//                server.addConverterFactory("leads-processor-converter-factory",new LeadsProcessorConverterFactory());
+//                server.addKeyValueFilterFactory("leads-processor-filter-factory",new LeadsProcessorKeyValueFilterFactory(manager));
 
             } catch (Exception e) {
                 System.out.println("Exception e " + e.getLocalizedMessage());

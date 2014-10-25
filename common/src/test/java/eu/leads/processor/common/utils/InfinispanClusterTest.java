@@ -1,7 +1,12 @@
 package eu.leads.processor.common.utils;
 
+import eu.leads.processor.common.infinispan.InfinispanCluster;
+import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
+import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import junit.framework.TestCase;
+
+import java.util.concurrent.ConcurrentMap;
 
 public class InfinispanClusterTest extends TestCase {
     public static void main(String[] args) {
@@ -24,6 +29,12 @@ public class InfinispanClusterTest extends TestCase {
         //        PrintUtilities.printList(cluster.getManager().getMembers());
         //        System.out.println("cl2");
         //        PrintUtilities.printList(cluster2.getManager().getMembers());
+        InfinispanManager manager = InfinispanClusterSingleton.getInstance().getManager();
+        ConcurrentMap map = manager.getPersisentCache("testCache");
+        map.put("1","1");
+        map.put("2","2");
+        PrintUtilities.printMap(map);
+        manager.stopManager();
     }
 
     public void testGetManager() throws Exception {
