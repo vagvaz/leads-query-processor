@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class PeriodicCheckHandler implements Handler<Long> {
     ConcurrentMap<String, Integer> actionToLevelMap;
-    ConcurrentMap<Integer, Map<String, Action>> monitoredActions;
+    ConcurrentMap<Integer, ConcurrentMap<String, Action>> monitoredActions;
     String ownerId;
     String nqeGroup;
     LogProxy log;
@@ -29,7 +29,7 @@ public class PeriodicCheckHandler implements Handler<Long> {
     public PeriodicCheckHandler(String ownerId, String deployerId, String nqeGroup, LogProxy log,
                                    Node com,
                                    ConcurrentMap<String, Integer> actionToLevelMap,
-                                   ConcurrentMap<Integer, Map<String, Action>> monitoredActions) {
+                                   ConcurrentMap<Integer, ConcurrentMap<String, Action>> monitoredActions) {
         this.actionToLevelMap = actionToLevelMap;
         this.monitoredActions = monitoredActions;
         this.ownerId = ownerId;

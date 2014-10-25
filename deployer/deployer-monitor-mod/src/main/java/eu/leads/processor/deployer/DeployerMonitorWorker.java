@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by vagvaz on 8/27/14.
@@ -27,8 +28,8 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
     String deployerLogic;
     String nqeGroup;
     String deployerMonitor;
-    Map<String, Integer> actionToLevelMap;
-    Map<Integer, Map<String, Action>> monitoredActions;
+    ConcurrentMap<String, Integer> actionToLevelMap;
+    ConcurrentMap<Integer, ConcurrentMap<String, Action>> monitoredActions;
     LogProxy log;
     Node com;
     String id;
@@ -47,14 +48,14 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
         period = config.getLong("period", 600000);
         deployerMonitor = id;
         actionToLevelMap = new ConcurrentHashMap<String, Integer>();
-        monitoredActions = new ConcurrentHashMap<Integer, Map<String, Action>>();
+        monitoredActions = new ConcurrentHashMap<Integer, ConcurrentMap<String, Action>>();
         for (int i = -1; i < 4; i++) {
             //-1: Action is unclaimed (there is no NQE that started executing the operator.
             //0 : Action is monitored and it is ok
             //1 : Action has unknown status
             //2 : Action owner did not respond
             //3 : Action has failed either because of timed out or failed
-            monitoredActions.put(i, new HashMap<String, Action>());
+            monitoredActions.put(i, new ConcurrentHashMap<String, Action>());
         }
 
         com = new DefaultNode();
