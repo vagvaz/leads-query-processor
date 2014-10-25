@@ -57,7 +57,7 @@ public class READTableList {
 				"NUMERIC"
 				});
 		
-		readTables.put("Webpages", new READTable("Webpages",arguments,returns));
+		readTables.put("webpages", new READTable("webpages",arguments,returns));
 		
 		putAttributeList(returns, 
 				new String[]{
@@ -72,7 +72,7 @@ public class READTableList {
 				"NUMERIC",
 				"DATE"
 				});
-		readTables.put("Entities", new READTable("Entities",arguments,returns));
+		readTables.put("entities", new READTable("entities",arguments,returns));
 		
 		/*
 		 * getInfo2
