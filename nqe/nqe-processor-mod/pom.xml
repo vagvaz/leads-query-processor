@@ -92,11 +92,11 @@
          <scope>test</scope>
       </dependency>
    
-       <dependency>
-           <groupId>org.infinispan</groupId>
-           <artifactId>infinispan-core</artifactId>
-           <version>7.0.0.Alpha5</version>
-       </dependency>
+       <!--<dependency>-->
+           <!--<groupId>org.infinispan</groupId>-->
+           <!--<artifactId>infinispan-core</artifactId>-->
+           <!--<version>7.0.0.Alpha5</version>-->
+       <!--</dependency>-->
       <dependency>
          <groupId>gr.tuc.softnet</groupId>
          <artifactId>common-core</artifactId>
