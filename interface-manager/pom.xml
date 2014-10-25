@@ -9,8 +9,10 @@
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    
+    <groupId>gr.tuc.softnet</groupId>
     <artifactId>interface-manager</artifactId>
+    <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -19,11 +21,11 @@
             <artifactId>common-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>gr.tuc.softnet</groupId>
             <artifactId>leads-query-processor-plugins</artifactId>
             <version>${processor.version}</version>
-        </dependency>
+        </dependency-->
     </dependencies>
 
     <modules>

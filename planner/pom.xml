@@ -4,6 +4,20 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
    <packaging>pom</packaging>
+ 
+
+   <parent>
+      <groupId>gr.tuc.softnet</groupId>
+      <artifactId>leads-query-processor-parent</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <relativePath>../parent/pom.xml</relativePath>
+   </parent>
+
+  <groupId>gr.tuc.softnet</groupId>
+   <artifactId>leads-query-processor-planner</artifactId>
+   <version>1.0-SNAPSHOT</version>
+
+   
    <modules>
       <module>planner-comp-mod</module>
       <module>planner-logic-mod</module>
@@ -13,18 +27,10 @@
       <module>planner-catalog-mod</module>
    </modules>
 
-   <parent>
-      <groupId>gr.tuc.softnet</groupId>
-      <artifactId>leads-query-processor-parent</artifactId>
-      <version>1.0-SNAPSHOT</version>
-      <relativePath>../parent/pom.xml</relativePath>
-   </parent>
 
-   <groupId>gr.tuc.softnet</groupId>
-   <artifactId>leads-query-processor-planner</artifactId>
-   <version>${processor.version}</version>
+
    <dependencies>
-          <dependency>
+         <dependency>
          <groupId>org.apache.tajo</groupId>
          <artifactId>tajo-core</artifactId>
          <version>0.9.0-SNAPSHOT</version>

@@ -10,11 +10,13 @@
    </parent>
    <modelVersion>4.0.0</modelVersion>
 
-   <artifactId>leads-aux-tools</artifactId>
+   <artifactId>leads-base-modules</artifactId>
    <packaging>pom</packaging>
    <modules>
-       <module>data-collection</module>
-       <module>data-snapshot</module>
+      <module>sentiment-module</module>
+       <module>pagerank-node</module>
+       <module>wp4-rest-client</module>
+       <module>sse-module</module>
    </modules>
 
     <build>
