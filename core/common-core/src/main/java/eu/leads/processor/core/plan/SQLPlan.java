@@ -14,6 +14,7 @@ import java.util.List;
  * Created by vagvaz on 8/4/14.
  */
 public class SQLPlan extends DataType implements Plan {
+
     public SQLPlan(JsonObject plan) {
         super(plan);
     }
@@ -163,6 +164,15 @@ public class SQLPlan extends DataType implements Plan {
             top.addInput(right.getNodeId());
             left.setOutput(top.getNodeId());
             right.setOutput(top.getNodeId());
+            if (current instanceof JoinNode) {
+                JoinNode joinNode = (JoinNode) current;
+                LogicalNode leftNode = joinNode.getLeftChild();
+                LogicalNode rightNode = joinNode.getRightChild();
+                JsonObject leftSchema = new JsonObject(leftNode.getOutSchema().toJson());
+                JsonObject rightSchema = new JsonObject(rightNode.getOutSchema().toJson());
+                top.asJsonObject().getObject("configuration").getObject("body").putObject("leftSchema", leftSchema);
+                top.asJsonObject().getObject("configuration").getObject("body").putObject("rightSchema", rightSchema);
+            }
             top.asJsonObject().getObject("configuration").getObject("body").removeField("leftChild");
             top.asJsonObject().getObject("configuration").getObject("body").removeField("rightChild");
             result.putObject(top.getNodeId(), top.asJsonObject());
@@ -171,10 +181,10 @@ public class SQLPlan extends DataType implements Plan {
         } else {
             if (current instanceof RelationNode) {
                 if (current instanceof ScanNode) {
-                   ScanNode sc = (ScanNode) current;
+                    ScanNode sc = (ScanNode) current;
                     top.addInput(sc.getCanonicalName());
-                   result.putObject(top.getNodeId(), top.asJsonObject());
-                }else if (current instanceof TableSubQueryNode) {
+                    result.putObject(top.getNodeId(), top.asJsonObject());
+                } else if (current instanceof TableSubQueryNode) {
                     TableSubQueryNode tmp = (TableSubQueryNode) current;
                     LogicalNode n = tmp.getSubQuery();
                     PlanNode currentNode = new PlanNode(n, getQueryId());
@@ -183,10 +193,18 @@ public class SQLPlan extends DataType implements Plan {
                     result.putObject(top.getNodeId(), top.asJsonObject());
                     currentNode.setOutput(top.getNodeId());
                     visit(currentNode, n, result);
-                } else {
+                }  else {
                     System.err.println("PROBLEM WITH RELNODE TYPES");
                 }
-            } else {
+            }
+            else if (current instanceof EvalExprNode) {
+                EvalExprNode tmp = (EvalExprNode) current;
+                PlanNode currentNode = new PlanNode(tmp,getQueryId());
+                currentNode.addInput("");
+                currentNode.setOutput(top.getNodeId());
+                result.putObject(currentNode.getNodeId(),currentNode.asJsonObject());
+                setIsSpecial(true);
+            }else {
                 System.err.println("PROBLEM WITH NODE TYPES");
             }
 
@@ -295,5 +313,30 @@ public class SQLPlan extends DataType implements Plan {
     @Override
     public JsonObject getNodeByPid(int pid) {
         return getNodeById(Integer.toString(pid));
+    }
+
+    public void setIsSpecial(boolean isSpecial) {
+        data.putBoolean("planIsSpecial",true);
+    }
+    public boolean getIsSpecial()
+    {
+        return data.getBoolean("planIsSpecial",false);
+    }
+
+    public void updateNode(PlanNode node) {
+        getPlanGraph().putObject(node.getNodeId(),node.asJsonObject());
+        JsonArray oldNodesArray = data.getArray("nodes");
+        JsonArray newNodesArray = new JsonArray();
+        Iterator<Object> iterator = oldNodesArray.iterator();
+        while(iterator.hasNext()){
+            JsonObject ob = (JsonObject) iterator.next();
+            if(ob.getString("id").equals(node.getNodeId())){
+                newNodesArray.add(node.asJsonObject());
+            }
+            else{
+                newNodesArray.add(ob);
+            }
+        }
+        data.putArray("nodes",newNodesArray);
     }
 }

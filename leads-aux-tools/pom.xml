@@ -18,6 +18,7 @@
        <module>pagerank-node</module>
        <module>data-snapshot</module>
        <module>wp4-rest-client</module>
+       <module>sse-module</module>
    </modules>
 
     <build>

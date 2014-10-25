@@ -1,5 +1,6 @@
 package eu.leads.processor.planner.handlers;
 
+import com.google.gson.Gson;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
@@ -7,16 +8,19 @@ import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
-import eu.leads.processor.core.plan.QueryState;
-import eu.leads.processor.core.plan.QueryStatus;
-import eu.leads.processor.core.plan.SQLPlan;
-import eu.leads.processor.core.plan.SQLQuery;
+import eu.leads.processor.core.plan.*;
 import leads.tajo.module.TaJoModule;
 import org.apache.tajo.algebra.Expr;
+import org.apache.tajo.algebra.Insert;
+import org.apache.tajo.algebra.OpType;
+import org.apache.tajo.catalog.Column;
+import org.apache.tajo.catalog.Schema;
 import org.apache.tajo.engine.json.CoreGsonHelper;
+import org.apache.tajo.engine.planner.PlanningException;
 import org.apache.tajo.engine.planner.logical.LogicalRootNode;
 import org.apache.tajo.master.session.Session;
 import org.infinispan.Cache;
+import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.HashSet;
@@ -52,25 +56,20 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         Expr expr = null;
         try {
             expr = module.parseQuery(sqlQuery.getSQL());
-        } catch (Exception e) {
-            failQuery(e, sqlQuery);
-            result.setResult(createFailResult(e, sqlQuery));
-            return result;
-        }
 
-        //Optimize plan
-        String planAsString = null;
-        try {
-            Session session =
-                new Session(sqlQuery.getId(), sqlQuery.getUser(),StringConstants.DEFAULT_DATABASE_NAME);
-            planAsString = module.Optimize(session, expr);
         } catch (Exception e) {
             failQuery(e, sqlQuery);
             result.setResult(createFailResult(e, sqlQuery));
             return result;
         }
-        LogicalRootNode n = CoreGsonHelper.fromJson(planAsString, LogicalRootNode.class);
-        SQLPlan plan = new SQLPlan(sqlQuery.getId(), n);
+        SQLPlan plan = null;
+        try {
+            plan = getLogicaSQLPlan(expr,sqlQuery);
+        } catch (PlanningException e) {
+            failQuery(e, sqlQuery);
+            result.setResult(createFailResult(e, sqlQuery));
+            return result;
+        }
         Set<SQLPlan> candidatePlans = new HashSet<SQLPlan>();
         candidatePlans.add(plan);
         Set<SQLPlan> evaluatedPlans = evaluatePlansFromScheduler(candidatePlans);
@@ -82,6 +81,81 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         actionResult.putObject("query", sqlQuery.asJsonObject());
         result.setStatus(ActionStatus.COMPLETED.toString());
         result.setResult(actionResult);
+        return result;
+    }
+
+    private SQLPlan getLogicaSQLPlan(Expr expr, SQLQuery sqlQuery) throws PlanningException {
+        SQLPlan result = null;
+        Session session =
+                new Session(sqlQuery.getId(), sqlQuery.getUser(),StringConstants.DEFAULT_DATABASE_NAME);
+        if(expr.getType().equals(OpType.Insert)){
+            result = createInsertSQLPlan(session,expr);
+        }
+        //Optimize plan
+        String planAsString = null;
+
+
+        try {
+            planAsString = module.Optimize(session, expr);
+        } catch (Exception e) {
+            throw e;
+        }
+        LogicalRootNode n = CoreGsonHelper.fromJson(planAsString, LogicalRootNode.class);
+        SQLPlan plan = new SQLPlan(sqlQuery.getId(), n);
+        return result;
+    }
+
+    private SQLPlan createInsertSQLPlan(Session session, Expr expr) {
+        SQLPlan result = new SQLPlan();
+        LogicalRootNode rootNode = new LogicalRootNode(1);
+        Insert opInsert = (Insert)expr;
+        Expr subexpr = opInsert.getSubQuery();
+
+//        insertNode.setInSchema(opInsert);
+        try {
+            String prelimPlan = TaJoModule.Optimize( session,subexpr);
+            Gson gson = new Gson();
+            LogicalRootNode n = CoreGsonHelper.fromJson(prelimPlan, LogicalRootNode.class);
+            result = new SQLPlan(n);
+            PlanNode node = result.getNode(result.getQueryId()+".0");
+            node.getConfiguration().getObject("body").putString("operationType", OpType.Insert.toString());
+            node.getConfiguration().getObject("body").putString("tableName",opInsert.getTableName());
+            node.getConfiguration().getObject("body").putArray("primaryColumns",resolvePrimaryColumns(opInsert.getTableName()));
+            if(opInsert.hasTargetColumns()) {
+                JsonArray array = new JsonArray(opInsert.getTargetColumns());
+                node.getConfiguration().getObject("body").putArray("columnNames", array);
+            }
+            else{
+                JsonArray array = new JsonArray();
+                Schema tableSchema = TaJoModule.getTableSchema(opInsert.getTableName());
+                for(Column c : tableSchema.getColumns()){
+                    array.add(c.getSimpleName());
+                }
+                node.getConfiguration().getObject("body").putArray("columnNames",array);
+            }
+            result.updateNode(node);
+        } catch (PlanningException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    private JsonArray resolvePrimaryColumns(String tableName) {
+        Set<String> primaryColumns = TaJoModule.getPrimaryColumn(tableName);
+        if(tableName.equals(StringConstants.DEFAULT_DATABASE_NAME+".webpages"))
+        {
+            primaryColumns = new HashSet<>();
+            primaryColumns.add("url");
+        }
+        else if(tableName.equals(StringConstants.DEFAULT_DATABASE_NAME+".entities")){
+            primaryColumns = new HashSet<>();
+            primaryColumns.add("webpageurl");
+            primaryColumns.add("name");
+        }
+        else{
+
+        }
+        JsonArray result = new JsonArray(primaryColumns.toArray());
         return result;
     }
 

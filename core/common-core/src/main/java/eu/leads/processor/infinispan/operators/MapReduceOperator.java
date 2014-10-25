@@ -3,6 +3,7 @@ package eu.leads.processor.infinispan.operators;
 import eu.leads.processor.common.*;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.*;
+import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DefaultExecutorService;
@@ -28,9 +29,9 @@ public abstract class MapReduceOperator extends BasicOperator{
     protected LeadsReducer<?,?> reducer;
 
 
-    public MapReduceOperator(Node com, InfinispanManager persistence, Action action) {
+    public MapReduceOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
 
-       super(com,persistence,action);
+       super(com,persistence,log,action);
        inputCacheName = getInput();
        outputCacheName = action.getData().getObject("operator").getString("id");
        intermediateCacheName = action.getData().getObject("operator").getString("id")+".intermediate";

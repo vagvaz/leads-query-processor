@@ -2,18 +2,21 @@ package eu.leads.processor.nqe.handlers;
 
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
+import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.LeadsNodeType;
 import eu.leads.processor.infinispan.operators.*;
 import eu.leads.processor.infinispan.operators.mapreduce.IntersectOperator;
 import eu.leads.processor.infinispan.operators.mapreduce.ScanOperator;
 import eu.leads.processor.infinispan.operators.mapreduce.UnionOperator;
+import eu.leads.processor.nqe.operators.InsertOperator;
+import org.apache.tajo.algebra.OpType;
 
 /**
  * Created by vagvaz on 9/23/14.
  */
 public class SQLOperatorFactory {
-   public static Operator getOperator(Node com, InfinispanManager persistence, Action action) {
+   public static Operator getOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
       Operator result = null;
       String implemenationType = action.getData().getString("implementation");
       LeadsNodeType operatorType = LeadsNodeType.valueOf(action.getData().getString("operatorType"));
@@ -21,42 +24,43 @@ public class SQLOperatorFactory {
          case ROOT:
             break;
          case EXPRS:
+             result = getSingleOperator(com,persistence,log,action);
             break;
          case PROJECTION:
-            result = new ProjectOperator(com,persistence,action);
+            result = new ProjectOperator(com,persistence,log,action);
             break;
          case LIMIT:
-            result = new LimitOperator(com,persistence,action);
+            result = new LimitOperator(com,persistence,log,action);
             break;
          case SORT:
-            result = new SortOperator(com,persistence,action);
+            result = new SortOperator(com,persistence,log,action);
             break;
          case HAVING:
-            result = new FilterOperator(com,persistence,action);
+            result = new FilterOperator(com,persistence,log,action);
             break;
          case GROUP_BY:
-            result = new GroupByOperator(com,persistence,action);
+            result = new GroupByOperator(com,persistence,log,action);
             break;
          case WINDOW_AGG:
             break;
          case SELECTION:
-            result = new FilterOperator(com,persistence,action);
+            result = new FilterOperator(com,persistence,log,action);
             break;
          case JOIN:
-            result = new JoinOperator(com,persistence,action);
+            result = new JoinOperator(com,persistence,log,action);
             break;
          case UNION:
-            result = new UnionOperator(com,persistence,action);
+            result = new UnionOperator(com,persistence,log,action);
             break;
          case EXCEPT:
             break;
          case INTERSECT:
-            result = new IntersectOperator(com,persistence,action);
+            result = new IntersectOperator(com,persistence,log,action);
             break;
          case TABLE_SUBQUERY:
             break;
          case SCAN:
-            result = new ScanOperator(com,persistence,action);
+            result = new ScanOperator(com,persistence,log,action);
             break;
          case PARTITIONS_SCAN:
             break;
@@ -89,4 +93,17 @@ public class SQLOperatorFactory {
       }
       return result;
    }
+
+    private static Operator getSingleOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
+        Operator result  = null;
+        String opType = action.getData().getObject("body").getString("operationType");
+        if(opType.equals(OpType.Insert.toString())){
+            result = new InsertOperator(com,persistence,log,action);
+        }
+        else{
+            log.error("Trying to create Unimplemented operator " + opType);
+
+        }
+        return result;
+    }
 }

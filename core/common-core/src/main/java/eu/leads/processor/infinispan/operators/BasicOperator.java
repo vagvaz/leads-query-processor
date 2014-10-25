@@ -4,6 +4,7 @@ import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
+import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.infinispan.Cache;
@@ -18,6 +19,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     protected InfinispanManager manager;
     protected Node com;
     protected Cache statisticsCache;
+    protected LogProxy log;
     private String finalOperatorName, statInputSizeKey, statOutputSizeKey, statExecTimeKey;
 
 
@@ -25,7 +27,7 @@ public abstract class BasicOperator extends Thread implements Operator{
         conf = action.getData();
         this.action = action;
     }
-    protected BasicOperator(Node com, InfinispanManager manager,Action action){
+    protected BasicOperator(Node com, InfinispanManager manager,LogProxy log,Action action){
        super(com.getId()+"-operator-thread");
        System.err.println(this.getClass().getCanonicalName());
 

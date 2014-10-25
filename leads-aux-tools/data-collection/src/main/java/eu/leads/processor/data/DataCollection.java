@@ -34,7 +34,7 @@ public class DataCollection {
           seed = "http://www.yahoo.com/";
       }
       long sleepingPeriod = 5;
-      String webCacheName = "default.webpages";//StringConstants.CRAWLER_DEFAULT_CACHE;
+      String webCacheName = StringConstants.DEFAULT_DATABASE_NAME+".webpages";//StringConstants.CRAWLER_DEFAULT_CACHE;
 
       //Important Call to initialize System Configuration
       LQPConfiguration.initialize();

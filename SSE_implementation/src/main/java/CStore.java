@@ -1,5 +1,6 @@
 package sse_implementation_trial1;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 

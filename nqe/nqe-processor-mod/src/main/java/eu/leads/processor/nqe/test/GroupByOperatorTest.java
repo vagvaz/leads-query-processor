@@ -248,7 +248,7 @@ public class GroupByOperatorTest {
       Action action  = createNewAction();
       action.setData(confg);
 
-      GroupByOperator operator = new GroupByOperator(null, InfinispanClusterSingleton.getInstance().getManager(),action);
+      GroupByOperator operator = new GroupByOperator(null, InfinispanClusterSingleton.getInstance().getManager(), null, action);
       operator.init(action.getData());
       operator.execute();
       try {

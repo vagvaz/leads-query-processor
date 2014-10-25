@@ -13,10 +13,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.apache.tajo.algebra.BinaryOperator;
 import org.apache.tajo.algebra.Expr;
 import org.apache.tajo.algebra.UnaryOperator;
-import org.apache.tajo.catalog.CatalogClient;
-import org.apache.tajo.catalog.CatalogService;
-import org.apache.tajo.catalog.Schema;
-import org.apache.tajo.catalog.TableDesc;
+import org.apache.tajo.catalog.*;
 import org.apache.tajo.conf.TajoConf;
 import org.apache.tajo.engine.json.CoreGsonHelper;
 import org.apache.tajo.engine.parser.SQLSyntaxError;
@@ -27,6 +24,8 @@ import org.apache.tajo.engine.planner.PlanningException;
 import org.apache.tajo.master.session.Session;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
@@ -54,7 +53,7 @@ public class TaJoModule {
             return null;
         }
         try {
-            Expr expr = sqlAnalyzer.parse(sql);
+            Expr expr = parseQuery(sql);
            if( (expr instanceof UnaryOperator) || expr instanceof BinaryOperator)
                return Optimize(session, expr);
            else
@@ -136,4 +135,12 @@ public class TaJoModule {
         }
     }
 
+    public static Set<String> getPrimaryColumn(String tableName) {
+        TableDesc desc = catalog.getTableDesc(tableName);
+        Set<String> result = new HashSet<>();
+        for(Column c : desc.getSchema().getColumns()){
+          result.add(c.getSimpleName());
+        }
+        return result;
+    }
 }

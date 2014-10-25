@@ -338,7 +338,7 @@ public class FilterOperatorTest {
       Action action  = createNewAction();
       action.setData(confg);
 
-      FilterOperator operator = new FilterOperator(null, InfinispanClusterSingleton.getInstance().getManager(),action);
+      FilterOperator operator = new FilterOperator(null, InfinispanClusterSingleton.getInstance().getManager(), null, action);
       operator.init(action.getData());
       operator.execute();
       try {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import eu.leads.processor.core.LeadsMapper;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
+import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.infinispan.operators.mapreduce.ProjectMapper;
 import org.vertx.java.core.json.JsonObject;
@@ -15,8 +16,8 @@ public class ProjectOperator extends MapReduceOperator {
 
 
 
-   public ProjectOperator(Node com, InfinispanManager persistence, Action actionData) {
-      super(com, persistence, actionData);
+   public ProjectOperator(Node com, InfinispanManager persistence, LogProxy log, Action actionData) {
+      super(com, persistence,log, actionData);
 
    }
 

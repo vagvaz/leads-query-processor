@@ -2,6 +2,9 @@ package eu.leads.processor.math;
 
 import org.vertx.java.core.json.JsonObject;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -138,6 +141,27 @@ public class MathUtils {
       }
    }
 
+    public static Object getValueFrom(JsonObject json){
+       Object result = null;
+        JsonObject datum = json.getObject("expr").getObject("body").getObject("datum");
+        if(datum.getString("type").equalsIgnoreCase("TEXT")){
+            result = getTextFrom(json.getObject("expr"));
+        }else if(datum.getString("type").startsWith("INT")){
+            result = new Integer(datum.getObject("body").getNumber("val").intValue());
+        }else if(datum.getString("type").startsWith("FLOAT")){
+            result = new Double(datum.getObject("body").getNumber("val").doubleValue());
+        }else if(datum.getString("type").startsWith("DATE")){
+            result = getTextFrom(json.getObject("expr"));
+        }
+        else if(datum.getString("type").equals("BLOB")){
+            result = getTextFrom(json.getObject("expr"));
+        }
+        else
+        {
+            System.err.println("Unknown type");
+        }
+        return result;
+    }
     private static String getTextFrom(JsonObject value) {
 
         String result = null;

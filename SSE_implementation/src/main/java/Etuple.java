@@ -5,10 +5,12 @@
 package sse_implementation_trial1;
 
 
+import java.io.Serializable;
+
 /**
  * @author John Demertzis
  */
-public class Etuple {
+public class Etuple implements Serializable {
     private byte[] ciphertext;
     private byte[] IV = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 

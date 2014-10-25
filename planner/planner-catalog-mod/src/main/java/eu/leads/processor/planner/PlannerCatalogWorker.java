@@ -135,9 +135,9 @@ public class PlannerCatalogWorker extends Verticle {
     webPagesSchema.addColumn("language",Type.TEXT);
     webPagesSchema.addColumn("charset",Type.TEXT);
     webPagesSchema.addColumn("responsetime",Type.INT4);
-    webPagesSchema.addColumn("links",Type.TEXT_ARRAY);
+    webPagesSchema.addColumn("links",Type.TEXT);
     webPagesSchema.addColumn("title",Type.TEXT);
-    webPagesSchema.addColumn("version",Type.DATE);
+//    webPagesSchema.addColumn("version",Type.DATE);
     webPagesSchema.addColumn("pagerank",Type.FLOAT8);
     webPagesSchema.addColumn("sentiment",Type.FLOAT8);
 
@@ -145,7 +145,7 @@ public class PlannerCatalogWorker extends Verticle {
     entitiesSchema.addColumn("webpageurl",Type.TEXT);
     entitiesSchema.addColumn("name",Type.TEXT);
     entitiesSchema.addColumn("sentiment",Type.FLOAT8);
-    entitiesSchema.addColumn("version",Type.DATE);
+//    entitiesSchema.addColumn("version",Type.DATE);
 
 
 

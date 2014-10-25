@@ -2,6 +2,7 @@ package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
+import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.math.FilterOperatorTree;
 import org.infinispan.Cache;
@@ -30,9 +31,9 @@ public class FilterOperator extends BasicOperator {
     private Cache inputCache;
 
 
-    public FilterOperator(Node com, InfinispanManager persistence, Action action) {
+    public FilterOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
 
-       super(com, persistence, action);
+       super(com, persistence,log, action);
        JsonElement qual = conf.getObject("body").getElement("qual");
        tree = new FilterOperatorTree(qual);
         inputCache = (Cache) manager.getPersisentCache(getInput());

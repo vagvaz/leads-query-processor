@@ -34,13 +34,13 @@ public class JoinOperator extends BasicOperator {
     private LogProxy logProxy;
     private String qualString;
     private boolean isLeft;
-    public JoinOperator(Node com, InfinispanManager persistence, Action action) {
-      super(com, persistence, action);
+    public JoinOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
+      super(com, persistence,log, action);
 
        JsonElement qual = conf.getObject("body").getElement("joinQual");
         if(!qual.asObject().getString("type").equals("EQUAL")){
             //TODO change to logProxy
-            System.err.println("JOIN is not equal but " + qual.asObject().getString("type") );
+            log.error("JOIN is not equal but " + qual.asObject().getString("type"));
         }
         tree = new FilterOperatorTree(qual);
    }
@@ -82,7 +82,9 @@ public class JoinOperator extends BasicOperator {
     public void init(JsonObject config) {
 //        super.init(config); //fix set correctly caches names
         //fix configuration
-        JsonArray inputsArray = action.getData().getObject("operator").getArray("inputs");
+       JsonObject correctQual = resolveQual(conf);
+        conf.getObject("body").putObject("joinQual",correctQual);
+       JsonArray inputsArray = action.getData().getObject("operator").getArray("inputs");
        Iterator<Object> inputIterator = inputsArray.iterator();
        List<String> inputs = new ArrayList<String>(2);
        while(inputIterator.hasNext()){
@@ -102,6 +104,31 @@ public class JoinOperator extends BasicOperator {
        }
        conf.putString("output",getOutput());
        init_statistics(this.getClass().getCanonicalName());
+    }
+
+    private JsonObject resolveQual(JsonObject conf) {
+        JsonObject qual = conf.getObject("body").getObject("joinQual");
+        JsonObject leftSchema = conf.getObject("body").getObject("leftSchema");
+        JsonObject rightSchema = conf.getObject("body").getObject("rightSchema");
+        JsonObject leftExpr = qual.getObject("body").getObject("leftExpr");
+        JsonObject rightExpr = qual.getObject("body").getObject("rightExpr");
+        boolean swap = true;
+        String leftFieldName = leftExpr.getObject("body").getObject("column").getString("name");
+        Iterator<Object> iterator = leftSchema.getArray("fields").iterator();
+        while(iterator.hasNext()){
+            JsonObject field = (JsonObject)iterator.next();
+            if(field.getString("name").equals(leftFieldName)){
+                swap = false;
+                break;
+            }
+        }
+        if(swap){
+            log.info("Join  swap predicates");
+            conf.getObject("body").getObject("joinQual").putObject("leftExpr",rightExpr);
+            conf.getObject("body").getObject("joinQual").putObject("rightExpr",leftExpr);
+        }
+        log.info("Join Did not need to swap predicates");
+        return conf.getObject("body").getObject("joinQual");
     }
 
     @Override

@@ -5,7 +5,9 @@
 package sse_implementation_trial1;
 
 
-public class Record {
+import java.io.Serializable;
+
+public class Record implements Serializable{
     private String label;
     private byte[] value = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 

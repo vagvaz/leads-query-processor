@@ -219,8 +219,8 @@ public class PluginManager {
         configuration.putString("id", UUID.randomUUID().toString());
 //        configuration.getArray("types").add(EventType.CREATED);
 //        configuration.getArray("types").add(EventType.MODIFIED);
-        SimplePluginRunner runner = new SimplePluginRunner("TestSimplePluginDeployer", conf);
-        PluginHandlerListener listener = new PluginHandlerListener();
+        SimplePluginRunner listener = new SimplePluginRunner("TestSimplePluginDeployer", conf);
+//        PluginHandlerListener runner = new PluginHandlerListener();
 
         manager.addListener(listener, cacheName);
 //        RemoteCacheManager remoteCacheManager = createRemoteCacheManager();
@@ -237,7 +237,7 @@ public class PluginManager {
 //            return;
 //        }
 //
-//        remoteCache.addClientListener(listener, new Object[]{configuration.toString()}, new Object[0]);
+//        remoteCache.addClientListener(runner, new Object[]{configuration.toString()}, new Object[0]);
 
 
 

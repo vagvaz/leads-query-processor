@@ -42,7 +42,7 @@ public class OperatorActionHandler implements ActionHandler {
        ownerAction.setLabel(NQEConstants.OPERATOR_OWNER);
        ownerAction.setStatus(ActionStatus.INPROCESS.toString());
        com.sendTo(action.getData().getString("monitor"),ownerAction.asJsonObject());
-       Operator operator = OperatorFactory.createOperator(com,persistence,result);
+       Operator operator = OperatorFactory.createOperator(com,persistence,log,result);
        operator.init(result.getData());
        operator.execute();
 

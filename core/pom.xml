@@ -3,6 +3,12 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
+    <parent>
+        <groupId>gr.tuc.softnet</groupId>
+        <artifactId>leads-query-processor-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../parent/pom.xml</relativePath>
+    </parent>
    <artifactId>leads-query-processor-core</artifactId>
    <packaging>pom</packaging>
    <modules>

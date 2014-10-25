@@ -2,6 +2,7 @@ package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.core.*;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DefaultExecutorService;
@@ -30,8 +31,8 @@ public class SortOperator extends BasicOperator {
     private LeadsMapper<String,String,String,String> mapper;
 
 
-   public SortOperator(Node com, InfinispanManager persistence, Action action) {
-      super(com, persistence, action);
+   public SortOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
+      super(com, persistence,log, action);
       JsonArray sortKeys = conf.getObject("body").getArray("sortKeys");
       Iterator<Object> sortKeysIterator = sortKeys.iterator();
       sortColumns = new String[sortKeys.size()];

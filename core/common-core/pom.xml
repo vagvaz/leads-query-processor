@@ -12,6 +12,7 @@
    <parent>
       <groupId>gr.tuc.softnet</groupId>
       <artifactId>leads-query-processor-core</artifactId>
+       <relativePath>../pom.xml</relativePath>
       <version>1.0-SNAPSHOT</version>
    </parent>
 
@@ -124,19 +125,24 @@
       <dependency>
          <groupId>org.infinispan</groupId>
          <artifactId>infinispan-core</artifactId>
-         <version>7.0.0-SNAPSHOT</version>
+         <version>${infinispan.version}</version>
       </dependency>
 
        <dependency>
            <groupId>org.infinispan</groupId>
            <artifactId>infinispan-versioning</artifactId>
-           <version>7.0.0-SNAPSHOT</version>
+           <version>${infinispan.version}</version>
        </dependency>
 
        <dependency>
            <groupId>org.infinispan</groupId>
            <artifactId>infinispan-atomic-factory</artifactId>
-           <version>7.0.0-SNAPSHOT</version>
+           <version>${infinispan.version}</version>
+       </dependency>
+       <dependency>
+           <groupId>com.google.code.gson</groupId>
+           <artifactId>gson</artifactId>
+           <version>2.2.4</version>
        </dependency>
    </dependencies>
 
@@ -174,11 +180,7 @@
                   <version>${vertx.version}</version>
                </dependency>
 
-                <dependency>
-                    <groupId>com.google.code.gson</groupId>
-                    <artifactId>gson</artifactId>
-                    <version>2.2.4</version>
-                </dependency>
+
             </dependencies>
             <executions>
                <execution>
