@@ -15,9 +15,6 @@
     <artifactId>pagerank-plugin</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <properties>
-        <infinispan.version>7.0.0.Alpha4</infinispan.version>
-    </properties>
 
     <dependencies>
 

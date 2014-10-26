@@ -95,7 +95,7 @@
        <dependency>
            <groupId>org.infinispan</groupId>
            <artifactId>infinispan-core</artifactId>
-           <version>7.0.0.Alpha5</version>
+           <version>${infinispan.version}</version>
        </dependency>
       <dependency>
          <groupId>gr.tuc.softnet</groupId>

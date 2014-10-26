@@ -20,9 +20,6 @@
         <url>http://www.leads-project.eu/</url>
     </organization>
 
-    <properties>
-        <infinispan.version>7.0.0.Alpha4</infinispan.version>
-    </properties>
 
     <dependencies>
 

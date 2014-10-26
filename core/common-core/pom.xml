@@ -13,6 +13,7 @@
       <groupId>gr.tuc.softnet</groupId>
       <artifactId>leads-query-processor-core</artifactId>
       <version>1.0-SNAPSHOT</version>
+      <relativePath>../pom.xml</relativePath>
    </parent>
 
    <properties>
@@ -124,7 +125,7 @@
       <dependency>
          <groupId>org.infinispan</groupId>
          <artifactId>infinispan-core</artifactId>
-         <version>7.0.0.Alpha5</version>
+         <version>${infinispan.version}</version>
       </dependency>
    </dependencies>
 

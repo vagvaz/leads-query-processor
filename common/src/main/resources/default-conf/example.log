@@ -1,0 +1,72 @@
+INFO main eu.leads.processor.conf.LQPConfiguration - HOST:  vagvaz-laptop IP 192.168.42.252 BRCD 192.168.42.255
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Loading configuration, Name: imanager Processors 1
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Loading configuration, Name: planner Processors 1
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Loading configuration, Name: deployer Processors 1
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Loading configuration, Name: nqe Processors 1
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Loading configuration, Name: webservice Processors 1
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - File successful uploaded: /tmp/imanager-default-4d47ca3d-d19f-44d3-9f95-048145f3e356.json
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Execution command: screen -AmdS shell_imanager-default-4d47ca3d-d19f-44d3-9f95-048145f3e356 bash -l && screen -S shell_imanager-default-4d47ca3d-d19f-44d3-9f95-048145f3e356 -p 0 -X stuff $"vertx runMod gr.tuc.softnet~imanager-comp-mod~1.0-SNAPSHOT -conf /tmp/Rimanager-default-4d47ca3d-d19f-44d3-9f95-048145f3e356.json -ha\r"
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - exit-status: 0
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Remote execution DONE
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - File successful uploaded: /tmp/nqe-default-f4d63d34-8b38-4f4c-b759-dd6859e9300e.json
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Execution command: screen -AmdS shell_nqe-default-f4d63d34-8b38-4f4c-b759-dd6859e9300e bash -l && screen -S shell_nqe-default-f4d63d34-8b38-4f4c-b759-dd6859e9300e -p 0 -X stuff $"vertx runMod gr.tuc.softnet~nqe-comp-mod~1.0-SNAPSHOT -conf /tmp/Rnqe-default-f4d63d34-8b38-4f4c-b759-dd6859e9300e.json -ha\r"
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - exit-status: 0
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Remote execution DONE
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - File successful uploaded: /tmp/deployer-default-fc92ee03-53ab-4f0f-bcc8-4c0c6a60201b.json
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Execution command: screen -AmdS shell_deployer-default-fc92ee03-53ab-4f0f-bcc8-4c0c6a60201b bash -l && screen -S shell_deployer-default-fc92ee03-53ab-4f0f-bcc8-4c0c6a60201b -p 0 -X stuff $"vertx runMod gr.tuc.softnet~deployer-comp-mod~1.0-SNAPSHOT -conf /tmp/Rdeployer-default-fc92ee03-53ab-4f0f-bcc8-4c0c6a60201b.json -ha\r"
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - exit-status: 0
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Remote execution DONE
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - File successful uploaded: /tmp/processor-webservice-default-244f9dea-15e1-41c6-9ca3-ecc976b9c8ef.json
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Execution command: screen -AmdS shell_processor-webservice-default-244f9dea-15e1-41c6-9ca3-ecc976b9c8ef bash -l && screen -S shell_processor-webservice-default-244f9dea-15e1-41c6-9ca3-ecc976b9c8ef -p 0 -X stuff $"vertx runMod gr.tuc.softnet~processor-webservice~1.0-SNAPSHOT -conf /tmp/Rprocessor-webservice-default-244f9dea-15e1-41c6-9ca3-ecc976b9c8ef.json -ha\r"
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - exit-status: 0
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Remote execution DONE
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - File successful uploaded: /tmp/planner-default-6160ed7a-1330-4484-b3fd-9fb487af138a.json
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Execution command: screen -AmdS shell_planner-default-6160ed7a-1330-4484-b3fd-9fb487af138a bash -l && screen -S shell_planner-default-6160ed7a-1330-4484-b3fd-9fb487af138a -p 0 -X stuff $"vertx runMod gr.tuc.softnet~planner-comp-mod~1.0-SNAPSHOT -conf /tmp/Rplanner-default-6160ed7a-1330-4484-b3fd-9fb487af138a.json -ha\r"
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - exit-status: 0
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Remote execution DONE
+INFO main eu.leads.processor.conf.LQPConfiguration - HOST:  vagvaz-laptop IP 192.168.42.252 BRCD 192.168.42.255
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Loading configuration, Name: imanager Processors 1
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Loading configuration, Name: planner Processors 1
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Loading configuration, Name: deployer Processors 1
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Loading configuration, Name: nqe Processors 1
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Loading configuration, Name: webservice Processors 1
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - File successful uploaded: /tmp/imanager-default-e7f89ce7-bf57-442f-a0e4-28a301115277.json
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Execution command: screen -AmdS shell_imanager-default-e7f89ce7-bf57-442f-a0e4-28a301115277 bash -l && screen -S shell_imanager-default-e7f89ce7-bf57-442f-a0e4-28a301115277 -p 0 -X stuff $"vertx runMod gr.tuc.softnet~imanager-comp-mod~1.0-SNAPSHOT -conf /tmp/Rimanager-default-e7f89ce7-bf57-442f-a0e4-28a301115277.json -ha\r"
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - exit-status: 0
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Remote execution DONE
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - File successful uploaded: /tmp/nqe-default-cd2c2f3c-0c1a-402f-ab98-20af48a463f6.json
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Execution command: screen -AmdS shell_nqe-default-cd2c2f3c-0c1a-402f-ab98-20af48a463f6 bash -l && screen -S shell_nqe-default-cd2c2f3c-0c1a-402f-ab98-20af48a463f6 -p 0 -X stuff $"vertx runMod gr.tuc.softnet~nqe-comp-mod~1.0-SNAPSHOT -conf /tmp/Rnqe-default-cd2c2f3c-0c1a-402f-ab98-20af48a463f6.json -ha\r"
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - exit-status: 0
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Remote execution DONE
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - File successful uploaded: /tmp/deployer-default-e2a4ccb5-174b-4a62-9c12-bcfd03a50d9d.json
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Execution command: screen -AmdS shell_deployer-default-e2a4ccb5-174b-4a62-9c12-bcfd03a50d9d bash -l && screen -S shell_deployer-default-e2a4ccb5-174b-4a62-9c12-bcfd03a50d9d -p 0 -X stuff $"vertx runMod gr.tuc.softnet~deployer-comp-mod~1.0-SNAPSHOT -conf /tmp/Rdeployer-default-e2a4ccb5-174b-4a62-9c12-bcfd03a50d9d.json -ha\r"
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - exit-status: 0
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Remote execution DONE
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - File successful uploaded: /tmp/processor-webservice-default-7e79ed0f-cabf-4c26-91f4-7e264a9c86ae.json
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Execution command: screen -AmdS shell_processor-webservice-default-7e79ed0f-cabf-4c26-91f4-7e264a9c86ae bash -l && screen -S shell_processor-webservice-default-7e79ed0f-cabf-4c26-91f4-7e264a9c86ae -p 0 -X stuff $"vertx runMod gr.tuc.softnet~processor-webservice~1.0-SNAPSHOT -conf /tmp/Rprocessor-webservice-default-7e79ed0f-cabf-4c26-91f4-7e264a9c86ae.json -ha\r"
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - exit-status: 0
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Remote execution DONE
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - File successful uploaded: /tmp/planner-default-aefca316-25da-4fa5-b365-5d41e92ebd24.json
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Execution command: screen -AmdS shell_planner-default-aefca316-25da-4fa5-b365-5d41e92ebd24 bash -l && screen -S shell_planner-default-aefca316-25da-4fa5-b365-5d41e92ebd24 -p 0 -X stuff $"vertx runMod gr.tuc.softnet~planner-comp-mod~1.0-SNAPSHOT -conf /tmp/Rplanner-default-aefca316-25da-4fa5-b365-5d41e92ebd24.json -ha\r"
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - ssh identity added: /home/vagvaz/.ssh/id_rsa
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - exit-status: 0
+INFO main eu.leads.processor.system.LeadsProcessorBootstrapper2 - Remote execution DONE
