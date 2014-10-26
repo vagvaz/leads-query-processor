@@ -172,7 +172,7 @@ public class SQLPlan extends DataType implements Plan {
             if (current instanceof RelationNode) {
                 if (current instanceof ScanNode) {
                    ScanNode sc = (ScanNode) current;
-                    top.addInput(sc.getCanonicalName());
+                    top.addInput(sc.getTableDesc().getName());
                    result.putObject(top.getNodeId(), top.asJsonObject());
                 }else if (current instanceof TableSubQueryNode) {
                     TableSubQueryNode tmp = (TableSubQueryNode) current;
