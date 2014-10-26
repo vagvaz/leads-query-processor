@@ -57,7 +57,26 @@ public class LeadsMemStore implements CatalogStore {
 
     public LeadsMemStore(Configuration conf) {
         LQPConfiguration.initialize();
-        manager = InfinispanClusterSingleton.getInstance().getManager();
+        boolean isManagerStarted = false;
+        int count = 0;
+        while(!isManagerStarted) {
+         try {
+             if(count >= 10){
+                 System.err.println("Exiting we could not start LeadsMemStore for CatalogServer so we exit... ");
+                 System.exit(-1);
+             }
+             manager = InfinispanClusterSingleton.getInstance().getManager();
+             isManagerStarted = true;
+         }catch(Exception e){
+             isManagerStarted = false;
+             System.err.println("Starting EmbeddedCache Manager failed retrying... for " + ++count);
+             try {
+                 Thread.sleep(10);
+             } catch (InterruptedException e1) {
+                 e1.printStackTrace();
+             }
+         }
+        }
              tablespaces = manager.getPersisentCache("leads.processor.catalog.tablespaces");
              databases = manager.getPersisentCache("leads.processor.catalog.databases");
              functions = manager.getPersisentCache("leads.processor.catalog.functions");

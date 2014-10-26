@@ -79,17 +79,24 @@ public class PlannerCatalogWorker extends Verticle {
           try {
               catalogServerStarted=catalogServer.StartServer();
               catalogServerStarted=true;
-              if (container.config().containsField("generateSchemas"))
-                  createInitialTables();
+
           } catch (Exception e) {
               catalogServer=null;
-              container.logger().error("Problem Encountered when tried to create Initial Schemas " + e.getMessage());
-              try {
-                  sleep(1000);
-                  container.logger().error("\n\n\n\n\n\n\n SIZE 0 \n\n\n\n\n");
-              } catch (InterruptedException e1) {
-                  e1.printStackTrace();
-              }
+              container.logger().error("Problem Encountered when tried to start CatalogServer exiting..." + e.getMessage());
+              System.exit(-1);
+//              try {
+//                  sleep(1000);
+//                  container.logger().error("\n\n\n\n\n\n\n SIZE 0 \n\n\n\n\n");
+//              } catch (InterruptedException e1) {
+//                  e1.printStackTrace();
+//              }
+          }
+          try{
+            if (container.config().containsField("generateSchemas"))
+              createInitialTables();
+          }catch(Exception e){
+              container.logger().error("Problem Encountered when tried to createInitialTables. Exiting...");
+              System.exit(-1);
           }
       }
 

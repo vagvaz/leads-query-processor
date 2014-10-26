@@ -60,8 +60,8 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
         com.initialize(id, gr, null, leadsHandler, leadsHandler, vertx);
         bus.registerHandler(id + ".process", this);
        LQPConfiguration.initialize();
-        persistence = InfinispanClusterSingleton.getInstance().getManager();
 
+        persistence = InfinispanClusterSingleton.getInstance().getManager();
         JsonObject msg = new JsonObject();
         msg.putString("processor", id + ".process");
         handlers = new HashMap<String, ActionHandler>();

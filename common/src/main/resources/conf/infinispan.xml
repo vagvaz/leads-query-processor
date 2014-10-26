@@ -42,7 +42,7 @@
       <jmx domain="eu.leads.processor"></jmx>
       <distributed-cache name="default" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
                          statistics="true">
-         <compatibility enabled="true"/>
+         <compatibility />
          <eviction max-entries="10000"/>
          <locking concurrency-level="2000"/>
          <state-transfer enabled="false" await-initial-transfer="false"/>
