@@ -70,6 +70,10 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             result.setResult(createFailResult(e, sqlQuery));
             return result;
         }
+        if(plan == null){
+            failQuery(new Exception("Could not Create Plan"),sqlQuery);
+            result.setResult(createFailResult(new Exception("Unable to create plan due to internal error"),sqlQuery));
+        }
         Set<SQLPlan> candidatePlans = new HashSet<SQLPlan>();
         candidatePlans.add(plan);
         Set<SQLPlan> evaluatedPlans = evaluatePlansFromScheduler(candidatePlans);
@@ -101,7 +105,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             throw e;
         }
         LogicalRootNode n = CoreGsonHelper.fromJson(planAsString, LogicalRootNode.class);
-        SQLPlan plan = new SQLPlan(sqlQuery.getId(), n);
+        result = new SQLPlan(sqlQuery.getId(), n);
         return result;
     }
 

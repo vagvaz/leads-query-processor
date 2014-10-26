@@ -18,6 +18,7 @@ public class SQLQuery extends DataType implements Query {
         setLocation("localation");
         setMessage("unsued");
         setQueryType(QueryType.SQL.toString());
+        setId("default-query-id");
 
     }
 

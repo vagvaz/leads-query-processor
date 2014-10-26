@@ -30,6 +30,11 @@
 
 
    <dependencies>
+       <dependency>
+           <groupId>gr.tuc.softnet</groupId>
+           <artifactId>leads-query-processor-common</artifactId>
+           <version>1.0-SNAPSHOT</version>
+       </dependency>
          <dependency>
          <groupId>org.apache.tajo</groupId>
          <artifactId>tajo-core</artifactId>

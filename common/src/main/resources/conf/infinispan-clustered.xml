@@ -28,7 +28,7 @@
                     start="true">
       <transport stack="tcp"/>
       <serialization version="70"/>
-      <jmx domain="eu.leads.processor" duplicate-domains="true" mbean-server-lookup="false"></jmx>
+      <jmx domain="eu.leads.processor" duplicate-domains="true"></jmx>
       <distributed-cache name="default" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
                          statistics="true">
          <compatibility></compatibility>
@@ -40,7 +40,7 @@
             <persistence passivation="true">
                 <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
             </persistence>
-           <state-transfer enabled="true" await-initial-transfer="true"/>
+           <state-transfer enabled="true" await-initial-transfer="false"/>
 
       </distributed-cache>
 
@@ -55,7 +55,7 @@
            <persistence passivation="true">
                <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
            </persistence>
-           <state-transfer enabled="true" await-initial-transfer="true"/>
+           <state-transfer enabled="true" await-initial-transfer="false"/>
        </distributed-cache>
 
        <distributed-cache name="default.entities" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
@@ -69,7 +69,7 @@
            <persistence passivation="true">
                <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
            </persistence>
-           <state-transfer enabled="true" await-initial-transfer="true"/>
+           <state-transfer enabled="true" await-initial-transfer="false"/>
        </distributed-cache>
 
 
@@ -84,7 +84,7 @@
           <persistence passivation="true">
               <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
           </persistence>
-          <state-transfer enabled="true" await-initial-transfer="true"/>
+          <state-transfer enabled="true" await-initial-transfer="false"/>
       </distributed-cache>
 
       <distributed-cache name="clustered" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
@@ -98,7 +98,7 @@
           <persistence passivation="true">
               <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
           </persistence>
-          <state-transfer enabled="true" await-initial-transfer="true"/>
+          <state-transfer enabled="true" await-initial-transfer="false"/>
       </distributed-cache>
       <distributed-cache name="active_plugins_cache" mode="ASYNC" owners="2" l1-lifespan="600000"
                          start="true"
@@ -112,7 +112,7 @@
           <persistence passivation="true">
               <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
           </persistence>
-          <state-transfer enabled="true" await-initial-transfer="true"/>
+          <state-transfer enabled="true" await-initial-transfer="false"/>
       </distributed-cache>
       <distributed-cache name="processor_plugins" mode="ASYNC" owners="2" l1-lifespan="600000"
                          start="true"
@@ -126,7 +126,7 @@
           <persistence passivation="true">
               <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
           </persistence>
-          <state-transfer enabled="true" await-initial-transfer="true"/>
+          <state-transfer enabled="true" await-initial-transfer="false"/>
       </distributed-cache>
 
       <distributed-cache name="queries" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
@@ -140,7 +140,7 @@
           <persistence passivation="true">
               <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
           </persistence>
-          <state-transfer enabled="true" await-initial-transfer="true"/>
+          <state-transfer enabled="true" await-initial-transfer="false"/>
      </distributed-cache>
      <distributed-cache name="tables" mode="SYNC" owners="3" l1-lifespan="600000" start="true"
                          statistics="true">
@@ -153,7 +153,7 @@
          <persistence passivation="true">
              <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
          </persistence>
-         <state-transfer enabled="true" await-initial-transfer="true"/>
+         <state-transfer enabled="true" await-initial-transfer="false"/>
       </distributed-cache>
    </cache-container>
 

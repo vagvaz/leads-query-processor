@@ -73,7 +73,44 @@
          <artifactId>infinispan-commons</artifactId>
          <version>${infinispan.version}</version>
       </dependency>
+
+      <!--<dependency>-->
+           <!--<groupId>org.infinispan</groupId>-->
+           <!--<artifactId>infinispan-query</artifactId>-->
+           <!--<version>${infinispan.version}</version>-->
+       <!--</dependency>-->
        <dependency>
+           <groupId>org.infinispan</groupId>
+           <artifactId>infinispan-server-hotrod</artifactId>
+           <version>${infinispan.version}</version>
+       </dependency>
+       <dependency>
+           <groupId>org.infinispan</groupId>
+           <artifactId>infinispan-remote-query-server</artifactId>
+           <version>${infinispan.version}</version>
+       </dependency>
+       <dependency>
+           <groupId>org.infinispan</groupId>
+           <artifactId>infinispan-client-hotrod</artifactId>
+           <version>${infinispan.version}</version>
+       </dependency>
+       <dependency>
+           <groupId>org.infinispan</groupId>
+           <artifactId>infinispan-versioning</artifactId>
+           <version>${infinispan.version}</version>
+       </dependency>
+       <dependency>
+           <groupId>org.infinispan</groupId>
+           <artifactId>infinispan-lucene-v4</artifactId>
+           <version>${infinispan.version}</version>
+       </dependency>
+       <dependency>
+           <groupId>org.infinispan</groupId>
+           <artifactId>infinispan-query</artifactId>
+           <version>${infinispan.version}</version>
+       </dependency>
+       <!--
+      <dependency>
            <groupId>org.infinispan</groupId>
            <artifactId>infinispan-remote-query-server</artifactId>
            <version>${infinispan.version}</version>
@@ -142,6 +179,7 @@
            <artifactId>lucene-core</artifactId>
            <version>4.8.1</version>
        </dependency>
+      -->
        <dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

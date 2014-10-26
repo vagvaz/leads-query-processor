@@ -73,15 +73,15 @@ public class PlannerCatalogWorker extends Verticle {
                      .getNumber("port"));
       //Start Catalog Server
       boolean catalogServerStarted = false;
-      while (!catalogServerStarted){
+      while (!catalogServerStarted) {
           container.logger().info("Trying to start CatalogServer.");
           catalogServer = new LeadsCatalog(conf);
           try {
-              catalogServerStarted=catalogServer.StartServer();
-              catalogServerStarted=true;
+              catalogServerStarted = catalogServer.StartServer();
+
 
           } catch (Exception e) {
-              catalogServer=null;
+              catalogServer = null;
               container.logger().error("Problem Encountered when tried to start CatalogServer exiting..." + e.getMessage());
               System.exit(-1);
 //              try {
@@ -91,13 +91,13 @@ public class PlannerCatalogWorker extends Verticle {
 //                  e1.printStackTrace();
 //              }
           }
+      }
           try{
             if (container.config().containsField("generateSchemas"))
               createInitialTables();
           }catch(Exception e){
               container.logger().error("Problem Encountered when tried to createInitialTables. Exiting...");
               System.exit(-1);
-          }
       }
 
   }

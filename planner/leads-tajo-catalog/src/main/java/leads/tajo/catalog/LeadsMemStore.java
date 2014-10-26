@@ -61,12 +61,13 @@ public class LeadsMemStore implements CatalogStore {
         int count = 0;
         while(!isManagerStarted) {
          try {
-             if(count >= 10){
+             if(count >= 5){
                  System.err.println("Exiting we could not start LeadsMemStore for CatalogServer so we exit... ");
                  System.exit(-1);
              }
+             count++;
              manager = InfinispanClusterSingleton.getInstance().getManager();
-             isManagerStarted = true;
+             isManagerStarted = manager.isStarted();
          }catch(Exception e){
              isManagerStarted = false;
              System.err.println("Starting EmbeddedCache Manager failed retrying... for " + ++count);

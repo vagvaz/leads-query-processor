@@ -91,7 +91,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         getPersisentCache("defaultCache");
         //I might want to sleep here for a little while
         PrintUtilities.printList(manager.getMembers());
-        startHotRodServer(manager,host, serverPort);
+        //startHotRodServer(manager,host, serverPort);
 
         System.out.println("We have started");
 

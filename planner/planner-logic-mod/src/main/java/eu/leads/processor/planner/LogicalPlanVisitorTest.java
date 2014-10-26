@@ -1,8 +1,10 @@
 package eu.leads.processor.planner;
 
 import com.google.gson.Gson;
+import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.core.plan.PlanNode;
 import eu.leads.processor.core.plan.SQLPlan;
+import eu.leads.processor.core.plan.SQLQuery;
 import leads.tajo.module.TaJoModule;
 import org.apache.hadoop.fs.Path;
 import org.apache.tajo.TajoConstants;
@@ -48,14 +50,29 @@ public class LogicalPlanVisitorTest {
         Mymodule.init_connection("127.0.0.1", 5998);
 //        String line = "select count(sentiment) as pipo,links,url as lala,pagerank as foobar,count(domainname) as papari   from webpages where lala = 'ddsaf' and foobar =9 group by links,lala, foobar having papari > 5 order by papari";
            // "select dept.deptname,dept.tmsp from dept join ( select score,phone,deptname,sumtest(score) as tmsp from score group by score,phone, deptname) s on dept.deptname = s.deptname and s.tmsp = dept.tmsp";
-        String line = "select domainname,name,entities.sentimentscore as w from webpages join entities on webpageurl = url ";
+        String line = "select url from webpages ";
         System.out.println(line);
-        Expr expr = TaJoModule.parseQuery(line);
+
+
+
+        Expr expr = null;
+        try {
+            expr = Mymodule.parseQuery(line);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         SQLPlan plan = null;
-        if(expr.getType().equals(OpType.Insert)){
-           plan = createInsertSQLPlan(session,expr);
+        try {
+            SQLQuery query = new SQLQuery("foo",line);
+            plan = getLogicaSQLPlan(expr,query);
+        } catch (PlanningException e) {
+            e.printStackTrace();
         }
         if(plan == null) {
+            System.err.println("PLAN is NULL");
+            System.exit(-1);
+        }
         String res = TaJoModule.Optimize(session, expr);
         Gson gson = new Gson();
         LogicalRootNode n = CoreGsonHelper.fromJson(res, LogicalRootNode.class);
@@ -70,16 +87,78 @@ public class LogicalPlanVisitorTest {
             }
 
         }
-        else{
-            System.out.println(plan.asJsonObject().encodePrettily());
-        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//        Expr expr = TaJoModule.parseQuery(line);
+//        SQLPlan plan = null;
+//        if(expr.getType().equals(OpType.Insert)){
+//           plan = createInsertSQLPlan(session,expr);
+//        }
+//        if(plan == null) {
+//        String res = TaJoModule.Optimize(session, expr);
+//        Gson gson = new Gson();
+//        LogicalRootNode n = CoreGsonHelper.fromJson(res, LogicalRootNode.class);
+//
+//            if (n.getChild() != null) {
+//
+//                plan = new SQLPlan("queryId-custom", n);
+//                System.out.println(plan.asJsonObject().encodePrettily());
+//            } else {
+//                CreateTable table;
+//                System.out.println(res);
+//            }
+//
+//        }
+//        else{
+//            System.out.println(plan.asJsonObject().encodePrettily());
+//        }
 
 
         //      List<LogicalPlan.QueryBlock> childblocks = plan.getChildBlocks(rootBlock);
         //      System.out.println("result\n"+res);
         //      System.out.println("explan " + explan);
 
+
+
+    private static SQLPlan getLogicaSQLPlan(Expr expr, SQLQuery sqlQuery) throws PlanningException {
+        SQLPlan result = null;
+        Session session =
+                new Session(sqlQuery.getId(), sqlQuery.getUser(), StringConstants.DEFAULT_DATABASE_NAME);
+        if(expr.getType().equals(OpType.Insert)){
+            result = createInsertSQLPlan(session,expr);
+        }
+        //Optimize plan
+        String planAsString = null;
+
+
+        try {
+            planAsString = Mymodule.Optimize(session, expr);
+        } catch (Exception e) {
+            throw e;
+        }
+        LogicalRootNode n = CoreGsonHelper.fromJson(planAsString, LogicalRootNode.class);
+        result = new SQLPlan(sqlQuery.getId(), n);
+        return result;
     }
+
+
+
+
+
+
+
 
     private static SQLPlan createInsertSQLPlan(Session session, Expr expr) {
         SQLPlan result = new SQLPlan();
