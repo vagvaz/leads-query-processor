@@ -32,6 +32,13 @@
       <!--<artifactId>infinispan-query</artifactId>-->
       <!--<version>${version.infinispan}</version>-->
       <!--</dependency>-->
+
+      <dependency>
+         <groupId>io.vertx</groupId>
+         <artifactId>vertx-core</artifactId>
+         <version>${usedvertx.version}</version>
+      </dependency>
+
       <dependency>
          <groupId>org.apache.httpcomponents</groupId>
          <artifactId>httpclient</artifactId>

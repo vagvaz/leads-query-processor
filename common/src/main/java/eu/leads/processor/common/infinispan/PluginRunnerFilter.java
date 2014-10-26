@@ -16,8 +16,10 @@ import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -30,11 +32,13 @@ import static eu.leads.processor.plugins.EventType.REMOVED;
 /**
  * Created by vagvaz on 9/29/14.
  */
-public class PluginRunnerFilter implements KeyValueFilter {
-    private final EmbeddedCacheManager manager;
+public class PluginRunnerFilter implements KeyValueFilter,Serializable {
+
     private JsonObject conf;
-    private ClusterInfinispanManager imanager;
-    private Cache pluginsCache;
+    private String configString;
+    transient private final EmbeddedCacheManager manager;
+    transient private ClusterInfinispanManager imanager;
+    transient private Cache pluginsCache;
     transient Cache targetCache;
     transient String targetCacheName;
     transient Logger log ;
@@ -42,29 +46,35 @@ public class PluginRunnerFilter implements KeyValueFilter {
     transient String pluginsCacheName;
     transient String pluginName;
     transient List<EventType> type;
+    transient  boolean isInitialized = false;
     public PluginRunnerFilter(EmbeddedCacheManager manager,String confString){
         this.manager = manager;
-        this.conf = new JsonObject(confString);
+        this.configString = confString;
+        this.conf = new JsonObject(configString);
         imanager = new ClusterInfinispanManager(manager);
         initialize();
     }
 
     private void initialize() {
-
+        isInitialized = true;
         pluginsCacheName = conf.getString("activePluginCache");
         pluginName = conf.getString("pluginName");
         JsonArray types = conf.getArray("types");
         //InferTypes
         type = new ArrayList<EventType>(3);
-        Iterator<Object> iterator = types.iterator();
-        if(iterator.hasNext()){
-            type.add(valueOf((String) iterator.next()));
+        if(types != null ) {
+            Iterator<Object> iterator = types.iterator();
+            if (iterator.hasNext()) {
+                type.add((EventType) iterator.next());
+            }
         }
+
         if(type.size() == 0){
             type.add(CREATED);
             type.add(REMOVED);
             type.add(MODIFIED);
         }
+
         pluginsCache = (Cache) imanager.getPersisentCache(pluginsCacheName);
         log = LoggerFactory.getLogger( "PluginRunner."+pluginName+":"+ pluginsCacheName);
         initializePlugin(pluginsCache,pluginName);
@@ -105,8 +115,32 @@ public class PluginRunnerFilter implements KeyValueFilter {
     }
 
     private void initializePlugin(Cache cache, String plugName) {
-        byte[] jarAsBytes = (byte[]) cache.get(plugName + ":jar");
-        FSUtilities.flushPluginToDisk(plugName + ".jar", jarAsBytes);
+                 String jarFileName = null;
+                 if (plugName.equals("eu.leads.processor.plugins.pagerank.PagerankPlugin")) {
+             //            ConfigurationUtilities
+             //                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar");
+                         jarFileName = System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
+                     } else if (plugName.equals("eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin")) {
+             //            ConfigurationUtilities
+             //                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar");
+                         jarFileName = System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
+                     } else {
+                         byte[] jarAsBytes = (byte[]) cache.get(plugName + ":jar");
+                         FSUtilities.flushPluginToDisk(plugName + ".jar", jarAsBytes);
+
+             //            ConfigurationUtilities
+             //                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugin
+             //                            + ".jar");
+                         jarFileName = System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugName
+                                         + ".jar";
+                     }
+                 ClassLoader classLoader = null;
+                 try {
+                         classLoader = ConfigurationUtilities.getClassLoaderFor(jarFileName);
+                     } catch (URISyntaxException e) {
+                         e.printStackTrace();
+                     }
+
 
         ConfigurationUtilities
             .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugName
@@ -125,7 +159,7 @@ public class PluginRunnerFilter implements KeyValueFilter {
         if (className != null && !className.equals("")) {
             try {
                 Class<?> plugClass =
-                    Class.forName(className, true, this.getClass().getClassLoader());
+                    Class.forName(className, true, classLoader);
                 Constructor<?> con = plugClass.getConstructor();
                 plugin = (PluginInterface) con.newInstance();
                 plugin.initialize(pluginConfig, imanager);
@@ -147,9 +181,12 @@ public class PluginRunnerFilter implements KeyValueFilter {
     }
 
     @Override public boolean accept(Object key, Object value, Metadata metadata) {
-//        String o1 = (String)key;
-//        String o2 = (String)value;
-//        accept2(o1,o2,metadata);
+
+        if(!isInitialized)
+            initialize();
+        String o1 = (String)key;
+        String o2 = (String)value;
+        accept2(o1,o2,metadata);
         return false;
     }
 }

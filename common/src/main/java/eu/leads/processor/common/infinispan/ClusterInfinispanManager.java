@@ -49,7 +49,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
      */
     public ClusterInfinispanManager() {
         host = "0.0.0.0";
-        serverPort = 11000;
+        serverPort = 11222;
     }
 
     public ClusterInfinispanManager(EmbeddedCacheManager manager) {
@@ -70,7 +70,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     @Override
     public void startManager(String configurationFile)  {
 
-//        server = new HotRodServer();
+
         ParserRegistry registry = new ParserRegistry();
         ConfigurationBuilderHolder holder = null;
         ConfigurationBuilder builder = null;
@@ -85,12 +85,12 @@ public class ClusterInfinispanManager implements InfinispanManager {
         }catch(IOException e){
             e.printStackTrace();
         }
-
         manager = new DefaultCacheManager(holder, true);
         getPersisentCache("clustered");
         getPersisentCache("defaultCache");
         //I might want to sleep here for a little while
         PrintUtilities.printList(manager.getMembers());
+
 //        startHotRodServer(manager,host, serverPort);
 
         System.out.println("We have started");
@@ -123,12 +123,15 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     private void startHotRodServer(EmbeddedCacheManager targetManager, String localhost, int port) {
         serverPort = port;
+        server = new HotRodServer();
         boolean isStarted = false;
         while (!isStarted) {
             HotRodServerConfigurationBuilder serverConfigurationBuilder =
                 new HotRodServerConfigurationBuilder();
-            serverConfigurationBuilder.host(localhost).port(serverPort).keyValueFilterFactory("leads-processor-filter-factory",new LeadsProcessorKeyValueFilterFactory(manager))
+            serverConfigurationBuilder.host(localhost).port(serverPort).defaultCacheName("default")
+                  .keyValueFilterFactory("leads-processor-filter-factory",new LeadsProcessorKeyValueFilterFactory(manager))
             .converterFactory("leads-processor-converter-factory",new LeadsProcessorConverterFactory());
+
             try {
                 server.start(serverConfigurationBuilder.build(), targetManager);
                 isStarted = true;
