@@ -32,8 +32,8 @@
     <BPING dest="" port_range="20"/>
     <MERGE2 max_interval="30000" min_interval="10000"/>
     <FD_SOCK/>
-    <FD timeout="3000" max_tries="3"/>
-    <VERIFY_SUSPECT timeout="1500"/>
+    <FD timeout="4000" max_tries="3"/>
+    <VERIFY_SUSPECT timeout="2000"/>
     <pbcast.NAKACK2 use_mcast_xmit="false"
                     xmit_interval="1000"
                     xmit_table_num_rows="100"
@@ -49,9 +49,9 @@
               max_msg_batch_size="100"
               conn_expiry_timeout="0"/>
     <pbcast.STABLE stability_delay="500" desired_avg_gossip="5000" max_bytes="1m"/>
-    <pbcast.GMS print_local_addr="true" join_timeout="3000" view_bundling="true"/>
+    <pbcast.GMS print_local_addr="true" join_timeout="4000" view_bundling="true"/>
     <tom.TOA/>
     <MFC max_credits="200k" min_threshold="0.20"/>
-    <FRAG2 frag_size="60000"/>
+    <FRAG2 frag_size="30000"/>
     <RSVP timeout="60000" resend_interval="500" ack_on_delivery="false"/>
 </config>
