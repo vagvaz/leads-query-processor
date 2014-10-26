@@ -34,7 +34,24 @@
    <properties>
       <infinispan.version>7.0.0-SNAPSHOT</infinispan.version>
       <processor.version>1.0-SNAPSHOT</processor.version>
-      <usedvertx.version>2.1.2</usedvertx.version>
+       <vertx.version>2.1.2</vertx.version>
+       <vertx.testtools.version>2.0.3-final</vertx.testtools.version>
+       <junit.version>4.11</junit.version>
+
+       <tajo.version>0.9.0-SNAPSHOT</tajo.version>
+       <maven.compiler.plugin.version>3.2</maven.compiler.plugin.version>
+       <maven.resources.plugin.version>2.7</maven.resources.plugin.version>
+       <maven.clean.plugin.version>2.6</maven.clean.plugin.version>
+       <maven.vertx.plugin.version>2.0.4-final</maven.vertx.plugin.version>
+       <maven.surefire.plugin.version>2.17</maven.surefire.plugin.version>
+       <maven.failsafe.plugin.version>2.17</maven.failsafe.plugin.version>
+       <maven.surefire.report.plugin.version>2.17</maven.surefire.report.plugin.version>
+       <maven.javadoc.plugin.version>2.10.1</maven.javadoc.plugin.version>
+       <maven.dependency.plugin.version>2.9</maven.dependency.plugin.version>
+       <maven.install.plugin.version>2.5.2</maven.install.plugin.version>
+       <maven.jar.plugin.version>2.5</maven.jar.plugin.version>
+
+
    </properties>
 
    <build>
@@ -42,12 +59,12 @@
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-install-plugin</artifactId>
-            <version>2.4</version>
+            <version>${maven.install.plugin.version}</version>
          </plugin>
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.2</version>
+            <version>${maven.compiler.plugin.version}</version>
             <configuration>
                <source>1.7</source>
                <target>1.7</target>

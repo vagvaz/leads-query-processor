@@ -13,9 +13,7 @@
    <artifactId>leads-aux-tools</artifactId>
    <packaging>pom</packaging>
    <modules>
-      <module>sentiment-module</module>
        <module>data-collection</module>
-       <module>pagerank-node</module>
        <module>data-snapshot</module>
    </modules>
 
@@ -25,7 +23,7 @@
                 processors -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
+                <version>${maven.compiler.plugin.version}</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>

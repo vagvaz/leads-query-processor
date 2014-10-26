@@ -25,7 +25,8 @@
       <module>plugins</module>
       <module>crawler</module>
       <module>interface-manager</module>
-      <module>leads-query-processor-interfaces</module>
+       <module>leads-base-modules</module>
+      <!--<module>leads-query-processor-interfaces</module>-->
       <module>leads-results-gui</module>
       <module>leads-cli</module>
       <module>leads-aux-tools</module>

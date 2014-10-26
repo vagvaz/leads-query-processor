@@ -1,9 +1,7 @@
 package eu.leads.processor.common.test;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.leads.processor.common.infinispan.CacheManagerFactory;
-import eu.leads.processor.common.infinispan.InfinispanCluster;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.utils.PrintUtilities;
@@ -17,7 +15,7 @@ import java.util.concurrent.ConcurrentMap;
 public class InfinispanTest {
     public static void main(String[] args) {
         LQPConfiguration.initialize();
-        ObjectMapper mapper = new ObjectMapper();
+
 
 
         //        cluster.initialize();

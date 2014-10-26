@@ -1,0 +1,795 @@
+INFO main eu.leads.processor.conf.LQPConfiguration - HOST:  vagvaz-PC IP 192.168.1.5 BRCD 192.168.1.255
+INFO main eu.leads.processor.common.infinispan.CacheManagerFactory - Starting Clustered Infinispan Manager
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for clustered is not clustered so using default cluster configuration
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000078: Starting JGroups channel ISPN
+WARN main org.jgroups.stack.Configurator - JGRP000014: TP.loopback has been deprecated: enabled by default
+WARN main org.jgroups.protocols.MFC - The fragmentation size of the fragmentation protocol is 60000, which is greater than min_credits (40000). This can lead to blockings (https://issues.jboss.org/browse/JGRP-1659)
+WARN main org.jgroups.protocols.TCP - JGRP000046: bundler_type=new has been removed; using transfer-queue
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000094: Received new cluster view for channel ISPN: [vagvaz-PC-824|19] (6) [vagvaz-PC-824, vagvaz-PC-57154, vagvaz-PC-51791, vagvaz-PC-53201, vagvaz-PC-33577, vagvaz-PC-936]
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000079: Channel ISPN local address is vagvaz-PC-936, physical addresses are [192.168.1.5:46982]
+INFO main org.infinispan.factories.GlobalComponentRegistry - ISPN000128: Infinispan version: Infinispan 'Guinness' 7.0.0-SNAPSHOT
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for defaultCache is not clustered so using default cluster configuration
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for default.entities is not clustered so using default cluster configuration
+WARN OOB-2,vagvaz-PC-936 org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher - ISPN000220: Problems un-marshalling remote command from byte buffer
+java.lang.ClassNotFoundException: eu.leads.processor.infinispan.operators.mapreduce.ScanCallable
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:366)
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:355)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:354)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:425)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:308)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:358)
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:274)
+	at org.jboss.marshalling.AbstractClassResolver.loadClass(AbstractClassResolver.java:131)
+	at org.jboss.marshalling.AbstractClassResolver.resolveClass(AbstractClassResolver.java:112)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadClassDescriptor(RiverUnmarshaller.java:943)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadNewObject(RiverUnmarshaller.java:1239)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:272)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.marshall.exts.ReplicableCommandExternalizer.readParameters(ReplicableCommandExternalizer.java:100)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:153)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:64)
+	at org.infinispan.marshall.core.ExternalizerTable$ExternalizerAdapter.readObject(ExternalizerTable.java:409)
+	at org.infinispan.marshall.core.ExternalizerTable.readObject(ExternalizerTable.java:214)
+	at org.infinispan.marshall.core.JBossMarshaller$ExternalizerTableProxy.readObject(JBossMarshaller.java:148)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:351)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.commons.marshall.jboss.AbstractJBossMarshaller.objectFromObjectStream(AbstractJBossMarshaller.java:135)
+	at org.infinispan.marshall.core.VersionAwareMarshaller.objectFromByteBuffer(VersionAwareMarshaller.java:101)
+	at org.infinispan.commons.marshall.AbstractDelegatingMarshaller.objectFromByteBuffer(AbstractDelegatingMarshaller.java:80)
+	at org.infinispan.remoting.transport.jgroups.MarshallerAdapter.objectFromBuffer(MarshallerAdapter.java:28)
+	at org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher.handle(CommandAwareRpcDispatcher.java:204)
+	at org.jgroups.blocks.RequestCorrelator.handleRequest(RequestCorrelator.java:460)
+	at org.jgroups.blocks.RequestCorrelator.receiveMessage(RequestCorrelator.java:377)
+	at org.jgroups.blocks.RequestCorrelator.receive(RequestCorrelator.java:250)
+	at org.jgroups.blocks.MessageDispatcher$ProtocolAdapter.up(MessageDispatcher.java:674)
+	at org.jgroups.JChannel.up(JChannel.java:733)
+	at org.jgroups.stack.ProtocolStack.up(ProtocolStack.java:1030)
+	at org.jgroups.protocols.RSVP.up(RSVP.java:190)
+	at org.jgroups.protocols.FRAG2.up(FRAG2.java:165)
+	at org.jgroups.protocols.FlowControl.up(FlowControl.java:390)
+	at org.jgroups.protocols.tom.TOA.up(TOA.java:121)
+	at org.jgroups.protocols.pbcast.GMS.up(GMS.java:1041)
+	at org.jgroups.protocols.pbcast.STABLE.up(STABLE.java:234)
+	at org.jgroups.protocols.UNICAST2.handleDataReceived(UNICAST2.java:803)
+	at org.jgroups.protocols.UNICAST2.up(UNICAST2.java:420)
+	at org.jgroups.protocols.pbcast.NAKACK2.up(NAKACK2.java:610)
+	at org.jgroups.protocols.VERIFY_SUSPECT.up(VERIFY_SUSPECT.java:147)
+	at org.jgroups.protocols.FD.up(FD.java:255)
+	at org.jgroups.protocols.FD_SOCK.up(FD_SOCK.java:297)
+	at org.jgroups.protocols.MERGE2.up(MERGE2.java:241)
+	at org.jgroups.protocols.Discovery.up(Discovery.java:245)
+	at org.jgroups.protocols.TP.passMessageUp(TP.java:1541)
+	at org.jgroups.protocols.TP$MyHandler.run(TP.java:1760)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:745)
+INFO main eu.leads.processor.conf.LQPConfiguration - HOST:  vagvaz-PC IP 192.168.1.5 BRCD 192.168.1.255
+INFO main eu.leads.processor.common.infinispan.CacheManagerFactory - Starting Clustered Infinispan Manager
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for clustered is not clustered so using default cluster configuration
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000078: Starting JGroups channel ISPN
+WARN main org.jgroups.stack.Configurator - JGRP000014: TP.loopback has been deprecated: enabled by default
+WARN main org.jgroups.protocols.MFC - The fragmentation size of the fragmentation protocol is 60000, which is greater than min_credits (40000). This can lead to blockings (https://issues.jboss.org/browse/JGRP-1659)
+WARN main org.jgroups.protocols.TCP - JGRP000046: bundler_type=new has been removed; using transfer-queue
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000094: Received new cluster view for channel ISPN: [vagvaz-PC-18972|5] (6) [vagvaz-PC-18972, vagvaz-PC-61354, vagvaz-PC-64745, vagvaz-PC-58633, vagvaz-PC-36051, vagvaz-PC-17194]
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000079: Channel ISPN local address is vagvaz-PC-17194, physical addresses are [192.168.1.5:49188]
+INFO main org.infinispan.factories.GlobalComponentRegistry - ISPN000128: Infinispan version: Infinispan 'Guinness' 7.0.0-SNAPSHOT
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for defaultCache is not clustered so using default cluster configuration
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for default.entities is not clustered so using default cluster configuration
+WARN OOB-1,vagvaz-PC-17194 org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher - ISPN000220: Problems un-marshalling remote command from byte buffer
+java.lang.ClassNotFoundException: eu.leads.processor.infinispan.operators.mapreduce.ScanCallable
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:366)
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:355)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:354)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:425)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:308)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:358)
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:274)
+	at org.jboss.marshalling.AbstractClassResolver.loadClass(AbstractClassResolver.java:131)
+	at org.jboss.marshalling.AbstractClassResolver.resolveClass(AbstractClassResolver.java:112)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadClassDescriptor(RiverUnmarshaller.java:943)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadNewObject(RiverUnmarshaller.java:1239)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:272)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.marshall.exts.ReplicableCommandExternalizer.readParameters(ReplicableCommandExternalizer.java:100)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:153)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:64)
+	at org.infinispan.marshall.core.ExternalizerTable$ExternalizerAdapter.readObject(ExternalizerTable.java:409)
+	at org.infinispan.marshall.core.ExternalizerTable.readObject(ExternalizerTable.java:214)
+	at org.infinispan.marshall.core.JBossMarshaller$ExternalizerTableProxy.readObject(JBossMarshaller.java:148)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:351)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.commons.marshall.jboss.AbstractJBossMarshaller.objectFromObjectStream(AbstractJBossMarshaller.java:135)
+	at org.infinispan.marshall.core.VersionAwareMarshaller.objectFromByteBuffer(VersionAwareMarshaller.java:101)
+	at org.infinispan.commons.marshall.AbstractDelegatingMarshaller.objectFromByteBuffer(AbstractDelegatingMarshaller.java:80)
+	at org.infinispan.remoting.transport.jgroups.MarshallerAdapter.objectFromBuffer(MarshallerAdapter.java:28)
+	at org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher.handle(CommandAwareRpcDispatcher.java:204)
+	at org.jgroups.blocks.RequestCorrelator.handleRequest(RequestCorrelator.java:460)
+	at org.jgroups.blocks.RequestCorrelator.receiveMessage(RequestCorrelator.java:377)
+	at org.jgroups.blocks.RequestCorrelator.receive(RequestCorrelator.java:250)
+	at org.jgroups.blocks.MessageDispatcher$ProtocolAdapter.up(MessageDispatcher.java:674)
+	at org.jgroups.JChannel.up(JChannel.java:733)
+	at org.jgroups.stack.ProtocolStack.up(ProtocolStack.java:1030)
+	at org.jgroups.protocols.RSVP.up(RSVP.java:190)
+	at org.jgroups.protocols.FRAG2.up(FRAG2.java:165)
+	at org.jgroups.protocols.FlowControl.up(FlowControl.java:390)
+	at org.jgroups.protocols.tom.TOA.up(TOA.java:121)
+	at org.jgroups.protocols.pbcast.GMS.up(GMS.java:1041)
+	at org.jgroups.protocols.pbcast.STABLE.up(STABLE.java:234)
+	at org.jgroups.protocols.UNICAST2.handleDataReceived(UNICAST2.java:803)
+	at org.jgroups.protocols.UNICAST2.up(UNICAST2.java:420)
+	at org.jgroups.protocols.pbcast.NAKACK2.up(NAKACK2.java:610)
+	at org.jgroups.protocols.VERIFY_SUSPECT.up(VERIFY_SUSPECT.java:147)
+	at org.jgroups.protocols.FD.up(FD.java:255)
+	at org.jgroups.protocols.FD_SOCK.up(FD_SOCK.java:297)
+	at org.jgroups.protocols.MERGE2.up(MERGE2.java:241)
+	at org.jgroups.protocols.Discovery.up(Discovery.java:245)
+	at org.jgroups.protocols.TP.passMessageUp(TP.java:1541)
+	at org.jgroups.protocols.TP$MyHandler.run(TP.java:1760)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:745)
+INFO main eu.leads.processor.conf.LQPConfiguration - HOST:  vagvaz-PC IP 192.168.1.5 BRCD 192.168.1.255
+INFO main eu.leads.processor.common.infinispan.CacheManagerFactory - Starting Clustered Infinispan Manager
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for clustered is not clustered so using default cluster configuration
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000078: Starting JGroups channel ISPN
+WARN main org.jgroups.stack.Configurator - JGRP000014: TP.loopback has been deprecated: enabled by default
+WARN main org.jgroups.protocols.MFC - The fragmentation size of the fragmentation protocol is 60000, which is greater than min_credits (40000). This can lead to blockings (https://issues.jboss.org/browse/JGRP-1659)
+WARN main org.jgroups.protocols.TCP - JGRP000046: bundler_type=new has been removed; using transfer-queue
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000094: Received new cluster view for channel ISPN: [vagvaz-PC-55445|5] (7) [vagvaz-PC-55445, vagvaz-PC-41468, vagvaz-PC-56707, vagvaz-PC-27688, vagvaz-PC-65467, vagvaz-PC-42223, vagvaz-PC-37216]
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000079: Channel ISPN local address is vagvaz-PC-37216, physical addresses are [192.168.1.5:38323]
+INFO main org.infinispan.factories.GlobalComponentRegistry - ISPN000128: Infinispan version: Infinispan 'Guinness' 7.0.0-SNAPSHOT
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for defaultCache is not clustered so using default cluster configuration
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for default.entities is not clustered so using default cluster configuration
+WARN OOB-2,vagvaz-PC-37216 org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher - ISPN000220: Problems un-marshalling remote command from byte buffer
+java.lang.ClassNotFoundException: eu.leads.processor.infinispan.operators.mapreduce.ScanCallable
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:366)
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:355)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:354)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:425)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:308)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:358)
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:274)
+	at org.jboss.marshalling.AbstractClassResolver.loadClass(AbstractClassResolver.java:131)
+	at org.jboss.marshalling.AbstractClassResolver.resolveClass(AbstractClassResolver.java:112)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadClassDescriptor(RiverUnmarshaller.java:943)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadNewObject(RiverUnmarshaller.java:1239)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:272)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.marshall.exts.ReplicableCommandExternalizer.readParameters(ReplicableCommandExternalizer.java:100)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:153)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:64)
+	at org.infinispan.marshall.core.ExternalizerTable$ExternalizerAdapter.readObject(ExternalizerTable.java:409)
+	at org.infinispan.marshall.core.ExternalizerTable.readObject(ExternalizerTable.java:214)
+	at org.infinispan.marshall.core.JBossMarshaller$ExternalizerTableProxy.readObject(JBossMarshaller.java:148)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:351)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.commons.marshall.jboss.AbstractJBossMarshaller.objectFromObjectStream(AbstractJBossMarshaller.java:135)
+	at org.infinispan.marshall.core.VersionAwareMarshaller.objectFromByteBuffer(VersionAwareMarshaller.java:101)
+	at org.infinispan.commons.marshall.AbstractDelegatingMarshaller.objectFromByteBuffer(AbstractDelegatingMarshaller.java:80)
+	at org.infinispan.remoting.transport.jgroups.MarshallerAdapter.objectFromBuffer(MarshallerAdapter.java:28)
+	at org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher.handle(CommandAwareRpcDispatcher.java:204)
+	at org.jgroups.blocks.RequestCorrelator.handleRequest(RequestCorrelator.java:460)
+	at org.jgroups.blocks.RequestCorrelator.receiveMessage(RequestCorrelator.java:377)
+	at org.jgroups.blocks.RequestCorrelator.receive(RequestCorrelator.java:250)
+	at org.jgroups.blocks.MessageDispatcher$ProtocolAdapter.up(MessageDispatcher.java:674)
+	at org.jgroups.JChannel.up(JChannel.java:733)
+	at org.jgroups.stack.ProtocolStack.up(ProtocolStack.java:1030)
+	at org.jgroups.protocols.RSVP.up(RSVP.java:190)
+	at org.jgroups.protocols.FRAG2.up(FRAG2.java:165)
+	at org.jgroups.protocols.FlowControl.up(FlowControl.java:390)
+	at org.jgroups.protocols.tom.TOA.up(TOA.java:121)
+	at org.jgroups.protocols.pbcast.GMS.up(GMS.java:1041)
+	at org.jgroups.protocols.pbcast.STABLE.up(STABLE.java:234)
+	at org.jgroups.protocols.UNICAST2.handleDataReceived(UNICAST2.java:803)
+	at org.jgroups.protocols.UNICAST2.up(UNICAST2.java:420)
+	at org.jgroups.protocols.pbcast.NAKACK2.up(NAKACK2.java:610)
+	at org.jgroups.protocols.VERIFY_SUSPECT.up(VERIFY_SUSPECT.java:147)
+	at org.jgroups.protocols.FD.up(FD.java:255)
+	at org.jgroups.protocols.FD_SOCK.up(FD_SOCK.java:297)
+	at org.jgroups.protocols.MERGE2.up(MERGE2.java:241)
+	at org.jgroups.protocols.Discovery.up(Discovery.java:245)
+	at org.jgroups.protocols.TP.passMessageUp(TP.java:1541)
+	at org.jgroups.protocols.TP$MyHandler.run(TP.java:1760)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:745)
+WARN OOB-2,vagvaz-PC-37216 org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher - ISPN000220: Problems un-marshalling remote command from byte buffer
+java.lang.ClassNotFoundException: eu.leads.processor.infinispan.operators.mapreduce.ScanCallable
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:366)
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:355)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:354)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:425)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:308)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:358)
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:274)
+	at org.jboss.marshalling.AbstractClassResolver.loadClass(AbstractClassResolver.java:131)
+	at org.jboss.marshalling.AbstractClassResolver.resolveClass(AbstractClassResolver.java:112)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadClassDescriptor(RiverUnmarshaller.java:943)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadNewObject(RiverUnmarshaller.java:1239)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:272)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.marshall.exts.ReplicableCommandExternalizer.readParameters(ReplicableCommandExternalizer.java:100)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:153)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:64)
+	at org.infinispan.marshall.core.ExternalizerTable$ExternalizerAdapter.readObject(ExternalizerTable.java:409)
+	at org.infinispan.marshall.core.ExternalizerTable.readObject(ExternalizerTable.java:214)
+	at org.infinispan.marshall.core.JBossMarshaller$ExternalizerTableProxy.readObject(JBossMarshaller.java:148)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:351)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.commons.marshall.jboss.AbstractJBossMarshaller.objectFromObjectStream(AbstractJBossMarshaller.java:135)
+	at org.infinispan.marshall.core.VersionAwareMarshaller.objectFromByteBuffer(VersionAwareMarshaller.java:101)
+	at org.infinispan.commons.marshall.AbstractDelegatingMarshaller.objectFromByteBuffer(AbstractDelegatingMarshaller.java:80)
+	at org.infinispan.remoting.transport.jgroups.MarshallerAdapter.objectFromBuffer(MarshallerAdapter.java:28)
+	at org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher.handle(CommandAwareRpcDispatcher.java:204)
+	at org.jgroups.blocks.RequestCorrelator.handleRequest(RequestCorrelator.java:460)
+	at org.jgroups.blocks.RequestCorrelator.receiveMessage(RequestCorrelator.java:377)
+	at org.jgroups.blocks.RequestCorrelator.receive(RequestCorrelator.java:250)
+	at org.jgroups.blocks.MessageDispatcher$ProtocolAdapter.up(MessageDispatcher.java:674)
+	at org.jgroups.JChannel.up(JChannel.java:733)
+	at org.jgroups.stack.ProtocolStack.up(ProtocolStack.java:1030)
+	at org.jgroups.protocols.RSVP.up(RSVP.java:190)
+	at org.jgroups.protocols.FRAG2.up(FRAG2.java:165)
+	at org.jgroups.protocols.FlowControl.up(FlowControl.java:390)
+	at org.jgroups.protocols.tom.TOA.up(TOA.java:121)
+	at org.jgroups.protocols.pbcast.GMS.up(GMS.java:1041)
+	at org.jgroups.protocols.pbcast.STABLE.up(STABLE.java:234)
+	at org.jgroups.protocols.UNICAST2.handleDataReceived(UNICAST2.java:803)
+	at org.jgroups.protocols.UNICAST2.up(UNICAST2.java:420)
+	at org.jgroups.protocols.pbcast.NAKACK2.up(NAKACK2.java:610)
+	at org.jgroups.protocols.VERIFY_SUSPECT.up(VERIFY_SUSPECT.java:147)
+	at org.jgroups.protocols.FD.up(FD.java:255)
+	at org.jgroups.protocols.FD_SOCK.up(FD_SOCK.java:297)
+	at org.jgroups.protocols.MERGE2.up(MERGE2.java:241)
+	at org.jgroups.protocols.Discovery.up(Discovery.java:245)
+	at org.jgroups.protocols.TP.passMessageUp(TP.java:1541)
+	at org.jgroups.protocols.TP$MyHandler.run(TP.java:1760)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:745)
+INFO Incoming-1,vagvaz-PC-37216 org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000094: Received new cluster view for channel ISPN: [vagvaz-PC-55445|6] (6) [vagvaz-PC-55445, vagvaz-PC-56707, vagvaz-PC-27688, vagvaz-PC-65467, vagvaz-PC-42223, vagvaz-PC-37216]
+INFO Incoming-1,vagvaz-PC-37216 org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000094: Received new cluster view for channel ISPN: [vagvaz-PC-55445|7] (5) [vagvaz-PC-55445, vagvaz-PC-27688, vagvaz-PC-65467, vagvaz-PC-42223, vagvaz-PC-37216]
+INFO Incoming-2,vagvaz-PC-37216 org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000094: Received new cluster view for channel ISPN: [vagvaz-PC-55445|8] (4) [vagvaz-PC-55445, vagvaz-PC-27688, vagvaz-PC-65467, vagvaz-PC-37216]
+WARN transport-thread--p3-t15 org.infinispan.statetransfer.InboundTransferTask - ISPN000210: Failed to request segments [37] of cache defaultCache from node vagvaz-PC-42223 (node will not be retried)
+ERROR transport-thread--p3-t15 org.infinispan.statetransfer.StateConsumerImpl - ISPN000208: No live owners found for segment 37 of cache defaultCache. Current owners are:  [vagvaz-PC-42223]. Faulty owners: [vagvaz-PC-42223]
+WARN transport-thread--p3-t11 org.infinispan.statetransfer.InboundTransferTask - ISPN000210: Failed to request segments [37] of cache clustered from node vagvaz-PC-42223 (node will not be retried)
+ERROR transport-thread--p3-t11 org.infinispan.statetransfer.StateConsumerImpl - ISPN000208: No live owners found for segment 37 of cache clustered. Current owners are:  [vagvaz-PC-42223]. Faulty owners: [vagvaz-PC-42223]
+INFO main eu.leads.processor.conf.LQPConfiguration - HOST:  vagvaz-PC IP 192.168.1.5 BRCD 192.168.1.255
+INFO main eu.leads.processor.common.infinispan.CacheManagerFactory - Starting Clustered Infinispan Manager
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for clustered is not clustered so using default cluster configuration
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000078: Starting JGroups channel ISPN
+WARN main org.jgroups.stack.Configurator - JGRP000014: TP.loopback has been deprecated: enabled by default
+WARN main org.jgroups.protocols.MFC - The fragmentation size of the fragmentation protocol is 60000, which is greater than min_credits (40000). This can lead to blockings (https://issues.jboss.org/browse/JGRP-1659)
+WARN main org.jgroups.protocols.TCP - JGRP000046: bundler_type=new has been removed; using transfer-queue
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000094: Received new cluster view for channel ISPN: [vagvaz-PC-55542|5] (6) [vagvaz-PC-55542, vagvaz-PC-33196, vagvaz-PC-41142, vagvaz-PC-11682, vagvaz-PC-45495, vagvaz-PC-32904]
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000079: Channel ISPN local address is vagvaz-PC-32904, physical addresses are [192.168.1.5:51517]
+INFO main org.infinispan.factories.GlobalComponentRegistry - ISPN000128: Infinispan version: Infinispan 'Guinness' 7.0.0-SNAPSHOT
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for defaultCache is not clustered so using default cluster configuration
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for default.entities is not clustered so using default cluster configuration
+INFO main eu.leads.processor.conf.LQPConfiguration - HOST:  vagvaz-PC IP 192.168.1.5 BRCD 192.168.1.255
+INFO main eu.leads.processor.common.infinispan.CacheManagerFactory - Starting Clustered Infinispan Manager
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for clustered is not clustered so using default cluster configuration
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000078: Starting JGroups channel ISPN
+WARN main org.jgroups.stack.Configurator - JGRP000014: TP.loopback has been deprecated: enabled by default
+WARN main org.jgroups.protocols.MFC - The fragmentation size of the fragmentation protocol is 60000, which is greater than min_credits (40000). This can lead to blockings (https://issues.jboss.org/browse/JGRP-1659)
+WARN main org.jgroups.protocols.TCP - JGRP000046: bundler_type=new has been removed; using transfer-queue
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000094: Received new cluster view for channel ISPN: [vagvaz-PC-55542|7] (6) [vagvaz-PC-55542, vagvaz-PC-33196, vagvaz-PC-41142, vagvaz-PC-11682, vagvaz-PC-45495, vagvaz-PC-5522]
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000079: Channel ISPN local address is vagvaz-PC-5522, physical addresses are [192.168.1.5:32879]
+INFO main org.infinispan.factories.GlobalComponentRegistry - ISPN000128: Infinispan version: Infinispan 'Guinness' 7.0.0-SNAPSHOT
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for defaultCache is not clustered so using default cluster configuration
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for default.entities is not clustered so using default cluster configuration
+WARN OOB-1,vagvaz-PC-5522 org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher - ISPN000220: Problems un-marshalling remote command from byte buffer
+java.lang.ClassNotFoundException: eu.leads.processor.infinispan.operators.mapreduce.ScanCallable
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:366)
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:355)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:354)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:425)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:308)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:358)
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:274)
+	at org.jboss.marshalling.AbstractClassResolver.loadClass(AbstractClassResolver.java:131)
+	at org.jboss.marshalling.AbstractClassResolver.resolveClass(AbstractClassResolver.java:112)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadClassDescriptor(RiverUnmarshaller.java:943)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadNewObject(RiverUnmarshaller.java:1239)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:272)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.marshall.exts.ReplicableCommandExternalizer.readParameters(ReplicableCommandExternalizer.java:100)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:153)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:64)
+	at org.infinispan.marshall.core.ExternalizerTable$ExternalizerAdapter.readObject(ExternalizerTable.java:409)
+	at org.infinispan.marshall.core.ExternalizerTable.readObject(ExternalizerTable.java:214)
+	at org.infinispan.marshall.core.JBossMarshaller$ExternalizerTableProxy.readObject(JBossMarshaller.java:148)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:351)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.commons.marshall.jboss.AbstractJBossMarshaller.objectFromObjectStream(AbstractJBossMarshaller.java:135)
+	at org.infinispan.marshall.core.VersionAwareMarshaller.objectFromByteBuffer(VersionAwareMarshaller.java:101)
+	at org.infinispan.commons.marshall.AbstractDelegatingMarshaller.objectFromByteBuffer(AbstractDelegatingMarshaller.java:80)
+	at org.infinispan.remoting.transport.jgroups.MarshallerAdapter.objectFromBuffer(MarshallerAdapter.java:28)
+	at org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher.handle(CommandAwareRpcDispatcher.java:204)
+	at org.jgroups.blocks.RequestCorrelator.handleRequest(RequestCorrelator.java:460)
+	at org.jgroups.blocks.RequestCorrelator.receiveMessage(RequestCorrelator.java:377)
+	at org.jgroups.blocks.RequestCorrelator.receive(RequestCorrelator.java:250)
+	at org.jgroups.blocks.MessageDispatcher$ProtocolAdapter.up(MessageDispatcher.java:674)
+	at org.jgroups.JChannel.up(JChannel.java:733)
+	at org.jgroups.stack.ProtocolStack.up(ProtocolStack.java:1030)
+	at org.jgroups.protocols.RSVP.up(RSVP.java:190)
+	at org.jgroups.protocols.FRAG2.up(FRAG2.java:165)
+	at org.jgroups.protocols.FlowControl.up(FlowControl.java:390)
+	at org.jgroups.protocols.tom.TOA.up(TOA.java:121)
+	at org.jgroups.protocols.pbcast.GMS.up(GMS.java:1041)
+	at org.jgroups.protocols.pbcast.STABLE.up(STABLE.java:234)
+	at org.jgroups.protocols.UNICAST2.handleDataReceived(UNICAST2.java:803)
+	at org.jgroups.protocols.UNICAST2.up(UNICAST2.java:420)
+	at org.jgroups.protocols.pbcast.NAKACK2.up(NAKACK2.java:610)
+	at org.jgroups.protocols.VERIFY_SUSPECT.up(VERIFY_SUSPECT.java:147)
+	at org.jgroups.protocols.FD.up(FD.java:255)
+	at org.jgroups.protocols.FD_SOCK.up(FD_SOCK.java:297)
+	at org.jgroups.protocols.MERGE2.up(MERGE2.java:241)
+	at org.jgroups.protocols.Discovery.up(Discovery.java:245)
+	at org.jgroups.protocols.TP.passMessageUp(TP.java:1541)
+	at org.jgroups.protocols.TP$MyHandler.run(TP.java:1760)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:745)
+INFO main eu.leads.processor.conf.LQPConfiguration - HOST:  vagvaz-PC IP 192.168.1.5 BRCD 192.168.1.255
+INFO main eu.leads.processor.common.infinispan.CacheManagerFactory - Starting Clustered Infinispan Manager
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for clustered is not clustered so using default cluster configuration
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000078: Starting JGroups channel ISPN
+WARN main org.jgroups.stack.Configurator - JGRP000014: TP.loopback has been deprecated: enabled by default
+WARN main org.jgroups.protocols.MFC - The fragmentation size of the fragmentation protocol is 60000, which is greater than min_credits (40000). This can lead to blockings (https://issues.jboss.org/browse/JGRP-1659)
+WARN main org.jgroups.protocols.TCP - JGRP000046: bundler_type=new has been removed; using transfer-queue
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000094: Received new cluster view for channel ISPN: [vagvaz-PC-63521|5] (7) [vagvaz-PC-63521, vagvaz-PC-53308, vagvaz-PC-62967, vagvaz-PC-19080, vagvaz-PC-32278, vagvaz-PC-39530, vagvaz-PC-26647]
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000079: Channel ISPN local address is vagvaz-PC-26647, physical addresses are [192.168.1.5:56125]
+INFO main org.infinispan.factories.GlobalComponentRegistry - ISPN000128: Infinispan version: Infinispan 'Guinness' 7.0.0-SNAPSHOT
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for defaultCache is not clustered so using default cluster configuration
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for default.entities is not clustered so using default cluster configuration
+WARN OOB-1,vagvaz-PC-26647 org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher - ISPN000220: Problems un-marshalling remote command from byte buffer
+java.lang.ClassNotFoundException: eu.leads.processor.infinispan.operators.mapreduce.ScanCallable
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:366)
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:355)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:354)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:425)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:308)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:358)
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:274)
+	at org.jboss.marshalling.AbstractClassResolver.loadClass(AbstractClassResolver.java:131)
+	at org.jboss.marshalling.AbstractClassResolver.resolveClass(AbstractClassResolver.java:112)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadClassDescriptor(RiverUnmarshaller.java:943)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadNewObject(RiverUnmarshaller.java:1239)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:272)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.marshall.exts.ReplicableCommandExternalizer.readParameters(ReplicableCommandExternalizer.java:100)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:153)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:64)
+	at org.infinispan.marshall.core.ExternalizerTable$ExternalizerAdapter.readObject(ExternalizerTable.java:409)
+	at org.infinispan.marshall.core.ExternalizerTable.readObject(ExternalizerTable.java:214)
+	at org.infinispan.marshall.core.JBossMarshaller$ExternalizerTableProxy.readObject(JBossMarshaller.java:148)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:351)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.commons.marshall.jboss.AbstractJBossMarshaller.objectFromObjectStream(AbstractJBossMarshaller.java:135)
+	at org.infinispan.marshall.core.VersionAwareMarshaller.objectFromByteBuffer(VersionAwareMarshaller.java:101)
+	at org.infinispan.commons.marshall.AbstractDelegatingMarshaller.objectFromByteBuffer(AbstractDelegatingMarshaller.java:80)
+	at org.infinispan.remoting.transport.jgroups.MarshallerAdapter.objectFromBuffer(MarshallerAdapter.java:28)
+	at org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher.handle(CommandAwareRpcDispatcher.java:204)
+	at org.jgroups.blocks.RequestCorrelator.handleRequest(RequestCorrelator.java:460)
+	at org.jgroups.blocks.RequestCorrelator.receiveMessage(RequestCorrelator.java:377)
+	at org.jgroups.blocks.RequestCorrelator.receive(RequestCorrelator.java:250)
+	at org.jgroups.blocks.MessageDispatcher$ProtocolAdapter.up(MessageDispatcher.java:674)
+	at org.jgroups.JChannel.up(JChannel.java:733)
+	at org.jgroups.stack.ProtocolStack.up(ProtocolStack.java:1030)
+	at org.jgroups.protocols.RSVP.up(RSVP.java:190)
+	at org.jgroups.protocols.FRAG2.up(FRAG2.java:165)
+	at org.jgroups.protocols.FlowControl.up(FlowControl.java:390)
+	at org.jgroups.protocols.tom.TOA.up(TOA.java:121)
+	at org.jgroups.protocols.pbcast.GMS.up(GMS.java:1041)
+	at org.jgroups.protocols.pbcast.STABLE.up(STABLE.java:234)
+	at org.jgroups.protocols.UNICAST2.handleDataReceived(UNICAST2.java:803)
+	at org.jgroups.protocols.UNICAST2.up(UNICAST2.java:420)
+	at org.jgroups.protocols.pbcast.NAKACK2.up(NAKACK2.java:610)
+	at org.jgroups.protocols.VERIFY_SUSPECT.up(VERIFY_SUSPECT.java:147)
+	at org.jgroups.protocols.FD.up(FD.java:255)
+	at org.jgroups.protocols.FD_SOCK.up(FD_SOCK.java:297)
+	at org.jgroups.protocols.MERGE2.up(MERGE2.java:241)
+	at org.jgroups.protocols.Discovery.up(Discovery.java:245)
+	at org.jgroups.protocols.TP.passMessageUp(TP.java:1541)
+	at org.jgroups.protocols.TP$MyHandler.run(TP.java:1760)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:745)
+WARN OOB-1,vagvaz-PC-26647 org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher - ISPN000220: Problems un-marshalling remote command from byte buffer
+java.lang.ClassNotFoundException: eu.leads.processor.infinispan.operators.mapreduce.ScanCallable
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:366)
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:355)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:354)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:425)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:308)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:358)
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:274)
+	at org.jboss.marshalling.AbstractClassResolver.loadClass(AbstractClassResolver.java:131)
+	at org.jboss.marshalling.AbstractClassResolver.resolveClass(AbstractClassResolver.java:112)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadClassDescriptor(RiverUnmarshaller.java:943)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadNewObject(RiverUnmarshaller.java:1239)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:272)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.marshall.exts.ReplicableCommandExternalizer.readParameters(ReplicableCommandExternalizer.java:100)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:153)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:64)
+	at org.infinispan.marshall.core.ExternalizerTable$ExternalizerAdapter.readObject(ExternalizerTable.java:409)
+	at org.infinispan.marshall.core.ExternalizerTable.readObject(ExternalizerTable.java:214)
+	at org.infinispan.marshall.core.JBossMarshaller$ExternalizerTableProxy.readObject(JBossMarshaller.java:148)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:351)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.commons.marshall.jboss.AbstractJBossMarshaller.objectFromObjectStream(AbstractJBossMarshaller.java:135)
+	at org.infinispan.marshall.core.VersionAwareMarshaller.objectFromByteBuffer(VersionAwareMarshaller.java:101)
+	at org.infinispan.commons.marshall.AbstractDelegatingMarshaller.objectFromByteBuffer(AbstractDelegatingMarshaller.java:80)
+	at org.infinispan.remoting.transport.jgroups.MarshallerAdapter.objectFromBuffer(MarshallerAdapter.java:28)
+	at org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher.handle(CommandAwareRpcDispatcher.java:204)
+	at org.jgroups.blocks.RequestCorrelator.handleRequest(RequestCorrelator.java:460)
+	at org.jgroups.blocks.RequestCorrelator.receiveMessage(RequestCorrelator.java:377)
+	at org.jgroups.blocks.RequestCorrelator.receive(RequestCorrelator.java:250)
+	at org.jgroups.blocks.MessageDispatcher$ProtocolAdapter.up(MessageDispatcher.java:674)
+	at org.jgroups.JChannel.up(JChannel.java:733)
+	at org.jgroups.stack.ProtocolStack.up(ProtocolStack.java:1030)
+	at org.jgroups.protocols.RSVP.up(RSVP.java:190)
+	at org.jgroups.protocols.FRAG2.up(FRAG2.java:165)
+	at org.jgroups.protocols.FlowControl.up(FlowControl.java:390)
+	at org.jgroups.protocols.tom.TOA.up(TOA.java:121)
+	at org.jgroups.protocols.pbcast.GMS.up(GMS.java:1041)
+	at org.jgroups.protocols.pbcast.STABLE.up(STABLE.java:234)
+	at org.jgroups.protocols.UNICAST2.handleDataReceived(UNICAST2.java:803)
+	at org.jgroups.protocols.UNICAST2.up(UNICAST2.java:420)
+	at org.jgroups.protocols.pbcast.NAKACK2.up(NAKACK2.java:610)
+	at org.jgroups.protocols.VERIFY_SUSPECT.up(VERIFY_SUSPECT.java:147)
+	at org.jgroups.protocols.FD.up(FD.java:255)
+	at org.jgroups.protocols.FD_SOCK.up(FD_SOCK.java:297)
+	at org.jgroups.protocols.MERGE2.up(MERGE2.java:241)
+	at org.jgroups.protocols.Discovery.up(Discovery.java:245)
+	at org.jgroups.protocols.TP.passMessageUp(TP.java:1541)
+	at org.jgroups.protocols.TP$MyHandler.run(TP.java:1760)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:745)
+INFO main eu.leads.processor.conf.LQPConfiguration - HOST:  vagvaz-PC IP 192.168.1.5 BRCD 192.168.1.255
+INFO main eu.leads.processor.common.infinispan.CacheManagerFactory - Starting Clustered Infinispan Manager
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for clustered is not clustered so using default cluster configuration
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000078: Starting JGroups channel ISPN
+WARN main org.jgroups.stack.Configurator - JGRP000014: TP.loopback has been deprecated: enabled by default
+WARN main org.jgroups.protocols.MFC - The fragmentation size of the fragmentation protocol is 60000, which is greater than min_credits (40000). This can lead to blockings (https://issues.jboss.org/browse/JGRP-1659)
+WARN main org.jgroups.protocols.TCP - JGRP000046: bundler_type=new has been removed; using transfer-queue
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000094: Received new cluster view for channel ISPN: [vagvaz-PC-22243|5] (7) [vagvaz-PC-22243, vagvaz-PC-32224, vagvaz-PC-58431, vagvaz-PC-15988, vagvaz-PC-14201, vagvaz-PC-55086, vagvaz-PC-38204]
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000079: Channel ISPN local address is vagvaz-PC-38204, physical addresses are [192.168.1.5:45827]
+INFO main org.infinispan.factories.GlobalComponentRegistry - ISPN000128: Infinispan version: Infinispan 'Guinness' 7.0.0-SNAPSHOT
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for defaultCache is not clustered so using default cluster configuration
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for default.entities is not clustered so using default cluster configuration
+WARN OOB-2,vagvaz-PC-38204 org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher - ISPN000220: Problems un-marshalling remote command from byte buffer
+java.lang.ClassNotFoundException: eu.leads.processor.infinispan.operators.mapreduce.ScanCallable
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:366)
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:355)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:354)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:425)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:308)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:358)
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:274)
+	at org.jboss.marshalling.AbstractClassResolver.loadClass(AbstractClassResolver.java:131)
+	at org.jboss.marshalling.AbstractClassResolver.resolveClass(AbstractClassResolver.java:112)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadClassDescriptor(RiverUnmarshaller.java:943)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadNewObject(RiverUnmarshaller.java:1239)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:272)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.marshall.exts.ReplicableCommandExternalizer.readParameters(ReplicableCommandExternalizer.java:100)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:153)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:64)
+	at org.infinispan.marshall.core.ExternalizerTable$ExternalizerAdapter.readObject(ExternalizerTable.java:409)
+	at org.infinispan.marshall.core.ExternalizerTable.readObject(ExternalizerTable.java:214)
+	at org.infinispan.marshall.core.JBossMarshaller$ExternalizerTableProxy.readObject(JBossMarshaller.java:148)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:351)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.commons.marshall.jboss.AbstractJBossMarshaller.objectFromObjectStream(AbstractJBossMarshaller.java:135)
+	at org.infinispan.marshall.core.VersionAwareMarshaller.objectFromByteBuffer(VersionAwareMarshaller.java:101)
+	at org.infinispan.commons.marshall.AbstractDelegatingMarshaller.objectFromByteBuffer(AbstractDelegatingMarshaller.java:80)
+	at org.infinispan.remoting.transport.jgroups.MarshallerAdapter.objectFromBuffer(MarshallerAdapter.java:28)
+	at org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher.handle(CommandAwareRpcDispatcher.java:204)
+	at org.jgroups.blocks.RequestCorrelator.handleRequest(RequestCorrelator.java:460)
+	at org.jgroups.blocks.RequestCorrelator.receiveMessage(RequestCorrelator.java:377)
+	at org.jgroups.blocks.RequestCorrelator.receive(RequestCorrelator.java:250)
+	at org.jgroups.blocks.MessageDispatcher$ProtocolAdapter.up(MessageDispatcher.java:674)
+	at org.jgroups.JChannel.up(JChannel.java:733)
+	at org.jgroups.stack.ProtocolStack.up(ProtocolStack.java:1030)
+	at org.jgroups.protocols.RSVP.up(RSVP.java:190)
+	at org.jgroups.protocols.FRAG2.up(FRAG2.java:165)
+	at org.jgroups.protocols.FlowControl.up(FlowControl.java:390)
+	at org.jgroups.protocols.tom.TOA.up(TOA.java:121)
+	at org.jgroups.protocols.pbcast.GMS.up(GMS.java:1041)
+	at org.jgroups.protocols.pbcast.STABLE.up(STABLE.java:234)
+	at org.jgroups.protocols.UNICAST2.handleDataReceived(UNICAST2.java:803)
+	at org.jgroups.protocols.UNICAST2.up(UNICAST2.java:420)
+	at org.jgroups.protocols.pbcast.NAKACK2.up(NAKACK2.java:610)
+	at org.jgroups.protocols.VERIFY_SUSPECT.up(VERIFY_SUSPECT.java:147)
+	at org.jgroups.protocols.FD.up(FD.java:255)
+	at org.jgroups.protocols.FD_SOCK.up(FD_SOCK.java:297)
+	at org.jgroups.protocols.MERGE2.up(MERGE2.java:241)
+	at org.jgroups.protocols.Discovery.up(Discovery.java:245)
+	at org.jgroups.protocols.TP.passMessageUp(TP.java:1541)
+	at org.jgroups.protocols.TP$MyHandler.run(TP.java:1760)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:745)
+WARN FD_SOCK pinger,vagvaz-PC-38204 org.jgroups.protocols.FD_SOCK - vagvaz-PC-38204: creating the client socket failed: java.net.ConnectException: Connection refused
+WARN FD_SOCK pinger,vagvaz-PC-38204 org.jgroups.protocols.FD_SOCK - vagvaz-PC-38204: creating the client socket failed: java.net.ConnectException: Connection refused
+WARN FD_SOCK pinger,vagvaz-PC-38204 org.jgroups.protocols.FD_SOCK - vagvaz-PC-38204: creating the client socket failed: java.net.ConnectException: Connection refused
+INFO main eu.leads.processor.conf.LQPConfiguration - HOST:  vagvaz-PC IP 192.168.1.5 BRCD 192.168.1.255
+INFO main eu.leads.processor.common.infinispan.CacheManagerFactory - Starting Clustered Infinispan Manager
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+INFO main org.infinispan.configuration.cache.EvictionConfigurationBuilder - ISPN000152: Passivation configured without an eviction policy being selected. Only manually evicted entities will be passivated.
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main org.infinispan.configuration.cache.AbstractStoreConfigurationBuilder - ISPN000149: Fetch persistent state and purge on startup are both disabled, cache may contain stale entries on startup
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for clustered is not clustered so using default cluster configuration
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000078: Starting JGroups channel ISPN
+WARN main org.jgroups.stack.Configurator - JGRP000014: TP.loopback has been deprecated: enabled by default
+WARN main org.jgroups.protocols.MFC - The fragmentation size of the fragmentation protocol is 60000, which is greater than min_credits (40000). This can lead to blockings (https://issues.jboss.org/browse/JGRP-1659)
+WARN main org.jgroups.protocols.TCP - JGRP000046: bundler_type=new has been removed; using transfer-queue
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000094: Received new cluster view for channel ISPN: [vagvaz-PC-10532|5] (6) [vagvaz-PC-10532, vagvaz-PC-3353, vagvaz-PC-10581, vagvaz-PC-49301, vagvaz-PC-33974, vagvaz-PC-61634]
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000079: Channel ISPN local address is vagvaz-PC-61634, physical addresses are [192.168.1.5:39000]
+INFO main org.infinispan.factories.GlobalComponentRegistry - ISPN000128: Infinispan version: Infinispan 'Guinness' 7.0.0-SNAPSHOT
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for defaultCache is not clustered so using default cluster configuration
+WARN main eu.leads.processor.common.infinispan.ClusterInfinispanManager - Configuration given for default.entities is not clustered so using default cluster configuration
+WARN OOB-1,vagvaz-PC-61634 org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher - ISPN000220: Problems un-marshalling remote command from byte buffer
+java.lang.ClassNotFoundException: eu.leads.processor.infinispan.operators.mapreduce.ScanCallable
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:366)
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:355)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:354)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:425)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:308)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:358)
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:274)
+	at org.jboss.marshalling.AbstractClassResolver.loadClass(AbstractClassResolver.java:131)
+	at org.jboss.marshalling.AbstractClassResolver.resolveClass(AbstractClassResolver.java:112)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadClassDescriptor(RiverUnmarshaller.java:943)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadNewObject(RiverUnmarshaller.java:1239)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:272)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.marshall.exts.ReplicableCommandExternalizer.readParameters(ReplicableCommandExternalizer.java:100)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:153)
+	at org.infinispan.marshall.exts.CacheRpcCommandExternalizer.readObject(CacheRpcCommandExternalizer.java:64)
+	at org.infinispan.marshall.core.ExternalizerTable$ExternalizerAdapter.readObject(ExternalizerTable.java:409)
+	at org.infinispan.marshall.core.ExternalizerTable.readObject(ExternalizerTable.java:214)
+	at org.infinispan.marshall.core.JBossMarshaller$ExternalizerTableProxy.readObject(JBossMarshaller.java:148)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:351)
+	at org.jboss.marshalling.river.RiverUnmarshaller.doReadObject(RiverUnmarshaller.java:209)
+	at org.jboss.marshalling.AbstractObjectInput.readObject(AbstractObjectInput.java:41)
+	at org.infinispan.commons.marshall.jboss.AbstractJBossMarshaller.objectFromObjectStream(AbstractJBossMarshaller.java:135)
+	at org.infinispan.marshall.core.VersionAwareMarshaller.objectFromByteBuffer(VersionAwareMarshaller.java:101)
+	at org.infinispan.commons.marshall.AbstractDelegatingMarshaller.objectFromByteBuffer(AbstractDelegatingMarshaller.java:80)
+	at org.infinispan.remoting.transport.jgroups.MarshallerAdapter.objectFromBuffer(MarshallerAdapter.java:28)
+	at org.infinispan.remoting.transport.jgroups.CommandAwareRpcDispatcher.handle(CommandAwareRpcDispatcher.java:204)
+	at org.jgroups.blocks.RequestCorrelator.handleRequest(RequestCorrelator.java:460)
+	at org.jgroups.blocks.RequestCorrelator.receiveMessage(RequestCorrelator.java:377)
+	at org.jgroups.blocks.RequestCorrelator.receive(RequestCorrelator.java:250)
+	at org.jgroups.blocks.MessageDispatcher$ProtocolAdapter.up(MessageDispatcher.java:674)
+	at org.jgroups.JChannel.up(JChannel.java:733)
+	at org.jgroups.stack.ProtocolStack.up(ProtocolStack.java:1030)
+	at org.jgroups.protocols.RSVP.up(RSVP.java:190)
+	at org.jgroups.protocols.FRAG2.up(FRAG2.java:165)
+	at org.jgroups.protocols.FlowControl.up(FlowControl.java:390)
+	at org.jgroups.protocols.tom.TOA.up(TOA.java:121)
+	at org.jgroups.protocols.pbcast.GMS.up(GMS.java:1041)
+	at org.jgroups.protocols.pbcast.STABLE.up(STABLE.java:234)
+	at org.jgroups.protocols.UNICAST2.handleDataReceived(UNICAST2.java:803)
+	at org.jgroups.protocols.UNICAST2.up(UNICAST2.java:420)
+	at org.jgroups.protocols.pbcast.NAKACK2.up(NAKACK2.java:610)
+	at org.jgroups.protocols.VERIFY_SUSPECT.up(VERIFY_SUSPECT.java:147)
+	at org.jgroups.protocols.FD.up(FD.java:255)
+	at org.jgroups.protocols.FD_SOCK.up(FD_SOCK.java:297)
+	at org.jgroups.protocols.MERGE2.up(MERGE2.java:241)
+	at org.jgroups.protocols.Discovery.up(Discovery.java:245)
+	at org.jgroups.protocols.TP.passMessageUp(TP.java:1541)
+	at org.jgroups.protocols.TP$MyHandler.run(TP.java:1760)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:745)
