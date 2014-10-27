@@ -223,7 +223,7 @@ public class SortOperatorTest {
       Action action  = createNewAction();
       action.setData(confg);
 
-      SortOperator operator = new SortOperator(null, InfinispanClusterSingleton.getInstance().getManager(),action);
+      SortOperator operator = new SortOperator(null, InfinispanClusterSingleton.getInstance().getManager(),null,action);
       operator.init(action.getData());
       operator.execute();
       try {

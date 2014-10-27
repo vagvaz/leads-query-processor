@@ -73,27 +73,34 @@ public class PlannerCatalogWorker extends Verticle {
                      .getNumber("port"));
       //Start Catalog Server
       boolean catalogServerStarted = false;
+      int count = 0;
       while (!catalogServerStarted){
           container.logger().info("Trying to start CatalogServer.");
           catalogServer = new LeadsCatalog(conf);
           try {
-              catalogServerStarted=catalogServer.StartServer();
-              catalogServerStarted=true;
-              if (container.config().containsField("generateSchemas"))
-                  createInitialTables();
-          } catch (Exception e) {
-              catalogServer=null;
-              container.logger().error("Problem Encountered when tried to create Initial Schemas " + e.getMessage());
-              try {
-                  sleep(1000);
-                  container.logger().error("\n\n\n\n\n\n\n SIZE 0 \n\n\n\n\n");
-              } catch (InterruptedException e1) {
-                  e1.printStackTrace();
-              }
-          }
-      }
+              catalogServerStarted = catalogServer.StartServer();
+//              catalogServerStarted=true;
+          }catch(Exception e){
+            container.logger().error("Problem when starting CatalogServer retrying");
 
-  }
+          }
+          if(count > 2)
+          {
+              container.logger().error("Failed to Started Catalog Server Exiting");
+              System.exit(-1);
+          }
+          count++;
+      }
+      try {
+          if (container.config().containsField("generateSchemas"))
+              createInitialTables();
+      } catch (Exception e) {
+        catalogServer=null;
+        container.logger().error("Problem Encountered when tried to create Initial Schemas " + e.getMessage());
+        container.logger().error("\n\n\n\n\n\n\n SIZE 0 \n\n\n\n\n");
+       container.logger().error("neither the tables nor the functions have been created...");
+        }
+    }
 
   private void createInitialTables() {
     CatalogClient catalog = null;
@@ -134,9 +141,9 @@ public class PlannerCatalogWorker extends Verticle {
     webPagesSchema.addColumn("language",Type.TEXT);
     webPagesSchema.addColumn("charset",Type.TEXT);
     webPagesSchema.addColumn("responsetime",Type.INT4);
-    webPagesSchema.addColumn("links",Type.TEXT_ARRAY);
+    webPagesSchema.addColumn("links",Type.TEXT);
     webPagesSchema.addColumn("title",Type.TEXT);
-    webPagesSchema.addColumn("version",Type.DATE);
+//    webPagesSchema.addColumn("version",Type.DATE);
     webPagesSchema.addColumn("pagerank",Type.FLOAT8);
     webPagesSchema.addColumn("sentiment",Type.FLOAT8);
 
@@ -144,7 +151,7 @@ public class PlannerCatalogWorker extends Verticle {
     entitiesSchema.addColumn("webpageurl",Type.TEXT);
     entitiesSchema.addColumn("name",Type.TEXT);
     entitiesSchema.addColumn("sentiment",Type.FLOAT8);
-    entitiesSchema.addColumn("version",Type.DATE);
+//    entitiesSchema.addColumn("version",Type.DATE);
 
 
 

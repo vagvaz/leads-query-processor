@@ -214,7 +214,7 @@ public class LimitOperatorTest {
       Action action  = createNewAction();
       action.setData(confg);
 
-      LimitOperator operator = new LimitOperator(null, InfinispanClusterSingleton.getInstance().getManager(),action);
+      LimitOperator operator = new LimitOperator(null, InfinispanClusterSingleton.getInstance().getManager(),null,action);
       operator.init(action.getData());
       operator.execute();
       try {

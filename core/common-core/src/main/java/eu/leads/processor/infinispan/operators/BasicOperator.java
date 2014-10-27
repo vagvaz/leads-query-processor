@@ -4,6 +4,7 @@ import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
+import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.infinispan.Cache;
@@ -18,22 +19,26 @@ public abstract class BasicOperator extends Thread implements Operator{
     protected InfinispanManager manager;
     protected Node com;
     protected Cache statisticsCache;
+    protected LogProxy log;
     private String finalOperatorName, statInputSizeKey, statOutputSizeKey, statExecTimeKey;
+    private long startTime;
 
 
     protected BasicOperator(Action action) {
         conf = action.getData();
         this.action = action;
     }
-    protected BasicOperator(Node com, InfinispanManager manager,Action action){
+    protected BasicOperator(Node com, InfinispanManager manager,LogProxy log,Action action){
        super(com.getId()+"-operator-thread");
        System.err.println(this.getClass().getCanonicalName());
 
        this.com = com;
        this.manager = manager;
+       this.log = log;
        this.action = action;
        this.conf = action.getData().getObject("operator").getObject("configuration");
        this.statisticsCache = (Cache) manager.getPersisentCache(StringConstants.STATISTICS_CACHE);
+       this.init_statistics(this.getClass().getCanonicalName());
     }
     protected void init_statistics(String finalOperatorName ){
         this.finalOperatorName=finalOperatorName;
@@ -49,25 +54,42 @@ public abstract class BasicOperator extends Thread implements Operator{
 
    @Override
    public void execute() {
-      start();
+       startTime = System.currentTimeMillis();
+       start();
    }
 
    @Override
    public void cleanup() {
       action.setStatus(ActionStatus.COMPLETED.toString());
+
       if(com != null)
          com.sendTo(action.getData().getString("owner"),action.asJsonObject());
       else
          System.err.println("PROBLEM Uninitialized com");
    }
 
-    public void UpdateStatistics(double inputSize, double outputSize, double executionTime){
-        UpdateSpecificStatistic(statInputSizeKey, inputSize);
-        UpdateSpecificStatistic(statOutputSizeKey, outputSize);
-        UpdateSpecificStatistic(statExecTimeKey, executionTime);
+    public void updateStatistics(Cache input1,Cache input2, Cache output)
+    {
+        long endTime = System.currentTimeMillis();
+        long inputSize = 1;
+        long outputSize = 1;
+        if(input1 != null)
+            inputSize += input1.size();
+        if(input2 != null)
+            inputSize += input2.size();
+        if(outputSize != 0){
+            outputSize = output.size();
+        }
+        updateStatisticsCache(inputSize,outputSize,(endTime-startTime));
     }
 
-    public void UpdateSpecificStatistic(String StatNameKey, double NewValue){
+    public void updateStatisticsCache(double inputSize, double outputSize, double executionTime){
+        updateSpecificStatistic(statInputSizeKey, inputSize);
+        updateSpecificStatistic(statOutputSizeKey, outputSize);
+        updateSpecificStatistic(statExecTimeKey, executionTime);
+    }
+
+    public void updateSpecificStatistic(String StatNameKey, double NewValue){
         DescriptiveStatistics  stats;
         if(!statisticsCache.containsKey(StatNameKey)) {
              stats = new DescriptiveStatistics();
@@ -91,7 +113,7 @@ public abstract class BasicOperator extends Thread implements Operator{
 
    @Override
    public String getInput() {
-      return action.getData().getObject("operator").getArray("inputs").iterator().next().toString();
+      return action.getData().getObject("operator").getArray("inputs").get(0).toString();
    }
 
    @Override

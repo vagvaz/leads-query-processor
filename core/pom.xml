@@ -16,11 +16,11 @@
    <packaging>pom</packaging>
    <modules>
       <module>log-module</module>
-      <module>persist-module</module>
       <module>common-core</module>
-      <module>default-processor-mod</module>
+      <!--module>default-processor-mod</module>
+      <module>persist-module</module>
       <module>default-logic-mod</module>
-      <module>default-comp-mod</module>
+      <module>default-comp-mod</module-->
       <module>log-sink-module</module>
       <module>leads-processor-system-bootstrapper</module>
    </modules>

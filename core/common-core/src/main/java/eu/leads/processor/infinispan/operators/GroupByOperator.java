@@ -3,6 +3,7 @@ package eu.leads.processor.infinispan.operators;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
+import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.infinispan.operators.mapreduce.GroupByMapper;
 import eu.leads.processor.infinispan.operators.mapreduce.GroupByReducer;
@@ -27,9 +28,9 @@ public class GroupByOperator extends MapReduceOperator {
 
     List<String> groupByColumns;
 
-    public GroupByOperator(Node com, InfinispanManager persistence, Action action) {
+    public GroupByOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
 
-       super(com, persistence, action);
+       super(com, persistence,log, action);
 
        JsonArray columns = conf.getObject("body").getArray("groupingColumns");
        Iterator<Object> columnIterator = columns.iterator();

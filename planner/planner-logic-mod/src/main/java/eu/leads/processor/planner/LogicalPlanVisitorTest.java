@@ -1,20 +1,26 @@
 package eu.leads.processor.planner;
 
 import com.google.gson.Gson;
+import eu.leads.processor.core.plan.PlanNode;
 import eu.leads.processor.core.plan.SQLPlan;
 import leads.tajo.module.TaJoModule;
 import org.apache.hadoop.fs.Path;
 import org.apache.tajo.TajoConstants;
 import org.apache.tajo.algebra.CreateTable;
+import org.apache.tajo.algebra.Expr;
+import org.apache.tajo.algebra.Insert;
+import org.apache.tajo.algebra.OpType;
 import org.apache.tajo.catalog.*;
 import org.apache.tajo.catalog.proto.CatalogProtos;
 import org.apache.tajo.common.TajoDataTypes;
 import org.apache.tajo.conf.TajoConf;
 import org.apache.tajo.engine.function.builtin.SumInt;
 import org.apache.tajo.engine.json.CoreGsonHelper;
+import org.apache.tajo.engine.planner.PlanningException;
 import org.apache.tajo.engine.planner.logical.LogicalRootNode;
 import org.apache.tajo.master.session.Session;
 import org.apache.tajo.util.KeyValueSet;
+import org.vertx.java.core.json.JsonArray;
 
 /**
  * Created by vagvaz on 8/27/14.
@@ -34,36 +40,106 @@ public class LogicalPlanVisitorTest {
     private static TaJoModule Mymodule;
     private static CatalogClient catalog;
 
-    public static void main(String[] args) throws Exception {
-        Session session = new Session("0", "LeadsTestModule",
-                                         DEFAULT_DATABASE_NAME);
-        Mymodule = new TaJoModule();
-        Mymodule.init_connection("127.0.0.1", 5998);
-        String line = "select count(sentiment) as pipo,links,url as lala,pagerank as foobar,count(domainname) as papari   from webpages where lala = 'ddsaf' and foobar =9 group by links,lala, foobar having papari > 5 order by papari";
-           // "select dept.deptname,dept.tmsp from dept join ( select score,phone,deptname,sumtest(score) as tmsp from score group by score,phone, deptname) s on dept.deptname = s.deptname and s.tmsp = dept.tmsp";
-        System.out.println(line);
-        String res = TaJoModule.Optimize(session, line);
+//    public static void main(String[] args) throws Exception {
+//        Session session = new Session("0", "LeadsTestModule",
+//                                         DEFAULT_DATABASE_NAME);
+//        Mymodule = new TaJoModule();
+//        Mymodule.init_connection("127.0.0.1", 5998);
+//        String line = "select count(sentiment) as pipo,links,url as lala,pagerank as foobar,count(domainname) as papari   from webpages where lala = 'ddsaf' and foobar =9 group by links,lala, foobar having papari > 5 order by papari";
+//           // "select dept.deptname,dept.tmsp from dept join ( select score,phone,deptname,sumtest(score) as tmsp from score group by score,phone, deptname) s on dept.deptname = s.deptname and s.tmsp = dept.tmsp";
+//        System.out.println(line);
+//        String res = TaJoModule.Optimize(session, line);
+//        Gson gson = new Gson();
+//        LogicalRootNode n = CoreGsonHelper.fromJson(res, LogicalRootNode.class);
+//        SQLPlan plan = null;
+//        if(n.getChild() != null)
+//        {
+//           plan = new SQLPlan("queryId-custom", n);
+//           System.out.println(plan.asJsonObject().encodePrettily());
+//        }
+//        else
+//        {
+//           CreateTable table;
+//           System.out.println(res);
+//        }
+//
+//
+//
+//
+//        //      List<LogicalPlan.QueryBlock> childblocks = plan.getChildBlocks(rootBlock);
+//        //      System.out.println("result\n"+res);
+//        //      System.out.println("explan " + explan);
+//
+//    }
+public static void main(String[] args) throws Exception {
+    Session session = new Session("0", "LeadsTestModule",
+            DEFAULT_DATABASE_NAME);
+    Mymodule = new TaJoModule();
+    Mymodule.init_connection("127.0.0.1", 5998);
+//        String line = "select count(sentiment) as pipo,links,url as lala,pagerank as foobar,count(domainname) as papari   from webpages where lala = 'ddsaf' and foobar =9 group by links,lala, foobar having papari > 5 order by papari";
+    // "select dept.deptname,dept.tmsp from dept join ( select score,phone,deptname,sumtest(score) as tmsp from score group by score,phone, deptname) s on dept.deptname = s.deptname and s.tmsp = dept.tmsp";
+    String line = "insert into entities (webpageurl,name,sentiment) values ('one','two',22)";
+    System.out.println(line);
+    Expr expr = TaJoModule.parseQuery(line);
+    SQLPlan plan = null;
+    if(expr.getType().equals(OpType.Insert)){
+        plan = createInsertSQLPlan(session,expr);
+    }
+    if(plan == null) {
+        String res = TaJoModule.Optimize(session, expr);
         Gson gson = new Gson();
         LogicalRootNode n = CoreGsonHelper.fromJson(res, LogicalRootNode.class);
-        SQLPlan plan = null;
-        if(n.getChild() != null)
-        {
-           plan = new SQLPlan("queryId-custom", n);
-           System.out.println(plan.asJsonObject().encodePrettily());
-        }
-        else
-        {
-           CreateTable table;
-           System.out.println(res);
+
+        if (n.getChild() != null) {
+
+            plan = new SQLPlan("queryId-custom", n);
+            System.out.println(plan.asJsonObject().encodePrettily());
+        } else {
+            CreateTable table;
+            System.out.println(res);
         }
 
+    }
+    else{
+        System.out.println(plan.asJsonObject().encodePrettily());
+    }
 
 
+    //      List<LogicalPlan.QueryBlock> childblocks = plan.getChildBlocks(rootBlock);
+    //      System.out.println("result\n"+res);
+    //      System.out.println("explan " + explan);
 
-        //      List<LogicalPlan.QueryBlock> childblocks = plan.getChildBlocks(rootBlock);
-        //      System.out.println("result\n"+res);
-        //      System.out.println("explan " + explan);
+}
+    private static SQLPlan createInsertSQLPlan(Session session, Expr expr) {
+        SQLPlan result = new SQLPlan();
+        LogicalRootNode rootNode = new LogicalRootNode(1);
+        Insert opInsert = (Insert)expr;
+        Expr subexpr = opInsert.getSubQuery();
 
+//        insertNode.setInSchema(opInsert);
+        try {
+            String result2 = TaJoModule.Optimize( session,subexpr);
+            Gson gson = new Gson();
+            LogicalRootNode n = CoreGsonHelper.fromJson(result2, LogicalRootNode.class);
+            result = new SQLPlan(n);
+            PlanNode node = result.getNode(result.getQueryId()+".0");
+            if(opInsert.hasTargetColumns()) {
+                JsonArray array = new JsonArray(opInsert.getTargetColumns());
+                node.getConfiguration().getObject("body").putArray("columnNames", array);
+            }
+            else{
+                JsonArray array = new JsonArray();
+                Schema tableSchema = TaJoModule.getTableSchema(opInsert.getTableName());
+                for(Column c : tableSchema.getColumns()){
+                    array.add(c.getSimpleName());
+                }
+                node.getConfiguration().getObject("body").putArray("columnNames",array);
+            }
+            result.updateNode(node);
+        } catch (PlanningException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     public static void TestsetUp() throws Exception {

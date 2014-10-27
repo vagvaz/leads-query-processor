@@ -40,10 +40,10 @@ public abstract class ManageVerticle extends Verticle implements LeadsService {
             configuration = this.config;
         }
         com = new DefaultNode();
-        System.err.println("\n\n" + this.getClass().getCanonicalName().toString());
-        System.err.println(" \ncom " + com.toString());
-        System.err.println("\nthis.config " + this.config.toString());
-        System.err.println("\nPARAMETER->" + configuration.toString());
+//        System.err.println("\n\n" + this.getClass().getCanonicalName().toString());
+//        System.err.println(" \ncom " + com.toString());
+//        System.err.println("\nthis.config " + this.config.toString());
+//        System.err.println("\nPARAMETER->" + configuration.toString());
         logProxy = new LogProxy(configuration.getString("log"), com);
 //        persistenceProxy = new PersistenceProxy(configuration.getString("persistence"), com, vertx);
         serviceHandler = new ServiceHandler(this, com, logProxy);

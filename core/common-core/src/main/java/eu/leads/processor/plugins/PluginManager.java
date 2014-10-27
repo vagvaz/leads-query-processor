@@ -7,12 +7,16 @@ import eu.leads.processor.common.utils.FSUtilities;
 import eu.leads.processor.common.utils.FileLockWrapper;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.infinispan.Cache;
+import org.infinispan.client.hotrod.RemoteCacheManager;
+import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.context.Flag;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.remoting.transport.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vertx.java.core.json.JsonArray;
+import org.vertx.java.core.json.JsonObject;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -22,6 +26,7 @@ import java.net.URLClassLoader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -202,11 +207,41 @@ public class PluginManager {
         conf.put("config", StringConstants.PLUGIN_ACTIVE_CACHE);
         LinkedList<String> alist = new LinkedList<String>();
         alist.add(pluginId);
-        conf.put("pluginNames", alist);
-        SimplePluginRunner runner = new SimplePluginRunner("TestSimplePluginDeployer", conf);
-        manager.addListener(runner, cacheName);
+        conf.put("pluginName", alist);
+        JsonObject configuration = new JsonObject();
+        configuration.putString("targetCache",cacheName);
+        configuration.putString("activePluginCache",StringConstants.PLUGIN_ACTIVE_CACHE);
+        configuration.putString("pluginName", pluginId);
+        configuration.putArray("types", new JsonArray());
+        configuration.putString("id", UUID.randomUUID().toString());
+//        configuration.getArray("types").add(EventType.CREATED);
+//        configuration.getArray("types").add(EventType.MODIFIED);
+        SimplePluginRunner listener = new SimplePluginRunner("TestSimplePluginDeployer", conf);
+//        PluginHandlerListener runner = new PluginHandlerListener();
 
+        manager.addListener(listener, cacheName);
+//        RemoteCacheManager remoteCacheManager = createRemoteCacheManager();
+//        RemoteCache<Object, Object> remoteCache = remoteCacheManager.getCache(cacheName);
+//
+//        System.out.println("Using cache " + cacheName);
+//
+//        if (remoteCache == null) {
+//            System.err.println("Cache " + cacheName + " not found!");
+//            System.exit(1);
+//        }
+//        if (remoteCache == null) {
+//            System.err.println("Cache " + cacheName + " not found!");
+//            return;
+//        }
+//
+//        remoteCache.addClientListener(runner, new Object[]{configuration.toString()}, new Object[0]);
     }
+    private static RemoteCacheManager createRemoteCacheManager() {
+        ConfigurationBuilder builder = new ConfigurationBuilder();
+        builder.addServer().host("localhost").port(11222);
+        return new RemoteCacheManager(builder.build());
+    }
+
 
     public static boolean deployPlugin(String pluginId, XMLConfiguration config, String cacheName,
                                           EventType[] events) {

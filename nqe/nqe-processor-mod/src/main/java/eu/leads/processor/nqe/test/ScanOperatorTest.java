@@ -340,7 +340,7 @@ public class ScanOperatorTest {
       Action action  = createNewAction();
       action.setData(confg);
 
-      ScanOperator operator = new ScanOperator(null, InfinispanClusterSingleton.getInstance().getManager(),action);
+      ScanOperator operator = new ScanOperator(null, InfinispanClusterSingleton.getInstance().getManager(),null,action);
       operator.init(action.getData());
       operator.execute();
       try {

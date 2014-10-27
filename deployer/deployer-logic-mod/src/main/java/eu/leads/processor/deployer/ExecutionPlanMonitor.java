@@ -194,7 +194,7 @@ public class ExecutionPlanMonitor {
        JsonObject planNodes = plan.getPlanGraph();
        for(String nodeId : planNodes.getFieldNames()){
           PlanNode node = plan.getNode(nodeId);
-          if(node.getNodeType().equals(LeadsNodeType.SCAN)){
+           if(node.getNodeType().equals(LeadsNodeType.SCAN) || node.getNodeType().equals(LeadsNodeType.EXPRS)){
              result.add(node);
           }
        }

@@ -38,9 +38,9 @@
             <eviction max-entries="1000" strategy="LIRS"/>
             <transaction mode="NONE"/>
             <persistence passivation="true">
-                <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
+                <file-store path="${java.io.tmpdir}" shared="false" preload="true" />
             </persistence>
-           <state-transfer enabled="false" await-initial-transfer="true"/>
+           <state-transfer enabled="false" await-initial-transfer="false"/>
 
       </distributed-cache>
 
@@ -53,9 +53,9 @@
            <eviction max-entries="1000" strategy="LIRS"/>
            <transaction mode="NONE"/>
            <persistence passivation="true">
-               <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
+               <file-store path="${java.io.tmpdir}" shared="false" preload="true" />
            </persistence>
-           <state-transfer enabled="false" await-initial-transfer="true"/>
+           <state-transfer enabled="false" await-initial-transfer="false"/>
        </distributed-cache>
 
        <distributed-cache name="default.entities" mode="SYNC" owners="2" l1-lifespan="600000" start="true"
@@ -67,9 +67,9 @@
            <eviction max-entries="1000" strategy="LIRS"/>
            <transaction mode="NONE"/>
            <persistence passivation="true">
-               <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
+               <file-store path="${java.io.tmpdir}" shared="false" preload="true" />
            </persistence>
-           <state-transfer enabled="false" await-initial-transfer="true"/>
+           <state-transfer enabled="false" await-initial-transfer="false"/>
        </distributed-cache>
 
 
@@ -82,9 +82,9 @@
           <eviction max-entries="1" strategy="LIRS"/>
           <transaction mode="NONE"/>
           <persistence passivation="true">
-              <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
+              <file-store path="${java.io.tmpdir}" shared="false" preload="true" />
           </persistence>
-          <state-transfer enabled="false" await-initial-transfer="true"/>
+          <state-transfer enabled="false" await-initial-transfer="false"/>
       </distributed-cache>
 
       <distributed-cache name="clustered" mode="SYNC" owners="2" l1-lifespan="600000" start="true"
@@ -96,9 +96,9 @@
           <eviction max-entries="1" strategy="LIRS"/>
           <transaction mode="NONE"/>
           <persistence passivation="true">
-              <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
+              <file-store path="${java.io.tmpdir}" shared="false" preload="true" />
           </persistence>
-          <state-transfer enabled="false" await-initial-transfer="true"/>
+          <state-transfer enabled="false" await-initial-transfer="false"/>
       </distributed-cache>
       <distributed-cache name="active_plugins_cache" mode="ASYNC" owners="2" l1-lifespan="600000"
                          start="true"
@@ -110,9 +110,9 @@
           <eviction max-entries="1" strategy="LIRS"/>
           <transaction mode="NONE"/>
           <persistence passivation="true">
-              <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
+              <file-store path="${java.io.tmpdir}" shared="false" preload="true" />
           </persistence>
-          <state-transfer enabled="false" await-initial-transfer="true"/>
+          <state-transfer enabled="false" await-initial-transfer="false"/>
       </distributed-cache>
       <distributed-cache name="processor_plugins" mode="ASYNC" owners="2" l1-lifespan="600000"
                          start="true"
@@ -124,9 +124,9 @@
           <eviction max-entries="1" strategy="LIRS"/>
           <transaction mode="NONE"/>
           <persistence passivation="true">
-              <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
+              <file-store path="${java.io.tmpdir}" shared="false" preload="true" />
           </persistence>
-          <state-transfer enabled="false" await-initial-transfer="true"/>
+          <state-transfer enabled="false" await-initial-transfer="false"/>
       </distributed-cache>
 
       <distributed-cache name="queries" mode="SYNC" owners="2" l1-lifespan="600000" start="true"
@@ -138,9 +138,9 @@
           <eviction max-entries="100" strategy="LIRS"/>
           <transaction mode="NONE"/>
           <persistence passivation="true">
-              <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
+              <file-store path="${java.io.tmpdir}" shared="false" preload="true" />
           </persistence>
-          <state-transfer enabled="false" await-initial-transfer="true"/>
+          <state-transfer enabled="false" await-initial-transfer="false"/>
      </distributed-cache>
      <distributed-cache name="tables" mode="SYNC" owners="2" l1-lifespan="600000" start="true"
                          statistics="true">
@@ -151,9 +151,9 @@
          <eviction max-entries="1" strategy="LIRS"/>
          <transaction mode="NONE"/>
          <persistence passivation="true">
-             <file-store path="${java.io.tmpdir}" shared="false" preload="true" relative-to="${java.io.tmpdir}"/>
+             <file-store path="${java.io.tmpdir}" shared="false" preload="true" />
          </persistence>
-         <state-transfer enabled="false" await-initial-transfer="true"/>
+         <state-transfer enabled="false" await-initial-transfer="false"/>
       </distributed-cache>
    </cache-container>
 

@@ -16,6 +16,7 @@ public class PlanNode extends DataType {
 
     public PlanNode() {
         super();
+        setSite("C&H micro-cloud 0");
     }
 
     public PlanNode(JsonObject node) {
@@ -23,7 +24,7 @@ public class PlanNode extends DataType {
        if(!node.containsField("status"))
           setStatus(NodeStatus.PENDING);
        if(!node.containsField("site")){
-          setSite("");
+          setSite("C&H micro-cloud 0");
        }
 
     }
@@ -34,7 +35,7 @@ public class PlanNode extends DataType {
         this.setConfiguration(configuration);
         setNodeType(LeadsNodeType.valueOf(configuration.getString("type")));
        setStatus(NodeStatus.PENDING);
-       setSite("");
+       setSite("C&H micro-cloud 0");
     }
 
     public PlanNode(LogicalNode n, String queryId) {
@@ -44,7 +45,7 @@ public class PlanNode extends DataType {
        setNodeType(LeadsNodeType.valueOf(configuration.getString("type")));
        generateId(queryId);
        setStatus(NodeStatus.PENDING);
-       setSite("");
+       setSite("C&H micro-cloud 0");
     }
 
     public LeadsNodeType getNodeType() {

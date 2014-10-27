@@ -2,6 +2,7 @@ package eu.leads.processor.infinispan.operators.mapreduce;
 
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
+import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.infinispan.operators.BasicOperator;
 import org.infinispan.Cache;
@@ -20,8 +21,8 @@ import java.util.concurrent.Future;
 public class ScanOperator extends BasicOperator {
    private Cache inputCache;
 
-   public ScanOperator(Node com, InfinispanManager persistence, Action action) {
-      super(com,persistence,action);
+   public ScanOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
+      super(com,persistence,log,action);
    }
 
    //  public FilterOperator(PlanNode node) {
@@ -33,6 +34,7 @@ public class ScanOperator extends BasicOperator {
 
    @Override
    public void run() {
+
       System.err.println("RUNNNING SCAN OPERATOR");
       inputCache = (Cache) manager.getPersisentCache(getInput());
 
@@ -65,6 +67,7 @@ public class ScanOperator extends BasicOperator {
          e.printStackTrace();
       }
       System.err.println("FINISHED RUNNING SCAN " + outputCache.size());
+      updateStatistics(inputCache,null,outputCache);
       cleanup();
    }
 

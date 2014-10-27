@@ -5,6 +5,7 @@ import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.Tuple;
+import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
@@ -36,9 +37,9 @@ public class LimitOperator extends BasicOperator {
       super(action);
    }
 
-   public LimitOperator(Node com, InfinispanManager persistence, Action action) {
+   public LimitOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
 
-      super(com, persistence, action);
+      super(com, persistence,log, action);
       rowCount = conf.getObject("body").getLong("fetchFirstNum");
       sorted = conf.getBoolean("isSorted");
       prefix =   getOutput() + ":";
@@ -91,8 +92,10 @@ public class LimitOperator extends BasicOperator {
         }
        cleanup();
         //Store Values for statistics
-        UpdateStatistics(inputMap.size(),data.size(),System.nanoTime()-startTime);
+//        updateStatistics(inputMap.size(), data.size(), System.nanoTime() - startTime);
+        updateStatistics(inputMap,null,(Cache)data);
     }
+
     private void handlePagerank(Tuple t) {
         if (t.hasField("pagerank")) {
             if (!t.hasField("url"))

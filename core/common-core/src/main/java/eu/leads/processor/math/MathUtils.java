@@ -137,7 +137,27 @@ public class MathUtils {
          return leftValue.toString().compareTo(rightValue.toString()) < 0;
       }
    }
-
+    public static Object getValueFrom(JsonObject json){
+        Object result = null;
+        JsonObject datum = json.getObject("expr").getObject("body").getObject("datum");
+        if(datum.getString("type").equalsIgnoreCase("TEXT")){
+            result = getTextFrom(json.getObject("expr"));
+        }else if(datum.getString("type").startsWith("INT")){
+            result = new Integer(datum.getObject("body").getNumber("val").intValue());
+        }else if(datum.getString("type").startsWith("FLOAT")){
+            result = new Double(datum.getObject("body").getNumber("val").doubleValue());
+        }else if(datum.getString("type").startsWith("DATE")){
+            result = getTextFrom(json.getObject("expr"));
+        }
+        else if(datum.getString("type").equals("BLOB")){
+            result = getTextFrom(json.getObject("expr"));
+        }
+        else
+        {
+            System.err.println("Unknown type");
+        }
+        return result;
+    }
     private static String getTextFrom(JsonObject value) {
 
         String result = null;
@@ -152,7 +172,7 @@ public class MathUtils {
             int size = body.getInteger("size");
             patternBytes = new byte[size];
             for (int i = 0; i < size; i++) {
-                patternBytes[i] = bytes.get(i);
+                patternBytes[i] = ((Integer)bytes.get(i)).byteValue();
             }
             result = new String(patternBytes);
         }

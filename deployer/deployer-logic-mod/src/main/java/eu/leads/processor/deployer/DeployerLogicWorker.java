@@ -155,7 +155,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                     //
                     //               }
                     //               else {
-                    log.error("Unknown PENDING Action received " + action.toString());
+                    log.error("Unknown INPROCESS Action received " + action.toString());
                     //                  return;
                     //               }
                     //               action.setStatus(ActionStatus.INPROCESS.toString());
@@ -172,6 +172,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                     //
                     //               }
                     //               else
+                   try{
                     if (label.equals(NQEConstants.OPERATOR_COMPLETE) || label.equals(NQEConstants.DEPLOY_OPERATOR)) {
                         PlanNode node = new PlanNode(action.getData().getObject("operator"));
                         String queryId = action.getData().getString("queryId");
@@ -179,27 +180,27 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                         plan.complete(node);
                         PlanNode next = plan.getNextOperator(node);
 
-                      boolean useNode = true;
-                      if(next.getNodeType().equals(LeadsNodeType.ROOT))
-                      {
-                        plan.complete(next);
-                        next = plan.getNextExecutableOperator(next);
-                        useNode = false;;
-                      }
-                      if(next.getNodeType().equals(LeadsNodeType.OUTPUT_NODE)){
-                        plan.complete(next);
-                        next = plan.getNextExecutableOperator(next);
-                        useNode = false;
-                      }
-                      PlanNode tobeDeployed =null;
-                      if(useNode)
-                       tobeDeployed = plan.getNextExecutableOperator(node);
-                      else {
-                        if(next != null)
-                          tobeDeployed = plan.getNextExecutableOperator(next);
-                        else
-                          tobeDeployed = null;
-                      }
+                        boolean useNode = true;
+                        if (next.getNodeType().equals(LeadsNodeType.ROOT)) {
+                            plan.complete(next);
+                            next = plan.getNextExecutableOperator(next);
+                            useNode = false;
+                            ;
+                        }
+                        if (next.getNodeType().equals(LeadsNodeType.OUTPUT_NODE)) {
+                            plan.complete(next);
+                            next = plan.getNextExecutableOperator(next);
+                            useNode = false;
+                        }
+                        PlanNode tobeDeployed = null;
+                        if (useNode)
+                            tobeDeployed = plan.getNextExecutableOperator(node);
+                        else {
+                            if (next != null)
+                                tobeDeployed = plan.getNextExecutableOperator(next);
+                            else
+                                tobeDeployed = null;
+                        }
 
 
 //                      if(tobeDeployed.getNodeType().equals(LeadsNodeType.ROOT))
@@ -228,7 +229,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                         newAction.getData().putObject("plan", plan.getLogicalPlan().asJsonObject());
                         com.sendTo(recoveryAddress, newAction.asJsonObject());
                     } else {
-                        log.error("Unknown PENDING Action received " + action.toString());
+                        log.error("Unknown COMPLETED Action received " + action.toString());
                         return;
                     }
                     action.setStatus(ActionStatus.INPROCESS.toString());
@@ -238,6 +239,9 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                     }
 
                     finalizeAction(action);
+                   }catch(Exception e){
+                      log.error("Unexpected error encounted in DeployLogicWorker " + e.getMessage());
+                   }
             }
         }
     }
@@ -275,6 +279,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
 
    private void deployOperator(ExecutionPlanMonitor executionPlan, PlanNode next) {
      Action deployAction = createNewAction(executionPlan.getAction());
+       log.info("Deploying operator to micro-cloud " + next.getSite());
       deployAction.getData().putString("monitor",monitorAddress);
       deployAction.getData().putObject("operator",next.asJsonObject());
       deployAction.getData().putString("operatorType",next.getNodeType().toString());

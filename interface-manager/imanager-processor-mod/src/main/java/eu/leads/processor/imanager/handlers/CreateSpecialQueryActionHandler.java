@@ -69,6 +69,7 @@ public class CreateSpecialQueryActionHandler implements ActionHandler {
            actionResult.putString("error", "");
            actionResult.putString("message",
                                          "Failed to add wgs query " + " from user " + action.getData().toString());
+            result.setResult(actionResult);
 
         }
         return result;

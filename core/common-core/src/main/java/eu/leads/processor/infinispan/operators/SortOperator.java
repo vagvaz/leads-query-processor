@@ -2,6 +2,7 @@ package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.core.*;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DefaultExecutorService;
@@ -30,8 +31,8 @@ public class SortOperator extends BasicOperator {
     private LeadsMapper<String,String,String,String> mapper;
 
 
-   public SortOperator(Node com, InfinispanManager persistence, Action action) {
-      super(com, persistence, action);
+   public SortOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
+      super(com, persistence,log, action);
       JsonArray sortKeys = conf.getObject("body").getArray("sortKeys");
       Iterator<Object> sortKeysIterator = sortKeys.iterator();
       sortColumns = new String[sortKeys.size()];
@@ -83,13 +84,15 @@ public class SortOperator extends BasicOperator {
       TupleComparator comparator = new TupleComparator(sortColumns,asceding,types);
       SortMerger merger = new SortMerger(addresses, getOutput(),comparator,manager,conf);
       merger.merge();
+       Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
 //      for(String cacheName : addresses){
 //         manager.removePersistentCache(cacheName);
 //      }
       manager.removePersistentCache(beforeMerge.getName());
       cleanup();
       //Store Values for statistics
-      UpdateStatistics(inputCache.size(), manager.getPersisentCache(getOutput()).size(),System.nanoTime()-startTime);
+//      updateStatistics(inputCache.size(), manager.getPersisentCache(getOutput()).size(), System.nanoTime() - startTime);
+       updateStatistics(inputCache,null,outputCache);
    }
 
    @Override

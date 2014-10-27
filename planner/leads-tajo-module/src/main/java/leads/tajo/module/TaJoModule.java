@@ -4,6 +4,7 @@
 package leads.tajo.module;
 
 import com.google.protobuf.TextFormat.ParseException;
+import eu.leads.processor.common.StringConstants;
 import grammar.LeadsSQLParser;
 import grammar.LeadsSQLParser.SqlContext;
 import grammar.SQLLexer;
@@ -13,10 +14,7 @@ import org.apache.tajo.algebra.BinaryOperator;
 import org.apache.tajo.algebra.Expr;
 import org.apache.tajo.algebra.OpType;
 import org.apache.tajo.algebra.UnaryOperator;
-import org.apache.tajo.catalog.CatalogClient;
-import org.apache.tajo.catalog.CatalogService;
-import org.apache.tajo.catalog.Schema;
-import org.apache.tajo.catalog.TableDesc;
+import org.apache.tajo.catalog.*;
 import org.apache.tajo.conf.TajoConf;
 import org.apache.tajo.engine.json.CoreGsonHelper;
 import org.apache.tajo.engine.parser.SQLSyntaxError;
@@ -28,6 +26,7 @@ import org.apache.tajo.engine.planner.PlanningException;
 import org.apache.tajo.master.session.Session;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -67,13 +66,15 @@ public class TaJoModule {
     }
 
     public static Schema getTableSchema(String tableName) {
-        TableDesc result = catalog.getTableDesc("default", tableName);
+        TableDesc result = catalog.getTableDesc(StringConstants.DEFAULT_DATABASE_NAME, tableName);
+
         return result.getLogicalSchema();
     }
 
     public static Expr parseQuery(String sql) {
-        System.out.print(sql.length());
-        ANTLRInputStream input = new ANTLRInputStream(sql);
+//        System.out.print(sql.length());
+        String query = check_insert(sql);
+        ANTLRInputStream input = new ANTLRInputStream(query);
         SQLLexer lexer = new SQLLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         LeadsSQLParser parser = new LeadsSQLParser(tokens);
@@ -84,6 +85,18 @@ public class TaJoModule {
             return visitor.visitSql(context);
 
         return null;
+    }
+
+    private static String check_insert(String sql){
+        sql = sql.trim();
+        final String[] arr = sql.split(" ", 2);
+        if(arr[0].equalsIgnoreCase("insert"))
+            if(sql.toLowerCase().contains(" values")) {
+                String[] newsql = sql.split("(?i)VALUES");
+                sql = newsql[0] + " select " + newsql[1].replaceAll("\\(|\\)", "");
+            }
+
+        return sql;
     }
 
     public static String Optimize(Session session, Expr expr) throws PlanningException {
@@ -122,5 +135,15 @@ public class TaJoModule {
             e.printStackTrace();
         }
     }
+
+    public static Set<String> getPrimaryColumn(String tableName) {
+        TableDesc desc = catalog.getTableDesc(tableName);
+        Set<String> result = new HashSet<>();
+        for(Column c : desc.getSchema().getColumns()){
+            result.add(c.getSimpleName());
+        }
+        return result;
+    }
+
 
 }
