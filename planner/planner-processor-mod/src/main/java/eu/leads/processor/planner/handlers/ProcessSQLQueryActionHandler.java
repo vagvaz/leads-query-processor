@@ -10,10 +10,8 @@ import com.google.gson.Gson;
         import eu.leads.processor.core.net.Node;
         import eu.leads.processor.core.plan.*;
         import leads.tajo.module.TaJoModule;
-        import org.apache.tajo.algebra.Expr;
-        import org.apache.tajo.algebra.Insert;
-        import org.apache.tajo.algebra.OpType;
-        import org.apache.tajo.catalog.Column;
+import org.apache.tajo.algebra.*;
+import org.apache.tajo.catalog.Column;
         import org.apache.tajo.catalog.Schema;
         import org.apache.tajo.engine.json.CoreGsonHelper;
         import org.apache.tajo.engine.planner.PlanningException;
@@ -64,6 +62,18 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             return result;
         }
 
+        if(expr.getType().equals(OpType.CreateTable)){
+            module.createTable((CreateTable)expr);
+            result.setResult(ignoreResult(sqlQuery));
+            completeQuery(sqlQuery);
+            return result;
+        }
+        else if(expr.getType().equals(OpType.DropTable)){
+            module.dropTable((DropTable)expr);
+            result.setResult(ignoreResult(sqlQuery));
+            completeQuery(sqlQuery);
+            return result;
+        }
         //Optimize plan
 //        String planAsString = null;
 //        try {
@@ -78,7 +88,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         SQLPlan plan = null;
         try {
             plan = getLogicaSQLPlan(expr,sqlQuery);
-        } catch (PlanningException e) {
+        } catch (Exception e) {
             failQuery(e, sqlQuery);
             result.setResult(createFailResult(e, sqlQuery));
             return result;
@@ -86,6 +96,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         if(plan == null){
             failQuery(new Exception("Could not Create Plan"),sqlQuery);
              result.setResult(createFailResult(new Exception("Unable to create plan due to internal error"),sqlQuery));
+            return result;
          }
         Set<SQLPlan> candidatePlans = new HashSet<SQLPlan>();
         candidatePlans.add(plan);
@@ -100,12 +111,27 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         result.setResult(actionResult);
         return result;
     }
+
+
+
+    private JsonObject ignoreResult(SQLQuery sqlQuery) {
+        JsonObject ob = new JsonObject();
+        ob.putString("status", "ignore");
+        ob.putString("message", sqlQuery.getSQL());
+        return ob;
+    }
+
     private SQLPlan getLogicaSQLPlan(Expr expr, SQLQuery sqlQuery) throws PlanningException {
         SQLPlan result = null;
 
-        if(expr.getType().equals(OpType.Insert)){
-            result = createInsertSQLPlan(session,expr,sqlQuery);
-            return result;
+        try {
+            if (expr.getType().equals(OpType.Insert)) {
+                result = createInsertSQLPlan(session, expr, sqlQuery);
+                return result;
+
+            }
+        }catch (Exception e){
+            throw e;
         }
         //Optimize plan
         String planAsString = null;
@@ -120,7 +146,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         result = new SQLPlan(sqlQuery.getId(), n);
         return result;
     }
-    private SQLPlan createInsertSQLPlan(Session session, Expr expr, SQLQuery sqlQuery) {
+    private SQLPlan createInsertSQLPlan(Session session, Expr expr, SQLQuery sqlQuery) throws PlanningException {
         SQLPlan result = new SQLPlan();
         LogicalRootNode rootNode = new LogicalRootNode(1);
         Insert opInsert = (Insert)expr;
@@ -153,7 +179,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             }
             result.updateNode(node);
         } catch (PlanningException e) {
-            e.printStackTrace();
+            throw e;
         }
         return result;
     }
@@ -207,6 +233,14 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         QueryStatus status = sqlQuery.getQueryStatus();
         status.setErrorMessage(e.getMessage());
         status.setStatus(QueryState.FAILED);
+        sqlQuery.setQueryStatus(status);
+        queriesCache.put(sqlQuery.getId(), sqlQuery.asJsonObject().toString());
+    }
+
+    private void completeQuery(SQLQuery sqlQuery) {
+        QueryStatus status = sqlQuery.getQueryStatus();
+        status.setErrorMessage("");
+        status.setStatus(QueryState.COMPLETED);
         sqlQuery.setQueryStatus(status);
         queriesCache.put(sqlQuery.getId(), sqlQuery.asJsonObject().toString());
     }

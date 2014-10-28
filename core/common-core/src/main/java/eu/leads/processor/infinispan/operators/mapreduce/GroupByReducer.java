@@ -76,7 +76,18 @@ public class GroupByReducer extends LeadsReducer<String, String> {
          JsonObject current = (JsonObject) funcIterator.next();
          aggregates.add(current);
          String funcType = current.getObject("funcDesc").getString("signature");
-         JsonObject argument = (JsonObject) current.getArray("argEvals").iterator().next();
+
+         JsonObject argument = null;
+
+         if( ((JsonObject) current).getArray("argEvals").size() > 0){
+            argument = ((JsonObject)current).getArray("argEvals").get(0);
+         }
+         else{ // handling empty parameters for count(*)
+            argument = new JsonObject();
+            argument.putObject("body",new JsonObject());
+            argument.getObject("body").putObject("column",new JsonObject());
+            argument.getObject("body").getObject("column").putString("name","*");
+         }
          columnParams.add(argument.getObject("body").getObject("column").getString("name"));
          functionType.add(funcType);
          Integer count = typesOfaggregates.get(funcType);
@@ -89,10 +100,20 @@ public class GroupByReducer extends LeadsReducer<String, String> {
             count++;
          }
          typesOfaggregates.put(funcType,count);
-         JsonObject parameter = (JsonObject) current.getObject("funcDesc").getArray("params").iterator().next();
-         columnTypes.add(parameter.getString("type"));
-         Object object = MathUtils.getInitialValue(parameter.getString("type"),current.getObject("funcDesc").getString("signature"));
-         aggregateValues.add(object);
+         JsonArray params = ((JsonObject) current.getObject("funcDesc")).getArray("params");
+         JsonObject parameter = null;
+         if(params.size() > 0 ) {
+            parameter = params.get(0);
+            columnTypes.add(parameter.getString("type"));
+            Object object = MathUtils.getInitialValue(parameter.getString("type"), current.getObject("funcDesc").getString("signature"));
+            aggregateValues.add(object);
+         }
+         else{
+            //Should be done only for count
+            columnTypes.add("INT8");
+            Object object = MathUtils.getInitialValue("INT8",current.getObject("funcDesc").getString("signature"));
+            aggregateValues.add(object);
+         }
       }
       aggregateInferred = inferFinalAggNames();
     }
@@ -134,7 +155,7 @@ public class GroupByReducer extends LeadsReducer<String, String> {
 
             t = new Tuple(iterator.next());
            //handle pagerank
-           handlePagerank(t);
+//           handlePagerank(t);
            Iterator<String> funcTypeIterator= functionType.iterator();
 //           Iterator<Object> aggValuesIterator = aggregateValues.iterator();
            Iterator<String> columnTypesIterator = columnTypes.iterator();

@@ -742,7 +742,7 @@ public class ClientSide {
             System.out.println("No results");
             return null;
         }
-        ArrayList<Etuple> result = encResult.get("results");
+        ArrayList<Etuple> result = encResult.get("result");
         ArrayList<String> DecResult = new ArrayList<String>();
         try {
             Cipher aesCipherForDecryption = Cipher.getInstance("AES/CBC/PKCS5Padding");

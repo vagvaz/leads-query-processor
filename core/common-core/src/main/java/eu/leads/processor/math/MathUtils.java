@@ -376,21 +376,21 @@ public class MathUtils {
       else if (type.startsWith("INT")){
          int currentValueInt = (int)currentValue;
          Map<String,Object> oldMap = (Map<String, Object>) oldValue;
-         oldMap.put("count",(Long)oldMap.get("count")+1);
+         oldMap.put("count",((Number)oldMap.get("count")).longValue()+1);
          oldMap.put("sum",(Long)oldMap.get("sum")+currentValueInt);
          result = oldMap;
       }
       else if (type.startsWith("FLOAT") || type.startsWith("DOUBLE")){
          Map<String,Object> oldMap = (Map<String, Object>) oldValue;
-         oldMap.put("count",(Long)oldMap.get("count")+1);
-         oldMap.put("sum",(Double)oldMap.get("sum")+(Double)currentValue);
+         oldMap.put("count",((Number)oldMap.get("count")).longValue()+1);
+         oldMap.put("sum",((Number)oldMap.get("sum")).doubleValue()+((Number)currentValue).doubleValue());
          result = oldMap;
       }
       else{
          System.out.println("Unknonw type " + type);
          Map<String,Object> oldMap = (Map<String, Object>) oldValue;
-         oldMap.put("count",(Long)oldMap.get("count")+1);
-         oldMap.put("sum",(Long)oldMap.get("sum")+((int)currentValue));
+         oldMap.put("count",((Number)oldMap.get("count")).longValue()+1);
+         oldMap.put("sum",((Number)oldMap.get("sum")).longValue()+((Number)currentValue).longValue());
          result = oldMap;
       }
       return result;
@@ -406,23 +406,23 @@ public class MathUtils {
          }
       }
       else if (type.startsWith("INT")){
-         Long old = (Long) oldValue;
-         int current = (int) currentValue;
+         Long old = ((Number) oldValue).longValue();
+         long current = ((Number) currentValue).longValue();
          if(current < old){
             result = new Long(current);
          }
       }
       else if (type.startsWith("FLOAT") || type.startsWith("DOUBLE")){
-         Double old = (Double) oldValue;
-         Double current = (Double) currentValue;
+         Double old = ((Number) oldValue).doubleValue();
+         Double current = ((Number)currentValue).doubleValue();
          if(old.compareTo(current) > 0){
             result = current;
          }
       }
       else{
          System.out.println("Unknonw type " + type);
-        Long old = (Long) oldValue;
-        int current = (int) currentValue;
+        Long old = ((Number)oldValue).longValue();
+        long current = ((Number)currentValue).longValue();
         if(current < old){
           result = new Long(current);
         }
@@ -440,23 +440,23 @@ public class MathUtils {
          }
       }
       else if (type.startsWith("INT")){
-        Long old = (Long) oldValue;
-        int current = (int) currentValue;
+        Long old = ((Number)oldValue).longValue();
+        long current = ((Number)currentValue).longValue();
         if(current > old){
           result = new Long(current);
         }
       }
       else if (type.startsWith("FLOAT") || type.startsWith("DOUBLE")){
-         Double old = (Double) oldValue;
-         Double current = (Double) currentValue;
+         Double old = ((Number)oldValue).doubleValue();
+         Double current = ((Number)currentValue).doubleValue();
          if(old.compareTo(current) < 0){
             result = current;
          }
       }
       else{
          System.out.println("Unknonw type " + type);
-         Long old = (Long) oldValue;
-        int current = (int) currentValue;
+         Long old = ((Number)oldValue).longValue();
+        long current = ((Number)currentValue).longValue();
         if(current > old){
           result = new Long(current);
         }
@@ -477,20 +477,20 @@ public class MathUtils {
          result = oldValue.toString().concat(currentValue.toString());
       }
       else if (type.startsWith("INT")){
-         Long old = (Long) oldValue;
-         int current = (int)currentValue;
+         Long old = ((Number)oldValue).longValue();
+         long current = ((Number)currentValue).longValue();
          result = current + old;
 
       }
       else if (type.startsWith("FLOAT") || type.startsWith("DOUBLE")){
-         Double old = (Double) oldValue;
-         Double current = (Double) currentValue;
+         Double old = ((Number)oldValue).doubleValue();
+         Double current = ((Number)currentValue).doubleValue();
          result = current + old;
       }
       else{
          System.out.println("Unknonw type " + type);
-        Long old = (Long) oldValue;
-        int current = (int)currentValue;
+        Long old = ((Number)oldValue).longValue();
+        long current = ((Number)currentValue).longValue();
         result = current + old;
       }
       return result;

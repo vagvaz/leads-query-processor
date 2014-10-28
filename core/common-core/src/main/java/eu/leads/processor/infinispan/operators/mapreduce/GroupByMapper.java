@@ -35,7 +35,8 @@ public class GroupByMapper extends LeadsMapper<String, String, String, String> {
 
    @Override
     public void map(String key, String value, Collector<String, String> collector) {
-        if (!isInitialized)
+      System.out.println("Called for " + key + "     " + value);
+      if (!isInitialized)
             intialize();
         StringBuilder builder = new StringBuilder();
 //        String tupleId = key.substring(key.indexOf(":"));
@@ -44,11 +45,18 @@ public class GroupByMapper extends LeadsMapper<String, String, String, String> {
         for (String c : columns) {
             builder.append(t.getGenericAttribute(c).toString() + ",");
         }
-        collector.emit(builder.toString(), t.asString());
+        if(columns.size() != 0) {
+           System.out.println("+++++++++++ " + t.asString() + " normal at " + builder.toString());
+           collector.emit(builder.toString(), t.asString());
+        }else {
+           System.out.println("**************" + t.asString() + " emit");
+           collector.emit("***" ,  t.asString());
+        }
     }
 
     private void intialize() {
        isInitialized = true;
+       System.err.println("-------------Initialize");
        super.initialize();
        JsonArray columnArray = conf.getObject("body").getArray("groupingColumns");
        Iterator<Object> columnsIterator = columnArray.iterator();

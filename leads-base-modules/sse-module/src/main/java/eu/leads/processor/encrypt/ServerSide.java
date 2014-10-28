@@ -9,10 +9,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -61,7 +58,7 @@ public class ServerSide {
         return retVal;
     }
 
-    public Map<String, ArrayList<Etuple>> TSetRetrieve(CStore cs, String token) throws UnsupportedEncodingException, InvalidAlgorithmParameterException {
+    public Map<String, ArrayList<Etuple>> TSetRetrieve(CStore cs, String token, Map<String,ArrayList<Etuple>> result) throws UnsupportedEncodingException, InvalidAlgorithmParameterException {
         Map<String, Etuple> EDB = cs.getEDB(); //The encrypted Database
         Map<Integer, Record[]> TSet = cs.getTSet(); //the inverted index
         
@@ -126,11 +123,6 @@ public class ServerSide {
             }
             i++;
         }
-        Map<String, ArrayList<Etuple>> result = null;
-        if(manager != null)
-            result = manager.getPersisentCache(output);
-        else
-            result = new HashMap<String, ArrayList<Etuple>>();
 
         result.put("result", result_list);
         return result;

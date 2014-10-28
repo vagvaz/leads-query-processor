@@ -1,0 +1,9 @@
+INFO main org.infinispan.client.hotrod.RemoteCacheManager - ISPN004021: Infinispan version: null
+INFO main org.infinispan.client.hotrod.impl.protocol.Codec20 - ISPN004006: localhost/127.0.0.1:11222 sent new topology view (id=30) containing 5 addresses: [/0.0.0.0:11222, /0.0.0.0:11223, /0.0.0.0:11224, /0.0.0.0:11225, /0.0.0.0:11226]
+INFO main org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory - ISPN004014: New server added(/0.0.0.0:11222), adding to the pool.
+INFO main org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory - ISPN004014: New server added(/0.0.0.0:11223), adding to the pool.
+INFO main org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory - ISPN004014: New server added(/0.0.0.0:11224), adding to the pool.
+INFO main org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory - ISPN004014: New server added(/0.0.0.0:11225), adding to the pool.
+INFO main org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory - ISPN004014: New server added(/0.0.0.0:11226), adding to the pool.
+INFO main org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory - ISPN004016: Server not in cluster anymore(localhost/127.0.0.1:11222), removing from the pool.
+INFO main org.infinispan.client.hotrod.RemoteCacheManager - ISPN004021: Infinispan version: null

@@ -33,21 +33,81 @@
          <groupId>org.apache.tajo</groupId>
          <artifactId>tajo-core</artifactId>
          <version>${tajo.version}</version>
+              <exclusions>
+                  <exclusion>
+                      <groupId>log4j</groupId>
+                      <artifactId>log4j</artifactId>
+                  </exclusion>
+                  <exclusion>
+                      <groupId>org.apache.logging.log4j</groupId>
+                      <artifactId>log4j-core</artifactId>
+                  </exclusion>
+                  <exclusion>
+                      <groupId>org.apache.tajo</groupId>
+                      <artifactId>tajo-jdbc</artifactId>
+
+                  </exclusion>
+              </exclusions>
       </dependency>
       <dependency>
          <groupId>org.apache.tajo</groupId>
          <artifactId>tajo-algebra</artifactId>
          <version>${tajo.version}</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>log4j</groupId>
+                  <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                  <groupId>org.apache.logging.log4j</groupId>
+                  <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                  <groupId>org.apache.tajo</groupId>
+                  <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+          </exclusions>
       </dependency>
       <dependency>
          <groupId>org.apache.tajo</groupId>
          <artifactId>tajo-catalog-common</artifactId>
          <version>${tajo.version}</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>log4j</groupId>
+                  <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                  <groupId>org.apache.logging.log4j</groupId>
+                  <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                  <groupId>org.apache.tajo</groupId>
+                  <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+          </exclusions>
       </dependency>
       <dependency>
          <groupId>org.apache.tajo</groupId>
          <artifactId>tajo-catalog-client</artifactId>
          <version>${tajo.version}</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>log4j</groupId>
+                  <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                  <groupId>org.apache.logging.log4j</groupId>
+                  <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                  <groupId>org.apache.tajo</groupId>
+                  <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+          </exclusions>
       </dependency>
       <dependency>
          <groupId>org.apache.tajo</groupId>
@@ -58,12 +118,42 @@
          <groupId>org.apache.tajo</groupId>
          <artifactId>tajo-catalog</artifactId>
          <version>${tajo.version}</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>log4j</groupId>
+                  <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                  <groupId>org.apache.logging.log4j</groupId>
+                  <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                  <groupId>org.apache.tajo</groupId>
+                  <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+          </exclusions>
          <type>pom</type>
       </dependency>
       <dependency>
          <groupId>org.apache.tajo</groupId>
          <artifactId>tajo-storage</artifactId>
          <version>${tajo.version}</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>log4j</groupId>
+                  <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                  <groupId>org.apache.logging.log4j</groupId>
+                  <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                  <groupId>org.apache.tajo</groupId>
+                  <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+          </exclusions>
       </dependency>
       <dependency>
          <groupId>org.apache.tajo</groupId>
@@ -74,6 +164,21 @@
          <groupId>org.apache.tajo</groupId>
          <artifactId>tajo-rpc</artifactId>
          <version>${tajo.version}</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>log4j</groupId>
+                  <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                  <groupId>org.apache.logging.log4j</groupId>
+                  <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                  <groupId>org.apache.tajo</groupId>
+                  <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+          </exclusions>
       </dependency>
       
        <dependency>

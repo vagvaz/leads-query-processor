@@ -10,11 +10,11 @@ import grammar.LeadsSQLParser.SqlContext;
 import grammar.SQLLexer;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.apache.tajo.algebra.BinaryOperator;
-import org.apache.tajo.algebra.Expr;
-import org.apache.tajo.algebra.OpType;
-import org.apache.tajo.algebra.UnaryOperator;
+import org.apache.hadoop.fs.Path;
+import org.apache.tajo.algebra.*;
 import org.apache.tajo.catalog.*;
+import org.apache.tajo.catalog.proto.CatalogProtos;
+import org.apache.tajo.common.TajoDataTypes;
 import org.apache.tajo.conf.TajoConf;
 import org.apache.tajo.engine.json.CoreGsonHelper;
 import org.apache.tajo.engine.parser.SQLSyntaxError;
@@ -99,6 +99,28 @@ public class TaJoModule {
         return sql;
     }
 
+    public static boolean createTable(CreateTable ctCommand)
+    {
+        boolean result = false;
+        if(ctCommand==null){
+            return result;
+        }
+        ColumnDefinition[] columns = ctCommand.getTableElements();
+        Schema newTableSchema = new Schema();
+        for(ColumnDefinition c : columns){
+            newTableSchema.addColumn(c.getColumnName(), TajoDataTypes.Type.valueOf(c.getTypeName()));
+        }
+        TableMeta newTableMeta = CatalogUtil.newTableMeta(CatalogProtos.StoreType.SEQUENCEFILE);
+        Path tablePath = getTablePath(ctCommand.getTableName());
+        TableDesc desc = new TableDesc(CatalogUtil
+                .buildFQName(StringConstants.DEFAULT_DATABASE_NAME,ctCommand.getTableName()),newTableSchema,newTableMeta,tablePath);
+        return catalog.createTable(desc);
+    }
+
+    private static Path getTablePath(String tableName) {
+        return new Path(StringConstants.DEFAULT_PATH + "/" + tableName);
+    }
+
     public static String Optimize(Session session, Expr expr) throws PlanningException {
         if (catalog == null) {
             // catalog.
@@ -146,4 +168,13 @@ public class TaJoModule {
     }
 
 
+    public void dropTable(DropTable expr) {
+      String tableName = expr.getTableName();
+       if(tableName.startsWith(StringConstants.DEFAULT_DATABASE_NAME+".")){
+          catalog.dropTable(tableName);
+       }
+       else{
+          catalog.dropTable(StringConstants.DEFAULT_DATABASE_NAME+"."+tableName);
+       }
+    }
 }

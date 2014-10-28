@@ -17,6 +17,11 @@ import org.infinispan.Cache;
 //import org.infinispan.versioning.utils.version.Version;
 //import org.infinispan.versioning.utils.version.VersionScalar;
 //import org.infinispan.versioning.utils.version.VersionScalarGenerator;
+import org.infinispan.versioning.VersionedCache;
+import org.infinispan.versioning.impl.VersionedCacheTreeMapImpl;
+import org.infinispan.versioning.utils.version.Version;
+import org.infinispan.versioning.utils.version.VersionScalar;
+import org.infinispan.versioning.utils.version.VersionScalarGenerator;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import java.text.ParseException;
@@ -33,7 +38,8 @@ public class InsertOperator extends BasicOperator {
         Cache  targetCache;
         JsonObject data;
         String key = "";
-//        Version version = null;
+    String tableName;
+        Version version = null;
     
                 @Override
         public void init(JsonObject config) {
@@ -48,7 +54,7 @@ public class InsertOperator extends BasicOperator {
                     if (values.size() != columnNames.size()) {
                         log.error("INSERT problem different size between values and columnNames");
                     }
-                    String tableName = conf.getObject("body").getString("tableName");
+                    tableName = conf.getObject("body").getString("tableName");
                     key = tableName + ":";
                     while (columnIterator.hasNext() && valuesIterator.hasNext()) {
                         String column = (String) columnIterator.next();
@@ -70,24 +76,31 @@ public class InsertOperator extends BasicOperator {
                                 if (primaryColumns.contains(column)) {
                                     key = key + "," + value.toString();
                                 }
-                                data.putValue(column, value);
+//                                data.putValue(column, value);
 
                             }
 
                         }
+                        if (primaryColumns.contains(column)) {
+                            key = key + "," + value.toString();
+                        }
                         data.putValue(column,value);
                     }
-                    targetCache = (Cache) manager.getPersisentCache(tableName);
+
                 }
     
          @Override
         public void execute() {
+             targetCache = (Cache) manager.getPersisentCache(tableName);
 //                VersionedCache versionedCache = new VersionedCacheTreeMapImpl(targetCache, new VersionScalarGenerator(),targetCache.getName());
-//                if(version == null){
-//                        version = new VersionScalar(System.currentTimeMillis());
-//                    }
-                long size = targetCache.size();
-             log.info("inserting " + key  +"     \n"+data.toString());
+                if(version == null){
+                        version = new VersionScalar(System.currentTimeMillis());
+                    }
+
+             long size = targetCache.size();
+             log.info("inserting into " + targetCache.getName() + " "
+
+                     + key  +"     \n"+data.toString());
                 targetCache.put(key,data.toString());
 //                        versionedCache.put(key,data.toString(),version);
                 if(targetCache.size() < size + 1 ){

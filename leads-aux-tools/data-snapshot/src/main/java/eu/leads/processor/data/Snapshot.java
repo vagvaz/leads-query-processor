@@ -5,6 +5,9 @@ import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.Cache;
+import org.infinispan.client.hotrod.RemoteCache;
+import org.infinispan.client.hotrod.RemoteCacheManager;
+import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.commons.util.CloseableIterable;
 import org.vertx.java.core.json.JsonObject;
 
@@ -17,18 +20,27 @@ import java.util.Map;
 public class Snapshot {
 
     public static void main(String[] args) throws IOException {
-        if(args.length != 3 ){
+        if(args.length != 3 && args.length != 5 ){
          System.err.println("Wrong number of arguments action cacheName directory");
          System.err.println("                        [load/save]");
         }
-        Double d = Double.parseDouble("0x1.619c8bf8a2127p-10");
-        System.out.println("f " + d.toString());
+
+
         System.in.read();
         if(args[0].toLowerCase().startsWith("load")){
-            try {
-                loadFrom(args[1],args[2]);
-            } catch (IOException e) {
-                e.printStackTrace();
+            if(args.length == 3) {
+               try {
+                  loadFrom(args[1], args[2]);
+               } catch (IOException e) {
+                  e.printStackTrace();
+               }
+            }
+            else{
+               try{
+                  loadFromTo(args[1],args[2],args[3],args[4]);
+               }catch (Exception e){
+                  e.printStackTrace();
+               }
             }
         }
         else{
@@ -40,7 +52,57 @@ public class Snapshot {
         }
     }
 
-    private static void saveTo(String arg, String arg1) throws IOException {
+   private static RemoteCacheManager createRemoteCacheManager(String host, String port) {
+      ConfigurationBuilder builder = new ConfigurationBuilder();
+      builder.addServer().host(host).port(Integer.parseInt(port));
+      return new RemoteCacheManager(builder.build());
+   }
+
+   private static void loadFromTo(String cacheName, String dir, String host, String port) throws IOException {
+      if(checkDirectory(dir)){
+         System.err.println("input is not a directory");
+      }
+      LQPConfiguration.initialize();
+//      InfinispanManager manager = InfinispanClusterSingleton.getInstance().getManager();
+      RemoteCacheManager manager = createRemoteCacheManager(host,port);
+      RemoteCache cache =  manager.getCache(cacheName,true);
+      BufferedReader keyReader = new BufferedReader(new InputStreamReader(new FileInputStream(dir+"/"+cacheName+".keys")));
+//        BufferedReader sizeReader = new BufferedReader(new InputStreamReader(new FileInputStream(dir+"/"+cacheName+".sizes")));
+      BufferedReader valueReader = new BufferedReader(new InputStreamReader(new FileInputStream(dir+"/"+cacheName+".values")));
+
+      String keyLine = "";
+      String valueLine = "";
+
+      try {
+         keyLine = keyReader.readLine();
+         valueLine = valueReader.readLine();
+      } catch (IOException e) {
+         keyReader.close();
+         valueReader.close();
+         System.out.println("Emtpy files ?");
+      }
+      long counter = 0;
+      try {
+         while (true && keyLine != null){
+            if(keyLine != null && !keyLine.trim().equals("")){
+               if(valueLine != null && !valueLine.trim().equals("")) {
+                  JsonObject ob = new JsonObject(valueLine);
+                  cache.put(keyLine.trim(), valueLine.trim());
+               }
+            }
+
+            System.out.println(counter++);
+            keyLine = keyReader.readLine();
+            valueLine = valueReader.readLine();
+         }
+      }catch(IOException e){
+         keyReader.close();
+         valueReader.close();
+         System.out.println("Read " + counter + "tuples");
+      }
+   }
+
+   private static void saveTo(String arg, String arg1) throws IOException {
         if(!checkDirectory(arg1)){
             System.err.println("input is not a directory");
         }
@@ -65,7 +127,7 @@ public class Snapshot {
         for (Map.Entry<String, String> entry : iterable) {
             keyOut.write(entry.getKey()+"\n");
             valueOut.write(entry.getValue()+"\n");
-            counter++;
+            System.out.println(counter++);
         }
         keyOut.close();
         valueOut.close();
@@ -109,6 +171,7 @@ public class Snapshot {
                     if(valueLine != null && !valueLine.trim().equals("")) {
                         JsonObject ob = new JsonObject(valueLine);
                         cache.put(keyLine.trim(), valueLine.trim());
+                       System.out.println(counter++);
                     }
                 }
 

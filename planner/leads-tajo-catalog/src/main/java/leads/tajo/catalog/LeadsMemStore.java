@@ -226,6 +226,7 @@ public class LeadsMemStore implements CatalogStore {
             checkAndGetDatabaseNS(databases, dbName);
 
         if (database.containsKey(tbName)) {
+            manager.removePersistentCache(dbName+"."+tbName);
             database.remove(tbName);
         } else {
             throw new NoSuchTableException(tbName);

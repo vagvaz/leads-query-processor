@@ -92,6 +92,12 @@
          <groupId>gr.tuc.softnet</groupId>
          <artifactId>common-core</artifactId>
          <version>${processor.version}</version>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+         </exclusions>
       </dependency>
    </dependencies>
 

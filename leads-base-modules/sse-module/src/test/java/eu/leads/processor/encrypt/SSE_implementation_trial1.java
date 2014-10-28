@@ -27,11 +27,15 @@ public class SSE_implementation_trial1 {
     }
     
     public static CStore get(CStore store, String value,  String sk_fileName) throws Exception{
-        
+        //Client
         ClientSide client = new ClientSide(sk_fileName);
         String token = client.TSetGetTag(value);
+        //Server
         ServerSide server = new ServerSide(store.getSvalue(), store.getBvalue());
-        Map<String, ArrayList<Etuple>> resultDB = server.TSetRetrieve(store, token);
+        //Inform finish
+        //Client REad
+        Map<String, ArrayList<Etuple>> resultDB = new HashMap<>();
+                server.TSetRetrieve(store, token,resultDB);
         client.Decrypt_Answer(resultDB);
     return null;
     }
@@ -46,13 +50,14 @@ public class SSE_implementation_trial1 {
         int Bvalue = 10;
         int maximum_tuple_size = 120;
         String sk_fileName = "src/main/resources/Keys";
-        
-        CStore store = encrypted_upload(Svalue, k, sk_fileName,fileName);
-        get(store, "88911",sk_fileName);
+        String keyfilename = "/home/vagvaz/keys.txt";
+//        CStore store = encrypted_upload(Svalue, k, sk_fileName,fileName);
+        CStore store = encrypted_upload(Svalue,k,keyfilename,"/home/vagvaz/Dataset.txt");
+        get(store, "55574",keyfilename);
         
         DB db = new DB();
         //db.intilialize();
-        CStore storeDB = encrypted_upload(Svalue, k, sk_fileName,db.getConnection(),"EmployeeRecords","salary");
+        CStore storeDB = encrypted_upload(Svalue, k, keyfilename,db.getConnection(),"EmployeeRecords","salary");
         get(storeDB, "88911",sk_fileName);
         //ClientSide clientDB = new ClientSide(Svalue, k, "/home/john/Dropbox/master/LEADS/Implementations/SSE/Keys");
         //CStore storeDB = clientDB.Setup(db.getConnection(),"EmployeeRecords","salary");
