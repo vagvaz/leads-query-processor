@@ -378,7 +378,6 @@ public class Apatar2Tajo {
             node = node.getChild("ConnectionPoint");
             node = node.getChild("tableInfo");
             node = node.getChild("records");
-            node = node.getChild("records");
             System.out.println("ProjectNode  " + ((List<Element>) node.getChildren("com.apatar.core.Record")).size());
             List<Element> recordslist;
             NamedExpr[] targets;
@@ -466,7 +465,14 @@ public class Apatar2Tajo {
         }else if(nodeType.equals("com.apatar.read.READNode")) {
             System.out.println("READNode " );
             return new Relation(cur.getAttributeValue("title"));
+        }else if(nodeType.equals("com.apatar.limit.LimitNode")) {
+            System.out.println("LimitNode " );
+            if(subExpr!=null && ChildExpr!=null) {
+                Limit limitNode = new Limit(subExpr);
 
+                limitNode.setChild(ChildExpr);
+                return limitNode;
+            }
         }else
             System.out.println("Unknown Operator  " );
 
@@ -854,72 +860,23 @@ public class Apatar2Tajo {
                return null;
             }else  if(ParentNode.equals("Project")) {
                 System.out.println(" Projection Node ");
-            }
+            }else if(ParentNode.equals("Limit")){
+                System.out.println(" Limit Node ");
+                for (String id : endNodes) {
+                    Element cur = subnodesMap.get(id);
+                    System.out.print(" ID " + id + " " + cur.getAttributeValue("title"));
 
+                    String nodeType = cur.getAttributeValue("nodeClass");
+                    if (nodeType.equals("com.apatar.functions.ConstantFunctionNode")) {
+                        String functionType = cur.getAttributeValue("classFunction");
 
-            String Attrb;
-            for (Map.Entry<String, Element> entry : subnodesMap.entrySet()) {
-                subnode = entry.getValue();
-                fieldName = null;
-
-                if (subnode.getAttributeValue("nodeClass").contains("ColumnNode")) {
-                    fieldName = subnode.getChild("com.apatar.core.Record").getAttributeValue("fieldName");
-                    fieldName.toLowerCase();
-                    System.out.println("Found Column fieldName: " + fieldName);
-                    if (!subArrowMap.containsKey(subnode.getAttributeValue("id")) && !SubReverseArrowMap.containsKey(subnode.getAttributeValue("id"))) {
-                        System.out.println("Not connected fieldName: " + fieldName);
-                        GroupBynamelist.put(fieldName, new NamedExpr(new ColumnReferenceExpr(fieldName)));
-                    }
-                } else if (subnode.getAttributeValue("nodeClass").contains("FunctionNode")) {
-                    //Search for arrow that are input to this node
-                    Element prenode = null, nextnode = null;
-                    if (SubReverseArrowMap.containsKey(subnode.getAttributeValue("id"))) {
-
-                        prenode = subnodesMap.get(SubReverseArrowMap.get(subnode.getAttributeValue("id")));
-                        fieldName = prenode.getChild("com.apatar.core.Record").getAttributeValue("fieldName");
-
-                        fieldName.toLowerCase();
-                        Expr Column;
-                        if (AlliasedExpr.containsKey(fieldName))
-                            Column = AlliasedExpr.get(fieldName).getExpr();
+                        String value = cur.getChild(functionType).getAttributeValue("value");
+                        if (value == null)
+                            return null;
+                        if (functionType.equals("com.apatar.functions.constant.LimitFunction"))
+                            return new LiteralValue(value, LiteralValue.getLiteralType(value));
                         else
-                            Column = new ColumnReferenceExpr(fieldName);
-                        String alias = "";
-
-
-                        NamedExpr tmpNE = new NamedExpr(new ColumnReferenceExpr(fieldName));
-                        Attrb = null;
-
-                        if ((Attrb = subnode.getAttributeValue("classFunction")) != null) {
-                            NamedExpr[] targets = new NamedExpr[1];
-                            targets[0] = tmpNE;
-                            Expr tmpGF = null;
-
-                            tmpNE = new NamedExpr(get_function( subnode, Column)); //named or not ?
-
-                            //output alias
-                            if (subnodesMap.containsKey(subArrowMap.get(subnode.getAttributeValue("id")))) {
-                                nextnode = subnodesMap.get(subArrowMap.get(subnode.getAttributeValue("id")));
-                                fieldName = nextnode.getChild("com.apatar.core.Record").getAttributeValue("fieldName");
-                                fieldName.toLowerCase();
-                                tmpNE.setAlias(fieldName);
-                                AlliasedExpr.put(fieldName, tmpNE);
-                            }
-                            if (fieldName == null && !tmpNE.hasAlias()) { //FIX
-                                //fieldName = tmpGF.getSignature() + "_" + tmpGF.getParams()[0].toString();
-                                System.out.println("Artificial field name: " + fieldName);
-                                tmpNE.setAlias(fieldName);
-                            }
-                            System.out.println("Save function   " + tmpNE.toJson());
-                            FunctionMap.put(ParentNode + alias + fieldName, tmpNE);
-                        }
-                    } else {
-                        System.out.println("Found function  no arrows " + subnode.getAttributeValue("nodeClass"));
-                        //Now arrow to this function
-                        if ((Attrb = subnode.getAttributeValue("classFunction")) != null) {
-                            get_function(subnode);
-                            // FunctionMap.put(ParentNode, tmpNE);
-                        }
+                            return null;
                     }
                 }
             }
