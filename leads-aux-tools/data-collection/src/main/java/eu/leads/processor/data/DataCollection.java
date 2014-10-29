@@ -40,7 +40,7 @@ public class DataCollection {
 
       //Put some configuration properties for crawler
       LQPConfiguration.getConf().setProperty("crawler.seed",
-                                                    seed); //For some reason it is ignored news.yahoo.com is used by default
+                                                    seed+",http://economist.com"); //For some reason it is ignored news.yahoo.com is used by default
       LQPConfiguration.getConf().setProperty("crawler.depth", 3);
      String pagerankPluginClassName = "eu.leads.processor.plugins.pagerank.PagerankPlugin";
      String sentimentPluginClassName = "eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin";

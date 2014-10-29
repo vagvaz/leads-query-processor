@@ -1,9 +1,11 @@
 package eu.leads.processor.plugins.pagerank.node;
 
 import gnu.trove.map.hash.THashMap;
+
+import java.io.Serializable;
 import java.util.TreeMap;
 
-public class FIPNode extends Node{
+public class FIPNode extends Node implements Serializable{
 
     protected int fipVisits;
 	protected THashMap<Object,TreeMap<Integer, Object>> fip_map;//<RWid, Object>, where Object: sortedMap with entries <curr_pos_at_RWid, nextNode>

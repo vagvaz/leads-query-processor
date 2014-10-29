@@ -114,7 +114,8 @@ public class Snapshot {
             System.out.println("cache size is 0");
             return;
         }
-       FileWriter keyOut = new FileWriter(arg1+"/"+arg+".keys");
+
+       FileWriter keyOut = new FileWriter(arg1+"/"+arg+".keys",true);
         FileWriter sizeOut = new FileWriter(arg1+"/"+arg+".sizes");
         FileWriter valueOut = new FileWriter(arg1+"/"+arg+".values");
 

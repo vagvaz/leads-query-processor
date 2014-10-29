@@ -320,6 +320,7 @@ public class PluginManager {
         conf.put("target", cacheName);
         conf.put("config", StringConstants.PLUGIN_ACTIVE_CACHE);
         LinkedList<String> alist = new LinkedList<String>();
+        alist.add(plugin.getClassName());
         conf.put("pluginNames", alist);
         SimplePluginRunner runner = new SimplePluginRunner("test-local", conf);
         runner.initialize(manager);

@@ -38,7 +38,7 @@
             <eviction max-entries="1000" strategy="LIRS"/>
             <transaction mode="NONE"/>
             <persistence passivation="false">
-                <file-store path="${java.io.tmpdir}" shared="true" preload="true" />
+                <file-store path="${java.io.tmpdir}" shared="true" preload="false" />
             </persistence>
            <state-transfer enabled="false" await-initial-transfer="false"/>
 
@@ -53,7 +53,7 @@
            <eviction max-entries="1000" strategy="LIRS"/>
            <transaction mode="NONE"/>
            <persistence passivation="false">
-               <file-store path="${java.io.tmpdir}" shared="true" preload="true" />
+               <file-store path="${java.io.tmpdir}" shared="true" preload="false" />
            </persistence>
            <state-transfer enabled="false" await-initial-transfer="false"/>
        </distributed-cache>
@@ -67,7 +67,7 @@
            <eviction max-entries="1000" strategy="LIRS"/>
            <transaction mode="NONE"/>
            <persistence passivation="false">
-               <file-store path="${java.io.tmpdir}" shared="true" preload="true" />
+               <file-store path="${java.io.tmpdir}" shared="true" preload="false" />
            </persistence>
            <state-transfer enabled="false" await-initial-transfer="false"/>
        </distributed-cache>
@@ -82,7 +82,7 @@
           <eviction max-entries="1" strategy="LIRS"/>
           <transaction mode="NONE"/>
           <persistence passivation="false">
-              <file-store path="${java.io.tmpdir}" shared="true" preload="true" />
+              <file-store path="${java.io.tmpdir}" shared="true" preload="false" />
           </persistence>
           <state-transfer enabled="false" await-initial-transfer="false"/>
       </distributed-cache>
@@ -96,7 +96,7 @@
           <eviction max-entries="1" strategy="LIRS"/>
           <transaction mode="NONE"/>
           <persistence passivation="false">
-              <file-store path="${java.io.tmpdir}" shared="true" preload="true" />
+              <file-store path="${java.io.tmpdir}" shared="true" preload="false" />
           </persistence>
           <state-transfer enabled="false" await-initial-transfer="false"/>
       </distributed-cache>
@@ -110,7 +110,7 @@
           <eviction max-entries="1" strategy="LIRS"/>
           <transaction mode="NONE"/>
           <persistence passivation="false">
-              <file-store path="${java.io.tmpdir}" shared="true" preload="true" />
+              <file-store path="${java.io.tmpdir}" shared="true" preload="false" />
           </persistence>
           <state-transfer enabled="false" await-initial-transfer="false"/>
       </distributed-cache>
@@ -124,7 +124,7 @@
           <eviction max-entries="1" strategy="LIRS"/>
           <transaction mode="NONE"/>
           <persistence passivation="false">
-              <file-store path="${java.io.tmpdir}" shared="true" preload="true" />
+              <file-store path="${java.io.tmpdir}" shared="true" preload="false" />
           </persistence>
           <state-transfer enabled="false" await-initial-transfer="false"/>
       </distributed-cache>
@@ -138,7 +138,7 @@
           <eviction max-entries="100" strategy="LIRS"/>
           <transaction mode="NONE"/>
           <persistence passivation="false">
-              <file-store path="${java.io.tmpdir}" shared="true" preload="true" />
+              <file-store path="${java.io.tmpdir}" shared="true" preload="false" />
           </persistence>
           <state-transfer enabled="false" await-initial-transfer="false"/>
      </distributed-cache>
@@ -151,7 +151,7 @@
          <eviction max-entries="1" strategy="LIRS"/>
          <transaction mode="NONE"/>
          <persistence passivation="false">
-             <file-store path="${java.io.tmpdir}" shared="true" preload="true" />
+             <file-store path="${java.io.tmpdir}" shared="true" preload="false" />
          </persistence>
          <state-transfer enabled="false" await-initial-transfer="false"/>
       </distributed-cache>

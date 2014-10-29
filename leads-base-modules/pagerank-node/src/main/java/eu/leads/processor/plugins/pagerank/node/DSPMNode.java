@@ -2,7 +2,9 @@ package eu.leads.processor.plugins.pagerank.node;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
 
-public class DSPMNode extends FIPNode {
+import java.io.Serializable;
+
+public class DSPMNode extends FIPNode implements Serializable {
 
     protected int dspmVisits;
 
