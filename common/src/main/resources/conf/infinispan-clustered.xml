@@ -32,8 +32,8 @@
       <distributed-cache name="default" mode="SYNC" owners="2" l1-lifespan="600000" start="true"
                          statistics="true">
          <compatibility></compatibility>
-          <indexing index="ALL">
-              <property name="default.directory_provider">infinispan</property>
+          <indexing index="NONE">
+              <property name="default.directory_provider">ram</property>
           </indexing>
             <eviction max-entries="1000" strategy="LIRS"/>
             <transaction mode="NONE"/>
@@ -104,9 +104,9 @@
                          start="true"
                          statistics="false">
           <compatibility></compatibility>
-          <indexing index="NONE">
-              <property name="default.directory_provider">ram</property>
-          </indexing>
+          <!--<indexing index="NONE">-->
+              <!--<property name="default.directory_provider">ram</property>-->
+          <!--</indexing>-->
           <eviction max-entries="1" strategy="LIRS"/>
           <transaction mode="NONE"/>
           <persistence passivation="false">
@@ -118,9 +118,9 @@
                          start="true"
                          statistics="false">
           <compatibility></compatibility>
-          <indexing index="NONE">
-              <property name="default.directory_provider">ram</property>
-          </indexing>
+          <!--<indexing index="NONE">-->
+              <!--<property name="default.directory_provider">ram</property>-->
+          <!--</indexing>-->
           <eviction max-entries="1" strategy="LIRS"/>
           <transaction mode="NONE"/>
           <persistence passivation="false">
@@ -132,9 +132,9 @@
       <distributed-cache name="queries" mode="SYNC" owners="2" l1-lifespan="600000" start="true"
                          statistics="true">
           <compatibility></compatibility>
-          <indexing index="NONE">
-              <property name="default.directory_provider">ram</property>
-          </indexing>
+          <!--<indexing index="NONE">-->
+              <!--<property name="default.directory_provider">ram</property>-->
+          <!--</indexing>-->
           <eviction max-entries="100" strategy="LIRS"/>
           <transaction mode="NONE"/>
           <persistence passivation="false">
@@ -145,9 +145,9 @@
      <distributed-cache name="tables" mode="SYNC" owners="2" l1-lifespan="600000" start="true"
                          statistics="true">
          <compatibility></compatibility>
-         <indexing index="NONE">
-             <property name="default.directory_provider">ram</property>
-         </indexing>
+         <!--<indexing index="NONE">-->
+             <!--<property name="default.directory_provider">ram</property>-->
+         <!--</indexing>-->
          <eviction max-entries="1" strategy="LIRS"/>
          <transaction mode="NONE"/>
          <persistence passivation="false">

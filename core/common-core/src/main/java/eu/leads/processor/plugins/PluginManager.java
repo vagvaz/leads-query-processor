@@ -25,10 +25,7 @@ import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -192,7 +189,7 @@ public class PluginManager {
 //        configCache.put(prefix+":"+plugin.getId() + ":conf", plugin.getConfig());
 //        configCache.put(prefix+":"+plugin.getId() + ":events", eventmask);
 //        configCache.put(prefix+":"+plugin.getId() + ":className", plugin.getClassName());
-        configCache.getAdvancedCache().withFlags(Flag.FORCE_ASYNCHRONOUS,Flag.SKIP_LISTENER_NOTIFICATION,Flag.SKIP_LOCKING,Flag.SKIP_STATISTICS,Flag.IGNORE_RETURN_VALUES);
+//        configCache.getAdvancedCache().withFlags(Flag.FORCE_ASYNCHRONOUS,Flag.SKIP_LISTENER_NOTIFICATION,Flag.SKIP_LOCKING,Flag.SKIP_STATISTICS,Flag.IGNORE_RETURN_VALUES);
         if(!plugin.getId().equals("eu.leads.processor.plugins.pagerank.PagerankPlugin") &&  ! plugin.getId().equals("eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin"))
         configCache.put(plugin.getId() + ":jar", plugin.getJar());
 
@@ -207,36 +204,36 @@ public class PluginManager {
         Properties conf = new Properties();
         conf.put("target", cacheName);
         conf.put("config", StringConstants.PLUGIN_ACTIVE_CACHE);
-        LinkedList<String> alist = new LinkedList<String>();
+        ArrayList<String> alist = new ArrayList<String>();
         alist.add(pluginId);
-        conf.put("pluginNames", pluginId);
+        conf.put("pluginNames", alist);
         JsonObject configuration = new JsonObject();
         configuration.putString("targetCache",cacheName);
         configuration.putString("activePluginCache",StringConstants.PLUGIN_ACTIVE_CACHE);
         configuration.putString("pluginNames", pluginId);
         configuration.putArray("types", new JsonArray());
         configuration.putString("id", UUID.randomUUID().toString());
-//        configuration.getArray("types").add(EventType.CREATED);
+        configuration.getArray("types").add(EventType.CREATED.toString());
 //        configuration.getArray("types").add(EventType.MODIFIED);
-//        SimplePluginRunner listener = new SimplePluginRunner("TestSimplePluginDeployer", conf);
-        PluginHandlerListener runner = new PluginHandlerListener();
+        SimplePluginRunner listener = new SimplePluginRunner("TestSimplePluginDeployer", conf);
+//        PluginHandlerListener runner = new PluginHandlerListener();
 
-//        manager.addListener(listener, cacheName);
-        RemoteCacheManager remoteCacheManager = createRemoteCacheManager();
-        RemoteCache<Object, Object> remoteCache = remoteCacheManager.getCache(cacheName);
+        manager.addListener(listener, cacheName);
+//        RemoteCacheManager remoteCacheManager = createRemoteCacheManager();
+//        RemoteCache<Object, Object> remoteCache = remoteCacheManager.getCache(cacheName);
 //
 //        System.out.println("Using cache " + cacheName);
 //
-        if (remoteCache == null) {
-            System.err.println("Cache " + cacheName + " not found!");
-            System.exit(1);
-        }
+//        if (remoteCache == null) {
+//            System.err.println("Cache " + cacheName + " not found!");
+//            System.exit(1);
+//        }
 //        if (remoteCache == null) {
 //            System.err.println("Cache " + cacheName + " not found!");
 //            return;
 //        }
 //
-        remoteCache.addClientListener(runner, new Object[]{configuration.toString()}, new Object[0]);
+//        remoteCache.addClientListener(runner, new Object[]{configuration.toString()}, new Object[0]);
     }
     private static RemoteCacheManager createRemoteCacheManager() {
         ConfigurationBuilder builder = new ConfigurationBuilder();

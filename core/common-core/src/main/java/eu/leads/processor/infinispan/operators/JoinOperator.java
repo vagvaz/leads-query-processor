@@ -59,14 +59,14 @@ public class JoinOperator extends BasicOperator {
             if(res != null){
                 for(Future<String> result : res){
                     addresses.add(result.get());
-                  System.err.println(addresses.get(addresses.size()-1));
+                  log.info(addresses.get(addresses.size()-1));
                 }
                 //TODO log
-                System.err.println("Join Callable successfully run");
+                log.info("Join Callable successfully run");
             }
             else{
                 //TODO log
-                System.err.println("Join Callable did not run");
+                log.error("Join Callable did not run");
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -92,16 +92,16 @@ public class JoinOperator extends BasicOperator {
        }
        Cache left = (Cache) manager.getPersisentCache(inputs.get(0));
        Cache right = (Cache) manager.getPersisentCache(inputs.get(1));
-       if(left.size() >= right.size()){
+//       if(left.size() >= right.size()){
            innerCacheName = left.getName();
            outerCacheName = right.getName();
            isLeft = true;
-       }
-       else{
-           innerCacheName = right.getName();
-           outerCacheName = left.getName();
-           isLeft = false;
-       }
+//       }
+//       else{
+//           innerCacheName = right.getName();
+//           outerCacheName = left.getName();
+//           isLeft = false;
+//       }
        conf.putString("output",getOutput());
        init_statistics(this.getClass().getCanonicalName());
     }

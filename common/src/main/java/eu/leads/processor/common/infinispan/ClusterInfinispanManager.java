@@ -3,10 +3,12 @@ package eu.leads.processor.common.infinispan;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
+import org.apache.lucene.document.Field;
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
+import org.infinispan.configuration.cache.Index;
 import org.infinispan.configuration.parsing.ConfigurationBuilderHolder;
 import org.infinispan.configuration.parsing.ParserRegistry;
 import org.infinispan.distexec.DefaultExecutorService;
@@ -17,6 +19,7 @@ import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.remoting.transport.Address;
 import org.infinispan.server.hotrod.HotRodServer;
 import org.infinispan.server.hotrod.configuration.HotRodServerConfigurationBuilder;
+import org.infinispan.transaction.TransactionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -350,7 +353,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
        manager.defineConfiguration(cacheName, new ConfigurationBuilder()
                                                       .clustering()
                                                       .cacheMode(CacheMode.DIST_SYNC)
-                                                      .hash().numOwners(3)
+                                                      .hash().numOwners(2)
+                                                      .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
                                                       .persistence().addSingleFileStore().location("/tmp/").shared(true).preload(false).compatibility().enable()
                                                       .build());
        Cache cache = manager.getCache(cacheName);

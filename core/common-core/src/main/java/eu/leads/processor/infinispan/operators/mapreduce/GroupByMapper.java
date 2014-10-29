@@ -35,7 +35,7 @@ public class GroupByMapper extends LeadsMapper<String, String, String, String> {
 
    @Override
     public void map(String key, String value, Collector<String, String> collector) {
-      System.out.println("Called for " + key + "     " + value);
+//      System.out.println("Called for " + key + "     " + value);
       if (!isInitialized)
             intialize();
         StringBuilder builder = new StringBuilder();
