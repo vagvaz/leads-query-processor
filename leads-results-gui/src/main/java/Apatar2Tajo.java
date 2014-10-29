@@ -1,4 +1,3 @@
-import com.google.common.collect.HashMultimap;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.tajo.algebra.*;
 import org.jdom.Document;
@@ -11,18 +10,6 @@ import java.nio.charset.Charset;
 import java.util.*;
 
 public class Apatar2Tajo {
-    static HashMultimap<String, String> multiMap;
-    //private static  Expr ApatarExpr;
-    static String InputNodeId = null;
-    static String OutputNodeId = null;
-    private static HashMap<String, Expr> expmap = new HashMap<String, Expr>();
-    private static HashMap<String, NamedExpr> AlliasedExpr = new HashMap<String, NamedExpr>();
-    private static HashMap<String, Expr> GroupBynamelist = new HashMap<String, Expr>();
-    private static HashMap<String, Expr> FunctionMap = new HashMap<String, Expr>();
-    private static List<Expr> UnconnectedFunctionMap = new ArrayList<Expr>();
-
-    private static HashMap<String, Element> nodesMap = new HashMap<String, Element>();
-    private static HashMap<String, String> ArrowMap = new HashMap<String, String>();
 
     private static HashMap<String, Expr> ApatarTajoFilterFunctMap = new HashMap<String, Expr> ();
 
@@ -34,57 +21,25 @@ public class Apatar2Tajo {
     private int funtionsCount = 0;
 
     public static Expr xml2tajo(File xmlFile) throws JDOMException, IOException {
-        Expr ApatarExpr = null;
+
         SAXBuilder builder = new SAXBuilder();
 
         Document document = (Document) builder.build(xmlFile);
         Element rootNode = document.getRootElement();
         return visit_apatar_xml(rootNode);
-
-//        //Display data
-//
-//        System.out.println("Arrows");
-//        for (Map.Entry<String, String> entry : ArrowMap.entrySet()) {
-//            System.out.println(entry.getKey() + " : " + entry.getValue());
-//        }
-//
-//        multiMap = Multimaps.invertFrom(Multimaps.forMap(ArrowMap),
-//                HashMultimap.<String, String>create());
-//
-//        for (Map.Entry<String, Collection<String>> entry : multiMap.asMap().entrySet()) {
-//            System.out.println("Original value: " + entry.getKey() + " was mapped to keys: "
-//                    + entry.getValue());
-//        }
-//
-//        System.out.println("Nodes");
-//        for (Map.Entry<String, Element> entry : nodesMap.entrySet()) {
-//            System.out.println(entry.getKey() + " : " + entry.getValue().getAttributeValue("nodeClass"));
-//        }
-//
-//
-//        return ApatarExpr = visit_project();
-
-
     }
 
 
     public static String xml2tajo_json(File xmlFile) throws JDOMException, IOException {
-
-
 
         return xml2tajo(xmlFile).toJson();
     }
 
     public static void main(String[] args) {
         init_string_maps();
-        String xmlWithSpecial = "";
         System.out.println(" Appatar Parsing xml");
 
-
-        File xmlFile = new File(args[0]);// "QUERY 2/XML_output.aptr");//"QUERY 3/XML_output_1.aptr");// "QUERY 1/XML-OUTPUT.aptr");//+
-        //
-        //"/home/tr/Projects/LEADs/xml/Leuteris/Example3.aptr");
-
+        File xmlFile = new File(args[0]);
 
         try {
             System.out.println("Expr" + xml2tajo(xmlFile).toJson());
@@ -211,7 +166,7 @@ public class Apatar2Tajo {
             for(String id:endNodes)
             {
                 //Check End node => output node !
-                String projecID = FindnRaiseNode(id, ReverseArrowTree, nodesMap,"com.apatar.project.ProjectNode");
+                String projecID = FindnRaiseNode(id, ReverseArrowTree, nodesMap, "com.apatar.project.ProjectNode");
 
                 System.out.println("Search for Projection node result:  ");
                 print("", true, id, ReverseArrowTree, nodesMap);
@@ -233,8 +188,6 @@ public class Apatar2Tajo {
                     projection.setChild(new RelationList(relations));
                     ret = projection;
                 }
-
-
                 return ret;
             }
         }
@@ -336,7 +289,7 @@ public class Apatar2Tajo {
             if(ChildExpr==null)
                 return null;
 
-            if(ChildExpr.getType()==OpType.Relation){
+            if(ChildExpr.getType()==OpType.RelationList){
                 System.out.println("Select  * ");
 
                 Projection projection = new Projection();
@@ -345,13 +298,12 @@ public class Apatar2Tajo {
                 targets[0] = new NamedExpr(new QualifiedAsteriskExpr());
                 projection.setNamedExprs(targets);
 
-                Expr[] relations = new Expr[1];
-                relations[0] = ChildExpr;
-                projection.setChild(new RelationList(relations));
+
+                projection.setChild(ChildExpr);
 
                 return projection;
             }else if(ChildExpr.getType()==OpType.Aggregation){
-
+                ChildExpr = ((Aggregation)ChildExpr).getChild();
                 if(GroupByOther.size()==1) {
                     Expr func = GroupByOther.get("CountRowsFunction");
                     System.out.println("Count  * ");
@@ -362,9 +314,7 @@ public class Apatar2Tajo {
                         targets = new NamedExpr[1];
                         targets[0] = new NamedExpr(func);
                         projection.setNamedExprs(targets);
-                        Expr[] relations = new Expr[1];
-                        relations[0] = ((Aggregation) ChildExpr).getChild();
-                        projection.setChild(new RelationList(relations));
+                        projection.setChild(ChildExpr);
                         return projection;
                     }
                 }
@@ -500,184 +450,6 @@ public class Apatar2Tajo {
             System.out.println("Unknown Operator  " );
 
         return  null;
-    }
-
-    static Expr visit_project() {
-        Element node, subnode;
-        boolean projectnodeFound = false;
-        Expr projectExpr = new Projection();
-        Projection Project = null;
-
-        if (ArrowMap.get(InputNodeId).equals(OutputNodeId)) {
-            List<String> from = new ArrayList<>();
-            System.out.println("Select *");
-            from.add(nodesMap.get(InputNodeId).getAttributeValue("title").toLowerCase());
-            projectExpr = visitSelect_list(null, visitFrom_clause(from));
-        } else {
-            //Check if more than 1 inputs
-            Expr Curr = new Projection();
-            String curNodeId = InputNodeId;
-            String Attrb = null;
-            while ((node = nodesMap.get(curNodeId)) != null) {
-
-                Attrb = node.getAttributeValue("nodeClass");
-                System.out.println("Checking Node: " + Attrb);
-
-                if (Attrb.contains("READNode")) {
-                    List<String> from = new ArrayList<>();
-                    System.out.println("READNode ");
-                    from.add(nodesMap.get(InputNodeId).getAttributeValue("title").toLowerCase());
-                    Curr = visitFrom_clause(from);
-                } else if (Attrb.contains("OutputNode")) {
-                    if (!projectnodeFound) {
-                        //Fix
-                        Curr = visitSelect_list_expr(UnconnectedFunctionMap.get(0), Curr);
-
-                    }
-                } else if (Attrb.contains("LimitNode")) {
-                    Limit lim = null;
-                    if (FunctionMap.containsKey("limit")) {
-                        lim = (Limit) ((NamedExpr) FunctionMap.get("limit")).getExpr();
-                        lim.setChild(Curr);
-                        Curr = lim;
-                    }
-
-
-                } else if (Attrb.contains("FilterNode")) {
-                    Expr qual = null;
-
-                    for (Map.Entry<String, Expr> Subentry : FunctionMap.entrySet()) {
-                        qual = ((NamedExpr) (Subentry.getValue())).getExpr();
-                        System.out.println("Filter node Subentry Type" + qual.getType());
-                        if (qual.getType() == OpType.LikePredicate) {
-                            qual = ((NamedExpr) Subentry.getValue()).getChild();
-                            break; //CHeck
-                        }
-                    }
-                    Selection ret = new Selection(qual);
-                    ret.setChild(Curr);
-
-
-                    Curr = ret;
-                } else if (Attrb.contains("GroupByNewNode")) {
-
-                    if (GroupBynamelist.size() > 0) {
-                        Expr havingCondition = null;
-                        Aggregation clause = new Aggregation();
-                        ArrayList<Expr> ordinaryExprs = new ArrayList<Expr>();
-
-                        for (Map.Entry<String, Expr> Subentry : GroupBynamelist.entrySet()) {
-                            System.out.println("GroupBynamelist key: " + Subentry.getKey() + " value: " + Subentry.getValue().toJson());
-                            ordinaryExprs.add(((NamedExpr) Subentry.getValue()).getChild());
-                        }
-                        ArrayList<Aggregation.GroupElement> groups = new ArrayList<Aggregation.GroupElement>(1);
-                        groups.add(new Aggregation.GroupElement(Aggregation.GroupType.OrdinaryGroup, ordinaryExprs.toArray(new Expr[ordinaryExprs.size()])));
-                        int groupSize = 1;
-                        clause.setGroups(groups.subList(0, groupSize).toArray(new Aggregation.GroupElement[groupSize]));
-                        clause.setChild(Curr);
-
-                        Curr = clause;
-
-                        //FIIIIIIIIIIIIIIX IT
-                        for (Map.Entry<String, Expr> Subentry : FunctionMap.entrySet()) {
-                            Expr tmpexpr = ((NamedExpr) Subentry.getValue()).getExpr();
-                            System.out.println("Subentry Type" + tmpexpr.getType());
-                            if (tmpexpr.getType() == OpType.LikePredicate) {
-
-                            } else if (tmpexpr.getType() == OpType.GreaterThan) {
-                                havingCondition = ((NamedExpr) Subentry.getValue()).getChild();
-                                Having having = new Having(havingCondition);
-                                having.setChild(Curr);
-                                Curr = having;
-                            } else {
-                                System.out.println("Unknown function?");
-                            }
-
-                        }
-                    }
-
-
-                } else if (Attrb.contains("JoinNode")) {
-                    Join join;
-                    if (multiMap.get(ArrowMap.get(InputNodeId)).size() == 2) {
-                        String[] InputIds = new String[2];
-                        (multiMap.get(ArrowMap.get(InputNodeId))).toArray(InputIds);
-                        join = new Join(JoinType.INNER);
-
-                        join.setRight(new Relation(nodesMap.get(InputIds[0]).getAttributeValue("title")));
-                        join.setLeft(new Relation(nodesMap.get(InputIds[1]).getAttributeValue("title")));
-
-                        subnode = node.getChild("Condition");
-                        Expr right = new ColumnReferenceExpr(subnode.getAttributeValue("column1"));
-                        Expr left = new ColumnReferenceExpr(subnode.getAttributeValue("column2"));
-                        Expr searchCondition = new BinaryOperator(OpType.Equals, left, right);
-
-                        join.setQual(searchCondition);
-                        Curr = join;
-                        //More than one input possible join
-                    } else {
-                        System.out.println("Triple join?");
-                    }
-
-                } else if (Attrb.contains("ProjectNode")) {
-                    projectnodeFound = true;
-                    Project = new Projection();
-
-                    String TargetName = "";
-
-                    node = node.getChild("OutputConnectionPoints");
-                    node = node.getChild("ConnectionPoint");
-                    node = node.getChild("tableInfo");
-                    node = node.getChild("records");
-                    System.out.println("ProjectNode  " + ((List<Element>) node.getChildren("com.apatar.core.Record")).size());
-                    List<Element> recordslist;
-                    if ((recordslist = (List<Element>) node.getChildren("com.apatar.core.Record")).size() > 0) {
-                        List<String> targetnames = new ArrayList<>();
-                        NamedExpr[] targets = new NamedExpr[recordslist.size()];
-                        int count = 0;
-                        for (Element temp : recordslist) {
-                            TargetName = temp.getAttributeValue("fieldName");
-
-                            System.out.println("Record  " + TargetName);
-                            if (AlliasedExpr.containsKey(TargetName))
-                                targets[count++] = AlliasedExpr.get(TargetName);
-                            else
-                                targets[count++] = new NamedExpr(new ColumnReferenceExpr(TargetName));
-                        }
-                        Project.setNamedExprs(targets);
-
-                    }
-                    //Project.setNamedExprs(from);
-                    //Project.setChild(Curr);
-                    //Project = visitSelect_list_expr()
-                    //Curr = Project;
-
-                } else if (Attrb.contains("OrderByNode")) {
-
-                    Expr qual = null;
-
-                    for (Map.Entry<String, Expr> Subentry : FunctionMap.entrySet()) {
-                        qual = ((NamedExpr) (Subentry.getValue())).getExpr();
-                        System.out.println("Filter node Subentry Type" + qual.getType());
-                        if (qual.getType() == OpType.Sort) {
-                            Sort asort = (Sort) qual;
-                            asort.setChild(Curr);
-                            Curr = asort;
-                        }
-                    }
-                }
-
-                projectExpr = Curr;
-                curNodeId = ArrowMap.get(curNodeId);
-            }
-
-            if(Project!=null) {
-                Project.setChild(Curr);
-                projectExpr = Project;
-            }
-        }
-
-        return projectExpr;
     }
 
     static void  test_conf(String xmlWithSpecial){
@@ -1266,119 +1038,10 @@ public class Apatar2Tajo {
         return null;
     }
 
-    static void get_function(Element subnode){
-        String Attrb = subnode.getAttributeValue("classFunction");
-        if (Attrb.contains("LimitFunction")) {
-            subnode = subnode.getChild("com.apatar.functions.constant.LimitFunction");
-            System.out.println("limit " + subnode.getAttributeValue("value"));
-            //ApatarExpr = visitLimit_clause(node.getAttributeValue("value"), ApatarExpr);
-            NamedExpr tmpNE = new NamedExpr(visitLimit_clause(subnode.getAttributeValue("value"), null));
-            FunctionMap.put("limit", tmpNE);
-        } else if (Attrb.contains("CountStarFunction")) {
-            System.out.println("Count*  ");
-            Expr func = new CountRowsFunctionExpr();
-            UnconnectedFunctionMap.add(func);
-        }
-        else if (Attrb.contains("CountFunction")) {
-            System.out.println("Count  ");
-            Expr func = new CountRowsFunctionExpr();
-            UnconnectedFunctionMap.add(func);
-        }
-        else if (Attrb.contains("MaxFunction")) {
-            System.out.println("MaxFunction*  ");
-            //Expr func = new  ();
-            //UnconnectedFunctionMap.add(func);
-        }else {
-            System.out.println("Unknown no arrows field name: " + Attrb);
-        }
-    }
-
-
-    static Expr get_function( Element subnode, Expr Column){
-
-       String Attrb = subnode.getAttributeValue("classFunction");
-        Expr tmpGF=null;
-
-        if (Attrb.contains("GreaterThanValidateFunction")) {
-            String numValue = subnode.getChild("com.apatar.functions.Logic.GreaterThanValidateFunction").getAttributeValue("Value");
-            Expr value = new LiteralValue(numValue, LiteralValue.getLiteralType(numValue));
-
-            tmpGF = new BinaryOperator(OpType.GreaterThan, Column, value);//new GeneralSetFunctionExpr("GTH", false, targets);
-        } else if (Attrb.contains("AvgFunction")) {
-            ColumnReferenceExpr[] params = new ColumnReferenceExpr[1];
-            params[0] = (ColumnReferenceExpr) Column;
-            tmpGF = new GeneralSetFunctionExpr("avg", false, params);
-        } else if (Attrb.contains("EqualToValidateFunction")) {
-            String numValue = subnode.getChild("").getAttributeValue("Value");
-            //check if does not contain value
-            Expr value = new LiteralValue(numValue, LiteralValue.getLiteralType(numValue));
-
-            tmpGF = new BinaryOperator(OpType.Equals, Column, value);
-        }else if (Attrb.contains("ContainValidateFunction")) {
-            System.err.println("Not yet implemmented");
-            //ColumnReferenceExpr[] params = new ColumnReferenceExpr[1];
-            //params[0] = (ColumnReferenceExpr) Column;
-            //tmpGF = new GeneralSetFunctionExpr("avg", false, params);
-        }else if (Attrb.contains("FindRegExpFunction")) {
-            System.err.println("Not yet implemmented");
-            //ColumnReferenceExpr[] params = new ColumnReferenceExpr[1];
-            //params[0] = (ColumnReferenceExpr) Column;
-            //tmpGF = new GeneralSetFunctionExpr("avg", false, params);
-        }else if (Attrb.contains("AndValidateFunction")) {
-
-            //ColumnReferenceExpr[] params = new ColumnReferenceExpr[1];
-            //params[0] = (ColumnReferenceExpr) Column;
-            //tmpGF = new GeneralSetFunctionExpr("avg", false, params);
-        }else if (Attrb.contains("IsNullValidateFunction")) {
-            ColumnReferenceExpr[] params = new ColumnReferenceExpr[1];
-            params[0] = (ColumnReferenceExpr) Column;
-            tmpGF = new GeneralSetFunctionExpr("avg", false, params);
-        }else if (Attrb.contains("IsNotNullValidateFunction")) {
-            //ColumnReferenceExpr[] params = new ColumnReferenceExpr[1];
-            //params[0] = (ColumnReferenceExpr) Column;
-            //tmpGF = new GeneralSetFunctionExpr("avg", false, params);
-        }else if (Attrb.contains("GreaterOrEqualValidateFunction")) {
-            String numValue = subnode.getChild("com.apatar.functions.Logic.GreaterThan").getAttributeValue("Value");
-            Expr value = new LiteralValue(numValue, LiteralValue.getLiteralType(numValue));
-
-            tmpGF = new BinaryOperator(OpType.GreaterThanOrEquals, Column, value);
-        }else if (Attrb.contains("LessOrEqualValidateFunction")) {
-            String numValue = subnode.getChild("com.apatar.functions.Logic.LessOrEqualValidateFunction").getAttributeValue("Value");
-            Expr value = new LiteralValue(numValue, LiteralValue.getLiteralType(numValue));
-
-            tmpGF = new BinaryOperator(OpType.LessThanOrEquals, Column, value);
-        }else if (Attrb.contains("NotValidateFunction")) {
-            //ColumnReferenceExpr[] params = new ColumnReferenceExpr[1];
-            //params[0] = (ColumnReferenceExpr) Column;
-            //tmpGF = new GeneralSetFunctionExpr("avg", false, params);
-        }else if (Attrb.contains("TESTFunction")) {
-            //ColumnReferenceExpr[] params = new ColumnReferenceExpr[1];
-            //params[0] = (ColumnReferenceExpr) Column;
-            //tmpGF = new GeneralSetFunctionExpr("avg", false, params);
-        }
-        else if (Attrb.contains("LikeValidateFunction")) {
-            Expr pattern = new LiteralValue(subnode.getChild("com.apatar.functions.Logic.LikeValidateFunction").getAttributeValue("Value"),
-                    LiteralValue.LiteralType.String);
-            tmpGF = new PatternMatchPredicate(OpType.LikePredicate, false, Column, pattern);
-            //alias = "like."; betteruserOpType
-        } else if (Attrb.contains("DescFunction")) {
-            Sort.SortSpec specs[] = new Sort.SortSpec[1];
-            specs[0] = new Sort.SortSpec(Column);
-            specs[0].setDescending();
-            //alias = "sort."; betteruserOpType
-            tmpGF = new Sort(specs);
-        } else {
-            System.out.println("Unknown field name");
-        }
-        return  tmpGF;
-    }
-
-
     static Element get_root(String xml) {
         Element rootNode = null;
         InputStream inputStream = new ByteArrayInputStream(
                 xml.getBytes(Charset.forName("UTF-8")));
-        Document newXml = null;
         SAXBuilder testbuilder = new SAXBuilder();
         Document document;
         try {
@@ -1392,58 +1055,5 @@ public class Apatar2Tajo {
             e.printStackTrace();
         }
         return rootNode;
-
-
     }
-
-    public static Selection visitWhere_clause(Expr in, Expr left, Expr right) {
-
-        Selection ret = new Selection(new BinaryOperator(OpType.GreaterThan, left, right));
-        ret.setChild(in);
-        return ret;
-    }
-
-    public static Projection visitSelect_list(List<String> TargetsNames, Expr from) {
-        Projection projection = new Projection();
-        NamedExpr[] targets;
-        if (TargetsNames == null) {
-            targets = new NamedExpr[1];
-            targets[0] = new NamedExpr(new QualifiedAsteriskExpr());
-        } else {
-            targets = new NamedExpr[TargetsNames.size()];
-
-            for (int i = 0; i < targets.length; i++) {
-                targets[i] = new NamedExpr(new ColumnReferenceExpr(TargetsNames.get(i)));
-            }
-        }
-        projection.setNamedExprs(targets);
-        projection.setChild(from);
-        return projection;
-    }
-
-    public static Projection visitSelect_list_expr(Expr target, Expr from) {
-        Projection projection = new Projection();
-        NamedExpr[] targets = new NamedExpr[1];
-        targets[0] = new NamedExpr(target);
-
-        projection.setNamedExprs(targets);
-        projection.setChild(from);
-        return projection;
-    }
-
-    public static RelationList visitFrom_clause(List<String> relations_names) {
-        Expr[] relations = new Expr[relations_names.size()];
-        System.out.println(" Size = " + relations_names.size());
-        for (int i = 0; i < relations.length; i++) {
-            relations[i] = new Relation(relations_names.get(i));
-        }
-        return new RelationList(relations);
-    }
-
-
-    public static Expr visitLimit_clause(String value, Expr right) {
-        Expr left = new LiteralValue(value, LiteralValue.getLiteralType(value));
-        return new Limit(left);
-    }
-
 }
