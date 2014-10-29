@@ -210,83 +210,88 @@ public class Apatar2Tajo {
 
             for(String id:endNodes)
             {
-                Expr target=null;
-                Expr from = null;
-                Projection projection = new Projection();
-                NamedExpr[] targets = new NamedExpr[1];
-                targets[0] = new NamedExpr(target);
-
-                projection.setNamedExprs(targets);
-                projection.setChild(from);
-                //Recursive nodes traversing
-
                 //Check End node => output node !
+                String projecID = FindnRaiseNode(id, ReverseArrowTree, nodesMap,"com.apatar.project.ProjectNode");
+
+                System.out.println("Search for Projection node result:  ");
+                print("", true, id, ReverseArrowTree, nodesMap);
+
+                //Recursive nodes traversing
                 Expr ret = recursiveTree(id,ReverseArrowTree,nodesMap,ArrowConnections);
+
+                //Select everything
+                if(projecID==null && ret!=null && ret.getType()!=OpType.Projection){
+                    System.out.println("Select  * ");
+                    Projection projection = new Projection();
+                    NamedExpr[] targets;
+                    targets = new NamedExpr[1];
+                    targets[0] = new NamedExpr(new QualifiedAsteriskExpr());
+                    projection.setNamedExprs(targets);
+
+                    Expr[] relations = new Expr[1];
+                    relations[0] = ret;
+                    projection.setChild(new RelationList(relations));
+                    ret = projection;
+                }
+
 
                 return ret;
             }
         }
         return null;
 
-        /*
+    }
+
+    //Use only in Unary operators
+    private static String FindnRaiseNode(String head, HashMap<String, List<String>> nodesTree, HashMap<String, Element> nodesMap, String nodeClass) {
+
+        //Traverse the tree
+        //Search for projection node
+        Element cur = nodesMap.get(head);
+        String ProjectionId = null;
+        List<String> children = nodesTree.get(head);
+        String nodeType = cur.getAttributeValue("nodeClass");
 
 
-        for (int i = 0; i < list.size(); i++) {
-            node = (Element) list.get(i);
-            System.out.println("Node  id: " + node.getAttributeValue("id") + " "
-                    + node.getAttributeValue("nodeClass"));
+        if(children!=null){
+            for(String child:children){
+                Element childElement =  nodesMap.get(child);
+                String childNodeType = childElement.getAttributeValue("nodeClass");
 
+                if(childNodeType.equals(nodeClass)) {
+                    System.out.println("Found node " + nodeClass);
 
-            if (node.getAttributeValue("nodeClass").contains("read.READNode")) {
-                System.out.println("Found input node: " + node.getAttributeValue("id"));
-                InputNodeId = node.getAttributeValue("id");
+                    List<String> childrenNext = nodesTree.get(child);
+                    if(childrenNext!=null){
+                        if(childrenNext.size()>1){
+                            System.err.println("Error cannot raise a binary operator");
+                            return null;
+                        }
+                        nodesTree.remove(head);
+                        nodesTree.remove(child);
+                        nodesTree.put(head,childrenNext);
+                        ProjectionId=child; //Found
+                        break;
+                    }else
+                    {
+                        System.err.println("Found Projection node with no children error");
+                    }
+                }
+                ProjectionId= FindnRaiseNode(child, nodesTree, nodesMap,nodeClass);
             }
-
-            if (node.getAttributeValue("nodeClass").contains("output.OutputNode")) {
-                System.out.println("Found output node: " + node.getAttributeValue("id"));
-                OutputNodeId = node.getAttributeValue("id");
-            }
-
-            //Found Subproject
-            if (node.getAttribute("subProject") != null) {
-                System.out.println("\nSubproject found Reparsing");
-                String xmlWithSpecial = StringEscapeUtils
-                        .unescapeXml(StringEscapeUtils.unescapeXml(node
-                                .getAttributeValue("subProject")));
-
-                Expr sub = visit_subproject(xmlWithSpecial, node.getAttributeValue("title"));
-                if(sub !=null)
-                System.out.println("Visited subproject: " + sub.toJson().toString());
-
-            }
-
-
-            System.out.println("Save node  " + node.getAttributeValue("nodeClass"));
-            //Save nodes !!
-            //if (functionNode != null){
-            //    nodesMap.put(node.getAttributeValue("id"), functionNode);functionNode = null;}
-            // else
-            nodesMap.put(node.getAttributeValue("id"), node);
-
-
-        }
-        //Get arrows
-        System.out.println("Found Function SubEntries: " + FunctionMap.size());
-
-        for (Map.Entry<String, Expr> Subentry : FunctionMap.entrySet()) {
-            System.out.println("Function Subentry key: " + Subentry.getKey() + " value: " + Subentry.getValue().toJson());
-
         }
 
+        if(nodeType.equals("com.apatar.output.OutputNode") && ProjectionId!=null){
+            nodesTree.remove(head);
+            List<String> childrenNew = new ArrayList<>();
+            childrenNew.add(ProjectionId);
+            nodesTree.put(head,childrenNew);
+            nodesTree.put(ProjectionId,children);
+            System.out.println("   Projection node @ top ! ");
+        }
 
-        list = rootNode.getChildren("arrow");
-        System.out.println("Arrows " + list.size());
-        for (int i = 0; i < list.size(); i++) {
-            node = (Element) list.get(i);
-            System.out.println("Arrow id: " + node.getAttributeValue("id") + "  from: "
-                    + node.getAttributeValue("begin_id") + " to: " + node.getAttributeValue("end_id"));
-            ArrowMap.put(node.getAttributeValue("begin_id"), node.getAttributeValue("end_id"));
-        }*/
+        return ProjectionId;
+
     }
 
     private static Expr recursiveTree(String head, HashMap<String, List<String>> nodesTree, HashMap<String, Element> nodesMap, String[][] arrowConnections) {
@@ -390,8 +395,8 @@ public class Apatar2Tajo {
                     TargetName = temp.getAttributeValue("fieldName");
 
                     System.out.println("Record  " + TargetName);
-                    if (AlliasedExpr.containsKey(TargetName))
-                        targets[count++] = AlliasedExpr.get(TargetName);
+                    if (GroupByOther.containsKey(TargetName))
+                        targets[count++] =  new NamedExpr(GroupByOther.get(TargetName));
                     else
                         targets[count++] = new NamedExpr(new ColumnReferenceExpr(TargetName));
                 }
@@ -443,14 +448,28 @@ public class Apatar2Tajo {
             System.out.println("JoinNode  " );
             if(childrenExpr.size()==2){
                 join = new Join(JoinType.INNER);
-                join.setRight(childrenExpr.get(0));
-                join.setLeft(childrenExpr.get(1));
+                if(childrenExpr.get(0).getType()==OpType.RelationList){
+                    Expr [] r = ((RelationList)childrenExpr.get(0)).getRelations();
+                    join.setRight(r[0]);
+                }
+                else
+                    join.setRight(childrenExpr.get(0));
+
+                if(childrenExpr.get(1).getType()==OpType.RelationList){
+                    Expr [] r = ((RelationList)childrenExpr.get(1)).getRelations();
+                    join.setLeft(r[0]);
+                }
+                else
+                    join.setLeft(childrenExpr.get(1));
+
                 Element subnode = cur.getChild("Condition");
                 Expr right = new ColumnReferenceExpr(subnode.getAttributeValue("column1"));
                 Expr left = new ColumnReferenceExpr(subnode.getAttributeValue("column2"));
                 Expr searchCondition = new BinaryOperator(OpType.Equals, left, right);
                 join.setQual(searchCondition);
-                return join;
+                Expr[] relations = new Expr[1];
+                relations[0] = join;
+                return new RelationList(relations);
             }else{
                 System.err.println("Not correct inputs for Join  " );
             }
@@ -464,7 +483,11 @@ public class Apatar2Tajo {
             return subExpr;
         }else if(nodeType.equals("com.apatar.read.READNode")) {
             System.out.println("READNode " );
-            return new Relation(cur.getAttributeValue("title"));
+
+            Expr[] relations = new Expr[1];
+            relations[0] = new Relation(cur.getAttributeValue("title"));
+            return new RelationList(relations);
+
         }else if(nodeType.equals("com.apatar.limit.LimitNode")) {
             System.out.println("LimitNode " );
             if(subExpr!=null && ChildExpr!=null) {
@@ -656,6 +679,7 @@ public class Apatar2Tajo {
 
         return projectExpr;
     }
+
     static void  test_conf(String xmlWithSpecial){
         File temp;
     try {
@@ -883,6 +907,7 @@ public class Apatar2Tajo {
         }
         return null;
     }
+
     static private void print(String prefix, boolean isTail,String head, HashMap<String, List<String>>  nodesTree, HashMap<String, Element> nodesMap ) {
         Element cur = nodesMap.get(head);
         //System.out.print(cur.toString() + " " + cur.getAttributeValue("title"));
@@ -920,7 +945,11 @@ public class Apatar2Tajo {
                 cur= nodesMap.get(children.get(0));
                 nodeType = cur.getAttributeValue("nodeClass");
                 if(nodeType.equals("com.apatar.core.ColumnNode")) {
-                    Spec.setKey(new ColumnReferenceExpr(getCollumnName(cur)));
+                    String columnName = getCollumnName(cur);
+                    if(GroupByOther.containsKey(columnName)){
+                        Spec.setKey(GroupByOther.get(columnName));
+                    }else
+                        Spec.setKey(new ColumnReferenceExpr(columnName));
                     return Spec;
                 }
             }
