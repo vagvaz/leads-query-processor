@@ -24,7 +24,7 @@ public class READTableList {
 		arguments.clear();
 		returns.clear();
 		
-		
+				
 		putAttributeList(returns, 
 				new String[]{
 				"url",
@@ -37,7 +37,6 @@ public class READTableList {
                 "responsetime",
                 "links",
                 "title",
-                "version",
                 "pagerank",
                 "sentiment"
 				}, 
@@ -52,7 +51,6 @@ public class READTableList {
 				"NUMERIC",
 				"TEXT",
 				"TEXT",
-				"DATE",
 				"NUMERIC",
 				"NUMERIC"
 				});
@@ -63,14 +61,12 @@ public class READTableList {
 				new String[]{
 				"webpageurl",
 				"name",
-				"sentiment",
-				"version"
+				"sentimentscore"				 
 				}, 
 				new String[]{
 				"TEXT",
 				"TEXT",
-				"NUMERIC",
-				"DATE"
+				"NUMERIC" 
 				});
 		readTables.put("entities", new READTable("entities",arguments,returns));
 		

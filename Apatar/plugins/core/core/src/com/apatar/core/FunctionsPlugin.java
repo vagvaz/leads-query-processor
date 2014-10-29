@@ -91,9 +91,10 @@ public class FunctionsPlugin extends Plugin {
 				if(factory.getCategory().contains("Aggregation_functions")){
 					listFunctionGroupBy.add(factory);
 				}
+				/*
 				if(factory.getCategory().contains("Filter")){
 					listFunctionGroupBy.add(factory);
-				}
+				}*/
 				listFunction.add(factory);
 				//listFunction2.add(factory);
 				//@@--->
@@ -168,9 +169,10 @@ public class FunctionsPlugin extends Plugin {
 				if(factory.getCategory().contains("Aggregation_functions")){
 					listFunctionGroupBy.add(factory);
 				}
+				/*
 				if(factory.getCategory().contains("Filter")){
 					listFunctionGroupBy.add(factory);
-				}
+				}*/
 				//@@<---
 				
 				//@@--->
@@ -244,9 +246,10 @@ public class FunctionsPlugin extends Plugin {
 					if(factory.getCategory().contains("Aggregation_functions")){
 						listFunctionGroupBy.add(factory);
 					}
+					/*
 					if(factory.getCategory().contains("Filter")){
 						listFunctionGroupBy.add(factory);
-					}
+					}*/
 					//@@<---
 					//listFunction2.add(factory);
 					functionLoaders.put(cvParam.valueAsString(), classLoader);

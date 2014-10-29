@@ -25,34 +25,34 @@ ________________________
 
 package com.apatar.functions.Logic;
 
+import java.util.Iterator;
 import java.util.List;
 
-import com.apatar.core.ValueAbstractApatarFunction;
+import com.apatar.core.AbstractApatarFunction;
 import com.apatar.functions.FunctionInfo;
 import com.apatar.ui.FunctionCategory;
 
-public class LessOrEqualValidateFunction extends ValueAbstractApatarFunction {
+public class LessOrEqualValidateFunction extends AbstractApatarFunction {
 	public Object execute(List list) {
-		if (list == null || list.size() < 1) {
+		boolean returnFlag = true;
+		boolean tmpBool;
+		
+		if (list == null || list.size()<1)
 			return false;
-		}
-
-		Object ob = list.get(0);
-		if (ob == null) {
-			return false;
-		}
-
-		try {
-			if ((list.size() == 1) || (null == list.get(0))
-					|| (null == list.get(1))) {
-				return CompareUtils.Compare(ob, value) <= 0;
-			} else {
-				return CompareUtils.Compare(ob, list.get(1)) <= 0;
+		
+		for(Iterator it=list.iterator(); it.hasNext();){
+			try{
+				tmpBool = (Boolean) it.next();
+				if( tmpBool == false ){
+					returnFlag = false;
+					break;
+				}
+			} catch(Exception e){
+				return false;
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
 		}
+		
+		return returnFlag;
 	}
 
 	static FunctionInfo fi = new FunctionInfo("Less Or Equal", 2, 1);
