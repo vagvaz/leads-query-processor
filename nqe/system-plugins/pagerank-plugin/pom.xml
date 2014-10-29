@@ -22,12 +22,42 @@
             <groupId>gr.tuc.softnet</groupId>
             <artifactId>leads-query-processor-common</artifactId>
             <version>${processor.version}</version>
+           <exclusions>
+              <exclusion>
+                 <groupId>log4j</groupId>
+                 <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.logging.log4j</groupId>
+                 <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.tajo</groupId>
+                 <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+           </exclusions>
         </dependency>
 
         <dependency>
             <groupId>gr.tuc.softnet</groupId>
             <artifactId>leads-query-processor-plugins</artifactId>
             <version>1.0-SNAPSHOT</version>
+           <exclusions>
+              <exclusion>
+                 <groupId>log4j</groupId>
+                 <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.logging.log4j</groupId>
+                 <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.tajo</groupId>
+                 <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+           </exclusions>
             <scope>test</scope>
         </dependency>
 
@@ -35,12 +65,42 @@
             <groupId>gr.tuc.softnet</groupId>
             <artifactId>simple-crawler</artifactId>
             <version>${processor.version}</version>
+           <exclusions>
+              <exclusion>
+                 <groupId>log4j</groupId>
+                 <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.logging.log4j</groupId>
+                 <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.tajo</groupId>
+                 <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+           </exclusions>
         </dependency>
 
         <dependency>
             <groupId>colt</groupId>
             <artifactId>colt</artifactId>
             <version>1.2.0</version>
+           <exclusions>
+              <exclusion>
+                 <groupId>log4j</groupId>
+                 <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.logging.log4j</groupId>
+                 <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.tajo</groupId>
+                 <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+           </exclusions>
         </dependency>
         <dependency>
             <groupId>net.sf.trove4j</groupId>
@@ -51,6 +111,21 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>3.3</version>
+           <exclusions>
+              <exclusion>
+                 <groupId>log4j</groupId>
+                 <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.logging.log4j</groupId>
+                 <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.tajo</groupId>
+                 <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+           </exclusions>
         </dependency>
 
 
@@ -59,53 +134,43 @@
             <groupId>org.infinispan</groupId>
             <artifactId>infinispan-core</artifactId>
             <version>${infinispan.version}</version>
+           <exclusions>
+              <exclusion>
+                 <groupId>log4j</groupId>
+                 <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.logging.log4j</groupId>
+                 <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.tajo</groupId>
+                 <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+           </exclusions>
         </dependency>
         <dependency>
             <groupId>org.infinispan</groupId>
             <artifactId>infinispan-client-hotrod</artifactId>
             <version>${infinispan.version}</version>
+           <exclusions>
+              <exclusion>
+                 <groupId>log4j</groupId>
+                 <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.logging.log4j</groupId>
+                 <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.tajo</groupId>
+                 <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+           </exclusions>
         </dependency>
-        <!-- test Dependencies -->
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <scope>test</scope>
-            <version>6.8</version>
-        </dependency>
-        <dependency>
-            <groupId>org.infinispan</groupId>
-            <artifactId>infinispan-core</artifactId>
-            <version>${infinispan.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.infinispan</groupId>
-            <artifactId>infinispan-client-hotrod</artifactId>
-            <version>${infinispan.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.infinispan</groupId>
-            <artifactId>infinispan-server-core</artifactId>
-            <version>${infinispan.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.infinispan</groupId>
-            <artifactId>infinispan-server-hotrod</artifactId>
-            <version>${infinispan.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.infinispan</groupId>
-            <artifactId>infinispan-server-hotrod</artifactId>
-            <version>${infinispan.version}</version>
-            <scope>test</scope>
-        </dependency>
+
 
     </dependencies>
 

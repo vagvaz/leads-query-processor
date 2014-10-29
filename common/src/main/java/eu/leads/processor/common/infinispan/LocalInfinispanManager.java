@@ -87,7 +87,7 @@ public class LocalInfinispanManager implements InfinispanManager {
      */
     @Override
     public ConcurrentMap getPersisentCache(String name) {
-        return manager.getCache(name, true);
+        return manager.getCache(name);
     }
 
     /**

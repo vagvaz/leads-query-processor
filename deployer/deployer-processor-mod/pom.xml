@@ -50,18 +50,63 @@
          <artifactId>vertx-core</artifactId>
          <version>${vertx.version}</version>
          <scope>provided</scope>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+
+            </exclusion>
+         </exclusions>
       </dependency>
       <dependency>
          <groupId>io.vertx</groupId>
          <artifactId>vertx-platform</artifactId>
          <version>${vertx.version}</version>
          <scope>provided</scope>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+
+            </exclusion>
+         </exclusions>
       </dependency>
       <dependency>
          <groupId>io.vertx</groupId>
          <artifactId>vertx-hazelcast</artifactId>
          <version>${vertx.version}</version>
          <scope>provided</scope>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+
+            </exclusion>
+         </exclusions>
       </dependency>
       <!--Test dependencies-->
       <dependency>
@@ -75,6 +120,21 @@
          <artifactId>testtools</artifactId>
          <version>${vertx.testtools.version}</version>
          <scope>test</scope>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+
+            </exclusion>
+         </exclusions>
       </dependency>
       <dependency>
          <groupId>gr.tuc.softnet</groupId>

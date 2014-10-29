@@ -49,7 +49,8 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
 
         SubmitQueryHandler submitQueryHandler = new SubmitQueryHandler(com, log);
         SubmitSpecialCallHandler submitSpecialCallHandler = new SubmitSpecialCallHandler(com, log);
-
+        Handler<HttpServerRequest> uploadEncryptedData = new UploadEncryptedDataHandler(com,log);
+        Handler<HttpServerRequest> privacyPointQueryHandler = new PrivacyPointQueryHandler(com,log);
         //object
         failHandler = new Handler<HttpServerRequest>() {
             @Override
@@ -92,6 +93,8 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
 
             }
         });
+       matcher.post("/rest/upload/encData",uploadEncryptedData);
+       matcher.post("/rest/query/encrypted/ppq",privacyPointQueryHandler);
         vertx.createHttpServer().requestHandler(matcher)
             .listen((Integer) config.getNumber("port", 8080));
 

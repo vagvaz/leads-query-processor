@@ -19,28 +19,103 @@
          <groupId>commons-configuration</groupId>
          <artifactId>commons-configuration</artifactId>
          <version>1.7</version>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+
+            </exclusion>
+         </exclusions>
       </dependency>
       <dependency>
          <groupId>gr.tuc.softnet</groupId>
          <artifactId>leads-query-processor-common</artifactId>
          <version>${processor.version}</version>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+
+            </exclusion>
+         </exclusions>
       </dependency>
       <dependency>
          <groupId>gr.tuc.softnet</groupId>
          <artifactId>common-core</artifactId>
          <version>${processor.version}</version>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+
+            </exclusion>
+         </exclusions>
       </dependency>
 
       <dependency>
          <groupId>gr.tuc.softnet</groupId>
          <artifactId>sentiment-module</artifactId>
          <version>${processor.version}</version>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+
+            </exclusion>
+         </exclusions>
       </dependency>
        <dependency>
            <groupId>gr.tuc.softnet</groupId>
            <artifactId>simple-crawler</artifactId>
            <version>${processor.version}</version>
            <scope>test</scope>
+          <exclusions>
+             <exclusion>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+             </exclusion>
+             <exclusion>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+             </exclusion>
+             <exclusion>
+                <groupId>org.apache.tajo</groupId>
+                <artifactId>tajo-jdbc</artifactId>
+
+             </exclusion>
+          </exclusions>
        </dependency>
    </dependencies>
 

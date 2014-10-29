@@ -1,6 +1,7 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
+import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.LeadsReducer;
 import eu.leads.processor.core.Tuple;
@@ -36,7 +37,7 @@ public class GroupByReducer extends LeadsReducer<String, String> {
     transient List<String> aggregateNames;
   transient Set<String> inputFields;
   transient ArrayList<String> aggregateInferred;
- transient InfinispanManager imanager;
+
 
    public GroupByReducer(JsonObject configuration) {
         super(configuration);
@@ -53,7 +54,7 @@ public class GroupByReducer extends LeadsReducer<String, String> {
         super.initialize();
         imanager = new ClusterInfinispanManager(manager);
       prefix = outputCacheName+":";
-      data = (Cache<String, String>) imanager.getPersisentCache(outputCacheName);
+      data = (Cache<String, String>) InfinispanClusterSingleton.getInstance().getManager().getPersisentCache(outputCacheName);
       aggregateValues = new ArrayList<>();
       functionType = new ArrayList<>();
       columnTypes = new ArrayList<>();
@@ -78,15 +79,21 @@ public class GroupByReducer extends LeadsReducer<String, String> {
          String funcType = current.getObject("funcDesc").getString("signature");
 
          JsonObject argument = null;
-
-         if( ((JsonObject) current).getArray("argEvals").size() > 0){
-            argument = ((JsonObject)current).getArray("argEvals").get(0);
+         if(current.getArray("argEvals").size() > 0){
+//         if( ((JsonObject) current).getArray("argEvals").size() > 0){
+            argument = current.getArray("argEvals").get(0);
          }
          else{ // handling empty parameters for count(*)
             argument = new JsonObject();
-            argument.putObject("body",new JsonObject());
-            argument.getObject("body").putObject("column",new JsonObject());
-            argument.getObject("body").getObject("column").putString("name","*");
+            argument.putString("type","FIELD");
+            JsonObject body = new JsonObject();
+            body.putNumber("fieldId",-1);
+            body.putString("type","FIELD");
+            JsonObject columnObject = new JsonObject();
+            columnObject.putString("name","*");
+            columnObject.putObject("dataType", new JsonObject().putString("type","INT8"));
+            body.putObject("column",columnObject);
+            argument.putObject("body",body);
          }
          columnParams.add(argument.getObject("body").getObject("column").getString("name"));
          functionType.add(funcType);
@@ -144,6 +151,7 @@ public class GroupByReducer extends LeadsReducer<String, String> {
   @Override
     public String reduce(String key, Iterator<String> iterator) {
        //Reduce takes all the grouped Typles per key
+//      System.out.println("running for " + key + " .");
       if(key == null || key.equals(""))
         return "";
         if (!isInitialized) initialize();

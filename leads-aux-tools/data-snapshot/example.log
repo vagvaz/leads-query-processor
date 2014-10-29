@@ -7,3 +7,39 @@ INFO main org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory - 
 INFO main org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory - ISPN004014: New server added(/0.0.0.0:11226), adding to the pool.
 INFO main org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory - ISPN004016: Server not in cluster anymore(localhost/127.0.0.1:11222), removing from the pool.
 INFO main org.infinispan.client.hotrod.RemoteCacheManager - ISPN004021: Infinispan version: null
+INFO main org.infinispan.client.hotrod.impl.protocol.Codec20 - ISPN004006: localhost/127.0.0.1:11222 sent new topology view (id=8) containing 5 addresses: [/0.0.0.0:11222, /0.0.0.0:11223, /0.0.0.0:11224, /0.0.0.0:11225, /0.0.0.0:11226]
+INFO main org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory - ISPN004014: New server added(/0.0.0.0:11222), adding to the pool.
+INFO main org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory - ISPN004014: New server added(/0.0.0.0:11223), adding to the pool.
+INFO main org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory - ISPN004014: New server added(/0.0.0.0:11224), adding to the pool.
+INFO main org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory - ISPN004014: New server added(/0.0.0.0:11225), adding to the pool.
+INFO main org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory - ISPN004014: New server added(/0.0.0.0:11226), adding to the pool.
+INFO main org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory - ISPN004016: Server not in cluster anymore(localhost/127.0.0.1:11222), removing from the pool.
+INFO main org.infinispan.client.hotrod.RemoteCacheManager - ISPN004021: Infinispan version: null
+INFO main org.infinispan.client.hotrod.impl.protocol.Codec20 - ISPN004006: /0.0.0.0:11224 sent new topology view (id=11) containing 4 addresses: [/0.0.0.0:11222, /0.0.0.0:11224, /0.0.0.0:11225, /0.0.0.0:11226]
+INFO main org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory - ISPN004016: Server not in cluster anymore(/0.0.0.0:11223), removing from the pool.
+INFO main org.infinispan.client.hotrod.RemoteCacheManager - ISPN004021: Infinispan version: null
+ERROR main org.infinispan.client.hotrod.impl.operations.RetryOnFailureOperation - ISPN004007: Exception encountered. Retry 10 out of 10
+org.infinispan.client.hotrod.exceptions.TransportException:: Could not fetch transport
+	at org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory.borrowTransportFromPool(TcpTransportFactory.java:325)
+	at org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory.getTransport(TcpTransportFactory.java:190)
+	at org.infinispan.client.hotrod.impl.operations.FaultTolerantPingOperation.getTransport(FaultTolerantPingOperation.java:27)
+	at org.infinispan.client.hotrod.impl.operations.RetryOnFailureOperation.execute(RetryOnFailureOperation.java:48)
+	at org.infinispan.client.hotrod.impl.RemoteCacheImpl.ping(RemoteCacheImpl.java:589)
+	at org.infinispan.client.hotrod.RemoteCacheManager.ping(RemoteCacheManager.java:643)
+	at org.infinispan.client.hotrod.RemoteCacheManager.createRemoteCache(RemoteCacheManager.java:624)
+	at org.infinispan.client.hotrod.RemoteCacheManager.getCache(RemoteCacheManager.java:527)
+	at eu.leads.processor.data.Snapshot.loadFromTo(Snapshot.java:68)
+	at eu.leads.processor.data.Snapshot.main(Snapshot.java:40)
+Caused by: org.infinispan.client.hotrod.exceptions.TransportException:: Could not connect to server: localhost/127.0.0.1:11222
+	at org.infinispan.client.hotrod.impl.transport.tcp.TcpTransport.<init>(TcpTransport.java:76)
+	at org.infinispan.client.hotrod.impl.transport.tcp.TransportObjectFactory.makeObject(TransportObjectFactory.java:35)
+	at org.infinispan.client.hotrod.impl.transport.tcp.TransportObjectFactory.makeObject(TransportObjectFactory.java:16)
+	at org.apache.commons.pool.impl.GenericKeyedObjectPool.borrowObject(GenericKeyedObjectPool.java:1220)
+	at org.infinispan.client.hotrod.impl.transport.tcp.TcpTransportFactory.borrowTransportFromPool(TcpTransportFactory.java:321)
+	... 9 more
+Caused by: java.net.ConnectException: Connection refused
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:716)
+	at sun.nio.ch.SocketAdaptor.connect(SocketAdaptor.java:111)
+	at org.infinispan.client.hotrod.impl.transport.tcp.TcpTransport.<init>(TcpTransport.java:67)
+	... 13 more

@@ -72,7 +72,7 @@ public class SentimentAnalysisPlugin implements PluginInterface {
             Tuple tuple = new Tuple("{}"); //create a tuple with no attributes
             Sentiment s = module.getSentimentForEntity(e.getName(), body);
             tuple.setAttribute("name", e.getName());
-           tuple.setAttribute("sentiment",s.getValue());
+           tuple.setAttribute("sentimentScore",s.getValue());
             tuple.setAttribute("webpageurl", url);
             tuple.setNumberAttribute("version", System.currentTimeMillis());
             this.targetCache.put(url + ":" + e.getName(), tuple.asString());

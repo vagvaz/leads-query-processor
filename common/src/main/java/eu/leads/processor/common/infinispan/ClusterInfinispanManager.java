@@ -346,11 +346,12 @@ public class ClusterInfinispanManager implements InfinispanManager {
                           + " is not clustered so using default cluster configuration");
             //            cacheConfiguration = new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_ASYNC).async().l1().lifespan(100000L).hash().numOwners(3).build();
         }
+
        manager.defineConfiguration(cacheName, new ConfigurationBuilder()
                                                       .clustering()
                                                       .cacheMode(CacheMode.DIST_SYNC)
                                                       .hash().numOwners(3)
-                                                      .compatibility().enable().persistence().addSingleFileStore().location("/tmp/"+manager.getAddress().toString())
+                                                      .persistence().addSingleFileStore().location("/tmp/").shared(true).preload(false).compatibility().enable()
                                                       .build());
        Cache cache = manager.getCache(cacheName);
 //        DistributedExecutorService des = new DefaultExecutorService(manager.getCache());

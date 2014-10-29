@@ -5,6 +5,7 @@ import eu.leads.processor.core.Action;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.LeadsNodeType;
+import eu.leads.processor.infinispan.operators.SSEPointQueryOperator;
 import eu.leads.processor.nqe.NQEConstants;
 import eu.leads.processor.infinispan.operators.Operator;
 import eu.leads.processor.infinispan.operators.WGSOperator;
@@ -24,8 +25,8 @@ public class OperatorFactory {
             result = new WGSOperator(com,persistence,log,action);
 
          }
-         else if(operatorType.equals(NQEConstants.PPPQ_OPERATOR.toString())){
-
+         else if(operatorType.equals(LeadsNodeType.EPQ.toString())){
+            result = new SSEPointQueryOperator(com,persistence,log,action);
          }
          else{
             //SQL Operators

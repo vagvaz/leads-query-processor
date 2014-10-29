@@ -20,4 +20,7 @@ public class IManagerConstants {
     public static final String SUBMIT_PLUGIN = "submitPlugin";
     public static final String DEPLOY_PLUGIN = "deployPlugin";
     public static final String UNDEPLOY_PLUGIN = "undeployPlugin";
+   public static final String PUT_ENC_OBJECT ="encPut";
+   public static final String SUBMIT_ENC_QUERY = "encQuery";
+   public static final String CREATE_NEW_ENC_QUERY = "newEncQuery";
 }

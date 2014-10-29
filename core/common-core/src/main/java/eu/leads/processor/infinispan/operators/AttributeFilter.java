@@ -19,7 +19,11 @@ public class AttributeFilter implements KeyValueFilter,Serializable {
 
 
     public boolean accept2(String key, String value, Metadata metadata) {
-        Tuple tuple = new Tuple(value);
+       if(value == null){
+          System.err.println("key " + key + " had null " + value);
+          return false;
+       }
+       Tuple tuple = new Tuple(value);
         if(tuple.getGenericAttribute(columnKey).toString().equals(columnValue))
             return true;
         return false;

@@ -5,6 +5,8 @@
 package eu.leads.processor.encrypt;
 
 
+import org.vertx.java.core.json.JsonObject;
+
 import java.io.Serializable;
 
 /**
@@ -37,4 +39,22 @@ public class Etuple implements Serializable {
     public void setIV(byte[] IV) {
         this.IV = IV;
     }
+
+    public JsonObject toJson(){
+       JsonObject result = new JsonObject();
+       result.putBinary("cipher",ciphertext);
+       result.putBinary("iv",IV);
+       return result;
+    }
+
+    public Etuple fromJson(String json){
+       JsonObject object= new JsonObject(json);
+       fromJson(object);
+       return this;
+    }
+   public void fromJson(JsonObject object)
+   {
+      ciphertext = object.getBinary("ciphertext");
+      IV = object.getBinary("iv");
+   }
 }

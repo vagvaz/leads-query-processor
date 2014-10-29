@@ -48,6 +48,7 @@ public class ScanOperator extends BasicOperator {
 
       ScanCallable callable = new ScanCallable(conf.toString(),getOutput());
       List<Future<String>> res = des.submitEverywhere(callable);
+//      Future<String> res = des.submit(callable);
       List<String> addresses = new ArrayList<String>();
       try {
          if (res != null) {

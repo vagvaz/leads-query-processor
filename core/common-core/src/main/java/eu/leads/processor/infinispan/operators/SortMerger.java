@@ -58,7 +58,6 @@ public class SortMerger {
             Tuple t = getCurrentValue(keys.size() - 1);
             values.add(t);
             cacheNames.add(entry);
-
         }
 //      outputSchema = conf.getObject("body").getObject("outputSchema");
 //      inputSchema = conf.getObject("body").getObject("inputSchema");
@@ -100,13 +99,14 @@ public class SortMerger {
     public void merge() {
         Tuple nextValue = null;
         Tuple t = null;
+       long counter = 0;
         while (caches.size() > 0) {
             int minIndex = findMinIndex(values);
 
             t = values.get(minIndex);
 //            t = prepareOutput(t);
-            outputCache.put(prefix + outputCache.size(), t.asString());
-
+            outputCache.put(prefix + counter, t.asString());
+            counter++;
             nextValue = getNextValue(minIndex);
             if (nextValue != null)
                 values.set(minIndex, nextValue);
@@ -134,7 +134,7 @@ public class SortMerger {
         Tuple curMin = values.get(0);
         for (int i = 1; i < values.size(); i++) {
             int cmp = comparator.compare(curMin, values.get(i));
-            if (cmp > 0) {
+            if (cmp < 0) {
                 curMin = values.get(i);
                 result = i;
             }

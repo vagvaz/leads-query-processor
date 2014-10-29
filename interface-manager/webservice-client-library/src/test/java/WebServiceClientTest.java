@@ -116,7 +116,7 @@ public class WebServiceClientTest {
             } catch (InterruptedException e) {
               e.printStackTrace();
             }
-            wgsStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
+            wgsStatus = WebServiceClient.getQueryStatus(wgsStatus.getId());
           }
           if(wgsStatus.getStatus().equals("COMPLETED")){
             JsonObject level0 = WebServiceClient.getObject(wgsreply.getString("output"),"0",null);

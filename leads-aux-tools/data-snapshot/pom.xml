@@ -6,6 +6,7 @@
         <artifactId>leads-aux-tools</artifactId>
         <groupId>gr.tuc.softnet</groupId>
         <version>1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -16,11 +17,49 @@
             <groupId>gr.tuc.softnet</groupId>
             <artifactId>leads-query-processor-common</artifactId>
             <version>${processor.version}</version>
+           <exclusions>
+              <exclusion>
+                 <groupId>log4j</groupId>
+                 <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.logging.log4j</groupId>
+                 <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.slf4j</groupId>
+                 <artifactId>slf4j-log4j12</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.tajo</groupId>
+                 <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+           </exclusions>
         </dependency>
       <dependency>
          <groupId>io.vertx</groupId>
          <artifactId>vertx-core</artifactId>
          <version>${vertx.version}</version>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+
+            </exclusion>
+         </exclusions>
       </dependency>
 
     </dependencies>

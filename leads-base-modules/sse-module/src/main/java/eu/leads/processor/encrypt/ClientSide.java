@@ -237,12 +237,12 @@ public class ClientSide {
         Map<String, ArrayList<String>> index =null;
         Map<String, Etuple> db = null;
         if(manager != null){
-            index = manager.getPersisentCache("tmp.index.cache");
+            index = manager.getCacheManager().getCache("tmp.index.cache");
         }else{
             index = new HashMap<String, ArrayList<String>>();
         }
         if(manager != null){
-            db = manager.getPersisentCache("tmp.index.cache");
+            db =manager.getCacheManager().getCache("tmp.db.cache");
         }
         else{
              db = new HashMap<String, Etuple>();

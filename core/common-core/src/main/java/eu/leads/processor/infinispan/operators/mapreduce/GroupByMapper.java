@@ -46,17 +46,19 @@ public class GroupByMapper extends LeadsMapper<String, String, String, String> {
             builder.append(t.getGenericAttribute(c).toString() + ",");
         }
         if(columns.size() != 0) {
-           System.out.println("+++++++++++ " + t.asString() + " normal at " + builder.toString());
-           collector.emit(builder.toString(), t.asString());
+//           System.out.println("+++++++++++ " + t.asString() + " normal at " + builder.toString());
+           String outkey = builder.toString();
+           outkey.substring(0,outkey.length()-1);
+           collector.emit(outkey, t.asString());
         }else {
-           System.out.println("**************" + t.asString() + " emit");
+//           System.out.println("**************" + t.asString() + " emit");
            collector.emit("***" ,  t.asString());
         }
     }
 
     private void intialize() {
        isInitialized = true;
-       System.err.println("-------------Initialize");
+//       System.err.println("-------------Initialize");
        super.initialize();
        JsonArray columnArray = conf.getObject("body").getArray("groupingColumns");
        Iterator<Object> columnsIterator = columnArray.iterator();

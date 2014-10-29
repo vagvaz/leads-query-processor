@@ -150,7 +150,7 @@ public class PlannerCatalogWorker extends Verticle {
     Schema entitiesSchema = new Schema();
     entitiesSchema.addColumn("webpageurl",Type.TEXT);
     entitiesSchema.addColumn("name",Type.TEXT);
-    entitiesSchema.addColumn("sentiment",Type.FLOAT8);
+    entitiesSchema.addColumn("sentimentscore",Type.FLOAT8);
 //    entitiesSchema.addColumn("version",Type.DATE);
 
 

@@ -3,10 +3,12 @@ package eu.leads.processor.plugins;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.infinispan.PluginHandlerListener;
 import eu.leads.processor.common.utils.FSUtilities;
 import eu.leads.processor.common.utils.FileLockWrapper;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.infinispan.Cache;
+import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.context.Flag;
@@ -207,34 +209,34 @@ public class PluginManager {
         conf.put("config", StringConstants.PLUGIN_ACTIVE_CACHE);
         LinkedList<String> alist = new LinkedList<String>();
         alist.add(pluginId);
-        conf.put("pluginName", alist);
+        conf.put("pluginNames", pluginId);
         JsonObject configuration = new JsonObject();
         configuration.putString("targetCache",cacheName);
         configuration.putString("activePluginCache",StringConstants.PLUGIN_ACTIVE_CACHE);
-        configuration.putString("pluginName", pluginId);
+        configuration.putString("pluginNames", pluginId);
         configuration.putArray("types", new JsonArray());
         configuration.putString("id", UUID.randomUUID().toString());
 //        configuration.getArray("types").add(EventType.CREATED);
 //        configuration.getArray("types").add(EventType.MODIFIED);
-        SimplePluginRunner listener = new SimplePluginRunner("TestSimplePluginDeployer", conf);
-//        PluginHandlerListener runner = new PluginHandlerListener();
+//        SimplePluginRunner listener = new SimplePluginRunner("TestSimplePluginDeployer", conf);
+        PluginHandlerListener runner = new PluginHandlerListener();
 
-        manager.addListener(listener, cacheName);
-//        RemoteCacheManager remoteCacheManager = createRemoteCacheManager();
-//        RemoteCache<Object, Object> remoteCache = remoteCacheManager.getCache(cacheName);
+//        manager.addListener(listener, cacheName);
+        RemoteCacheManager remoteCacheManager = createRemoteCacheManager();
+        RemoteCache<Object, Object> remoteCache = remoteCacheManager.getCache(cacheName);
 //
 //        System.out.println("Using cache " + cacheName);
 //
-//        if (remoteCache == null) {
-//            System.err.println("Cache " + cacheName + " not found!");
-//            System.exit(1);
-//        }
+        if (remoteCache == null) {
+            System.err.println("Cache " + cacheName + " not found!");
+            System.exit(1);
+        }
 //        if (remoteCache == null) {
 //            System.err.println("Cache " + cacheName + " not found!");
 //            return;
 //        }
 //
-//        remoteCache.addClientListener(runner, new Object[]{configuration.toString()}, new Object[0]);
+        remoteCache.addClientListener(runner, new Object[]{configuration.toString()}, new Object[0]);
     }
     private static RemoteCacheManager createRemoteCacheManager() {
         ConfigurationBuilder builder = new ConfigurationBuilder();

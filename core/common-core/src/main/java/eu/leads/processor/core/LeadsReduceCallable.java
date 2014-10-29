@@ -42,13 +42,14 @@ public class LeadsReduceCallable<kOut, vOut> implements
 //                    + this.inputCache.size());
             for (Entry<kOut, List<vOut>> entry : inputCache.entrySet()) {
                 kOut key = entry.getKey();
+
                 vOut res = reducer.reduce(key, entry.getValue().iterator());
                 if(res == null || res.toString().equals("")){
                   ;
                 }
                 else
                 {
-                  outCache.put(key, res);
+//                  outCache.put(key, res);
                 }
             }
 

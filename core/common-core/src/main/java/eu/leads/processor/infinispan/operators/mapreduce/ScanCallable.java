@@ -79,7 +79,8 @@ public class ScanCallable <K,V> implements
 
    @Override
    public String call() throws Exception {
-      for (Map.Entry<K, V> entry : inputCache.entrySet()) {
+      for (Map.Entry<K, V> entry : inputCache.getAdvancedCache().getDataContainer().entrySet()) {
+//         System.err.println(manager.getCacheManager().getAddress().toString() + " "+ entry.getKey() + "       " + entry.getValue());
 //          String versionedKey = (String) entry.getKey();
 //          String key = pruneVersion(versionedKey);
 //          Version latestVersion = versionedCache.getLatestVersion(key);
@@ -152,15 +153,15 @@ public class ScanCallable <K,V> implements
 
       JsonObject result = new JsonObject();
        //WARNING
-       System.err.println("out: " + tuple.asString());
+//       System.err.println("out: " + tuple.asString());
 
        if(targetsMap.size() == 0)
        {
-          System.err.println("s 0 ");
+//          System.err.println("s 0 ");
           return tuple;
 
        }
-       System.err.println("normal");
+//       System.err.println("normal");
 
        //END OF WANRING
       List<String> toRemoveFields = new ArrayList<String>();

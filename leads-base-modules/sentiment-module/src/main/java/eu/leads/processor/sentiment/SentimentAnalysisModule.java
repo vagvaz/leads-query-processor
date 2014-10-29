@@ -82,12 +82,12 @@ public class SentimentAnalysisModule implements SentimentAnalysis {
                                                SentimentCoreAnnotations.ClassName.class)
                                    .equalsIgnoreCase("Negative")) {
                         // out.println("-1");
-                        r = -1;
+                        r = -0.1;
                     } else if (sentence.get(
                                                SentimentCoreAnnotations.ClassName.class)
                                    .equalsIgnoreCase("Very Negative")) {
                         // out.println("-2");
-                        r = -2;
+                        r = -0.2;
                     } else {
                         // out.println("0");
 

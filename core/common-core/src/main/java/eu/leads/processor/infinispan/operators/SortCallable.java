@@ -7,10 +7,7 @@ import org.infinispan.Cache;
 import org.infinispan.distexec.DistributedCallable;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by vagvaz on 9/24/14.
@@ -46,9 +43,9 @@ public class SortCallable<K,V> implements
    @Override
    public String call() throws Exception {
       ArrayList<Tuple> tuples =  new ArrayList<Tuple>();
-      for(V value : cache.values())
-      {
-        String valueString = (String)value;
+      for (Map.Entry<K, V> entry : cache.getAdvancedCache().getDataContainer().entrySet()){
+      
+        String valueString = (String)entry.getValue();
         if(valueString.equals(""))
           continue;
          tuples.add(new Tuple(valueString));

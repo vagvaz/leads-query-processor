@@ -20,28 +20,103 @@
             <groupId>gr.tuc.softnet</groupId>
             <artifactId>leads-query-processor-common</artifactId>
             <version>${processor.version}</version>
+           <exclusions>
+              <exclusion>
+                 <groupId>log4j</groupId>
+                 <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.logging.log4j</groupId>
+                 <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.tajo</groupId>
+                 <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+           </exclusions>
         </dependency>
 
          <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>17.0</version>
+            <exclusions>
+               <exclusion>
+                  <groupId>log4j</groupId>
+                  <artifactId>log4j</artifactId>
+               </exclusion>
+               <exclusion>
+                  <groupId>org.apache.logging.log4j</groupId>
+                  <artifactId>log4j-core</artifactId>
+               </exclusion>
+               <exclusion>
+                  <groupId>org.apache.tajo</groupId>
+                  <artifactId>tajo-jdbc</artifactId>
+
+               </exclusion>
+            </exclusions>
         </dependency>
           <dependency>
             <groupId>colt</groupId>
             <artifactId>colt</artifactId>
             <version>1.2.0</version>
+             <exclusions>
+                <exclusion>
+                   <groupId>log4j</groupId>
+                   <artifactId>log4j</artifactId>
+                </exclusion>
+                <exclusion>
+                   <groupId>org.apache.logging.log4j</groupId>
+                   <artifactId>log4j-core</artifactId>
+                </exclusion>
+                <exclusion>
+                   <groupId>org.apache.tajo</groupId>
+                   <artifactId>tajo-jdbc</artifactId>
+
+                </exclusion>
+             </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>3.3</version>
+           <exclusions>
+              <exclusion>
+                 <groupId>log4j</groupId>
+                 <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.logging.log4j</groupId>
+                 <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.tajo</groupId>
+                 <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+           </exclusions>
         </dependency>
         <dependency>
             <groupId>gr.tuc.softnet</groupId>
             <artifactId>simple-crawler</artifactId>
             <version>${processor.version}</version>
             <scope>test</scope>
+           <exclusions>
+              <exclusion>
+                 <groupId>log4j</groupId>
+                 <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.logging.log4j</groupId>
+                 <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.tajo</groupId>
+                 <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+           </exclusions>
         </dependency>
 
     </dependencies>

@@ -117,7 +117,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                         specialNode.getConfiguration().putString("type", LeadsNodeType.WGS_URL.toString());
 
                       }
-                      else if(queryType.equals("epq_call")){
+                      else if(queryType.equals("ppq_call")){
                         specialNode.setNodeType(LeadsNodeType.EPQ);
                         specialNode.getConfiguration().putString("type",LeadsNodeType.EPQ.toString());
                       }

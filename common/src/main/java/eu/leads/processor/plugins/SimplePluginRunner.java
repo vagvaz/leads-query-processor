@@ -44,7 +44,7 @@ public class
     protected String id;
     protected String targetCacheName;
     protected String configCacheName;
-    protected List<String> pluginNames;
+     protected List<String> pluginNames;
     transient private Logger log = LoggerFactory.getLogger(this.getClass());
 
 

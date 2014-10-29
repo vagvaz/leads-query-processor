@@ -30,7 +30,7 @@ public class PersistentCrawler extends DefaultCrawler {
     private static Log log = LogFactory.getLog(PersistentCrawler.class.getName());
 
 //  private static JavaLanguageDetection det = JavaLanguageDetection.getInstance();
-   private SentimentAnalysisModule sentimentAnalysisModule;
+   private final static SentimentAnalysisModule sentimentAnalysisModule = new SentimentAnalysisModule("classifiers/english.all.3class.distsim.crf.ser.gz");
     /**
      * Constructs a new PersistentCrawler.
      */
@@ -42,7 +42,6 @@ public class PersistentCrawler extends DefaultCrawler {
       prefix = LQPConfiguration.getConf()
                  .getString(StringConstants.CRAWLER_DEFAULT_CACHE);
         mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-      sentimentAnalysisModule = new SentimentAnalysisModule("classifiers/english.all.3class.distsim.crf.ser.gz");
     }
 
     /**
