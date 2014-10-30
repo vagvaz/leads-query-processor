@@ -1,6 +1,9 @@
 package eu.leads.processor.core;
 
 import eu.leads.processor.common.ProgressReport;
+import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
+import eu.leads.processor.common.infinispan.InfinispanManager;
+import org.infinispan.Cache;
 import org.infinispan.distexec.mapreduce.Reducer;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.vertx.java.core.json.JsonArray;
@@ -21,9 +24,11 @@ public abstract class LeadsReducer<kOut, vOut> implements Reducer<kOut, vOut> {
     *
     */
    private static final long serialVersionUID = -402082107893975415L;
+   transient protected Cache thecache;
    protected String configString;
    protected String outputCacheName;
    protected long overall;
+   transient protected InfinispanManager imanager;
    transient protected JsonObject conf;
    transient protected ConcurrentMap<String, String> output;
    transient protected boolean isInitialized = false;
@@ -64,11 +69,14 @@ public abstract class LeadsReducer<kOut, vOut> implements Reducer<kOut, vOut> {
                  target);
        }
      }
+      if(thecache != null)
+         System.err.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  \n\nLLLLLL "+thecache.size() );
       overall = this.conf.getLong("workload",100);
       timer = new Timer();
       report = new ProgressReport(this.getClass().toString(), 0, overall);
       timer.scheduleAtFixedRate(report, 0, 2000);
-      output = manager.getCache("output");
+       imanager =  InfinispanClusterSingleton.getInstance().getManager();
+      output = imanager.getPersisentCache("output");
    }
 
 

@@ -85,6 +85,8 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
                 new DeployPluginActionHandler(com, log, persistence, id));
         handlers.put(IManagerConstants.UNDEPLOY_PLUGIN,
                 new UndeployPluginActionHandler(com, log, persistence, id));
+        handlers.put(IManagerConstants.PUT_ENC_OBJECT, new PutEncActionHandler(com,log,persistence,id));
+        handlers.put(IManagerConstants.CREATE_NEW_ENC_QUERY, new CreateEncQueryActionHandler(com,log,persistence,id));
         log = new LogProxy(config.getString("log"), com);
 
         bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {

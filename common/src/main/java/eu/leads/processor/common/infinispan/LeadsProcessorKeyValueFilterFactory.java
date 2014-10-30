@@ -8,12 +8,14 @@ import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.server.hotrod.event.KeyValueFilterFactory;
 import org.vertx.java.core.json.JsonObject;
 
+import java.io.Serializable;
+
 /**
  * Created by vagvaz on 9/29/14.
  */
 
 
-public class LeadsProcessorKeyValueFilterFactory implements KeyValueFilterFactory {
+public class LeadsProcessorKeyValueFilterFactory implements KeyValueFilterFactory, Serializable {
     private final EmbeddedCacheManager manager;
 
     public LeadsProcessorKeyValueFilterFactory(EmbeddedCacheManager cacheManager){

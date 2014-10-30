@@ -5,6 +5,7 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.LeadsMapperCallable;
 import eu.leads.processor.core.LeadsReduceCallable;
+import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.infinispan.operators.mapreduce.WGSMapper;
 import eu.leads.processor.infinispan.operators.mapreduce.WGSReducer;
@@ -24,8 +25,8 @@ import java.util.concurrent.Future;
 public class WGSOperator extends MapReduceOperator {
    private Cache inputCache  ;
    private JsonArray attributesArray;
-   public WGSOperator(Node com, InfinispanManager persistence, Action action) {
-      super(com,persistence,action);
+   public WGSOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
+      super(com,persistence,log,action);
       attributesArray = new JsonArray();
       attributesArray.add("url");
       attributesArray.add("links");

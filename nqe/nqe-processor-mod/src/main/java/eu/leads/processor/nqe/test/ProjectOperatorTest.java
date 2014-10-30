@@ -339,7 +339,7 @@ public class ProjectOperatorTest {
       Action action  = createNewAction();
       action.setData(confg);
 
-      ProjectOperator operator = new ProjectOperator(null, InfinispanClusterSingleton.getInstance().getManager(),action);
+      ProjectOperator operator = new ProjectOperator(null, InfinispanClusterSingleton.getInstance().getManager(),null,action);
       operator.init(action.getData());
       operator.execute();
       try {

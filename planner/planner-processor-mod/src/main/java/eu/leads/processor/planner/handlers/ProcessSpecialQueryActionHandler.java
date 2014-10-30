@@ -7,10 +7,7 @@ import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
-import eu.leads.processor.core.plan.RecursiveCallQuery;
-import eu.leads.processor.core.plan.SQLPlan;
-import eu.leads.processor.core.plan.SpecialQuery;
-import eu.leads.processor.core.plan.WGSUrlDepthNode;
+import eu.leads.processor.core.plan.*;
 import leads.tajo.module.TaJoModule;
 import org.apache.hadoop.fs.Path;
 import org.apache.tajo.catalog.TableDesc;
@@ -72,6 +69,30 @@ public class ProcessSpecialQueryActionHandler implements ActionHandler {
             actionResult.putObject("query", query.asJsonObject());
             result.setStatus(ActionStatus.COMPLETED.toString());
             result.setResult(actionResult);
+        }else if(specialQuery.getSpecialQueryType().equals("ppq_call")){
+           PPPQCallQuery query = new PPPQCallQuery(specialQuery);
+
+           ScanNode node = new ScanNode(0);
+
+           Path testPath = new Path("test-"+query.getCache()+"-path");
+           TableMeta meta = new TableMeta(CatalogProtos.StoreType.SEQUENCEFILE,new KeyValueSet());
+           TableDesc desc = new TableDesc(query.getCache(),module.getTableSchema("entities"),meta, testPath );
+           node.init(desc);
+           EncryptedPointQueryNode rootNode = new EncryptedPointQueryNode(1);
+           rootNode.setCache(query.getCache());
+           rootNode.setToken(query.getToken());
+           rootNode.setChild(node);
+           SQLPlan plan = new SQLPlan(query.getId(), rootNode);
+           Set<SQLPlan> candidatePlans = new HashSet<SQLPlan>();
+           candidatePlans.add(plan);
+           Set<SQLPlan> evaluatedPlans = evaluatePlansFromScheduler(candidatePlans);
+           SQLPlan selectedPlan = choosePlan(evaluatedPlans);
+           query.setPlan(selectedPlan);
+           JsonObject actionResult = new JsonObject();
+           actionResult.putString("status", "ok");
+           actionResult.putObject("query", query.asJsonObject());
+           result.setStatus(ActionStatus.COMPLETED.toString());
+           result.setResult(actionResult);
         }
         return result;
     }

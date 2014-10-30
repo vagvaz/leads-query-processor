@@ -34,13 +34,13 @@ public class JoinOperator extends BasicOperator {
     private LogProxy logProxy;
     private String qualString;
     private boolean isLeft;
-    public JoinOperator(Node com, InfinispanManager persistence, Action action) {
-      super(com, persistence, action);
+    public JoinOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
+      super(com, persistence,log, action);
 
        JsonElement qual = conf.getObject("body").getElement("joinQual");
         if(!qual.asObject().getString("type").equals("EQUAL")){
             //TODO change to logProxy
-            System.err.println("JOIN is not equal but " + qual.asObject().getString("type") );
+            log.error("JOIN is not equal but " + qual.asObject().getString("type") );
         }
         tree = new FilterOperatorTree(qual);
    }
@@ -59,14 +59,14 @@ public class JoinOperator extends BasicOperator {
             if(res != null){
                 for(Future<String> result : res){
                     addresses.add(result.get());
-                  System.err.println(addresses.get(addresses.size()-1));
+                  log.info(addresses.get(addresses.size()-1));
                 }
                 //TODO log
-                System.err.println("Join Callable successfully run");
+                log.info("Join Callable successfully run");
             }
             else{
                 //TODO log
-                System.err.println("Join Callable did not run");
+                log.error("Join Callable did not run");
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -75,13 +75,15 @@ public class JoinOperator extends BasicOperator {
         }
         cleanup();
         //Store Values for statistics
-        UpdateStatistics(innerCache.size(),outerCache.size(),System.nanoTime()-startTime);
+        updateStatistics(innerCache,outerCache,outputCache);
     }
 
     @Override
     public void init(JsonObject config) {
 //        super.init(config); //fix set correctly caches names
         //fix configuration
+        JsonObject correctQual = resolveQual(conf);
+        conf.getObject("body").putObject("joinQual",correctQual);
         JsonArray inputsArray = action.getData().getObject("operator").getArray("inputs");
        Iterator<Object> inputIterator = inputsArray.iterator();
        List<String> inputs = new ArrayList<String>(2);
@@ -90,18 +92,42 @@ public class JoinOperator extends BasicOperator {
        }
        Cache left = (Cache) manager.getPersisentCache(inputs.get(0));
        Cache right = (Cache) manager.getPersisentCache(inputs.get(1));
-       if(left.size() >= right.size()){
+//       if(left.size() >= right.size()){
            innerCacheName = left.getName();
            outerCacheName = right.getName();
            isLeft = true;
-       }
-       else{
-           innerCacheName = right.getName();
-           outerCacheName = left.getName();
-           isLeft = false;
-       }
+//       }
+//       else{
+//           innerCacheName = right.getName();
+//           outerCacheName = left.getName();
+//           isLeft = false;
+//       }
        conf.putString("output",getOutput());
        init_statistics(this.getClass().getCanonicalName());
+    }
+    private JsonObject resolveQual(JsonObject conf) {
+        JsonObject qual = conf.getObject("body").getObject("joinQual");
+        JsonObject leftSchema = conf.getObject("body").getObject("leftSchema");
+        JsonObject rightSchema = conf.getObject("body").getObject("rightSchema");
+        JsonObject leftExpr = qual.getObject("body").getObject("leftExpr");
+        JsonObject rightExpr = qual.getObject("body").getObject("rightExpr");
+        boolean swap = true;
+        String leftFieldName = leftExpr.getObject("body").getObject("column").getString("name");
+        Iterator<Object> iterator = leftSchema.getArray("fields").iterator();
+        while(iterator.hasNext()){
+            JsonObject field = (JsonObject)iterator.next();
+            if(field.getString("name").equals(leftFieldName)){
+                swap = false;
+                break;
+            }
+        }
+        if(swap){
+            log.info("Join  swap predicates");
+            conf.getObject("body").getObject("joinQual").getObject("body").putObject("leftExpr",rightExpr);
+            conf.getObject("body").getObject("joinQual").getObject("body").putObject("rightExpr",leftExpr);
+        }
+        log.info("Join Did not need to swap predicates");
+        return conf.getObject("body").getObject("joinQual");
     }
 
     @Override

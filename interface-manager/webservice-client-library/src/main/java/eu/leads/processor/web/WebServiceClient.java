@@ -1,11 +1,19 @@
 package eu.leads.processor.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.leads.processor.common.infinispan.CacheManagerFactory;
+import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.encrypt.CStore;
+import eu.leads.processor.encrypt.ClientSide;
+import eu.leads.processor.encrypt.Etuple;
+import eu.leads.processor.encrypt.Record;
 import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.plugins.PluginPackage;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang.SerializationUtils;
 import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.core.json.JsonArray;
 
 import javax.ws.rs.core.MediaType;
 import java.io.*;
@@ -13,8 +21,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
+import java.security.InvalidAlgorithmParameterException;
+import java.util.*;
 
 /**
  * Created by vagvaz on 8/15/14.
@@ -95,7 +103,14 @@ public class WebServiceClient {
         os.flush();
         os.close();
     }
-
+   private static void setBody(HttpURLConnection connection, JsonObject body) throws IOException {
+      String output = body.toString();
+//        System.out.println("Size: " + output.getBytes().length);
+      DataOutputStream os = new DataOutputStream(connection.getOutputStream());
+      os.writeBytes(output);
+      os.flush();
+      os.close();
+   }
     private static void setDataBody(HttpURLConnection connection, byte[] data) throws IOException {
         //String output = mapper.writeValueAsString(body);
        // System.out.println("Size: " + output.getBytes().length);
@@ -314,4 +329,162 @@ public class WebServiceClient {
         }
         return result;
     }
+
+     public static void encryptUpload(int Svalue, double k , String targetCache, String sk_fileName, String inputFileName) throws IOException {
+        LQPConfiguration.initialize();
+        //Encrypte phase
+        System.out.println("Encrypt Data");
+//        InfinispanManager manager = CacheManagerFactory.createCacheManager("local","infinispan-encrypted.xml");
+        ClientSide client = new ClientSide(Svalue, k,sk_fileName);
+        CStore store = null;
+        try {
+           store = client.Setup(inputFileName, 3);
+        } catch (IOException e) {
+           e.printStackTrace();
+        } catch (InvalidAlgorithmParameterException e) {
+           e.printStackTrace();
+        }
+
+        //Upload
+        //steps
+        //1. upload metadata a json document with
+        // a. cachename with enc index
+        // b. cachename with enc db
+        // c. Svalue
+        // d. bvalue
+        // the metadata will be put to the cache given as parameter
+        System.out.println("upload MetaData");
+        if(store.getEDB().size() > 0 && store.getTSet().size() > 0) {
+           JsonObject object = new JsonObject();
+           object.putString("index", targetCache + ".index");
+           object.putString("db", targetCache + ".db");
+
+           object.putString("svalue", String.valueOf(store.getBvalue()));
+           object.putString("bvalue", String.valueOf(store.getSvalue()));
+           putObject(targetCache, "metadata", object);
+
+           //now we must upload the encrypted index
+           String encryptedCache = targetCache+".index";
+           String encryptedDB = targetCache+".db";
+           System.out.println("upload Index");
+           for (Map.Entry<Integer, Record[]> entry : store.getTSet().entrySet()) {
+              if(!putEncryptedIndexData(encryptedCache, entry.getKey(), entry.getValue())){
+                 System.err.println("Could not upload encrypted db");
+              }
+           }
+           //upload encrypted db
+           System.out.println("upload Data");
+           for(Map.Entry<String,Etuple> entry: store.getEDB().entrySet()){
+              if(!putEncryptedData(encryptedDB,entry.getKey(),entry.getValue()))
+              {
+                 System.err.println("Could not upload encrypted db");
+              }
+           }
+        }
+
+     }
+
+   private static boolean putEncryptedData(String encryptedDB, String key, Etuple value) throws IOException {
+      boolean result = false;
+         address = new URL(host + ":" + port + prefix + "upload/encData");
+         HttpURLConnection connection = (HttpURLConnection) address.openConnection();
+         connection = setUp(connection, "POST", MediaType.APPLICATION_JSON, true, true);
+         JsonObject uploadValue = new JsonObject();
+      uploadValue.putString("key",key);
+      uploadValue.putString("cache",encryptedDB);
+      uploadValue.putBoolean("isData",true);
+      uploadValue.putObject("value", value.toJson());
+         setBody(connection, uploadValue);
+         String response = getResult(connection);
+         JsonObject reply = new JsonObject(response);
+//            result.put("id",reply.getString("id"));
+//            result.put("output",reply.getString("output"));
+      result = reply.getString("status").equals("SUCCESS");
+      return result;
+   }
+
+   private static boolean putEncryptedIndexData(String encryptedCache, Integer key, Record[] value) throws IOException {
+      boolean result = false;
+      address = new URL(host + ":" + port + prefix + "upload/encData");
+      HttpURLConnection connection = (HttpURLConnection) address.openConnection();
+      connection = setUp(connection, "POST", MediaType.APPLICATION_JSON, true, true);
+      JsonObject uploadValue =  new JsonObject();
+      JsonArray array = new JsonArray();
+      for (int i = 0; i < value.length; i++) {
+         array.add(value[i].toJson());
+
+      }
+      uploadValue.putString("key", String.valueOf(key));
+      uploadValue.putString("cache",encryptedCache);
+      uploadValue.putBoolean("isData", false);
+      uploadValue.putArray("value",array);
+      setBody(connection, uploadValue);
+      String response = getResult(connection);
+      JsonObject reply = new JsonObject(response);
+//            result.put("id",reply.getString("id"));
+//            result.put("output",reply.getString("output"));
+      result = reply.getString("status").equals("SUCCESS");
+      return result;
+   }
+
+   public  static List<String> getEncryptedData(String user,String encryptedCache,String value, String fileName) throws InvalidAlgorithmParameterException, IOException {
+      List<String> result = null;
+      ClientSide client = new ClientSide(fileName);
+      String token = client.TSetGetTag(value);
+      JsonObject status = submitEncryptedQuery(user,encryptedCache,token);
+      String outputCache = status.getString("output");
+      boolean successful = waitForFinish(status);
+      if(successful){
+         JsonObject  results= getObject(outputCache,"results",new ArrayList<String>());
+         Map<String, ArrayList<Etuple>> resultDB = new HashMap<>();
+         JsonArray array = results.getArray("result");
+         Iterator<Object> iterator = array.iterator();
+         ArrayList<Etuple> etuples = new ArrayList<>();
+         while(iterator.hasNext()){
+            String val = (String) iterator.next();
+            Etuple e = new Etuple();
+            etuples.add(e.fromJson(val));
+         }
+         resultDB.put("result",etuples);
+                 client.Decrypt_Answer(resultDB);
+      }
+
+
+      return result;
+   }
+
+   private static boolean waitForFinish(JsonObject reply) throws IOException {
+      String queryId = reply.getString("id");
+      QueryStatus status = WebServiceClient.getQueryStatus(queryId);
+      while(!status.getStatus().equals("COMPLETED") && !status.getStatus().equals("FAILED")){
+         try {
+            Thread.sleep(1000);
+         } catch (InterruptedException e) {
+            e.printStackTrace();
+         }
+         status = WebServiceClient.getQueryStatus(status.getId());
+      }
+      return status.getStatus().equals("COMPLETED");
+   }
+
+   private static JsonObject submitEncryptedQuery(String user,String encryptedCache, String token) throws IOException {
+      JsonObject result = new JsonObject();
+
+
+         JsonObject encryptedQuery = new JsonObject();
+         encryptedQuery.putString("token",token);
+         encryptedQuery.putString("cache",encryptedCache);
+         encryptedQuery.putString("user",user);
+         address = new URL(host + ":" + port + prefix + "query/encrypted/ppq");
+         HttpURLConnection connection = (HttpURLConnection) address.openConnection();
+         connection = setUp(connection, "POST", MediaType.APPLICATION_JSON, true, true);
+         setBody(connection, encryptedQuery);
+         String response = getResult(connection);
+         JsonObject reply = new JsonObject(response);
+//            result.put("id",reply.getString("id"));
+//            result.put("output",reply.getString("output"));
+         result = reply;
+
+      return result;
+   }
 }

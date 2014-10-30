@@ -86,7 +86,7 @@ public class JoinCallable<K,V> implements
 //        ignoreColumns.add(innerColumn);
 //        ignoreColumns.add(outerColumn);
         String prefix = output + ":";
-        for (Map.Entry<K, V> entry : inputCache.entrySet()) {
+         for (Map.Entry<K, V> entry : inputCache.getAdvancedCache().getDataContainer().entrySet()){
           Tuple current = new Tuple((String) entry.getValue());
           String columnValue = current.getGenericAttribute(innerColumn).toString();
           String key = (String) entry.getKey();

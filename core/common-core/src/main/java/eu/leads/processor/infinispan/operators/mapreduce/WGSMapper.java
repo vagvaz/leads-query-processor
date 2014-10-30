@@ -76,6 +76,8 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
       result.putValue("links",t.getGenericAttribute("links"));
       collector.emit(String.valueOf(iteration),result.toString());
       if(outputCache != null){
+         if (!result.getElement("links").isArray())
+             return;
          JsonArray links = result.getArray("links");
          Iterator<Object> iterator = links.iterator();
          while(iterator.hasNext()){
@@ -98,7 +100,7 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
                 return Double.toString(0.0f);
             }
             result = currentPagerank.getVisitCount()/totalSum;
-            return Double.toHexString(result);
+            return Double.toString(result);
 
     }
 

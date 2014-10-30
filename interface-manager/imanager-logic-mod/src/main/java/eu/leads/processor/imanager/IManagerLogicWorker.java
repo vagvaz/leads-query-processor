@@ -139,7 +139,19 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
 //                        com.sendWithEventBus(workQueueAddress, newAction.asJsonObject());
                         action.getData().putString("replyTo", msg.getString("from"));
                         com.sendWithEventBus(workQueueAddress, action.asJsonObject());
-                    } else {
+                    }else if (label.equals(IManagerConstants.PUT_ENC_OBJECT)){
+                       action.getData().putString("replyTo", msg.getString("from"));
+                       com.sendWithEventBus(workQueueAddress, action.asJsonObject());
+                    }else if (label.equals(IManagerConstants.SUBMIT_ENC_QUERY)){
+                       newAction = createNewAction(action);
+                       newAction.setCategory(ActionCategory.ACTION.toString());
+                       newAction.setLabel(IManagerConstants.CREATE_NEW_ENC_QUERY);
+                       newAction.setProcessedBy(id);
+                       newAction.setData(action.getData());
+                       newAction.getData().putString("replyTo", msg.getString("from"));
+                       com.sendWithEventBus(workQueueAddress, newAction.asJsonObject());
+                    }
+                    else {
                         log.error("Unknown PENDING Action received " + action.toString());
                         return;
                     }
@@ -231,7 +243,27 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                         //Reply to the SUBMIT Query Action to the webservice
                         com.sendTo(action.getData().getString("replyTo"), webServiceReply);
                         //Create Action for the QueryPlanner to create the plan for the new Query.
-                    }else {
+                    }else if (label.equals(IManagerConstants.PUT_ENC_OBJECT)){
+                       if (!action.getResult().containsField("message")) {
+                          action.getResult().putString("message", "");
+                       }
+                       com.sendTo(action.getData().getString("replyTo"), action.getResult());
+                    }else if (label.equals(IManagerConstants.CREATE_NEW_ENC_QUERY)){
+                       JsonObject webServiceReply = action.getResult().getObject("status");
+                       //Reply to the SUBMIT Query Action to the webservice
+                       com.sendTo(action.getData().getString("replyTo"), webServiceReply);
+                       //Create Action for the QueryPlanner to create the plan for the new Query.
+                       if (!action.getResult().containsField("error")) {
+                          Action plannerAction = createNewAction(action);
+                          plannerAction.setCategory(ActionCategory.ACTION.toString());
+                          plannerAction.setLabel(QueryPlannerConstants.PROCESS_SPECIAL_QUERY);
+                          plannerAction.setDestination(StringConstants.PLANNERQUEUE);
+                          plannerAction.setData(action.getResult());
+                          com.sendTo(plannerAction.getDestination(),
+                                            plannerAction.asJsonObject());
+                       }
+                    }
+                    else {
                         log.error("Unknown COMPLETED OR INPROCESS Action received " + action
                                                                                           .toString());
                         return;

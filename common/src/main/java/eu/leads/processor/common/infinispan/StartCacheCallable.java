@@ -7,7 +7,9 @@ import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.global.GlobalConfiguration;
 import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.distexec.DistributedCallable;
+import org.infinispan.eviction.EvictionStrategy;
 import org.infinispan.manager.EmbeddedCacheManager;
+import org.infinispan.transaction.TransactionMode;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -40,9 +42,10 @@ public class StartCacheCallable<K, V> implements DistributedCallable<K, V, Void>
         manager.defineConfiguration(cacheName, new ConfigurationBuilder()
                 .clustering()
                 .cacheMode(CacheMode.DIST_SYNC)
-                .hash().numOwners(2)
+                .hash().numOwners(3)
+                .compatibility().enable().persistence().addSingleFileStore().location("/tmp/"+manager.getAddress().toString())
                 .build());
-        Cache cache = manager.getCache(cacheName,true);
+        Cache cache = manager.getCache(cacheName);
 
 //        Cache newCache = manager.getCache(cacheName,true);
 //        if(newCache != null){

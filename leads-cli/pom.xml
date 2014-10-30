@@ -14,17 +14,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-
-        <!--Dependency versions-->
-        <vertx.version>2.1</vertx.version>
-        <vertx.testtools.version>2.0.3-final</vertx.testtools.version>
-        <junit.version>4.11</junit.version>
-        <maven.vertx.plugin.version>2.0.4-final</maven.vertx.plugin.version>
     </properties>
 
     <artifactId>leads-cli</artifactId>
-
+     <version>1.0-SNAPSHOT</version>
 
     <repositories>
         <repository>
@@ -45,7 +38,7 @@
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.1</version>
+            <version>${maven.compiler.plugin.version}</version>
             <configuration>
                <source>1.7</source>
                <target>1.7</target>
@@ -74,18 +67,75 @@
             <artifactId>vertx-core</artifactId>
             <version>${vertx.version}</version>
             <scope>provided</scope>
+           <exclusions>
+              <exclusion>
+                 <groupId>log4j</groupId>
+                 <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.logging.log4j</groupId>
+                 <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.slf4j</groupId>
+                 <artifactId>slf4j-log4j12</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.tajo</groupId>
+                 <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+           </exclusions>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-platform</artifactId>
             <version>${vertx.version}</version>
             <scope>provided</scope>
+           <exclusions>
+              <exclusion>
+                 <groupId>log4j</groupId>
+                 <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.logging.log4j</groupId>
+                 <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.slf4j</groupId>
+                 <artifactId>slf4j-log4j12</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.tajo</groupId>
+                 <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+           </exclusions>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-hazelcast</artifactId>
             <version>${vertx.version}</version>
             <scope>provided</scope>
+           <exclusions>
+              <exclusion>
+                 <groupId>log4j</groupId>
+                 <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.logging.log4j</groupId>
+                 <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.slf4j</groupId>
+                 <artifactId>slf4j-log4j12</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.tajo</groupId>
+                 <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+           </exclusions>
         </dependency>
         <!--Test dependencies-->
         <dependency>
@@ -93,12 +143,50 @@
             <artifactId>junit</artifactId>
             <version>4.11</version>
             <scope>test</scope>
+           <exclusions>
+              <exclusion>
+                 <groupId>log4j</groupId>
+                 <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.logging.log4j</groupId>
+                 <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.slf4j</groupId>
+                 <artifactId>slf4j-log4j12</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.tajo</groupId>
+                 <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+           </exclusions>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>testtools</artifactId>
             <version>${vertx.testtools.version}</version>
             <scope>test</scope>
+           <exclusions>
+              <exclusion>
+                 <groupId>log4j</groupId>
+                 <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.logging.log4j</groupId>
+                 <artifactId>log4j-core</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.slf4j</groupId>
+                 <artifactId>slf4j-log4j12</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>org.apache.tajo</groupId>
+                 <artifactId>tajo-jdbc</artifactId>
+
+              </exclusion>
+           </exclusions>
         </dependency>
 
        <dependency>
@@ -106,18 +194,32 @@
           <artifactId>webservice-client-library</artifactId>
           <version>1.0-SNAPSHOT</version>
        </dependency>
-       <dependency>
-          <groupId>io.vertx</groupId>
-          <artifactId>vertx-core</artifactId>
-          <version>2.1</version>
-       </dependency>
-
 
        <dependency>
           <groupId>gr.tuc.softnet</groupId>
           <artifactId>common-core</artifactId>
           <version>1.0-SNAPSHOT</version>
+          <exclusions>
+             <exclusion>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+             </exclusion>
+             <exclusion>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+             </exclusion>
+             <exclusion>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+             </exclusion>
+             <exclusion>
+                <groupId>org.apache.tajo</groupId>
+                <artifactId>tajo-jdbc</artifactId>
+
+             </exclusion>
+          </exclusions>
        </dependency>
+
     </dependencies>
 
 </project>

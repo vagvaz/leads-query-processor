@@ -2,9 +2,13 @@ package eu.leads.processor.common.infinispan;
 
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.utils.PrintUtilities;
+import eu.leads.processor.conf.LQPConfiguration;
+import org.apache.lucene.document.Field;
 import org.infinispan.Cache;
+import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
+import org.infinispan.configuration.cache.Index;
 import org.infinispan.configuration.parsing.ConfigurationBuilderHolder;
 import org.infinispan.configuration.parsing.ParserRegistry;
 import org.infinispan.distexec.DefaultExecutorService;
@@ -15,6 +19,7 @@ import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.remoting.transport.Address;
 import org.infinispan.server.hotrod.HotRodServer;
 import org.infinispan.server.hotrod.configuration.HotRodServerConfigurationBuilder;
+import org.infinispan.transaction.TransactionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +54,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
      */
     public ClusterInfinispanManager() {
         host = "0.0.0.0";
-        serverPort = 11000;
+        serverPort = 11222;
     }
 
     public ClusterInfinispanManager(EmbeddedCacheManager manager) {
@@ -70,7 +75,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     @Override
     public void startManager(String configurationFile)  {
 
-//        server = new HotRodServer();
+
         ParserRegistry registry = new ParserRegistry();
         ConfigurationBuilderHolder holder = null;
         ConfigurationBuilder builder = null;
@@ -85,13 +90,15 @@ public class ClusterInfinispanManager implements InfinispanManager {
         }catch(IOException e){
             e.printStackTrace();
         }
-
         manager = new DefaultCacheManager(holder, true);
+        if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
+            startHotRodServer(manager,host, serverPort);
         getPersisentCache("clustered");
         getPersisentCache("defaultCache");
         //I might want to sleep here for a little while
         PrintUtilities.printList(manager.getMembers());
-//        startHotRodServer(manager,host, serverPort);
+
+
 
         System.out.println("We have started");
 
@@ -122,13 +129,18 @@ public class ClusterInfinispanManager implements InfinispanManager {
     }
 
     private void startHotRodServer(EmbeddedCacheManager targetManager, String localhost, int port) {
+        log.info("Starting HotRod Server");
+        System.err.println("Starting HotRod Server");
         serverPort = port;
+        server = new HotRodServer();
         boolean isStarted = false;
         while (!isStarted) {
             HotRodServerConfigurationBuilder serverConfigurationBuilder =
                 new HotRodServerConfigurationBuilder();
-            serverConfigurationBuilder.host(localhost).port(serverPort).keyValueFilterFactory("leads-processor-filter-factory",new LeadsProcessorKeyValueFilterFactory(manager))
+            serverConfigurationBuilder.host(localhost).port(serverPort).defaultCacheName("default")
+                  .keyValueFilterFactory("leads-processor-filter-factory",new LeadsProcessorKeyValueFilterFactory(manager))
             .converterFactory("leads-processor-converter-factory",new LeadsProcessorConverterFactory());
+
             try {
                 server.start(serverConfigurationBuilder.build(), targetManager);
                 isStarted = true;
@@ -216,15 +228,15 @@ public class ClusterInfinispanManager implements InfinispanManager {
     public void addListener(Object listener, Cache cache) {
         DistributedExecutorService des = new DefaultExecutorService(cache);
         List<Future<Void>> list = new LinkedList<Future<Void>>();
-        for (Address a : getMembers()) {
+//        for (Address a : getMembers()) {
 
             try {
-                des.submitEverywhere(new AddListenerCallable(cache.getName(),listener));
+           list =     des.submitEverywhere(new AddListenerCallable(cache.getName(),listener));
 //                list.add(des.submit(a, new AddListenerCallable(cache.getName(), listener)));
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
-        }
+//        }
 
 
         for (Future<Void> future : list) {
@@ -337,16 +349,25 @@ public class ClusterInfinispanManager implements InfinispanManager {
                           + " is not clustered so using default cluster configuration");
             //            cacheConfiguration = new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_ASYNC).async().l1().lifespan(100000L).hash().numOwners(3).build();
         }
-        DistributedExecutorService des = new DefaultExecutorService(manager.getCache());
-        List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
 
-        System.out.println("list " + list.size());
-        for (Future<Void> future : list) {
-            try {
-                future.get(); // wait for task to complete
-            } catch (InterruptedException e) {
-            } catch (ExecutionException e) {
-            }
-        }
+       manager.defineConfiguration(cacheName, new ConfigurationBuilder()
+                                                      .clustering()
+                                                      .cacheMode(CacheMode.DIST_SYNC)
+                                                      .hash().numOwners(2)
+                                                      .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
+                                                      .persistence().addSingleFileStore().location("/tmp/").shared(true).preload(false).compatibility().enable()
+                                                      .build());
+       Cache cache = manager.getCache(cacheName);
+//        DistributedExecutorService des = new DefaultExecutorService(manager.getCache());
+//        List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
+//
+//        System.out.println("list " + list.size());
+//        for (Future<Void> future : list) {
+//            try {
+//                future.get(); // wait for task to complete
+//            } catch (InterruptedException e) {
+//            } catch (ExecutionException e) {
+//            }
+//        }
     }
 }

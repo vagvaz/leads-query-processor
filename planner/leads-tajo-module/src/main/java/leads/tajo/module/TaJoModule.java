@@ -4,18 +4,17 @@
 package leads.tajo.module;
 
 import com.google.protobuf.TextFormat.ParseException;
+import eu.leads.processor.common.StringConstants;
 import grammar.LeadsSQLParser;
 import grammar.LeadsSQLParser.SqlContext;
 import grammar.SQLLexer;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.apache.tajo.algebra.BinaryOperator;
-import org.apache.tajo.algebra.Expr;
-import org.apache.tajo.algebra.UnaryOperator;
-import org.apache.tajo.catalog.CatalogClient;
-import org.apache.tajo.catalog.CatalogService;
-import org.apache.tajo.catalog.Schema;
-import org.apache.tajo.catalog.TableDesc;
+import org.apache.hadoop.fs.Path;
+import org.apache.tajo.algebra.*;
+import org.apache.tajo.catalog.*;
+import org.apache.tajo.catalog.proto.CatalogProtos;
+import org.apache.tajo.common.TajoDataTypes;
 import org.apache.tajo.conf.TajoConf;
 import org.apache.tajo.engine.json.CoreGsonHelper;
 import org.apache.tajo.engine.parser.SQLSyntaxError;
@@ -23,9 +22,12 @@ import org.apache.tajo.engine.planner.LeadsLogicalOptimizer;
 import org.apache.tajo.engine.planner.LogicalPlan;
 import org.apache.tajo.engine.planner.LogicalPlanner;
 import org.apache.tajo.engine.planner.PlanningException;
+
 import org.apache.tajo.master.session.Session;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
@@ -64,15 +66,15 @@ public class TaJoModule {
     }
 
     public static Schema getTableSchema(String tableName) {
-        TableDesc result = catalog.getTableDesc("default", tableName);
+        TableDesc result = catalog.getTableDesc(StringConstants.DEFAULT_DATABASE_NAME, tableName);
+
         return result.getLogicalSchema();
     }
 
     public static Expr parseQuery(String sql) {
-
-        System.out.print(sql.length());
-        sql=check_insert(  sql);
-        ANTLRInputStream input = new ANTLRInputStream(sql);
+//        System.out.print(sql.length());
+        String query = check_insert(sql);
+        ANTLRInputStream input = new ANTLRInputStream(query);
         SQLLexer lexer = new SQLLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         LeadsSQLParser parser = new LeadsSQLParser(tokens);
@@ -97,6 +99,27 @@ public class TaJoModule {
         return sql;
     }
 
+    public static boolean createTable(CreateTable ctCommand)
+    {
+        boolean result = false;
+        if(ctCommand==null){
+            return result;
+        }
+        ColumnDefinition[] columns = ctCommand.getTableElements();
+        Schema newTableSchema = new Schema();
+        for(ColumnDefinition c : columns){
+            newTableSchema.addColumn(c.getColumnName(), TajoDataTypes.Type.valueOf(c.getTypeName()));
+        }
+        TableMeta newTableMeta = CatalogUtil.newTableMeta(CatalogProtos.StoreType.SEQUENCEFILE);
+        Path tablePath = getTablePath(ctCommand.getTableName());
+        TableDesc desc = new TableDesc(CatalogUtil
+                .buildFQName(StringConstants.DEFAULT_DATABASE_NAME,ctCommand.getTableName()),newTableSchema,newTableMeta,tablePath);
+        return catalog.createTable(desc);
+    }
+
+    private static Path getTablePath(String tableName) {
+        return new Path(StringConstants.DEFAULT_PATH + "/" + tableName);
+    }
 
     public static String Optimize(Session session, Expr expr) throws PlanningException {
         if (catalog == null) {
@@ -135,4 +158,23 @@ public class TaJoModule {
         }
     }
 
+    public static Set<String> getPrimaryColumn(String tableName) {
+        TableDesc desc = catalog.getTableDesc(tableName);
+        Set<String> result = new HashSet<>();
+        for(Column c : desc.getSchema().getColumns()){
+            result.add(c.getSimpleName());
+        }
+        return result;
+    }
+
+
+    public void dropTable(DropTable expr) {
+      String tableName = expr.getTableName();
+       if(tableName.startsWith(StringConstants.DEFAULT_DATABASE_NAME+".")){
+          catalog.dropTable(tableName);
+       }
+       else{
+          catalog.dropTable(StringConstants.DEFAULT_DATABASE_NAME+"."+tableName);
+       }
+    }
 }

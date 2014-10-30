@@ -53,7 +53,7 @@ public class FilterCallable<K,V> implements
 
    @Override
    public String call() throws Exception {
-      for(Map.Entry<K,V> entry : inputCache.entrySet()){
+      for (Map.Entry<K, V> entry : inputCache.getAdvancedCache().getDataContainer().entrySet()){
          String key = (String) entry.getKey();
          String value = (String) entry.getValue();
          Tuple tuple = new Tuple(value);

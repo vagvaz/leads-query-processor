@@ -89,7 +89,7 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
             }
         });
 
-      log.info(" started....");
+      log.info("PlannerProcessorWorker started....");
     }
 
     @Override

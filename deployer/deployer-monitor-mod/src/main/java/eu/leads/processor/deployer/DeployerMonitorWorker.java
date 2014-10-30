@@ -156,7 +156,7 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
                 case COMPLETED: // the action either a part of a multistep workflow (INPROCESSING) or it could be processed.
                     if (label.equals(NQEConstants.DEPLOY_OPERATOR)) {
                        completeOperator(action);
-                       log.error("Received OPERATOR STARTED Action " + action.toString()
+                       log.info("DeployerMonitor  received " + action.getId() + "( " + action.getLabel() + ")"
                                       + " with status COMPLETED");
                         return;
                     } else if (label.equals(NQEConstants.OPERATOR_COMPLETE)) {

@@ -7,6 +7,8 @@ import org.infinispan.client.hotrod.annotation.ClientCacheEntryRemoved;
 import org.infinispan.client.hotrod.annotation.ClientListener;
 import org.infinispan.client.hotrod.event.ClientCacheEntryCustomEvent;
 
+import java.io.Serializable;
+
 /**
  * Created by vagvaz on 9/29/14.
  */
@@ -14,7 +16,7 @@ import org.infinispan.client.hotrod.event.ClientCacheEntryCustomEvent;
                    converterFactoryName = "leads-processor-converter-factory",
                    filterFactoryName = "leads-processor-filter-factory"
 )
-public class PluginHandlerListener {
+public class PluginHandlerListener implements Serializable{
 
     @ClientCacheEntryCreated
     @ClientCacheEntryModified

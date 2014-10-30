@@ -48,22 +48,45 @@ import static org.apache.tajo.catalog.proto.CatalogProtos.TablespaceProto;
  * So, we don't need to consider concurrency problem here.
  */
 public class LeadsMemStore implements CatalogStore {
-    private final Map<String, String> tablespaces ;
-    private final Map<String, Map<String, CatalogProtos.TableDescProto>> databases  ;
-    private final Map<String, CatalogProtos.FunctionDescProto> functions ;
-    private final Map<String, Map<String, IndexDescProto>> indexes ;
-    private final Map<String, Map<String, IndexDescProto>> indexesByColumn ;
+    private  Map<String, String> tablespaces = null;
+    private  Map<String, Map<String, CatalogProtos.TableDescProto>> databases  = null ;
+    private  Map<String, CatalogProtos.FunctionDescProto> functions = null;
+    private  Map<String, Map<String, IndexDescProto>> indexes = null ;
+    private  Map<String, Map<String, IndexDescProto>> indexesByColumn = null ;
     private InfinispanManager manager;
 
-    public LeadsMemStore(Configuration conf) {
+    public LeadsMemStore(Configuration conf) throws Exception {
         LQPConfiguration.initialize();
-        manager = InfinispanClusterSingleton.getInstance().getManager();
-             tablespaces = manager.getPersisentCache("leads.processor.catalog.tablespaces");
-             databases = manager.getPersisentCache("leads.processor.catalog.databases");
-             functions = manager.getPersisentCache("leads.processor.catalog.functions");
-             indexes = manager.getPersisentCache("leads.processor.catalog.indexes");
-             indexesByColumn = manager.getPersisentCache("leads.processor.catalog.indexesByColumn");
+        boolean isManagerStarted = false;
+        int count = 0;
+        while(!isManagerStarted) {
 
+            try {
+                manager = InfinispanClusterSingleton.getInstance().getManager();
+                isManagerStarted = manager.isStarted();
+                if (count > 2) {
+                    System.err.println("Exiting we could not start LeadsMemStore for CatalogServer so we exit");
+                    throw new Exception("Could not start InfinispanManager");
+                }
+            }catch(Exception e ){
+                isManagerStarted = false;
+                System.err.println("Failed Starting LeadsMemStore Manager retrying for " +  ++count);
+                throw new Exception("Problem with getting maps for Leads Memstore " + e.getMessage());
+
+            }
+
+        }
+//        try {
+            tablespaces = manager.getPersisentCache("leads.processor.catalog.tablespaces");
+            databases = manager.getPersisentCache("leads.processor.catalog.databases");
+            functions = manager.getPersisentCache("leads.processor.catalog.functions");
+            indexes = manager.getPersisentCache("leads.processor.catalog.indexes");
+            indexesByColumn = manager.getPersisentCache("leads.processor.catalog.indexesByColumn");
+//        }
+//        catch(Exception e){
+//            System.err.println("Problem with starting the Catalog maps exiting...\n" + e.getMessage());
+//            System.exit(-1);
+//        }
     }
 
 
@@ -203,6 +226,7 @@ public class LeadsMemStore implements CatalogStore {
             checkAndGetDatabaseNS(databases, dbName);
 
         if (database.containsKey(tbName)) {
+            manager.removePersistentCache(dbName+"."+tbName);
             database.remove(tbName);
         } else {
             throw new NoSuchTableException(tbName);

@@ -13,7 +13,7 @@
 
    <groupId>gr.tuc.softnet</groupId>
    <artifactId>leads-query-processor</artifactId>
-   <version>${processor.version}</version>
+   <version>1.0-SNAPSHOT</version>
    <packaging>pom</packaging>
    <modules>
       <module>parent</module>
@@ -25,7 +25,8 @@
       <module>plugins</module>
       <module>crawler</module>
       <module>interface-manager</module>
-      <module>leads-query-processor-interfaces</module>
+       <module>leads-base-modules</module>
+      <!--<module>leads-query-processor-interfaces</module>-->
       <module>leads-results-gui</module>
       <module>leads-cli</module>
       <module>leads-aux-tools</module>

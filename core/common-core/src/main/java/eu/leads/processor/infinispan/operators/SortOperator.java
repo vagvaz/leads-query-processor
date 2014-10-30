@@ -1,17 +1,18 @@
 package eu.leads.processor.infinispan.operators;
 
+import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.core.*;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import org.infinispan.Cache;
+import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -30,8 +31,8 @@ public class SortOperator extends BasicOperator {
     private LeadsMapper<String,String,String,String> mapper;
 
 
-   public SortOperator(Node com, InfinispanManager persistence, Action action) {
-      super(com, persistence, action);
+   public SortOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
+      super(com, persistence,log, action);
       JsonArray sortKeys = conf.getObject("body").getArray("sortKeys");
       Iterator<Object> sortKeysIterator = sortKeys.iterator();
       sortColumns = new String[sortKeys.size()];
@@ -58,38 +59,64 @@ public class SortOperator extends BasicOperator {
    public void run() {
        long startTime = System.nanoTime();
       Cache inputCache = (Cache) this.manager.getPersisentCache(getInput());
-      Cache beforeMerge = (Cache)this.manager.getPersisentCache(getOutput()+".merge");
-      DistributedExecutorService des = new DefaultExecutorService(inputCache);
-      SortCallable callable = new SortCallable(sortColumns,asceding,types,getOutput()+".merge");
-      List<Future<String>> res = des.submitEverywhere(callable);
-      List<String> addresses = new ArrayList<String>();
-      try {
-         if (res != null) {
-            for (Future<?> result : res) {
-               addresses.add((String) result.get());
-            }
-            System.out.println("mapper Execution is done");
-         }
-         else
-         {
-            System.out.println("mapper Execution not done");
-         }
-      } catch (InterruptedException e) {
-         e.printStackTrace();
-      } catch (ExecutionException e) {
-         e.printStackTrace();
-      }
+//      Cache beforeMerge = (Cache)this.manager.getPersisentCache(getOutput()+".merge");
+//      DistributedExecutorService des = new DefaultExecutorService(inputCache);
+//      SortCallable callable = new SortCallable(sortColumns,asceding,types,getOutput()+".merge");
+//      List<Future<String>> res = des.submitEverywhere(callable);
+//      List<String> addresses = new ArrayList<String>();
+//      try {
+//         if (res != null) {
+//            for (Future<?> result : res) {
+//               addresses.add((String) result.get());
+//            }
+//            System.out.println("mapper Execution is done");
+//         }
+//         else
+//         {
+//            System.out.println("mapper Execution not done");
+//         }
+//      } catch (InterruptedException e) {
+//         e.printStackTrace();
+//      } catch (ExecutionException e) {
+//         e.printStackTrace();
+//      }
       //Merge outputs
-      TupleComparator comparator = new TupleComparator(sortColumns,asceding,types);
-      SortMerger merger = new SortMerger(addresses, getOutput(),comparator,manager,conf);
-      merger.merge();
+//      TupleComparator comparator = new TupleComparator(sortColumns,asceding,types);
+//      SortMerger merger = new SortMerger(addresses, getOutput(),comparator,manager,conf);
+//      merger.merge();
+       Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
 //      for(String cacheName : addresses){
 //         manager.removePersistentCache(cacheName);
 //      }
-      manager.removePersistentCache(beforeMerge.getName());
+//      manager.removePersistentCache(beforeMerge.getName());
+      List<Tuple> tuples = new ArrayList<>();
+      String prefix = getOutput()+":";
+      try {
+         CloseableIterable<Map.Entry<String, String>> iterable =
+                 inputCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
+         for (Map.Entry<String, String> entry : iterable) {
+
+
+            String valueString = (String) entry.getValue();
+            if (valueString.equals(""))
+               continue;
+            tuples.add(new Tuple(valueString));
+         }
+      }catch (Exception e){
+         e.printStackTrace();
+      }
+      Comparator<Tuple> comparator = new TupleComparator(sortColumns,asceding,types);
+      Collections.sort(tuples, comparator);
+      int counter = 0;
+      for (Tuple t : tuples) {
+         outputCache.put(prefix  + counter, t.asString());
+         counter++;
+      }
+      tuples.clear();
       cleanup();
       //Store Values for statistics
-      UpdateStatistics(inputCache.size(), manager.getPersisentCache(getOutput()).size(),System.nanoTime()-startTime);
+//      updateStatistics(inputCache.size(), manager.getPersisentCache(getOutput()).size(), System.nanoTime() - startTime);
+       updateStatistics(inputCache,null,outputCache);
    }
 
    @Override

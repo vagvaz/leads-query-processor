@@ -98,6 +98,12 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
                             deployAction.setLabel(DeployerConstants.DEPLOY_SQL_PLAN);
                             com.sendTo(deployer, deployAction.asJsonObject());
                         }
+                        else if(actionResult != null && actionResult.getString("status").equals("ignore")){
+                            log.info("query " + actionResult.getString("message") + " is completed");
+                        }
+                        else{
+                            log.error("PROCESS_SQL_QUERY " + action.toString() + "failed");
+                        }
                     }else if(label.equals(QueryPlannerConstants.PROCESS_WORKFLOW_QUERY)){
                       JsonObject actionResult = action.getResult();
                       if (actionResult != null && actionResult.getString("status").equals("ok")) {

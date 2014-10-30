@@ -3,15 +3,18 @@ package eu.leads.processor.infinispan.operators;
 import eu.leads.processor.common.*;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.*;
+import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
+import org.infinispan.distexec.mapreduce.MapReduceTask;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by tr on 19/9/2014.
@@ -28,9 +31,9 @@ public abstract class MapReduceOperator extends BasicOperator{
     protected LeadsReducer<?,?> reducer;
 
 
-    public MapReduceOperator(Node com, InfinispanManager persistence, Action action) {
+    public MapReduceOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
 
-       super(com,persistence,action);
+       super(com,persistence,log,action);
        inputCacheName = getInput();
        outputCacheName = action.getData().getObject("operator").getString("id");
        intermediateCacheName = action.getData().getObject("operator").getString("id")+".intermediate";
@@ -58,48 +61,53 @@ public abstract class MapReduceOperator extends BasicOperator{
     @Override
     public void run() {
         long startTime = System.nanoTime();
-       DistributedExecutorService des = new DefaultExecutorService(inputCache);
-       LeadsMapperCallable mapperCallable = new LeadsMapperCallable(inputCache,collector,mapper);
-       List<Future<?>> res = des.submitEverywhere(mapperCallable);
-       try {
-            if (res != null) {
-               for (Future<?> result : res) {
-                  result.get();
-               }
-               System.out.println("mapper Execution is done");
-            }
-            else
-            {
-               System.out.println("mapper Execution not done");
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-       if(reducer != null) {
-          LeadsReduceCallable reducerCacllable = new LeadsReduceCallable(outputCache, reducer);
-          DistributedExecutorService des_inter = new DefaultExecutorService(intermediateCache);
-          List<Future<?>> reducers_res;
-          res = des_inter
-                        .submitEverywhere(reducerCacllable);
-          try {
-             if (res != null) {
-                for (Future<?> result : res) {
-                   result.get();
-                }
-                System.out.println("reducer Execution is done");
-             } else {
-                System.out.println("reducer Execution not done");
-             }
-          } catch (InterruptedException e) {
-             e.printStackTrace();
-          } catch (ExecutionException e) {
-             e.printStackTrace();
-          }
-       }
+       MapReduceTask<String,String,String,String> task = new MapReduceTask(inputCache);
+       task.mappedWith((org.infinispan.distexec.mapreduce.Mapper<String, String, String, String>) mapper)
+               .reducedWith((org.infinispan.distexec.mapreduce.Reducer<String, String>) reducer);
+       task.timeout(1, TimeUnit.HOURS);
+       task.execute();
+//       DistributedExecutorService des = new DefaultExecutorService(inputCache);
+//       LeadsMapperCallable mapperCallable = new LeadsMapperCallable(inputCache,collector,mapper);
+//       List<Future<?>> res = des.submitEverywhere(mapperCallable);
+//       try {
+//            if (res != null) {
+//               for (Future<?> result : res) {
+//                  result.get();
+//               }
+//               System.out.println("mapper Execution is done");
+//            }
+//            else
+//            {
+//               System.out.println("mapper Execution not done");
+//            }
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        }
+//       if(reducer != null) {
+//          LeadsReduceCallable reducerCacllable = new LeadsReduceCallable(outputCache, reducer);
+//          DistributedExecutorService des_inter = new DefaultExecutorService(intermediateCache);
+//          List<Future<?>> reducers_res;
+//          res = des_inter
+//                        .submitEverywhere(reducerCacllable);
+//          try {
+//             if (res != null) {
+//                for (Future<?> result : res) {
+//                   result.get();
+//                }
+//                System.out.println("reducer Execution is done");
+//             } else {
+//                System.out.println("reducer Execution not done");
+//             }
+//          } catch (InterruptedException e) {
+//             e.printStackTrace();
+//          } catch (ExecutionException e) {
+//             e.printStackTrace();
+//          }
+//       }
         //Store Values for statistics
-       UpdateStatistics(inputCache.size(),outputCache.size(),System.nanoTime()-startTime);
+        updateStatistics(inputCache,null,outputCache);
        cleanup();
     }
 

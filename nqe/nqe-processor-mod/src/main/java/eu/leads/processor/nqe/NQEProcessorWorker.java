@@ -115,11 +115,12 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
       persistence = InfinispanClusterSingleton.getInstance().getManager();
       JsonObject msg = new JsonObject();
       msg.putString("processor", id + ".process");
-      handlers = new HashMap<String,ActionHandler>();
+       log = new LogProxy(config.getString("log"),com);
+       handlers = new HashMap<String,ActionHandler>();
       handlers.put(NQEConstants.DEPLOY_OPERATOR,new OperatorActionHandler(com,log,persistence,id));
       handlers.put(NQEConstants.DEPLOY_PLUGIN,new DeployPluginActionHandler(com,log,persistence,id));
       handlers.put(NQEConstants.UNDEPLOY_PLUGIN,new UnDeployPluginActionHandler(com,log,persistence,id));
-      log = new LogProxy(config.getString("log"),com);
+
 
       bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {
          @Override

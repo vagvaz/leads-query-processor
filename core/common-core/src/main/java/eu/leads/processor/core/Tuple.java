@@ -9,6 +9,9 @@ import java.util.*;
 
 public class Tuple extends DataType {
 
+    public Tuple(){
+        super();
+    }
     public Tuple(String value) {
             this.data = new JsonObject(value);
     }

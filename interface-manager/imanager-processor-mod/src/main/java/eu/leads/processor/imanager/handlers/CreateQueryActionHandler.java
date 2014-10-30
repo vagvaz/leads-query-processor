@@ -64,6 +64,7 @@ public class CreateQueryActionHandler implements ActionHandler {
            actionResult.putString("message",
                                          "Failed to add query " + action.getData().toString()+"\n"
                                                  + " to the queries cache");
+            result.setResult(actionResult);
         }
         return result;
     }

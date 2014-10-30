@@ -70,4 +70,32 @@ public class CacheManagerFactory {
 
         return result;
     }
+
+   public static InfinispanManager createCacheManager(String type, String config) {
+      InfinispanManager result = null;
+      System.out.println("Creatting ISPN manager");
+      switch (KVSType.stringToKVSType(type)) {
+         case LOCAL:
+            System.out.println("Creatting ISPN manager loc");
+            logger.info("Starting local Infinispan Manager");
+//                result = new LocalInfinispanManager();
+            result = new LocalInfinispanManager();
+            break;
+         case CLUSTER:
+
+            logger.info("Starting Clustered Infinispan Manager");
+            result = new ClusterInfinispanManager();
+            break;
+         case MULTICLUSTER:
+            logger.info("Creatting ISPN manager multi");
+            break;
+         default:
+            logger.info("Creatting ISPN manager def");
+            break;
+      }
+      result.startManager(config);
+
+      return result;
+
+   }
 }

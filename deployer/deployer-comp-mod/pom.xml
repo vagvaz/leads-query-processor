@@ -13,6 +13,7 @@
       <groupId>gr.tuc.softnet</groupId>
       <artifactId>leads-query-processor-deployer</artifactId>
       <version>1.0-SNAPSHOT</version>
+       <relativePath>../pom.xml</relativePath>
    </parent>
 
    <properties>
@@ -34,21 +35,6 @@
     with -Dmods.directory=mydir -->
       <mods.directory>target/mods</mods.directory>
 
-      <!--Dependency versions-->
-      <vertx.version>2.1</vertx.version>
-      <vertx.testtools.version>2.0.3-final</vertx.testtools.version>
-      <junit.version>4.11</junit.version>
-
-      <!--Plugin versions-->
-      <maven.compiler.plugin.version>3.0</maven.compiler.plugin.version>
-      <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
-      <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
-      <maven.vertx.plugin.version>2.0.4-final</maven.vertx.plugin.version>
-      <maven.surefire.plugin.version>2.14</maven.surefire.plugin.version>
-      <maven.failsafe.plugin.version>2.14</maven.failsafe.plugin.version>
-      <maven.surefire.report.plugin.version>2.14</maven.surefire.report.plugin.version>
-      <maven.javadoc.plugin.version>2.9</maven.javadoc.plugin.version>
-      <maven.dependency.plugin.version>2.7</maven.dependency.plugin.version>
    </properties>
 
    <repositories>
@@ -65,36 +51,126 @@
          <artifactId>vertx-core</artifactId>
          <version>${vertx.version}</version>
          <scope>provided</scope>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+
+            </exclusion>
+         </exclusions>
       </dependency>
       <dependency>
          <groupId>io.vertx</groupId>
          <artifactId>vertx-platform</artifactId>
          <version>${vertx.version}</version>
          <scope>provided</scope>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+
+            </exclusion>
+         </exclusions>
       </dependency>
       <dependency>
          <groupId>io.vertx</groupId>
          <artifactId>vertx-hazelcast</artifactId>
          <version>${vertx.version}</version>
          <scope>provided</scope>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+
+            </exclusion>
+         </exclusions>
       </dependency>
       <!--Test dependencies-->
       <dependency>
          <groupId>junit</groupId>
          <artifactId>junit</artifactId>
-         <version>4.11</version>
+         <version>${junit.version}</version>
          <scope>test</scope>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+
+            </exclusion>
+         </exclusions>
       </dependency>
       <dependency>
          <groupId>io.vertx</groupId>
          <artifactId>testtools</artifactId>
          <version>${vertx.testtools.version}</version>
          <scope>test</scope>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+
+            </exclusion>
+         </exclusions>
       </dependency>
       <dependency>
          <groupId>gr.tuc.softnet</groupId>
          <artifactId>common-core</artifactId>
-         <version>1.0-SNAPSHOT</version>
+         <version>${processor.version}</version>
+         <exclusions>
+         <exclusion>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+         </exclusion>
+         <exclusion>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+         </exclusion>
+         <exclusion>
+            <groupId>org.apache.tajo</groupId>
+            <artifactId>tajo-jdbc</artifactId>
+
+         </exclusion>
+         </exclusions>
       </dependency>
 
       <!-- Add any other dependencies that you want packaged into your module (in the lib dir) here

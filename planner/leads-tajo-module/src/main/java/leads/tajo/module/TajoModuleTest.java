@@ -46,6 +46,7 @@ public class TajoModuleTest {
 
                              res_expr= JsonHelper.fromJson(everything.toString(), Expr.class);//
                         }else{
+                            line = check_insert(line);
                              res_expr = TaJoModule.parseQuery(line);
                         }
                         System.out.println("END");
@@ -99,4 +100,22 @@ public class TajoModuleTest {
 			e1.printStackTrace();
 		}   
 	}
+
+
+    private static String check_insert(String sql){
+        sql = sql.trim();
+        final String[] arr = sql.split(" ", 2);
+        if(arr[0].equalsIgnoreCase("insert")) {
+            //
+            if(sql.toLowerCase().contains("values")) {
+                String[] newsql = sql.split("(?i)VALUES");
+                sql = newsql[0] + " select " + newsql[1].replaceAll("\\(|\\)", "");
+                System.out.print("Fixed sql: "+sql);
+            }
+
+        }
+
+        return sql;
+
+    }
 }

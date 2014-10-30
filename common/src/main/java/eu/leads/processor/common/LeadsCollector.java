@@ -10,6 +10,8 @@ import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
+import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
+import eu.leads.processor.common.infinispan.InfinispanManager;
 import org.infinispan.Cache;
 import org.infinispan.distexec.mapreduce.Collector;
 import org.infinispan.manager.EmbeddedCacheManager;
@@ -21,6 +23,7 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
     private final AtomicInteger emitCount;
     private final int maxCollectorSize;
     private transient Cache<KOut, List<VOut>> store_cache;
+    private transient InfinispanManager imanager;
     private String cache_name;
 
     public LeadsCollector(int maxCollectorSize,
@@ -41,6 +44,7 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
 
 
         List<VOut> list = store_cache.get(key);
+
         if (list == null) {
             list = new ArrayList<VOut>(128);
             store_cache.put(key, list);
@@ -54,7 +58,8 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
 
 
     public void initialize_cache(EmbeddedCacheManager manager) {
-        store_cache = manager.getCache(cache_name);
+       imanager = new ClusterInfinispanManager(manager);
+        store_cache = (Cache<KOut, List<VOut>>) imanager.getPersisentCache(cache_name);
     }
 
     public void reset() {
