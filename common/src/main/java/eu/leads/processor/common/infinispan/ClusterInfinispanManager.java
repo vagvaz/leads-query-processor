@@ -93,8 +93,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
         manager = new DefaultCacheManager(holder, true);
         if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
             startHotRodServer(manager,host, serverPort);
+        getPersisentCache("pagerankCache");
+        getPersisentCache("approx_sum_cache");
         getPersisentCache("clustered");
-        getPersisentCache("defaultCache");
         //I might want to sleep here for a little while
         PrintUtilities.printList(manager.getMembers());
 
