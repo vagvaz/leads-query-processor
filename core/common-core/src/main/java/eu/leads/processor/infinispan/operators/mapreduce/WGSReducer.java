@@ -27,7 +27,7 @@ public class WGSReducer extends LeadsReducer<String, String> {
    public void initialize(){
       isInitialized = true;
       super.initialize();
-      imanager = new ClusterInfinispanManager(manager);
+      imanager = InfinispanClusterSingleton.getInstance().getManager();
       depth = conf.getInteger("depth");
       iteration = conf.getInteger("iteration");
       outputCache = (Cache<String, String>) imanager.getPersisentCache(conf.getString("realOutput"));
