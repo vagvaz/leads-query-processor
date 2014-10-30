@@ -2,10 +2,7 @@ package eu.leads.processor.system;
 
 import com.jcraft.jsch.*;
 import eu.leads.processor.conf.LQPConfiguration;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConversionException;
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration.*;
 import org.apache.commons.configuration.tree.ConfigurationNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +34,10 @@ public class LeadsProcessorBootstrapper2 {
             filename = args[0];
             LQPConfiguration.getInstance().loadFile(filename);
             ips = LQPConfiguration.getInstance().getConfiguration().getStringArray("processor.ips");
-            components =
+          /*  components =
                     LQPConfiguration.getInstance().getConf().getStringArray("processor.components");
             configurationFiles = LQPConfiguration.getInstance().getConf()
-                    .getStringArray("processor.configurationFiles");
+                    .getStringArray("processor.configurationFiles");*/
         }
         XMLConfiguration xmlConfiguration = (XMLConfiguration) LQPConfiguration.getInstance().getConfigurations().get(filename);
 
@@ -59,14 +56,22 @@ public class LeadsProcessorBootstrapper2 {
             componentsXml.put(c.getString("name"), c);
             if (c.containsKey("configurationFile")) {
                 LQPConfiguration.getInstance().loadFile(c.getString("configurationFile"));
-                XMLConfiguration subconf = (XMLConfiguration) LQPConfiguration.getInstance().getConfigurations().get(c.getString("configurationFile"));
+                String baseDir = LQPConfiguration.getInstance().getConf().getString("processor.ssh.baseDir");
+                String filePathname = baseDir+c.getString("configurationFile");
+                LQPConfiguration.getInstance().loadFile(filePathname);
+                XMLConfiguration subconf = null;//(XMLConfiguration) LQPConfiguration.getInstance().getConfigurations().get(filePathname);
+                try {
+                    subconf = new XMLConfiguration(filePathname);
+                } catch (ConfigurationException e) {
+                    System.err.println("File " + filePathname + " not found, fix configuration files. \nExiting stopping boot!!!!!!!");
+                    System.exit(1);
+                }
                 componentsConf.put(c.getString("name"), subconf);
                 JsonObject modjson = convertConf2Json(subconf);
                 modjson.putString("processors", c.getString("numberOfProcessors"));
                 if (c.containsKey("modName")) {
                     modjson.putString("id", c.getString("modName") + "-default-" + UUID.randomUUID().toString());
                     modjson.putString("modName", c.getString("modName"));
-
                 }
                 componentsJson.put(c.getString("name"), modjson);
             }

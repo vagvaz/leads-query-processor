@@ -49,7 +49,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>LeadsCli</mainClass>
+                            <mainClass>leadsCli</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
