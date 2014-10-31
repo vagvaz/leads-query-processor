@@ -37,6 +37,7 @@
           </indexing>
             <eviction max-entries="1000" strategy="LIRS"/>
             <transaction mode="NONE"/>
+
             <!--<persistence passivation="false">-->
                 <!--<file-store path="${java.io.tmpdir}" shared="true" preload="false" />-->
             <!--</persistence>-->
@@ -71,8 +72,6 @@
            <!--</persistence>-->
            <!--<state-transfer enabled="false" await-initial-transfer="false"/>-->
        <!--</distributed-cache>-->
-
-
       <!--<distributed-cache name="testCache" mode="SYNC" owners="2" l1-lifespan="600000" start="true"-->
                          <!--statistics="true">-->
           <!--<compatibility></compatibility>-->

@@ -51,6 +51,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     private int serverPort;
     private String host;
     private Configuration defaultConfig = null;
+
     /**
      * Constructs a new ClusterInfinispanManager.
      */
@@ -95,6 +96,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             e.printStackTrace();
         }
         manager = new DefaultCacheManager(holder, true);
+       manager.getTransport().start();
         if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
             startHotRodServer(manager,host, serverPort);
        getPersisentCache("clustered");
@@ -185,16 +187,36 @@ public class ClusterInfinispanManager implements InfinispanManager {
      */
     @Override
     public ConcurrentMap getPersisentCache(String name) {
+        if(defaultConfiguration == null){
+          initDefaultCacheConfiguration();
+        }
         if (manager.cacheExists(name))
             manager.getCache(name);
 //            createCache(name,manager.getDefaultCacheConfiguration());
         else {
-            createCache(name, manager.getDefaultCacheConfiguration());
+            createCache(name, defaultConfiguration);
         }
         return manager.getCache(name);
     }
 
-    /**
+   private void initDefaultCacheConfiguration() {
+      defaultConfiguration = new ConfigurationBuilder().read(manager.getCache().getCacheConfiguration())
+                                     .clustering()
+                                     .cacheMode(CacheMode.DIST_SYNC)
+                                     .hash().numOwners(2)
+                                     .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
+//               .persistence().addSingleFileStore().location(System.getProperty("java.io.tmpdir")+"/"+manager.getAddress().toString())
+//               .fetchPersistentState(true)
+                                     .persistence().addSingleFileStore().shared(false).purgeOnStartup(true)
+                                     .location(System.getProperty("java.io.tmpdir")+"/"+manager.getAddress().toString()+"/lvldb/")
+//                                          .expiredLocation(System.getProperty("java.io.tmpdir")+"/"+manager.getAddress().toString()+"/expired/")
+
+                                     .transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
+
+                                     .build();
+   }
+
+   /**
      * {@inheritDoc}
      */
     @Override
@@ -406,7 +428,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
    private Configuration getCacheDefaultConfiguration(String cacheName) {
       Configuration cacheConfig = null;
-      if(cacheName.equals("clustered") || cacheName.equals("default")){
+      if(cacheName.equals("clustered") && cacheName.equals("default")){
          cacheConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
                             .clustering()
                             .cacheMode(CacheMode.DIST_SYNC)
