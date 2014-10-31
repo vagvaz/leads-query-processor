@@ -157,7 +157,7 @@ public class GroupByReducer extends LeadsReducer<String, String> {
         if (!isInitialized) initialize();
         resetValues();
         Tuple t = null;
-        progress();
+//        progress();
        //Iterate overall values
         while (iterator.hasNext()) {
 

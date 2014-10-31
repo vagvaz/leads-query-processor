@@ -16,6 +16,7 @@ import org.vertx.java.core.json.JsonObject;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -53,7 +54,7 @@ public class PersistentCrawler extends DefaultCrawler {
 
         if (page == null
                 || page.getResponseCode() != HttpURLConnection.HTTP_OK
-                || page.getContent()
+                || page.getBody()
                        .isEmpty()) {  // this pages violated the crawler constraints (size, etc..).
             return;
         }
@@ -62,13 +63,14 @@ public class PersistentCrawler extends DefaultCrawler {
 
         try {
 
-            String htmlString = new String(page.getContent());
+            String htmlString = new String(page.getBody());
             Document doc = Jsoup.parse(htmlString);
             String body = doc.body().text();
             Page page2 = new Page(page.getUrl(), page.getHeaders(), page.getResponseCode(),
                                      page.getCharset(), page.getResponseTime(), body.getBytes());
             page2.setLinks(page.getLinks());
             page2.setTitle(page.getTitle());
+            page2.setPublished(getPublished(page2));
             JsonObject object = new JsonObject(mapper.writeValueAsString(page2));
             additionalAttributes(object);
             preprocessingMap
@@ -81,13 +83,30 @@ public class PersistentCrawler extends DefaultCrawler {
 
     }
 
-  private void additionalAttributes(JsonObject object) {
+   private String getPublished(Page page2) {
+      Map<String,String> headers = page2.getHeaders();
+      for(String k : headers.keySet()){
+         if(k.toLowerCase().startsWith("last-modified")){
+            return headers.get(k);
+         }
+         if(k.toLowerCase().startsWith("published")){
+            return headers.get(k);
+         }
+         if(k.toLowerCase().startsWith("date")){
+            return headers.get(k);
+         }
+      }
+      return "null";
+   }
+
+   private void additionalAttributes(JsonObject object) {
      Double minusOne = new Double(-1.9);
     object.putNumber("pagerank", minusOne);
-    Sentiment sentiment = sentimentAnalysisModule.getOverallSentiment(object.getString("content"));
+    Sentiment sentiment = sentimentAnalysisModule.getOverallSentiment(object.getString("body"));
     object.putValue("sentiment",sentiment.getValue());
 //    String language = det.detectLanguage(object.getString("content"));
-//    object.putString("language",language);
+
+    object.putString("language","en");
   }
 
   /**

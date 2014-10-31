@@ -64,7 +64,7 @@ public class SentimentAnalysisPlugin implements PluginInterface {
     private void processTuple(String key, Tuple value) {
 
         String url = value.getAttribute("url");
-        String body = value.getAttribute("content");
+        String body = value.getAttribute("body");
         Set<Entity> entities = module.getEntities(body);
         int counter = 5;
         for (Entity e : entities) {

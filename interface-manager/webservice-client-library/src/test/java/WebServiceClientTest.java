@@ -122,7 +122,7 @@ public class WebServiceClientTest {
             JsonObject level0 = WebServiceClient.getObject(wgsreply.getString("output"),"0",null);
             JsonObject level1 = WebServiceClient.getObject(wgsreply.getString("output"),"1",null);
             JsonObject level2 = WebServiceClient.getObject(wgsreply.getString("output"),"2",null);
-            JsonObject level3 = WebServiceClient.getObject(wgsreply.getString("output"),"3",null);
+//            JsonObject level3 = WebServiceClient.getObject(wgsreply.getString("output"),"3",null);
             System.out.println("===========    0   ================= \n"+level0.encodePrettily());
             System.out.println("===========    1   ================= \n"+level1.encodePrettily());
             System.out.println("===========    2   ================= \n"+level2.encodePrettily());

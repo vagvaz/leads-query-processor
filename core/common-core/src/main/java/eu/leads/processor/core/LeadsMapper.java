@@ -1,6 +1,7 @@
 package eu.leads.processor.core;
 
 import eu.leads.processor.common.ProgressReport;
+import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import org.infinispan.distexec.mapreduce.Mapper;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.vertx.java.core.json.JsonArray;
@@ -26,9 +27,9 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
 //        protected Cache<String,String> cache;
     transient protected JsonObject conf;
    transient protected boolean isInitialized = false;
-    transient protected long overall;
-    transient  protected Timer timer;
-   transient  protected ProgressReport report;
+//    transient protected long overall;
+//    transient  protected Timer timer;
+//   transient  protected ProgressReport report;
    transient  protected JsonObject inputSchema;
    transient  protected JsonObject outputSchema;
    transient  protected Map<String,String> outputMap;
@@ -59,6 +60,8 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
                     target);
           }
         }
+
+       manager = InfinispanClusterSingleton.getInstance().getManager().getCacheManager();
 //       JsonArray fields = outputSchema.getArray("fields");
 //       Iterator<Object> fieldIterator = fields.iterator();
 //       while(fieldIterator.hasNext()){
@@ -66,31 +69,31 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
 //          String outputFieldName = field.getString("name");
 //          outputMap.put(outputFieldName,targetsMap.get(outputFieldName).getObject("expr").getObject("body").getString("name"));
 //       }
-       overall =conf.getLong("workload",100);
-       timer = new Timer();
-       report = new ProgressReport(this.getClass().toString(), 0, overall);
-       timer.scheduleAtFixedRate(report, 0, 2000);
+//       overall =conf.getLong("workload",100);
+//       timer = new Timer();
+//       report = new ProgressReport(this.getClass().toString(), 0, overall);
+//       timer.scheduleAtFixedRate(report, 0, 2000);
     }
 
     @Override
     protected void finalize() {
-        report.printReport(report.getReport());
+//        report.printReport(report.getReport());
         //////////////StdOutputWriter.getInstance().println("");
-        report.cancel();
-        timer.cancel();
+//        report.cancel();
+//        timer.cancel();
     }
 
     protected void progress() {
-        report.tick();
+//        report.tick();
     }
 
     protected void progress(long n) {
-        report.tick(n);
+//        report.tick(n);
     }
 
-    protected double getProgress() {
-        return report.getReport();
-    }
+//    protected double getProgress() {
+//        return report.getReport();
+//    }
 
    protected Tuple prepareOutput(Tuple tuple){
       if(outputSchema.toString().equals(inputSchema.toString())){

@@ -139,7 +139,7 @@ public class SynopsesTestPlugin implements PluginInterface {
 
         tuple.keepOnly(attributes);
 
-        String content = tuple.getAttribute("content");
+        String content = tuple.getAttribute("body");
         st = new StringTokenizer(content);
         String tmp;
         while (st.hasMoreTokens()){

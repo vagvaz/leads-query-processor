@@ -35,8 +35,8 @@ public class Page {
     @JsonProperty("domainName")
     String domainName;
     private
-    @JsonProperty("content")
-    String content;
+    @JsonProperty("body")
+    String body;
     private
     @JsonProperty("headers")
     Map<String, String> headers = new HashMap<String, String>();
@@ -62,6 +62,27 @@ public class Page {
     private
     @JsonProperty("pagerank")
     double pagerank;
+    @JsonProperty
+    String language;
+
+   public String getLanguage() {
+      return language;
+   }
+
+   public void setLanguage(String language) {
+      this.language = language;
+   }
+
+   public String getPublished() {
+      return published;
+   }
+
+   public void setPublished(String published) {
+      this.published = published;
+   }
+
+   @JsonProperty("published")
+    String published;
 
     public double getSentiment() {
         return sentiment;
@@ -98,14 +119,14 @@ public class Page {
      * @param responseCode Reposne code
      * @param charset      Page encoding
      * @param responseTime Reponse time
-     * @param content      Page content
+     * @param body      Page body
      */
     public Page(URL url,
                    Map<String, String> headers,
                    int responseCode,
                    String charset,
                    long responseTime,
-                   byte[] content) {
+                   byte[] body) {
         this.url = url;
         this.headers = headers;
         this.responseCode = responseCode;
@@ -113,16 +134,16 @@ public class Page {
         this.responseTime = responseTime;
 
         try {
-            this.content = Charset.forName(charset).newDecoder().
+            this.body = Charset.forName(charset).newDecoder().
                                                                     onMalformedInput(CodingErrorAction.REPLACE)
                                .
                                    onUnmappableCharacter(CodingErrorAction.REPLACE).
                                                                                        decode(ByteBuffer
-                                                                                                  .wrap(content))
+                                                                                                  .wrap(body))
                                .toString();
         } catch (Exception e) {
-            log.debug("Unable to retrieve content for " + url);
-            this.content = new String();
+            log.debug("Unable to retrieve body for " + url);
+            this.body = new String();
         }
     }
 
@@ -208,12 +229,12 @@ public class Page {
     }
 
     /**
-     * Returns page content
+     * Returns page body
      *
      * @return
      */
-    public String getContent() {
-        return content;
+    public String getBody() {
+        return body;
     }
 
     /**
@@ -255,7 +276,7 @@ public class Page {
      */
     @JsonIgnore
     public String getContentEncoding() {
-        return headers == null ? null : getHeader("content-encoding");
+        return headers == null ? null : getHeader("body-encoding");
     }
 
     /**

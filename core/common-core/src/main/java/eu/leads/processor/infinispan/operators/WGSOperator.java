@@ -121,9 +121,10 @@ public class WGSOperator extends MapReduceOperator {
                   newCurrent.add(link);
                }
             }
+
          JsonObject res = new JsonObject();
          res.putArray("result",currentLevel);
-         realOutput.put(Integer.toString(count), currentLevel);
+         realOutput.put(Integer.toString(count), res.toString());
          nextLevel = newCurrent;
          currentLevel = new JsonArray();
          }
