@@ -16,6 +16,8 @@ import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.lifecycle.ComponentStatus;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
+import org.infinispan.persistence.leveldb.configuration.LevelDBStoreConfiguration;
+import org.infinispan.persistence.leveldb.configuration.LevelDBStoreConfigurationBuilder;
 import org.infinispan.remoting.transport.Address;
 import org.infinispan.server.hotrod.HotRodServer;
 import org.infinispan.server.hotrod.configuration.HotRodServerConfigurationBuilder;
@@ -48,7 +50,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     private HotRodServer server;
     private int serverPort;
     private String host;
-
+    private Configuration defaultConfig = null;
     /**
      * Constructs a new ClusterInfinispanManager.
      */
@@ -59,9 +61,11 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     public ClusterInfinispanManager(EmbeddedCacheManager manager) {
         this.manager = manager;
+        initDefaultCacheConfig();
     }
 
-    /**
+
+   /**
      * {@inheritDoc}
      */
     @Override
@@ -93,9 +97,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
         manager = new DefaultCacheManager(holder, true);
         if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
             startHotRodServer(manager,host, serverPort);
-        getPersisentCache("pagerankCache");
+       getPersisentCache("clustered");
+       getPersisentCache("pagerankCache");
         getPersisentCache("approx_sum_cache");
-        getPersisentCache("clustered");
+
         //I might want to sleep here for a little while
         PrintUtilities.printList(manager.getMembers());
 
@@ -181,8 +186,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
     @Override
     public ConcurrentMap getPersisentCache(String name) {
         if (manager.cacheExists(name))
-//            manager.getCache(name);
-            createCache(name,manager.getDefaultCacheConfiguration());
+            manager.getCache(name);
+//            createCache(name,manager.getDefaultCacheConfiguration());
         else {
             createCache(name, manager.getDefaultCacheConfiguration());
         }
@@ -351,14 +356,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
             //            cacheConfiguration = new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_ASYNC).async().l1().lifespan(100000L).hash().numOwners(3).build();
         }
 
-       manager.defineConfiguration(cacheName, new ConfigurationBuilder()
-                                                      .clustering()
-                                                      .cacheMode(CacheMode.DIST_SYNC)
-                                                      .hash().numOwners(2)
-                                                      .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
-                                                      .persistence().addSingleFileStore().location("/tmp/").shared(true).preload(false).compatibility().enable()
-                                                      .build());
-       Cache cache = manager.getCache(cacheName);
+       Configuration cacheConfig = getCacheDefaultConfiguration(cacheName);
+       manager.defineConfiguration(cacheName,cacheConfig);
+//       Cache cache = manager.getCache(cacheName);
 //        DistributedExecutorService des = new DefaultExecutorService(manager.getCache());
 //        List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
 //
@@ -371,4 +371,60 @@ public class ClusterInfinispanManager implements InfinispanManager {
 //            }
 //        }
     }
+   private void initDefaultCacheConfig() {
+      if(!LQPConfiguration.getConf().getBoolean("leads.processor.infinispan.useLevelDB",false)) {
+         defaultConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
+                                        .clustering()
+                                        .cacheMode(CacheMode.DIST_SYNC)
+                                        .hash().numOwners(2)
+                                        .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
+                                        .persistence()
+//                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
+//               .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
+                                        .addSingleFileStore().location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
+                                        .build();
+      }
+      else{
+         defaultConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
+                                        .clustering()
+                                        .cacheMode(CacheMode.DIST_SYNC)
+                                        .hash().numOwners(2)
+                                        .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
+                                        .persistence()
+                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
+               .location("/tmp/leveldb/data-"+manager.getAddress().toString()).expiredLocation("/tmp/leveldb/expired-"+manager.getAddress().toString())
+                                 .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
+
+               .preload(false).compatibility().enable()
+
+
+//                                        .addSingleFileStore().location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
+                                        .build();
+      }
+
+   }
+
+   private Configuration getCacheDefaultConfiguration(String cacheName) {
+      Configuration cacheConfig = null;
+      if(cacheName.equals("clustered") || cacheName.equals("default")){
+         cacheConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
+                            .clustering()
+                            .cacheMode(CacheMode.DIST_SYNC)
+                            .hash().numOwners(2)
+                            .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
+                            .persistence()
+//                            .addStore(LevelDBStoreConfigurationBuilder.class)
+//                            .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
+                                        .addSingleFileStore().location("/tmp/").shared(true).preload(false).compatibility().enable()
+                            .build();
+      }
+      else{
+         if(defaultConfig == null) {
+            initDefaultCacheConfig();
+         }
+          cacheConfig =  defaultConfig;
+
+      }
+      return cacheConfig;
+   }
 }

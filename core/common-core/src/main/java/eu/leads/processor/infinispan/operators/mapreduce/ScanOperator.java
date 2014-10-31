@@ -8,12 +8,15 @@ import eu.leads.processor.infinispan.operators.BasicOperator;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
+import org.infinispan.distexec.DistributedTask;
+import org.infinispan.distexec.DistributedTaskBuilder;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by vagvaz on 9/22/14.
@@ -45,9 +48,11 @@ public class ScanOperator extends BasicOperator {
          return;
       }
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
-
       ScanCallable callable = new ScanCallable(conf.toString(),getOutput());
-      List<Future<String>> res = des.submitEverywhere(callable);
+      DistributedTaskBuilder builder = des.createDistributedTaskBuilder( callable);
+      builder.timeout(1, TimeUnit.HOURS);
+      DistributedTask task = builder.build();
+      List<Future<String>> res = des.submitEverywhere(task);
 //      Future<String> res = des.submit(callable);
       List<String> addresses = new ArrayList<String>();
       try {

@@ -191,6 +191,25 @@
       </dependency>
       <dependency>
          <groupId>org.infinispan</groupId>
+         <artifactId>infinispan-cachestore-leveldb</artifactId>
+         <version>${infinispan.version}</version>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+            </exclusion>
+         </exclusions>
+      </dependency>
+      <dependency>
+         <groupId>org.infinispan</groupId>
          <artifactId>infinispan-client-hotrod</artifactId>
          <version>${infinispan.version}</version>
          <exclusions>

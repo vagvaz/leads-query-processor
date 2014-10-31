@@ -41,7 +41,7 @@ public class GroupByMapper extends LeadsMapper<String, String, String, String> {
         StringBuilder builder = new StringBuilder();
 //        String tupleId = key.substring(key.indexOf(":"));
         Tuple t = new Tuple(value);
-        progress();
+        //progress();
         for (String c : columns) {
             builder.append(t.getGenericAttribute(c).toString() + ",");
         }
