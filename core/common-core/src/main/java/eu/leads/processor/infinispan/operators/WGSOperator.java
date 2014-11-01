@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 public class WGSOperator extends MapReduceOperator {
    private Cache inputCache  ;
    private JsonArray attributesArray;
-   static int totalSum = -1;
+   private double totalSum = -1.0f;
    Cache pagerank = null;
    Cache approx_sum = null;
 

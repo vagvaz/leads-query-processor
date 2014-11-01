@@ -135,7 +135,6 @@ public class PlannerCatalogWorker extends Verticle {
     Schema webPagesSchema = new Schema();
     webPagesSchema.addColumn("url",Type.TEXT);
     webPagesSchema.addColumn("domainname",Type.TEXT);
-//    webPagesSchema.addColumn("headers",Type.BLOB);
     webPagesSchema.addColumn("body",Type.TEXT);
     webPagesSchema.addColumn("responsecode",Type.INT4);
     webPagesSchema.addColumn("language",Type.TEXT);
@@ -144,7 +143,6 @@ public class PlannerCatalogWorker extends Verticle {
     webPagesSchema.addColumn("links",Type.TEXT);
     webPagesSchema.addColumn("title",Type.TEXT);
     webPagesSchema.addColumn("published",Type.DATE);
-//    webPagesSchema.addColumn("version",Type.DATE);
     webPagesSchema.addColumn("pagerank",Type.FLOAT8);
     webPagesSchema.addColumn("sentiment",Type.FLOAT8);
 
