@@ -363,20 +363,24 @@ public class ClusterInfinispanManager implements InfinispanManager {
          //            cacheConfiguration = new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_ASYNC).async().l1().lifespan(100000L).hash().numOwners(3).build();
       }
 
-//      Configuration cacheConfig = getCacheDefaultConfiguration(cacheName);
-//      manager.defineConfiguration(cacheName,cacheConfig);
-//       Cache cache = manager.getCache(cacheName);
-        DistributedExecutorService des = new DefaultExecutorService(manager.getCache());
-        List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
+      if(cacheName.equals("clustered")){
+      Configuration cacheConfig = getCacheDefaultConfiguration(cacheName);
+      manager.defineConfiguration(cacheName,cacheConfig);
+       Cache cache = manager.getCache(cacheName);
+   }
+      else {
+         DistributedExecutorService des = new DefaultExecutorService(manager.getCache("clustered"));
+         List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
 //
-        System.out.println("list " + list.size());
-        for (Future<Void> future : list) {
+         System.out.println("list " + list.size());
+         for (Future<Void> future : list) {
             try {
-                future.get(); // wait for task to complete
+               future.get(); // wait for task to complete
             } catch (InterruptedException e) {
             } catch (ExecutionException e) {
             }
-        }
+         }
+      }
    }
    private void initDefaultCacheConfig() {
       if(!LQPConfiguration.getConf().getBoolean("leads.processor.infinispan.useLevelDB",false)) {
