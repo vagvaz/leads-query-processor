@@ -11,6 +11,7 @@ import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.distexec.mapreduce.MapReduceTask;
 import org.vertx.java.core.json.JsonObject;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -61,6 +62,8 @@ public abstract class MapReduceOperator extends BasicOperator{
     @Override
     public void run() {
         long startTime = System.nanoTime();
+       if(reducer == null)
+          reducer = new LeadsReducer("");
        MapReduceTask<String,String,String,String> task = new MapReduceTask(inputCache);
        task.mappedWith((org.infinispan.distexec.mapreduce.Mapper<String, String, String, String>) mapper)
                .reducedWith((org.infinispan.distexec.mapreduce.Reducer<String, String>) reducer);

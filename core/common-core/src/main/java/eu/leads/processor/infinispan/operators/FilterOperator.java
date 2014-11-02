@@ -8,6 +8,8 @@ import eu.leads.processor.math.FilterOperatorTree;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
+import org.infinispan.distexec.DistributedTask;
+import org.infinispan.distexec.DistributedTaskBuilder;
 import org.vertx.java.core.json.JsonElement;
 import org.vertx.java.core.json.JsonObject;
 
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created with IntelliJ IDEA.
@@ -60,7 +63,10 @@ public class FilterOperator extends BasicOperator {
 
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
       FilterCallable callable = new FilterCallable(conf.toString(),getOutput(),conf.getObject("body").getObject("qual").toString());
-      List<Future<String>> res = des.submitEverywhere(callable);
+      DistributedTaskBuilder builder = des.createDistributedTaskBuilder( callable);
+      builder.timeout(1, TimeUnit.HOURS);
+      DistributedTask task = builder.build();
+      List<Future<String>> res = des.submitEverywhere(task);
       List<String> addresses = new ArrayList<String>();
       try {
          if (res != null) {

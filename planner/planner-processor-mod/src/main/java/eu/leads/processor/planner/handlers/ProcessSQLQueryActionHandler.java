@@ -56,11 +56,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         Expr expr = null;
         try {
             expr = module.parseQuery(sqlQuery.getSQL());
-        } catch (Exception e) {
-            failQuery(e, sqlQuery);
-            result.setResult(createFailResult(e, sqlQuery));
-            return result;
-        }
+
 
         if(expr.getType().equals(OpType.CreateTable)){
             module.createTable((CreateTable)expr);
@@ -68,11 +64,17 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             completeQuery(sqlQuery);
             return result;
         }
+
         else if(expr.getType().equals(OpType.DropTable)){
             module.dropTable((DropTable)expr);
             result.setResult(ignoreResult(sqlQuery));
             completeQuery(sqlQuery);
             return result;
+        }
+        } catch (Exception e) {
+           failQuery(e, sqlQuery);
+           result.setResult(createFailResult(e, sqlQuery));
+           return result;
         }
         //Optimize plan
 //        String planAsString = null;

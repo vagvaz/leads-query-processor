@@ -38,14 +38,14 @@ public class StartCacheCallable<K, V> implements DistributedCallable<K, V, Void>
         //        cache.getCacheManager().defineConfiguration(cacheName, new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_ASYNC).async().l1().lifespan(100000L).hash().numOwners(3).build());
 
 
-        EmbeddedCacheManager manager = cache.getCacheManager();
-        manager.defineConfiguration(cacheName, new ConfigurationBuilder()
-                .clustering()
-                .cacheMode(CacheMode.DIST_SYNC)
-                .hash().numOwners(3)
-                .compatibility().enable().persistence().addSingleFileStore().location("/tmp/"+manager.getAddress().toString())
-                .build());
-        Cache cache = manager.getCache(cacheName);
+        ClusterInfinispanManager manager = new ClusterInfinispanManager(cache.getCacheManager());
+        if(manager.getCacheManager().cacheExists(cacheName)){
+           //Check that the configuration is the same;
+           return null;
+        }
+        Configuration configuration = manager.getCacheDefaultConfiguration(cacheName);
+        manager.getCacheManager().defineConfiguration(cacheName,configuration);
+        Cache startedCache = manager.getCacheManager().getCache(cacheName);
 
 //        Cache newCache = manager.getCache(cacheName,true);
 //        if(newCache != null){

@@ -9,6 +9,10 @@ import org.infinispan.distexec.mapreduce.Collector;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,6 +35,7 @@ public class ProjectMapper extends LeadsMapper<String, String, String, String> i
     public void initialize() {
         isInitialized = true;
         super.initialize();
+
         imanager = new ClusterInfinispanManager(manager);
         prefix = conf.getString("output") + ":";
         output = (Cache<String, String>) imanager.getPersisentCache(conf.getString("output"));
@@ -48,4 +53,24 @@ public class ProjectMapper extends LeadsMapper<String, String, String, String> i
         projected = prepareOutput(projected);
         output.put(prefix + tupleId, projected.asString());
     }
+
+   protected Tuple prepareOutput(Tuple tuple){
+      if(outputSchema.toString().equals(inputSchema.toString())){
+         return tuple;
+      }
+      JsonObject result = new JsonObject();
+      List<String> toRemoveFields = new ArrayList<String>();
+      Map<String,String> toRename = new HashMap<String,String>();
+      for (String field : tuple.getFieldNames()) {
+         JsonObject ob = targetsMap.get(field);
+         if (ob == null)
+            toRemoveFields.add(field);
+         else {
+            toRename.put(field, ob.getObject("column").getString("name"));
+         }
+      }
+      tuple.removeAtrributes(toRemoveFields);
+      tuple.renameAttributes(toRename);
+      return tuple;
+   }
 }

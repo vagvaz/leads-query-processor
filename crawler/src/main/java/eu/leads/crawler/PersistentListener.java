@@ -84,7 +84,7 @@ public class PersistentListener {
     public boolean isMatching(Page page) {
 
         // check for key words.
-        String content = page.getContent().toLowerCase();
+        String content = page.getBody().toLowerCase();
         for (String w : words) {
             if (!content.contains(w.toLowerCase()))
                 return false;

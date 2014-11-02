@@ -43,7 +43,7 @@ public class DefaultParser implements Parser {
 
             BulletParser bulletParser = new BulletParser();
             bulletParser.setCallback(parserCallback);
-            bulletParser.parse(page.getContent().toCharArray());
+            bulletParser.parse(page.getBody().toCharArray());
 
             parserCallback.endPage(page);
         }

@@ -12,7 +12,7 @@ package eu.leads.processor.common.infinispan;
  */
 public class InfinispanClusterSingleton {
     private static final InfinispanClusterSingleton instance = new InfinispanClusterSingleton();
-    protected static InfinispanManager cluster;
+    protected  InfinispanManager cluster;
 
     /**
      * Do not instantiate InfinispanClusterSingleton.

@@ -44,7 +44,10 @@ public class GetObjectActionHandler implements ActionHandler {
                 result.setResult(actionResult);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+           JsonObject object = new JsonObject();
+           object.putString("error",e.getMessage());
+           result.setResult(object);
         }
         return result;
     }

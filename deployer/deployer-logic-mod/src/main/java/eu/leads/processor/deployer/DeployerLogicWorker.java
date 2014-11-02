@@ -87,7 +87,11 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                         ExecutionPlanMonitor executionPlan = new ExecutionPlanMonitor(plan);
                         executionPlan.setAction(action);
                         runningPlans.put(plan.getQueryId(), executionPlan);
-                        SQLQuery query = new SQLQuery(new JsonObject(queriesCache.get(plan.getQueryId())));
+                        String queryJson = queriesCache.get(plan.getQueryId());
+                       if(queryJson == null || queryJson.equals("")){
+                          failQuery(plan.getQueryId(),"Could not read query from queries");
+                       }
+                        SQLQuery query = new SQLQuery(new JsonObject(queryJson));
                         query.getQueryStatus().setStatus(QueryState.RUNNING);
                         queriesCache.put(query.getId(),query.asJsonObject().toString());
                         startExecution(executionPlan);
@@ -96,7 +100,11 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
 
                         String queryType = action.getData().getString("specialQueryType");
                         SQLPlan plan = new SQLPlan(action.getData().getObject("plan"));
-                        SQLQuery query = new SQLQuery(new JsonObject(queriesCache.get(plan.getQueryId())));
+                       String queryJson = queriesCache.get(plan.getQueryId());
+                       if(queryJson == null || queryJson.equals("")){
+                          failQuery(plan.getQueryId(),"Could not read query from queries");
+                       }
+                        SQLQuery query = new SQLQuery(new JsonObject(queryJson));
                         query.getQueryStatus().setStatus(QueryState.RUNNING);
                         queriesCache.put(query.getId(),query.asJsonObject().toString());
                         ExecutionPlanMonitor executionPlan = new ExecutionPlanMonitor(plan);
@@ -246,7 +254,11 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
         }
     }
 
-    private void finalizeQuery(String queryId) {
+   private void failQuery(String queryId, String s) {
+
+   }
+
+   private void finalizeQuery(String queryId) {
       String queryDoc = queriesCache.get(queryId);
       if(queryDoc == null || queryDoc.equals("")){
          //error

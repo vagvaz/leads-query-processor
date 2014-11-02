@@ -2,6 +2,7 @@ package eu.leads.processor.infinispan.operators.mapreduce;
 
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
+import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.LeadsMapper;
 import eu.leads.processor.core.Tuple;
@@ -35,7 +36,7 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
     protected transient Cache pagerankCache;
     protected transient InfinispanManager imanager;
   public  void initialize() {
-      imanager = new ClusterInfinispanManager(manager);
+      imanager = InfinispanClusterSingleton.getInstance().getManager();
       isInitialized = true;
       super.initialize();
         totalSum = -1.0;

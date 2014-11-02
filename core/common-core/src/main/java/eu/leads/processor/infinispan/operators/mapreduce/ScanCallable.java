@@ -37,6 +37,7 @@ public class ScanCallable <K,V> implements
    transient protected Map<String, JsonObject> targetsMap;
    transient protected JsonObject conf;
    transient protected double totalSum;
+   transient protected Cache approxSumCache;
    protected String configString;
    protected String output;
    protected String qualString;
@@ -54,6 +55,7 @@ public class ScanCallable <K,V> implements
        manager =  new ClusterInfinispanManager(cache.getCacheManager());
       outputCache = (Cache) manager.getPersisentCache(output);
       pageRankCache = (Cache) manager.getPersisentCache("pagerankCache");
+       approxSumCache = (Cache) manager.getPersisentCache("approx_sum_cache");
       totalSum = -1f;
 
       conf = new JsonObject(configString);
@@ -220,7 +222,7 @@ public class ScanCallable <K,V> implements
    }
 
     private void computeTotalSum() {
-        Cache approxSumCache = (Cache) manager.getPersisentCache("approx_sum_cache");
+
         CloseableIterable<Map.Entry<String, Integer>> iterable =
                 approxSumCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
 

@@ -35,7 +35,8 @@ public class UberSnapshot {
          System.exit(-1);
       }
       LQPConfiguration.initialize();
-      imanager = InfinispanClusterSingleton.getInstance().getManager();
+      if(args.length == 2)
+         imanager = InfinispanClusterSingleton.getInstance().getManager();
       if(args[0].startsWith("l")){
          loadData(args);
       }
@@ -85,6 +86,8 @@ public class UberSnapshot {
          valueOut.write(entry.getValue()+"\n");
          System.out.println(counter++);
       }
+      keyOut.flush();
+      valueOut.flush();
       keyOut.close();
       valueOut.close();
       System.out.println("Stored " + counter + " tuples ");
@@ -139,24 +142,28 @@ public class UberSnapshot {
       for (Map.Entry<String, DSPMNode> entry : iterable) {
          keyOut.write(entry.getKey()+"\n");
          DSPMNode tmp = entry.getValue();
-//         int zero = tmp.getFipVisits();
-//         outstream.writeInt(zero);
-         int one = tmp.getDspmVisits();
-         outstream.writeInt(one);
-         int two = tmp.getPend();
-         outstream.writeInt(two);
-
-         int four = tmp.getFipVisits();
-         outstream.writeInt(four);
-         TObjectIntHashMap five = tmp.getStepChoices();
-         five.writeExternal(outstream);
-         THashMap<Object, TreeMap<Integer, Object>> six = tmp.getFip_map();
-         six.writeExternal(outstream);
-         THashSet seven = tmp.getNeighbours();
-         seven.writeExternal(outstream);
+         outstream.writeObject(tmp);
+////         int zero = tmp.getFipVisits();
+////         outstream.writeInt(zero);
+//         int one = tmp.getDspmVisits();
+//         outstream.writeInt(one);
+//         int two = tmp.getPend();
+//         outstream.writeInt(two);
+//
+//         int four = tmp.getFipVisits();
+//         outstream.writeInt(four);
+//         TObjectIntHashMap five = tmp.getStepChoices();
+//         outstream.writeObject(five);
+//         THashMap<Object, TreeMap<Integer, Object>> six = tmp.getFip_map();
+//         outstream.writeObject(six);
+//
+//         THashSet seven = tmp.getNeighbours();
+//         outstream.writeObject(seven);
          System.out.println(counter++);
       }
+      keyOut.flush();
       keyOut.close();
+      outstream.flush();
       outstream.close();
       System.out.println("Stored " + counter + "approx_sums tuples ");
    }
@@ -184,18 +191,18 @@ public class UberSnapshot {
       System.out.println("loading webpages");
       loadCacheTo("default.webpages", args[1]);
       System.out.println("loading entities");
-      loadCacheTo("default.webpages", args[1]);
+      loadCacheTo("default.entities", args[1]);
 
-      Cache cache = (Cache) manager.getCache("approx_sum_cache");
+      Map cache =  manager.getCache("approx_sum_cache");
       loadApproxSum(args[1], cache);
 
-      Cache cachep  = (Cache) manager.getCache("pagerankCache");
+      Map cachep  =  manager.getCache("pagerankCache");
       loadPagerank(args[1],cachep);
    }
 
    private static void loadCacheTo(String s, String arg) throws IOException {
       String cacheName = s;
-      Cache cache = (Cache) manager.getCache(cacheName);
+      Map cache =  manager.getCache(cacheName);
       BufferedReader keyReader = new BufferedReader(new InputStreamReader(new FileInputStream(arg+"/"+cacheName+".keys")));
 //        BufferedReader sizeReader = new BufferedReader(new InputStreamReader(new FileInputStream(dir+"/"+cacheName+".sizes")));
       BufferedReader valueReader = new BufferedReader(new InputStreamReader(new FileInputStream(arg+"/"+cacheName+".values")));
@@ -235,14 +242,14 @@ public class UberSnapshot {
       System.out.println("loading webpages");
          loadCache("default.webpages",args[1]);
       System.out.println("loading entities");
-      loadCache("default.webpages",args[1]);
+      loadCache("default.entities",args[1]);
 
       Cache cache = (Cache) imanager.getPersisentCache("approx_sum_cache");
       loadApproxSum(args[1], cache);
       cache = (Cache) imanager.getPersisentCache("pagerankCache");
       loadPagerank(args[1],cache);
    }
-   private static void loadPagerank(String arg,Cache cache) throws IOException, ClassNotFoundException {
+   private static void loadPagerank(String arg,Map cache) throws IOException, ClassNotFoundException {
       String cacheName = "pagerankCache";
 
       BufferedReader keyReader = new BufferedReader(new InputStreamReader(new FileInputStream(arg+"/"+cacheName+".keys")));
@@ -257,25 +264,28 @@ public class UberSnapshot {
 
       try {
          keyLine = keyReader.readLine();
-
-//         int zero = instream.readInt();
-         int one = instream.readInt();
-         int two = instream.readInt();
-         int three = instream.readInt();
-         int four = instream.readInt();
-         TObjectIntHashMap five = new TObjectIntHashMap();
-         five.readExternal(instream);
-         THashMap<Object, TreeMap<Integer, Object>> six = new THashMap<>();
-         THashSet seven = new THashSet();
-//         tmp.setFipVisits(zero);
-         tmp.setDspmVisits(one);
-         tmp.setPend(two);
-         tmp.setFipVisits(four);
-         tmp.setStepChoices(five);
-         tmp.setFip_map(six);
-         tmp.setNeighbours(seven);
+         tmp = new DSPMNode(keyLine.trim());
+         tmp = (DSPMNode) instream.readObject();
          cache.put(keyLine.trim(),tmp);
-         tmp = new DSPMNode("");
+//         int zero = instream.readInt();
+//         int one = instream.readInt();
+//         int two = instream.readInt();
+////         int three = instream.readInt();
+//         int four = instream.readInt();
+//         TObjectIntHashMap five =(TObjectIntHashMap)instream.readObject();
+////         five.readExternal(instream);
+//         THashMap<Object, TreeMap<Integer, Object>> six = new THashMap<>();
+//         six = (THashMap<Object, TreeMap<Integer, Object>>)instream.readObject();
+//         THashSet seven = (THashSet)instream.readObject();
+////         tmp.setFipVisits(zero);
+//         tmp.setDspmVisits(one);
+//         tmp.setPend(two);
+//         tmp.setFipVisits(four);
+//         tmp.setStepChoices(five);
+//         tmp.setFip_map(six);
+//         tmp.setNeighbours(seven);
+//         cache.put(keyLine.trim(),tmp);
+//         tmp = new DSPMNode("");
       } catch (IOException e) {
          keyReader.close();
          instream.close();
@@ -286,30 +296,32 @@ public class UberSnapshot {
          while (true && keyLine != null){
             if(keyLine != null && !keyLine.trim().equals("")){
                keyLine = keyReader.readLine();
-
+               if(keyLine == null ||  keyLine.trim().equals(""))
+                  break;
+               tmp = new DSPMNode(keyLine.trim());
+               tmp = (DSPMNode)instream.readObject();
+               System.out.println(counter);
 //         int zero = instream.readInt();
-               int one = instream.readInt();
-               int two = instream.readInt();
-               int three = instream.readInt();
-               int four = instream.readInt();
-               TObjectIntHashMap five = new TObjectIntHashMap();
-               five.readExternal(instream);
-               THashMap<Object, TreeMap<Integer, Object>> six = new THashMap<>();
-               THashSet seven = new THashSet();
-//         tmp.setFipVisits(zero);
-               tmp.setDspmVisits(one);
-               tmp.setPend(two);
-               tmp.setFipVisits(four);
-               tmp.setStepChoices(five);
-               tmp.setFip_map(six);
-               tmp.setNeighbours(seven);
+//               int one = instream.readInt();
+//               int two = instream.readInt();
+//               int three = instream.readInt();
+//               int four = instream.readInt();
+//               TObjectIntHashMap five = new TObjectIntHashMap();
+//               five.readExternal(instream);
+//               THashMap<Object, TreeMap<Integer, Object>> six = new THashMap<>();
+//               THashSet seven = new THashSet();
+////         tmp.setFipVisits(zero);
+//               tmp.setDspmVisits(one);
+//               tmp.setPend(two);
+//               tmp.setFipVisits(four);
+//               tmp.setStepChoices(five);
+//               tmp.setFip_map(six);
+//               tmp.setNeighbours(seven);
                cache.put(keyLine.trim(),tmp);
-               tmp = new DSPMNode("");
+
             }
 
             counter++;
-            keyLine = keyReader.readLine();
-
          }
       }catch(IOException e){
          keyReader.close();
@@ -317,7 +329,7 @@ public class UberSnapshot {
          System.out.println("Read " + counter + "tuples");
       }
    }
-   private static void loadApproxSum(String arg, Cache cache) throws IOException {
+   private static void loadApproxSum(String arg, Map cache) throws IOException {
       String cacheName = "approx_sum_cache";
 
       BufferedReader keyReader = new BufferedReader(new InputStreamReader(new FileInputStream(arg+"/"+cacheName+".keys")));

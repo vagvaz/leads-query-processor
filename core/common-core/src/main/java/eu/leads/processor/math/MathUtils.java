@@ -345,11 +345,12 @@ public class MathUtils {
 
    public static Object updateFunctionValue(String function, String type, Object oldValue,Object currentValue) {
       Object result = oldValue;
+      if(function.equals("count")) {
+         return updateCountValue(type, oldValue, currentValue);
+      }else if(currentValue == null || currentValue.toString().equals("null"))
+         return oldValue;
       if(function.equals("sum") ){
          result = updateSumValue(type,oldValue,currentValue);
-      }
-      else if( function.equals("count")){
-         result = updateCountValue(type,oldValue,currentValue);
       }
       else if(function.equals("max")){
          result = updateMaxValue(type,oldValue,currentValue);

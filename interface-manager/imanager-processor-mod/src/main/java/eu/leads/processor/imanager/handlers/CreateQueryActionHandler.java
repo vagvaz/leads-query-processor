@@ -69,13 +69,26 @@ public class CreateQueryActionHandler implements ActionHandler {
         return result;
     }
 
-    private String generateNewQueryId(String prefix) {
-        String candidateId = prefix + "." + UUID.randomUUID();
-        while (queriesCache.containsKey(candidateId)) {
+   private String generateNewQueryId(String prefix) {
+      String candidateId = prefix + "." + UUID.randomUUID();
+      int retries = 0;
+      boolean checked = false;
+      while (!checked) {
+         try {
             candidateId = prefix + "." + UUID.randomUUID();
-        }
-        return candidateId;
-    }
+            checked = !queriesCache.containsKey(candidateId);
+         }catch(Exception e ){
+            log.error("Checking if queries cache contains key " + candidateId);
+            retries++;
+            if(retries > 10){
+               log.error("Could not ensure that the query is unique continue either way");
+               return candidateId;
+            }
+         }
+      }
+
+      return candidateId;
+   }
 }
 
 

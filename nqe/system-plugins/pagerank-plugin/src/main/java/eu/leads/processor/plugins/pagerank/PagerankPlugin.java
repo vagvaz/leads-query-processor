@@ -106,12 +106,13 @@ public class PagerankPlugin implements PluginInterface {
 
         //remove self-loops (meaningless concerning PageRank)
         String skey = key.toString();
-        for (URL u: p.getLinks()) {
-            if ( ! ( skey.equals(u.toString()) ) ){
-                myDSPM.processEdge( skey, u.toString() );
-            }
+        if(p.getLinks()!=null) {
+           for (URL u : p.getLinks()) {
+              if (!(skey.equals(u.toString()))) {
+                 myDSPM.processEdge(skey, u.toString());
+              }
+           }
         }
-
     }
 
 }

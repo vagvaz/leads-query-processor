@@ -9,6 +9,7 @@ import org.infinispan.manager.EmbeddedCacheManager;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 
@@ -19,7 +20,7 @@ import java.util.concurrent.ConcurrentMap;
  * Time: 6:08 AM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class LeadsReducer<kOut, vOut> implements Reducer<kOut, vOut> {
+public class LeadsReducer<kOut, vOut> implements Reducer<kOut, vOut>,Serializable {
    /**
     *
     */
@@ -52,6 +53,12 @@ public abstract class LeadsReducer<kOut, vOut> implements Reducer<kOut, vOut> {
    public void setCacheManager(EmbeddedCacheManager manager){
       this.manager = manager;
    }
+
+   @Override
+   public vOut reduce(kOut reducedKey, Iterator<vOut> iter) {
+      return null;
+   }
+
    public void initialize() {
       conf = new JsonObject(configString);
       outputCacheName = conf.getString("output");
@@ -75,7 +82,9 @@ public abstract class LeadsReducer<kOut, vOut> implements Reducer<kOut, vOut> {
       timer = new Timer();
       report = new ProgressReport(this.getClass().toString(), 0, overall);
       timer.scheduleAtFixedRate(report, 0, 2000);
+
        imanager =  InfinispanClusterSingleton.getInstance().getManager();
+      manager = imanager.getCacheManager();
       output = imanager.getPersisentCache("output");
    }
 
