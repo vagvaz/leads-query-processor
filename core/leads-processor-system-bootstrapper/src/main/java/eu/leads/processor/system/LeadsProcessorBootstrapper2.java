@@ -27,7 +27,9 @@ public class LeadsProcessorBootstrapper2 {
     static Map<String, Configuration> componentsConf;
     static Map<String, JsonObject> componentsJson;
 
+    static Map<String, String> screensIPmap;
 
+    static int pagecounter= 0;
     public static void main(String[] args){
         if (checkArguments(args)) {
             LQPConfiguration.initialize(true);
@@ -43,22 +45,23 @@ public class LeadsProcessorBootstrapper2 {
 
         List<HierarchicalConfiguration> nodes = xmlConfiguration.configurationsAt("processor.component");
 
-        Iterator it = xmlConfiguration.getKeys("processor.component");
+
 
         componentsXml = new HashMap<>();
         componentsConf = new HashMap<>();
         componentsJson = new HashMap<>();
+        screensIPmap= new HashMap<>();
+        String baseDir = LQPConfiguration.getInstance().getConf().getString("processor.ssh.baseDir");
 
-        List Components2 = xmlConfiguration.getList("processor.component");
-        for (HierarchicalConfiguration c : nodes) {
+         for (HierarchicalConfiguration c : nodes) {
             ConfigurationNode node = c.getRootNode();
             logger.info("Loading configuration, Name: " + c.getString("name") + " Processors " + c.getString("numberOfProcessors"));
             componentsXml.put(c.getString("name"), c);
             if (c.containsKey("configurationFile")) {
-                LQPConfiguration.getInstance().loadFile(c.getString("configurationFile"));
-                String baseDir = LQPConfiguration.getInstance().getConf().getString("processor.ssh.baseDir");
+                //LQPConfiguration.getInstance().loadFile(c.getString("configurationFile"));
+
                 String filePathname = baseDir+c.getString("configurationFile");
-                LQPConfiguration.getInstance().loadFile(filePathname);
+                //LQPConfiguration.getInstance().loadFile(filePathname);
                 XMLConfiguration subconf = null;//(XMLConfiguration) LQPConfiguration.getInstance().getConfigurations().get(filePathname);
                 try {
                     subconf = new XMLConfiguration(filePathname);
@@ -78,14 +81,40 @@ public class LeadsProcessorBootstrapper2 {
         }
         //runRemotely("test","localhost","vertx");
         int ip = 0;
-
+        String sleep = LQPConfiguration.getInstance().getConf().getString("processor.ssh.startWaitSeconds");
+        int sleepTime = 5;
+        if(sleep!=null)
+        {
+            try {
+                int parsedInt = Integer.parseInt(sleep);
+                sleepTime= parsedInt;
+            }catch (NumberFormatException e){
+                ;
+            }
+        }
+        boolean started = false;
         for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
             //JSch jsch = new JSch();
            // Session session = createSession( jsch,  ips[ip] );
+            if(started)
+                for(int t = 0; t<sleepTime; t++) {
+                    System.out.print(" .");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+
+                }
+
+
             deployComponent(e.getKey(), ips[ip]);
             ip = (ip + 1) % ips.length;
-            //break;
+            System.out.print("\nWaiting for " + sleepTime + " seconds to start the next module.");
 
+
+            //break;
+            started=true;
         }
     }
 
@@ -215,12 +244,40 @@ public class LeadsProcessorBootstrapper2 {
 
     }
 
+    public static void runRemotely(String id, String ip, String command){
+        runRemotely( id,  ip,  command, false);
+    }
 
-    public static void runRemotely(String id, String ip, String command) {
-        String command0 = "screen -AmdS shell_" + id + " bash -l";
-        // run top within that bash session
-        String command1 = command0 + " && " + "screen -S shell_" + id + " -p 0 -X stuff $\"" + command + "\\r\"";//ping 147.27.18.1";
-        //System.out.print("Cmd" + command1);
+    public static void runRemotely(String id, String ip, String command, boolean existingWindow) {
+        String command1;
+        if(existingWindow)
+        {
+            String session_name;
+            if(screensIPmap.containsKey(ip)) {
+                session_name = screensIPmap.get(ip);
+                // run top within that bash session
+                String command0 = "screen -S " + session_name ;
+                // run top within that bash session
+                command1 = command0 +   " screen -S  " + session_name + " -p " + (pagecounter++) +" -X stuff $\"" + " bash -l &&" +command + "\\r\"";//ping 147.27.18.1";
+            }
+            else
+            {
+                session_name = "shell_" + ip;
+                screensIPmap.put(ip, session_name );
+                String command0 = "screen -AmdS " + session_name + " bash -l";
+                // run top within that bash session
+                command1 = command0 + " && " + "screen -S  " + session_name + " -p \" + (pagecounter++) +\" -X stuff $\"" + command + "\\r\"";//ping 147.27.18.1";
+            }
+
+
+
+        }else {
+            String command0 = "screen -AmdS shell_" + id + " bash -l";
+            // run top within that bash session
+            command1 = command0 + " && " + "screen -S shell_" + id + " -p 0 -X stuff $\"" + command + "\\r\"";//ping 147.27.18.1";
+        }
+
+        System.out.print("Cmd" + command1);
         logger.info("Execution command: " + command1);
         //command1 =command;
         try {

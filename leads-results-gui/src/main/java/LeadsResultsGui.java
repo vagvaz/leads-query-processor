@@ -175,7 +175,7 @@ public class LeadsResultsGui extends JPanel {
         }
         try {
             config = new XMLConfiguration("leads-results-gui-settings.xml");
-            System.err.println("FoundXml settings file");
+            System.err.println("Found Xml settings file");
 
         } catch (ConfigurationException e) {
            System.err.print("Xml error: " + e.getMessage());

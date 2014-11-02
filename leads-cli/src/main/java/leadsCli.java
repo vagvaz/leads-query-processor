@@ -150,17 +150,18 @@ public class leadsCli {
             currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
 //            System.out.print("s: " + currentStatus.toString());
 //            System.out.println(", o: " + currentStatus.toString());
-            System.out.println("The query with id " + currentStatus.getId() + " is " + currentStatus.getStatus());
+            //System.out.println("The query with id " + currentStatus.getId() + " is " + currentStatus.getStatus());
+            System.out.print(". ");
 
         }  //currentStatus.getStatus()!= QueryState.COMPLETED
         System.out.println("The query with id " + currentStatus.getId() + " " + currentStatus.getStatus());
         if(currentStatus.getStatus().equals("COMPLETED")) {
-            System.out.println("Wait while we fetching your result...");
+            System.out.println("Please wait ...");
             QueryResults res = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
             print_results(res);
         }
         else{
-            System.out.println("because " + currentStatus.getErrorMessage());
+            System.err.println("Execution terminated with error : " + currentStatus.getErrorMessage());
         }
 
     }

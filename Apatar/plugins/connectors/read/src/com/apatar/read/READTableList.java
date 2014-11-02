@@ -30,7 +30,7 @@ public class READTableList {
 				"url",
                 "domainname",
                 "headers",
-                "content",
+                "body",
                 "responsecode",
                 "language",
                 "charset",
@@ -38,7 +38,8 @@ public class READTableList {
                 "links",
                 "title",
                 "pagerank",
-                "sentiment"
+                "sentiment",
+                "published"
 				}, 
 				new String[]{
 				"TEXT",
@@ -52,7 +53,8 @@ public class READTableList {
 				"TEXT",
 				"TEXT",
 				"NUMERIC",
-				"NUMERIC"
+				"NUMERIC",
+				"DATE"
 				});
 		
 		readTables.put("webpages", new READTable("webpages",arguments,returns));
