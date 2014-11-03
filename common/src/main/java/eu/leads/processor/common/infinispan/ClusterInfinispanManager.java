@@ -362,7 +362,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
                           + " is not clustered so using default cluster configuration");
          //            cacheConfiguration = new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_ASYNC).async().l1().lifespan(100000L).hash().numOwners(3).build();
       }
-
+//      if(manager.cacheExists(cacheName))
+//         return;
       if(cacheName.equals("clustered")){
          Configuration cacheConfig = getCacheDefaultConfiguration(cacheName);
          manager.defineConfiguration(cacheName,cacheConfig);
