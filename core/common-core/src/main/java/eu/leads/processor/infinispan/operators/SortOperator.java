@@ -109,7 +109,9 @@ public class SortOperator extends BasicOperator {
       Collections.sort(tuples, comparator);
       int counter = 0;
       for (Tuple t : tuples) {
-         outputCache.put(prefix  + counter, t.asString());
+//         while(outputCache.size() != counter+1) {
+            outputCache.put(prefix + counter, t.asString());
+//         }
          counter++;
       }
       tuples.clear();
