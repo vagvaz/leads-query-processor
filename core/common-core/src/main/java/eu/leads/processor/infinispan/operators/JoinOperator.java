@@ -118,6 +118,9 @@ public class JoinOperator extends BasicOperator {
         JsonObject rightExpr = qual.getObject("body").getObject("rightExpr");
         boolean swap = true;
         String leftFieldName = leftExpr.getObject("body").getObject("column").getString("name");
+        //if(leftSchema == null || leftSchema.getArray("fields") == null)
+        if(leftSchema == null || !leftSchema.containsField("fields") || leftSchema.getArray("fields") == null)
+           return qual;
         Iterator<Object> iterator = leftSchema.getArray("fields").iterator();
         while(iterator.hasNext()){
             JsonObject field = (JsonObject)iterator.next();
