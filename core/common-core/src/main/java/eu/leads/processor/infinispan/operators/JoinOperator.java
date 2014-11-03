@@ -122,6 +122,8 @@ public class JoinOperator extends BasicOperator {
         if(leftSchema == null || !leftSchema.containsField("fields") || leftSchema.getArray("fields") == null)
            return qual;
         Iterator<Object> iterator = leftSchema.getArray("fields").iterator();
+        if(leftSchema == null || !leftSchema.containsField("fields") || leftSchema.getArray("fields") == null)
+           return qual;
         while(iterator.hasNext()){
             JsonObject field = (JsonObject)iterator.next();
             if(field.getString("name").equals(leftFieldName)){

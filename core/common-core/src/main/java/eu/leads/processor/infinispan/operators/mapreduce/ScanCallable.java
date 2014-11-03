@@ -14,6 +14,8 @@ import org.infinispan.versioning.impl.VersionedCacheTreeMapImpl;
 import org.infinispan.versioning.utils.version.Version;
 import org.infinispan.versioning.utils.version.VersionScalar;
 import org.infinispan.versioning.utils.version.VersionScalarGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
@@ -42,6 +44,7 @@ public class ScanCallable <K,V> implements
    protected String output;
    protected String qualString;
    transient protected InfinispanManager manager;
+   protected Logger log;
    public ScanCallable(String configString, String output) {
       this.configString = configString;
       this.output = output;
@@ -53,8 +56,12 @@ public class ScanCallable <K,V> implements
      versionedCache = new VersionedCacheTreeMapImpl(cache,new VersionScalarGenerator(),cache.getName());
 
        manager =  new ClusterInfinispanManager(cache.getCacheManager());
+      log = LoggerFactory.getLogger("###### ScanCallable: " + manager.getMemberName().toString());
+      log.info("--------------------    get output cache ------------------------");
       outputCache = (Cache) manager.getPersisentCache(output);
+      log.info("--------------------    get pagerank cache ------------------------");
       pageRankCache = (Cache) manager.getPersisentCache("pagerankCache");
+      log.info("--------------------    get approxSum cache ------------------------");
        approxSumCache = (Cache) manager.getPersisentCache("approx_sum_cache");
       totalSum = -1f;
 
@@ -81,6 +88,7 @@ public class ScanCallable <K,V> implements
 
    @Override
    public String call() throws Exception {
+      log.info("--------------------   Iterate over values... ------------------------");
       for (Map.Entry<K, V> entry : inputCache.getAdvancedCache().getDataContainer().entrySet()) {
 //         System.err.println(manager.getCacheManager().getAddress().toString() + " "+ entry.getKey() + "       " + entry.getValue());
 //          String versionedKey = (String) entry.getKey();
@@ -102,11 +110,13 @@ public class ScanCallable <K,V> implements
          if (tree != null) {
             if(tree.accept(tuple)) {
                tuple = prepareOutput(tuple);
+               log.info("--------------------    put into output with filter ------------------------");
                outputCache.putIfAbsent(entry.getKey(), tuple.asString());
             }
          }
          else{
             tuple = prepareOutput(tuple);
+            log.info("--------------------    put into output without tree ------------------------");
             outputCache.putIfAbsent(entry.getKey(), tuple.asString());
          }
 
@@ -222,10 +232,10 @@ public class ScanCallable <K,V> implements
    }
 
     private void computeTotalSum() {
-
+       log.info("--------------------   Creating iterable over approx sum entries ------------------------");
         CloseableIterable<Map.Entry<String, Integer>> iterable =
                 approxSumCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
-
+       log.info("--------------------    Iterating over approx sum entries cache ------------------------");
         for (Map.Entry<String, Integer> outerEntry : iterable) {
             totalSum += outerEntry.getValue() ;
         }
