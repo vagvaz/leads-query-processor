@@ -364,9 +364,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
       }
 
       if(cacheName.equals("clustered")){
-      Configuration cacheConfig = getCacheDefaultConfiguration(cacheName);
-      manager.defineConfiguration(cacheName,cacheConfig);
-       Cache cache = manager.getCache(cacheName);
+         Configuration cacheConfig = getCacheDefaultConfiguration(cacheName);
+         manager.defineConfiguration(cacheName,cacheConfig);
+          Cache cache = manager.getCache(cacheName);
    }
       else {
          DistributedExecutorService des = new DefaultExecutorService(manager.getCache("clustered"));
@@ -392,7 +392,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                  .persistence()
 //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
 //               .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
-                                 .addSingleFileStore().location("/tmp/"+manager.getAddress().toString()+"/").shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
+                                 .addSingleFileStore().location("/tmp/"+manager.getAddress().toString()+"/").fetchPersistentState(true)
+                                 .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
                                  .build();
       }
       else{
@@ -404,12 +405,14 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                  .persistence()
                                  .addStore(LevelDBStoreConfigurationBuilder.class)
                                  .location("/tmp/leveldb/data-"+manager.getAddress().toString()).expiredLocation("/tmp/leveldb/expired-"+manager.getAddress().toString()).implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
-
-                                 .shared(false).preload(false).compatibility().enable()
+                                 .fetchPersistentState(true)
+                                 .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
+                                 .build();
+//                                 .shared(false).preload(false).compatibility().enable()
 
 
 //                                        .addSingleFileStore().location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
-                                 .build();
+//                                 .build();
       }
 
    }
