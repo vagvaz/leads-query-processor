@@ -107,8 +107,8 @@ public class JAggregateDialog extends JDialog {
 			String keyForReferringToDescription) {
 		String url = ApplicationData
 				.getGadgetHelpProperty(keyForReferringToDescription);
-		getKeyForReferringToDescriptionLabel().setText(
-				"<html><a href='" + url + "'>View operation guide</a></html>");
+	//	getKeyForReferringToDescriptionLabel().setText(
+	//			"<html><a href='" + url + "'>View operation guide</a></html>");
 	}
 
 	public JAggregateDialog(final Project project_1, final Project project_2,

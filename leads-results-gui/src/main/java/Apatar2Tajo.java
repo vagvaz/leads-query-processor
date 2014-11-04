@@ -16,7 +16,7 @@ public class Apatar2Tajo {
     private static HashMap<String, Expr> ApatarTajoAgregateFunctMap = new HashMap<String, Expr> ();
     private static HashMap<String, Sort.SortSpec> ApatarTajoSortFunctMap = new HashMap<String, Sort.SortSpec> ();
 
-    private static HashMap<String,Expr> GroupByOther ;
+    private static HashMap<String,Expr> GroupByOther = new HashMap<String, Expr> ();
     private static boolean foundHaving;
     private int funtionsCount = 0;
 
@@ -83,7 +83,7 @@ public class Apatar2Tajo {
         ApatarTajoSortFunctMap.put("com.apatar.functions.String.AscFunction", new  Sort.SortSpec(nullColumn,true,false));
         System.out.println("Initializing  ApatarTajoFilterFunctMap " + ApatarTajoFilterFunctMap.size());
 
-        GroupByOther = new HashMap<>();
+
     }
 
     static Expr visit_apatar_xml(Element rootNode) {

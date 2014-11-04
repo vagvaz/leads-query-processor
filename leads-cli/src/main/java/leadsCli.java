@@ -151,7 +151,7 @@ public class leadsCli {
 //            System.out.print("s: " + currentStatus.toString());
 //            System.out.println(", o: " + currentStatus.toString());
             //System.out.println("The query with id " + currentStatus.getId() + " is " + currentStatus.getStatus());
-            System.out.print(". ");
+            System.out.print(".");
 
         }  //currentStatus.getStatus()!= QueryState.COMPLETED
         System.out.println("The query with id " + currentStatus.getId() + " " + currentStatus.getStatus());
@@ -167,6 +167,10 @@ public class leadsCli {
     }
 
     private static void print_results(QueryResults data){
+        if(data==null){
+            System.out.println("Error occurred!!");
+            return;
+        }
         ArrayList<Tuple> resultSet = new ArrayList<Tuple> ();
         for (String s : data.getResult()) {
           if (s== null || s.equals("") )
@@ -181,6 +185,11 @@ public class leadsCli {
 
     //Print the results of the query
     private static void printResults(ArrayList<Tuple> resultSet) {
+        if(resultSet==null){
+            System.out.println("Error occurred!!");
+            return;
+        }
+
         boolean firstTuple = true;
         if (resultSet.size() == 0) {
             System.out.println("EMPTY RESULTS");

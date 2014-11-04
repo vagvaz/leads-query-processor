@@ -279,8 +279,8 @@ public class Wizard extends WindowAdapter implements PropertyChangeListener {
 			String keyForReferringToDescription) {
 		String url = ApplicationData
 				.getGadgetHelpProperty(keyForReferringToDescription);
-		keyForReferringToDescriptionLabel.setText("<html><a href='" + url
-				+ "'>View connector guide</a></html>");
+		//keyForReferringToDescriptionLabel.setText("<html><a href='" + url
+		//		+ "'>View connector guide</a></html>");
 	}
 
 	/**

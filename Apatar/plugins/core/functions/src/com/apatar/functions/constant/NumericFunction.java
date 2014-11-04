@@ -37,7 +37,7 @@ import com.apatar.ui.FunctionCategory;
 import com.apatar.ui.UiUtils;
 
 public class NumericFunction extends AbstractConstantApatarFunction {
-	long value;
+	double value;
 
 	public Object execute(List l) {
 		return value;
@@ -54,7 +54,7 @@ public class NumericFunction extends AbstractConstantApatarFunction {
 		return fi;
 	}
 
-	public long getValue() {
+	public double getValue() {
 		return value;
 	}
 

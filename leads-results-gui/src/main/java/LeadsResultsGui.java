@@ -7,18 +7,18 @@ import org.apache.commons.configuration.XMLConfiguration;
 import org.jdom.JDOMException;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 public class LeadsResultsGui extends JPanel {
     transient protected static Random r;
@@ -195,7 +195,8 @@ public class LeadsResultsGui extends JPanel {
         //Send Expr Json for execution
         //Wait for results
         try {
-            convert_results(send_query_and_wait(Apatar2Tajo.xml2tajo_json(xmlFile)));
+            Apatar2Tajo.init_string_maps();
+            convert_results(send_query_and_wait(Apatar2Tajo.xml2tajo(xmlFile).toJson()));
         } catch (IOException e) {
             e.printStackTrace();
             return ;
@@ -252,31 +253,81 @@ public class LeadsResultsGui extends JPanel {
 
 
     }
+    //the actionPerformed method in this class
+    //when the user presses the start button
 
     static QueryResults send_query_and_wait(String json) throws IOException, InterruptedException {
-        System.out.print("json: " + json.toString());
-        InitializeWebClient(new String[]{});
+        if(json==null){
+            JOptionPane.showMessageDialog(null,"Bad Apatar format.","Leads Results",JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
 
+        System.out.print("json: " + json.toString());
+        JButton cancelButton;
+        JFrame f = new JFrame("Progress");
+        cancelButton = new JButton("Cancel");
+        cancelButton.setActionCommand("Cancel");
+        cancelButton.addActionListener(new ButtonListener());
+        cancelButton.setPreferredSize(new Dimension(80, 30));
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        f.setLocationRelativeTo(null);
+        Container content = f.getContentPane();
+        JProgressBar progressBar = new JProgressBar();
+        progressBar.setValue(0);
+        progressBar.setStringPainted(true);
+        Border border = BorderFactory.createTitledBorder("Sending...");
+        Thread.sleep(200);
+        progressBar.setBorder(border);
+        content.add(progressBar, BorderLayout.NORTH);
+        content.add(cancelButton, BorderLayout.SOUTH);
+        f.setSize(300, 100);
+        f.setVisible(true);
+
+        InitializeWebClient(new String[]{});
+        progressBar.setValue(10);
         QueryStatus  currentStatus = WebServiceClient.submitWorkflow(username, json);
+        progressBar.setValue(20);
+        int value = 20;
         System.out.print("Waiting for results: ");
+        progressBar.setBorder(BorderFactory.createTitledBorder("Waiting for results ... "));
         while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")){
             try {
+                value = (87 - value )/3 + value;
+                progressBar.setValue(value);
                 Thread.sleep(2000);
                 System.out.print(" - ");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
+
         }
+        Thread.sleep(200);
+        progressBar.setValue(95);
+        Thread.sleep(200);
         if(currentStatus.getStatus().equals("COMPLETED")) {
             QueryResults results = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
             System.out.println("Workflow query results size: " + results.getResult().size());
+            progressBar.setBorder(BorderFactory.createTitledBorder("Completed..."));
+            progressBar.setValue(100);
+            Thread.sleep(200);
+            f.setVisible(false);
+            f.dispose();
             return results;
+        }else{
+            JOptionPane.showMessageDialog(null,"Workflow query " + currentStatus.getStatus().toString(),"Leads Results",JOptionPane.INFORMATION_MESSAGE);
+            System.out.println("Workflow query " + currentStatus.getStatus().toString());
         }
         return null;
     }
 
     private static void convert_results(QueryResults data) {
+        if (data==null) {
+            JOptionPane.showMessageDialog(null,"Error no data received, Failed","Leads Results",JOptionPane.WARNING_MESSAGE);
+            System.out.println("Error no data received, Failed");
+            System.exit(0);
+//            return;
+        }
         ArrayList<Tuple> resultSet = new ArrayList<Tuple>();
         for (String s : data.getResult()) {
             if (s== null || s.equals("") )
@@ -287,6 +338,7 @@ public class LeadsResultsGui extends JPanel {
 
         boolean firstTuple = true;
         if (resultSet.size() == 0) {
+            JOptionPane.showMessageDialog(null,"EMPTY RESULTS","Leads Results",JOptionPane.WARNING_MESSAGE);
             System.out.println("EMPTY RESULTS");
             return;
         }
@@ -301,17 +353,21 @@ public class LeadsResultsGui extends JPanel {
              String[] splField = field.split("\\.");
 
             columnNames.add(splField[splField.length-1]);
-            System.out.println("Collumn:" + splField[splField.length-1]) ;
+            System.out.println("Column:" + splField[splField.length-1]) ;
         }
 
         rowdata = new Vector<Vector>();
         Vector<Object> row;
-
+        Locale.setDefault(new Locale("en", "US"));
         for (Tuple t : resultSet) {
             row = new Vector<Object>();
             for (String field : fields){
                 Object value = t.getGenericAttribute(field);
+                //System.out.print("Class: " + value.getClass());
+
                 if(value != null ) {
+                    //if(value.getClass() == Double.class)
+
                     System.out.print("| " + value.toString()) ;
                     row.addElement(new String(value.toString()));
 
@@ -365,5 +421,11 @@ public class LeadsResultsGui extends JPanel {
             return super.getTableCellRendererComponent(
                     table, value, isSelected, hasFocus, row, column);
         }
+    }
+}
+
+class ButtonListener implements ActionListener {
+    public void actionPerformed(ActionEvent evt) {
+        System.exit(0);
     }
 }

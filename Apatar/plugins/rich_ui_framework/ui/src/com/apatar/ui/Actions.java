@@ -374,8 +374,7 @@ public class Actions {
 								"java -jar  " + jarname + " "
 										+ projectPath);
 
-						JOptionPane.showMessageDialog(ApatarUiMain.MAIN_FRAME,
-								"Please Wait for the results");
+						
 					} else {
 						JOptionPane.showMessageDialog(ApatarUiMain.MAIN_FRAME,
 								"Unable to find executable: " + dir + "/"

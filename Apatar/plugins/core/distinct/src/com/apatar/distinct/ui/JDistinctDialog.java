@@ -76,7 +76,7 @@ public class JDistinctDialog extends JDialog {
 	private JLabel keyForReferringToDescriptionLabel;
     public void setKeyForReferringToDescription(String keyForReferringToDescription) {
     	String url = ApplicationData.getGadgetHelpProperty(keyForReferringToDescription);
-    	keyForReferringToDescriptionLabel.setText("<html><a href='" + url + "'>View operation guide</a></html>");
+    	//keyForReferringToDescriptionLabel.setText("<html><a href='" + url + "'>View operation guide</a></html>");
     }
 
 	public JDistinctDialog(final DistinctNode node) throws HeadlessException {

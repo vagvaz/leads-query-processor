@@ -94,8 +94,8 @@ public class JTransformDialog extends JDialog {
 			String keyForReferringToDescription) {
 		String url = ApplicationData
 				.getGadgetHelpProperty(keyForReferringToDescription);
-		keyForReferringToDescriptionLabel.setText("<html><a href='" + url
-				+ "'>View operation guide</a></html>");
+		//keyForReferringToDescriptionLabel.setText("<html><a href='" + url
+		//		+ "'>View operation guide</a></html>");
 	}
 
 	Project project;
