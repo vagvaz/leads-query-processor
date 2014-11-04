@@ -21,7 +21,7 @@ public class DataCollection {
 
    public static void main(String[] args) {
       String seed = "";
-      int numOfPages = 60;
+      int numOfPages = 70;
        if(args.length >= 1){
            seed = args[0];
        }
@@ -29,7 +29,7 @@ public class DataCollection {
            numOfPages = Integer.parseInt(args[1]);
        }
       if(seed == null || seed.equals("")){
-          seed = "http://www.bbc.co.uk/";
+          seed = "http://www.reuters.com";
       }
       long sleepingPeriod = 5;
       String webCacheName = "default.webpages";//StringConstants.CRAWLER_DEFAULT_CACHE;

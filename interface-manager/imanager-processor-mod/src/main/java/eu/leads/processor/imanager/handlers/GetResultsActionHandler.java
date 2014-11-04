@@ -110,10 +110,13 @@ public class GetResultsActionHandler implements ActionHandler {
       Cache cache = (Cache) persistence.getPersisentCache(cacheName);
         if(isSorted) {
             String prefix = cache.getName() + ":";
-            long cacheSize = cache.size();
-            for (long index = 0; index < cacheSize; index++) {
-                String value = (String) cache.get(prefix+String.valueOf(index));
-                listOfValues.add(value);
+//            long cacheSize = cache.size();
+           long index = 0;
+           String value = (String) cache.get(prefix+String.valueOf(index));
+            while(value != null){
+               listOfValues.add(value);
+               index++;
+	       value =  (String) cache.get(prefix+String.valueOf(index));
             }
         }
         else{

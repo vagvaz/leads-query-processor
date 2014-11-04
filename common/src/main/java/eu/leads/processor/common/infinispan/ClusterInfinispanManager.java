@@ -362,21 +362,26 @@ public class ClusterInfinispanManager implements InfinispanManager {
                           + " is not clustered so using default cluster configuration");
          //            cacheConfiguration = new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_ASYNC).async().l1().lifespan(100000L).hash().numOwners(3).build();
       }
-
-//      Configuration cacheConfig = getCacheDefaultConfiguration(cacheName);
-//      manager.defineConfiguration(cacheName,cacheConfig);
-//       Cache cache = manager.getCache(cacheName);
-        DistributedExecutorService des = new DefaultExecutorService(manager.getCache());
-        List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
+//      if(manager.cacheExists(cacheName))
+//         return;
+      if(cacheName.equals("clustered")){
+         Configuration cacheConfig = getCacheDefaultConfiguration(cacheName);
+         manager.defineConfiguration(cacheName,cacheConfig);
+          Cache cache = manager.getCache(cacheName);
+   }
+      else {
+         DistributedExecutorService des = new DefaultExecutorService(manager.getCache("clustered"));
+         List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
 //
-        System.out.println("list " + list.size());
-        for (Future<Void> future : list) {
+         System.out.println("list " + list.size());
+         for (Future<Void> future : list) {
             try {
-                future.get(); // wait for task to complete
+               future.get(); // wait for task to complete
             } catch (InterruptedException e) {
             } catch (ExecutionException e) {
             }
-        }
+         }
+      }
    }
    private void initDefaultCacheConfig() {
       if(!LQPConfiguration.getConf().getBoolean("leads.processor.infinispan.useLevelDB",false)) {
@@ -388,7 +393,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                  .persistence()
 //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
 //               .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
-                                 .addSingleFileStore().location("/tmp/"+manager.getAddress().toString()+"/").shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
+                                 .addSingleFileStore().location("/tmp/"+manager.getAddress().toString()+"/").fetchPersistentState(true)
+                                 .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
                                  .build();
       }
       else{
@@ -400,12 +406,14 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                  .persistence()
                                  .addStore(LevelDBStoreConfigurationBuilder.class)
                                  .location("/tmp/leveldb/data-"+manager.getAddress().toString()).expiredLocation("/tmp/leveldb/expired-"+manager.getAddress().toString()).implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
-
-                                 .shared(false).preload(false).compatibility().enable()
+                                 .fetchPersistentState(true)
+                                 .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
+                                 .build();
+//                                 .shared(false).preload(false).compatibility().enable()
 
 
 //                                        .addSingleFileStore().location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
-                                 .build();
+//                                 .build();
       }
 
    }
