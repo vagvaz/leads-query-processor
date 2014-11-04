@@ -115,8 +115,8 @@ public class GetResultsActionHandler implements ActionHandler {
            String value = (String) cache.get(prefix+String.valueOf(index));
             while(value != null){
                listOfValues.add(value);
-               value =  (String) cache.get(prefix+String.valueOf(index));
                index++;
+	       value =  (String) cache.get(prefix+String.valueOf(index));
             }
         }
         else{
