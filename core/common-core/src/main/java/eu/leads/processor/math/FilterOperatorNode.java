@@ -1,7 +1,6 @@
 package eu.leads.processor.math;
 
 import eu.leads.processor.core.Tuple;
-import eu.leads.processor.core.TupleUtils;
 import org.vertx.java.core.json.JsonElement;
 import org.vertx.java.core.json.JsonObject;
 
@@ -20,6 +19,12 @@ public class FilterOperatorNode {
           value = node.asObject();
           left = null;
           right = null;
+       }
+       else if(type.equals(FilterOpType.ROW_CONSTANT)){
+          value = node.asObject();
+          left = null;
+          right = null;
+          value = MathUtils.createValueSet(value);
        }
        else{
           left = new FilterOperatorNode(node.asObject().getObject("body").getElement("leftExpr"));
@@ -93,6 +98,21 @@ public class FilterOperatorNode {
                break;
             case IN:
                //TODO
+               JsonObject val = null;
+               JsonObject set = null;
+               if(left.getValueAsJson().getString("type").equals("FIELD")){
+                  val = left.getValueAsJson();
+                  set = right.getValueAsJson();
+               }
+               else{
+                  val = right.getValueAsJson();
+                  set= left.getValueAsJson();
+               }
+               return MathUtils.checkIfIn(val,set);
+               // check conditino
+               // rerturn field in set
+            case ROW_CONSTANT:
+               //TODO
                break;
             case FIELD:
                this.value.getObject("body").putObject("datum", computeDatum(t));
@@ -101,6 +121,7 @@ public class FilterOperatorNode {
             case CONST:
                result = true;
                return result;
+
          }
       putBooleanDatum(result);
       return result;

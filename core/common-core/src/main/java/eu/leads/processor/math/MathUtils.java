@@ -1,9 +1,10 @@
 package eu.leads.processor.math;
 
+import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -175,6 +176,17 @@ public class MathUtils {
                 patternBytes[i] = ((Integer)bytes.get(i)).byteValue();
             }
             result = new String(patternBytes);
+        }
+        else if(value.getString("type").equals("TEXT")){
+          byte[] patternBytes = null;
+          JsonObject body = value.getObject("body");
+          org.vertx.java.core.json.JsonArray bytes = body.getArray("bytes");
+          int size = body.getInteger("size");
+          patternBytes = new byte[size];
+          for (int i = 0; i < size; i++) {
+            patternBytes[i] = ((Integer)bytes.get(i)).byteValue();
+          }
+          result = new String(patternBytes);
         }
 
         return result;
@@ -511,4 +523,27 @@ public class MathUtils {
       }
       return sum / count;
    }
+
+  public static boolean checkIfIn(JsonObject val, JsonObject set) {
+    boolean result = false;
+    Object value = getValueFrom(val);
+    result = set.getObject("valueSet").containsField(value.toString());
+    return result;
+  }
+
+  public static JsonObject createValueSet(JsonObject value) {
+    JsonObject result = value;
+    JsonObject valueSet = new JsonObject();
+    JsonArray values = result.getObject("body").getArray("values");
+    Iterator<Object> iterator = values.iterator();
+    while(iterator.hasNext()){
+      JsonObject val = (JsonObject) iterator.next();
+      if(val.getString("type").equals("TEXT")){
+        String textValue = getTextFrom(val);
+        valueSet.putString(textValue,"");
+      }
+    }
+    result.putObject("valueSet",valueSet);
+    return result;
+  }
 }
