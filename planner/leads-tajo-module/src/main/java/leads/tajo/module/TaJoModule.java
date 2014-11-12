@@ -26,6 +26,7 @@ import org.apache.tajo.engine.planner.PlanningException;
 import org.apache.tajo.master.session.Session;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,11 +41,12 @@ public class TaJoModule {
     private static LeadsLogicalOptimizer optimizer = null;
     private static CatalogClient catalog = null;
     private static TajoConf c = null;
-
+    private static HashMap<String,Set<String>> primaryKeys = null;
     public TaJoModule() {
         c = new TajoConf();
         optimizer = new LeadsLogicalOptimizer(c);
         sqlAnalyzer = new LeadsSQLAnalyzer();
+        initializePrimaryColumns();
     }
 
     public static String Optimize(Session session,
@@ -158,12 +160,43 @@ public class TaJoModule {
         }
     }
 
+    private void initializePrimaryColumns(){
+        primaryKeys = new HashMap<>();
+        HashSet<String> commonKeys = new HashSet<>();
+        commonKeys.add("uri");
+        commonKeys.add("ts");
+        primaryKeys.put("crawler.content", (Set<String>) commonKeys.clone());
+        primaryKeys.put("internal.page", (Set<String>) commonKeys.clone());
+        primaryKeys.put("internal.urldirectory", (Set<String>) commonKeys.clone());
+        primaryKeys.put("internal.urldirectory_ecom", (Set<String>) commonKeys.clone());
+        primaryKeys.put("leads.page_core", (Set<String>) commonKeys.clone());
+        primaryKeys.put("leads.site", (Set<String>) commonKeys.clone());
+
+        HashSet<String> Keys = (HashSet<String>) commonKeys.clone();
+        Keys.add("partid");
+        Keys.add("keywords");
+        primaryKeys.put("leads.keywords", (Set<String>) Keys.clone());
+
+        Keys = (HashSet<String>) commonKeys.clone();
+        Keys.add("partid");
+        Keys.add("resourceparttype");
+        primaryKeys.put("leads.resourcepart", (Set<String>) Keys.clone());
+
+        Keys= new HashSet<>();
+        Keys.add("keywords");
+        primaryKeys.put("adidas.keywords", (Set<String>) Keys.clone());
+    }
+
     public static Set<String> getPrimaryColumn(String tableName) {
+        if(primaryKeys.containsKey(tableName))
+            return primaryKeys.get(tableName);
+
         TableDesc desc = catalog.getTableDesc(tableName);
         Set<String> result = new HashSet<>();
-        for(Column c : desc.getSchema().getColumns()){
+
+        for(Column c : desc.getSchema().getColumns())
             result.add(c.getSimpleName());
-        }
+
         return result;
     }
 
