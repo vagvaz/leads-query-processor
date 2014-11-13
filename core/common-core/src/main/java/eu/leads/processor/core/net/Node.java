@@ -62,4 +62,10 @@ public interface Node {
     void sendWithEventBusReply(String id, JsonObject putAction, ReplyHandler replyHandler);
 
     void unsubscribeFromAll();
+
+    void ack(JsonObject incoming);
+
+    boolean checkIfDelivered(JsonObject message);
+
+    void receive(JsonObject message);
 }

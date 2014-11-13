@@ -2,12 +2,13 @@ package eu.leads.processor.core;
 
 import eu.leads.processor.common.LeadsCollector;
 import org.infinispan.Cache;
+import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
+import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 
 public class LeadsMapperCallable<K, V, kOut, vOut> implements
@@ -47,11 +48,13 @@ public class LeadsMapperCallable<K, V, kOut, vOut> implements
 		} else {
          mapper.setCacheManager(cache.getCacheManager());
 			List<K> result = new ArrayList<K>();
-
-			for (Entry< K, V  > entry : cache.entrySet()){
-				V value = entry.getValue();
+			final ClusteringDependentLogic cdl = cache.getAdvancedCache().getComponentRegistry().getComponent(ClusteringDependentLogic.class);
+			for(Object key : cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()){
+				if(!cdl.localNodeIsPrimaryOwner(key))
+					continue;
+				V value = cache.get(key);
 				if (value != null) {
-					mapper.map(entry.getKey(), value, collector);
+					mapper.map((K)key, value, collector);
 				}
 			}
 			

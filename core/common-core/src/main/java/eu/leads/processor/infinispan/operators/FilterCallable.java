@@ -3,7 +3,9 @@ package eu.leads.processor.infinispan.operators;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.math.FilterOperatorTree;
 import org.infinispan.Cache;
+import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
+import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.Serializable;
@@ -53,9 +55,12 @@ public class FilterCallable<K,V> implements
 
    @Override
    public String call() throws Exception {
-      for (Map.Entry<K, V> entry : inputCache.getAdvancedCache().getDataContainer().entrySet()){
-         String key = (String) entry.getKey();
-         String value = (String) entry.getValue();
+      final ClusteringDependentLogic cdl = inputCache.getAdvancedCache().getComponentRegistry().getComponent(ClusteringDependentLogic.class);
+      for (Object ikey : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()){
+         if(!cdl.localNodeIsPrimaryOwner(ikey))
+            continue;
+         String key = (String) ikey;
+         String value = (String)inputCache.get(key);
          Tuple tuple = new Tuple(value);
          if(tree.accept(tuple)){
 //            tuple = prepareOutput(tuple);

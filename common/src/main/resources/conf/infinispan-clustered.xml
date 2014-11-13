@@ -15,25 +15,24 @@
       <cached-thread-pool name="infinispan-cached" thread-factory="infinispan-factory"/>
       <blocking-bounded-queue-thread-pool name="infinispan-transport"
                                           thread-factory="infinispan-factory"
-                                          core-threads="5" max-threads="10" queue-length="100"
+                                          core-threads="5" max-threads="15" queue-length="100"
                                           keepalive-time="10000"/>
       <scheduled-thread-pool name="infinispan-eviction" thread-factory="infinispan-factory"/>
    </threads>
    <cache-container name="defaultContainer" statistics="false" default-cache="defaultCache"
-                    start="true">
+                    start="true" >
       <transport stack="tcp"/>
-      <serialization version="70"/>
+      <!--<serialization version="70"/>-->
       <jmx domain="eu.leads.processor" duplicate-domains="true"></jmx>
       <distributed-cache name="defaultCache" mode="SYNC" owners="2" l1-lifespan="600000" start="true"
                          statistics="true">
          <compatibility></compatibility>
-          <indexing index="ALL">
+          <indexing index="NONE">
               <property name="default.directory_provider">ram</property>
           </indexing>
             <eviction max-entries="1000" strategy="LIRS"/>
             <transaction mode="NONE"/>
-           <state-transfer enabled="false" await-initial-transfer="false"/>
-
+           <state-transfer enabled="true" await-initial-transfer="true"/>
       </distributed-cache>
 
    </cache-container>

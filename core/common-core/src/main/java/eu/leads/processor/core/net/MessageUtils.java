@@ -14,17 +14,18 @@ public class MessageUtils {
     public static final String FROM = "from";
     public static final String TO = "to";
     public static final String COMTYPE = "comtype";
-
-    public static JsonObject createLeadsMessage(JsonObject message, String from) {
-        return createLeadsMessage(message, from, null, null);
-    }
-
-    public static JsonObject createLeadsMessage(JsonObject message, String from, String to) {
-        return createLeadsMessage(message, from, to, null);
-    }
+    public static final String MSGTYPE ="msgtype";
+    public static final String MSGID = "msgId";
+//    public static JsonObject createLeadsMessage(JsonObject message, String from) {
+//        return createLeadsMessage(message, from, null, null);
+//    }
+//
+//    public static JsonObject createLeadsMessage(JsonObject message, String from, String to) {
+//        return createLeadsMessage(message, from, to, null);
+//    }
 
     public static JsonObject createLeadsMessage(JsonObject message, String from, String to,
-                                                   String type) {
+                                                   String type,long msgId) {
         JsonObject result = message;
         if (!Strings.isNullOrEmpty(from)) {
             result.putString(FROM, from);
@@ -35,6 +36,8 @@ public class MessageUtils {
         if (!Strings.isNullOrEmpty(type)) {
             result.putString(COMTYPE, type);
         }
+        result.putString(MSGTYPE,"msg");
+        result.putNumber(MSGID, msgId);
         return result;
     }
 
@@ -72,6 +75,15 @@ public class MessageUtils {
         JsonObject result = new JsonObject();
         result.putString("type", MessageTypeConstants.SERVICE_CMD);
         result.putString("command", cmd.toString());
+        return result;
+    }
+
+    public static JsonObject createAckMessage(JsonObject incoming) {
+        JsonObject  result  = new JsonObject();
+        result.putString(FROM,incoming.getString(TO));
+        result.putString(TO,incoming.getString(FROM));
+        result.putNumber(MSGID,incoming.getNumber(MSGID));
+        result.putString(MSGTYPE,"ack");
         return result;
     }
 }

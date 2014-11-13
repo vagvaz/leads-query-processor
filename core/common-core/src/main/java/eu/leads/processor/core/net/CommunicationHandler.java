@@ -1,6 +1,7 @@
 package eu.leads.processor.core.net;
 
 import eu.leads.processor.core.comp.LeadsMessageHandler;
+import org.slf4j.Logger;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonObject;
@@ -17,12 +18,14 @@ public class CommunicationHandler implements Handler<Message> {
     private Map<String, LeadsMessageHandler> handlers;
     private Node owner;
     private Set<String> requests;
+    private org.vertx.java.core.logging.Logger logger;
 
     public CommunicationHandler(LeadsMessageHandler defaultHandler, Node owner) {
         this.owner = owner;
         handlers = new HashMap<String, LeadsMessageHandler>();
         handlers.put("default", defaultHandler);
         requests = new HashSet<String>();
+        logger = ((DefaultNode)owner).getLogger();
     }
 
     @Override
@@ -32,8 +35,19 @@ public class CommunicationHandler implements Handler<Message> {
         String from = incoming.getString(MessageUtils.FROM);
         String to = incoming.getString(MessageUtils.TO);
         String type = incoming.getString(MessageUtils.COMTYPE);
-        JsonObject object = new JsonObject();
-        message.reply(MessageUtils.createLeadsMessage(object, to, from));
+//        JsonObject object = new JsonObject();
+//        message.reply(MessageUtils.createAckMessage(object, to, from));
+        if(incoming.getString(MessageUtils.MSGTYPE).equals("ack")){
+            logger.info(owner.getId() + " Received ack from " + from + " for " + incoming.getLong(MessageUtils.MSGID));
+            owner.succeed(incoming.getLong(MessageUtils.MSGID));
+            return;
+        }
+        else if(incoming.getString(MessageUtils.MSGTYPE).equals("msg")){
+            logger.info(owner.getId() + " Received Message from " + from + " with id " + incoming.getLong(MessageUtils.MSGID));
+            owner.ack(incoming);
+        }
+
+
         LeadsMessageHandler handler = handlers.get(to);
         if (requests.remove(to)) {
             owner.unsubscribe(to);

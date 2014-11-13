@@ -5,7 +5,6 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import org.infinispan.Cache;
@@ -31,22 +30,25 @@ public class GetQueryStatusActionHandler implements ActionHandler {
 
     @Override
     public Action process(Action action) {
+      log.info("process get query resutls");
         Action result = action;
        JsonObject actionResult = new JsonObject();
        try {
             String queryId = action.getData().getString("queryId");
 //            JsonObject actionResult = persistence.get(StringConstants.QUERIESCACHE, queryId);
-
+         log.info("read query");
             String queryJson = queriesCache.get(queryId);
 
             JsonObject query = new JsonObject(queryJson);
             result.setResult(query.getObject("status"));
 
            }catch(Exception e){
+         log.info("exception in read");
               actionResult.putString("error", "");
               result.setResult(actionResult);
             }
         result.setStatus(ActionStatus.COMPLETED.toString());
+      log.info("preturn query resutls");
         return result;
     }
 }

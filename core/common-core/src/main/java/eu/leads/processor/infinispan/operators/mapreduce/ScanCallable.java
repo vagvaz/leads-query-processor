@@ -8,7 +8,9 @@ import eu.leads.processor.math.FilterOperatorTree;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
+import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
+import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 import org.infinispan.versioning.VersionedCache;
 import org.infinispan.versioning.impl.VersionedCacheTreeMapImpl;
 import org.infinispan.versioning.utils.version.Version;
@@ -89,35 +91,47 @@ public class ScanCallable <K,V> implements
    @Override
    public String call() throws Exception {
       log.info("--------------------   Iterate over values... ------------------------");
-      for (Map.Entry<K, V> entry : inputCache.getAdvancedCache().getDataContainer().entrySet()) {
+
+     final ClusteringDependentLogic cdl = inputCache.getAdvancedCache().getComponentRegistry().getComponent(ClusteringDependentLogic.class);
+
+//      for (Map.Entry<K, V> entry : inputCache.getAdvancedCache().getDataContainer().entrySet()) {
+     for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()){
+          if(!cdl.localNodeIsPrimaryOwner(key))
+            continue;
 //         System.err.println(manager.getCacheManager().getAddress().toString() + " "+ entry.getKey() + "       " + entry.getValue());
-//          String versionedKey = (String) entry.getKey();
-//          String key = pruneVersion(versionedKey);
-//          Version latestVersion = versionedCache.getLatestVersion(key);
+          //VERSIONING
+//          String versionedKey = (String) key;
+//          String ikey = pruneVersion(versionedKey);
+//          Version latestVersion = versionedCache.getLatestVersion(ikey);
 //          if(latestVersion == null){
 //           continue;
 //           }
 //          Version currentVersion = getVersion(versionedKey);
-
-
+//       Object objectValue = versionedCache.get(ikey);
+//       String value = (String)objectValue;
+//END VERSIONING
+       //NONVERSIONING
+       String ikey = (String)key;
+       String value = (String) inputCache.get(ikey);
+//ENDNONVERSIONDING
           //         String value = (String) entry.getValue();
-//          Object objectValue = versionedCache.get(key);
 
-          String value = (String) entry.getValue();
+//          String value = (String) entry.getValue();
+//          String value = (String)inputCache.get(key);
           Tuple tuple = new Tuple(value);
-          namesToLowerCase(tuple);
+//          namesToLowerCase(tuple);
           renameAllTupleAttributes(tuple);
          if (tree != null) {
             if(tree.accept(tuple)) {
                tuple = prepareOutput(tuple);
-               log.info("--------------------    put into output with filter ------------------------");
-               outputCache.putIfAbsent(entry.getKey(), tuple.asString());
+//               log.info("--------------------    put into output with filter ------------------------");
+               outputCache.put(key.toString(), tuple.asString());
             }
          }
          else{
             tuple = prepareOutput(tuple);
-            log.info("--------------------    put into output without tree ------------------------");
-            outputCache.putIfAbsent(entry.getKey(), tuple.asString());
+//            log.info("--------------------    put into output without tree ------------------------");
+            outputCache.put(key.toString(), tuple.asString());
          }
 
       }

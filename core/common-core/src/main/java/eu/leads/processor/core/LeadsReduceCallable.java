@@ -1,11 +1,12 @@
 package eu.leads.processor.core;
 
 import org.infinispan.Cache;
+import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
+import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 
 public class LeadsReduceCallable<kOut, vOut> implements
@@ -40,10 +41,18 @@ public class LeadsReduceCallable<kOut, vOut> implements
             vOut result = null;
 //            System.out.println("inputCache Cache Size:"
 //                    + this.inputCache.size());
-            for (Entry<kOut, List<vOut>> entry : inputCache.entrySet()) {
-                kOut key = entry.getKey();
+//            for (Entry<kOut, List<vOut>> entry : inputCache.entrySet()) {
+          final ClusteringDependentLogic cdl = inputCache.getAdvancedCache().getComponentRegistry().getComponent(ClusteringDependentLogic.class);
+          for(Object ikey : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()){
+            if(!cdl.localNodeIsPrimaryOwner(ikey))
+              continue;
+                kOut key = (kOut)ikey;
+                List<vOut> list = inputCache.get(key);
+                if(list == null || list.size() == 0){
+                  continue;
+                }
 
-                vOut res = reducer.reduce(key, entry.getValue().iterator());
+                vOut res = reducer.reduce(key, list.iterator());
                 if(res == null || res.toString().equals("")){
                   ;
                 }
