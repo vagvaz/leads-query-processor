@@ -30,9 +30,11 @@
           <indexing index="NONE">
               <property name="default.directory_provider">ram</property>
           </indexing>
-            <eviction max-entries="1000" strategy="LIRS"/>
+            <eviction max-entries="1000" strategy="LIRS" />
             <transaction mode="NONE"/>
+            <expiration lifespan="-1" max-idle="-1"/>
            <state-transfer enabled="true" await-initial-transfer="true"/>
+
       </distributed-cache>
 
    </cache-container>

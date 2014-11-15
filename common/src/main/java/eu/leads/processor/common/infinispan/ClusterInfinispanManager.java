@@ -403,9 +403,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                  .persistence()
 //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
 //               .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
-                                 .addSingleFileStore().location("/tmp/"+manager.getAddress().toString()+"/")
+                                 .addSingleFileStore().location("/tmp/" + manager.getAddress().toString() + "/")
                            .fetchPersistentState(true)
-                           .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
+                           .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1)
                                  .build();
       }
       else{
@@ -416,11 +416,11 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                  .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
                                  .persistence()
                                  .addStore(LevelDBStoreConfigurationBuilder.class)
-                                 .location("/tmp/leveldb/data-"+manager.getAddress().toString()+"/")
-                                 .expiredLocation("/tmp/leveldb/expired-"+manager.getAddress().toString()+"/")
+                                 .location("/tmp/leveldb/data-" + manager.getAddress().toString() + "/")
+                                 .expiredLocation("/tmp/leveldb/expired-" + manager.getAddress().toString() + "/")
                                  .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
                                  .fetchPersistentState(true)
-                                 .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
+                                 .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1)
                                  .build();
       }
 

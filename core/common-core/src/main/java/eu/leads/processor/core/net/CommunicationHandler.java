@@ -38,14 +38,18 @@ public class CommunicationHandler implements Handler<Message> {
 //        JsonObject object = new JsonObject();
 //        message.reply(MessageUtils.createAckMessage(object, to, from));
         if(incoming.getString(MessageUtils.MSGTYPE).equals("ack")){
-            logger.info(owner.getId() + " Received ack from " + from + " for " + incoming.getLong(MessageUtils.MSGID));
+//            logger.info(owner.getId() + " Received ack from " + from + " for " + incoming.getLong(MessageUtils.MSGID));
             owner.succeed(incoming.getLong(MessageUtils.MSGID));
             return;
         }
         else if(incoming.getString(MessageUtils.MSGTYPE).equals("msg")){
-            logger.info(owner.getId() + " Received Message from " + from + " with id " + incoming.getLong(MessageUtils.MSGID));
+//            logger.info(owner.getId() + " Received Message from " + from + " with id " + incoming.getLong(MessageUtils.MSGID));
+            boolean alreadyDelivered = owner.checkIfDelivered(incoming);
             owner.ack(incoming);
+            if(alreadyDelivered)
+                return;
         }
+
 
 
         LeadsMessageHandler handler = handlers.get(to);

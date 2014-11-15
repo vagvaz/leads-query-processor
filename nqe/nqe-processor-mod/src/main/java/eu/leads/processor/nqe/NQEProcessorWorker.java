@@ -125,11 +125,11 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
       bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {
          @Override
          public void handle(Message<JsonObject> event) {
-            log.info("Registration " + event.toString());
+            log.info(id + " Registration " + event.address().toString());
          }
       });
 
-     log.info("started ....");
+     log.info(id +" started ....");
    }
 
    @Override

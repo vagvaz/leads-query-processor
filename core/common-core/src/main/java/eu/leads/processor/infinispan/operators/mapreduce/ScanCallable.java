@@ -119,7 +119,7 @@ public class ScanCallable <K,V> implements
 //          String value = (String) entry.getValue();
 //          String value = (String)inputCache.get(key);
           Tuple tuple = new Tuple(value);
-//          namesToLowerCase(tuple);
+          namesToLowerCase(tuple);
           renameAllTupleAttributes(tuple);
          if (tree != null) {
             if(tree.accept(tuple)) {

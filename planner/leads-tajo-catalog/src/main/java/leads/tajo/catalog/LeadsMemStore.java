@@ -91,14 +91,20 @@ public class LeadsMemStore implements CatalogStore {
 
 
     public void close() throws IOException {
-        databases.clear();
-        functions.clear();
-        indexes.clear();
+//        databases.clear();
+//        functions.clear();
+//        indexes.clear();
+        manager.removePersistentCache("leads.processor.catalog.tablespaces");
+        manager.removePersistentCache("leads.processor.catalog.databases");
+        manager.removePersistentCache("leads.processor.catalog.functions");
+        manager.removePersistentCache("leads.processor.catalog.indexes");
+        manager.removePersistentCache("leads.processor.catalog.indexesByColumn");
     }
 
     @Override
     public void createTablespace(String spaceName, String spaceUri) throws CatalogException {
-        if (tablespaces.containsKey(spaceName)) {
+        Object tableSpace = tablespaces.get(spaceName);
+        if (tableSpace != null) {
             throw new AlreadyExistsTablespaceException(spaceName);
         }
 
@@ -107,12 +113,15 @@ public class LeadsMemStore implements CatalogStore {
 
     @Override
     public boolean existTablespace(String spaceName) throws CatalogException {
-        return tablespaces.containsKey(spaceName);
+//        return tablespaces.containsKey(spaceName);
+        Object tableSpace = tablespaces.get(spaceName);
+        return tableSpace != null;
     }
 
     @Override
     public void dropTablespace(String spaceName) throws CatalogException {
-        if (!tablespaces.containsKey(spaceName)) {
+        Object tableSpace = tablespaces.get(spaceName);
+        if (tableSpace == null) {
             throw new NoSuchTablespaceException(spaceName);
         }
         tablespaces.remove(spaceName);
@@ -125,7 +134,8 @@ public class LeadsMemStore implements CatalogStore {
 
     @Override
     public TablespaceProto getTablespace(String spaceName) throws CatalogException {
-        if (!tablespaces.containsKey(spaceName)) {
+        Object tableSpace = tablespaces.get(spaceName);
+        if (tableSpace == null) {
             throw new NoSuchTablespaceException(spaceName);
         }
 
@@ -138,7 +148,8 @@ public class LeadsMemStore implements CatalogStore {
     @Override
     public void alterTablespace(CatalogProtos.AlterTablespaceProto alterProto)
         throws CatalogException {
-        if (!tablespaces.containsKey(alterProto.getSpaceName())) {
+        Object tableSpace = tablespaces.get(alterProto.getSpaceName());
+        if (tableSpace == null) {
             throw new NoSuchTablespaceException(alterProto.getSpaceName());
         }
 
@@ -155,7 +166,8 @@ public class LeadsMemStore implements CatalogStore {
 
     @Override
     public void createDatabase(String databaseName, String tablespaceName) throws CatalogException {
-        if (databases.containsKey(databaseName)) {
+        Object database = databases.get(databaseName);
+        if (database != null) {
             throw new AlreadyExistsDatabaseException(databaseName);
         }
 
@@ -164,12 +176,14 @@ public class LeadsMemStore implements CatalogStore {
 
     @Override
     public boolean existDatabase(String databaseName) throws CatalogException {
-        return databases.containsKey(databaseName);
+        Object database = databases.get(databaseName);
+        return (database != null);
     }
 
     @Override
     public void dropDatabase(String databaseName) throws CatalogException {
-        if (!databases.containsKey(databaseName)) {
+        Object database = databases.get(databaseName);
+        if (database == null) {
             throw new NoSuchDatabaseException(databaseName);
         }
         databases.remove(databaseName);
@@ -185,7 +199,8 @@ public class LeadsMemStore implements CatalogStore {
      */
     private <T> Map<String, T> checkAndGetDatabaseNS(final Map<String, Map<String, T>> databaseMap,
                                                         String databaseName) {
-        if (databaseMap.containsKey(databaseName)) {
+        Object database = databases.get(databaseName);
+        if (database != null) {
             return databaseMap.get(databaseName);
         } else {
             throw new NoSuchDatabaseException(databaseName);
@@ -206,7 +221,8 @@ public class LeadsMemStore implements CatalogStore {
             checkAndGetDatabaseNS(databases, databaseName);
 
         String tbName = tableName;
-        if (database.containsKey(tbName)) {
+        Object table = database.get(tbName);
+        if (table != null) {
             throw new AlreadyExistsTableException(tbName);
         }
         database.put(tbName, request);
@@ -216,8 +232,9 @@ public class LeadsMemStore implements CatalogStore {
     public boolean existTable(String dbName, String tbName) throws CatalogException {
         Map<String, CatalogProtos.TableDescProto> database =
             checkAndGetDatabaseNS(databases, dbName);
-
-        return database.containsKey(tbName);
+        Object table = database.get(tbName);
+        return (table != null);
+//        return database.containsKey(tbName);
     }
 
     @Override
@@ -225,7 +242,8 @@ public class LeadsMemStore implements CatalogStore {
         Map<String, CatalogProtos.TableDescProto> database =
             checkAndGetDatabaseNS(databases, dbName);
 
-        if (database.containsKey(tbName)) {
+        Object table = database.get(tbName);
+        if (table != null) {
             manager.removePersistentCache(dbName+"."+tbName);
             database.remove(tbName);
         } else {
@@ -257,7 +275,8 @@ public class LeadsMemStore implements CatalogStore {
 
         switch (alterTableDescProto.getAlterTableType()) {
             case RENAME_TABLE:
-                if (database.containsKey(alterTableDescProto.getNewTableName())) {
+                Object table = database.get(alterTableDescProto.getNewTableName());
+                if (table == null) {
                     throw new AlreadyExistsTableException(alterTableDescProto.getNewTableName());
                 }
                 // Currently, we only use the default table space (i.e., WAREHOUSE directory).
@@ -322,7 +341,8 @@ public class LeadsMemStore implements CatalogStore {
         Map<String, CatalogProtos.TableDescProto> database =
             checkAndGetDatabaseNS(databases, databaseName);
 
-        if (database.containsKey(tableName)) {
+        Object table = database.get(tableName);
+        if (table != null) {
             CatalogProtos.TableDescProto unqualified = database.get(tableName);
             CatalogProtos.TableDescProto.Builder builder =
                 CatalogProtos.TableDescProto.newBuilder();

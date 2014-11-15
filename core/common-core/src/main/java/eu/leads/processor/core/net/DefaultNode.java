@@ -44,10 +44,10 @@ public class DefaultNode implements Node, Handler<Long> {
         removalListener = new RemovalListener<String, Long>() {
             @Override
             public void onRemoval(RemovalNotification<String, Long> removalNotification) {
-
+                logger.info(getId() + " REMOVING RECEIVED " + removalNotification.getKey());
             }
         };
-        incomingMessages = CacheBuilder.newBuilder().expireAfterAccess(retries*timeout, TimeUnit.MILLISECONDS).build();
+        incomingMessages = CacheBuilder.newBuilder().expireAfterWrite((1 + retries) * timeout, TimeUnit.MILLISECONDS).build();
     }
 
     /**
@@ -114,6 +114,7 @@ public class DefaultNode implements Node, Handler<Long> {
 //        AckHandler ack = new AckHandler(this, logger, messageId, null);
         pending.put(messageId, new MessageWrapper(messageId,leadsMessage,ComUtils.DEFAULT_RETRIES));
 //        pendingHandlers.put(messageId, ack);
+//        logger.error(getId() + " send to " + leadsMessage.getString(MessageUtils.TO) +"\nmessage " + leadsMessage.toString());
         bus.send(nodeid, leadsMessage);
     }
 
@@ -123,6 +124,7 @@ public class DefaultNode implements Node, Handler<Long> {
     public void sendToGroup(String groupId, JsonObject message) {
         JsonObject leadsMessage =
             MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.GROUP,getNextMessageId());
+//        logger.error(getId() + " send to " + leadsMessage.getString(MessageUtils.TO) +"\nmessage " + leadsMessage.toString());
         sendMessageToDestination(groupId, leadsMessage, null);
     }
 
@@ -134,6 +136,7 @@ public class DefaultNode implements Node, Handler<Long> {
         pending.put(messageId, new MessageWrapper(messageId,leadsMessage,ComUtils.DEFAULT_RETRIES));
 //        pendingHandlers.put(messageId, ack);
 //        bus.sendWithTimeout(destination, leadsMessage, timeout, ack);
+//        logger.error(getId() + " send to " + leadsMessage.getString(MessageUtils.TO) +"\nmessage " + leadsMessage.toString());
         bus.send(destination, leadsMessage);
     }
 
@@ -150,6 +153,7 @@ public class DefaultNode implements Node, Handler<Long> {
 //        AckHandler ack = new AckHandler(this, logger, messageId, null);
         pending.put(messageId, new MessageWrapper(messageId,leadsMessage,ComUtils.DEFAULT_RETRIES));
 //        pendingHandlers.put(messageId, ack);
+//        logger.error(getId() + " send to " + leadsMessage.getString(MessageUtils.TO) +"\nmessage " + leadsMessage.toString());
         bus.send(groupId, leadsMessage);
 
     }
@@ -160,6 +164,7 @@ public class DefaultNode implements Node, Handler<Long> {
         JsonObject leadsMessage =
             MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.ALLGROUP,messageId);
         pending.put(messageId, new MessageWrapper(messageId,leadsMessage,ComUtils.DEFAULT_RETRIES));
+//        logger.error(getId() + " send to " + leadsMessage.getString(MessageUtils.TO) +"\nmessage " + leadsMessage.toString());
         bus.publish(groupId, leadsMessage);
     }
 
@@ -288,8 +293,10 @@ public class DefaultNode implements Node, Handler<Long> {
     @Override
     public void retry(Long messageId, AckHandler handler) {
 //        JsonObject msg = pending.get(messageId);
+
         MessageWrapper wrapper = pending.get(messageId);
         JsonObject msg = wrapper.getMessage();
+        logger.error(getId() + "Retrying... " + messageId + " to " + msg.getString(MessageUtils.TO));
         if (msg.getString(MessageUtils.COMTYPE).equals(ComUtils.P2P)) {
             //resend message through event bus to the nodeid
 //            bus.sendWithTimeout(msg.getString(MessageUtils.TO), msg, timeout, handler);
@@ -300,20 +307,32 @@ public class DefaultNode implements Node, Handler<Long> {
 //            bus.sendWithTimeout(msg.getString(MessageUtils.TO), msg, timeout, handler);
             bus.send(msg.getString(MessageUtils.TO),msg);
         }
+        else{
+            bus.send(msg.getString(MessageUtils.TO),msg);
+        }
     }
 
     @Override
     public void succeed(Long messageId) {
-        //If succeded remove message and ackHandler
-        MessageWrapper wrapper = pending.remove(messageId);
+        try {
+            //If succeded remove message and ackHandler
+            MessageWrapper wrapper = pending.remove(messageId);
 //        JsonObject msg = pending.remove(messageId);
-        logger.error(getId() + " Try to succeed " + messageId);
-        JsonObject msg = wrapper.getMessage();
+//            logger.error(getId() + " Try to succeed " + messageId + " currentId " + currentId);
+            if(wrapper == null){
+//                logger.error(getId() + " Message " + messageId + " Was ALREADY Succeeded");
+                return;
+            }
+            JsonObject msg = wrapper.getMessage();
 //        AckHandler handler = pendingHandlers.remove(messageId);
 //        handler = null;
-        logger.info("Succeded Message: " + msg.toString());
-        msg = null;
-        wrapper = null;
+//            logger.info("Succeded Message: " + msg.toString());
+            msg = null;
+            wrapper = null;
+        }catch (Exception e){
+            logger.fatal(getId() + " Exception in succeed " + messageId);
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -324,13 +343,18 @@ public class DefaultNode implements Node, Handler<Long> {
         JsonObject msg = wrapper.getMessage();
         AckHandler handler = pendingHandlers.remove(messageId);
         handler = null;
-        logger.error("Failed Message: " + msg.toString());
+        if(!getId().endsWith(".log"))
+        {
+            logger.error(getId() + " Failed Message: " + msg.toString());
+        }
         if (requests.remove(messageId)) {
             comHandler.unregisterRequest(getId() + "-request-" + messageId);
         }
         if (failHandler != null) {
             failHandler.handle(msg);
         }
+        msg =null;
+        wrapper = null;
     }
 
     @Override
@@ -341,17 +365,17 @@ public class DefaultNode implements Node, Handler<Long> {
 
     @Override
     public void sendWithEventBus(String groupId, JsonObject message) {
-        long messageId = getNextMessageId();
-        JsonObject leadsMessage =
-            MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.GROUP,messageId);
+//        long messageId = getNextMessageId();
+//        JsonObject leadsMessage =
+//            MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.GROUP,messageId);
         bus.send(groupId, message);
     }
 
     @Override
     public void sendWithEventBusReply(String groupId, JsonObject message,
                                          ReplyHandler replyHandler) {
-        JsonObject leadsMessage =
-            MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.GROUP,getNextMessageId());
+//        JsonObject leadsMessage =
+//            MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.GROUP,getNextMessageId());
         bus.send(groupId, message, replyHandler);
     }
 
@@ -362,7 +386,7 @@ public class DefaultNode implements Node, Handler<Long> {
 
     @Override
     public void ack(JsonObject incoming) {
-        logger.error(getId() + " ack " + incoming.getLong(MessageUtils.MSGID) + " from " + incoming.getString(MessageUtils.FROM));
+//        logger.error(getId() + " ack " + incoming.getLong(MessageUtils.MSGID) + " from " + incoming.getString(MessageUtils.FROM));
         receive(incoming);
         JsonObject ackMessage = MessageUtils.createAckMessage(incoming);
         bus.send(ackMessage.getString(MessageUtils.TO),ackMessage);
@@ -372,12 +396,12 @@ public class DefaultNode implements Node, Handler<Long> {
     public boolean checkIfDelivered(JsonObject message) {
         String from = message.getString(MessageUtils.FROM);
         Long messageId = message.getNumber(MessageUtils.MSGID).longValue();
-        Long longMessage = incomingMessages.getIfPresent(from+":"+messageId);
+        Long longMessage = incomingMessages.getIfPresent(from + ":" + messageId);
         if(longMessage == null){
-            logger.error(getId() + " Not Delivered " + from + " "+ messageId);
+//            logger.error(getId() + " Not Delivered " + from + " "+ messageId);
         }
         else{
-            logger.error(getId() + " Already Delivered " + from + " " + messageId);
+//            logger.error(getId() + " Already Delivered " + from + " " + messageId);
         }
         return longMessage != null;
     }
@@ -397,7 +421,7 @@ public class DefaultNode implements Node, Handler<Long> {
             Map.Entry<Long,MessageWrapper> entry = entryIterator.next();
             int retries = entry.getValue().getRetries();
             retries--;
-            if(retries < 0){
+            if(retries < 0 || getId().endsWith(".log")){
                 fail(entry.getKey());
                 return;
             }
