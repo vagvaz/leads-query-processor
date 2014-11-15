@@ -87,8 +87,8 @@ public class JoinOperator extends BasicOperator {
     public void init(JsonObject config) {
 //        super.init(config); //fix set correctly caches names
         //fix configuration
-        JsonObject correctQual = resolveQual(conf);
-        conf.getObject("body").putObject("joinQual",correctQual);
+//        JsonObject correctQual = resolveQual(conf);
+//        conf.getObject("body").putObject("joinQual",correctQual);
         JsonArray inputsArray = action.getData().getObject("operator").getArray("inputs");
        Iterator<Object> inputIterator = inputsArray.iterator();
        List<String> inputs = new ArrayList<String>(2);

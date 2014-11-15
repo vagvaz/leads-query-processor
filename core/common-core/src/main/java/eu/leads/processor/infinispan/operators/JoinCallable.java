@@ -1,6 +1,7 @@
 package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
+import eu.leads.processor.infinispan.QualFilter;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.math.FilterOperatorTree;
 import org.infinispan.Cache;
@@ -31,6 +32,7 @@ public class JoinCallable<K,V> implements
     transient protected Map<String,String> outputMap;
     transient protected Map<String,JsonObject> targetsMap;
     transient protected JsonObject conf;
+   transient  protected  JsonObject joinQual;
 
     protected String configString;
     protected String output;
@@ -56,7 +58,8 @@ public class JoinCallable<K,V> implements
         outerCache = (Cache) manager.getPersisentCache(outerCacheName);
 
         JsonObject object = conf.getObject("body").getObject("joinQual");
-
+        joinQual = new JsonObject();
+        joinQual.mergeIn(object);
         tree = new FilterOperatorTree(object);
         outputSchema = conf.getObject("body").getObject("outputSchema");
         inputSchema = conf.getObject("body").getObject("inputSchema");
@@ -68,15 +71,15 @@ public class JoinCallable<K,V> implements
             JsonObject target = (JsonObject) targetIterator.next();
             targetsMap.put(target.getObject("expr").getObject("body").getObject("column").getString("name"), target);
         }
-        if(left) {
-            innerColumn = conf.getObject("body").getObject("joinQual").getObject("body").getObject("leftExpr").getObject("body").getObject("column").getString("name");
-            outerColumn = conf.getObject("body").getObject("joinQual").getObject("body").getObject("rightExpr").getObject("body").getObject("column").getString("name");
-        }
-        else
-        {
-            innerColumn = conf.getObject("body").getObject("joinQual").getObject("body").getObject("rightExpr").getObject("body").getObject("column").getString("name");
-            outerColumn = conf.getObject("body").getObject("joinQual").getObject("body").getObject("leftExpr").getObject("body").getObject("column").getString("name");
-        }
+   //        if(left) {
+   //            innerColumn = conf.getObject("body").getObject("joinQual").getObject("body").getObject("leftExpr").getObject("body").getObject("column").getString("name");
+   //            outerColumn = conf.getObject("body").getObject("joinQual").getObject("body").getObject("rightExpr").getObject("body").getObject("column").getString("name");
+   //        }
+   //        else
+   //        {
+   //            innerColumn = conf.getObject("body").getObject("joinQual").getObject("body").getObject("rightExpr").getObject("body").getObject("column").getString("name");
+   //            outerColumn = conf.getObject("body").getObject("joinQual").getObject("body").getObject("leftExpr").getObject("body").getObject("column").getString("name");
+   //        }
     }
 
     @Override public String call() throws Exception {
@@ -92,14 +95,16 @@ public class JoinCallable<K,V> implements
           if(!cdl.localNodeIsPrimaryOwner(ikey))
             continue;
           Tuple current = new Tuple((String)inputCache.get(ikey));
-          String columnValue = current.getGenericAttribute(innerColumn).toString();
+//          String columnValue = current.getGenericAttribute(innerColumn).toString();
           String key = (String) ikey;
           String currentKey = key.substring(key.indexOf(":") + 1);
+           tree.getRoot().updateWith(current);
 
-
-          CloseableIterable<Map.Entry<String, String>> iterable =
-            outerCache.getAdvancedCache().filterEntries(new AttributeFilter(outerColumn,
-                                                                             columnValue));
+//          CloseableIterable<Map.Entry<String, String>> iterable =
+//            outerCache.getAdvancedCache().filterEntries(new AttributeFilter(outerColumn,
+//                                                                             columnValue));
+           CloseableIterable<Map.Entry<String, String>> iterable =
+            outerCache.getAdvancedCache().filterEntries(new QualFilter(tree.getJson().toString()));
           for (Map.Entry<String, String> outerEntry : iterable) {
             Tuple outerTuple = new Tuple(outerEntry.getValue());
             Tuple resultTuple = new Tuple(current, outerTuple, ignoreColumns);
@@ -113,7 +118,7 @@ public class JoinCallable<K,V> implements
       }catch (Exception e) {
 
                 System.err.println("Iterating over " + outerCacheName
-                                       + " for batch resulted in Exception "
+                                       + " for batch resulted in Exception " + e.getClass().toString() + " " + e.getCause().toString() + "\n"
                                        + e.getMessage() + "\n from  " + outerCacheName);
               return "Iterating over " + outerCacheName
                        + " for batch resulted in Exception "
