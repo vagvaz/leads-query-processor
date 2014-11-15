@@ -163,13 +163,14 @@ public class PlannerCatalogWorker extends Verticle {
     TableDesc webpages = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"webpages"), webPagesSchema, meta, getTestDir("webpages"));
     catalog.createTable(webpages);
 
-
+      String databaseName = "default";
+      String tableName = "defaultname";
     //New schema
 
-      catalog.createDatabase("internal", StringConstants.DEFAULT_TABLESPACE_NAME);
-      catalog.createDatabase("crawler", StringConstants.DEFAULT_TABLESPACE_NAME);
-      catalog.createDatabase("leads", StringConstants.DEFAULT_TABLESPACE_NAME);
-      catalog.createDatabase("adidas", StringConstants.DEFAULT_TABLESPACE_NAME);
+      //catalog.createDatabase("internal", StringConstants.DEFAULT_TABLESPACE_NAME);
+      //catalog.createDatabase("crawler", StringConstants.DEFAULT_TABLESPACE_NAME);
+      //catalog.createDatabase("leads", StringConstants.DEFAULT_TABLESPACE_NAME);
+      //catalog.createDatabase("adidas", StringConstants.DEFAULT_TABLESPACE_NAME);
 
 
       Schema schema = new Schema();
@@ -177,8 +178,10 @@ public class PlannerCatalogWorker extends Verticle {
       schema.addColumn("ts", Type.INT8);
       schema.addColumn("content", Type.TEXT);
       //PRIMARY KEY (uri, ts)
+      //databaseName = "crawler";
+      tableName = "content";
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName("crawler", "content"),schema,meta, getTestDir("crawler.content")));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
 
 
       schema = new Schema();
@@ -189,8 +192,11 @@ public class PlannerCatalogWorker extends Verticle {
       schema.addColumn("extractioncandidates", Type.TEXT);
       schema.addColumn("successfulextractions", Type.TEXT);
       //PRIMARY KEY (uri, ts)
+      //databaseName = "internal";
+      tableName = "page";
+
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName("internal", "page"),schema,meta, getTestDir("internal.page")));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
 
 
       schema = new Schema();
@@ -200,8 +206,10 @@ public class PlannerCatalogWorker extends Verticle {
       schema.addColumn("ecomassumptionpagesno", Type.TEXT);
       schema.addColumn("pagesno", Type.TEXT);
       //PRIMARY KEY (uri, ts)
+      //databaseName = "internal";
+      tableName = "urldirectory";
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName("internal", "urldirectory"),schema,meta, getTestDir("internal.urldirectory")));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
 
 
       schema = new Schema();
@@ -220,8 +228,10 @@ public class PlannerCatalogWorker extends Verticle {
       schema.addColumn("scalermean", Type.TEXT);
       schema.addColumn("scalerstd", Type.TEXT);
       //PRIMARY KEY (uri, ts)
+      //databaseName = "internal";
+      tableName = "urldirectory_ecom";
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName("internal", "urldirectory_ecom"),schema,meta, getTestDir("internal.urldirectory_ecom")));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
 
 
 
@@ -233,8 +243,10 @@ public class PlannerCatalogWorker extends Verticle {
       schema.addColumn("relevance", Type.TEXT);
       schema.addColumn("sentiment", Type.TEXT);
       //	PRIMARY KEY (uri,ts,partid,keywords)
+      //databaseName = "leads";
+      tableName = "keywords";
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName("leads", "keywords"),schema,meta, getTestDir("leads.keywords")));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
 
 
       schema = new Schema();
@@ -247,8 +259,19 @@ public class PlannerCatalogWorker extends Verticle {
       schema.addColumn("textcontent", Type.TEXT);
       schema.addColumn("type", Type.TEXT);
       //	PRIMARY KEY (uri,ts)
+      //databaseName = "leads";
+      tableName = "page_core";
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName("leads", "page_core"),schema,meta, getTestDir("leads.page_core")));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
+
+      schema = new Schema();
+      schema.addColumn("uri", Type.TEXT);
+      schema.addColumn("textcontent", Type.TEXT);
+      //databaseName = "leads";
+      tableName = "page_textcontent";
+      catalog.createTable(new TableDesc(
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
+
 
       schema = new Schema();
       schema.addColumn("uri", Type.TEXT);
@@ -257,8 +280,10 @@ public class PlannerCatalogWorker extends Verticle {
       schema.addColumn("resourceparttype", Type.TEXT);
       schema.addColumn("resourcepartvalue", Type.TEXT);
       //PRIMARY KEY (uri,ts,partid,resourceparttype)
+      //databaseName = "leads";
+      tableName = "resourcepart";
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName("leads", "resourcepart"),schema,meta, getTestDir("leads.resourcepart")));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
 
 
       schema = new Schema();
@@ -271,15 +296,19 @@ public class PlannerCatalogWorker extends Verticle {
       schema.addColumn("mainlanguages", Type.TEXT);
       schema.addColumn("whoiscountry", Type.TEXT);
       //	PRIMARY KEY (uri,ts)
+      //databaseName = "leads";
+      tableName = "site";
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName("leads", "site"),schema,meta, getTestDir("leads.site")));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
 
 
       schema = new Schema();
       schema.addColumn("keywords", Type.TEXT);
       //	PRIMARY KEY (keywords)
+      //databaseName = "adidas";
+      tableName = "adidas_keywords";//"keywords";
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName("adidas", "keywords"),schema,meta, getTestDir("adidas.keywords")));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
 
   }
 

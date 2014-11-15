@@ -1,16 +1,33 @@
 #!/bin/bash
+screen -wipe
 rawscreens=`screen -ls | grep shell | awk '{print $1}' `
 #echo $rawscreens
 #a=( $rawscreens )
 #echo ${a[0]}
+
 i=1
 for word in $rawscreens; 
 do 
-	echo $word; 
+	Array=`echo $word | sed -e 's/-/\n/g'`
+	
+	title=''
+	for a in $Array;
+	do
+		title=$a;
+		beforedot=${a%.*}
+		title=${a#*.}
+		title=${a#*_}
+		echo $title;
+		break;
+	done
+	echo $word' '$title; 
 	comm="screen -r "$word
-	echo $comm
-	guake -n "newtab" -e "$comm" -r "$i";
-	i=i+1
+	echo $comm"newtab$i"
+	guake -n "newtab$i" -e "$comm";
+	sleep 0.1
+	guake -r "$title"
+	sleep 0.7
+	i=$((i+1))
 
 done
 

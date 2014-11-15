@@ -3,7 +3,6 @@ package eu.leads.processor.common.infinispan;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
-import org.apache.lucene.document.Field;
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.Configuration;
@@ -94,6 +93,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
       }catch(IOException e){
          e.printStackTrace();
       }
+
+
       manager = new DefaultCacheManager(holder, true);
       if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
          startHotRodServer(manager,host, serverPort);
@@ -102,6 +103,18 @@ public class ClusterInfinispanManager implements InfinispanManager {
       getPersisentCache("approx_sum_cache");
       getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".webpages");
       getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".entities");
+
+      getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".content");
+      getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".page");
+      getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".urldirectory");
+      getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".urldirectory_ecom");
+      getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".page_core");
+      getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".keywords");
+      getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".resourcepart");
+      getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".site");
+      getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".adidas_keywords");
+
+
 
       //I might want to sleep here for a little while
       PrintUtilities.printList(manager.getMembers());
@@ -395,7 +408,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
 //               .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
                                  .addSingleFileStore().location("/tmp/"+manager.getAddress().toString()+"/").fetchPersistentState(true)
                                  .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
+
                                  .build();
+
       }
       else{
          defaultConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
@@ -408,6 +423,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                  .location("/tmp/leveldb/data-"+manager.getAddress().toString()).expiredLocation("/tmp/leveldb/expired-"+manager.getAddress().toString()).implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
                                  .fetchPersistentState(true)
                                  .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
+
                                  .build();
 //                                 .shared(false).preload(false).compatibility().enable()
 
@@ -421,6 +437,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
    public Configuration getCacheDefaultConfiguration(String cacheName) {
       Configuration cacheConfig = null;
       if(cacheName.equals("clustered") && cacheName.equals("default")){
+
+
          cacheConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
                                .clustering()
                                .cacheMode(CacheMode.DIST_SYNC)
@@ -430,7 +448,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
 //                            .addStore(LevelDBStoreConfigurationBuilder.class)
 //                            .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
                                .addSingleFileStore().location("/tmp/"+manager.getAddress().toString()+"/").shared(false).preload(false).compatibility().enable()
-                               .build();
+
+                                .build();
       }
       else{
          if(defaultConfig == null) {

@@ -165,26 +165,26 @@ public class TaJoModule {
         HashSet<String> commonKeys = new HashSet<>();
         commonKeys.add("uri");
         commonKeys.add("ts");
-        primaryKeys.put("crawler.content", (Set<String>) commonKeys.clone());
-        primaryKeys.put("internal.page", (Set<String>) commonKeys.clone());
-        primaryKeys.put("internal.urldirectory", (Set<String>) commonKeys.clone());
-        primaryKeys.put("internal.urldirectory_ecom", (Set<String>) commonKeys.clone());
-        primaryKeys.put("leads.page_core", (Set<String>) commonKeys.clone());
-        primaryKeys.put("leads.site", (Set<String>) commonKeys.clone());
+        primaryKeys.put(/*"crawler.*/"content", (Set<String>) commonKeys.clone());
+        primaryKeys.put(/*"internal.*/"page", (Set<String>) commonKeys.clone());
+        primaryKeys.put(/*"internal.*/"urldirectory", (Set<String>) commonKeys.clone());
+        primaryKeys.put(/*"internal.*/"urldirectory_ecom", (Set<String>) commonKeys.clone());
+        primaryKeys.put(/*"leads.*/"page_core", (Set<String>) commonKeys.clone());
+        primaryKeys.put(/*"leads.*/"site", (Set<String>) commonKeys.clone());
 
         HashSet<String> Keys = (HashSet<String>) commonKeys.clone();
         Keys.add("partid");
         Keys.add("keywords");
-        primaryKeys.put("leads.keywords", (Set<String>) Keys.clone());
+        primaryKeys.put(/*"leads.*/"keywords", (Set<String>) Keys.clone());
 
         Keys = (HashSet<String>) commonKeys.clone();
         Keys.add("partid");
         Keys.add("resourceparttype");
-        primaryKeys.put("leads.resourcepart", (Set<String>) Keys.clone());
+        primaryKeys.put(/*"leads.*/"resourcepart", (Set<String>) Keys.clone());
 
         Keys= new HashSet<>();
         Keys.add("keywords");
-        primaryKeys.put("adidas.keywords", (Set<String>) Keys.clone());
+        primaryKeys.put(/*"adidas.*/"adidas_keywords", (Set<String>) Keys.clone());
     }
 
     public static Set<String> getPrimaryColumn(String tableName) {

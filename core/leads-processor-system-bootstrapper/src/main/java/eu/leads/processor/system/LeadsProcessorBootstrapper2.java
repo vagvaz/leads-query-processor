@@ -104,14 +104,11 @@ public class LeadsProcessorBootstrapper2 {
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
-
                 }
-
 
             deployComponent(e.getKey(), ips[ip]);
             ip = (ip + 1) % ips.length;
             System.out.print("\nWaiting for " + sleepTime + " seconds to start the next module.");
-
 
             //break;
             started=true;
@@ -256,7 +253,7 @@ public class LeadsProcessorBootstrapper2 {
             if(screensIPmap.containsKey(ip)) {
                 session_name = screensIPmap.get(ip);
                 // run top within that bash session
-                String command0 = "screen -S " + session_name ;
+                String command0 = "cd ~/.vertx_mods && screen -S " + session_name ;
                 // run top within that bash session
                 command1 = command0 +   " screen -S  " + session_name + " -p " + (pagecounter++) +" -X stuff $\"" + " bash -l &&" +command + "\\r\"";//ping 147.27.18.1";
             }
@@ -264,7 +261,7 @@ public class LeadsProcessorBootstrapper2 {
             {
                 session_name = "shell_" + ip;
                 screensIPmap.put(ip, session_name );
-                String command0 = "screen -AmdS " + session_name + " bash -l";
+                String command0 = "cd ~/.vertx_mods && screen -AmdS " + session_name + " bash -l";
                 // run top within that bash session
                 command1 = command0 + " && " + "screen -S  " + session_name + " -p \" + (pagecounter++) +\" -X stuff $\"" + command + "\\r\"";//ping 147.27.18.1";
             }
@@ -272,7 +269,7 @@ public class LeadsProcessorBootstrapper2 {
 
 
         }else {
-            String command0 = "screen -AmdS shell_" + id + " bash -l";
+            String command0 = "cd ~/.vertx_mods &&  screen -AmdS shell_" + id + " bash -l";
             // run top within that bash session
             command1 = command0 + " && " + "screen -S shell_" + id + " -p 0 -X stuff $\"" + command + "\\r\"";//ping 147.27.18.1";
         }

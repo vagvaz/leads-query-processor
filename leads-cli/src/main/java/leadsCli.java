@@ -143,10 +143,11 @@ public class leadsCli {
     }
 
     static void send_query_and_wait(String sql) throws IOException, InterruptedException {
-
+        long start = System.currentTimeMillis();
+        long resultArrived, resultPrinted;
         QueryStatus currentStatus = WebServiceClient.submitQuery(username,sql);
         while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")) {
-            sleep(3000);
+            sleep(2000);
             currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
 //            System.out.print("s: " + currentStatus.toString());
 //            System.out.println(", o: " + currentStatus.toString());
@@ -158,7 +159,11 @@ public class leadsCli {
         if(currentStatus.getStatus().equals("COMPLETED")) {
             System.out.println("Please wait ...");
             QueryResults res = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
+            resultArrived = System.currentTimeMillis();
             print_results(res);
+            resultPrinted  = System.currentTimeMillis();
+            System.out.println("Result acquisition (execution + delivery) time: " +  (resultArrived - start) + " ms.");
+            System.out.println("Display time: " +  (resultPrinted-resultArrived) + " ms.");
         }
         else{
             System.err.println("Execution terminated with error : " + currentStatus.getErrorMessage());
