@@ -4,10 +4,15 @@ import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.TupleComparator;
 import org.infinispan.Cache;
+import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
+import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Set;
 
 /**
  * Created by vagvaz on 9/24/14.
@@ -43,9 +48,12 @@ public class SortCallable<K,V> implements
    @Override
    public String call() throws Exception {
       ArrayList<Tuple> tuples =  new ArrayList<Tuple>();
-      for (Map.Entry<K, V> entry : cache.getAdvancedCache().getDataContainer().entrySet()){
+      final ClusteringDependentLogic cdl = cache.getAdvancedCache().getComponentRegistry().getComponent(ClusteringDependentLogic.class);
+      for(Object key : cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()){
+         if(!cdl.localNodeIsPrimaryOwner(key))
+            continue;
       
-        String valueString = (String)entry.getValue();
+        String valueString = (String)cache.get(key);
         if(valueString.equals(""))
           continue;
          tuples.add(new Tuple(valueString));

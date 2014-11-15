@@ -49,7 +49,7 @@
          <groupId>io.vertx</groupId>
          <artifactId>vertx-core</artifactId>
          <version>${vertx.version}</version>
-         <scope>provided</scope>
+         <!--<scope>provided</scope>-->
          <exclusions>
             <exclusion>
                <groupId>log4j</groupId>

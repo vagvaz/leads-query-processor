@@ -93,6 +93,8 @@ public class UndeployPluginHandler implements Handler<HttpServerRequest> {
             message.removeField(MessageUtils.FROM);
             message.removeField(MessageUtils.TO);
             message.removeField(MessageUtils.COMTYPE);
+            message.removeField(MessageUtils.MSGID);
+            message.removeField(MessageUtils.MSGTYPE);
             request.response().end(message.toString());
             cleanup(requestId);
         }

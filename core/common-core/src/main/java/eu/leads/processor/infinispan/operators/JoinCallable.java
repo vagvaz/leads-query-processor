@@ -1,12 +1,13 @@
 package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
-import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.math.FilterOperatorTree;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
+import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
+import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
@@ -86,10 +87,13 @@ public class JoinCallable<K,V> implements
 //        ignoreColumns.add(innerColumn);
 //        ignoreColumns.add(outerColumn);
         String prefix = output + ":";
-         for (Map.Entry<K, V> entry : inputCache.getAdvancedCache().getDataContainer().entrySet()){
-          Tuple current = new Tuple((String) entry.getValue());
+        final ClusteringDependentLogic cdl = inputCache.getAdvancedCache().getComponentRegistry().getComponent(ClusteringDependentLogic.class);
+        for(Object ikey : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()){
+          if(!cdl.localNodeIsPrimaryOwner(ikey))
+            continue;
+          Tuple current = new Tuple((String)inputCache.get(ikey));
           String columnValue = current.getGenericAttribute(innerColumn).toString();
-          String key = (String) entry.getKey();
+          String key = (String) ikey;
           String currentKey = key.substring(key.indexOf(":") + 1);
 
 

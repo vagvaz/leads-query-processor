@@ -93,11 +93,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
       }catch(IOException e){
          e.printStackTrace();
       }
-
-
       manager = new DefaultCacheManager(holder, true);
-      if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
-         startHotRodServer(manager,host, serverPort);
+      //Join Infinispan Cluster
+//      manager.start();
+        manager.getCache();
       getPersisentCache("clustered");
       getPersisentCache("pagerankCache");
       getPersisentCache("approx_sum_cache");
@@ -114,7 +113,11 @@ public class ClusterInfinispanManager implements InfinispanManager {
       getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".site");
       getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".adidas_keywords");
 
-
+      if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
+      {
+         host = LQPConfiguration.getConf().getString("node.ip");
+         startHotRodServer(manager,host, serverPort);
+      }
 
       //I might want to sleep here for a little while
       PrintUtilities.printList(manager.getMembers());
@@ -166,11 +169,14 @@ public class ClusterInfinispanManager implements InfinispanManager {
             server.start(serverConfigurationBuilder.build(), targetManager);
             isStarted = true;
          } catch (Exception e) {
-            System.out.println("Exception e " + e.getMessage());
+            System.out.println("Exception e " + e.getClass().getCanonicalName() + e.getMessage());
+//            if(e == null){
+//               System.out.println(port + " " +)
+//            }
             serverPort++;
             isStarted = false;
             try {
-               Thread.sleep(200);
+               Thread.sleep(300);
             } catch (InterruptedException e1) {
                e1.printStackTrace();
             }
@@ -383,6 +389,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
           Cache cache = manager.getCache(cacheName);
    }
       else {
+         manager.defineConfiguration(cacheName,getCacheDefaultConfiguration(cacheName));
          DistributedExecutorService des = new DefaultExecutorService(manager.getCache("clustered"));
          List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
 //
@@ -406,9 +413,15 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                  .persistence()
 //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
 //               .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
+<<<<<<< HEAD
                                  .addSingleFileStore().location("/tmp/"+manager.getAddress().toString()+"/").fetchPersistentState(true)
                                  .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
 
+=======
+                                 .addSingleFileStore().location("/tmp/" + manager.getAddress().toString() + "/")
+                           .fetchPersistentState(true)
+                           .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1)
+>>>>>>> origin/prototype2integration
                                  .build();
 
       }
@@ -420,16 +433,17 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                  .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
                                  .persistence()
                                  .addStore(LevelDBStoreConfigurationBuilder.class)
-                                 .location("/tmp/leveldb/data-"+manager.getAddress().toString()).expiredLocation("/tmp/leveldb/expired-"+manager.getAddress().toString()).implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
+                                 .location("/tmp/leveldb/data-" + manager.getAddress().toString() + "/")
+                                 .expiredLocation("/tmp/leveldb/expired-" + manager.getAddress().toString() + "/")
+                                 .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
                                  .fetchPersistentState(true)
+<<<<<<< HEAD
                                  .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
 
+=======
+                                 .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1)
+>>>>>>> origin/prototype2integration
                                  .build();
-//                                 .shared(false).preload(false).compatibility().enable()
-
-
-//                                        .addSingleFileStore().location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
-//                                 .build();
       }
 
    }

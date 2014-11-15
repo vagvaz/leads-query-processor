@@ -1,5 +1,9 @@
 package eu.leads.processor.core.net;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import eu.leads.processor.core.ReplyHandler;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import org.vertx.java.core.AsyncResult;
@@ -12,28 +16,38 @@ import org.vertx.java.core.logging.Logger;
 import org.vertx.java.core.logging.impl.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by vagvaz on 7/8/14.
  */
-public class DefaultNode implements Node {
+public class DefaultNode implements Node, Handler<Long> {
     private EventBus bus;
     private JsonObject config;
     private Logger logger;
     private int retries = ComUtils.DEFAULT_RETRIES;
     private long timeout = ComUtils.DEFAULT_TIMEOUT;
-    private long currentId;
-    private Map<Long, JsonObject> pending;
+    private static long currentId;
+    private Map<Long, MessageWrapper> pending;
     private Map<Long, AckHandler> pendingHandlers;
     private CommunicationHandler comHandler;
     private LeadsMessageHandler failHandler;
     private Set<Long> requests;
-
+    private Cache<String,Long> incomingMessages;
+    private RemovalListener<String,Long> removalListener;
+    private Vertx vertx;
     public DefaultNode() {
         config = new JsonObject();
-        pending = new HashMap<Long, JsonObject>();
+        pending = new HashMap<Long, MessageWrapper>();
         pendingHandlers = new HashMap<Long, AckHandler>();
         requests = new HashSet<Long>();
+        removalListener = new RemovalListener<String, Long>() {
+            @Override
+            public void onRemoval(RemovalNotification<String, Long> removalNotification) {
+                logger.info(getId() + " REMOVING RECEIVED " + removalNotification.getKey());
+            }
+        };
+        incomingMessages = CacheBuilder.newBuilder().expireAfterWrite((1 + retries) * timeout, TimeUnit.MILLISECONDS).build();
     }
 
     /**
@@ -85,8 +99,8 @@ public class DefaultNode implements Node {
     @Override
     public void sendTo(String nodeid, JsonObject message) {
         JsonObject leadsMessage =
-            MessageUtils.createLeadsMessage(message, getId(), nodeid, ComUtils.P2P);
-        sendMessageToDestination(nodeid, leadsMessage, null);
+            MessageUtils.createLeadsMessage(message, getId(), nodeid, ComUtils.P2P,getNextMessageId());
+        sendMessageToDestination(nodeid, leadsMessage,null);
     }
 
     @Override
@@ -96,11 +110,12 @@ public class DefaultNode implements Node {
         subscribeForRequest(from, handler);
         requests.add(messageId);
         JsonObject leadsMessage =
-            MessageUtils.createLeadsMessage(message, from, nodeid, ComUtils.P2P);
-        AckHandler ack = new AckHandler(this, logger, messageId, null);
-        pending.put(messageId, leadsMessage);
-        pendingHandlers.put(messageId, ack);
-        bus.sendWithTimeout(nodeid, leadsMessage, timeout, ack);
+            MessageUtils.createLeadsMessage(message, from, nodeid, ComUtils.P2P,messageId);
+//        AckHandler ack = new AckHandler(this, logger, messageId, null);
+        pending.put(messageId, new MessageWrapper(messageId,leadsMessage,ComUtils.DEFAULT_RETRIES));
+//        pendingHandlers.put(messageId, ack);
+//        logger.error(getId() + " send to " + leadsMessage.getString(MessageUtils.TO) +"\nmessage " + leadsMessage.toString());
+        bus.send(nodeid, leadsMessage);
     }
 
 
@@ -108,17 +123,21 @@ public class DefaultNode implements Node {
     @Override
     public void sendToGroup(String groupId, JsonObject message) {
         JsonObject leadsMessage =
-            MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.GROUP);
+            MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.GROUP,getNextMessageId());
+//        logger.error(getId() + " send to " + leadsMessage.getString(MessageUtils.TO) +"\nmessage " + leadsMessage.toString());
         sendMessageToDestination(groupId, leadsMessage, null);
     }
 
     private void sendMessageToDestination(String destination, JsonObject leadsMessage,
                                              LeadsMessageHandler handler) {
-        long messageId = this.getNextMessageId();
-        AckHandler ack = new AckHandler(this, logger, messageId, handler);
-        pending.put(messageId, leadsMessage);
-        pendingHandlers.put(messageId, ack);
-        bus.sendWithTimeout(destination, leadsMessage, timeout, ack);
+//        long messageId = this.getNextMessageId();
+        long messageId = leadsMessage.getLong(MessageUtils.MSGID);
+//        AckHandler ack = new AckHandler(this, logger, messageId, handler);
+        pending.put(messageId, new MessageWrapper(messageId,leadsMessage,ComUtils.DEFAULT_RETRIES));
+//        pendingHandlers.put(messageId, ack);
+//        bus.sendWithTimeout(destination, leadsMessage, timeout, ack);
+//        logger.error(getId() + " send to " + leadsMessage.getString(MessageUtils.TO) +"\nmessage " + leadsMessage.toString());
+        bus.send(destination, leadsMessage);
     }
 
 
@@ -130,18 +149,22 @@ public class DefaultNode implements Node {
         subscribeForRequest(from, handler);
         requests.add(messageId);
         JsonObject leadsMessage =
-            MessageUtils.createLeadsMessage(message, from, groupId, ComUtils.GROUP);
-        AckHandler ack = new AckHandler(this, logger, messageId, null);
-        pending.put(messageId, leadsMessage);
-        pendingHandlers.put(messageId, ack);
-        bus.sendWithTimeout(groupId, leadsMessage, timeout, ack);
+            MessageUtils.createLeadsMessage(message, from, groupId, ComUtils.GROUP,messageId);
+//        AckHandler ack = new AckHandler(this, logger, messageId, null);
+        pending.put(messageId, new MessageWrapper(messageId,leadsMessage,ComUtils.DEFAULT_RETRIES));
+//        pendingHandlers.put(messageId, ack);
+//        logger.error(getId() + " send to " + leadsMessage.getString(MessageUtils.TO) +"\nmessage " + leadsMessage.toString());
+        bus.send(groupId, leadsMessage);
 
     }
 
     @Override
     public void sendToAllGroup(String groupId, JsonObject message) {
+        long messageId = getNextMessageId();
         JsonObject leadsMessage =
-            MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.ALLGROUP);
+            MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.ALLGROUP,messageId);
+        pending.put(messageId, new MessageWrapper(messageId,leadsMessage,ComUtils.DEFAULT_RETRIES));
+//        logger.error(getId() + " send to " + leadsMessage.getString(MessageUtils.TO) +"\nmessage " + leadsMessage.toString());
         bus.publish(groupId, leadsMessage);
     }
 
@@ -194,16 +217,21 @@ public class DefaultNode implements Node {
         });
     }
 
+    public Logger getLogger() {
+        return logger;
+    }
+
     @Override
     public void initialize(JsonObject config, LeadsMessageHandler defaultHandler,
                               LeadsMessageHandler failHandler, Vertx vertx) {
+        logger = LoggerFactory.getLogger(this.getClass().getCanonicalName() + "." + this.getId());
         comHandler = new CommunicationHandler(defaultHandler, this);
         this.failHandler = failHandler;
         bus = vertx.eventBus();
-        logger = LoggerFactory.getLogger(this.getClass().getCanonicalName() + "." + this.getId());
         this.config = config.copy();
         registerToEventBusAddresses(this.config);
-
+        this.vertx = vertx;
+        vertx.setPeriodic(timeout,this);
     }
 
     @Override
@@ -264,62 +292,90 @@ public class DefaultNode implements Node {
 
     @Override
     public void retry(Long messageId, AckHandler handler) {
-        JsonObject msg = pending.get(messageId);
+//        JsonObject msg = pending.get(messageId);
+
+        MessageWrapper wrapper = pending.get(messageId);
+        JsonObject msg = wrapper.getMessage();
+        logger.error(getId() + "Retrying... " + messageId + " to " + msg.getString(MessageUtils.TO));
         if (msg.getString(MessageUtils.COMTYPE).equals(ComUtils.P2P)) {
             //resend message through event bus to the nodeid
-            bus.sendWithTimeout(msg.getString(MessageUtils.TO), msg, timeout, handler);
+//            bus.sendWithTimeout(msg.getString(MessageUtils.TO), msg, timeout, handler);
+             bus.send(msg.getString(MessageUtils.TO),msg);
         } else if (msg.getString(MessageUtils.COMTYPE).equals(ComUtils.GROUP)) {
             //resend message through event bus to the groupId, it is essentially the same as
             //sending to one node since the event bus address is just an id.
-            bus.sendWithTimeout(msg.getString(MessageUtils.TO), msg, timeout, handler);
+//            bus.sendWithTimeout(msg.getString(MessageUtils.TO), msg, timeout, handler);
+            bus.send(msg.getString(MessageUtils.TO),msg);
+        }
+        else{
+            bus.send(msg.getString(MessageUtils.TO),msg);
         }
     }
 
     @Override
     public void succeed(Long messageId) {
-        //If succeded remove message and ackHandler
-        JsonObject msg = pending.remove(messageId);
-        AckHandler handler = pendingHandlers.remove(messageId);
-        handler = null;
-        //logger.info("Succeded Message: " + msg.toString());
+        try {
+            //If succeded remove message and ackHandler
+            MessageWrapper wrapper = pending.remove(messageId);
+//        JsonObject msg = pending.remove(messageId);
+//            logger.error(getId() + " Try to succeed " + messageId + " currentId " + currentId);
+            if(wrapper == null){
+//                logger.error(getId() + " Message " + messageId + " Was ALREADY Succeeded");
+                return;
+            }
+            JsonObject msg = wrapper.getMessage();
+//        AckHandler handler = pendingHandlers.remove(messageId);
+//        handler = null;
+//            logger.info("Succeded Message: " + msg.toString());
+            msg = null;
+            wrapper = null;
+        }catch (Exception e){
+            logger.fatal(getId() + " Exception in succeed " + messageId);
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void fail(Long messageId) {
         //Remove message andhandler from pending handlers
-        JsonObject msg = pending.remove(messageId);
+//        JsonObject msg = pending.remove(messageId);
+        MessageWrapper wrapper = pending.remove(messageId);
+        JsonObject msg = wrapper.getMessage();
         AckHandler handler = pendingHandlers.remove(messageId);
         handler = null;
-        logger.error("Failed Message: " + msg.toString());
+        if(!getId().endsWith(".log"))
+        {
+            logger.error(getId() + " Failed Message: " + msg.toString());
+        }
         if (requests.remove(messageId)) {
             comHandler.unregisterRequest(getId() + "-request-" + messageId);
         }
         if (failHandler != null) {
             failHandler.handle(msg);
         }
-
-
-
+        msg =null;
+        wrapper = null;
     }
 
     @Override
     public long getNextMessageId() {
-        currentId += (currentId + 1) % Long.MAX_VALUE;
+        currentId = (currentId + 1) % Long.MAX_VALUE;
         return currentId;
     }
 
     @Override
     public void sendWithEventBus(String groupId, JsonObject message) {
-        JsonObject leadsMessage =
-            MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.GROUP);
+//        long messageId = getNextMessageId();
+//        JsonObject leadsMessage =
+//            MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.GROUP,messageId);
         bus.send(groupId, message);
     }
 
     @Override
     public void sendWithEventBusReply(String groupId, JsonObject message,
                                          ReplyHandler replyHandler) {
-        JsonObject leadsMessage =
-            MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.GROUP);
+//        JsonObject leadsMessage =
+//            MessageUtils.createLeadsMessage(message, getId(), groupId, ComUtils.GROUP,getNextMessageId());
         bus.send(groupId, message, replyHandler);
     }
 
@@ -328,5 +384,49 @@ public class DefaultNode implements Node {
 
     }
 
+    @Override
+    public void ack(JsonObject incoming) {
+//        logger.error(getId() + " ack " + incoming.getLong(MessageUtils.MSGID) + " from " + incoming.getString(MessageUtils.FROM));
+        receive(incoming);
+        JsonObject ackMessage = MessageUtils.createAckMessage(incoming);
+        bus.send(ackMessage.getString(MessageUtils.TO),ackMessage);
+    }
 
+    @Override
+    public boolean checkIfDelivered(JsonObject message) {
+        String from = message.getString(MessageUtils.FROM);
+        Long messageId = message.getNumber(MessageUtils.MSGID).longValue();
+        Long longMessage = incomingMessages.getIfPresent(from + ":" + messageId);
+        if(longMessage == null){
+//            logger.error(getId() + " Not Delivered " + from + " "+ messageId);
+        }
+        else{
+//            logger.error(getId() + " Already Delivered " + from + " " + messageId);
+        }
+        return longMessage != null;
+    }
+
+    @Override
+    public void receive(JsonObject message) {
+        String from = message.getString(MessageUtils.FROM);
+        Long messageId = message.getNumber(MessageUtils.MSGID).longValue();
+        incomingMessages.put(from+":"+messageId,messageId);
+    }
+
+
+    @Override
+    public void handle(Long event) {
+        Iterator<Map.Entry<Long,MessageWrapper>> entryIterator = pending.entrySet().iterator();
+        while(entryIterator.hasNext()){
+            Map.Entry<Long,MessageWrapper> entry = entryIterator.next();
+            int retries = entry.getValue().getRetries();
+            retries--;
+            if(retries < 0 || getId().endsWith(".log")){
+                fail(entry.getKey());
+                return;
+            }
+            entry.getValue().setRetries(retries);
+            retry(entry.getKey(),null);
+        }
+    }
 }

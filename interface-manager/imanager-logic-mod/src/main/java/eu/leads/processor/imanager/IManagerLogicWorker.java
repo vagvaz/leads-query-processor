@@ -79,6 +79,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                         action.getData().putString("replyTo", msg.getString("from"));
                         com.sendWithEventBus(workQueueAddress, action.asJsonObject());
                     } else if (label.equals(IManagerConstants.GET_QUERY_STATUS)) {
+                        log.info("peding get query resutls");
                         action.getData().putString("replyTo", msg.getString("from"));
                         com.sendWithEventBus(workQueueAddress, action.asJsonObject());
                     } else if (label.equals(IManagerConstants.GET_RESULTS)) {
@@ -174,7 +175,9 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
                         }
                         com.sendTo(action.getData().getString("replyTo"), action.getResult());
                     } else if (label.equals(IManagerConstants.GET_QUERY_STATUS)) {
+                        log.info("completed reply get query resutls");
                         com.sendTo(action.getData().getString("replyTo"), action.getResult());
+
                     }
                     else if (label.equals(IManagerConstants.DEPLOY_PLUGIN)) {
                         com.sendTo(action.getData().getString("replyTo"), action.getResult());

@@ -61,8 +61,9 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
         bus.registerHandler(id + ".process", this);
        LQPConfiguration.initialize();
         persistence = InfinispanClusterSingleton.getInstance().getManager();
-
+      log = new LogProxy(config.getString("log"), com);
         JsonObject msg = new JsonObject();
+
         msg.putString("processor", id + ".process");
         handlers = new HashMap<String, ActionHandler>();
         handlers.put(IManagerConstants.GET_OBJECT,
@@ -87,27 +88,30 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
                 new UndeployPluginActionHandler(com, log, persistence, id));
         handlers.put(IManagerConstants.PUT_ENC_OBJECT, new PutEncActionHandler(com,log,persistence,id));
         handlers.put(IManagerConstants.CREATE_NEW_ENC_QUERY, new CreateEncQueryActionHandler(com,log,persistence,id));
-        log = new LogProxy(config.getString("log"), com);
+
 
         bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {
             @Override
             public void handle(Message<JsonObject> event) {
-                log.info("Registration " + event.toString());
+               log.info(id + " Registration " + event.address().toString());
             }
         });
-      log.info(" started....");
+      log.info(id+" started....");
     }
 
     @Override
     public void handle(Message<JsonObject> message) {
         try {
+          log.info("processor received msg");
             JsonObject body = message.body();
             if (body.containsField("type")) {
                 if (body.getString("type").equals("action")) {
                     Action action = new Action(body);
                     ActionHandler ac = handlers.get(action.getLabel());
                     Action result = ac.process(action);
+                  log.info("processed");
                     result.setStatus(ActionStatus.COMPLETED.toString());
+                  log.info("reply to logic");
                     com.sendTo(logic, result.asJsonObject());
                     message.reply();
                 }

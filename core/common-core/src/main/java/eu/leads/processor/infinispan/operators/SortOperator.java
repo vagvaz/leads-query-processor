@@ -69,18 +69,18 @@ public class SortOperator extends BasicOperator {
 //            for (Future<?> result : res) {
 //               addresses.add((String) result.get());
 //            }
-//            System.out.println("mapper Execution is done");
+//            System.out.println("sort callable  Execution is done on " + addresses.get(addresses.size()-1));
 //         }
 //         else
 //         {
-//            System.out.println("mapper Execution not done");
+//            System.out.println("sort callable Execution not done");
 //         }
 //      } catch (InterruptedException e) {
 //         e.printStackTrace();
 //      } catch (ExecutionException e) {
 //         e.printStackTrace();
 //      }
-      //Merge outputs
+////      Merge outputs
 //      TupleComparator comparator = new TupleComparator(sortColumns,asceding,types);
 //      SortMerger merger = new SortMerger(addresses, getOutput(),comparator,manager,conf);
 //      merger.merge();
@@ -89,6 +89,7 @@ public class SortOperator extends BasicOperator {
 //         manager.removePersistentCache(cacheName);
 //      }
 //      manager.removePersistentCache(beforeMerge.getName());
+//Single
       List<Tuple> tuples = new ArrayList<>();
       String prefix = getOutput()+":";
       try {

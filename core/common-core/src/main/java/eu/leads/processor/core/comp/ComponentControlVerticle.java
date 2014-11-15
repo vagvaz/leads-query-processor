@@ -456,17 +456,17 @@ public class ComponentControlVerticle extends Verticle implements Component {
                 break;
             case INITIALIZING:
                 if (!(state == ComponentState.INITIALIZED || state == ComponentState.RUNNING)) {
-                    log.error("Cannot Go from external resource from " + this.state + "->" + state);
+                    log.error(getId() + " Cannot Go from external resource from " + this.state + "->" + state);
                 }
                 break;
             case STARTING:
             case INITIALIZED:
                 if (state != ComponentState.RUNNING)
-                    log.error("Cannot Go from external resource from " + this.state + "->" + state);
+                    log.error(getId() + " Cannot Go from external resource from " + this.state + "->" + state);
                 break;
             case RESETTING:
                 if (state != ComponentState.STOPPED) {
-                    log.error("Cannot Go from external resource from " + this.state + "->" + state);
+                    log.error(getId() + " Cannot Go from external resource from " + this.state + "->" + state);
                 } else {
                     undeployAllModules();
                     setup(config);
@@ -475,11 +475,11 @@ public class ComponentControlVerticle extends Verticle implements Component {
             case RUNNING:
             case STOPPING:
                 if (!(state == ComponentState.STOPPED || state == ComponentState.KILLED)) {
-                    log.error("Cannot Go from external resource from " + this.state + "->" + state);
+                    log.error(getId() + " Cannot Go from external resource from " + this.state + "->" + state);
                 }
                 break;
             case STOPPED:
-                log.error("Cannot Go from external resource from " + this.state + "->" + state);
+                log.error(getId() + " Cannot Go from external resource from " + this.state + "->" + state);
                 break;
             case KILLED:
                 log.error("Cannot Go from external resource from " + this.state + "->" + state);

@@ -1,9 +1,10 @@
 package eu.leads.processor.math;
 
+import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -163,7 +164,7 @@ public class MathUtils {
         String result = null;
         if(value.getString("type").equals("FIELD"))
         {
-            result = value.getObject("body").getObject("datum").getObject("body").getString("val");
+            result = value.getObject("body").getObject("datum").getObject("body").getValue("val").toString();
         }
         else if(value.getString("type").equals("CONST") ){
             byte[] patternBytes = null;
@@ -175,6 +176,17 @@ public class MathUtils {
                 patternBytes[i] = ((Integer)bytes.get(i)).byteValue();
             }
             result = new String(patternBytes);
+        }
+        else if(value.getString("type").equals("TEXT")){
+          byte[] patternBytes = null;
+          JsonObject body = value.getObject("body");
+          org.vertx.java.core.json.JsonArray bytes = body.getArray("bytes");
+          int size = body.getInteger("size");
+          patternBytes = new byte[size];
+          for (int i = 0; i < size; i++) {
+            patternBytes[i] = ((Integer)bytes.get(i)).byteValue();
+          }
+          result = new String(patternBytes);
         }
 
         return result;
@@ -201,6 +213,29 @@ public class MathUtils {
          Object leftValue = left.getObject("body").getObject("datum").getObject("body").getValue("val");
          Object rightValue = right.getObject("body").getObject("datum").getObject("body").getValue("val");
          return leftValue.toString().compareTo(rightValue.toString()) <= 0;
+      }
+   }
+   public static boolean equals(JsonObject left, JsonObject right) {
+      String type = left.getObject("body").getObject("datum").getString("type");
+      if (type.startsWith("TEXT")) {
+         String leftValue = getTextFrom(left);
+
+         //left.getObject("body").getObject("datum").getObject("body").getString("val");
+         String rightValue = getTextFrom(right);
+         return leftValue.compareTo(rightValue) == 0;
+      } else if (type.startsWith("INT")) {
+         Long leftValue = left.getObject("body").getObject("datum").getObject("body").getLong("val");
+         Long rightValue = right.getObject("body").getObject("datum").getObject("body").getLong("val");
+         return leftValue.compareTo(rightValue) == 0;
+      } else if (type.startsWith("FLOAT") || type.startsWith("DOUBLE")) {
+         Number leftValue = left.getObject("body").getObject("datum").getObject("body").getNumber("val");
+         Number rightValue = right.getObject("body").getObject("datum").getObject("body").getNumber("val");
+         return leftValue.doubleValue() == rightValue.doubleValue();
+      } else {
+         System.out.println("Unknonw type equals " + type);
+         Object leftValue = left.getObject("body").getObject("datum").getObject("body").getValue("val");
+         Object rightValue = right.getObject("body").getObject("datum").getObject("body").getValue("val");
+         return leftValue.toString().compareTo(rightValue.toString()) == 0;
       }
    }
 
@@ -255,9 +290,11 @@ public class MathUtils {
           pattern = pattern.replaceAll("%","");
           result = testString.endsWith(pattern);
         }
-        else{
+        else if(pattern.endsWith("%")){
           pattern = pattern.replaceAll("%","");
           result = testString.startsWith(pattern);
+        }else{
+           result = testString.equals(pattern);
         }
 
 
@@ -273,9 +310,11 @@ public class MathUtils {
             pattern = pattern.replaceAll("%","");
             result = testString.endsWith(pattern);
         }
-        else{
-          pattern = pattern.replaceAll("%","");
-          result = testString.startsWith(pattern);
+        else if(pattern.endsWith("%")){
+           pattern = pattern.replaceAll("%","");
+           result = testString.startsWith(pattern);
+        }else{
+           result = testString.equals(pattern);
         }
 
       }
@@ -511,4 +550,28 @@ public class MathUtils {
       }
       return sum / count;
    }
+
+  public static boolean checkIfIn(JsonObject val, JsonObject set) {
+    boolean result = false;
+    Object value = getTextFrom(val);
+    result = set.getObject("valueSet").containsField(value.toString());
+    return result;
+  }
+
+  public static JsonObject createValueSet(JsonObject value) {
+    JsonObject result = value;
+    JsonObject valueSet = new JsonObject();
+    JsonArray values = result.getObject("body").getArray("values");
+    Iterator<Object> iterator = values.iterator();
+    while(iterator.hasNext()){
+      JsonObject val = (JsonObject) iterator.next();
+      if(val.getString("type").equals("TEXT")){
+        String textValue = getTextFrom(val);
+        valueSet.putString(textValue,"");
+      }
+    }
+    result.putObject("valueSet",valueSet);
+    return result;
+  }
+
 }

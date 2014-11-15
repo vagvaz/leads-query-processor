@@ -4,7 +4,6 @@ import org.infinispan.filter.KeyValueFilter;
 //import org.infinispan.filter.KeyValueFilterFactory;
 //import org.infinispan.filter.NamedFactory;
 import org.infinispan.manager.EmbeddedCacheManager;
-
 import org.infinispan.server.hotrod.event.KeyValueFilterFactory;
 import org.vertx.java.core.json.JsonObject;
 

@@ -52,8 +52,7 @@ public class DefaultWorkerProcessor extends Verticle implements Handler<Message>
             bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {
                 @Override
                 public void handle(Message<JsonObject> event) {
-                    System.out.println("Registration " + event.toString());
-                }
+                    log.info(id + " Registration " + event.address().toString());                }
             });
             log = new LogProxy(config.getString("log"), com);
         } catch (Exception e) {

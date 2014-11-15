@@ -62,14 +62,16 @@ public class LimitOperator extends BasicOperator {
         long startTime = System.nanoTime();
         int counter = 0;
         if (sorted) {
-            int sz = inputMap.size();
+//            int sz = inputMap.size();
           CloseableIterable<Map.Entry<String, String>> iterable =
             inputMap.getAdvancedCache().filterEntries(new AcceptAllFilter());
-          for (Map.Entry<String, String> entry : iterable) {
-              System.err.println("e: " + entry.getKey().toString() + " ---> " + entry.getValue().toString());
-            }
-            for (counter = 0; counter < rowCount && counter < sz; counter++) {
+//          for (Map.Entry<String, String> entry : iterable) {
+//              System.err.println("e: " + entry.getKey().toString() + " ---> " + entry.getValue().toString());
+//            }
+            for (counter = 0; counter < rowCount ; counter++) {
                 String tupleValue = (String) inputMap.get(inputPrefix + counter);
+                if(tupleValue == null)
+                   break;
                 System.err.println("Read " + inputPrefix + counter + " --> " +tupleValue);
                 Tuple t = new Tuple(tupleValue);
                 handlePagerank(t);

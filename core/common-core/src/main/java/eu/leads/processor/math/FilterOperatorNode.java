@@ -1,7 +1,6 @@
 package eu.leads.processor.math;
 
 import eu.leads.processor.core.Tuple;
-import eu.leads.processor.core.TupleUtils;
 import org.vertx.java.core.json.JsonElement;
 import org.vertx.java.core.json.JsonObject;
 
@@ -20,6 +19,12 @@ public class FilterOperatorNode {
           value = node.asObject();
           left = null;
           right = null;
+       }
+       else if(type.equals(FilterOpType.ROW_CONSTANT)){
+          value = node.asObject();
+          left = null;
+          right = null;
+          value = MathUtils.createValueSet(value);
        }
        else{
           left = new FilterOperatorNode(node.asObject().getObject("body").getElement("leftExpr"));
@@ -64,13 +69,13 @@ public class FilterOperatorNode {
             }
                break;
             case EQUAL:
-               result = left.getValue().equals(right.getValue());
+               result = MathUtils.equals(left.getValueAsJson(),right.getValueAsJson());
                break;
             case IS_NULL:
                result = left.isValueNull();
                break;
             case NOT_EQUAL:
-               result = !(left.getValue().equals(right.getValue()));
+               result = !(MathUtils.equals(left.getValueAsJson(), right.getValueAsJson()));
                break;
             case LTH:
                result = MathUtils.lessThan(left.getValueAsJson(),right.getValueAsJson());
@@ -93,6 +98,21 @@ public class FilterOperatorNode {
                break;
             case IN:
                //TODO
+               JsonObject val = null;
+               JsonObject set = null;
+               if(left.getValueAsJson().getString("type").equals("FIELD")){
+                  val = left.getValueAsJson();
+                  set = right.getValueAsJson();
+               }
+               else{
+                  val = right.getValueAsJson();
+                  set= left.getValueAsJson();
+               }
+               result =  MathUtils.checkIfIn(val,set);
+               // check conditino
+               // rerturn field in set
+            case ROW_CONSTANT:
+               //TODO
                break;
             case FIELD:
                this.value.getObject("body").putObject("datum", computeDatum(t));
@@ -101,10 +121,94 @@ public class FilterOperatorNode {
             case CONST:
                result = true;
                return result;
+
          }
       putBooleanDatum(result);
       return result;
    }
+   public void updateWith(Tuple t){
+
+      if(left != null)
+         left.updateWith(t);
+      if(right != null)
+         right.updateWith(t);
+
+      switch (type) {
+         case NOT:
+            //TODO
+            break;
+         case AND: {
+//            boolean leftValue = left.getValueAsBoolean();
+//            boolean rightValue = right.getValueAsBoolean();
+//            result =  leftValue && rightValue;
+         }
+         break;
+         case OR: {
+//            boolean leftValue = left.getValueAsBoolean();
+//            boolean rightValue = right.getValueAsBoolean();
+//
+//            result =  leftValue || rightValue;
+         }
+         break;
+         case EQUAL:
+//            result = MathUtils.equals(left.getValueAsJson(),right.getValueAsJson());
+            break;
+         case IS_NULL:
+//            result = left.isValueNull();
+            break;
+         case NOT_EQUAL:
+//            result = !(MathUtils.equals(left.getValueAsJson(),right.getValueAsJson()));
+            break;
+         case LTH:
+//            result = MathUtils.lessThan(left.getValueAsJson(),right.getValueAsJson());
+            break;
+         case LEQ:
+//            result = MathUtils.lessEqualThan(left.getValueAsJson(),right.getValueAsJson());
+            break;
+         case GTH:
+//            result = MathUtils.greaterThan(left.getValueAsJson(),right.getValueAsJson());
+            break;
+         case GEQ:
+//            result = MathUtils.greaterEqualThan(left.getValueAsJson(),right.getValueAsJson());
+            break;
+         case AGG_FUNCTION:
+            break;
+         case FUNCTION:
+            break;
+         case LIKE:
+//            result = MathUtils.like(left.getValueAsJson(),right.getValueAsJson(),value);
+            break;
+         case IN:
+//            //TODO
+//            JsonObject val = null;
+//            JsonObject set = null;
+//            if(left.getValueAsJson().getString("type").equals("FIELD")){
+//               val = left.getValueAsJson();
+//               set = right.getValueAsJson();
+//            }
+//            else{
+//               val = right.getValueAsJson();
+//               set= left.getValueAsJson();
+//            }
+//            result = MathUtils.checkIfIn(val,set);
+         // check conditino
+         // rerturn field in set
+         case ROW_CONSTANT:
+            //TODO
+            break;
+         case FIELD:
+            this.value.getObject("body").putObject("datum", computeDatum(t));
+//            result = true;
+//            return result;
+         case CONST:
+//            result = true;
+//            return result;
+
+      }
+//      putBooleanDatum(result);
+//      return result;
+   }
+
 
    private boolean getValueAsBoolean() {
       Object object =  value.getObject("body").getObject("datum").getObject("body").getValue("val");

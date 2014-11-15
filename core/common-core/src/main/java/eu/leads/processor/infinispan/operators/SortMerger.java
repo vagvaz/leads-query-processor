@@ -82,7 +82,8 @@ public class SortMerger {
         String key = keys.get(cacheIndex);
         Integer counter = counters.get(cacheIndex);
         counter = counter + 1;
-        if (counter >= caches.get(cacheIndex).size()) {
+       String tmp = caches.get(cacheIndex).get(key +  counter.toString());
+        if (tmp == null) {
             counters.remove(cacheIndex);
             caches.remove(cacheIndex);
             manager.removePersistentCache(cacheNames.elementAt(cacheIndex));
@@ -92,7 +93,7 @@ public class SortMerger {
             return null;
         }
         counters.set(cacheIndex, counter);
-        String tmp = caches.get(cacheIndex).get(key +  counter.toString());
+//        String tmp = caches.get(cacheIndex).get(key +  counter.toString());
         return new Tuple(tmp);
     }
 

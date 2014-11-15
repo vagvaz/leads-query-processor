@@ -37,19 +37,21 @@ public class AckHandler implements Handler<AsyncResult<Message<JsonObject>>> {
 
     @Override
     public void handle(AsyncResult<Message<JsonObject>> result) {
+        logger.fatal("Ack RIN");
         if (result.succeeded()) {
-            owner.succeed(msgId);
+            logger.fatal("Ack RIN");
+//            owner.succeed(msgId);
             //         if (handler != null)
             //            handler.handle(result.result().body());
         } else {
             //IF maximum number of retries reached then fail the message
-            if (retries == 0) {
-                owner.fail(msgId);
-            } else {
-                //RETRY Sending
-                retries--;
-                owner.retry(msgId, this);
-            }
+//            if (retries == 0) {
+//                owner.fail(msgId);
+//            } else {
+//                //RETRY Sending
+//                retries--;
+//                owner.retry(msgId, this);
+//            }
 
         }
     }
