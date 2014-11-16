@@ -32,8 +32,28 @@ public class FilterOperatorTree {
       root = new FilterOperatorNode(qual);
    }
 
+   public FilterOperatorTree() {
+
+   }
+
    public boolean accept(Tuple tuple){
       return root.accept(tuple);
+   }
+
+   public FilterOperatorNode getRoot() {
+      return root;
+   }
+
+   public JsonObject getJson() {
+      JsonObject result = new JsonObject();
+      result = root.toJson(result);
+      return result;
+   }
+
+   public void loadFromJson(String treeAsJson) {
+      JsonObject tree = new JsonObject(treeAsJson);
+      root = new FilterOperatorNode();
+      root.fromJson(tree);
    }
 //    public MathOperatorTree(MathOperatorTreeNode root) {
 //        this.root = root;

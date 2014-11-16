@@ -26,7 +26,6 @@ import org.apache.tajo.engine.planner.PlanningException;
 import org.apache.tajo.master.session.Session;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -74,9 +73,9 @@ public class TaJoModule {
     }
 
     public static Expr parseQuery(String sql) {
-//        System.out.print(sql.length());
-        String query = check_insert(sql);
-        ANTLRInputStream input = new ANTLRInputStream(query);
+        System.out.print(sql.length());
+        sql=check_insert(  sql);
+        ANTLRInputStream input = new ANTLRInputStream(sql);
         SQLLexer lexer = new SQLLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         LeadsSQLParser parser = new LeadsSQLParser(tokens);

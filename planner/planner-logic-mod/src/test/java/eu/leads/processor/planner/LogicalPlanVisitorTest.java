@@ -1,8 +1,10 @@
 package eu.leads.processor.planner;
 
 import com.google.gson.Gson;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.plan.PlanNode;
 import eu.leads.processor.core.plan.SQLPlan;
+import eu.leads.processor.math.FilterOperatorTree;
 import leads.tajo.module.TaJoModule;
 import org.apache.hadoop.fs.Path;
 import org.apache.tajo.TajoConstants;
@@ -21,6 +23,7 @@ import org.apache.tajo.engine.planner.logical.LogicalRootNode;
 import org.apache.tajo.master.session.Session;
 import org.apache.tajo.util.KeyValueSet;
 import org.vertx.java.core.json.JsonArray;
+import org.vertx.java.core.json.JsonObject;
 
 /**
  * Created by vagvaz on 8/27/14.
@@ -78,8 +81,23 @@ public static void main(String[] args) throws Exception {
     Mymodule.init_connection("127.0.0.1", 5998);
 //        String line = "select count(sentiment) as pipo,links,url as lala,pagerank as foobar,count(domainname) as papari   from webpages where lala = 'ddsaf' and foobar =9 group by links,lala, foobar having papari > 5 order by papari";
     // "select dept.deptname,dept.tmsp from dept join ( select score,phone,deptname,sumtest(score) as tmsp from score group by score,phone, deptname) s on dept.deptname = s.deptname and s.tmsp = dept.tmsp";
-    String line = "select w.url,w.sentiment from webpages as w join entities as e  on e.webpageurl=w.url where w.sentiment=e.sentimentscore and w.title =e.name and w.title = e.webpageurl";
+    String line = "select w.url,w.sentiment from webpages as w join entities as e  on e.webpageurl=w.url where w.sentiment=e.sentimentscore and w.title =e.name and w.body = e.webpageurl";
 //   String line = "insert into entities values('a','dfs',728)";
+   Tuple t = new Tuple();
+   t.setAttribute("default.e.webpageurl","mywebpage");
+   t.setAttribute("default.e.sentimentscore",0.32342);
+   t.setAttribute("default.e.name","metaxa");
+   Tuple test = new Tuple();
+   test.setAttribute("default.w.url","mywebpage");
+   test.setAttribute("default.w.sentiment",0.32342);
+   test.setAttribute("default.w.title","metaxa");
+   test.setAttribute("default.w.body","mywebpage");
+
+   Tuple test2 = new Tuple();
+   test2.setAttribute("default.w.url","mywebpage");
+   test2.setAttribute("default.w.sentiment",0.32342);
+   test2.setAttribute("default.w.title","metaxa");
+   test2.setAttribute("default.w.body","mywebpage2");
    System.out.println(line);
     Expr expr = TaJoModule.parseQuery(line);
     SQLPlan plan = null;
@@ -94,6 +112,30 @@ public static void main(String[] args) throws Exception {
         if (n.getChild() != null) {
 
             plan = new SQLPlan("queryId-custom", n);
+           PlanNode joinN = plan.getNode("queryId-custom.6");
+           JsonObject jqual = joinN.getConfiguration().getObject("body").getObject("joinQual");
+           FilterOperatorTree tree = new FilterOperatorTree(jqual);
+           tree.getRoot().updateWith(t);
+           JsonObject updated = tree.getJson();
+           FilterOperatorTree newtree = new FilterOperatorTree();
+           newtree.loadFromJson(updated.toString());
+           if(newtree.getJson().toString().equals(tree.getJson().toString())){
+              System.out.println("Json Serialize deserialize was successful");
+              System.out.println(tree.getJson().encodePrettily());
+              if(newtree.accept(test)){
+                 System.out.println("Solustion is acceptable until test");
+              }
+              else{
+                 System.out.println("Solution is not acceptable test failed");
+              }
+              if(!newtree.accept(test2)){
+                 System.out.println("Failed test2 horay");
+              }
+              else{
+                 System.out.println("Did not failed test2 bad news");
+              }
+              return;
+           }
             System.out.println(plan.asJsonObject().encodePrettily());
         } else {
             CreateTable table;
@@ -102,7 +144,7 @@ public static void main(String[] args) throws Exception {
 
     }
     else{
-        System.out.println(plan.asJsonObject().encodePrettily());
+         System.out.println("\n\n\n"+plan.asJsonObject().encodePrettily());
     }
 
 

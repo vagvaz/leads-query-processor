@@ -43,6 +43,10 @@ public class FilterOperatorNode {
 
    }
 
+   public FilterOperatorNode() {
+
+   }
+
 
    public boolean accept(Tuple t){
          boolean result =false;
@@ -115,7 +119,9 @@ public class FilterOperatorNode {
                //TODO
                break;
             case FIELD:
-               this.value.getObject("body").putObject("datum", computeDatum(t));
+               JsonObject datum = computeDatum(t);
+               if(datum != null)
+                  this.value.getObject("body").putObject("datum", datum);
                result = true;
                return result;
             case CONST:
@@ -197,7 +203,10 @@ public class FilterOperatorNode {
             //TODO
             break;
          case FIELD:
-            this.value.getObject("body").putObject("datum", computeDatum(t));
+            JsonObject datum = computeDatum(t);
+            if(datum != null) {
+               this.value.getObject("body").putObject("datum",datum);
+            }
 //            result = true;
 //            return result;
          case CONST:
@@ -245,11 +254,46 @@ public class FilterOperatorNode {
    }
 
    private JsonObject computeDatum(Tuple t) {
+      if(!t.hasField(value.getObject("body").getObject("column").getString("name")))
+         return null;
       JsonObject result = new JsonObject();
       result.putString("type",value.getObject("body").getObject("column").getObject("dataType").getString("type"));
       result.putObject("body",new JsonObject());
       result.getObject("body").putString("type", result.getString("type"));
       result.getObject("body").putValue("val",t.getGenericAttribute(value.getObject("body").getObject("column").getString("name")));
       return result;
+   }
+
+   public JsonObject toJson(JsonObject result) {
+//      FilterOpType type;
+//      FilterOperatorNode left;
+//      FilterOperatorNode right;
+//      JsonObject value;
+      result.putString("type",type.toString());
+      result.putObject("value",value);
+      if(left != null){
+         JsonObject leftOb = new JsonObject();
+         leftOb = left.toJson(leftOb);
+         result.putObject("left",leftOb);
+      }
+      if(right != null){
+         JsonObject rightOb = new JsonObject();
+         rightOb = right.toJson(rightOb);
+         result.putObject("right",rightOb);
+      }
+      return result;
+   }
+
+   public void fromJson(JsonObject treeAsJson) {
+      type = FilterOpType.valueOf(treeAsJson.getString("type"));
+      value = treeAsJson.getObject("value");
+      if(treeAsJson.containsField("left")){
+         left = new FilterOperatorNode();
+         left.fromJson(treeAsJson.getObject("left"));
+      }
+      if(treeAsJson.containsField("right")){
+         right = new FilterOperatorNode();
+         right.fromJson(treeAsJson.getObject("right"));
+      }
    }
 }
