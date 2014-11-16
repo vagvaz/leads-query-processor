@@ -10,11 +10,13 @@ import grammar.LeadsSQLParser.SqlContext;
 import grammar.SQLLexer;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.apache.hadoop.fs.Path;
-import org.apache.tajo.algebra.*;
-import org.apache.tajo.catalog.*;
-import org.apache.tajo.catalog.proto.CatalogProtos;
-import org.apache.tajo.common.TajoDataTypes;
+import org.apache.tajo.algebra.BinaryOperator;
+import org.apache.tajo.algebra.Expr;
+import org.apache.tajo.algebra.UnaryOperator;
+import org.apache.tajo.catalog.CatalogClient;
+import org.apache.tajo.catalog.CatalogService;
+import org.apache.tajo.catalog.Schema;
+import org.apache.tajo.catalog.TableDesc;
 import org.apache.tajo.conf.TajoConf;
 import org.apache.tajo.engine.json.CoreGsonHelper;
 import org.apache.tajo.engine.parser.SQLSyntaxError;
@@ -22,7 +24,6 @@ import org.apache.tajo.engine.planner.LeadsLogicalOptimizer;
 import org.apache.tajo.engine.planner.LogicalPlan;
 import org.apache.tajo.engine.planner.LogicalPlanner;
 import org.apache.tajo.engine.planner.PlanningException;
-
 import org.apache.tajo.master.session.Session;
 
 import java.io.IOException;
@@ -72,9 +73,9 @@ public class TaJoModule {
     }
 
     public static Expr parseQuery(String sql) {
-//        System.out.print(sql.length());
-        String query = check_insert(sql);
-        ANTLRInputStream input = new ANTLRInputStream(query);
+        System.out.print(sql.length());
+        sql=check_insert(  sql);
+        ANTLRInputStream input = new ANTLRInputStream(sql);
         SQLLexer lexer = new SQLLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         LeadsSQLParser parser = new LeadsSQLParser(tokens);
