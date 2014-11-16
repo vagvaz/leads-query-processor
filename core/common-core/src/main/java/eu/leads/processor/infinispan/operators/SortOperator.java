@@ -59,63 +59,64 @@ public class SortOperator extends BasicOperator {
    public void run() {
        long startTime = System.nanoTime();
       Cache inputCache = (Cache) this.manager.getPersisentCache(getInput());
-//      Cache beforeMerge = (Cache)this.manager.getPersisentCache(getOutput()+".merge");
-//      DistributedExecutorService des = new DefaultExecutorService(inputCache);
-//      SortCallable callable = new SortCallable(sortColumns,asceding,types,getOutput()+".merge");
-//      List<Future<String>> res = des.submitEverywhere(callable);
-//      List<String> addresses = new ArrayList<String>();
-//      try {
-//         if (res != null) {
-//            for (Future<?> result : res) {
-//               addresses.add((String) result.get());
-//            }
-//            System.out.println("sort callable  Execution is done on " + addresses.get(addresses.size()-1));
-//         }
-//         else
-//         {
-//            System.out.println("sort callable Execution not done");
-//         }
-//      } catch (InterruptedException e) {
-//         e.printStackTrace();
-//      } catch (ExecutionException e) {
-//         e.printStackTrace();
-//      }
-////      Merge outputs
-//      TupleComparator comparator = new TupleComparator(sortColumns,asceding,types);
-//      SortMerger merger = new SortMerger(addresses, getOutput(),comparator,manager,conf);
-//      merger.merge();
-       Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
-//      for(String cacheName : addresses){
-//         manager.removePersistentCache(cacheName);
-//      }
-//      manager.removePersistentCache(beforeMerge.getName());
-//Single
-      List<Tuple> tuples = new ArrayList<>();
-      String prefix = getOutput()+":";
+      Cache beforeMerge = (Cache)this.manager.getPersisentCache(getOutput()+".merge");
+      Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
+      DistributedExecutorService des = new DefaultExecutorService(inputCache);
+      SortCallable callable = new SortCallable(sortColumns,asceding,types,getOutput()+".merge",UUID.randomUUID().toString());
+      List<Future<String>> res = des.submitEverywhere(callable);
+      List<String> addresses = new ArrayList<String>();
       try {
-         CloseableIterable<Map.Entry<String, String>> iterable =
-                 inputCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
-         for (Map.Entry<String, String> entry : iterable) {
-
-
-            String valueString = (String) entry.getValue();
-            if (valueString.equals(""))
-               continue;
-            tuples.add(new Tuple(valueString));
+         if (res != null) {
+            for (Future<?> result : res) {
+               addresses.add((String) result.get());
+            }
+            System.out.println("sort callable  Execution is done on " + addresses.get(addresses.size()-1));
          }
-      }catch (Exception e){
+         else
+         {
+            System.out.println("sort callable Execution not done");
+         }
+      } catch (InterruptedException e) {
+         e.printStackTrace();
+      } catch (ExecutionException e) {
          e.printStackTrace();
       }
-      Comparator<Tuple> comparator = new TupleComparator(sortColumns,asceding,types);
-      Collections.sort(tuples, comparator);
-      int counter = 0;
-      for (Tuple t : tuples) {
-//         while(outputCache.size() != counter+1) {
-            outputCache.put(prefix + counter, t.asString());
-//         }
-         counter++;
+//      Merge outputs
+      TupleComparator comparator = new TupleComparator(sortColumns,asceding,types);
+      SortMerger merger = new SortMerger(addresses, getOutput(),comparator,manager,conf);
+      merger.merge();
+//       Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
+      for(String cacheName : addresses){
+         manager.removePersistentCache(cacheName);
       }
-      tuples.clear();
+      manager.removePersistentCache(beforeMerge.getName());
+//Single
+//      List<Tuple> tuples = new ArrayList<>();
+//      String prefix = getOutput()+":";
+//      try {
+//         CloseableIterable<Map.Entry<String, String>> iterable =
+//                 inputCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
+//         for (Map.Entry<String, String> entry : iterable) {
+//
+//
+//            String valueString = (String) entry.getValue();
+//            if (valueString.equals(""))
+//               continue;
+//            tuples.add(new Tuple(valueString));
+//         }
+//      }catch (Exception e){
+//         e.printStackTrace();
+//      }
+//      Comparator<Tuple> comparator = new TupleComparator(sortColumns,asceding,types);
+//      Collections.sort(tuples, comparator);
+//      int counter = 0;
+//      for (Tuple t : tuples) {
+////         while(outputCache.size() != counter+1) {
+//            outputCache.put(prefix + counter, t.asString());
+////         }
+//         counter++;
+//      }
+//      tuples.clear();
       cleanup();
       //Store Values for statistics
 //      updateStatistics(inputCache.size(), manager.getPersisentCache(getOutput()).size(), System.nanoTime() - startTime);

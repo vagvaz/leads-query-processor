@@ -47,15 +47,24 @@ public class SortMerger {
         comparator = comp;
         for (String entry : inputCaches) {
             Cache cache  = (Cache) manager.getPersisentCache((entry));
-            if(cache.size() == 0)
-            {
-              manager.removePersistentCache(entry);
-              continue;
-            }
+//            if(cache.size() == 0)
+//            {
+//              manager.removePersistentCache(entry);
+//              continue;
+//            }
             counters.add(0);
             keys.add(entry);
             caches.add(cache);
             Tuple t = getCurrentValue(keys.size() - 1);
+            if (t == null) {
+              counters.remove(counters.size()-1);
+              caches.remove(caches.size()-1);
+              manager.removePersistentCache(entry);
+//              cacheNames.removeElementAt(cacheNames.size()-1);
+              keys.remove(keys.size()-1);
+//              values.remove(values.size()-1);
+              continue;
+           }
             values.add(t);
             cacheNames.add(entry);
         }
@@ -75,6 +84,8 @@ public class SortMerger {
         String key = keys.get(cacheIndex);
         Integer counter = counters.get(cacheIndex);
         String tmp = caches.get(cacheIndex).get(key  + counter.toString());
+        if(tmp == null || tmp.equals(""))
+           return null;
         return new Tuple(tmp);
     }
 
@@ -135,7 +146,7 @@ public class SortMerger {
         Tuple curMin = values.get(0);
         for (int i = 1; i < values.size(); i++) {
             int cmp = comparator.compare(curMin, values.get(i));
-            if (cmp < 0) {
+            if (cmp > 0) {
                 curMin = values.get(i);
                 result = i;
             }

@@ -29,11 +29,14 @@ public class SortCallable<K,V> implements
    transient private Cache out;
    private String output;
    transient String address;
-   public SortCallable(String[] sortColumns,Boolean[] ascending, String[] types,String output){
+   private String prefix;
+
+   public SortCallable(String[] sortColumns, Boolean[] ascending, String[] types, String output, String prefix){
       this.sortColumns = sortColumns;
       this.asceding = ascending;
       this.types = types;
       this.output = output;
+      this.prefix = prefix;
    }
 
    @Override
@@ -42,7 +45,7 @@ public class SortCallable<K,V> implements
       keys = inputKeys;
       address = this.cache.getCacheManager().getAddress().toString();
       ClusterInfinispanManager manager = new ClusterInfinispanManager(cache.getCacheManager());
-      out = (Cache) manager.getPersisentCache(address);
+      out = (Cache) manager.getPersisentCache(prefix+"."+address);
    }
 
    @Override
@@ -62,7 +65,7 @@ public class SortCallable<K,V> implements
       Collections.sort(tuples, comparator);
       int counter = 0;
       for (Tuple t : tuples) {
-         out.put(address  + counter, t.asString());
+         out.put(out.getName()  + counter, t.asString());
          counter++;
       }
       tuples.clear();
