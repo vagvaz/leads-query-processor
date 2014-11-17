@@ -32,7 +32,7 @@
           </indexing>
             <eviction max-entries="1000" strategy="LIRS" />
             <transaction mode="NONE"/>
-            <expiration lifespan="-1" max-idle="-1"/>
+            <expiration lifespan="-1" max-idle="-1" interval="-1"/>
            <state-transfer enabled="true" await-initial-transfer="true"/>
 
       </distributed-cache>

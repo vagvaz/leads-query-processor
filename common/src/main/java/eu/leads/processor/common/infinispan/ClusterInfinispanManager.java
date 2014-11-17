@@ -416,7 +416,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
                                  .addSingleFileStore().location("/tmp/" + manager.getAddress().toString() + "/")
                            .fetchPersistentState(true)
-                           .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1)
+                           .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
                                  .build();
 
       }
@@ -432,7 +432,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                  .expiredLocation("/tmp/leveldb/expired-" + manager.getAddress().toString() + "/")
                                  .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
                                  .fetchPersistentState(true)
-                                 .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1)
+                                 .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
+                                 .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
                                  .build();
       }
 
@@ -449,11 +450,11 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                .hash().numOwners(2)
                                .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
                                .persistence()
-//                            .addStore(LevelDBStoreConfigurationBuilder.class)
+//                            .addStore(LevelDBStoreConfigurationBuilder.class
 //                            .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
-                               .addSingleFileStore().location("/tmp/"+manager.getAddress().toString()+"/").shared(false).preload(false).compatibility().enable()
-
-                                .build();
+                               .addSingleFileStore().location("/tmp/" + manager.getAddress().toString()+"/").shared(false).preload(false).compatibility().enable()
+                               .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
+                               .build();
       }
       else{
          if(defaultConfig == null) {
