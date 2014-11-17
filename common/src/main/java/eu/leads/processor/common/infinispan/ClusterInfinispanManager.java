@@ -124,7 +124,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
 
 
-      System.out.println("We have started");
+      System.out.println("We have started host:" + host);
 
    }
 
@@ -413,15 +413,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                  .persistence()
 //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
 //               .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
-<<<<<<< HEAD
-                                 .addSingleFileStore().location("/tmp/"+manager.getAddress().toString()+"/").fetchPersistentState(true)
-                                 .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
 
-=======
                                  .addSingleFileStore().location("/tmp/" + manager.getAddress().toString() + "/")
                            .fetchPersistentState(true)
                            .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1)
->>>>>>> origin/prototype2integration
                                  .build();
 
       }
@@ -437,12 +432,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                  .expiredLocation("/tmp/leveldb/expired-" + manager.getAddress().toString() + "/")
                                  .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
                                  .fetchPersistentState(true)
-<<<<<<< HEAD
-                                 .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
-
-=======
                                  .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1)
->>>>>>> origin/prototype2integration
                                  .build();
       }
 

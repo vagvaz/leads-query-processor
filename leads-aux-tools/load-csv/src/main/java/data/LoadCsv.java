@@ -191,7 +191,7 @@ public class LoadCsv {
            }
        }
 
-       initialize_cache(tableName);
+       if(initialize_cache(tableName))
        try {
 
            CSVReader reader = new CSVReader(new FileReader(csvfile));
@@ -235,7 +235,7 @@ public class LoadCsv {
                if(numofEntries%1000==0){
                    System.out.println("Imported: "+numofEntries);
                    //cache.endBatch(true);
-                   //return;
+                   return;
                }
            }
            System.out.println("Totally Imported: "+numofEntries);
@@ -248,14 +248,16 @@ public class LoadCsv {
 
    }
    private static void put(String key, String value){
+
        if(remoteCache!=null)
            remoteCache.put(key, value);
        else if(embeddedCache!=null)
            embeddedCache.put(key, value);
+
    }
 
 
-   private static void initialize_cache(String tableName){
+   private static boolean initialize_cache(String tableName){
 
        System.out.println(" Tablename: "+ tableName+ " Trying to create cache: "+ StringConstants.DEFAULT_DATABASE_NAME+"."+ tableName  );
        if(manager!=null)
@@ -263,18 +265,19 @@ public class LoadCsv {
                remoteCache =  manager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
            }catch ( Exception e){
                System.err.println("Error " + e.getMessage() + " Terminating file loading.");
-               return;
+               return false;
            }
        else if(imanager!=null)
            embeddedCache =  imanager.getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME +"."+ tableName);
        else{
            System.err.println("Not recognised type, stop importing");
-           return;
+           return false;
        }
        if(embeddedCache==null && remoteCache==null ){
            System.err.print("Unable to Crete Cache, exiting");
            System.exit(0);
        }
+       return true;
    }
 
 

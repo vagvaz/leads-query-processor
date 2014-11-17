@@ -39,7 +39,7 @@ public class QualFilter implements KeyValueFilter, Serializable {
 
    private void initialize() {
       initialized = true;
-      System.out.println("initiailize with " + treeAsString);
+      //System.out.println("initiailize with " + treeAsString);
       tree = new FilterOperatorTree();
       tree.loadFromJson(treeAsString);
    }
