@@ -30,7 +30,7 @@ public class GetQueryStatusActionHandler implements ActionHandler {
 
     @Override
     public Action process(Action action) {
-      log.info("process get query resutls");
+      log.info("process get query status");
         Action result = action;
        JsonObject actionResult = new JsonObject();
        try {
@@ -48,7 +48,7 @@ public class GetQueryStatusActionHandler implements ActionHandler {
               result.setResult(actionResult);
             }
         result.setStatus(ActionStatus.COMPLETED.toString());
-      log.info("preturn query resutls");
+      log.info("preturn query status");
         return result;
     }
 }
