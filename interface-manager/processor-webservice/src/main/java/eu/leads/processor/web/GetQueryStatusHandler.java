@@ -59,8 +59,8 @@ public class GetQueryStatusHandler implements Handler<HttpServerRequest> {
         JsonObject queryRequest = new JsonObject();
         queryRequest.putString("queryId", queryId);
         action.setData(queryRequest);
-        com.sendRequestTo(StringConstants.IMANAGERQUEUE, action.asJsonObject(), replyHandler);
         replyHandlers.put(action.getId(), replyHandler);
+        com.sendRequestTo(StringConstants.IMANAGERQUEUE, action.asJsonObject(), replyHandler);
     }
 
     public void cleanup(String id) {
@@ -81,6 +81,7 @@ public class GetQueryStatusHandler implements Handler<HttpServerRequest> {
         @Override
         public void handle(JsonObject message) {
             if (message.containsField("error")) {
+                log.error("and errror " + message.toString());
                 replyForError(message);
                 return;
             }
