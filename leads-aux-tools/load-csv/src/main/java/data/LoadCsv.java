@@ -5,6 +5,7 @@ import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
+import org.apache.commons.lang.time.DurationFormatUtils;
 import org.infinispan.Cache;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
@@ -74,7 +75,7 @@ public class LoadCsv {
            System.out.print("Loading file: " + csvfile.getName());
            Long filestartTime = System.currentTimeMillis();
            loadDataFromFile(csvfile);
-           System.out.println("Loading time: " + (System.currentTimeMillis() - filestartTime) + " ms ");
+           System.out.println("Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - filestartTime, "HH:mm:ss,SSS"));
        }
 //      System.out.println("Loading entities remotely");
 //      if(args.length > 2 ){
@@ -82,12 +83,9 @@ public class LoadCsv {
 //      }else{
 //         loadDataEmbedded(args);
 //      }
-      System.out.println("Loading finished.");
-       System.out.println("Overal Folder Loading time: " + (System.currentTimeMillis() - startTime) + " ms ");
-      System.exit(0);
-
-
-
+       System.out.println("Loading finished.");
+       System.out.println("Overall Folder Loading time: " +  DurationFormatUtils.formatDuration(System.currentTimeMillis() - startTime, "HH:mm:ss,SSS"));
+       System.exit(0);
    }
    private static void loadDataFromFile(File csvfile){
        String filename[] = csvfile.getAbsolutePath().split(".csv");
@@ -235,7 +233,8 @@ public class LoadCsv {
                if(numofEntries%1000==0){
                    System.out.println("Imported: "+numofEntries);
                    //cache.endBatch(true);
-                   return;
+                   //if(numofEntries%5000==0)
+                       //return;
                }
            }
            System.out.println("Totally Imported: "+numofEntries);

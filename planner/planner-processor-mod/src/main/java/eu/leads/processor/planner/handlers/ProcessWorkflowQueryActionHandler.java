@@ -9,8 +9,7 @@ import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.*;
 import leads.tajo.module.TaJoModule;
-import org.apache.tajo.algebra.Expr;
-import org.apache.tajo.algebra.JsonHelper;
+import org.apache.tajo.algebra.*;
 import org.apache.tajo.engine.json.CoreGsonHelper;
 import org.apache.tajo.engine.planner.logical.LogicalRootNode;
 import org.apache.tajo.master.session.Session;
@@ -61,6 +60,14 @@ public class ProcessWorkflowQueryActionHandler implements ActionHandler {
         try {
             Session session =
                 new Session(workflowQuery.getId(), workflowQuery.getUser(),StringConstants.DEFAULT_DATABASE_NAME);
+            if(expr.getType()== OpType.Filter) {
+                Expr qual = ((Selection)expr).getQual();
+                if(qual.getType() == OpType.ValueList) {
+                    ValueListExpr mapReduceData = (ValueListExpr) qual;
+                    //VAG OLO DIKO SOU !
+                }
+                expr=((Selection) expr).getChild();
+            }
             planAsString = module.Optimize(session, expr);
         } catch (Exception e) {
             failQuery(e, workflowQuery);

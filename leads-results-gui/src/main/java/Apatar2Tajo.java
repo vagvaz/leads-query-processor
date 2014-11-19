@@ -1,3 +1,4 @@
+import eu.leads.processor.common.utils.HDFSUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.tajo.algebra.*;
 import org.jdom.Document;
@@ -10,6 +11,9 @@ import java.nio.charset.Charset;
 import java.util.*;
 
 public class Apatar2Tajo {
+
+    private static HDFSUtils fs = null;
+
 
     private static HashMap<String, Expr> ApatarTajoFilterFunctMap = new HashMap<String, Expr> ();
 
@@ -167,6 +171,7 @@ public class Apatar2Tajo {
             {
                 //Check End node => output node !
                 String projecID = FindnRaiseNode(id, ReverseArrowTree, nodesMap, "com.apatar.project.ProjectNode");
+                projecID = FindnRaiseNode(id, ReverseArrowTree, nodesMap, "com.apatar.mapReduce.MapReduceNode");
 
                 System.out.println("Search for Projection node result:  ");
                 print("", true, id, ReverseArrowTree, nodesMap);
@@ -184,9 +189,19 @@ public class Apatar2Tajo {
                     projection.setNamedExprs(targets);
 
                     Expr[] relations = new Expr[1];
-                    relations[0] = ret;
-                    projection.setChild(new RelationList(relations));
-                    ret = projection;
+
+                    if(ret.getType()==OpType.Relation) {
+                        relations[0] = ret;
+                        projection.setChild(new RelationList(relations));
+                        ret = projection;
+                    }
+                    else{
+                        relations[0] = ((Selection)ret).getChild();
+                        projection.setChild(new RelationList(relations));
+                        ((Selection)ret).setChild(projection);
+                    }
+                       //TODO Check again !
+
                 }
                 return ret;
             }
@@ -446,6 +461,16 @@ public class Apatar2Tajo {
                 limitNode.setChild(ChildExpr);
                 return limitNode;
             }
+        }else if(nodeType.equals("com.apatar.mapReduce.MapReduceNode")) {
+            System.out.println("MapReduceNode " );
+
+            if(subExpr!=null && ChildExpr!=null) {
+
+                Selection mr =  new Selection(subExpr);
+                mr.setChild(ChildExpr);
+                return mr;
+            }
+
         }else
             System.out.println("Unknown Operator  " );
 
@@ -675,6 +700,33 @@ public class Apatar2Tajo {
                             return null;
                     }
                 }
+            }else  if(ParentNode.equals("MapReduce")) {
+                System.out.println(" MapReduce Node ");
+
+                Expr[] exprs = null;
+                ArrayList<Expr> mrData = new ArrayList<>();
+                for(String id:endNodes)
+                {
+                    subnode = (Element) subnodesMap.get(id);
+                    //System.out.println("SubNode id: " + subnodesMap.get(id) + " " + subnode.getAttributeValue("nodeClass")+" , "+ subnode.getAttributeValue("title"));
+                    String functionType = subnode.getAttributeValue("classFunction");
+                    //if (functionType.equals("com.apatar.functions.constant.LimitFunction")
+                    String value = subnode.getChild(functionType).getAttributeValue("value");
+
+                    print("", true, id, SubReverseArrowTree, subnodesMap);
+                    //fix the 4
+                    functionType=functionType.split("\\.")[4];
+                    System.out.println(" Function Type: " + functionType + " value " + value );
+
+                    mrData.add(new NamedExpr(new LiteralValue(value, LiteralValue.LiteralType.String),functionType));
+                }
+                if(mrData.size()>0) {
+                    exprs = new NamedExpr[mrData.size()];
+                    mrData.toArray(exprs);
+                    return new ValueListExpr(exprs);
+                }
+
+                System.out.print("Mr data parameters found: "+ mrData.size());
             }
         }
         return null;

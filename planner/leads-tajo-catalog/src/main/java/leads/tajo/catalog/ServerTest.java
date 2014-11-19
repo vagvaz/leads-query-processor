@@ -8,9 +8,14 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.tajo.TajoConstants;
 import org.apache.tajo.catalog.*;
+import org.apache.tajo.catalog.function.Function;
+import org.apache.tajo.catalog.proto.CatalogProtos.FunctionType;
 import org.apache.tajo.catalog.proto.CatalogProtos.StoreType;
+import org.apache.tajo.common.TajoDataTypes;
 import org.apache.tajo.common.TajoDataTypes.Type;
 import org.apache.tajo.conf.TajoConf;
+import org.apache.tajo.engine.function.builtin.SumFloat;
+import org.apache.tajo.engine.function.builtin.SumInt;
 import org.apache.tajo.master.TajoMaster;
 
 import java.io.IOException;
@@ -18,6 +23,7 @@ import java.util.UUID;
 
 import static org.apache.tajo.TajoConstants.DEFAULT_DATABASE_NAME;
 import static org.apache.tajo.TajoConstants.DEFAULT_TABLESPACE_NAME;
+import static org.jgroups.util.Util.*;
 
 /**
  * @author tr
@@ -263,12 +269,101 @@ public class ServerTest {
 //				schema5, StoreType.MEM, new KeyValueSet(), getTestDir("score3"));
 //		catalog.createTable(score3);
 //
-//	    FunctionDesc funcDesc = new FunctionDesc("sumtest", SumInt.class, FunctionType.AGGREGATION,
-//	            CatalogUtil.newSimpleDataType(Type.INT4),
-//	            CatalogUtil.newSimpleDataTypeArray(Type.INT4));
+	    FunctionDesc funcDesc = new FunctionDesc("sumtest2", SumInt.class, FunctionType.AGGREGATION,
+	            CatalogUtil.newSimpleDataType(Type.INT4),
+	            CatalogUtil.newSimpleDataTypeArray(Type.INT4));
 //
 //
-//		catalog.createFunction(funcDesc);
-		System.out.println("TestLeadsCatalogServer Started");
+		catalog.createFunction(funcDesc);
+
+
+        funcDesc = new FunctionDesc("sumtest", SumFloat.class, FunctionType.AGGREGATION,
+                CatalogUtil.newSimpleDataType(Type.INT4),
+                CatalogUtil.newSimpleDataTypeArray(Type.INT4));
+//
+//
+        catalog.createFunction(funcDesc);
+
+
+//        funcDesc = new FunctionDesc("mr_function", MRFunction.class, FunctionType.GENERAL,
+//                CatalogUtil.newSimpleDataType(Type.PROTOBUF),
+//                CatalogUtil.newSimpleDataTypeArray(Type.TEXT_ARRAY));
+////
+////
+//        catalog.createFunction(funcDesc);
+
+        testRegisterAndFindFunc();
+        System.out.println("testRegisterAndFindFunc Started");
+
+        testRegisterFunc();
+        System.out.println("testRegisterFunc Started");
+
+        System.out.println("TestLeadsCatalogServer Started");
 	}
+
+
+
+
+    public static class TestFunc1 extends Function {
+        public TestFunc1() {
+            super(
+                    new Column [] {
+                            new Column("name", TajoDataTypes.Type.INT4)
+                    }
+            );
+        }
+
+        public FunctionType getFunctionType() {
+            return FunctionType.GENERAL;
+        }
+    }
+
+    public static class TestFunc2 extends Function {
+        public TestFunc2() {
+            super(
+                    new Column [] {
+                            new Column("name", TajoDataTypes.Type.INT4),
+                            new Column("bytes", TajoDataTypes.Type.BLOB)
+                    }
+            );
+        }
+        public FunctionType getFunctionType() {
+            return FunctionType.GENERAL;
+        }
+    }
+
+
+    public static final void testRegisterAndFindFunc() throws Exception {
+        assertFalse(catalog.containFunction("test10", FunctionType.GENERAL));
+        FunctionDesc meta = new FunctionDesc("test10", TestFunc2.class, FunctionType.GENERAL,
+                CatalogUtil.newSimpleDataType(Type.INT4),
+                CatalogUtil.newSimpleDataTypeArray(Type.INT4, Type.BLOB));
+
+        catalog.createFunction(meta);
+        assertTrue(catalog.containFunction("test10", CatalogUtil.newSimpleDataTypeArray(Type.INT4, Type.BLOB)));
+        FunctionDesc retrived = catalog.getFunction("test10", CatalogUtil.newSimpleDataTypeArray(Type.INT4, Type.BLOB));
+
+        assertEquals(retrived.getSignature(), "test10");
+        assertEquals(retrived.getFuncClass(), TestFunc2.class);
+        assertEquals(retrived.getFuncType(), FunctionType.GENERAL);
+
+        assertFalse(catalog.containFunction("test10", CatalogUtil.newSimpleDataTypeArray(Type.BLOB, Type.INT4)));
+    }
+
+
+
+    public static final void testRegisterFunc() throws Exception {
+        assertFalse(catalog.containFunction("test2", FunctionType.UDF));
+        FunctionDesc meta = new FunctionDesc("test2", TestFunc1.class, FunctionType.UDF,
+                CatalogUtil.newSimpleDataType(Type.INT4),
+                CatalogUtil.newSimpleDataTypeArray(Type.INT4));
+
+        catalog.createFunction(meta);
+        assertTrue(catalog.containFunction("test2", CatalogUtil.newSimpleDataTypeArray(Type.INT4)));
+        FunctionDesc retrived = catalog.getFunction("test2", CatalogUtil.newSimpleDataTypeArray(Type.INT4));
+
+        assertEquals(retrived.getSignature(),"test2");
+        assertEquals(retrived.getFuncClass(),TestFunc1.class);
+        assertEquals(retrived.getFuncType(), FunctionType.UDF);
+    }
 }
