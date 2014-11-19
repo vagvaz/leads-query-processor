@@ -84,7 +84,7 @@ public class GetQueryStatusHandler implements Handler<HttpServerRequest> {
                 replyForError(message);
                 return;
             }
-            log.info("GetStatus webservice received reply " + message.getString(MessageUtils.TO) + " " + message.getString(MessageUtils.MSGID));
+            log.info("GetStatus webservice received reply " + message.getString(MessageUtils.TO) + " " + message.getValue(MessageUtils.MSGID).toString());
             message.removeField(MessageUtils.FROM);
             message.removeField(MessageUtils.TO);
             message.removeField(MessageUtils.COMTYPE);
