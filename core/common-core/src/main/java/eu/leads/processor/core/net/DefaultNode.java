@@ -187,11 +187,11 @@ public class DefaultNode implements Node, Handler<Long> {
     }
 
     private void subscribeForRequest(final String groupId, final LeadsMessageHandler handler, final long messageId, final JsonObject message, final String from) {
-        bus.registerHandler(groupId, comHandler, new Handler<AsyncResult<Void>>() {
+        bus.registerHandler(from, comHandler, new Handler<AsyncResult<Void>>() {
             @Override
             public void handle(AsyncResult<Void> event) {
                 if (event.succeeded()) {
-                    logger.info("subscribing to " + groupId + " succeded");
+                    logger.info("subscribing to " + from + " succeded");
                     //               config.getArray("groups").add(groupId);
                     requests.add(messageId);
                     JsonObject leadsMessage =
