@@ -202,7 +202,7 @@ public class DefaultNode implements Node, Handler<Long> {
 //--        logger.error(getId() + " send to " + leadsMessage.getString(MessageUtils.TO) +"\nmessage " + leadsMessage.toString());
                     bus.send(groupId, leadsMessage);
 
-                    comHandler.registerRequest(groupId, handler);
+                    comHandler.registerRequest(from, handler);
                 } else {
                     logger.error("Fail to subscribe to " + groupId);
                 }
