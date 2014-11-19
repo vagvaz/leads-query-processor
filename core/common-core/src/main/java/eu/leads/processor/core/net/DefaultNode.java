@@ -107,7 +107,7 @@ public class DefaultNode implements Node, Handler<Long> {
     public void sendRequestTo(String nodeid, JsonObject message, LeadsMessageHandler handler) {
         long messageId = this.getNextMessageId();
         String from = getId() + "-requests-" + messageId;
-        subscribeForRequest(from, handler,messageId,message,from);
+        subscribeForRequest(nodeid, handler,messageId,message,from);
 //        requests.add(messageId);
 //        JsonObject leadsMessage =
 //            MessageUtils.createLeadsMessage(message, from, nodeid, ComUtils.P2P,messageId);
@@ -146,7 +146,7 @@ public class DefaultNode implements Node, Handler<Long> {
                                       LeadsMessageHandler handler) {
         long messageId = this.getNextMessageId();
         String from = getId() + "-requests-" + messageId;
-        subscribeForRequest(from, handler,messageId,message,from);
+        subscribeForRequest(groupId, handler,messageId,message,from);
 //        requests.add(messageId);
 //        JsonObject leadsMessage =
 //            MessageUtils.createLeadsMessage(message, from, groupId, ComUtils.GROUP,messageId);
