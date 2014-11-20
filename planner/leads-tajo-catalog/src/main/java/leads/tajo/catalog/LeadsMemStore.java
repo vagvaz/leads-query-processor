@@ -34,6 +34,7 @@ import org.apache.tajo.catalog.exception.*;
 import org.apache.tajo.catalog.proto.CatalogProtos;
 import org.apache.tajo.catalog.proto.CatalogProtos.IndexDescProto;
 import org.apache.tajo.catalog.store.CatalogStore;
+import org.infinispan.Cache;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,10 +51,12 @@ import static org.apache.tajo.catalog.proto.CatalogProtos.TablespaceProto;
  */
 public class LeadsMemStore implements CatalogStore {
     private  Map<String, String> tablespaces = null;
-    private  Map<String, Map<String, CatalogProtos.TableDescProto>> databases  = null ;
+    private  Map<String, String> databases  = null ;
     private  Map<String, CatalogProtos.FunctionDescProto> functions = null;
-    private  Map<String, Map<String, IndexDescProto>> indexes = null ;
-    private  Map<String, Map<String, IndexDescProto>> indexesByColumn = null ;
+//    private  Map<String, Map<String, IndexDescProto>> indexes = null ;
+    private  Map<String, String> indexes = null ;
+    private  Map<String, String> indexesByColumn = null ;
+//    private  Map<String, Map<String, IndexDescProto>> indexesByColumn = null ;
     private InfinispanManager manager;
 
     public LeadsMemStore(Configuration conf) throws Exception {
@@ -171,8 +174,8 @@ public class LeadsMemStore implements CatalogStore {
         if (database != null) {
             throw new AlreadyExistsDatabaseException(databaseName);
         }
-        Map newDb = manager.getPersisentCache("leads.processor.databases.sub."+databaseName);
-        databases.put(databaseName, newDb);
+        Cache newDb = (Cache) manager.getPersisentCache("leads.processor.databases.sub."+databaseName);
+        databases.put(databaseName, newDb.getName());
     }
 
     @Override
@@ -187,6 +190,7 @@ public class LeadsMemStore implements CatalogStore {
         if (database == null) {
             throw new NoSuchDatabaseException(databaseName);
         }
+        manager.removePersistentCache((String) database);
         databases.remove(databaseName);
     }
 
@@ -198,11 +202,12 @@ public class LeadsMemStore implements CatalogStore {
     /**
      * Get a database namespace from a Map instance.
      */
-    private <T> Map<String, T> checkAndGetDatabaseNS(final Map<String, Map<String, T>> databaseMap,
+    private <T> Map<String, T> checkAndGetDatabaseNS(final Map<String, String> databaseMap,
                                                         String databaseName) {
-        Object database = databases.get(databaseName);
-        if (database != null) {
-            return databaseMap.get(databaseName);
+        Object databaseN = databases.get(databaseName);
+        if (databaseN != null) {
+//            return databaseMap.get(databaseName);
+            return manager.getPersisentCache((String) databaseN);
         } else {
             throw new NoSuchDatabaseException(databaseName);
         }
