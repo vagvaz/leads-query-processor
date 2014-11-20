@@ -37,6 +37,7 @@ public class GetResultsActionHandler implements ActionHandler {
     public Action process(Action action) {
         Action result = action;
       String queryId = action.getData().getString("queryId");
+      log.info("GetResults ");
         try {
             queryId = action.getData().getString("queryId");
             Long min = Long.parseLong(action.getData().getString("min"));
@@ -69,11 +70,11 @@ public class GetResultsActionHandler implements ActionHandler {
                     result.setResult(actionResult);
                     return result;
                 }
-
+              log.info("GetResults before batchGet ");
                   if (max < 0) {
                     tuples = batchGet(cacheName, isSorted, min);
                   } else {
-                    tuples = batchGet(cacheName, isSorted, min, max);
+                    tuples = batchGet(cacheName, isSorted, min);
                   }
 
 
@@ -105,10 +106,11 @@ public class GetResultsActionHandler implements ActionHandler {
    private JsonObject batchGet(String cacheName, boolean isSorted, Long min) {
       JsonObject result = new JsonObject();
       JsonArray listOfValues = new JsonArray();
-
+     log.info("GetResults batch get only min");
 
       Cache cache = (Cache) persistence.getPersisentCache(cacheName);
         if(isSorted) {
+          log.info("GetResults batchget sorted");
             String prefix = cache.getName() + ":";
 //            long cacheSize = cache.size();
            long index = 0;
@@ -120,12 +122,15 @@ public class GetResultsActionHandler implements ActionHandler {
             }
         }
         else{
+          log.info("GetResults batchet with iterator");
             try {
                 CloseableIterable<Map.Entry<String, String>> iterable =
                     cache.getAdvancedCache().filterEntries(new AcceptAllFilter());
+              log.info("GetResults batchget before iterate over values");
                 for (Map.Entry<String, String> entry : iterable) {
                     listOfValues.add(entry.getValue());
                 }
+              log.info("GetResults after iteration");
             } catch (Exception e) {
 
                 log.error("Iterating over " + cacheName + " for batch resulted in Exception "
@@ -142,6 +147,7 @@ public class GetResultsActionHandler implements ActionHandler {
    }
 
    private JsonObject batchGet(String cacheName, boolean isSorted, Long min, Long max) {
+     log.info("GetResults batchget min max");
       return batchGet(cacheName,isSorted,min,max);
    }
 

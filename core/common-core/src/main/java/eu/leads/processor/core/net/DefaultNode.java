@@ -107,15 +107,15 @@ public class DefaultNode implements Node, Handler<Long> {
     public void sendRequestTo(String nodeid, JsonObject message, LeadsMessageHandler handler) {
         long messageId = this.getNextMessageId();
         String from = getId() + "-requests-" + messageId;
-        subscribeForRequest(from, handler);
-        requests.add(messageId);
-        JsonObject leadsMessage =
-            MessageUtils.createLeadsMessage(message, from, nodeid, ComUtils.P2P,messageId);
-//        AckHandler ack = new AckHandler(this, logger, messageId, null);
-        pending.put(messageId, new MessageWrapper(messageId,leadsMessage,ComUtils.DEFAULT_RETRIES));
-//        pendingHandlers.put(messageId, ack);
-//        logger.error(getId() + " send to " + leadsMessage.getString(MessageUtils.TO) +"\nmessage " + leadsMessage.toString());
-        bus.send(nodeid, leadsMessage);
+        subscribeForRequest(nodeid, handler,messageId,message,from);
+//        requests.add(messageId);
+//        JsonObject leadsMessage =
+//            MessageUtils.createLeadsMessage(message, from, nodeid, ComUtils.P2P,messageId);
+////        AckHandler ack = new AckHandler(this, logger, messageId, null);
+//        pending.put(messageId, new MessageWrapper(messageId,leadsMessage,ComUtils.DEFAULT_RETRIES));
+////        pendingHandlers.put(messageId, ack);
+////        logger.error(getId() + " send to " + leadsMessage.getString(MessageUtils.TO) +"\nmessage " + leadsMessage.toString());
+//        bus.send(nodeid, leadsMessage);
     }
 
 
@@ -146,15 +146,15 @@ public class DefaultNode implements Node, Handler<Long> {
                                       LeadsMessageHandler handler) {
         long messageId = this.getNextMessageId();
         String from = getId() + "-requests-" + messageId;
-        subscribeForRequest(from, handler);
-        requests.add(messageId);
-        JsonObject leadsMessage =
-            MessageUtils.createLeadsMessage(message, from, groupId, ComUtils.GROUP,messageId);
-//        AckHandler ack = new AckHandler(this, logger, messageId, null);
-        pending.put(messageId, new MessageWrapper(messageId,leadsMessage,ComUtils.DEFAULT_RETRIES));
-//        pendingHandlers.put(messageId, ack);
-//        logger.error(getId() + " send to " + leadsMessage.getString(MessageUtils.TO) +"\nmessage " + leadsMessage.toString());
-        bus.send(groupId, leadsMessage);
+        subscribeForRequest(groupId, handler,messageId,message,from);
+//        requests.add(messageId);
+//        JsonObject leadsMessage =
+//            MessageUtils.createLeadsMessage(message, from, groupId, ComUtils.GROUP,messageId);
+////--        AckHandler ack = new AckHandler(this, logger, messageId, null);
+//        pending.put(messageId, new MessageWrapper(messageId,leadsMessage,ComUtils.DEFAULT_RETRIES));
+////--        pendingHandlers.put(messageId, ack);
+////--        logger.error(getId() + " send to " + leadsMessage.getString(MessageUtils.TO) +"\nmessage " + leadsMessage.toString());
+//        bus.send(groupId, leadsMessage);
 
     }
 
@@ -186,14 +186,23 @@ public class DefaultNode implements Node, Handler<Long> {
 
     }
 
-    private void subscribeForRequest(final String groupId, final LeadsMessageHandler handler) {
-        bus.registerHandler(groupId, comHandler, new Handler<AsyncResult<Void>>() {
+    private void subscribeForRequest(final String groupId, final LeadsMessageHandler handler, final long messageId, final JsonObject message, final String from) {
+        bus.registerHandler(from, comHandler, new Handler<AsyncResult<Void>>() {
             @Override
             public void handle(AsyncResult<Void> event) {
                 if (event.succeeded()) {
-                    logger.info("subscribing to " + groupId + " succeded");
+                    logger.info("subscribing to " + from + " succeded");
                     //               config.getArray("groups").add(groupId);
-                    comHandler.registerRequest(groupId, handler);
+                    requests.add(messageId);
+                    JsonObject leadsMessage =
+                            MessageUtils.createLeadsMessage(message, from, groupId, ComUtils.GROUP,messageId);
+//--        AckHandler ack = new AckHandler(this, logger, messageId, null);
+                    pending.put(messageId, new MessageWrapper(messageId,leadsMessage,ComUtils.DEFAULT_RETRIES));
+//--        pendingHandlers.put(messageId, ack);
+//--        logger.error(getId() + " send to " + leadsMessage.getString(MessageUtils.TO) +"\nmessage " + leadsMessage.toString());
+                    bus.send(groupId, leadsMessage);
+
+                    comHandler.registerRequest(from, handler);
                 } else {
                     logger.error("Fail to subscribe to " + groupId);
                 }

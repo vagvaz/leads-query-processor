@@ -93,12 +93,13 @@ public class GetResultsHandler implements Handler<HttpServerRequest> {
                 replyForError(message);
                 return;
             }
-
+            log.info("GetResults webservice received reply " + message.getString(MessageUtils.TO) + " " + message.getValue(MessageUtils.MSGID).toString());
             message.removeField(MessageUtils.FROM);
             message.removeField(MessageUtils.TO);
             message.removeField(MessageUtils.COMTYPE);
             message.removeField(MessageUtils.MSGID);
             message.removeField(MessageUtils.MSGTYPE);
+            log.info("end requests");
             request.response().end(message.toString());
             cleanup(requestId);
         }
