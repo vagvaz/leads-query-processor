@@ -22,8 +22,6 @@ package leads.tajo.catalog;
  *
  */
 
-import com.google.common.collect.Maps;
-import eu.leads.processor.common.infinispan.CacheManagerFactory;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
@@ -38,7 +36,10 @@ import org.apache.tajo.catalog.proto.CatalogProtos.IndexDescProto;
 import org.apache.tajo.catalog.store.CatalogStore;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import static org.apache.tajo.catalog.proto.CatalogProtos.AlterTablespaceProto.AlterTablespaceType;
 import static org.apache.tajo.catalog.proto.CatalogProtos.TablespaceProto;
@@ -170,8 +171,8 @@ public class LeadsMemStore implements CatalogStore {
         if (database != null) {
             throw new AlreadyExistsDatabaseException(databaseName);
         }
-
-        databases.put(databaseName, new HashMap<String, CatalogProtos.TableDescProto>());
+        Map newDb = manager.getPersisentCache("leads.processor.databases.sub."+databaseName);
+        databases.put(databaseName, newDb);
     }
 
     @Override
