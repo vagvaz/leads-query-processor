@@ -29,7 +29,11 @@ public class ApatarMapper extends LeadsMapper<String, String, String, String> {
         StringBuilder builder = new StringBuilder();
 //        String tupleId = key.substring(key.indexOf(":"));
         Tuple t = new Tuple(value);
-        t.setAttribute("uri", transformUri(t.getAttribute("uri")));
+        if(t.hasField("uri"))
+            t.setAttribute("uri", transformUri(t.getAttribute("uri")));
+        if(t.hasField("fqdnurl"))
+            t.setAttribute("fqdnurl", transformUri(t.getAttribute("fqdnurl")));
+        
         t.setAttribute("ts", transformTs(t.getNumberAttribute("ts")));
 
         collector.emit(key, t.asString());
