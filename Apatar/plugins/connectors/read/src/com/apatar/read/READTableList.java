@@ -1,7 +1,20 @@
 package com.apatar.read;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.FileNotFoundException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.swing.JOptionPane;
+
+import com.apatar.ui.ApatarUiMain;
 
 public class READTableList {
 	
@@ -15,6 +28,81 @@ public class READTableList {
 			map.put(attList[i], types[i]);
 		}
 	}
+	private static void putAttributeList(String tableName,HashMap<String, Object> returns, HashMap<String, Object> arguments, String[] attList, String[] types ){
+		returns.clear();
+		
+		for(int i=0;i<attList.length;i++){
+			returns.put(attList[i], types[i]);
+		}
+		readTables.put(tableName, new READTable(tableName,arguments,returns));
+	}
+	private static void initTables(HashMap<String, Object> returns, HashMap<String, Object> arguments,String keysFilename){
+		
+		
+	       Path path = Paths.get(keysFilename);
+
+	       BufferedReader keyReader=null;
+	       if (Files.exists(path)) {
+	           try {
+	               keyReader = new BufferedReader(new InputStreamReader(new FileInputStream(keysFilename)));
+	           } catch (FileNotFoundException e) {
+	               System.out.println("Unable to read keys file, skipping " + keysFilename);
+	               e.printStackTrace();
+	               return;
+	           }
+	           System.out.println(" Loading key from file " + keysFilename);
+	       }else{
+	           System.err.println(" No keys file, skipping " +keysFilename);
+	           return;
+	       }
+	       String keyLine = "";
+
+           try {
+			while ((keyLine =keyReader.readLine()) != null) {
+				if(keyLine.contains(":")){
+					String [] data = keyLine.split(":");
+				       String[] columns = null;
+				       String[] columnsTypes = null;
+					String tableName = data[0];
+					String pairs = data[1];
+					String [] keysTypePairs  = pairs.split(",");
+					if(keysTypePairs.length>0)
+					{
+						columns = new String[keysTypePairs.length];
+						columnsTypes = new String[keysTypePairs.length];
+					}else
+						continue;
+					
+					int index = 0;
+					for (String keyTypePair: keysTypePairs){
+                        String [] pair = keyTypePair.trim().split("\\s+");
+                        if(pair.length!=2){
+                            System.err.print("Column Key Data are not correct! Key line must be at Tablename:Column name space ColumnType, form");
+                            JOptionPane.showMessageDialog(ApatarUiMain.MAIN_FRAME,
+                            		"Column Key Data are not correct! Key line must be at Tablename:Column name space ColumnType, form");
+                            continue;
+                        }else{
+                        	 columns[index] = pair[0];
+                        	 columnsTypes[index]= pair[1];
+                        	 index++;
+                        }
+					}
+					if(index==keysTypePairs.length){
+						 putAttributeList(tableName, returns,  arguments,columns,columnsTypes);
+					}else{
+						 System.err.print("Column Key Data pairs incorrect please check Schema file!");
+                         JOptionPane.showMessageDialog(ApatarUiMain.MAIN_FRAME,
+                        		 "Column Key Data pairs incorrect please check Schema file!");
+					}
+					
+			   }
+			}
+			System.out.println(" Loaded file " + keysFilename);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	static{
 		HashMap<String, Object> arguments = new HashMap<String, Object>(); 
@@ -23,9 +111,8 @@ public class READTableList {
 		
 		arguments.clear();
 		returns.clear();
-		
-				
-		putAttributeList(returns, 
+	
+		putAttributeList("webpages",returns, arguments,
 				new String[]{
 				"url",
                 "domainname",
@@ -57,9 +144,9 @@ public class READTableList {
 				"DATE"
 				});
 		
-		readTables.put("webpages", new READTable("webpages",arguments,returns));
 		
-		putAttributeList(returns, 
+		
+		putAttributeList("entities",returns,  arguments,
 				new String[]{
 				"webpageurl",
 				"name",
@@ -70,7 +157,9 @@ public class READTableList {
 				"TEXT",
 				"NUMERIC" 
 				});
-		readTables.put("entities", new READTable("entities",arguments,returns));
+		 
+		String keysFilename = "Schema.keys";
+		initTables(returns, arguments,keysFilename);
 		
 		/*
 		 * getInfo2

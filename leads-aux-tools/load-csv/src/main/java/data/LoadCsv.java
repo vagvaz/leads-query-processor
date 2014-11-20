@@ -6,7 +6,6 @@ import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.apache.commons.lang.time.DurationFormatUtils;
-import org.infinispan.Cache;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
@@ -19,7 +18,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -43,7 +41,7 @@ public class LoadCsv {
       if(args.length == 2)
          imanager = InfinispanClusterSingleton.getInstance().getManager();
       if(args[0].startsWith("l")){
-         loadData(args);
+        loadData(args);
       }
 //      else{
 //         storeData(args);
@@ -255,7 +253,6 @@ public class LoadCsv {
 
    }
 
-
    private static boolean initialize_cache(String tableName){
 
        System.out.println(" Tablename: "+ tableName+ " Trying to create cache: "+ StringConstants.DEFAULT_DATABASE_NAME+"."+ tableName  );
@@ -277,154 +274,6 @@ public class LoadCsv {
            System.exit(0);
        }
        return true;
-   }
-
-
-   private static void loadDataWithRemote(String[] args) throws IOException, ClassNotFoundException {
-      manager = createRemoteCacheManager(args[2],args[3]);
-      System.out.println("loading webpages");
-      loadCacheTo("default.webpages", args[1]);
-      System.out.println("loading entities");
-      loadCacheTo("default.entities", args[1]);
-
-      Map cache =  manager.getCache("approx_sum_cache");
-      //loadApproxSum(args[1], cache);
-
-      Map cachep  =  manager.getCache("pagerankCache");
-      //loadPagerank(args[1],cachep);
-   }
-
-   private static void loadCacheTo(String s, String arg) throws IOException {
-      String cacheName = s;
-      Map cache =  manager.getCache(cacheName);
-      BufferedReader keyReader = new BufferedReader(new InputStreamReader(new FileInputStream(arg+"/"+cacheName+".keys")));
-//        BufferedReader sizeReader = new BufferedReader(new InputStreamReader(new FileInputStream(dir+"/"+cacheName+".sizes")));
-      BufferedReader valueReader = new BufferedReader(new InputStreamReader(new FileInputStream(arg+"/"+cacheName+".values")));
-
-      String keyLine = "";
-      String valueLine = "";
-
-      try {
-         keyLine = keyReader.readLine();
-         valueLine = valueReader.readLine();
-      } catch (IOException e) {
-         keyReader.close();
-         valueReader.close();
-         System.out.println("Emtpy files ?");
-      }
-      long counter = 0;
-      try {
-         while (true && keyLine != null){
-            if(keyLine != null && !keyLine.trim().equals("")){
-               if(valueLine != null && !valueLine.trim().equals("")) {
-                  JsonObject ob = new JsonObject(valueLine);
-                  cache.put(keyLine.trim(), valueLine.trim());
-
-               }
-            }
-
-            System.out.println(counter++);
-            keyLine = keyReader.readLine();
-            valueLine = valueReader.readLine();
-         }
-      }catch(IOException e){
-         keyReader.close();
-         valueReader.close();
-         System.out.println("Read " + counter + "tuples");
-      }
-   }
-   private static void loadDataEmbedded(String[] args) throws IOException, ClassNotFoundException {
-      System.out.println("loading webpages");
-         loadCache("default.webpages",args[1]);
-      System.out.println("loading entities");
-      loadCache("default.entities",args[1]);
-
-      Cache cache = (Cache) imanager.getPersisentCache("approx_sum_cache");
-      //loadApproxSum(args[1], cache);
-      cache = (Cache) imanager.getPersisentCache("pagerankCache");
-      //loadPagerank(args[1],cache);
-
-   }
-   private static void loadCache (String cacheName, String dir) throws IOException {
-      Cache cache = (Cache) imanager.getPersisentCache(cacheName);
-      BufferedReader keyReader = new BufferedReader(new InputStreamReader(new FileInputStream(dir+"/"+cacheName+".keys")));
-//        BufferedReader sizeReader = new BufferedReader(new InputStreamReader(new FileInputStream(dir+"/"+cacheName+".sizes")));
-      BufferedReader valueReader = new BufferedReader(new InputStreamReader(new FileInputStream(dir+"/"+cacheName+".values")));
-
-
-
-      String keyLine = "";
-      String valueLine = "";
-
-      try {
-         keyLine = keyReader.readLine();
-         valueLine = valueReader.readLine();
-      } catch (IOException e) {
-         keyReader.close();
-         valueReader.close();
-         System.out.println("Emtpy files ?");
-      }
-      long counter = 0;
-      try {
-         while (true && keyLine != null){
-            if(keyLine != null && !keyLine.trim().equals("")){
-               if(valueLine != null && !valueLine.trim().equals("")) {
-                  JsonObject ob = new JsonObject(valueLine);
-                  cache.put(keyLine.trim(), valueLine.trim());
-                  System.out.println(counter++);
-               }
-            }
-
-            counter++;
-            keyLine = keyReader.readLine();
-            valueLine = valueReader.readLine();
-         }
-      }catch(IOException e){
-         keyReader.close();
-         valueReader.close();
-         System.out.println("Read " + counter + "tuples");
-      }
-   }
-   private static void loadFromTo(String cacheName, String dir, String host, String port) throws IOException {
-
-      LQPConfiguration.initialize();
-//      InfinispanManager manager = InfinispanClusterSingleton.getInstance().getManager();
-      RemoteCacheManager manager = createRemoteCacheManager(host,port);
-      RemoteCache cache =  manager.getCache(cacheName,true);
-      BufferedReader keyReader = new BufferedReader(new InputStreamReader(new FileInputStream(dir+"/"+cacheName+".keys")));
-//        BufferedReader sizeReader = new BufferedReader(new InputStreamReader(new FileInputStream(dir+"/"+cacheName+".sizes")));
-      BufferedReader valueReader = new BufferedReader(new InputStreamReader(new FileInputStream(dir+"/"+cacheName+".values")));
-
-      String keyLine = "";
-      String valueLine = "";
-
-      try {
-         keyLine = keyReader.readLine();
-         valueLine = valueReader.readLine();
-      } catch (IOException e) {
-         keyReader.close();
-         valueReader.close();
-         System.out.println("Emtpy files ?");
-      }
-      long counter = 0;
-      try {
-         while (true && keyLine != null){
-            if(keyLine != null && !keyLine.trim().equals("")){
-               if(valueLine != null && !valueLine.trim().equals("")) {
-                  JsonObject ob = new JsonObject(valueLine);
-                  cache.put(keyLine.trim(), valueLine.trim());
-               }
-            }
-
-            System.out.println(counter++);
-            keyLine = keyReader.readLine();
-            valueLine = valueReader.readLine();
-         }
-      }catch(IOException e){
-         keyReader.close();
-         valueReader.close();
-         System.out.println("Read " + counter + "tuples");
-      }
    }
 
 
