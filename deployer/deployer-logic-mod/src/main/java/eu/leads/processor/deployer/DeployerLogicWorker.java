@@ -182,32 +182,50 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                     //               else
                    try{
                     if (label.equals(NQEConstants.OPERATOR_COMPLETE) || label.equals(NQEConstants.DEPLOY_OPERATOR)) {
+
                         PlanNode node = new PlanNode(action.getData().getObject("operator"));
                         String queryId = action.getData().getString("queryId");
                         ExecutionPlanMonitor plan = runningPlans.get(queryId);
                         plan.complete(node);
                         PlanNode next = plan.getNextOperator(node);
-
+                       log.info("Deployer " +  node.getNodeType() + " in action that  " + label + " has completed" );
                         boolean useNode = true;
                         if (next.getNodeType().equals(LeadsNodeType.ROOT)) {
-                            plan.complete(next);
-                            next = plan.getNextExecutableOperator(next);
-                            useNode = false;
-                            ;
+
+                            if(!next.getConfiguration().containsField("mapreduce")) {
+                               plan.complete(next);
+                               next = plan.getNextExecutableOperator(next);
+                               useNode = false;
+                               ;
+                               log.info("next is root  with MR");
+                            }
+                            else{
+                               useNode = true;
+                               log.info("next is root without MR");
+                            }
                         }
                         if (next.getNodeType().equals(LeadsNodeType.OUTPUT_NODE)) {
+                           log.info("next is output");
                             plan.complete(next);
                             next = plan.getNextExecutableOperator(next);
                             useNode = false;
                         }
+                        log.info("Continue to deployement");
                         PlanNode tobeDeployed = null;
-                        if (useNode)
-                            tobeDeployed = plan.getNextExecutableOperator(node);
+                        if (useNode) {
+                           log.info("using node for the deployment of next operator");
+                           tobeDeployed = plan.getNextExecutableOperator(node);
+                        }
                         else {
-                            if (next != null)
-                                tobeDeployed = plan.getNextExecutableOperator(next);
-                            else
+                           log.info("next is used");
+                            if (next != null) {
+                               tobeDeployed = plan.getNextExecutableOperator(next);
+                               log.info("To be deployed");
+                            }
+                            else{
+                               log.info("Todeployed is null");
                                 tobeDeployed = null;
+                            }
                         }
 
 
@@ -248,7 +266,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
 
                     finalizeAction(action);
                    }catch(Exception e){
-                      log.error("Unexpected error encounted in DeployLogicWorker " + e.getMessage());
+                      log.error("Unexpected error encounted in DeployLogicWorker " + e.getClass().toString() + " " + e.getMessage());
                    }
             }
         }
@@ -275,8 +293,9 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
       else{
         query.asJsonObject().putString("output",query.getId());
       }
-        query.asJsonObject().putBoolean("isSorted",plan.isSorted());
-       queriesCache.put(queryId,query.asJsonObject().toString());
+       query.asJsonObject().putBoolean("isSorted",plan.isSorted());
+      log.info("Query " + query.getId() + " completed");
+      queriesCache.put(queryId,query.asJsonObject().toString());
        //LATER TODO we could inform Interface Manager about the query completion to inform UIs
     }
 
@@ -291,8 +310,8 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
 
    private void deployOperator(ExecutionPlanMonitor executionPlan, PlanNode next) {
      Action deployAction = createNewAction(executionPlan.getAction());
-       log.info("Deploying operator to micro-cloud " + next.getSite());
-      deployAction.getData().putString("monitor",monitorAddress);
+       log.info("Deploying operator " + next.getNodeType().toString() + " to micro - cloud" + next.getSite());
+                       deployAction.getData().putString("monitor", monitorAddress);
       deployAction.getData().putObject("operator",next.asJsonObject());
       deployAction.getData().putString("operatorType",next.getNodeType().toString());
       deployAction.getData().putString("queryId",executionPlan.getQueryId());

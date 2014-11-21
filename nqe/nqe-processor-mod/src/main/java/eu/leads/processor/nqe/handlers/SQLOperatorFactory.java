@@ -21,6 +21,7 @@ public class SQLOperatorFactory {
       LeadsNodeType operatorType = LeadsNodeType.valueOf(action.getData().getString("operatorType"));
       switch(operatorType){
          case ROOT:
+            result = getCustomMapReduceOperator(com, persistence, log, action);
             break;
          case EXPRS:
              result = getSingleOperator(com,persistence,log,action);
@@ -94,7 +95,13 @@ public class SQLOperatorFactory {
       return result;
    }
 
-    private static Operator getSingleOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
+   private static Operator getCustomMapReduceOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
+      Operator result = null;
+      result = new DemoMapReduceOperator(com,persistence,log,action);
+      return result;
+   }
+
+   private static Operator getSingleOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
         Operator result  = null;
                  String opType = action.getData().getObject("operator").getObject("configuration")
                                                      .getObject("body").getString("operationType");

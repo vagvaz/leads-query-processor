@@ -296,4 +296,16 @@ public class WorkflowPlan extends DataType implements Plan {
     public JsonObject getNodeByPid(int pid) {
         return getNodeById(Integer.toString(pid));
     }
+
+  public void injectMapReduce(JsonObject mapReduceOpConfiguration) {
+    PlanNode outputNode = getOutput();
+    List<String> inputs = outputNode.getInputs();
+    String input = inputs.get(0);
+    JsonObject plan = getPlanGraph();
+    JsonObject rootJson= plan.getObject(input);
+    PlanNode r = new PlanNode(rootJson);
+    r.getConfiguration().putObject("mapreduce",mapReduceOpConfiguration);
+    plan.putObject(input,r.asJsonObject());
+    setPlanGraph(plan);
+  }
 }

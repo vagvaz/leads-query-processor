@@ -94,7 +94,11 @@ public class ExecutionPlanMonitor {
        LeadsNodeType currentType = node.getNodeType();
         if(currentType.equals(LeadsNodeType.SORT))
             isSorted = true;
-       if(currentType != LeadsNodeType.OUTPUT_NODE && currentType != LeadsNodeType.ROOT){
+       if(currentType == LeadsNodeType.ROOT){
+          if(node.getConfiguration().containsField("mapreduce"))
+             outputCacheName = node.getNodeId();
+       }
+       if(currentType != LeadsNodeType.OUTPUT_NODE ){
           outputCacheName = node.getNodeId();
        }
     }

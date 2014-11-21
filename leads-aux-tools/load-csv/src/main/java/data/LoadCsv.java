@@ -234,7 +234,7 @@ public class LoadCsv {
                    System.out.println("Imported: "+numofEntries);
                    //cache.endBatch(true);
                    //if(numofEntries%5000==0)
-                       //return;
+                       return;
                }
            }
            System.out.println("Totally Imported: "+numofEntries);

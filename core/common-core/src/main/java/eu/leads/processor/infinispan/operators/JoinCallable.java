@@ -83,6 +83,7 @@ public class JoinCallable<K,V> implements
     }
 
     @Override public String call() throws Exception {
+       CloseableIterable<Map.Entry<String, String>>iterable = null;
       try {
         Map<String, List<Tuple>> buffer = new HashMap<String, List<Tuple>>();
         int size = 0;
@@ -103,7 +104,7 @@ public class JoinCallable<K,V> implements
 //          CloseableIterable<Map.Entry<String, String>> iterable =
 //            outerCache.getAdvancedCache().filterEntries(new AttributeFilter(outerColumn,
 //                                                                             columnValue));
-           CloseableIterable<Map.Entry<String, String>> iterable =
+            iterable =
             outerCache.getAdvancedCache().filterEntries(new QualFilter(tree.getJson().toString()));
           for (Map.Entry<String, String> outerEntry : iterable) {
             Tuple outerTuple = new Tuple(outerEntry.getValue());
@@ -113,10 +114,11 @@ public class JoinCallable<K,V> implements
             resultTuple = prepareOutput(resultTuple);
             outputCache.put(combinedKey, resultTuple.asJsonObject().toString());
           }
-
+            iterable.close();
         }
       }catch (Exception e) {
-
+            if(iterable != null)
+               iterable.close();
                 System.err.println("Iterating over " + outerCacheName
                                        + " for batch resulted in Exception " + e.getClass().toString() + " " + e.getCause().toString() + "\n"
                                        + e.getMessage() + "\n from  " + outerCacheName);

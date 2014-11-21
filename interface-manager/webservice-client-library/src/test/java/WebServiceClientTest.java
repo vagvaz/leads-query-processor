@@ -52,27 +52,7 @@ public class WebServiceClientTest {
             System.out.println(mapObject.toString());
         }
 
-        String workflow = "{\n" +
-                "  \"IsDistinct\": false,\n" +
-                "  \"Projections\": [\n" +
-                "    {\n" +
-                "      \"Expr\": {\n" +
-                "        \"OpType\": \"Asterisk\"\n" +
-                "      },\n" +
-                "      \"OpType\": \"Target\"\n" +
-                "    }\n" +
-                "  ],\n" +
-                "  \"Expr\": {\n" +
-                "    \"Relations\": [\n" +
-                "      {\n" +
-                "        \"TableName\": \"webpages\",\n" +
-                "        \"OpType\": \"Relation\"\n" +
-                "      }\n" +
-                "    ],\n" +
-                "    \"OpType\": \"RelationList\"\n" +
-                "  },\n" +
-                "  \"OpType\": \"Projection\"\n" +
-                "}";
+        String workflow = "{ \"SelectCondition\": { \"Values\": [ { \"AliasName\": \"MapperFunction\", \"Expr\": { \"Value\": \"TestMapper\", \"ValueType\": \"String\", \"OpType\": \"Literal\" }, \"OpType\": \"Target\" }, { \"AliasName\": \"JarPathFunction\", \"Expr\": { \"Value\": \"/home/tr/Projects/LEADs/leads-query-processor/leads-cli/target/leads-cli-1.0-SNAPSHOT-jar-with-dependencies.jar\", \"ValueType\": \"String\", \"OpType\": \"Literal\" }, \"OpType\": \"Target\" }, { \"AliasName\": \"MRConfPathFunction\", \"Expr\": { \"Value\": \"/home/tr/Projects/LEADs/leads-query-processor/leads-cli/pom.xml\", \"ValueType\": \"String\", \"OpType\": \"Literal\" }, \"OpType\": \"Target\" }, { \"AliasName\": \"ReducerFunction\", \"Expr\": { \"Value\": \"TestReducer\", \"ValueType\": \"String\", \"OpType\": \"Literal\" }, \"OpType\": \"Target\" } ], \"OpType\": \"ValueList\" }, \"Expr\": { \"IsDistinct\": false, \"Projections\": [ { \"Expr\": { \"ColumnName\": \"url\", \"OpType\": \"Column\" }, \"OpType\": \"Target\" }, { \"Expr\": { \"ColumnName\": \"sentiment\", \"OpType\": \"Column\" }, \"OpType\": \"Target\" } ], \"Expr\": { \"SortSpecs\": [ { \"SortKey\": { \"ColumnName\": \"sentiment\", \"OpType\": \"Column\" }, \"IsAsc\": false, \"IsNullFirst\": false } ], \"Expr\": { \"Relations\": [ { \"TableName\": \"webpages\", \"OpType\": \"Relation\" } ], \"OpType\": \"RelationList\" }, \"OpType\": \"Sort\" }, \"OpType\": \"Projection\" }, \"OpType\": \"Filter\" } ";
         QueryStatus  currentStatus = WebServiceClient.submitWorkflow("testUser", workflow);
 
         while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")){
