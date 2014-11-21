@@ -197,11 +197,11 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                                next = plan.getNextExecutableOperator(next);
                                useNode = false;
                                ;
-                               log.info("next is root  with MR");
+                               log.info("next is root  without MR");
                             }
                             else{
                                useNode = true;
-                               log.info("next is root without MR");
+                               log.info("next is root  MR");
                             }
                         }
                         if (next.getNodeType().equals(LeadsNodeType.OUTPUT_NODE)) {

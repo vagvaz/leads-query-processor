@@ -24,17 +24,20 @@ public class ApatarMapper extends LeadsMapper<String, String, String, String> {
     @Override
     public void map(String key, String value, Collector<String, String> collector) {
 //      System.out.println("Called for " + key + "     " + value);
-        if (!isInitialized)
-            intialize();
+//        if (!isInitialized)
+//            intialize();
         StringBuilder builder = new StringBuilder();
 //        String tupleId = key.substring(key.indexOf(":"));
         Tuple t = new Tuple(value);
-        if(t.hasField("uri"))
-            t.setAttribute("uri", transformUri(t.getAttribute("uri")));
-        if(t.hasField("fqdnurl"))
-            t.setAttribute("fqdnurl", transformUri(t.getAttribute("fqdnurl")));
-        
-        t.setAttribute("ts", transformTs(t.getNumberAttribute("ts")));
+        for(String attribute : t.getFieldNames()) {
+            if (attribute.endsWith("uri"))
+                t.setAttribute(attribute, transformUri(t.getAttribute("uri")));
+            if (attribute.endsWith("fqdnurl"))
+                t.setAttribute(attribute, transformUri(t.getAttribute("fqdnurl")));
+
+            if(attribute.endsWith("ts"))
+                t.setAttribute(attribute, transformTs(t.getNumberAttribute("ts")));
+        }
 
         collector.emit(key, t.asString());
 
