@@ -3,6 +3,10 @@ package eu.leads.processor.math;
 import eu.leads.processor.core.Tuple;
 import org.vertx.java.core.json.JsonObject;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Created with IntelliJ IDEA.
  * User: vagvaz
@@ -54,6 +58,12 @@ public class FilterOperatorTree {
       JsonObject tree = new JsonObject(treeAsJson);
       root = new FilterOperatorNode();
       root.fromJson(tree);
+   }
+
+   public Map<String, List<String>> getJoinColumns() {
+      Map<String,List<String>> result  = new HashMap<>();
+      result = root.getAllFieldsByTable(result);
+      return result;
    }
 //    public MathOperatorTree(MathOperatorTreeNode root) {
 //        this.root = root;

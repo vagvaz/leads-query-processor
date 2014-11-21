@@ -64,6 +64,7 @@ public abstract class MapReduceOperator extends BasicOperator{
         long startTime = System.nanoTime();
        if(reducer == null)
           reducer = new LeadsReducer("");
+       System.out.println("RUN MR on " + inputCache.getName());
        MapReduceTask<String,String,String,String> task = new MapReduceTask(inputCache);
        task.mappedWith((org.infinispan.distexec.mapreduce.Mapper<String, String, String, String>) mapper)
                .reducedWith((org.infinispan.distexec.mapreduce.Reducer<String, String>) reducer);

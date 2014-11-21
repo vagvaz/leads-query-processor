@@ -156,23 +156,23 @@ public class SortMerger {
 
     }
 
-   protected Tuple prepareOutput(Tuple tuple){
-      if(outputSchema.toString().equals(inputSchema.toString())){
-         return tuple;
-      }
-      JsonObject result = new JsonObject();
-      List<String> toRemoveFields = new ArrayList<String>();
-      Map<String,String> toRename = new HashMap<String,String>();
-      for (String field : tuple.getFieldNames()) {
-         JsonObject ob = targetsMap.get(field);
-         if (ob == null)
-            toRemoveFields.add(field);
-         else {
-            toRename.put(field, ob.getObject("column").getString("name"));
-         }
-      }
-      tuple.removeAtrributes(toRemoveFields);
-      tuple.renameAttributes(toRename);
-      return tuple;
-   }
+//   protected Tuple prepareOutput(Tuple tuple){
+//      if(outputSchema.toString().equals(inputSchema.toString())){
+//         return tuple;
+//      }
+//      JsonObject result = new JsonObject();
+//      List<String> toRemoveFields = new ArrayList<String>();
+//      Map<String,String> toRename = new HashMap<String,String>();
+//      for (String field : tuple.getFieldNames()) {
+//         JsonObject ob = targetsMap.get(field);
+//         if (ob == null)
+//            toRemoveFields.add(field);
+//         else {
+//            toRename.put(field, ob.getObject("column").getString("name"));
+//         }
+//      }
+//      tuple.removeAtrributes(toRemoveFields);
+//      tuple.renameAttributes(toRename);
+//      return tuple;
+//   }
 }

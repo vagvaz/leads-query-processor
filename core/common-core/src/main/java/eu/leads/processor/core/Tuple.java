@@ -19,12 +19,13 @@ public class Tuple extends DataType {
     public Tuple(Tuple tl, Tuple tr, ArrayList<String> ignoreColumns) {
        super(tl.asJsonObject());
 
-        for (String field : ignoreColumns) {
-            if (data.containsField(field))
+       if(ignoreColumns != null) {
+          for (String field : ignoreColumns) {
+             if (data.containsField(field))
                 data.removeField(field);
-        }
-        tr.removeAtrributes(ignoreColumns);
-
+          }
+          tr.removeAtrributes(ignoreColumns);
+       }
        data.mergeIn(tr.asJsonObject());
     }
 
@@ -122,9 +123,25 @@ public class Tuple extends DataType {
       data.putValue(name,tupleValue);
    }
 
-   public void renameAttributes(Map<String, String> toRename) {
-      for(Map.Entry<String,String> entry : toRename.entrySet()){
-         renameAttribute(entry.getKey(),entry.getValue());
+//   public void renameAttributes(Map<String, String> toRename) {
+//      for(Map.Entry<String,String> entry : toRename.entrySet()){
+//         renameAttribute(entry.getKey(),entry.getValue());
+//      }
+//   }
+
+   public void renameAttributes(Map<String, List<String>> toRename) {
+            for(Map.Entry<String,List<String>> entry : toRename.entrySet()){
+               {
+                  Object value = getGenericAttribute(entry.getKey());
+                  for (int i = 0; i < entry.getValue().size(); i++) {
+                     if(i==0){
+                        renameAttribute(entry.getKey(),entry.getValue().get(i));
+                     }
+                     else{
+                        setAttribute(entry.getValue().get(i),value);
+                     }
+                  }
+               }
       }
    }
 }
