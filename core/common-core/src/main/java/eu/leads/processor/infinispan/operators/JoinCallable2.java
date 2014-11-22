@@ -222,7 +222,10 @@ public class JoinCallable2<K,V> implements
 
    private String resolveTableName(Tuple t) {
       for(String f : t.getFieldNames()){
-         String candidate = f.substring(0,f.lastIndexOf("."));
+         int index = f.lastIndexOf(".");
+         if(index <0)
+            continue;
+         String candidate = f.substring(0,index);
          if(conf.containsField(candidate))
          {
             return candidate;
