@@ -120,6 +120,7 @@ public class GetResultsActionHandler implements ActionHandler {
                index++;
                value =  (String) cache.get(prefix+String.valueOf(index));
             }
+           log.info("End of reading values");
         }
         else{
           log.info("GetResults batchet with iterator");
@@ -143,7 +144,9 @@ public class GetResultsActionHandler implements ActionHandler {
                 return result;
             }
       }
+      log.info("removing cache " + cacheName);
       persistence.removePersistentCache(cacheName);
+      log.info("Cache Removed " );
       result.putString("status", "ok");
       result.putArray("result", listOfValues);
       return result;

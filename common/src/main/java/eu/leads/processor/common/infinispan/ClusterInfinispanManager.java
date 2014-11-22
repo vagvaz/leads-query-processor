@@ -242,15 +242,23 @@ public class ClusterInfinispanManager implements InfinispanManager {
    }
 
    private void removeCache(String name) {
-      DistributedExecutorService des = new DefaultExecutorService(manager.getCache());
-      List<Future<Void>> list = des.submitEverywhere(new StopCacheCallable(name));
-      for (Future<Void> future : list) {
-         try {
-            future.get(); // wait for task to complete
-         } catch (InterruptedException e) {
-         } catch (ExecutionException e) {
+      try {
+         if (manager.cacheExists(name)) {
+            if(manager.getCache(name).getStatus().stopAllowed())
+               manager.getCache(name).stop();
          }
+      }catch (Exception e){
+         log.error("Exception while remove " + name + " " + e.getClass().toString() + " " + e.getMessage());
       }
+//      DistributedExecutorService des = new DefaultExecutorService(manager.getCache());
+//      List<Future<Void>> list = des.submitEverywhere(new StopCacheCallable(name));
+//      for (Future<Void> future : list) {
+//         try {
+//            future.get(); // wait for task to complete
+//         } catch (InterruptedException e) {
+//         } catch (ExecutionException e) {
+//         }
+//      }
    }
 
    /**
@@ -430,7 +438,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                  .addStore(LevelDBStoreConfigurationBuilder.class)
                                  .location("/tmp/leveldb/data-" + manager.getAddress().toString() + "/")
                                  .expiredLocation("/tmp/leveldb/expired-" + manager.getAddress().toString() + "/")
-                                 .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
+                                 .implementationType(LevelDBStoreConfiguration.ImplementationType.AUTO)
                                  .fetchPersistentState(true)
                                  .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
                                  .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)

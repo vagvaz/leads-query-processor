@@ -47,15 +47,17 @@ public class FilterCallable<K,V> implements
       targetsMap = new HashMap();
       outputMap = new HashMap<>();
       JsonArray targets = conf.getObject("body").getArray("targets");
-      Iterator<Object> targetIterator = targets.iterator();
-      while (targetIterator.hasNext()) {
-         JsonObject target = (JsonObject) targetIterator.next();
-         List<JsonObject> tars = targetsMap.get(target.getObject("expr").getObject("body").getObject("column").getString("name"));
-         if(tars == null){
-            tars = new ArrayList<>();
+      if(conf.containsField("body") && conf.getObject("body").containsField("targets")) {
+         Iterator<Object> targetIterator = targets.iterator();
+         while (targetIterator.hasNext()) {
+            JsonObject target = (JsonObject) targetIterator.next();
+            List<JsonObject> tars = targetsMap.get(target.getObject("expr").getObject("body").getObject("column").getString("name"));
+            if (tars == null) {
+               tars = new ArrayList<>();
+            }
+            tars.add(target);
+            targetsMap.put(target.getObject("expr").getObject("body").getObject("column").getString("name"), tars);
          }
-         tars.add(target);
-         targetsMap.put(target.getObject("expr").getObject("body").getObject("column").getString("name"),tars);
       }
 //      JsonArray targets = conf.getObject("body").getArray("targets");
 //      Iterator<Object> targetIterator = targets.iterator();
