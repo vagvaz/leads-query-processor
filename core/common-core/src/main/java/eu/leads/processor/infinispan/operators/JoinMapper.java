@@ -69,6 +69,8 @@ public class JoinMapper extends LeadsMapper<String,String,String,String> {
 
    private void resolveTableName(Tuple t) {
       for(String f : t.getFieldNames()){
+         int index = f.lastIndexOf(".");
+         if(index < 0 ) continue;
          String candidate = f.substring(0,f.lastIndexOf("."));
          if(conf.containsField(candidate))
          {

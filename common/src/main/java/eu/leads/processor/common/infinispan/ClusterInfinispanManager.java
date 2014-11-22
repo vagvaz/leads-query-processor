@@ -438,7 +438,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                  .addStore(LevelDBStoreConfigurationBuilder.class)
                                  .location("/tmp/leveldb/data-" + manager.getAddress().toString() + "/")
                                  .expiredLocation("/tmp/leveldb/expired-" + manager.getAddress().toString() + "/")
-                                 .implementationType(LevelDBStoreConfiguration.ImplementationType.AUTO)
+                                 .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
                                  .fetchPersistentState(true)
                                  .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
                                  .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
