@@ -59,9 +59,12 @@
                <artifactId>log4j-core</artifactId>
             </exclusion>
             <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
                <groupId>org.apache.tajo</groupId>
                <artifactId>tajo-jdbc</artifactId>
-
             </exclusion>
          </exclusions>
          <scope>provided</scope>
@@ -81,9 +84,12 @@
                <artifactId>log4j-core</artifactId>
             </exclusion>
             <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
                <groupId>org.apache.tajo</groupId>
                <artifactId>tajo-jdbc</artifactId>
-
             </exclusion>
          </exclusions>
       </dependency>
@@ -102,9 +108,12 @@
                <artifactId>log4j-core</artifactId>
             </exclusion>
             <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
                <groupId>org.apache.tajo</groupId>
                <artifactId>tajo-jdbc</artifactId>
-
             </exclusion>
          </exclusions>
       </dependency>
@@ -130,9 +139,12 @@
                <artifactId>log4j-core</artifactId>
             </exclusion>
             <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
                <groupId>org.apache.tajo</groupId>
                <artifactId>tajo-jdbc</artifactId>
-
             </exclusion>
          </exclusions>
       </dependency>
@@ -160,9 +172,12 @@
                <artifactId>log4j-core</artifactId>
             </exclusion>
             <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
                <groupId>org.apache.tajo</groupId>
                <artifactId>tajo-jdbc</artifactId>
-
             </exclusion>
          </exclusions>
       </dependency>
