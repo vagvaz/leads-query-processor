@@ -1,10 +1,13 @@
 package data;
 
 import au.com.bytecode.opencsv.CSVReader;
+import au.com.bytecode.opencsv.CSVWriter;
+import eu.leads.crawler.utils.Web;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.sentiment.SentimentAnalysisModule;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
@@ -16,14 +19,17 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
+
+import static data.LoadCsv.plugs.PAGERANK;
+import static data.LoadCsv.plugs.SENTIMENT;
 
 /**
  * Created by vagvaz on 10/29/14.
  */
 public class LoadCsv {
+        enum plugs{ SENTIMENT, PAGERANK};
 
    static RemoteCacheManager manager=null;
    static InfinispanManager imanager=null;
@@ -31,24 +37,186 @@ public class LoadCsv {
    static ConcurrentMap embeddedCache=null;
    static RemoteCache remoteCache=null;
    public static void main(String[] args) throws IOException, ClassNotFoundException {
-      if(args.length != 2  && args.length != 4)
-      {
-         System.err.println("Wrong number of arguments");
-         System.err.println("program [load] directory host port (only in load)");
-         System.exit(-1);
-      }
+      //if(args.length != 2  && args.length != 4)
+     // {
+       //  System.err.println("Wrong number of arguments");
+       //  System.err.println("program [load] directory host port (only in load)");
+       //  System.exit(-1);
+      //}
+       if(args[0].startsWith("convert")){
+           convert_csv(args);
+       }
       LQPConfiguration.initialize();
       if(args.length == 2)
          imanager = InfinispanClusterSingleton.getInstance().getManager();
       if(args[0].startsWith("l")){
         loadData(args);
       }
+
+     
 //      else{
 //         storeData(args);
 //      }
    }
 
-   private static void loadData(String[] args) throws IOException, ClassNotFoundException {
+    private static void convert_csv(String[] args) {
+//        if(args.length != 2 && args.length != 4 ){
+//            System.err.println("wrong number of arguments for store $prog load dir/ $prog load dir host port");
+//            System.exit(-1);
+//        }
+        Long filestartTime = System.currentTimeMillis();
+        String initfilename = args[1];
+        System.out.print("Trying to convert file: " + initfilename);
+        String filename[] = initfilename.split(".csv");
+        //System.out.println("Filename" + csvfile.getAbsolutePath()+" "+filename[0]);
+
+        String fulltableName[] = (initfilename.split(".csv")[0]).split("-");
+        String tableName = fulltableName[fulltableName.length - 1];
+        String keysFilename = filename[0] + ".keys";
+        Path path = Paths.get(keysFilename);
+        SentimentAnalysisModule sentimentAnalysisModule=null;
+
+        if(args.length%2!=0){
+            System.err.print("Not enougth arguments, Syntax: convertadd filename {inputcollumn conversion}+ \n where convertion type: sentiment, pagerank");
+        }
+
+        HashMap<plugs, Integer> plugins = new HashMap<>();
+        int max_column = 0;
+
+
+        for(int i=2;i<args.length;i=i+2){
+
+            int column = Integer.parseInt(args[i+1]);
+            if(column>max_column)
+                max_column=column;
+            if(args[i].startsWith("sentiment")){
+                plugins.put(SENTIMENT,column-1);
+                sentimentAnalysisModule = new SentimentAnalysisModule("../classifiers/english.all.3class.distsim.crf.ser.gz");
+            }else if(args[i].startsWith("pagerank")){
+                plugins.put(PAGERANK,column-1);
+            }else{
+                System.err.print("Unknown plugin!!!" + args[i]);
+            }
+        }
+
+        SentimentAnalysisModule module;
+        HashSet<Integer> errorenousline = new HashSet<Integer>();
+        try {
+            CSVReader reader = new CSVReader(new FileReader(initfilename));
+
+            String outputfn = initfilename.split(".csv")[0]+"-tuc.csv";
+            String errinitfilename = initfilename+"errlines";
+            path = Paths.get(errinitfilename);
+            CSVReader reader2 = null;
+            if (Files.exists(path)) {
+                reader2 = new CSVReader(new FileReader(errinitfilename));
+                String [] errline;
+                while((errline = reader2.readNext())!=null) {
+                    errorenousline.add(Integer.parseInt(errline[0]));
+                }
+                reader2.close();
+            }
+;
+            int convertedrows = 0;
+            int alreadyconvertedrows = 0;
+            path = Paths.get(outputfn);
+
+            CSVWriter writer;
+            if (Files.exists(path)) {
+
+                reader2 = new CSVReader(new FileReader(outputfn));
+                while(reader2.readNext()!=null){
+                    reader.readNext();
+                    convertedrows++;
+                }
+                reader2.close();
+                for(Integer e:errorenousline){
+                    if(convertedrows>e) {
+                        reader.readNext();
+                        convertedrows++;
+                    }
+                }
+
+                System.out.println("Continue from row: " + convertedrows);
+                alreadyconvertedrows=convertedrows;
+                filestartTime = System.currentTimeMillis();
+                writer = new CSVWriter(new FileWriter(outputfn,true));
+            }else
+                writer = new CSVWriter(new FileWriter(outputfn));
+
+
+            String[] StringData;
+
+            StringData = reader.readNext();
+            String[] newStringData = new String[StringData.length+plugins.size()];
+
+            if (StringData.length < max_column) {
+                System.err.println("Columns size < maximum column number at import error, stop converting");
+                return;
+            }
+            int pagerank=0;
+            String content;
+            int maximumSentimentStringLength = 600;
+            int cutoffchars=0;
+            int allchars=0;
+            do{
+                if(errorenousline.contains(convertedrows)) {
+                    System.out.println("Skipping line: " +convertedrows);
+                }else {
+                    System.arraycopy(StringData, 0, newStringData, 0, StringData.length);
+                    int counter = StringData.length;
+                    for (Map.Entry<plugs, Integer> e : plugins.entrySet()) {
+                        if (PAGERANK == e.getKey()) {
+                            pagerank = Web.pagerank(transformUri(StringData[e.getValue()]));
+                            //System.out.println(" pagerank: " + pagerank);
+                            newStringData[counter++] = String.valueOf(pagerank);
+                        } else if (e.getKey() == SENTIMENT) {
+                            try {
+                                content=StringData[e.getValue()];
+                                allchars+=content.length();
+                                if(content.length()>maximumSentimentStringLength){
+                                    cutoffchars+=content.length()-maximumSentimentStringLength;
+                                    content=content.substring(0,maximumSentimentStringLength);
+
+                                }
+                                newStringData[counter++] = String.valueOf(sentimentAnalysisModule.getOverallSentiment(content).getValue());
+
+                            } catch (StackOverflowError er) {
+                                CSVWriter errorwriter = new CSVWriter(new FileWriter(errinitfilename, true));
+                                String[] err = new String[1];
+                                err[0] = String.valueOf(convertedrows);
+                                errorwriter.writeNext(err);
+                                errorwriter.close();
+                                errorenousline.add(convertedrows);
+                                writer.flush();
+                            }
+                        }
+                    }
+
+                    writer.writeNext(newStringData);
+                    if (convertedrows % 100 == 0) {
+                        System.out.print("Converted " + convertedrows + " Mean process time: " + DurationFormatUtils.formatDuration((long) ((System.currentTimeMillis() - filestartTime) / (float) (convertedrows - alreadyconvertedrows + 1)), "HH:mm:ss,SSS" ));
+                        System.out.println(" bad: " + errorenousline.size() + " charout: " + cutoffchars + " "+((float)cutoffchars/allchars)*100+ "%");
+                        System.out.flush();
+                        writer.flush();
+                    }
+                }
+                convertedrows++;
+            } while ((StringData = reader.readNext()) != null);
+            writer.flush();
+            writer.close();
+            System.out.println("Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - filestartTime, "HH:mm:ss,SSS"));
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    private static void loadData(String[] args) throws IOException, ClassNotFoundException {
       if(args.length != 2 && args.length != 4 ){
          System.err.println("wrong number of arguments for store $prog load dir/ $prog load dir host port");
          System.exit(-1);
@@ -282,4 +450,33 @@ public class LoadCsv {
       builder.addServer().host(host).port(Integer.parseInt(port));
       return new RemoteCacheManager(builder.build());
    }
+
+    private static String transformUri(String nutchUrlBase) {
+
+        String domainName = "";
+        String url = "";
+
+        String[] parts = nutchUrlBase.split(":");
+        String nutchDomainName = parts[0];
+
+        String[] words = nutchDomainName.split("\\.");
+
+        for (int i = words.length - 1; i >= 0; i--) {
+            domainName += words[i] + ".";
+        }
+        domainName = domainName.substring(0, domainName.length() - 1);
+
+        if (parts.length == 2) {
+            //System.out.print("Parts[1]:" + parts[1]);
+            String[] parts2 = parts[1].split("/");
+            if (parts2[0].startsWith("http")) ;
+            url = parts2[0] + "://" + domainName;
+            for (int i = 1; i < parts2.length; i++) {
+                url += "/" + parts2[i];
+            }
+        }
+        //System.out.print("Corrected url: " +  url);
+        return url;
+
+    }
 }
