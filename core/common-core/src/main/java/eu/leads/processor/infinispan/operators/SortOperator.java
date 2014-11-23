@@ -9,12 +9,15 @@ import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
+import org.infinispan.distexec.DistributedTask;
+import org.infinispan.distexec.DistributedTaskBuilder;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created with IntelliJ IDEA.
@@ -63,7 +66,10 @@ public class SortOperator extends BasicOperator {
       Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
       SortCallable callable = new SortCallable(sortColumns,asceding,types,getOutput()+".merge",UUID.randomUUID().toString());
-      List<Future<String>> res = des.submitEverywhere(callable);
+      DistributedTaskBuilder builder = des.createDistributedTaskBuilder( callable);
+      builder.timeout(1, TimeUnit.HOURS);
+      DistributedTask task = builder.build();
+      List<Future<String>> res = des.submitEverywhere(task);
       List<String> addresses = new ArrayList<String>();
       try {
          if (res != null) {
