@@ -54,19 +54,41 @@ public class ProjectMapper extends LeadsMapper<String, String, String, String> i
         output.put(prefix + tupleId, projected.asString());
     }
 
-   protected Tuple prepareOutput(Tuple tuple){
-      if(outputSchema.toString().equals(inputSchema.toString())){
+   protected Tuple prepareOutput(Tuple tuple) {
+      if (outputSchema.toString().equals(inputSchema.toString())) {
          return tuple;
       }
+
       JsonObject result = new JsonObject();
+      //WARNING
+//       System.err.println("out: " + tuple.asString());
+
+      if(targetsMap.size() == 0)
+      {
+//          System.err.println("s 0 ");
+         return tuple;
+
+      }
+//       System.err.println("normal");
+
+      //END OF WANRING
       List<String> toRemoveFields = new ArrayList<String>();
-      Map<String,String> toRename = new HashMap<String,String>();
+      Map<String,List<String>> toRename = new HashMap<String,List<String>>();
       for (String field : tuple.getFieldNames()) {
-         JsonObject ob = targetsMap.get(field);
+         List<JsonObject> ob = targetsMap.get(field);
          if (ob == null)
             toRemoveFields.add(field);
          else {
-            toRename.put(field, ob.getObject("column").getString("name"));
+            for(JsonObject obb : ob)
+            {
+               List<String> ren  = toRename.get(field);
+               if(ren == null){
+                  ren = new ArrayList<>();
+               }
+//               toRename.put(field, ob.getObject("column").getString("name"));
+               ren.add(obb.getObject("column").getString("name"));
+               toRename.put(field,ren);
+            }
          }
       }
       tuple.removeAtrributes(toRemoveFields);

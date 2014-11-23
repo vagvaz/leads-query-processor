@@ -61,9 +61,12 @@
                <artifactId>log4j-core</artifactId>
             </exclusion>
             <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
                <groupId>org.apache.tajo</groupId>
                <artifactId>tajo-jdbc</artifactId>
-
             </exclusion>
          </exclusions>
       </dependency>
@@ -82,9 +85,12 @@
                <artifactId>log4j-core</artifactId>
             </exclusion>
             <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
                <groupId>org.apache.tajo</groupId>
                <artifactId>tajo-jdbc</artifactId>
-
             </exclusion>
          </exclusions>
       </dependency>
@@ -103,9 +109,12 @@
                <artifactId>log4j-core</artifactId>
             </exclusion>
             <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
                <groupId>org.apache.tajo</groupId>
                <artifactId>tajo-jdbc</artifactId>
-
             </exclusion>
          </exclusions>
       </dependency>
@@ -125,9 +134,12 @@
                <artifactId>log4j-core</artifactId>
             </exclusion>
             <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
                <groupId>org.apache.tajo</groupId>
                <artifactId>tajo-jdbc</artifactId>
-
             </exclusion>
          </exclusions>
       </dependency>
@@ -146,9 +158,12 @@
                <artifactId>log4j-core</artifactId>
             </exclusion>
             <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
                <groupId>org.apache.tajo</groupId>
                <artifactId>tajo-jdbc</artifactId>
-
             </exclusion>
          </exclusions>
       </dependency>
@@ -157,19 +172,22 @@
          <artifactId>common-core</artifactId>
          <version>${processor.version}</version>
          <exclusions>
-         <exclusion>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-         </exclusion>
-         <exclusion>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-         </exclusion>
-         <exclusion>
-            <groupId>org.apache.tajo</groupId>
-            <artifactId>tajo-jdbc</artifactId>
-
-         </exclusion>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+            </exclusion>
          </exclusions>
       </dependency>
 

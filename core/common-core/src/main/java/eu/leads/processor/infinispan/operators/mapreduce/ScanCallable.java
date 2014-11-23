@@ -38,7 +38,7 @@ public class ScanCallable <K,V> implements
    transient protected JsonObject inputSchema;
    transient protected JsonObject outputSchema;
    transient protected Map<String, String> outputMap;
-   transient protected Map<String, JsonObject> targetsMap;
+   transient protected Map<String, List<JsonObject>> targetsMap;
    transient protected JsonObject conf;
    transient protected double totalSum;
    transient protected Cache approxSumCache;
@@ -84,7 +84,12 @@ public class ScanCallable <K,V> implements
       Iterator<Object> targetIterator = targets.iterator();
       while (targetIterator.hasNext()) {
          JsonObject target = (JsonObject) targetIterator.next();
-         targetsMap.put(target.getObject("expr").getObject("body").getObject("column").getString("name"), target);
+         List<JsonObject> tars = targetsMap.get(target.getObject("expr").getObject("body").getObject("column").getString("name"));
+         if(tars == null){
+            tars = new ArrayList<>();
+         }
+         tars.add(target);
+         targetsMap.put(target.getObject("expr").getObject("body").getObject("column").getString("name"),tars);
       }
    }
 
@@ -191,13 +196,22 @@ public class ScanCallable <K,V> implements
 
        //END OF WANRING
       List<String> toRemoveFields = new ArrayList<String>();
-      Map<String,String> toRename = new HashMap<String,String>();
+      Map<String,List<String>> toRename = new HashMap<String,List<String>>();
       for (String field : tuple.getFieldNames()) {
-         JsonObject ob = targetsMap.get(field);
+         List<JsonObject> ob = targetsMap.get(field);
          if (ob == null)
             toRemoveFields.add(field);
          else {
-            toRename.put(field, ob.getObject("column").getString("name"));
+            for(JsonObject obb : ob)
+            {
+               List<String> ren  = toRename.get(field);
+               if(ren == null){
+                  ren = new ArrayList<>();
+               }
+//               toRename.put(field, ob.getObject("column").getString("name"));
+               ren.add(obb.getObject("column").getString("name"));
+               toRename.put(field,ren);
+            }
          }
       }
       tuple.removeAtrributes(toRemoveFields);

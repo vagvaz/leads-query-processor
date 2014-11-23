@@ -1,8 +1,13 @@
 package eu.leads.processor.math;
 
 import eu.leads.processor.core.Tuple;
+import org.apache.avro.generic.GenericData;
 import org.vertx.java.core.json.JsonElement;
 import org.vertx.java.core.json.JsonObject;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by vagvaz on 9/24/14.
@@ -295,5 +300,29 @@ public class FilterOperatorNode {
          right = new FilterOperatorNode();
          right.fromJson(treeAsJson.getObject("right"));
       }
+   }
+
+   public Map<String, List<String>> getAllFieldsByTable(Map<String, List<String>> map) {
+      Map<String, List<String>> result = map;
+      if(left != null)
+         result = left.getAllFieldsByTable(map);
+      if(right != null)
+         result = right.getAllFieldsByTable(map);
+      switch (type) {
+         case FIELD:
+           String columnName = value.getObject("body").getObject("column").getString("name");
+            String table = columnName.substring(0, columnName.lastIndexOf("."));
+            List<String> columns = result.get(table);
+            if(columns == null)
+            {
+               columns = new ArrayList<>();
+            }
+            columns.add(columnName);
+            result.put(table,columns);
+         default:
+            break;
+      }
+      return result;
+
    }
 }

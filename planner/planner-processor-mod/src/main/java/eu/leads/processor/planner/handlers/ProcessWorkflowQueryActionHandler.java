@@ -57,15 +57,36 @@ public class ProcessWorkflowQueryActionHandler implements ActionHandler {
 
         //Optimize plan
         String planAsString = null;
+      boolean hasMapReduce = false;
+      JsonObject mapReduceOpConfiguration = null;
         try {
             Session session =
                 new Session(workflowQuery.getId(), workflowQuery.getUser(),StringConstants.DEFAULT_DATABASE_NAME);
             if(expr.getType()== OpType.Filter) {
                 Expr qual = ((Selection)expr).getQual();
                 if(qual.getType() == OpType.ValueList) {
+                    hasMapReduce = true;
+                    mapReduceOpConfiguration = new JsonObject();
                     ValueListExpr mapReduceData = (ValueListExpr) qual;
-                    //VAG OLO DIKO SOU !
+                    Expr[] mapReduceConfiguration = mapReduceData.getValues();
+
+                  for(Expr e : mapReduceConfiguration){
+                    NamedExpr namedExpr = (NamedExpr)e;
+                    if(namedExpr.getAlias().equals("MapperFunction")){
+                      mapReduceOpConfiguration = getMapperConfig(namedExpr,mapReduceOpConfiguration);
+                    }
+                    else if (namedExpr.getAlias().equals("ReducerFunction")){
+                      mapReduceOpConfiguration = getReducerConfig(namedExpr,mapReduceOpConfiguration);
+                    }
+                    else if (namedExpr.getAlias().equals("JarPathFunction")){
+                      mapReduceOpConfiguration = getJarPathFunction(namedExpr,mapReduceOpConfiguration);
+                    }
+                    else if (namedExpr.getAlias().equals("MRConfPathFunction")){
+                      mapReduceOpConfiguration = getMRConfPathFunction(namedExpr,mapReduceOpConfiguration);
+                    }
+                  }
                 }
+
                 expr=((Selection) expr).getChild();
             }
             planAsString = module.Optimize(session, expr);
@@ -76,6 +97,9 @@ public class ProcessWorkflowQueryActionHandler implements ActionHandler {
         }
         LogicalRootNode n = CoreGsonHelper.fromJson(planAsString, LogicalRootNode.class);
         WorkflowPlan plan = new WorkflowPlan(workflowQuery.getId(), n);
+        if(hasMapReduce && mapReduceOpConfiguration != null){
+          plan.injectMapReduce(mapReduceOpConfiguration);
+        }
         Set<WorkflowPlan> candidatePlans = new HashSet<WorkflowPlan>();
         candidatePlans.add(plan);
         Set<WorkflowPlan> evaluatedPlans = evaluatePlansFromScheduler(candidatePlans);
@@ -90,7 +114,36 @@ public class ProcessWorkflowQueryActionHandler implements ActionHandler {
         return result;
     }
 
-    private WorkflowPlan choosePlan(Set<WorkflowPlan> evaluatedPlans) {
+  private JsonObject getMRConfPathFunction(NamedExpr namedExpr,
+                                            JsonObject mapReduceOpConfiguration) {
+    JsonObject result = mapReduceOpConfiguration;
+    JsonObject tmp  =  new JsonObject(namedExpr.toJson());
+    result.putObject("config",tmp.getObject("Expr"));
+    return result;
+  }
+
+  private JsonObject getJarPathFunction(NamedExpr namedExpr, JsonObject mapReduceOpConfiguration) {
+    JsonObject result = mapReduceOpConfiguration;
+    JsonObject tmp  =  new JsonObject(namedExpr.toJson());
+    result.putObject("jarPath",tmp.getObject("Expr"));
+    return result;
+  }
+
+  private JsonObject getReducerConfig(NamedExpr namedExpr, JsonObject mapReduceOpConfiguration) {
+    JsonObject result = mapReduceOpConfiguration;
+    JsonObject tmp  =  new JsonObject(namedExpr.toJson());
+    result.putObject("reducer",tmp.getObject("Expr"));
+    return result;
+  }
+
+  private JsonObject getMapperConfig(NamedExpr namedExpr, JsonObject mapReduceOpConfiguration) {
+    JsonObject result = mapReduceOpConfiguration;
+    JsonObject tmp  =  new JsonObject(namedExpr.toJson());
+    result.putObject("mapper",tmp.getObject("Expr"));
+    return result;
+  }
+
+  private WorkflowPlan choosePlan(Set<WorkflowPlan> evaluatedPlans) {
         //Iterate over the evaluated plans and use a heuristic method to choose a plan.
         WorkflowPlan plan = evaluatedPlans.iterator().next();
         return plan;

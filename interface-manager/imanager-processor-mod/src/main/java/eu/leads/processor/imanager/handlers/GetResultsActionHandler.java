@@ -120,19 +120,23 @@ public class GetResultsActionHandler implements ActionHandler {
                index++;
                value =  (String) cache.get(prefix+String.valueOf(index));
             }
+           log.info("End of reading values");
         }
         else{
           log.info("GetResults batchet with iterator");
+           CloseableIterable<Map.Entry<String, String>> iterable = null;
             try {
-                CloseableIterable<Map.Entry<String, String>> iterable =
+                 iterable =
                     cache.getAdvancedCache().filterEntries(new AcceptAllFilter());
               log.info("GetResults batchget before iterate over values");
                 for (Map.Entry<String, String> entry : iterable) {
                     listOfValues.add(entry.getValue());
                 }
+               iterable.close();
               log.info("GetResults after iteration");
             } catch (Exception e) {
-
+               if(iterable !=null)
+               iterable.close();
                 log.error("Iterating over " + cacheName + " for batch resulted in Exception "
                               + e.getMessage() + "\n from  " + cacheName);
                 result.putString("status", "failed");
@@ -140,7 +144,9 @@ public class GetResultsActionHandler implements ActionHandler {
                 return result;
             }
       }
-
+      log.info("removing cache " + cacheName);
+      persistence.removePersistentCache(cacheName);
+      log.info("Cache Removed " );
       result.putString("status", "ok");
       result.putArray("result", listOfValues);
       return result;

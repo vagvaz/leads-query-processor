@@ -17,14 +17,18 @@ public class TupleUtils {
          result = v1.compareTo(v2);
       }
       else if(type.startsWith("INT")){
-         Integer v1 = (Integer)o1;
-         Integer v2 = (Integer)o2;
-         result = v1.compareTo(v2);
+         Number v1 = (Number)o1;
+         Number v2 = (Number)o2;
+         Long l1 = v1.longValue();
+         Long l2 = v2.longValue();
+         result = l1.compareTo(l2);
       }
       else if(type.startsWith("FLOAT") || type.startsWith("DOUBLE")){
-         Double v1 = (Double)o1;
-         Double v2 = (Double)o2;
-         result = v1.compareTo(v2);
+         Number v1 = (Number)o1;
+         Number v2 = (Number)o2;
+         Double d1 = v1.doubleValue();
+         Double d2 = v2.doubleValue();
+         result = d1.compareTo(d2);
       }
 
       return result;

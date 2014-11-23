@@ -9,6 +9,7 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.sentiment.SentimentAnalysisModule;
 import org.apache.commons.lang.time.DurationFormatUtils;
+import org.infinispan.Cache;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
@@ -400,7 +401,7 @@ public class LoadCsv {
                    System.out.println("Imported: "+numofEntries);
                    //cache.endBatch(true);
                    //if(numofEntries%5000==0)
-                       //return;
+                       return;
                }
            }
            System.out.println("Totally Imported: "+numofEntries);
@@ -415,9 +416,9 @@ public class LoadCsv {
    private static void put(String key, String value){
 
        if(remoteCache!=null)
-           remoteCache.put(key, value);
+           remoteCache.put(remoteCache.getName()+":"+key, value);
        else if(embeddedCache!=null)
-           embeddedCache.put(key, value);
+           embeddedCache.put(((Cache)embeddedCache).getName()+":"+key, value);
 
    }
 

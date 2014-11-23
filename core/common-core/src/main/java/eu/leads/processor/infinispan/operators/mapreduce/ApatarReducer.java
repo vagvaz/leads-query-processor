@@ -23,6 +23,7 @@ public class ApatarReducer extends LeadsReducer<String, String> {
     transient Cache<String, String> data;
     transient String prefix;
 
+
     public ApatarReducer(JsonObject configuration) {
         super(configuration);
     }
@@ -35,8 +36,10 @@ public class ApatarReducer extends LeadsReducer<String, String> {
     public void initialize() {
 
         isInitialized = true;
-        super.initialize();
-        imanager = new ClusterInfinispanManager(manager);
+//        super.initialize();
+//        imanager = new ClusterInfinispanManager(manager);
+        conf = new JsonObject(configString);
+        outputCacheName = conf.getString("output");
         prefix = outputCacheName + ":";
         data = (Cache<String, String>) InfinispanClusterSingleton.getInstance().getManager().getPersisentCache(outputCacheName);
 
