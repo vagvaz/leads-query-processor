@@ -355,7 +355,7 @@ public class LoadCsv {
                               else if(pair[1].toLowerCase().equals("int"))
                                   columnType.add(Long.class);
                               else if(pair[1].toLowerCase().equals("float"))
-                                  columnType.add(Long.class);
+                                  columnType.add(Float.class);
                               else
                               {
                                   System.err.print("Column Key not recognized type: " + pair[1]);
@@ -445,7 +445,7 @@ public class LoadCsv {
                    System.out.println("Imported: "+numofEntries);
                    //cache.endBatch(true);
                    //if(numofEntries%5000==0)
-                       return;
+                   //    return;
                }
            }
            System.out.println("Totally Imported: "+numofEntries);
