@@ -155,6 +155,7 @@ public class LoadCsv {
                 System.err.println("Columns size < maximum column number at import error, stop converting");
                 return;
             }
+            int data_lenght=StringData.length;
             int pagerank=0;
             String content;
             int maximumSentimentStringLength = 600;
@@ -164,10 +165,12 @@ public class LoadCsv {
                 if(errorenousline.contains(convertedrows)) {
                     System.out.println("Skipping line: " +convertedrows);
                 }else {
-                    System.arraycopy(StringData, 0, newStringData, 0, StringData.length);
-                    int counter = StringData.length;
+
+                    System.arraycopy(StringData, 0, newStringData, 0, data_lenght);
+                    int counter = data_lenght;
                     for (Map.Entry<plugs, Integer> e : plugins.entrySet()) {
                         if (PAGERANK == e.getKey()) {
+                            Thread.sleep(500);
                             pagerank = Web.pagerank(transformUri(StringData[e.getValue()]));
                             //System.out.println(" pagerank: " + pagerank);
                             newStringData[counter++] = String.valueOf(pagerank);
@@ -211,6 +214,8 @@ public class LoadCsv {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 

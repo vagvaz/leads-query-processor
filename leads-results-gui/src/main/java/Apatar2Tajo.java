@@ -170,10 +170,15 @@ public class Apatar2Tajo {
             for(String id:endNodes)
             {
                 //Check End node => output node !
-                String projecID = FindnRaiseNode(id, ReverseArrowTree, nodesMap, "com.apatar.project.ProjectNode");
-                projecID = FindnRaiseNode(id, ReverseArrowTree, nodesMap, "com.apatar.mapReduce.MapReduceNode");
-
                 System.out.println("Search for Projection node result:  ");
+                String projecID = FindnRaiseNode(id, ReverseArrowTree, nodesMap, "com.apatar.project.ProjectNode");
+//                if(projecID!=null)
+//                    id = projecID;
+                print("", true, id, ReverseArrowTree, nodesMap);
+                System.out.println("Search for MapReduceNode node result:  ");
+                String MR =FindnRaiseNode(id, ReverseArrowTree, nodesMap, "com.apatar.mapReduce.MapReduceNode");
+//                if(MR!=null)
+//                    id = MR;
                 print("", true, id, ReverseArrowTree, nodesMap);
 
                 //Recursive nodes traversing
@@ -194,6 +199,10 @@ public class Apatar2Tajo {
                         relations[0] = ret;
                         projection.setChild(new RelationList(relations));
                         ret = projection;
+                    }else if(ret.getType()==OpType.Filter){
+                        relations[0] = ((Selection)ret).getChild();
+                        projection.setChild(relations[0]);
+                        ((UnaryOperator)ret).setChild(projection);
                     }
                     else{
                         relations[0] = ((Selection)ret).getChild();
@@ -216,10 +225,10 @@ public class Apatar2Tajo {
         //Traverse the tree
         //Search for projection node
         Element cur = nodesMap.get(head);
-        String ProjectionId = null;
+        String searchNodeId = null;
         List<String> children = nodesTree.get(head);
         String nodeType = cur.getAttributeValue("nodeClass");
-
+        boolean alreadyPushed = false;
 
         if(children!=null){
             for(String child:children){
@@ -228,6 +237,7 @@ public class Apatar2Tajo {
 
                 if(childNodeType.equals(nodeClass)) {
                     System.out.println("Found node " + nodeClass);
+                    searchNodeId=child; //Found
 
                     List<String> childrenNext = nodesTree.get(child);
                     if(childrenNext!=null){
@@ -235,30 +245,38 @@ public class Apatar2Tajo {
                             System.err.println("Error cannot raise a binary operator");
                             return null;
                         }
-                        nodesTree.remove(head);
-                        nodesTree.remove(child);
-                        nodesTree.put(head,childrenNext);
-                        ProjectionId=child; //Found
+
+                        if(!nodeType.equals("com.apatar.output.OutputNode"))
+                        {
+                            nodesTree.remove(head);
+                            nodesTree.remove(child);
+                            nodesTree.put(head,childrenNext);
+                            //remove the child and return so another one will insert it
+                        }else{
+                            System.out.println(nodeClass + " node @ top ! *");
+                            return searchNodeId;
+                        }
                         break;
                     }else
                     {
-                        System.err.println("Found Projection node with no children error");
+                        System.err.println("Found " +nodeClass+" node with no children error");
                     }
                 }
-                ProjectionId= FindnRaiseNode(child, nodesTree, nodesMap,nodeClass);
+                searchNodeId= FindnRaiseNode(child, nodesTree, nodesMap,nodeClass);
             }
         }
 
-        if(nodeType.equals("com.apatar.output.OutputNode") && ProjectionId!=null){
+        if(nodeType.equals("com.apatar.output.OutputNode") && searchNodeId!=null && !alreadyPushed){
             nodesTree.remove(head);
             List<String> childrenNew = new ArrayList<>();
-            childrenNew.add(ProjectionId);
-            nodesTree.put(head,childrenNew);
-            nodesTree.put(ProjectionId,children);
-            System.out.println("   Projection node @ top ! ");
+            childrenNew.add(searchNodeId);
+            nodesTree.put(head, childrenNew);
+            nodesTree.put(searchNodeId,children);
+            System.out.println(nodeClass + " node @ top ! ");
         }
 
-        return ProjectionId;
+
+        return searchNodeId;
 
     }
 
