@@ -30,13 +30,18 @@ public class ApatarMapper extends LeadsMapper<String, String, String, String> {
 //        String tupleId = key.substring(key.indexOf(":"));
         Tuple t = new Tuple(value);
         for(String attribute : t.getFieldNames()) {
-            if (attribute.endsWith("uri"))
-                t.setAttribute(attribute, transformUri(t.getAttribute("uri")));
-            if (attribute.endsWith("fqdnurl"))
-                t.setAttribute(attribute, transformUri(t.getAttribute("fqdnurl")));
+            try {
+                if (attribute.endsWith("uri"))
+                    t.setAttribute(attribute, transformUri(t.getAttribute(attribute)));
+                if (attribute.endsWith("fqdnurl"))
+                    t.setAttribute(attribute, transformUri(t.getAttribute(attribute)));
 
-            if(attribute.endsWith("ts"))
-                t.setAttribute(attribute, transformTs(t.getNumberAttribute("ts")));
+                if (attribute.endsWith("ts"))
+                    t.setAttribute(attribute, transformTs(t.getNumberAttribute(attribute)));
+            }catch(Exception e){
+                System.err.println("error trying to transform attributet " + attribute);
+                continue;
+            }
         }
 
         collector.emit(key, t.asString());
