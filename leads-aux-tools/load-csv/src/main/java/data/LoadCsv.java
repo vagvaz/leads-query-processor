@@ -403,17 +403,19 @@ public class LoadCsv {
        if(initialize_cache(tableName))
        try {
 
-           CSVReader reader = new CSVReader(new FileReader(csvfile));
+           CSVReader reader = new CSVReader(new FileReader(csvfile),',');
            String valueLine = "";
            int numofEntries=0;
+           int lines=0;
            String [] StringData;
            System.out.println("Importing data ... ");
           // cache.startBatch();
            while (( StringData = reader.readNext()) != null){
-
+                lines++;
                if (StringData.length != columns.size()) {
-                   System.err.println("Columns size, data column size mismatch, stop importing");
-                   return;
+
+                   System.err.println("Line: " +lines + " Columns size: "+columns.size()+", data column:"+ StringData.length  +" size mismatch, continue importing");
+                   continue;
                }
                JsonObject data = new JsonObject();
                String key = StringData[primaryKeysPos[0]];
@@ -444,8 +446,8 @@ public class LoadCsv {
                if(numofEntries%1000==0){
                    System.out.println("Imported: "+numofEntries);
                    //cache.endBatch(true);
-                   //if(numofEntries%5000==0)
-                   //    return;
+                   if(numofEntries%5000==0)
+                       return;
                }
            }
            System.out.println("Totally Imported: "+numofEntries);
