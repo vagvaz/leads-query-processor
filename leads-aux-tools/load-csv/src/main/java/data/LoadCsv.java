@@ -2,7 +2,6 @@ package data;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
-import eu.leads.crawler.utils.Web;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
@@ -31,6 +30,7 @@ import static data.LoadCsv.plugs.SENTIMENT;
  */
 public class LoadCsv {
         enum plugs{ SENTIMENT, PAGERANK};
+    transient protected static Random r;
 
    static RemoteCacheManager manager=null;
    static InfinispanManager imanager=null;
@@ -38,6 +38,7 @@ public class LoadCsv {
    static ConcurrentMap embeddedCache=null;
    static RemoteCache remoteCache=null;
    public static void main(String[] args) throws IOException, ClassNotFoundException {
+       r = new Random(0);
       //if(args.length != 2  && args.length != 4)
      // {
        //  System.err.println("Wrong number of arguments");
@@ -61,6 +62,7 @@ public class LoadCsv {
    }
 
     private static void convert_csv(String[] args) {
+
 //        if(args.length != 2 && args.length != 4 ){
 //            System.err.println("wrong number of arguments for store $prog load dir/ $prog load dir host port");
 //            System.exit(-1);
@@ -82,19 +84,33 @@ public class LoadCsv {
         }
 
         HashMap<plugs, Integer> plugins = new HashMap<>();
+        HashMap<plugs, Integer> output = new HashMap<>();
+
         int max_column = 0;
-
-
+        String inputcolumn, outputcolumn;
+        int incolumn = 0,outcolumn=0;
         for(int i=2;i<args.length;i=i+2){
+            incolumn=0;
+            inputcolumn=args[i+1];
+            if(inputcolumn.contains(":")){
+                String [] iocol=inputcolumn.split(":");
+                if(iocol.length==2) {
+                    inputcolumn = iocol[0];
+                    outcolumn =Integer.parseInt(iocol[1]);
+                }else
+                    System.err.print("bad input out put column error " + inputcolumn);
+            }
 
-            int column = Integer.parseInt(args[i+1]);
-            if(column>max_column)
-                max_column=column;
+            incolumn = Integer.parseInt(inputcolumn);
+            if(incolumn>max_column)
+                max_column=incolumn;
             if(args[i].startsWith("sentiment")){
-                plugins.put(SENTIMENT,column-1);
-                sentimentAnalysisModule = new SentimentAnalysisModule("../classifiers/english.all.3class.distsim.crf.ser.gz");
+                plugins.put(SENTIMENT,incolumn-1);
+                //output.put(SENTIMENT,outcolumn-1);
+                //sentimentAnalysisModule = new SentimentAnalysisModule("../classifiers/english.all.3class.distsim.crf.ser.gz");
             }else if(args[i].startsWith("pagerank")){
-                plugins.put(PAGERANK,column-1);
+                plugins.put(PAGERANK,incolumn-1);
+                //output.put(PAGERANK,outcolumn-1);
             }else{
                 System.err.print("Unknown plugin!!!" + args[i]);
             }
@@ -117,7 +133,7 @@ public class LoadCsv {
                 }
                 reader2.close();
             }
-;
+
             int convertedrows = 0;
             int alreadyconvertedrows = 0;
             path = Paths.get(outputfn);
@@ -168,24 +184,42 @@ public class LoadCsv {
 
                     System.arraycopy(StringData, 0, newStringData, 0, data_lenght);
                     int counter = data_lenght;
+                    int index;
+                    String newValue;
                     for (Map.Entry<plugs, Integer> e : plugins.entrySet()) {
+                        newValue = "0";
+                        if (output.containsKey(e.getKey()))
+                            index = output.get(e.getKey());
+                        else
+                            index = counter++;
+                        if(index<data_lenght && index<StringData.length) {//check if value already exists
+                            if(!StringData[index].isEmpty())
+                                continue;
+                        }
+
                         if (PAGERANK == e.getKey()) {
-                            Thread.sleep(500);
-                            pagerank = Web.pagerank(transformUri(StringData[e.getValue()]));
+                            //Thread.sleep(500);
+                            //pagerank = Web2.pagerank(transformUri(StringData[e.getValue()]));
+                            //if(pagerank<0)
+                                pagerank = r.nextInt(8);
+                            //else
+                                //Thread.sleep(300);
+
                             //System.out.println(" pagerank: " + pagerank);
-                            newStringData[counter++] = String.valueOf(pagerank);
+                            newValue=String.valueOf(pagerank);
                         } else if (e.getKey() == SENTIMENT) {
                             try {
-                                content=StringData[e.getValue()];
-                                allchars+=content.length();
-                                if(content.length()>maximumSentimentStringLength){
-                                    cutoffchars+=content.length()-maximumSentimentStringLength;
-                                    content=content.substring(0,maximumSentimentStringLength);
-
+                                content = StringData[e.getValue()];
+                                allchars += content.length();
+                                if (content.length() > maximumSentimentStringLength) {
+                                    cutoffchars += content.length() - maximumSentimentStringLength;
+                                    content = content.substring(0, maximumSentimentStringLength);
                                 }
-                                newStringData[counter++] = String.valueOf(sentimentAnalysisModule.getOverallSentiment(content).getValue());
-
+                                /*newStringData[counter++]*/
+                                newValue=String.valueOf(nextFloat(-5,5)); // String.valueOf(sentimentAnalysisModule.getOverallSentiment(content).getValue());
                             } catch (StackOverflowError er) {
+//                                newStringData[counter++] = "0";
+                                newValue="0";
                                 CSVWriter errorwriter = new CSVWriter(new FileWriter(errinitfilename, true));
                                 String[] err = new String[1];
                                 err[0] = String.valueOf(convertedrows);
@@ -195,12 +229,16 @@ public class LoadCsv {
                                 writer.flush();
                             }
                         }
-                    }
 
+
+                        newStringData[index] = newValue;
+                    }
                     writer.writeNext(newStringData);
+
                     if (convertedrows % 100 == 0) {
                         System.out.print("Converted " + convertedrows + " Mean process time: " + DurationFormatUtils.formatDuration((long) ((System.currentTimeMillis() - filestartTime) / (float) (convertedrows - alreadyconvertedrows + 1)), "HH:mm:ss,SSS" ));
-                        System.out.println(" bad: " + errorenousline.size() + " charout: " + cutoffchars + " "+((float)cutoffchars/allchars)*100+ "%");
+                        //System.out.println(" bad: " + errorenousline.size() + " charout: " + cutoffchars + " "+((float)cutoffchars/allchars)*100+ "%");
+                        System.out.print("\n");
                         System.out.flush();
                         writer.flush();
                     }
@@ -215,12 +253,13 @@ public class LoadCsv {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
         }
-
-
     }
+
+
+
 
     private static void loadData(String[] args) throws IOException, ClassNotFoundException {
       if(args.length != 2 && args.length != 4 ){
@@ -485,4 +524,17 @@ public class LoadCsv {
         return url;
 
     }
+    public static float nextFloat(float min, float max) {
+        return min + r.nextFloat() * (max - min);
+    }
+
+//    protected String getRandomDomain() {
+//        int l = 10;
+//        String result = "";
+//        for (int i = 0; i < l; i++) {
+//            result += loc[r.nextInt(loc.length)];
+//        }
+//        return "www." + result + ".com";
+//    }
+
 }
