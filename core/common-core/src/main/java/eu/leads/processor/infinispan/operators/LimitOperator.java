@@ -72,10 +72,10 @@ public class LimitOperator extends BasicOperator {
                 String tupleValue = (String) inputMap.get(inputPrefix + counter);
                 if(tupleValue == null)
                    break;
-                System.err.println("Read " + inputPrefix + counter + " --> " +tupleValue);
+//                System.err.println("Read " + inputPrefix + counter + " --> " +tupleValue);
                 Tuple t = new Tuple(tupleValue);
                 handlePagerank(t);
-                System.err.println(prefix+counter);
+//                System.err.println(prefix+counter);
                 data.put(prefix + Integer.toString(counter), t.asString());
             }
         } else {
