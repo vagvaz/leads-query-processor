@@ -47,7 +47,7 @@ public class DefaultNode implements Node, Handler<Long> {
                 logger.info(getId() + " REMOVING RECEIVED " + removalNotification.getKey());
             }
         };
-        incomingMessages = CacheBuilder.newBuilder().expireAfterWrite((1 + retries) * timeout, TimeUnit.MILLISECONDS).build();
+        incomingMessages = CacheBuilder.newBuilder().expireAfterWrite((retries / 3) * timeout, TimeUnit.MILLISECONDS).build();
     }
 
     /**
@@ -305,7 +305,7 @@ public class DefaultNode implements Node, Handler<Long> {
 
         MessageWrapper wrapper = pending.get(messageId);
         JsonObject msg = wrapper.getMessage();
-        logger.error(getId() + "Retrying... " + messageId + " to " + msg.getString(MessageUtils.TO));
+        logger.error(getId() + " Retrying... " + messageId + " to " + msg.getString(MessageUtils.TO));
         if (msg.getString(MessageUtils.COMTYPE).equals(ComUtils.P2P)) {
             //resend message through event bus to the nodeid
 //            bus.sendWithTimeout(msg.getString(MessageUtils.TO), msg, timeout, handler);
@@ -410,7 +410,7 @@ public class DefaultNode implements Node, Handler<Long> {
 //            logger.error(getId() + " Not Delivered " + from + " "+ messageId);
         }
         else{
-//            logger.error(getId() + " Already Delivered " + from + " " + messageId);
+            logger.error(getId() + " Already Delivered " + from + " " + messageId);
         }
         return longMessage != null;
     }

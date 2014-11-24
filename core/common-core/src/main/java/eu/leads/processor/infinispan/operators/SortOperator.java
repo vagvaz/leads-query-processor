@@ -89,7 +89,7 @@ public class SortOperator extends BasicOperator {
       }
 //      Merge outputs
       TupleComparator comparator = new TupleComparator(sortColumns,asceding,types);
-      SortMerger merger = new SortMerger(addresses, getOutput(),comparator,manager,conf);
+      SortMerger2 merger = new SortMerger2(addresses, getOutput(),comparator,manager,conf);
       merger.merge();
 //       Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
       for(String cacheName : addresses){
