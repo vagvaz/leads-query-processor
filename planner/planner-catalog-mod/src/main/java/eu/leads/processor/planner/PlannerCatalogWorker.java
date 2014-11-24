@@ -113,7 +113,7 @@ public class PlannerCatalogWorker extends Verticle {
       System.out.println("Loading functions");
     try {
         int k=-29;
-        List<FunctionDesc> builtin = initBuiltinFunctions();
+        List<FunctionDesc> builtin = initFunctions("org.apache.tajo.engine.function");
       if((k =builtin.size()) == 0){
             container.logger().error("\n\n\n\n\n\n\n SIZE 0 \n\n\n\n\n");
         }else{
@@ -121,12 +121,33 @@ public class PlannerCatalogWorker extends Verticle {
       }
       for (FunctionDesc funcDesc : builtin) {
         container.logger().info(funcDesc.toString());
-        //System.out.println(funcDesc.toString());
+        System.out.println(funcDesc.getFuncType());
         catalog.createFunction(funcDesc);
       }
     } catch (ServiceException e) {
       e.printStackTrace();
     }
+//      System.out.println(catalog.getFunctions().size() + " functions loaded.");
+//      System.out.println("initialize other Functions  ");
+//      try {
+//          int k=-29;
+//          List<FunctionDesc> otherfunctions = initFunctions("leads.tajo.catalog");
+//          if((k =otherfunctions.size()) == 0){
+//              container.logger().error("\n\n\n\n\n\n\n SIZE 0 \n\n\n\n\n");
+//          }else{
+//              System.out.println("Found Other Functions  = " + k );
+//          }
+//          for (FunctionDesc funcDesc : otherfunctions) {
+//              container.logger().info(funcDesc.toString());
+//              System.out.println(funcDesc.getFuncType());
+//              catalog.createFunction(funcDesc);
+//          }
+//      } catch (ServiceException e) {
+//          e.printStackTrace();
+//      }
+
+
+
     System.out.println(catalog.getFunctions().size() + " functions loaded.");
 
     Schema webPagesSchema = new Schema();
@@ -255,9 +276,12 @@ public class PlannerCatalogWorker extends Verticle {
       schema.addColumn("fqdnurl", Type.TEXT);
       schema.addColumn("lang", Type.TEXT);
       schema.addColumn("maincontent", Type.TEXT);
-      schema.addColumn("sentiment", Type.TEXT);
+      schema.addColumn("oldsentiment", Type.TEXT);
       schema.addColumn("textcontent", Type.TEXT);
       schema.addColumn("type", Type.TEXT);
+      schema.addColumn("sentiment", Type.TEXT);
+      schema.addColumn("pagerank", Type.FLOAT4);
+
       //	PRIMARY KEY (uri,ts)
       //databaseName = "leads";
       tableName = "page_core";
@@ -313,12 +337,12 @@ public class PlannerCatalogWorker extends Verticle {
   }
 
 
-  public static List<FunctionDesc> initBuiltinFunctions() throws ServiceException {
+  public static List<FunctionDesc> initFunctions(String class_dir) throws ServiceException {
     List<FunctionDesc> sqlFuncs = new ArrayList<FunctionDesc>();
 
     Set<Class> functionClasses = ClassUtil
                                    .findClasses(org.apache.tajo.catalog.function.Function.class,
-                                                 "org.apache.tajo.engine.function");
+                                                 class_dir);
 
     for (Class eachClass : functionClasses) {
       if(eachClass.isInterface() || Modifier.isAbstract(eachClass.getModifiers())) {
