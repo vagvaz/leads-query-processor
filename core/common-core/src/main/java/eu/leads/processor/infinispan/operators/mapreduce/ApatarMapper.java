@@ -72,7 +72,7 @@ public class ApatarMapper extends LeadsMapper<String, String, String, String> {
         domainName = domainName.substring(0, domainName.length() - 1);
 
         if (parts.length == 2) {
-            System.out.print("Parts[1]:" + parts[1]);
+//            System.out.print("Parts[1]:" + parts[1]);
             String[] parts2 = parts[1].split("/");
             if (parts2[0].startsWith("http")) ;
             url = parts2[0] + "://" + domainName;
