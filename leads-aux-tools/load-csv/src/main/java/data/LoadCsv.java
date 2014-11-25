@@ -436,16 +436,18 @@ public class LoadCsv {
                            data.putNumber(columns.get(pos), Integer.parseInt(StringData[pos]));
                        else if (columnType.get(pos) == Float.class) {
                            float num = Float.parseFloat(StringData[pos]);
-                           //System.out.println("Parsing float" + StringData[pos] + " : " + num);
-                          if(Float.isNaN(num))
-                               num = nextFloat(-5,5);
-                           data.putNumber(columns.get(pos), Float.parseFloat(StringData[pos]));
+
+                          if(Float.isNaN(num)) {
+                              num = nextFloat(-5, 5);
+                              System.err.println("Found " + StringData[pos] + " .. ->  " + num);
+                          }
+                           data.putNumber(columns.get(pos),num);
                        } else {
                            System.err.println("Not recognised type, stop importing");
                            return;
                        }
                    } catch (NumberFormatException e) {
-                       System.out.println("Line: " +lines + "Parsing error: " + StringData[pos]);
+                       System.err.println("Line: " +lines + "Parsing error: " + StringData[pos]);
                        //e.printStackTrace();
                        data.putNumber(columns.get(pos), nextFloat(-3,3));
                    }
@@ -454,11 +456,12 @@ public class LoadCsv {
                put(key, data.toString());
 
                numofEntries++;
+
                if(numofEntries%1000==0){
                    System.out.println("Imported: "+numofEntries);
                    //cache.endBatch(true);
 //                   if(numofEntries%3000==0)
-//                       return;
+              //         return;
                }
            }
            System.out.println("Totally Imported: " + numofEntries);
