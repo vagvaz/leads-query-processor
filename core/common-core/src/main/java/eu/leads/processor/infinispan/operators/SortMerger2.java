@@ -28,7 +28,7 @@ public class SortMerger2 {
    protected Map<String,String> outputMap;
    protected Map<String,JsonObject> targetsMap;
    InfinispanManager manager;
-   private int batchSize = 10;
+   private int batchSize = 10000;
    private List<Tuple> batchTuples;
    private int perCache = 1;
    private long counter = 0;
