@@ -62,7 +62,10 @@ public class SortMerger2 {
          values.add(t);
          cacheNames.add(entry);
       }
-      perCache = batchSize / caches.size();
+      if(caches.size() != 0)
+         perCache = batchSize / caches.size();
+      else
+         perCache = 10;
    }
 
    private Tuple getCurrentValue(int cacheIndex) {
