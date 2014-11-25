@@ -429,32 +429,44 @@ public class LoadCsv {
                            data.putString(columns.get(pos), "");
                        else
                            data.putString(columns.get(pos), StringData[pos]);
-                   else if (columnType.get(pos) == Long.class)
-                       data.putNumber(columns.get(pos), Long.parseLong(StringData[pos]));
-                   else if (columnType.get(pos) == Integer.class)
-                       data.putNumber(columns.get(pos), Integer.parseInt(StringData[pos]));
-                   else if (columnType.get(pos) == Float.class)
-                       data.putNumber(columns.get(pos), Float.parseFloat(StringData[pos]));
-                   else {
-                       System.err.println("Not recognised type, stop importing");
-                       return;
+                   else try {
+                       if (columnType.get(pos) == Long.class)
+                           data.putNumber(columns.get(pos), Long.parseLong(StringData[pos]));
+                       else if (columnType.get(pos) == Integer.class)
+                           data.putNumber(columns.get(pos), Integer.parseInt(StringData[pos]));
+                       else if (columnType.get(pos) == Float.class) {
+                           float num = Float.parseFloat(StringData[pos]);
+                           //System.out.println("Parsing float" + StringData[pos] + " : " + num);
+//                           if(Float.isNaN(num))
+//                               num = -100;
+                           data.putNumber(columns.get(pos), Float.parseFloat(StringData[pos]));
+                       } else {
+                           System.err.println("Not recognised type, stop importing");
+                           return;
+                       }
+                   } catch (NumberFormatException e) {
+                       System.out.println("Line: " +lines + "Parsing error: " + StringData[pos]);
+                       //e.printStackTrace();
+                       data.putNumber(columns.get(pos), Float.NaN);
                    }
+
                }
-               put(key,data.toString());
+               put(key, data.toString());
 
                numofEntries++;
                if(numofEntries%1000==0){
                    System.out.println("Imported: "+numofEntries);
                    //cache.endBatch(true);
-                   if(numofEntries%5000==0)
-                       return;
+//                   if(numofEntries%3000==0)
+//                       return;
                }
            }
-           System.out.println("Totally Imported: "+numofEntries);
+           System.out.println("Totally Imported: " + numofEntries);
        } catch (FileNotFoundException e) {
            e.printStackTrace();
        } catch (IOException e) {
            e.printStackTrace();
+
        }
 
 

@@ -127,28 +127,12 @@ public class PlannerCatalogWorker extends Verticle {
     } catch (ServiceException e) {
       e.printStackTrace();
     }
-//      System.out.println(catalog.getFunctions().size() + " functions loaded.");
-//      System.out.println("initialize other Functions  ");
-//      try {
-//          int k=-29;
-//          List<FunctionDesc> otherfunctions = initFunctions("leads.tajo.catalog");
-//          if((k =otherfunctions.size()) == 0){
-//              container.logger().error("\n\n\n\n\n\n\n SIZE 0 \n\n\n\n\n");
-//          }else{
-//              System.out.println("Found Other Functions  = " + k );
-//          }
-//          for (FunctionDesc funcDesc : otherfunctions) {
-//              container.logger().info(funcDesc.toString());
-//              System.out.println(funcDesc.getFuncType());
-//              catalog.createFunction(funcDesc);
-//          }
-//      } catch (ServiceException e) {
-//          e.printStackTrace();
-//      }
+//      SELECT C.fqdnurl AS fqdn,k.sentiment FROM keywords as k JOIN page_core as C  ON C.uri = k.uri  where k.partid like 'ecom_prod_name:000' group by fqdn order by  k.sentiment ;
 
 
 
-    System.out.println(catalog.getFunctions().size() + " functions loaded.");
+
+      System.out.println(catalog.getFunctions().size() + " functions loaded.");
 
     Schema webPagesSchema = new Schema();
     webPagesSchema.addColumn("url",Type.TEXT);
@@ -262,7 +246,7 @@ public class PlannerCatalogWorker extends Verticle {
       schema.addColumn("partid", Type.TEXT);
       schema.addColumn("keywords", Type.TEXT);
       schema.addColumn("relevance", Type.TEXT);
-      schema.addColumn("sentiment", Type.TEXT);
+      schema.addColumn("sentiment", Type.FLOAT4);
       //	PRIMARY KEY (uri,ts,partid,keywords)
       //databaseName = "leads";
       tableName = "keywords";
@@ -279,7 +263,7 @@ public class PlannerCatalogWorker extends Verticle {
       schema.addColumn("oldsentiment", Type.TEXT);
       schema.addColumn("textcontent", Type.TEXT);
       schema.addColumn("type", Type.TEXT);
-      schema.addColumn("sentiment", Type.TEXT);
+      schema.addColumn("sentiment", Type.FLOAT4);
       schema.addColumn("pagerank", Type.FLOAT4);
 
       //	PRIMARY KEY (uri,ts)
