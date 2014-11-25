@@ -446,7 +446,7 @@ public class Apatar2Tajo {
                     join.setLeft(childrenExpr.get(1));
 
                 Element subnode = cur.getChild("Condition");
-                Expr left = new ColumnReferenceExpr("page_core",subnode.getAttributeValue("column1"));
+                Expr left = CreateColumnReference(subnode.getAttributeValue("column1"));
                 Expr right = CreateColumnReference(subnode.getAttributeValue("column2"));
                 Expr searchCondition = new BinaryOperator(OpType.Equals, left, right);
                 join.setQual(searchCondition);
@@ -969,28 +969,12 @@ public class Apatar2Tajo {
 
     }
 
-    public static ColumnReferenceExpr CreateColumnReference(String columnName){
-        if(columnName.equals("sentiment"))
-            return  new ColumnReferenceExpr("keywords",columnName);
-        if(columnName.equals("uri"))
-            return  new ColumnReferenceExpr("keywords",columnName);
-        if(columnName.equals("ts"))
-            return  new ColumnReferenceExpr("keywords",columnName);
-        if(columnName.equals("partid"))
-            return  new ColumnReferenceExpr("keywords",columnName);
-
-        if(columnName.equals("fqdnurl"))
-            return  new ColumnReferenceExpr("page_core",columnName);
-//        if(columnName.equals("uri"))
-//            return  new ColumnReferenceExpr("keywords",columnName);
-//        if(columnName.equals("uri"))
-//            return  new ColumnReferenceExpr("keywords",columnName);
-//        if(columnName.equals("uri"))
-//            return  new ColumnReferenceExpr("keywords",columnName);
-//        if(columnName.equals("uri"))
-//            return  new ColumnReferenceExpr("keywords",columnName);
-
-        return new ColumnReferenceExpr(columnName);
+    public static ColumnReferenceExpr CreateColumnReference(String fullColumnName){
+        String attrNames [] = fullColumnName.split(".");
+        if(attrNames.length>=2){
+            return new ColumnReferenceExpr(attrNames[attrNames.length-2],attrNames[attrNames.length-1]);
+        }
+        return new ColumnReferenceExpr(fullColumnName);
     }
 
     public static String getCollumnName(Element node){

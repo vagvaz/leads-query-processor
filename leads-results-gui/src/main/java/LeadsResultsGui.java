@@ -22,17 +22,15 @@ import java.util.*;
 
 public class LeadsResultsGui extends JPanel {
     transient protected static Random r;
+    static XMLConfiguration config = null;
     private static String host;
     private static int port;
     private static String username;
     private static Vector<Vector> rowdata;
     private static Vector<String> columnNames;
-
     protected long rowsC = 60;
     protected String[] loc = {"a", "b", "c", "d"};
     private boolean DEBUG = false;
-
-    static XMLConfiguration config =null;
 
 
     public LeadsResultsGui(Vector<Vector> data, Vector<String> columnNames) {
@@ -145,9 +143,9 @@ public class LeadsResultsGui extends JPanel {
      */
     private static void createAndShowGUI(Vector<Vector> data, Vector<String> columnNames) {
         r = new Random(0);
-        String title =" LEADS - RESULTS ";
+        String title = " LEADS - RESULTS ";
 
-                    title +="user: " + username;
+        title += "user: " + username;
 
 
         //Create and set up the window.
@@ -166,11 +164,10 @@ public class LeadsResultsGui extends JPanel {
     }
 
     public static void main(String[] args) throws JDOMException, InterruptedException {
-        username ="Leads-gui";
-         //Read xml
-        if(args.length<1) {
-            System.err.println("Not enought arguments Exiting");
-
+        username = "Leads-gui";
+        //Read xml
+        if (args.length < 1) {
+            System.err.println("Not enough arguments Exiting");
             return;
         }
         try {
@@ -178,19 +175,20 @@ public class LeadsResultsGui extends JPanel {
             System.err.println("Found Xml settings file");
 
         } catch (ConfigurationException e) {
-           System.err.print("Xml error: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Xml configuration error", "Leads Results", JOptionPane.ERROR_MESSAGE);
+            System.err.print("Xml error: " + e.getMessage());
         }
 
 
         File xmlFile = new File(args[0]);
 
         System.out.println("Trying to open file: " + args[0]);
-        if(xmlFile.exists()){
+        if (xmlFile.exists()) {
             System.out.println("File Exists");
-        }
-        else {
+        } else {
             System.err.println("File DOES NOT Exists");
-            return ;
+            JOptionPane.showMessageDialog(null, "File DOES NOT Exists", "Leads Results", JOptionPane.ERROR_MESSAGE);
+            return;
         }
         //Send Expr Json for execution
         //Wait for results
@@ -198,24 +196,26 @@ public class LeadsResultsGui extends JPanel {
             Apatar2Tajo.init_string_maps();
             convert_results(send_query_and_wait(Apatar2Tajo.xml2tajo(xmlFile).toJson()));
         } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Leads Results", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
-            return ;
+            return;
         }
 
         // Display Data
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
         //
-        if(rowdata!=null)
-        if(rowdata.size()>0)
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                createAndShowGUI(rowdata,  columnNames);
+        if (rowdata != null)
+            if (rowdata.size() > 0)
+                javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        createAndShowGUI(rowdata, columnNames);
+                    }
+                });
+            else {
+                System.err.println("No results");
+                JOptionPane.showMessageDialog(null, "No results", "Leads Results", JOptionPane.ERROR_MESSAGE);
             }
-        });
-        else{
-            System.err.println("No results");
-        }
     }
 
     private static void InitializeWebClient(String args[]) {
@@ -227,18 +227,18 @@ public class LeadsResultsGui extends JPanel {
             port = Integer.parseInt(args[1]);
         }
 
-        if(config!=null){
-            System.err.print("Xml file ");
+        if (config != null) {
+            System.out.print("Reading Xml file ");
 
-            if(config.containsKey("server.host"))
-                host = "http://"+config.getString("server.host");
+            if (config.containsKey("server.host"))
+                host = "http://" + config.getString("server.host");
 
-            if(config.containsKey("server.port"))
+            if (config.containsKey("server.port"))
                 port = config.getInt("server.port");
 
-            if(config.containsKey("server.username"))
-                    if(config.getString("server.username").length()>0)
-                        username =config.getString("server.username");
+            if (config.containsKey("server.username"))
+                if (config.getString("server.username").length() > 0)
+                    username = config.getString("server.username");
         }
 
 
@@ -247,6 +247,7 @@ public class LeadsResultsGui extends JPanel {
             System.out.println("Connected at " + host + ":" + port + " Successful");
         } catch (MalformedURLException e) {
             System.err.println("Unable to connect at " + host + ":" + port + " . Exiting");
+            JOptionPane.showMessageDialog(null, "Unable to connect at " + host + ":" + port, "Leads Results", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
             System.exit(-1);
         }
@@ -257,8 +258,8 @@ public class LeadsResultsGui extends JPanel {
     //when the user presses the start button
 
     static QueryResults send_query_and_wait(String json) throws IOException, InterruptedException {
-        if(json==null){
-            JOptionPane.showMessageDialog(null,"Bad Apatar format.","Leads Results",JOptionPane.ERROR_MESSAGE);
+        if (json == null) {
+            JOptionPane.showMessageDialog(null, "Bad Apatar format.", "Leads Results", JOptionPane.ERROR_MESSAGE);
             return null;
         }
 
@@ -285,14 +286,14 @@ public class LeadsResultsGui extends JPanel {
 
         InitializeWebClient(new String[]{});
         progressBar.setValue(10);
-        QueryStatus  currentStatus = WebServiceClient.submitWorkflow(username, json);
+        QueryStatus currentStatus = WebServiceClient.submitWorkflow(username, json);
         progressBar.setValue(20);
         int value = 20;
         System.out.print("Waiting for results: ");
         progressBar.setBorder(BorderFactory.createTitledBorder("Waiting for results ... "));
-        while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")){
+        while (!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")) {
             try {
-                value = (87 - value )/3 + value;
+                value = (int)Math.round((double)(87 - value) / 5.5 + value);
                 progressBar.setValue(value);
                 Thread.sleep(2000);
                 System.out.print(" - ");
@@ -305,7 +306,7 @@ public class LeadsResultsGui extends JPanel {
         Thread.sleep(200);
         progressBar.setValue(95);
         Thread.sleep(200);
-        if(currentStatus.getStatus().equals("COMPLETED")) {
+        if (currentStatus.getStatus().equals("COMPLETED")) {
             QueryResults results = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
             System.out.println("Workflow query results size: " + results.getResult().size());
             progressBar.setBorder(BorderFactory.createTitledBorder("Completed..."));
@@ -314,23 +315,23 @@ public class LeadsResultsGui extends JPanel {
             f.setVisible(false);
             f.dispose();
             return results;
-        }else{
-            JOptionPane.showMessageDialog(null,"Workflow query " + currentStatus.getStatus().toString(),"Leads Results",JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, "Workflow query " + currentStatus.getStatus().toString(), "Leads Results", JOptionPane.INFORMATION_MESSAGE);
             System.out.println("Workflow query " + currentStatus.getStatus().toString());
         }
         return null;
     }
 
     private static void convert_results(QueryResults data) {
-        if (data==null) {
-            JOptionPane.showMessageDialog(null,"Error no data received, Failed","Leads Results",JOptionPane.WARNING_MESSAGE);
+        if (data == null) {
+            JOptionPane.showMessageDialog(null, "Error no data received, Failed", "Leads Results", JOptionPane.WARNING_MESSAGE);
             System.out.println("Error no data received, Failed");
             System.exit(0);
 //            return;
         }
         ArrayList<Tuple> resultSet = new ArrayList<Tuple>();
         for (String s : data.getResult()) {
-            if (s== null || s.equals("") )
+            if (s == null || s.equals(""))
                 continue;
             resultSet.add(new Tuple(s));
         }
@@ -338,7 +339,7 @@ public class LeadsResultsGui extends JPanel {
 
         boolean firstTuple = true;
         if (resultSet.size() == 0) {
-            JOptionPane.showMessageDialog(null,"EMPTY RESULTS","Leads Results",JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "EMPTY RESULTS", "Leads Results", JOptionPane.WARNING_MESSAGE);
             System.out.println("EMPTY RESULTS");
             return;
         }
@@ -350,10 +351,10 @@ public class LeadsResultsGui extends JPanel {
 
         //Read fields
         for (String field : fields) {
-             String[] splField = field.split("\\.");
+            String[] splField = field.split("\\.");
 
-            columnNames.add(splField[splField.length-1]);
-            System.out.println("Column:" + splField[splField.length-1]) ;
+            columnNames.add(splField[splField.length - 1]);
+            System.out.println("Column:" + splField[splField.length - 1]);
         }
 
         rowdata = new Vector<Vector>();
@@ -361,22 +362,21 @@ public class LeadsResultsGui extends JPanel {
         Locale.setDefault(new Locale("en", "US"));
         for (Tuple t : resultSet) {
             row = new Vector<Object>();
-            for (String field : fields){
+            for (String field : fields) {
                 Object value = t.getGenericAttribute(field);
                 //System.out.print("Class: " + value.getClass());
 
-                if(value != null ) {
+                if (value != null) {
                     //if(value.getClass() == Double.class)
 
-                    System.out.print("| " + value.toString()) ;
+                    System.out.print("| " + value.toString());
                     row.addElement(new String(value.toString()));
 
-                }
-                else
+                } else
                     row.addElement("(NULL)");
             }
             rowdata.add(row);
-            System.out.println("| " ) ;
+            System.out.println("| ");
         }
 
     }
