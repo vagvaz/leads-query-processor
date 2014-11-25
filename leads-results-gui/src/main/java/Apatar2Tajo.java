@@ -82,7 +82,7 @@ public class Apatar2Tajo {
         ApatarTajoAgregateFunctMap.put("com.apatar.functions.String.MaxFunction", new GeneralSetFunctionExpr("max", false, nullArgs));
         ApatarTajoAgregateFunctMap.put("com.apatar.functions.String.MinFunction", new GeneralSetFunctionExpr("min", false, nullArgs));
 
-        ColumnReferenceExpr nullColumn= new ColumnReferenceExpr("null");
+        ColumnReferenceExpr nullColumn= CreateColumnReference("null");
         ApatarTajoSortFunctMap.put("com.apatar.functions.String.DescFunction", new  Sort.SortSpec(nullColumn,false,false));//; new GeneralSetFunctionExpr("min", false, nullArgs));
         ApatarTajoSortFunctMap.put("com.apatar.functions.String.AscFunction", new  Sort.SortSpec(nullColumn,true,false));
         System.out.println("Initializing  ApatarTajoFilterFunctMap " + ApatarTajoFilterFunctMap.size());
@@ -381,7 +381,7 @@ public class Apatar2Tajo {
                     if (GroupByOther.containsKey(TargetName))
                         targets[count++] =  new NamedExpr(GroupByOther.get(TargetName));
                     else
-                        targets[count++] = new NamedExpr(new ColumnReferenceExpr(TargetName));
+                        targets[count++] = new NamedExpr(CreateColumnReference(TargetName));
                 }
                 ((Projection)ret).setNamedExprs(targets);
 
@@ -446,8 +446,8 @@ public class Apatar2Tajo {
                     join.setLeft(childrenExpr.get(1));
 
                 Element subnode = cur.getChild("Condition");
-                Expr right = new ColumnReferenceExpr(subnode.getAttributeValue("column1"));
-                Expr left = new ColumnReferenceExpr(subnode.getAttributeValue("column2"));
+                Expr left = new ColumnReferenceExpr("page_core",subnode.getAttributeValue("column1"));
+                Expr right = CreateColumnReference(subnode.getAttributeValue("column2"));
                 Expr searchCondition = new BinaryOperator(OpType.Equals, left, right);
                 join.setQual(searchCondition);
                 Expr[] relations = new Expr[1];
@@ -791,7 +791,7 @@ public class Apatar2Tajo {
                     if(GroupByOther.containsKey(columnName)){
                         Spec.setKey(GroupByOther.get(columnName));
                     }else
-                        Spec.setKey(new ColumnReferenceExpr(columnName));
+                        Spec.setKey(CreateColumnReference(columnName));
                     return Spec;
                 }
             }
@@ -873,7 +873,7 @@ public class Apatar2Tajo {
             else
                 return null;
         }else if(nodeType.equals("com.apatar.core.ColumnNode"))
-            return  new ColumnReferenceExpr(getCollumnName(cur));
+            return  CreateColumnReference(getCollumnName(cur));
         else
             return null;
         return null;
@@ -962,11 +962,35 @@ public class Apatar2Tajo {
                 foundHaving = true;
                 return GroupByOther.get(collumnName);
             }else
-                return  new ColumnReferenceExpr(collumnName);
+                return  CreateColumnReference(collumnName);
         }
         else
             return null;
 
+    }
+
+    public static ColumnReferenceExpr CreateColumnReference(String columnName){
+        if(columnName.equals("sentiment"))
+            return  new ColumnReferenceExpr("keywords",columnName);
+        if(columnName.equals("uri"))
+            return  new ColumnReferenceExpr("keywords",columnName);
+        if(columnName.equals("ts"))
+            return  new ColumnReferenceExpr("keywords",columnName);
+        if(columnName.equals("partid"))
+            return  new ColumnReferenceExpr("keywords",columnName);
+
+        if(columnName.equals("fqdnurl"))
+            return  new ColumnReferenceExpr("page_core",columnName);
+//        if(columnName.equals("uri"))
+//            return  new ColumnReferenceExpr("keywords",columnName);
+//        if(columnName.equals("uri"))
+//            return  new ColumnReferenceExpr("keywords",columnName);
+//        if(columnName.equals("uri"))
+//            return  new ColumnReferenceExpr("keywords",columnName);
+//        if(columnName.equals("uri"))
+//            return  new ColumnReferenceExpr("keywords",columnName);
+
+        return new ColumnReferenceExpr(columnName);
     }
 
     public static String getCollumnName(Element node){
@@ -1087,7 +1111,7 @@ public class Apatar2Tajo {
             String collumnName = getCollumnName(cur);
 
             if(!subArrowMap.containsKey(head) && cur.getAttributeValue("connectionName").equals("input") ) {
-                groupByCollumns.add(new ColumnReferenceExpr(collumnName));
+                groupByCollumns.add(CreateColumnReference(collumnName));
             }
 
             //if it is output node -> to be saved for later use
@@ -1101,7 +1125,7 @@ public class Apatar2Tajo {
 
             //if it is the input node
             if(children==null && subArrowMap.containsKey(head)) {
-                return new ColumnReferenceExpr(collumnName);
+                return CreateColumnReference(collumnName);
             }
         }
 
