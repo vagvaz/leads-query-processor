@@ -437,8 +437,8 @@ public class LoadCsv {
                        else if (columnType.get(pos) == Float.class) {
                            float num = Float.parseFloat(StringData[pos]);
                            //System.out.println("Parsing float" + StringData[pos] + " : " + num);
-//                           if(Float.isNaN(num))
-//                               num = -100;
+                          if(Float.isNaN(num))
+                               num = nextFloat(-5,5);
                            data.putNumber(columns.get(pos), Float.parseFloat(StringData[pos]));
                        } else {
                            System.err.println("Not recognised type, stop importing");
@@ -447,7 +447,7 @@ public class LoadCsv {
                    } catch (NumberFormatException e) {
                        System.out.println("Line: " +lines + "Parsing error: " + StringData[pos]);
                        //e.printStackTrace();
-                       data.putNumber(columns.get(pos), Float.NaN);
+                       data.putNumber(columns.get(pos), nextFloat(-3,3));
                    }
 
                }
