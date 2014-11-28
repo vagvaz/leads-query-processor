@@ -28,15 +28,17 @@ public class SortMerger2 {
    protected Map<String,String> outputMap;
    protected Map<String,JsonObject> targetsMap;
    InfinispanManager manager;
-   private int batchSize = 10000;
+   private long batchSize = 10000;
    private List<Tuple> batchTuples;
-   private int perCache = 1;
+   private long perCache = 1;
    private long counter = 0;
-   public SortMerger2(List<String> inputCaches, String output, TupleComparator comp, InfinispanManager manager, JsonObject conf) {
+   private long rowcount = Long.MAX_VALUE;
+   public SortMerger2(List<String> inputCaches, String output, TupleComparator comp, InfinispanManager manager, JsonObject conf,long rc) {
 
       prefix = output+":";
 //        this.output = output;
 //        input = inputMap;
+      rowcount  = rc;
       this.manager = manager;
       outputCache = manager.getPersisentCache(output);
       counters = new Vector<Integer>(inputCaches.size());
@@ -45,7 +47,7 @@ public class SortMerger2 {
       cacheNames = new Vector<String>(inputCaches.size());
       keys = new Vector<String>(inputCaches.size());
       comparator = comp;
-      batchTuples = new ArrayList<>(batchSize);
+      batchTuples = new ArrayList<>((int)batchSize);
       for (String entry : inputCaches) {
          Cache cache  = (Cache) manager.getPersisentCache((entry));
          counters.add(0);
@@ -62,6 +64,8 @@ public class SortMerger2 {
          values.add(t);
          cacheNames.add(entry);
       }
+      if(rowcount <= batchSize)
+         batchSize = 2*rowcount;
       if(caches.size() != 0)
          perCache = batchSize / caches.size();
       else
@@ -141,11 +145,14 @@ public class SortMerger2 {
          values = readValues();
 
          processBatch(batchTuples, values);
+
          batchTuples.clear();
 
-         batchTuples = new ArrayList<>(batchSize);
+         batchTuples = new ArrayList<>((int)batchSize);
          batchTuples.addAll(values);
          values.clear();
+         if(counter > rowcount)
+            return;
       }
    }
 
@@ -169,6 +176,8 @@ public class SortMerger2 {
                return;
             }
             counter++;
+            if(counter > rowcount)
+               return;
             cmp = comparator.compare(batchTuples.get(0), values.get(minIndex));
          }
          if(oldcounter == counter){
@@ -176,7 +185,10 @@ public class SortMerger2 {
             Tuple t = currentTuple;
             outputCache.put(prefix + counter, t.asString());
             counter++;
+            if(counter > rowcount)
+               return;
          }
+
          nextValue = getNextValueWithCleanUp(minIndex);
          if (nextValue != null)
             values.set(minIndex, nextValue);
@@ -210,13 +222,15 @@ public class SortMerger2 {
 //            t = prepareOutput(t);
          outputCache.put(prefix + counter, t.asString());
          counter++;
+         if(rowcount < counter)
+            return;
       }
    }
 
    private List<Tuple> readBatch(List<Tuple> currentBatch) {
       Tuple nextValue = null;
       List<Integer> tobeRemoved = new ArrayList<>();
-      List<Tuple> result = new ArrayList<>(batchSize);
+      List<Tuple> result = new ArrayList<>((int)batchSize);
       result.addAll(currentBatch);
       for(int cache = 0; cache < caches.size(); cache++) {
          for (int i = 0; i < perCache; i++) {
