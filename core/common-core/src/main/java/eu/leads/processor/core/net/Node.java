@@ -7,6 +7,7 @@ import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 /**
  * Created by vagvaz on 7/8/14.
@@ -23,6 +24,8 @@ public interface Node {
     public void sendToAllGroup(String groupId, JsonObject message);
 
     public void subscribe(String groupId, LeadsMessageHandler handler);
+
+    void subscribe(String groupId, LeadsMessageHandler handler, Callable callable);
 
     public void unsubscribe(String groupId);
 

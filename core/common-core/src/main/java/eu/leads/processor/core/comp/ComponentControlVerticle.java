@@ -2,7 +2,6 @@ package eu.leads.processor.core.comp;
 
 
 import eu.leads.processor.common.StringConstants;
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.ServiceCommand;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
@@ -200,7 +199,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
             arrayServices.add(componentPrefix + "." + s.getString("type") + ".manage");
         }
         serviceController = new ServiceController(arrayServices, this, com, log);
-        com.subscribe(id + ".serviceMonitor", serviceController);
+        com.subscribe(id + ".serviceMonitor", serviceController);//, new StartCallable(callStart,this));
         this.state = ComponentState.INITIALIZED;
         if (callStart)
             startUp();

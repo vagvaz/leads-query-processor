@@ -5,7 +5,6 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.QueryContext;
@@ -26,6 +25,7 @@ public class CreateQueryActionHandler implements ActionHandler {
     private final InfinispanManager persistence;
     private final String id;
     private Cache<String,String> queriesCache;
+//    private RandomAccessFile raf;
     public CreateQueryActionHandler(Node com, LogProxy log, InfinispanManager persistence,
                                        String id) {
         this.com = com;
@@ -33,6 +33,11 @@ public class CreateQueryActionHandler implements ActionHandler {
         this.persistence = persistence;
         this.id = id;
        queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
+//       try {
+//          raf = new RandomAccessFile("/tmp/queryhistory.log","w");
+//       } catch (FileNotFoundException e) {
+//          e.printStackTrace();
+//       }
     }
 
     @Override
@@ -45,7 +50,17 @@ public class CreateQueryActionHandler implements ActionHandler {
                 String user = q.getString("user");
                 String sql = q.getString("sql");
                 String uniqueId = generateNewQueryId(user);
-
+//                if(raf.getChannel().isOpen()){
+//                   raf.seek(raf.length());
+//                   raf.writeBytes(sql+"\n");
+//                   raf.close();
+//                }
+//               else{
+//                   raf = new RandomAccessFile("/tmp/queryhistory.log","w");
+//                   raf.seek(raf.length());
+//                   raf.writeBytes(sql+"\n");
+//                   raf.close();
+//                }
                 SQLQuery query = new SQLQuery(user, sql);
                 query.setId(uniqueId);
                 QueryStatus status = new QueryStatus(uniqueId, QueryState.PENDING, "");

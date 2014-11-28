@@ -414,7 +414,7 @@ public class MathUtils {
          result = currentValue;
       }
       else if (type.startsWith("INT")){
-         int currentValueInt = (int)currentValue;
+         long currentValueInt = ((Number)currentValue).longValue();
          Map<String,Object> oldMap = (Map<String, Object>) oldValue;
          oldMap.put("count",((Number)oldMap.get("count")).longValue()+1);
          oldMap.put("sum",(Long)oldMap.get("sum")+currentValueInt);

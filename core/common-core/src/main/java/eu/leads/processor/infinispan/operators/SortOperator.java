@@ -31,6 +31,14 @@ public class SortOperator extends BasicOperator {
    transient protected String[] sortColumns;
    transient protected Boolean[] asceding;
    transient protected String[] types;
+   transient  protected long rowcount = Long.MAX_VALUE;
+
+
+   public long getRowcount() {
+      return rowcount;
+   }
+
+
     private LeadsMapper<String,String,String,String> mapper;
 
 
@@ -48,6 +56,9 @@ public class SortOperator extends BasicOperator {
          asceding[counter] = sortKey.getBoolean("ascending");
          types[counter] = sortKey.getObject("sortKey").getObject("dataType").getString("type");
          counter++;
+      }
+      if(conf.containsField("limit")){
+         rowcount = conf.getObject("limit").getObject("body").getLong("fetchFirstNum");
       }
    }
 
@@ -89,7 +100,7 @@ public class SortOperator extends BasicOperator {
       }
 //      Merge outputs
       TupleComparator comparator = new TupleComparator(sortColumns,asceding,types);
-      SortMerger2 merger = new SortMerger2(addresses, getOutput(),comparator,manager,conf);
+      SortMerger2 merger = new SortMerger2(addresses, getOutput(),comparator,manager,conf,getRowcount());
       merger.merge();
 //       Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
       for(String cacheName : addresses){

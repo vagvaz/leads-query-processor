@@ -130,12 +130,14 @@ public class ScanCallable <K,V> implements
             if(tree.accept(tuple)) {
                tuple = prepareOutput(tuple);
 //               log.info("--------------------    put into output with filter ------------------------");
+               if(key != null && tuple != null)
                outputCache.put(key.toString(), tuple.asString());
             }
          }
          else{
             tuple = prepareOutput(tuple);
 //            log.info("--------------------    put into output without tree ------------------------");
+            if(key != null && tuple != null)
             outputCache.put(key.toString(), tuple.asString());
          }
 

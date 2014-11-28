@@ -243,22 +243,26 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
    private void removeCache(String name) {
       try {
-         if (manager.cacheExists(name)) {
-            if(manager.getCache(name).getStatus().stopAllowed())
-               manager.getCache(name).stop();
+//         if (manager.cacheExists(name)) {
+//            if(manager.getCache(name).getStatus().stopAllowed())
+//               manager.getCache(name).stop();
+//         }
+         DistributedExecutorService des = new DefaultExecutorService(manager.getCache());
+         List<Future<Void>> list = des.submitEverywhere(new StopCacheCallable(name));
+         for (Future<Void> future : list) {
+            try {
+               future.get(); // wait for task to complete
+            } catch (InterruptedException e) {
+               log.error(e.getClass().toString() + " while removing " + name + " " + e.getMessage());
+            } catch (ExecutionException e) {
+               log.error(e.getClass().toString() + " while removing " + name +" " + e.getMessage());
+            }
          }
+         manager.removeCache(name);
       }catch (Exception e){
          log.error("Exception while remove " + name + " " + e.getClass().toString() + " " + e.getMessage());
       }
-//      DistributedExecutorService des = new DefaultExecutorService(manager.getCache());
-//      List<Future<Void>> list = des.submitEverywhere(new StopCacheCallable(name));
-//      for (Future<Void> future : list) {
-//         try {
-//            future.get(); // wait for task to complete
-//         } catch (InterruptedException e) {
-//         } catch (ExecutionException e) {
-//         }
-//      }
+
    }
 
    /**
@@ -437,10 +441,12 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                  .persistence()
                                  .addStore(LevelDBStoreConfigurationBuilder.class)
                                  .location("/tmp/leveldb/data-" + manager.getAddress().toString() + "/")
+//                                 .location("/tmp/leveldb/data-foo/" + "/")
                                  .expiredLocation("/tmp/leveldb/expired-" + manager.getAddress().toString() + "/")
+//                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
                                  .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
                                  .fetchPersistentState(true)
-                                 .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
+                                 .shared(true).purgeOnStartup(false).preload(true).compatibility().enable()
                                  .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
                                  .build();
       }

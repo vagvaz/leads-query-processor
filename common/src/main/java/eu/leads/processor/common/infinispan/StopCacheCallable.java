@@ -29,11 +29,12 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
       if(cache.getCacheManager().cacheExists(cacheName))
       {
          System.out.println("Removing " + cacheName + " from " +cache.getCacheManager().getAddress().toString());
+           cache.getAdvancedCache().getDataContainer().clear();
            if(cache.getStatus().stopAllowed()) {
               System.out.println("Clear " + cacheName + " from " + cache.getCacheManager().getAddress().toString());
-//              cache.getAdvancedCache().stop();
+              cache.getAdvancedCache().stop();
               System.out.println("REmove " + cacheName + " from " + cache.getCacheManager().getAddress().toString());
-              cache.getCacheManager().removeCache(cache.getName());
+//              cache.getCacheManager().removeCache(cache.getName());
            }
       }
         return null;

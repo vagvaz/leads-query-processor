@@ -8,10 +8,7 @@ import eu.leads.processor.core.plan.PlanNode;
 import eu.leads.processor.core.plan.SQLPlan;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by vagvaz on 9/17/14.
@@ -85,10 +82,37 @@ public class ExecutionPlanMonitor {
        groupingCandidate.add(LeadsNodeType.SCAN);
        groupingCandidate.add(LeadsNodeType.TABLE_SUBQUERY);
        groupingCandidate.add(LeadsNodeType.SELECTION);
-
+       mergeSortAndLimit();
     }
 
-    public void complete(PlanNode nodeId) {
+   private void mergeSortAndLimit() {
+      List<PlanNode> sources = getSources();
+      PlanNode sort = findNodeByType(LeadsNodeType.SORT);
+      if(sort != null)
+      {
+         PlanNode limit = findNodeByType(LeadsNodeType.LIMIT);
+         if(limit != null)
+         {
+            sort.getConfiguration().putObject("limit",limit.getConfiguration());
+            plan.getPlanGraph().putObject(sort.getNodeId(),sort.asJsonObject());
+         }
+      }
+
+   }
+
+   private PlanNode findNodeByType(LeadsNodeType nodeType) {
+      PlanNode result = null;
+      Collection<PlanNode> nodes = plan.getNodes();
+      for(PlanNode n : nodes){
+         if(n.getNodeType().equals(nodeType)){
+            result = n;
+            break;
+         }
+      }
+      return result;
+   }
+
+   public void complete(PlanNode nodeId) {
        PlanNode node = plan.getNode(nodeId.getNodeId());
        node.setStatus(NodeStatus.COMPLETED);
        LeadsNodeType currentType = node.getNodeType();
@@ -109,7 +133,8 @@ public class ExecutionPlanMonitor {
       PlanNode result = null;
       if(node.getNodeType().equals(LeadsNodeType.OUTPUT_NODE))
         return result;
-      result = plan.getNode(node.getOutput());
+
+       result = plan.getNode(node.getOutput());
       return result;
     }
     public PlanNode getNextExecutableOperator(PlanNode node) {
