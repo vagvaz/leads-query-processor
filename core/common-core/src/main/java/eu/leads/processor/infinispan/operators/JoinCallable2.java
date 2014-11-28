@@ -2,6 +2,7 @@ package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
+import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.infinispan.QualFilter;
 import eu.leads.processor.math.FilterOperatorTree;
@@ -56,8 +57,10 @@ public class JoinCallable2<K,V> implements
    @Override public void setEnvironment(Cache<K, V> cache, Set<K> set) {
       conf = new JsonObject(configString);
       this.inputCache = cache;
-      ClusterInfinispanManager manager = new ClusterInfinispanManager(cache.getCacheManager());
+      ClusterInfinispanManager manager = (ClusterInfinispanManager) InfinispanClusterSingleton.getInstance().getManager();
+
       outputCache = (Cache) manager.getPersisentCache(output);
+
       outerCache = (Cache) manager.getPersisentCache(outerCacheName);
 
       JsonObject object = conf.getObject("body").getObject("joinQual");
@@ -94,14 +97,25 @@ public class JoinCallable2<K,V> implements
 
    @Override public String call() throws Exception {
       CloseableIterable<Map.Entry<String, String>> iterable = null;
+      System.out.println("Iterating in " + outerCache.getCacheManager().getAddress().toString());
       try {
          //Load other data
          iterable =
                  outerCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
+         Map<String,Tuple> buffer = new HashMap();
          for (Map.Entry<String, String> outerEntry : iterable) {
             Tuple outerTuple = new Tuple(outerEntry.getValue());
-            if(otherTableName == null)
-               otherTableName = resolveTableName(outerTuple);
+            buffer.put(outerEntry.getKey(),outerTuple);
+         }
+         iterable.close();
+         System.out.println("end of interation in " + outerCache.getCacheManager().getAddress().toString());
+         Iterator<Map.Entry<String,Tuple>> iterator = buffer.entrySet().iterator();
+            while(iterator.hasNext()){
+               Map.Entry<String,Tuple> outerEntry = iterator.next();
+               Tuple outerTuple = outerEntry.getValue();
+               if (otherTableName == null)
+                  otherTableName = resolveTableName(outerTuple);
+               iterator.remove();
             String thekey = outerEntry.getKey().substring(outerEntry.getKey().indexOf(":")+1,outerEntry.getKey().length());
             outerTuple.setAttribute("tupleKey",thekey);
              String tkey = getOutkey(conf,outerTuple,otherTableName);
@@ -112,7 +126,7 @@ public class JoinCallable2<K,V> implements
             groups.put(tkey,group);
 
          }
-         iterable.close();
+
 
 
          int size = 0;
@@ -154,10 +168,18 @@ public class JoinCallable2<K,V> implements
       }catch (Exception e) {
          if(iterable != null)
             iterable.close();
-         System.err.println("Iterating over " + outerCacheName
-                                    + " for batch resulted in Exception " + e.getClass().toString() + " " + e.getCause().toString() + "\n"
-                                    + e.getMessage() + "\n from  " + outerCacheName);
-         e.printStackTrace();
+         if(outerCacheName != null) {
+            System.err.println("Iterating over " + outerCacheName
+                                       + " for batch resulted in Exception " + e.getClass().toString() + " " + "\n"
+                                       + e.getMessage() + "\n from  " + outerCacheName);
+            e.printStackTrace();
+         }
+         else{
+            System.err.println("Iterating over " + "outerCache"
+                                       + " for batch resulted in Exception " + e.getClass().toString() + " " + e.getCause().toString() + "\n"
+                                       + e.getMessage() + "\n");
+            e.printStackTrace();
+         }
          return "Iterating over " + outerCacheName
                         + " for batch resulted in Exception "
                         + e.getMessage() + "\n from  " + outerCacheName;

@@ -13,6 +13,7 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
 
+import javax.xml.ws.AsyncHandler;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -200,10 +201,10 @@ public class ComponentControlVerticle extends Verticle implements Component {
             arrayServices.add(componentPrefix + "." + s.getString("type") + ".manage");
         }
         serviceController = new ServiceController(arrayServices, this, com, log);
-        com.subscribe(id + ".serviceMonitor", serviceController);
+        com.subscribe(id + ".serviceMonitor", serviceController, new StartCallable(callStart,this));
         this.state = ComponentState.INITIALIZED;
-        if (callStart)
-            startUp();
+//        if (callStart)
+//            startUp();
     }
 
     @Override

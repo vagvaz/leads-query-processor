@@ -16,6 +16,7 @@ import org.vertx.java.core.logging.Logger;
 import org.vertx.java.core.logging.impl.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -169,7 +170,24 @@ public class DefaultNode implements Node, Handler<Long> {
     }
 
     @Override
-    public void subscribe(final String groupId, final LeadsMessageHandler handler) {
+    public void subscribe(final String groupId,final  LeadsMessageHandler handler) {
+        bus.registerHandler(groupId, comHandler, new Handler<AsyncResult<Void>>() {
+            @Override
+            public void handle(AsyncResult<Void> event) {
+                if (event.succeeded()) {
+                    logger.info("subscribing to " + groupId + " succeded");
+                    config.getArray("groups").add(groupId);
+                    comHandler.register(groupId, handler);
+                } else {
+                    logger.error("Fail to subscribe to " + groupId);
+                }
+            }
+        });
+
+    }
+
+    @Override
+    public void subscribe(final String groupId, final LeadsMessageHandler handler, final Callable callable) {
 
         bus.registerHandler(groupId, comHandler, new Handler<AsyncResult<Void>>() {
             @Override
@@ -178,6 +196,11 @@ public class DefaultNode implements Node, Handler<Long> {
                     logger.info("subscribing to " + groupId + " succeded");
                     config.getArray("groups").add(groupId);
                     comHandler.register(groupId, handler);
+                    try {
+                        callable.call();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 } else {
                     logger.error("Fail to subscribe to " + groupId);
                 }
