@@ -32,11 +32,13 @@ public class SortMerger {
    protected Map<String,String> outputMap;
    protected Map<String,JsonObject> targetsMap;
    InfinispanManager manager;
-    public SortMerger(List<String> inputCaches, String output, TupleComparator comp, InfinispanManager manager, JsonObject conf) {
+   protected long rowcount = Long.MAX_VALUE;
+    public SortMerger(List<String> inputCaches, String output, TupleComparator comp, InfinispanManager manager, JsonObject conf,long rc) {
 
         prefix = output+":";
 //        this.output = output;
 //        input = inputMap;
+       rowcount = rc;
        this.manager = manager;
         outputCache = manager.getPersisentCache(output);
         counters = new Vector<Integer>(inputCaches.size());
