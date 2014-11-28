@@ -94,9 +94,10 @@ public class ExecutionPlanMonitor {
          if(limit != null)
          {
             sort.getConfiguration().putObject("limit",limit.getConfiguration());
+            plan.getPlanGraph().putObject(sort.getNodeId(),sort.asJsonObject());
          }
       }
-      plan.getPlanGraph().putObject(sort.getNodeId(),sort.asJsonObject());
+
    }
 
    private PlanNode findNodeByType(LeadsNodeType nodeType) {
