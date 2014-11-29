@@ -423,7 +423,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                     .cacheMode(CacheMode.DIST_SYNC)
                                     .hash().numOwners(1)
                                     .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
-                                    .persistence()
+                                    .persistence().passivation(true)
                                              //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
                                              //               .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
 
@@ -438,7 +438,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                     .cacheMode(CacheMode.DIST_SYNC)
                                     .hash().numOwners(1)
                                     .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
-                                    .persistence()
+                                    .persistence().passivation(true)
                                     .addStore(LevelDBStoreConfigurationBuilder.class)
                                     .location("/tmp/leveldb/data-" + manager.getAddress().toString() + "/")
                                              //                                 .location("/tmp/leveldb/data-foo/" + "/")
