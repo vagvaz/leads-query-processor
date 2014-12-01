@@ -10,13 +10,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
-public class ApatarMapper extends LeadsMapper<String, String, String, String> {
+public class TransformMapper extends LeadsMapper<String, String, String, String> {
 
-    public ApatarMapper(JsonObject configuration) {
+    public TransformMapper(JsonObject configuration) {
         super(configuration);
     }
 
-    public ApatarMapper(String configString) {
+    public TransformMapper(String configString) {
         super(configString);
     }
 

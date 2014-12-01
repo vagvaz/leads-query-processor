@@ -1,6 +1,5 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
-import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.core.LeadsReducer;
 import eu.leads.processor.core.Tuple;
@@ -18,17 +17,17 @@ import java.util.Iterator;
  * Time: 9:36 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ApatarReducer extends LeadsReducer<String, String> {
+public class TransformReducer extends LeadsReducer<String, String> {
 
     transient Cache<String, String> data;
     transient String prefix;
 
 
-    public ApatarReducer(JsonObject configuration) {
+    public TransformReducer(JsonObject configuration) {
         super(configuration);
     }
 
-    public ApatarReducer(String configString) {
+    public TransformReducer(String configString) {
         super(configString);
     }
 
