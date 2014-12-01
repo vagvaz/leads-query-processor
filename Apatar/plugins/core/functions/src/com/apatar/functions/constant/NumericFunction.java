@@ -46,8 +46,9 @@ public class NumericFunction extends AbstractConstantApatarFunction {
 	static ConstantFunctionInfo fi = new ConstantFunctionInfo("Numeric Constant", 0, 1, ERecordType.Numeric);
 	static
 	{
-		//fi.getCategories().add(FunctionCategory.Group_By);
 		fi.getCategories().add(FunctionCategory.Filter);
+		//fi.getCategories().add(FunctionCategory.Group_By);
+		//fi.getCategories().add(FunctionCategory.Filter);
 	}
 
 	public ConstantFunctionInfo getFunctionInfo() {
@@ -58,7 +59,7 @@ public class NumericFunction extends AbstractConstantApatarFunction {
 		return value;
 	}
 
-	public void setValue(long value) {
+	public void setValue(double value) {
 		this.value = value;
 	}
 
@@ -73,7 +74,7 @@ public class NumericFunction extends AbstractConstantApatarFunction {
 
 	public void initFromElement(Element e) {
 		super.initFromElement(e);
-		value = Long.parseLong(e.getAttributeValue("value"));
+		value = Double.parseDouble(e.getAttributeValue("value"));
 	}
 
 	public Element saveToElement() {

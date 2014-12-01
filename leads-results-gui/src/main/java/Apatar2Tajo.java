@@ -72,6 +72,7 @@ public class Apatar2Tajo {
         ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.LikeValidateFunction",new PatternMatchPredicate(OpType.LikePredicate,false,nullArg,nullArg));
         ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.FindRegExpFunction", new PatternMatchPredicate(OpType.Regexp,false,nullArg,nullArg));
         ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.NotValidateFunction",new NotExpr(nullArg));
+        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.LessThanValidateFunction",new BinaryOperator(OpType.LessThan,nullArg,nullArg));
 
 
         ApatarTajoAgregateFunctMap.put("com.apatar.functions.String.AvgFunction", new GeneralSetFunctionExpr("avg", false, nullArgs));
@@ -82,6 +83,7 @@ public class Apatar2Tajo {
         ApatarTajoAgregateFunctMap.put("com.apatar.functions.String.MaxFunction", new GeneralSetFunctionExpr("max", false, nullArgs));
         ApatarTajoAgregateFunctMap.put("com.apatar.functions.String.MinFunction", new GeneralSetFunctionExpr("min", false, nullArgs));
 
+        
         ColumnReferenceExpr nullColumn= CreateColumnReference("null");
         ApatarTajoSortFunctMap.put("com.apatar.functions.String.DescFunction", new  Sort.SortSpec(nullColumn,false,false));//; new GeneralSetFunctionExpr("min", false, nullArgs));
         ApatarTajoSortFunctMap.put("com.apatar.functions.String.AscFunction", new  Sort.SortSpec(nullColumn,true,false));

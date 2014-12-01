@@ -198,6 +198,7 @@ public class LeadsResultsGui extends JPanel {
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Leads Results", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
+            System.exit(-1);
             return;
         }
 
@@ -260,6 +261,7 @@ public class LeadsResultsGui extends JPanel {
     static QueryResults send_query_and_wait(String json) throws IOException, InterruptedException {
         if (json == null) {
             JOptionPane.showMessageDialog(null, "Bad Apatar format.", "Leads Results", JOptionPane.ERROR_MESSAGE);
+
             return null;
         }
 
@@ -272,21 +274,29 @@ public class LeadsResultsGui extends JPanel {
         cancelButton.setPreferredSize(new Dimension(80, 30));
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         f.setLocationRelativeTo(null);
+
+
+
+
         Container content = f.getContentPane();
         JProgressBar progressBar = new JProgressBar();
         progressBar.setValue(0);
         progressBar.setStringPainted(true);
-        Border border = BorderFactory.createTitledBorder("Sending...");
+        Border border = BorderFactory.createTitledBorder("Initializing Connection ...");
         Thread.sleep(200);
         progressBar.setBorder(border);
         content.add(progressBar, BorderLayout.NORTH);
         content.add(cancelButton, BorderLayout.SOUTH);
         f.setSize(300, 100);
         f.setVisible(true);
-
+        progressBar.setValue(1);
         InitializeWebClient(new String[]{});
+        Thread.sleep(200);
+
+
         progressBar.setValue(10);
         QueryStatus currentStatus = WebServiceClient.submitWorkflow(username, json);
+        progressBar.setBorder(BorderFactory.createTitledBorder("Sending ... "));
         progressBar.setValue(20);
         int value = 20;
         System.out.print("Waiting for results: ");
