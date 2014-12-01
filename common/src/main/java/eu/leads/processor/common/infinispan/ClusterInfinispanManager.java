@@ -416,40 +416,51 @@ public class ClusterInfinispanManager implements InfinispanManager {
       }
    }
    private void initDefaultCacheConfig() {
-      if(!LQPConfiguration.getConf().getBoolean("leads.processor.infinispan.useLevelDB",false)) {
-         defaultConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
-                                 .clustering()
-                                 .cacheMode(CacheMode.DIST_SYNC)
-                                 .hash().numOwners(2)
-                                 .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
-                                 .persistence()
-//                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
-//               .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
+      if(LQPConfiguration.getConf().getBoolean("leads.processor.infinispan.persistence",true)) { //perssistence
+         if (!LQPConfiguration.getConf().getBoolean("leads.processor.infinispan.useLevelDB", false)) {
+            defaultConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
+                                    .clustering()
+                                    .cacheMode(CacheMode.DIST_SYNC)
+                                    .hash().numOwners(1)
+                                    .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
+                                    .persistence().passivation(true)
+                                             //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
+                                             //               .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
 
-                                 .addSingleFileStore().location("/tmp/" + manager.getAddress().toString() + "/")
-                           .fetchPersistentState(true)
-                           .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
-                                 .build();
+                                    .addSingleFileStore().location("/tmp/" + manager.getAddress().toString() + "/")
+                                    .fetchPersistentState(true)
+                                    .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
+                                    .build();
 
+         } else { //Use leveldb
+            defaultConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
+                                    .clustering()
+                                    .cacheMode(CacheMode.DIST_SYNC)
+                                    .hash().numOwners(1)
+                                    .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
+                                    .persistence().passivation(true)
+                                    .addStore(LevelDBStoreConfigurationBuilder.class)
+                                    .location("/tmp/leveldb/data-" + manager.getAddress().toString() + "/")
+                                             //                                 .location("/tmp/leveldb/data-foo/" + "/")
+                                    .expiredLocation("/tmp/leveldb/expired-" + manager.getAddress().toString() + "/")
+                                             //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
+                                    .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
+                                    .fetchPersistentState(true)
+                                    .shared(false).purgeOnStartup(false).preload(true).compatibility().enable()
+                                    .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
+                                    .build();
+         }
       }
-      else{
+      else{ //do not use persistence
          defaultConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
                                  .clustering()
                                  .cacheMode(CacheMode.DIST_SYNC)
-                                 .hash().numOwners(2)
-                                 .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
-                                 .persistence()
-                                 .addStore(LevelDBStoreConfigurationBuilder.class)
-                                 .location("/tmp/leveldb/data-" + manager.getAddress().toString() + "/")
-//                                 .location("/tmp/leveldb/data-foo/" + "/")
-                                 .expiredLocation("/tmp/leveldb/expired-" + manager.getAddress().toString() + "/")
-//                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
-                                 .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
-                                 .fetchPersistentState(true)
-                                 .shared(true).purgeOnStartup(false).preload(true).compatibility().enable()
+                                 .hash().numOwners(1)
+                                 .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility().enable()
                                  .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
                                  .build();
       }
+
 
    }
 
