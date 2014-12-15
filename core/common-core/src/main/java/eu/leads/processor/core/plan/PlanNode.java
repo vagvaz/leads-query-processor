@@ -1,7 +1,7 @@
 package eu.leads.processor.core.plan;
 
 import eu.leads.processor.core.DataType;
-import org.apache.tajo.engine.planner.logical.LogicalNode;
+import org.apache.tajo.plan.logical.LogicalNode;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 

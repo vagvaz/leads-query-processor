@@ -1,7 +1,6 @@
 package eu.leads.processor.core.plan;
 
-import org.apache.tajo.engine.planner.AlterTablespaceNode;
-import org.apache.tajo.engine.planner.logical.*;
+import org.apache.tajo.plan.logical.*;
 
 /**
  * Created by vagvaz on 8/29/14.
@@ -37,7 +36,7 @@ public enum LeadsNodeType {
     TRUNCATE_TABLE(TruncateTableNode.class),
     WGS_URL(WGSUrlDepthNode.class),
     OUTPUT_NODE(OutputNode.class),
-  EPQ(EncryptedPointQueryNode.class);
+    EPQ(EncryptedPointQueryNode.class);
 
 
     private final Class<? extends LogicalNode> baseClass;

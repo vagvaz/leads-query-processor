@@ -1,7 +1,7 @@
 package eu.leads.processor.core.plan;
 
 import com.google.gson.annotations.Expose;
-import org.apache.tajo.engine.planner.logical.LogicalRootNode;
+import org.apache.tajo.plan.logical.LogicalRootNode;
 
 /**
  * Created by vagvaz on 10/2/14.

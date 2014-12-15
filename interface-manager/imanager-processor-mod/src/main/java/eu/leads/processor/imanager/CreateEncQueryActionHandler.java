@@ -7,7 +7,10 @@ import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
-import eu.leads.processor.core.plan.*;
+import eu.leads.processor.core.plan.PPPQCallQuery;
+import eu.leads.processor.core.plan.QueryContext;
+import eu.leads.processor.core.plan.QueryState;
+import eu.leads.processor.core.plan.QueryStatus;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 

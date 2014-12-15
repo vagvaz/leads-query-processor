@@ -8,15 +8,15 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.tajo.TajoConstants;
 import org.apache.tajo.catalog.*;
-import org.apache.tajo.catalog.function.Function;
 import org.apache.tajo.catalog.proto.CatalogProtos.FunctionType;
 import org.apache.tajo.catalog.proto.CatalogProtos.StoreType;
 import org.apache.tajo.common.TajoDataTypes;
 import org.apache.tajo.common.TajoDataTypes.Type;
 import org.apache.tajo.conf.TajoConf;
+import org.apache.tajo.engine.function.FunctionLoader;
 import org.apache.tajo.engine.function.builtin.SumFloat;
 import org.apache.tajo.engine.function.builtin.SumInt;
-import org.apache.tajo.master.TajoMaster;
+import org.apache.tajo.function.Function;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -93,10 +93,15 @@ public class ServerTest {
 				"leadsfs://localhost:5998/warehouse");
 		catalog.createDatabase(DEFAULT_DATABASE_NAME, DEFAULT_TABLESPACE_NAME);
 
-	    for (FunctionDesc funcDesc : TajoMaster.initBuiltinFunctions()) {
+        for (FunctionDesc funcDesc : FunctionLoader.findLegacyFunctions()) {
             System.out.println("Bultin func: " + funcDesc.getFuncType());
-	        catalog.createFunction(funcDesc);
-	      }
+            catalog.createFunction(funcDesc);
+        }
+
+//	    for (FunctionDesc funcDesc : TajoMaster.initBuiltinFunctions()) {
+//            System.out.println("Bultin func: " + funcDesc.getFuncType());
+//	        catalog.createFunction(funcDesc);
+//	      }
 
 		Schema schema = new Schema();
 		schema.addColumn("webpageurl", Type.TEXT);
@@ -130,12 +135,12 @@ public class ServerTest {
 		TableMeta meta = CatalogUtil.newTableMeta(StoreType.MEM);
 	    TableDesc Entities = new TableDesc(
 	            CatalogUtil.buildFQName(TajoConstants.DEFAULT_DATABASE_NAME, "entities"), schema, meta,
-	            getTestDir());
+	            getTestDir().toUri());
 	        catalog.createTable(Entities);
 //
 //
 		TableDesc Webpages = new TableDesc(
-				CatalogUtil.buildFQName(DEFAULT_DATABASE_NAME, "webpages"),schema2,meta, getTestDir());
+				CatalogUtil.buildFQName(DEFAULT_DATABASE_NAME, "webpages"),schema2,meta, getTestDir().toUri());
 		catalog.createTable(Webpages);
 
 
@@ -151,7 +156,7 @@ public class ServerTest {
         schema.addColumn("content", Type.TEXT);
         //PRIMARY KEY (uri, ts)
         catalog.createTable(new TableDesc(
-                CatalogUtil.buildFQName("crawler", "content"),schema,meta, getTestDir()));
+                CatalogUtil.buildFQName("crawler", "content"),schema,meta, getTestDir().toUri()));
 
 
         schema = new Schema();
@@ -163,7 +168,7 @@ public class ServerTest {
         schema.addColumn("successfulextractions", Type.TEXT);
         //PRIMARY KEY (uri, ts)
         catalog.createTable(new TableDesc(
-                CatalogUtil.buildFQName("internal", "page"),schema,meta, getTestDir()));
+                CatalogUtil.buildFQName("internal", "page"),schema,meta, getTestDir().toUri()));
 
 
         schema = new Schema();
@@ -174,7 +179,7 @@ public class ServerTest {
         schema.addColumn("pagesno", Type.TEXT);
         //PRIMARY KEY (uri, ts)
         catalog.createTable(new TableDesc(
-                CatalogUtil.buildFQName("internal", "urldirectory"),schema,meta, getTestDir()));
+                CatalogUtil.buildFQName("internal", "urldirectory"),schema,meta, getTestDir().toUri()));
 
 
         schema = new Schema();
@@ -194,7 +199,7 @@ public class ServerTest {
         schema.addColumn("scalerstd", Type.TEXT);
         //PRIMARY KEY (uri, ts)
         catalog.createTable(new TableDesc(
-                CatalogUtil.buildFQName("internal", "urldirectory_ecom"),schema,meta, getTestDir()));
+                CatalogUtil.buildFQName("internal", "urldirectory_ecom"),schema,meta, getTestDir().toUri()));
 
 
 
@@ -207,7 +212,7 @@ public class ServerTest {
         schema.addColumn("sentiment", Type.TEXT);
         //	PRIMARY KEY (uri,ts,partid,keywords)
         catalog.createTable(new TableDesc(
-                CatalogUtil.buildFQName("leads", "keywords"),schema,meta, getTestDir()));
+                CatalogUtil.buildFQName("leads", "keywords"),schema,meta, getTestDir().toUri()));
 
 
         schema = new Schema();
@@ -221,7 +226,7 @@ public class ServerTest {
         schema.addColumn("type", Type.TEXT);
         //	PRIMARY KEY (uri,ts)
         catalog.createTable(new TableDesc(
-                CatalogUtil.buildFQName("leads", "page_core"),schema,meta, getTestDir()));
+                CatalogUtil.buildFQName("leads", "page_core"),schema,meta, getTestDir().toUri()));
 
         schema = new Schema();
         schema.addColumn("uri", Type.TEXT);
@@ -231,7 +236,7 @@ public class ServerTest {
         schema.addColumn("resourcepartvalue", Type.TEXT);
         //PRIMARY KEY (uri,ts,partid,resourceparttype)
         catalog.createTable(new TableDesc(
-                CatalogUtil.buildFQName("leads", "resourcepart"),schema,meta, getTestDir()));
+                CatalogUtil.buildFQName("leads", "resourcepart"),schema,meta, getTestDir().toUri()));
 
 
         schema = new Schema();
@@ -245,14 +250,14 @@ public class ServerTest {
         schema.addColumn("whoiscountry", Type.TEXT);
         //	PRIMARY KEY (uri,ts)
         catalog.createTable(new TableDesc(
-                CatalogUtil.buildFQName("leads", "site"),schema,meta, getTestDir()));
+                CatalogUtil.buildFQName("leads", "site"),schema,meta, getTestDir().toUri()));
 
 
         schema = new Schema();
         schema.addColumn("keywords", Type.TEXT);
         //	PRIMARY KEY (keywords)
         catalog.createTable(new TableDesc(
-                CatalogUtil.buildFQName("adidas", "keywords"),schema,meta, getTestDir()));
+                CatalogUtil.buildFQName("adidas", "keywords"),schema,meta, getTestDir().toUri()));
 //
 //		TableDesc score = new org.apache.tajo.catalog.TableDesc(
 //				CatalogUtil.buildFQName(DEFAULT_DATABASE_NAME, "score"),

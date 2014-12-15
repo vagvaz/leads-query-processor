@@ -1,7 +1,6 @@
 package eu.leads.processor.math;
 
 import eu.leads.processor.core.Tuple;
-import org.apache.avro.generic.GenericData;
 import org.vertx.java.core.json.JsonElement;
 import org.vertx.java.core.json.JsonObject;
 

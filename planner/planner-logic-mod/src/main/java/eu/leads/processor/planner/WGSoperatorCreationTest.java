@@ -11,7 +11,7 @@ import org.apache.tajo.catalog.Schema;
 import org.apache.tajo.catalog.TableDesc;
 import org.apache.tajo.catalog.TableMeta;
 import org.apache.tajo.common.TajoDataTypes;
-import org.apache.tajo.engine.planner.logical.ScanNode;
+import org.apache.tajo.plan.logical.ScanNode;
 import org.apache.tajo.util.KeyValueSet;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -82,7 +82,7 @@ public class WGSoperatorCreationTest {
     ScanNode node = new ScanNode(0);
     Path testPath = new Path("adfasdfasd");
     TableMeta meta = new TableMeta(StoreType.SEQUENCEFILE,new KeyValueSet());
-    TableDesc desc = new TableDesc("default.webpages",getWebpagesSchema(),meta, testPath );
+    TableDesc desc = new TableDesc("default.webpages",getWebpagesSchema(),meta, testPath.toUri() );
     node.init(desc);
 //    node.setInSchema(getWebpagesSchema());
 //    node.setOutSchema(node.getInSchema());

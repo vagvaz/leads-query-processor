@@ -15,7 +15,7 @@
    <modules>
        <module>data-collection</module>
        <module>data-snapshot</module>
-      <module>uber-snapshot</module>
+       <module>uber-snapshot</module>
        <module>load-csv</module>
    </modules>
 

@@ -18,17 +18,16 @@ package eu.leads.processor.planner;
  */
 
 
+import com.google.common.io.Resources;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-        import com.google.common.io.Resources;
-        import org.apache.commons.logging.Log;
-        import org.apache.commons.logging.LogFactory;
-
-        import java.io.File;
-        import java.util.Enumeration;
-        import java.util.HashSet;
-        import java.util.Set;
-        import java.util.jar.JarEntry;
-        import java.util.jar.JarFile;
+import java.io.File;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public abstract class ClassUtil {
     private static final Log LOG = LogFactory.getLog(ClassUtil.class);

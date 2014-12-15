@@ -39,57 +39,6 @@
    </repositories>
 
    <dependencies>
-
-<!--         <groupId>org.apache.tajo</groupId>
-         <artifactId>tajo-core</artifactId>
-         <version>0.9.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.tajo</groupId>
-         <artifactId>tajo-algebra</artifactId>
-         <version>0.9.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.tajo</groupId>
-         <artifactId>tajo-catalog-common</artifactId>
-         <version>0.9.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.tajo</groupId>
-         <artifactId>tajo-catalog-client</artifactId>
-         <version>0.9.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.tajo</groupId>
-         <artifactId>tajo-catalog-server</artifactId>
-         <version>0.9.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.tajo</groupId>
-         <artifactId>tajo-storage</artifactId>
-         <version>0.9.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.tajo</groupId>
-         <artifactId>tajo-jdbc</artifactId>
-         <version>0.9.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.tajo</groupId>
-         <artifactId>tajo-rpc</artifactId>
-         <version>0.9.0-SNAPSHOT</version>
-      </dependency>-->
-      <!--<dependency>-->
-         <!--<groupId>org.slf4j</groupId>-->
-         <!--<artifactId>slf4j-api</artifactId>-->
-         <!--<version>1.7.7</version>-->
-      <!--</dependency>-->
-      <!--<dependency>-->
-         <!--<groupId>org.slf4j</groupId>-->
-         <!--<artifactId>slf4j-log4j12</artifactId>-->
-         <!--<version>1.7.7</version>-->
-      <!--</dependency>-->
-
       <dependency>
          <groupId>gr.tuc.softnet</groupId>
          <artifactId>leads-query-processor-common</artifactId>
@@ -117,7 +66,7 @@
       <dependency>
          <groupId>gr.tuc.softnet</groupId>
          <artifactId>leads-query-processor-tajo-module</artifactId>
-         <version>0.0.1-SNAPSHOT</version>
+         <version>0.0.2-SNAPSHOT</version>
          <exclusions>
             <exclusion>
                <groupId>log4j</groupId>

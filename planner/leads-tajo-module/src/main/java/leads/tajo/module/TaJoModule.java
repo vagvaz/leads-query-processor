@@ -11,6 +11,11 @@ import grammar.SQLLexer;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.security.UserGroupInformation;
+import org.apache.tajo.ConfigKey;
+import org.apache.tajo.OverridableConf;
+import org.apache.tajo.SessionVars;
+import org.apache.tajo.TajoConstants;
 import org.apache.tajo.algebra.*;
 import org.apache.tajo.catalog.*;
 import org.apache.tajo.catalog.proto.CatalogProtos;
@@ -19,15 +24,17 @@ import org.apache.tajo.conf.TajoConf;
 import org.apache.tajo.engine.json.CoreGsonHelper;
 import org.apache.tajo.engine.parser.SQLSyntaxError;
 import org.apache.tajo.engine.planner.LeadsLogicalOptimizer;
-import org.apache.tajo.engine.planner.LogicalPlan;
-import org.apache.tajo.engine.planner.LogicalPlanner;
-import org.apache.tajo.engine.planner.PlanningException;
+import org.apache.tajo.engine.query.QueryContext;
 import org.apache.tajo.master.session.Session;
+import org.apache.tajo.plan.LogicalPlan;
+import org.apache.tajo.plan.LogicalPlanner;
+import org.apache.tajo.plan.PlanningException;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 
 /**
@@ -41,10 +48,25 @@ public class TaJoModule {
     private static CatalogClient catalog = null;
     private static TajoConf c = null;
     private static HashMap<String,Set<String>> primaryKeys = null;
+
+    private static UserGroupInformation dummyUserInfo;
+    private static QueryContext defaultContext;
+
+
+    static {
+        try {
+            dummyUserInfo = UserGroupInformation.getCurrentUser();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public TaJoModule() {
         c = new TajoConf();
         optimizer = new LeadsLogicalOptimizer(c);
         sqlAnalyzer = new LeadsSQLAnalyzer();
+        defaultContext = createContext(c,null);
         initializePrimaryColumns();
     }
 
@@ -113,8 +135,10 @@ public class TaJoModule {
         }
         TableMeta newTableMeta = CatalogUtil.newTableMeta(CatalogProtos.StoreType.SEQUENCEFILE);
         Path tablePath = getTablePath(ctCommand.getTableName());
-        TableDesc desc = new TableDesc(CatalogUtil
-                .buildFQName(StringConstants.DEFAULT_DATABASE_NAME,ctCommand.getTableName()),newTableSchema,newTableMeta,tablePath);
+        TableDesc desc =// new TableDesc(CatalogUtil
+               // .buildFQName(StringConstants.DEFAULT_DATABASE_NAME,ctCommand.getTableName()),newTableSchema,newTableMeta,tablePath);
+        CatalogUtil.newTableDesc(CatalogUtil
+                .buildFQName(StringConstants.DEFAULT_DATABASE_NAME,ctCommand.getTableName()), newTableSchema, newTableMeta, tablePath);
         return catalog.createTable(desc);
     }
 
@@ -133,7 +157,7 @@ public class TaJoModule {
 
         LogicalPlan newPlan = null;
         try {
-            newPlan = planner.createPlan(session, expr);
+            newPlan = planner.createPlan(createContext(c,session), expr);
         } catch (PlanningException e) {
             throw new PlanningException("Unable to Create Plan: " + e.getMessage());
         }
@@ -208,5 +232,33 @@ public class TaJoModule {
        else{
           catalog.dropTable(StringConstants.DEFAULT_DATABASE_NAME+"."+tableName);
        }
+    }
+
+    public static QueryContext createContext(TajoConf conf, Session session) {
+
+        QueryContext context = null;
+        if(session==null)
+            context = new QueryContext(conf, createDummySession());
+        else
+            context = new QueryContext(conf, session);
+
+        OverridableConf userSessionVars;
+        userSessionVars = new OverridableConf(new TajoConf(), new ConfigKey.ConfigType[]{ConfigKey.ConfigType.SESSION});
+        SessionVars[] var0 = SessionVars.values();
+        int var1 = var0.length;
+
+        for(int var2 = 0; var2 < var1; ++var2) {
+            SessionVars var = var0[var2];
+            String value = System.getProperty(var.keyname());
+            if(value != null) {
+                userSessionVars.put(var, value);
+            }
+        }
+        context.putAll(userSessionVars.getAllKeyValus());
+        return context;
+    }
+
+    public static Session createDummySession() {
+        return new Session(UUID.randomUUID().toString(), dummyUserInfo.getUserName(), TajoConstants.DEFAULT_DATABASE_NAME);
     }
 }

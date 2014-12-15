@@ -4,11 +4,7 @@ import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.data.Snapshot;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
-import gnu.trove.map.hash.THashMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
-import gnu.trove.set.hash.THashSet;
 import org.infinispan.Cache;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
@@ -18,7 +14,6 @@ import org.vertx.java.core.json.JsonObject;
 
 import java.io.*;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Created by vagvaz on 10/29/14.

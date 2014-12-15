@@ -7,7 +7,7 @@ import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
-import eu.leads.processor.infinispan.operators.*;
+import eu.leads.processor.infinispan.operators.SortOperator;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;

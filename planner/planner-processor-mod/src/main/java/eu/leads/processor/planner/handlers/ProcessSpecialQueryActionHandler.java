@@ -13,7 +13,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.tajo.catalog.TableDesc;
 import org.apache.tajo.catalog.TableMeta;
 import org.apache.tajo.catalog.proto.CatalogProtos;
-import org.apache.tajo.engine.planner.logical.ScanNode;
+import org.apache.tajo.plan.logical.ScanNode;
 import org.apache.tajo.util.KeyValueSet;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
@@ -52,7 +52,7 @@ public class ProcessSpecialQueryActionHandler implements ActionHandler {
 
             Path testPath = new Path("test-webpages-path");
             TableMeta meta = new TableMeta(CatalogProtos.StoreType.SEQUENCEFILE,new KeyValueSet());
-            TableDesc desc = new TableDesc("default.webpages",module.getTableSchema("webpages"),meta, testPath );
+            TableDesc desc = new TableDesc("default.webpages",module.getTableSchema("webpages"),meta, testPath.toUri() );
             node.init(desc);
             WGSUrlDepthNode rootNode = new WGSUrlDepthNode(1);
             rootNode.setUrl(query.getUrl());
@@ -76,7 +76,7 @@ public class ProcessSpecialQueryActionHandler implements ActionHandler {
 
            Path testPath = new Path("test-"+query.getCache()+"-path");
            TableMeta meta = new TableMeta(CatalogProtos.StoreType.SEQUENCEFILE,new KeyValueSet());
-           TableDesc desc = new TableDesc(query.getCache(),module.getTableSchema("entities"),meta, testPath );
+           TableDesc desc = new TableDesc(query.getCache(),module.getTableSchema("entities"),meta, testPath.toUri() );
            node.init(desc);
            EncryptedPointQueryNode rootNode = new EncryptedPointQueryNode(1);
            rootNode.setCache(query.getCache());
