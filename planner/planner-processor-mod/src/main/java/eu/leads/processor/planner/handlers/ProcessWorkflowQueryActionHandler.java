@@ -11,7 +11,7 @@ import eu.leads.processor.core.plan.*;
 import leads.tajo.module.TaJoModule;
 import org.apache.tajo.algebra.*;
 import org.apache.tajo.engine.json.CoreGsonHelper;
-import org.apache.tajo.engine.planner.logical.LogicalRootNode;
+import org.apache.tajo.plan.logical.LogicalRootNode;
 import org.apache.tajo.master.session.Session;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;

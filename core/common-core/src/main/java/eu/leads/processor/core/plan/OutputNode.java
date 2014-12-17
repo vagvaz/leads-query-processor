@@ -1,6 +1,6 @@
 package eu.leads.processor.core.plan;
 
-import org.apache.tajo.engine.planner.logical.LogicalRootNode;
+import org.apache.tajo.plan.logical.LogicalRootNode;
 
 /**
  * Created by vagvaz on 8/29/14.

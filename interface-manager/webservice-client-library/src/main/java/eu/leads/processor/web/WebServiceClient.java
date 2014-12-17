@@ -1,8 +1,6 @@
 package eu.leads.processor.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.leads.processor.common.infinispan.CacheManagerFactory;
-import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.encrypt.CStore;
 import eu.leads.processor.encrypt.ClientSide;
@@ -12,8 +10,8 @@ import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.plugins.PluginPackage;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang.SerializationUtils;
-import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.json.JsonArray;
+import org.vertx.java.core.json.JsonObject;
 
 import javax.ws.rs.core.MediaType;
 import java.io.*;
@@ -77,6 +75,8 @@ public class WebServiceClient {
         connection.setUseCaches(false);
         connection.setDoInput(hasInput);
         connection.setDoOutput(hasOutput);
+        connection.setConnectTimeout(4000);
+        //connection.setReadTimeout(10000);
         return connection;
     }
 
@@ -177,7 +177,8 @@ public class WebServiceClient {
         HttpURLConnection connection = (HttpURLConnection) address.openConnection();
         connection = setUp(connection, "GET", MediaType.APPLICATION_JSON, true, true);
         String response = getResult(connection);
-        System.err.println("responsed " + response);
+        //System.err.println("responsed " + response);
+        //System.out.print(". ");
         result = mapper.readValue(response, QueryStatus.class);
         return result;
     }

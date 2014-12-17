@@ -1,7 +1,6 @@
 package eu.leads.processor.nqe;
 
 import eu.leads.processor.core.ManageVerticle;
-import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.net.MessageUtils;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;

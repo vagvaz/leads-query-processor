@@ -6,8 +6,6 @@ import eu.leads.processor.core.plan.PlanNode;
 import eu.leads.processor.core.plan.SQLPlan;
 import eu.leads.processor.math.FilterOperatorTree;
 import leads.tajo.module.TaJoModule;
-import org.apache.hadoop.fs.Path;
-import org.apache.tajo.TajoConstants;
 import org.apache.tajo.algebra.CreateTable;
 import org.apache.tajo.algebra.Expr;
 import org.apache.tajo.algebra.Insert;
@@ -16,12 +14,10 @@ import org.apache.tajo.catalog.*;
 import org.apache.tajo.catalog.proto.CatalogProtos;
 import org.apache.tajo.common.TajoDataTypes;
 import org.apache.tajo.conf.TajoConf;
-import org.apache.tajo.engine.function.builtin.SumInt;
 import org.apache.tajo.engine.json.CoreGsonHelper;
-import org.apache.tajo.engine.planner.PlanningException;
-import org.apache.tajo.engine.planner.logical.LogicalRootNode;
 import org.apache.tajo.master.session.Session;
-import org.apache.tajo.util.KeyValueSet;
+import org.apache.tajo.plan.PlanningException;
+import org.apache.tajo.plan.logical.LogicalRootNode;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
@@ -29,7 +25,7 @@ import org.vertx.java.core.json.JsonObject;
  * Created by vagvaz on 8/27/14.
  */
 public class LogicalPlanVisitorTest {
-    public static final java.lang.String TAJO_VERSION = "0.9.0-SNAPSHOT";
+    public static final java.lang.String TAJO_VERSION = "0.9.1-SNAPSHOT";
     public static final java.lang.String SYSTEM_CONF_FILENAME = "system_conf.xml";
     public static final java.lang.String SYSTEM_DIR_NAME = "system";
     public static final java.lang.String WAREHOUSE_DIR_NAME = "warehouse";
@@ -224,60 +220,60 @@ public static void main(String[] args) throws Exception {
 
 
         TableMeta meta = CatalogUtil.newTableMeta(CatalogProtos.StoreType.MEM);
-        TableDesc people = new TableDesc(
-                                            CatalogUtil
-                                                .buildFQName(TajoConstants.DEFAULT_DATABASE_NAME,
-                                                                "employee"), schema, meta,
-                                            new Path("testdir"));
-        catalog.createTable(people);
+     //   TableDesc people = new TableDesc(
+//                                            CatalogUtil
+//                                                .buildFQName(TajoConstants.DEFAULT_DATABASE_NAME,
+//                                                                "employee"), schema, meta,
+//                                            new Path("testdir"));
+//        catalog.createTable(people);
+//
+//
+//        TableDesc student = new org.apache.tajo.catalog.TableDesc(
+//                                                                     CatalogUtil
+//                                                                         .buildFQName(DEFAULT_DATABASE_NAME,
+//                                                                                         "dept"),
+//                                                                     schema2,
+//                                                                     CatalogProtos.StoreType.MEM,
+//                                                                     new KeyValueSet(),
+//                                                                     new Path("student"));
+//        catalog.createTable(student);
+//
+//        TableDesc score = new org.apache.tajo.catalog.TableDesc(
+//                                                                   CatalogUtil
+//                                                                       .buildFQName(DEFAULT_DATABASE_NAME,
+//                                                                                       "score"),
+//                                                                   schema3,
+//                                                                   CatalogProtos.StoreType.MEM,
+//                                                                   new KeyValueSet(),
+//                                                                   new Path("score"));
+//        catalog.createTable(score);
+//
+//        TableDesc score2 = new org.apache.tajo.catalog.TableDesc(
+//                                                                    CatalogUtil
+//                                                                        .buildFQName(DEFAULT_DATABASE_NAME,
+//                                                                                        "score2"),
+//                                                                    schema4,
+//                                                                    CatalogProtos.StoreType.MEM,
+//                                                                    new KeyValueSet(),
+//                                                                    new Path("score2"));
+//        catalog.createTable(score2);
+//
+//        TableDesc score3 = new org.apache.tajo.catalog.TableDesc(
+//                                                                    CatalogUtil
+//                                                                        .buildFQName(DEFAULT_DATABASE_NAME,
+//                                                                                        "score3"),
+//                                                                    schema5,
+//                                                                    CatalogProtos.StoreType.MEM,
+//                                                                    new KeyValueSet(),
+//                                                                    new Path("score3"));
+//        catalog.createTable(score3);
 
-
-        TableDesc student = new org.apache.tajo.catalog.TableDesc(
-                                                                     CatalogUtil
-                                                                         .buildFQName(DEFAULT_DATABASE_NAME,
-                                                                                         "dept"),
-                                                                     schema2,
-                                                                     CatalogProtos.StoreType.MEM,
-                                                                     new KeyValueSet(),
-                                                                     new Path("student"));
-        catalog.createTable(student);
-
-        TableDesc score = new org.apache.tajo.catalog.TableDesc(
-                                                                   CatalogUtil
-                                                                       .buildFQName(DEFAULT_DATABASE_NAME,
-                                                                                       "score"),
-                                                                   schema3,
-                                                                   CatalogProtos.StoreType.MEM,
-                                                                   new KeyValueSet(),
-                                                                   new Path("score"));
-        catalog.createTable(score);
-
-        TableDesc score2 = new org.apache.tajo.catalog.TableDesc(
-                                                                    CatalogUtil
-                                                                        .buildFQName(DEFAULT_DATABASE_NAME,
-                                                                                        "score2"),
-                                                                    schema4,
-                                                                    CatalogProtos.StoreType.MEM,
-                                                                    new KeyValueSet(),
-                                                                    new Path("score2"));
-        catalog.createTable(score2);
-
-        TableDesc score3 = new org.apache.tajo.catalog.TableDesc(
-                                                                    CatalogUtil
-                                                                        .buildFQName(DEFAULT_DATABASE_NAME,
-                                                                                        "score3"),
-                                                                    schema5,
-                                                                    CatalogProtos.StoreType.MEM,
-                                                                    new KeyValueSet(),
-                                                                    new Path("score3"));
-        catalog.createTable(score3);
-
-        FunctionDesc funcDesc =
-            new FunctionDesc("sumtest", SumInt.class, CatalogProtos.FunctionType.AGGREGATION,
-                                CatalogUtil.newSimpleDataType(TajoDataTypes.Type.INT4),
-                                CatalogUtil.newSimpleDataTypeArray(TajoDataTypes.Type.INT4));
-
-
-        catalog.createFunction(funcDesc);
+//        FunctionDesc funcDesc =
+//            new FunctionDesc("sumtest", SumInt.class, CatalogProtos.FunctionType.AGGREGATION,
+//                                CatalogUtil.newSimpleDataType(TajoDataTypes.Type.INT4),
+//                                CatalogUtil.newSimpleDataTypeArray(TajoDataTypes.Type.INT4));
+//
+//
+//        catalog.createFunction(funcDesc);
     }
 }

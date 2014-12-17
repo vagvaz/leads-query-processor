@@ -6,7 +6,7 @@ import eu.leads.processor.common.StringConstants;
 import leads.tajo.catalog.LeadsCatalog;
 import org.apache.hadoop.fs.Path;
 import org.apache.tajo.catalog.*;
-import org.apache.tajo.catalog.function.Function;
+import org.apache.tajo.function.Function;
 import org.apache.tajo.catalog.proto.CatalogProtos;
 import org.apache.tajo.common.TajoDataTypes.Type;
 import org.apache.tajo.conf.TajoConf;
@@ -158,14 +158,14 @@ public class PlannerCatalogWorker extends Verticle {
     //TableMeta meta = CatalogUtil.newTableMeta(CatalogProtos.StoreType.SEQUENCEFILE);
     TableMeta meta = CatalogUtil.newTableMeta(CatalogProtos.StoreType.MEM );
 
-    TableDesc entities  = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"entities"), entitiesSchema, meta, getTestDir("entities"));
+    TableDesc entities  = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"entities"), entitiesSchema, meta, getTestDir("entities").toUri());
     catalog.createTable(entities);
 
 
 //    TableDesc webpages = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"webpages"), webPagesSchema, CatalogProtos.StoreType.MEM,
 //                                                                new KeyValueSet(),
 //                                                                getTestDir("webpages"));
-    TableDesc webpages = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"webpages"), webPagesSchema, meta, getTestDir("webpages"));
+    TableDesc webpages = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"webpages"), webPagesSchema, meta, getTestDir("webpages").toUri());
     catalog.createTable(webpages);
 
       String databaseName = "default";
@@ -186,7 +186,7 @@ public class PlannerCatalogWorker extends Verticle {
       //databaseName = "crawler";
       tableName = "content";
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
 
 
       schema = new Schema();
@@ -201,7 +201,7 @@ public class PlannerCatalogWorker extends Verticle {
       tableName = "page";
 
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
 
 
       schema = new Schema();
@@ -214,7 +214,7 @@ public class PlannerCatalogWorker extends Verticle {
       //databaseName = "internal";
       tableName = "urldirectory";
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
 
 
       schema = new Schema();
@@ -236,7 +236,7 @@ public class PlannerCatalogWorker extends Verticle {
       //databaseName = "internal";
       tableName = "urldirectory_ecom";
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
 
 
 
@@ -251,7 +251,7 @@ public class PlannerCatalogWorker extends Verticle {
       //databaseName = "leads";
       tableName = "keywords";
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
 
 
       schema = new Schema();
@@ -270,7 +270,7 @@ public class PlannerCatalogWorker extends Verticle {
       //databaseName = "leads";
       tableName = "page_core";
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
 
       schema = new Schema();
       schema.addColumn("uri", Type.TEXT);
@@ -278,7 +278,7 @@ public class PlannerCatalogWorker extends Verticle {
       //databaseName = "leads";
       tableName = "page_textcontent";
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
 
 
       schema = new Schema();
@@ -291,7 +291,7 @@ public class PlannerCatalogWorker extends Verticle {
       //databaseName = "leads";
       tableName = "resourcepart";
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
 
 
       schema = new Schema();
@@ -307,7 +307,7 @@ public class PlannerCatalogWorker extends Verticle {
       //databaseName = "leads";
       tableName = "site";
       catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
 
 
       schema = new Schema();
@@ -315,8 +315,8 @@ public class PlannerCatalogWorker extends Verticle {
       //	PRIMARY KEY (keywords)
       //databaseName = "adidas";
       tableName = "adidas_keywords";//"keywords";
-      catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName)));
+      catalog.createTable(CatalogUtil.newTableDesc(
+              CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." +tableName)));
 
   }
 
@@ -325,7 +325,7 @@ public class PlannerCatalogWorker extends Verticle {
     List<FunctionDesc> sqlFuncs = new ArrayList<FunctionDesc>();
 
     Set<Class> functionClasses = ClassUtil
-                                   .findClasses(org.apache.tajo.catalog.function.Function.class,
+                                   .findClasses(org.apache.tajo.function.Function.class,
                                                  class_dir);
 
     for (Class eachClass : functionClasses) {

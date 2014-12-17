@@ -181,7 +181,7 @@
       <dependency>
          <groupId>gr.tuc.softnet</groupId>
          <artifactId>leads-query-processor-tajo-module</artifactId>
-         <version>0.0.1-SNAPSHOT</version>
+         <version>0.0.2-SNAPSHOT</version>
          <exclusions>
             <exclusion>
                <groupId>log4j</groupId>

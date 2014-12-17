@@ -1,25 +1,25 @@
 package eu.leads.processor.planner.handlers;
 
 import com.google.gson.Gson;
-        import eu.leads.processor.common.StringConstants;
-        import eu.leads.processor.common.infinispan.InfinispanManager;
-        import eu.leads.processor.core.Action;
-        import eu.leads.processor.core.ActionHandler;
-        import eu.leads.processor.core.ActionStatus;
-        import eu.leads.processor.core.comp.LogProxy;
-        import eu.leads.processor.core.net.Node;
-        import eu.leads.processor.core.plan.*;
-        import leads.tajo.module.TaJoModule;
+import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.core.Action;
+import eu.leads.processor.core.ActionHandler;
+import eu.leads.processor.core.ActionStatus;
+import eu.leads.processor.core.comp.LogProxy;
+import eu.leads.processor.core.net.Node;
+import eu.leads.processor.core.plan.*;
+import leads.tajo.module.TaJoModule;
 import org.apache.tajo.algebra.*;
 import org.apache.tajo.catalog.Column;
-        import org.apache.tajo.catalog.Schema;
-        import org.apache.tajo.engine.json.CoreGsonHelper;
-        import org.apache.tajo.engine.planner.PlanningException;
-        import org.apache.tajo.engine.planner.logical.LogicalRootNode;
-        import org.apache.tajo.master.session.Session;
-        import org.infinispan.Cache;
-        import org.vertx.java.core.json.JsonArray;
-        import org.vertx.java.core.json.JsonObject;
+import org.apache.tajo.catalog.Schema;
+import org.apache.tajo.engine.json.CoreGsonHelper;
+import org.apache.tajo.plan.PlanningException;
+import org.apache.tajo.plan.logical.LogicalRootNode;
+import org.apache.tajo.master.session.Session;
+import org.infinispan.Cache;
+import org.vertx.java.core.json.JsonArray;
+import org.vertx.java.core.json.JsonObject;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -165,7 +165,11 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             if(opInsert.getTableName().startsWith(StringConstants.DEFAULT_DATABASE_NAME))
                 node.getConfiguration().getObject("body").putString("tableName",opInsert.getTableName());
             else
-                node.getConfiguration().getObject("body").putString("tableName",StringConstants.DEFAULT_DATABASE_NAME+"."+opInsert.getTableName());
+                if(opInsert.getTableName().contains("."))
+                    node.getConfiguration().getObject("body").putString("tableName",opInsert.getTableName());
+                else
+                    node.getConfiguration().getObject("body").putString("tableName",StringConstants.DEFAULT_DATABASE_NAME+"."+opInsert.getTableName());
+
             node.getConfiguration().getObject("body").putArray("primaryColumns",resolvePrimaryColumns(opInsert.getTableName()));
             if(opInsert.hasTargetColumns()) {
                 JsonArray array = new JsonArray(opInsert.getTargetColumns());

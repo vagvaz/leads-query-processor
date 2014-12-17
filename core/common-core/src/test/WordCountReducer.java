@@ -1,9 +1,9 @@
 package eu.leads.processor.common.test;
 
 
-import java.util.Iterator;
-
 import org.vertx.java.core.json.JsonObject;
+
+import java.util.Iterator;
 
 public class WordCountReducer extends LeadsReducer<String, Integer> {
 

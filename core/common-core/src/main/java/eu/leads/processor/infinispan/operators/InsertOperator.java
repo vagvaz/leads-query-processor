@@ -6,29 +6,25 @@ package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
-import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
-import eu.leads.processor.infinispan.operators.BasicOperator;
 import eu.leads.processor.math.MathUtils;
 import org.infinispan.Cache;
+import org.infinispan.versioning.utils.version.Version;
+import org.infinispan.versioning.utils.version.VersionScalar;
+import org.vertx.java.core.json.JsonArray;
+import org.vertx.java.core.json.JsonObject;
+
+import java.text.SimpleDateFormat;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 //import org.infinispan.versioning.VersionedCache;
 //import org.infinispan.versioning.impl.VersionedCacheTreeMapImpl;
 //import org.infinispan.versioning.utils.version.Version;
 //import org.infinispan.versioning.utils.version.VersionScalar;
 //import org.infinispan.versioning.utils.version.VersionScalarGenerator;
-import org.infinispan.versioning.VersionedCache;
-import org.infinispan.versioning.impl.VersionedCacheTreeMapImpl;
-import org.infinispan.versioning.utils.version.Version;
-import org.infinispan.versioning.utils.version.VersionScalar;
-import org.infinispan.versioning.utils.version.VersionScalarGenerator;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
 
 public class InsertOperator extends BasicOperator {

@@ -20,60 +20,100 @@ package org.apache.tajo.engine.planner;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.classification.InterfaceStability;
+import org.apache.tajo.OverridableConf;
+import org.apache.tajo.SessionVars;
 import org.apache.tajo.algebra.JoinType;
 import org.apache.tajo.conf.TajoConf;
-import org.apache.tajo.engine.eval.AlgebraicUtil;
-import org.apache.tajo.engine.eval.EvalNode;
-import org.apache.tajo.engine.planner.graph.DirectedGraphCursor;
-import org.apache.tajo.engine.planner.logical.*;
-import org.apache.tajo.engine.planner.logical.join.FoundJoinOrder;
-import org.apache.tajo.engine.planner.logical.join.GreedyHeuristicJoinOrderAlgorithm;
-import org.apache.tajo.engine.planner.logical.join.JoinGraph;
-import org.apache.tajo.engine.planner.logical.join.JoinOrderAlgorithm;
-import org.apache.tajo.engine.planner.rewrite.BasicQueryRewriteEngine;
-import org.apache.tajo.engine.planner.rewrite.FilterPushDownRule;
-import org.apache.tajo.engine.planner.rewrite.PartitionedTableRewriter;
-import org.apache.tajo.engine.planner.rewrite.ProjectionPushDownRule;
+import org.apache.tajo.conf.TajoConf.ConfVars;
+import org.apache.tajo.plan.LogicalPlan;
+import org.apache.tajo.plan.PlanningException;
+import org.apache.tajo.plan.Target;
+import org.apache.tajo.plan.expr.AlgebraicUtil;
+import org.apache.tajo.plan.expr.EvalNode;
+import org.apache.tajo.plan.joinorder.FoundJoinOrder;
+import org.apache.tajo.plan.joinorder.GreedyHeuristicJoinOrderAlgorithm;
+import org.apache.tajo.plan.joinorder.JoinGraph;
+import org.apache.tajo.plan.joinorder.JoinOrderAlgorithm;
+import org.apache.tajo.plan.logical.*;
+import org.apache.tajo.plan.rewrite.BasicQueryRewriteEngine;
+import org.apache.tajo.plan.rewrite.RewriteRule;
+import org.apache.tajo.plan.rewrite.rules.FilterPushDownRule;
+import org.apache.tajo.plan.rewrite.rules.PartitionedTableRewriter;
+import org.apache.tajo.plan.rewrite.rules.ProjectionPushDownRule;
+import org.apache.tajo.plan.util.PlannerUtil;
+import org.apache.tajo.plan.visitor.BasicLogicalPlanVisitor;
+import org.apache.tajo.util.graph.DirectedGraphCursor;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Stack;
 
-import static org.apache.tajo.engine.planner.LogicalPlan.BlockEdge;
-import static org.apache.tajo.engine.planner.logical.join.GreedyHeuristicJoinOrderAlgorithm.getCost;
-
-//import org.apache.hadoop.classification.InterfaceStability;
-//import org.apache.tajo.engine.planner.rewrite.PartitionedTableRewriter;
+import static org.apache.tajo.plan.LogicalPlan.BlockEdge;
+import static org.apache.tajo.plan.joinorder.GreedyHeuristicJoinOrderAlgorithm.getCost;
 
 /**
  * This class optimizes a logical plan.
  */
-//@InterfaceStability.Evolving
+@InterfaceStability.Evolving
 public class LeadsLogicalOptimizer {
+    private static final Log LOG = LogFactory.getLog(LeadsLogicalOptimizer.class.getName());
+
     private BasicQueryRewriteEngine rulesBeforeJoinOpt;
     private BasicQueryRewriteEngine rulesAfterToJoinOpt;
     private JoinOrderAlgorithm joinOrderAlgorithm = new GreedyHeuristicJoinOrderAlgorithm();
 
     public LeadsLogicalOptimizer(TajoConf systemConf) {
         rulesBeforeJoinOpt = new BasicQueryRewriteEngine();
-        rulesBeforeJoinOpt.addRewriteRule(new FilterPushDownRule());
+        if (systemConf.getBoolVar(ConfVars.$TEST_FILTER_PUSHDOWN_ENABLED)) {
+            rulesBeforeJoinOpt.addRewriteRule(new FilterPushDownRule());
+        }
 
         rulesAfterToJoinOpt = new BasicQueryRewriteEngine();
         rulesAfterToJoinOpt.addRewriteRule(new ProjectionPushDownRule());
         rulesAfterToJoinOpt.addRewriteRule(new PartitionedTableRewriter(systemConf));
+
+        // Currently, it is only used for some test cases to inject exception manually.
+        String userDefinedRewriterClass = systemConf.get("tajo.plan.rewriter.classes");
+        if (userDefinedRewriterClass != null && !userDefinedRewriterClass.isEmpty()) {
+            for (String eachRewriterClass : userDefinedRewriterClass.split(",")) {
+                try {
+                    RewriteRule rule = (RewriteRule) Class.forName(eachRewriterClass).newInstance();
+                    rulesAfterToJoinOpt.addRewriteRule(rule);
+                } catch (Exception e) {
+                    LOG.error("Can't initiate a Rewriter object: " + eachRewriterClass, e);
+                    continue;
+                }
+            }
+        }
+    }
+
+    public void addRuleAfterToJoinOpt(RewriteRule rewriteRule) {
+        if (rewriteRule != null) {
+            rulesAfterToJoinOpt.addRewriteRule(rewriteRule);
+        }
     }
 
     public LogicalNode optimize(LogicalPlan plan) throws PlanningException {
+        return optimize(null, plan);
+    }
+
+    public LogicalNode optimize(OverridableConf context, LogicalPlan plan) throws PlanningException {
         rulesBeforeJoinOpt.rewrite(plan);
 
         DirectedGraphCursor<String, BlockEdge> blockCursor =
-            new DirectedGraphCursor<String, BlockEdge>(plan.getQueryBlockGraph(),
-                                                          plan.getRootBlock().getName());
+                new DirectedGraphCursor<String, BlockEdge>(plan.getQueryBlockGraph(), plan.getRootBlock().getName());
 
-        while (blockCursor.hasNext()) {
-            optimizeJoinOrder(plan, blockCursor.nextBlock());
+        if (context == null || context.getBool(SessionVars.TEST_JOIN_OPT_ENABLED)) {
+            // default is true
+            while (blockCursor.hasNext()) {
+                optimizeJoinOrder(plan, blockCursor.nextBlock());
+            }
+        } else {
+            LOG.info("Skip Join Optimized.");
         }
-
         rulesAfterToJoinOpt.rewrite(plan);
         return plan.getRootBlock().getRoot();
     }
@@ -90,8 +130,9 @@ public class LeadsLogicalOptimizer {
 
             // finding join order and restore remain filter order
             FoundJoinOrder order = joinOrderAlgorithm.findBestOrder(plan, block,
-                                                                       joinGraphContext.joinGraph,
-                                                                       joinGraphContext.relationsForProduct);
+                    joinGraphContext.joinGraph, joinGraphContext.relationsForProduct);
+
+            // replace join node with FoundJoinOrder.
             JoinNode newJoinNode = order.getOrderedJoin();
             JoinNode old = PlannerUtil.findTopNode(block.getRoot(), NodeType.JOIN);
 
@@ -104,24 +145,20 @@ public class LeadsLogicalOptimizer {
             } else {
                 newJoinNode.setTargets(targets.toArray(new Target[targets.size()]));
             }
-
             PlannerUtil.replaceNode(plan, block.getRoot(), old, newJoinNode);
+            // End of replacement logic
+
             String optimizedOrder = JoinOrderStringBuilder.buildJoinOrderString(plan, block);
-            block.addPlanHistory("Non-optimized join order: " + originalOrder + " (cost: "
-                                     + nonOptimizedJoinCost + ")");
-            block.addPlanHistory("Optimized join order    : " + optimizedOrder + " (cost: " + order
-                                                                                                  .getCost()
-                                     + ")");
+            block.addPlanHistory("Non-optimized join order: " + originalOrder + " (cost: " + nonOptimizedJoinCost + ")");
+            block.addPlanHistory("Optimized join order    : " + optimizedOrder + " (cost: " + order.getCost() + ")");
         }
     }
 
-    private static class JoinTargetCollector
-        extends BasicLogicalPlanVisitor<Set<Target>, LogicalNode> {
+    private static class JoinTargetCollector extends BasicLogicalPlanVisitor<Set<Target>, LogicalNode> {
         @Override
-        public LogicalNode visitJoin(Set<Target> ctx, LogicalPlan plan,
-                                        LogicalPlan.QueryBlock block, JoinNode node,
-                                        Stack<LogicalNode> stack)
-            throws PlanningException {
+        public LogicalNode visitJoin(Set<Target> ctx, LogicalPlan plan, LogicalPlan.QueryBlock block, JoinNode node,
+                                     Stack<LogicalNode> stack)
+                throws PlanningException {
             super.visitJoin(ctx, plan, block, node, stack);
 
             if (node.hasTargets()) {
@@ -133,16 +170,13 @@ public class LeadsLogicalOptimizer {
         }
     }
 
-
     private static class JoinGraphContext {
         JoinGraph joinGraph = new JoinGraph();
         Set<EvalNode> quals = Sets.newHashSet();
         Set<String> relationsForProduct = Sets.newHashSet();
     }
 
-
-    private static class JoinGraphBuilder
-        extends BasicLogicalPlanVisitor<JoinGraphContext, LogicalNode> {
+    private static class JoinGraphBuilder extends BasicLogicalPlanVisitor<JoinGraphContext, LogicalNode> {
         private final static JoinGraphBuilder instance;
 
         static {
@@ -154,29 +188,24 @@ public class LeadsLogicalOptimizer {
          * scan operators. In other words, filter push down must be performed before this method.
          * Otherwise, this method may build incorrectly a join graph.
          */
-        public static JoinGraphContext buildJoinGraph(LogicalPlan plan,
-                                                         LogicalPlan.QueryBlock block)
-            throws PlanningException {
+        public static JoinGraphContext buildJoinGraph(LogicalPlan plan, LogicalPlan.QueryBlock block)
+                throws PlanningException {
             JoinGraphContext joinGraphContext = new JoinGraphContext();
             instance.visit(joinGraphContext, plan, block);
             return joinGraphContext;
         }
 
-        public LogicalNode visitFilter(JoinGraphContext context, LogicalPlan plan,
-                                          LogicalPlan.QueryBlock block,
-                                          SelectionNode node, Stack<LogicalNode> stack)
-            throws PlanningException {
+        public LogicalNode visitFilter(JoinGraphContext context, LogicalPlan plan, LogicalPlan.QueryBlock block,
+                                       SelectionNode node, Stack<LogicalNode> stack) throws PlanningException {
             super.visitFilter(context, plan, block, node, stack);
-            context.quals.addAll(Lists.newArrayList(AlgebraicUtil
-                                                        .toConjunctiveNormalFormArray(node.getQual())));
+            context.quals.addAll(Lists.newArrayList(AlgebraicUtil.toConjunctiveNormalFormArray(node.getQual())));
             return node;
         }
 
         @Override
-        public LogicalNode visitJoin(JoinGraphContext joinGraphContext, LogicalPlan plan,
-                                        LogicalPlan.QueryBlock block,
-                                        JoinNode joinNode, Stack<LogicalNode> stack)
-            throws PlanningException {
+        public LogicalNode visitJoin(JoinGraphContext joinGraphContext, LogicalPlan plan, LogicalPlan.QueryBlock block,
+                                     JoinNode joinNode, Stack<LogicalNode> stack)
+                throws PlanningException {
             super.visitJoin(joinGraphContext, plan, block, joinNode, stack);
             if (joinNode.hasJoinQual()) {
                 joinGraphContext.joinGraph.addJoin(plan, block, joinNode);
@@ -196,11 +225,8 @@ public class LeadsLogicalOptimizer {
         }
     }
 
-
-    public static class JoinOrderStringBuilder
-        extends BasicLogicalPlanVisitor<StringBuilder, LogicalNode> {
+    public static class JoinOrderStringBuilder extends BasicLogicalPlanVisitor<StringBuilder, LogicalNode> {
         private static final JoinOrderStringBuilder instance;
-
         static {
             instance = new JoinOrderStringBuilder();
         }
@@ -209,40 +235,16 @@ public class LeadsLogicalOptimizer {
             return instance;
         }
 
-        public static String buildJoinOrderString(LogicalPlan plan, LogicalPlan.QueryBlock block)
-            throws PlanningException {
+        public static String buildJoinOrderString(LogicalPlan plan, LogicalPlan.QueryBlock block) throws PlanningException {
             StringBuilder originalOrder = new StringBuilder();
             instance.visit(originalOrder, plan, block);
             return originalOrder.toString();
         }
 
-        private static String getJoinNotation(JoinType joinType) {
-            switch (joinType) {
-                case CROSS:
-                    return "⋈";
-                case INNER:
-                    return "⋈θ";
-                case LEFT_OUTER:
-                    return "⟕";
-                case RIGHT_OUTER:
-                    return "⟖";
-                case FULL_OUTER:
-                    return "⟗";
-                case LEFT_SEMI:
-                    return "⋉";
-                case RIGHT_SEMI:
-                    return "⋊";
-                case LEFT_ANTI:
-                    return "▷";
-            }
-            return ",";
-        }
-
         @Override
-        public LogicalNode visitJoin(StringBuilder sb, LogicalPlan plan,
-                                        LogicalPlan.QueryBlock block, JoinNode joinNode,
-                                        Stack<LogicalNode> stack)
-            throws PlanningException {
+        public LogicalNode visitJoin(StringBuilder sb, LogicalPlan plan, LogicalPlan.QueryBlock block, JoinNode joinNode,
+                                     Stack<LogicalNode> stack)
+                throws PlanningException {
             stack.push(joinNode);
             sb.append("(");
             visit(sb, plan, block, joinNode.getLeftChild(), stack);
@@ -253,27 +255,37 @@ public class LeadsLogicalOptimizer {
             return joinNode;
         }
 
+        private static String getJoinNotation(JoinType joinType) {
+            switch (joinType) {
+                case CROSS: return "⋈";
+                case INNER: return "⋈θ";
+                case LEFT_OUTER: return "⟕";
+                case RIGHT_OUTER: return "⟖";
+                case FULL_OUTER: return "⟗";
+                case LEFT_SEMI: return "⋉";
+                case RIGHT_SEMI: return "⋊";
+                case LEFT_ANTI: return "▷";
+            }
+            return ",";
+        }
+
         @Override
-        public LogicalNode visitTableSubQuery(StringBuilder sb, LogicalPlan plan,
-                                                 LogicalPlan.QueryBlock block,
-                                                 TableSubQueryNode node, Stack<LogicalNode> stack) {
+        public LogicalNode visitTableSubQuery(StringBuilder sb, LogicalPlan plan, LogicalPlan.QueryBlock block,
+                                              TableSubQueryNode node, Stack<LogicalNode> stack) {
             sb.append(node.getTableName());
             return node;
         }
 
-        public LogicalNode visitScan(StringBuilder sb, LogicalPlan plan,
-                                        LogicalPlan.QueryBlock block, ScanNode node,
-                                        Stack<LogicalNode> stack) {
+        public LogicalNode visitScan(StringBuilder sb, LogicalPlan plan, LogicalPlan.QueryBlock block, ScanNode node,
+                                     Stack<LogicalNode> stack) {
             sb.append(node.getTableName());
             return node;
         }
     }
-
 
     private static class CostContext {
         double accumulatedCost = 0;
     }
-
 
     public static class JoinCostComputer extends BasicLogicalPlanVisitor<CostContext, LogicalNode> {
         private static final JoinCostComputer instance;
@@ -282,37 +294,30 @@ public class LeadsLogicalOptimizer {
             instance = new JoinCostComputer();
         }
 
-        public static double computeCost(LogicalPlan plan, LogicalPlan.QueryBlock block)
-            throws PlanningException {
+        public static double computeCost(LogicalPlan plan, LogicalPlan.QueryBlock block) throws PlanningException {
             CostContext costContext = new CostContext();
             instance.visit(costContext, plan, block);
             return costContext.accumulatedCost;
         }
 
         @Override
-        public LogicalNode visitJoin(CostContext joinGraphContext, LogicalPlan plan,
-                                        LogicalPlan.QueryBlock block,
-                                        JoinNode joinNode, Stack<LogicalNode> stack)
-            throws PlanningException {
+        public LogicalNode visitJoin(CostContext joinGraphContext, LogicalPlan plan, LogicalPlan.QueryBlock block,
+                                     JoinNode joinNode, Stack<LogicalNode> stack)
+                throws PlanningException {
             super.visitJoin(joinGraphContext, plan, block, joinNode, stack);
 
             double filterFactor = 1;
             if (joinNode.hasJoinQual()) {
-                EvalNode[] quals =
-                    AlgebraicUtil.toConjunctiveNormalFormArray(joinNode.getJoinQual());
-                filterFactor = Math.pow(GreedyHeuristicJoinOrderAlgorithm.DEFAULT_SELECTION_FACTOR,
-                                           quals.length);
+                EvalNode [] quals = AlgebraicUtil.toConjunctiveNormalFormArray(joinNode.getJoinQual());
+                filterFactor = Math.pow(GreedyHeuristicJoinOrderAlgorithm.DEFAULT_SELECTION_FACTOR, quals.length);
             }
 
             if (joinNode.getLeftChild() instanceof RelationNode) {
-                joinGraphContext.accumulatedCost =
-                    getCost(joinNode.getLeftChild()) * getCost(joinNode.getRightChild())
+                joinGraphContext.accumulatedCost = getCost(joinNode.getLeftChild()) * getCost(joinNode.getRightChild())
                         * filterFactor;
             } else {
                 joinGraphContext.accumulatedCost = joinGraphContext.accumulatedCost +
-                                                       (joinGraphContext.accumulatedCost
-                                                            * getCost(joinNode.getRightChild())
-                                                            * filterFactor);
+                        (joinGraphContext.accumulatedCost * getCost(joinNode.getRightChild()) * filterFactor);
             }
 
             return joinNode;

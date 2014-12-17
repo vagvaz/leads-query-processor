@@ -5,9 +5,8 @@ import eu.leads.processor.core.Action;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.LeadsNodeType;
-import eu.leads.processor.infinispan.operators.SSEPointQueryOperator;
-import eu.leads.processor.nqe.NQEConstants;
 import eu.leads.processor.infinispan.operators.Operator;
+import eu.leads.processor.infinispan.operators.SSEPointQueryOperator;
 import eu.leads.processor.infinispan.operators.WGSOperator;
 import org.vertx.java.core.json.JsonObject;
 

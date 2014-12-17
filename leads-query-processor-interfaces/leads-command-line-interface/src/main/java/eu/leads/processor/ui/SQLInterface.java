@@ -1,7 +1,7 @@
 package eu.leads.processor.ui;
 
-import eu.leads.processor.core.Tuple;
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.core.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

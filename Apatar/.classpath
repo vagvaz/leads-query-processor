@@ -11,50 +11,15 @@
 	<classpathentry kind="src" output="plugins/connectors/read/bin" path="plugins/connectors/read/src"/>
 	<classpathentry kind="src" output="plugins/rich_ui_framework/ui/bin" path="plugins/rich_ui_framework/ui/src"/>
 	<classpathentry kind="src" output="plugins/connectors/xml/bin" path="plugins/connectors/xml/src"/>
-	<classpathentry kind="src" output="plugins/connectors/sugarcrm/bin" path="plugins/connectors/sugarcrm/src"/>
-	<classpathentry kind="src" output="plugins/connectors/filesystem/bin" path="plugins/connectors/filesystem/src"/>
-	<classpathentry kind="src" output="plugins/connectors/openedge/bin" path="plugins/connectors/openedge/src"/>
-	<classpathentry kind="src" output="plugins/connectors/editgrid/bin" path="plugins/connectors/editgrid/src"/>
-	<classpathentry kind="src" output="plugins/connectors/mssql/bin" path="plugins/connectors/mssql/src"/>
-	<classpathentry kind="src" output="plugins/connectors/db2/bin" path="plugins/connectors/db2/src"/>
 	<classpathentry kind="src" output="plugins/tuc/core/bin" path="plugins/tuc/core/src"/>
 	<classpathentry kind="src" output="plugins/rich_ui_framework/systemtray/bin" path="plugins/rich_ui_framework/systemtray/src"/>
-	<classpathentry kind="src" output="plugins/connectors/amazon/bin" path="plugins/connectors/amazon/src"/>
-	<classpathentry kind="src" output="plugins/connectors/flickr/bin" path="plugins/connectors/flickr/src"/>
 	<classpathentry kind="src" output="plugins/rich_ui_framework/thirdparty/bin" path="plugins/rich_ui_framework/thirdparty/src"/>
 	<classpathentry kind="src" output="plugins/core/transform/bin" path="plugins/core/transform/src"/>
-	<classpathentry kind="src" output="plugins/connectors/hotels_HotelsInfo/bin" path="plugins/connectors/hotels_HotelsInfo/src"/>
-	<classpathentry kind="src" output="plugins/connectors/http/bin" path="plugins/connectors/http/src"/>
-	<classpathentry kind="src" output="plugins/connectors/msaccess/bin" path="plugins/connectors/msaccess/src"/>
-	<classpathentry kind="src" output="plugins/connectors/openbravojdbc/bin" path="plugins/connectors/openbravojdbc/src"/>
-	<classpathentry kind="src" output="plugins/connectors/sybase/bin" path="plugins/connectors/sybase/src"/>
-	<classpathentry kind="src" output="plugins/connectors/oracle/bin" path="plugins/connectors/postgresql/src"/>
 	<classpathentry kind="src" output="plugins/core/update/bin" path="plugins/core/update/src"/>
 	<classpathentry kind="src" output="plugins/core/core/bin" path="plugins/core/core/src"/>
-	<classpathentry kind="src" output="plugins/connectors/ldap/bin" path="plugins/connectors/ldap/src"/>
-	<classpathentry kind="src" output="plugins/connectors/dbf/bin" path="plugins/connectors/dbf/src"/>
-	<classpathentry kind="src" output="plugins/connectors/rss/bin" path="plugins/connectors/rss/src"/>
-	<classpathentry kind="src" output="plugins/connectors/email/bin" path="plugins/connectors/email/src"/>
-	<classpathentry kind="src" output="plugins/connectors/ftp/bin" path="plugins/connectors/ftp/src"/>
-	<classpathentry kind="src" output="plugins/connectors/vertica/bin" path="plugins/connectors/vertica/src"/>
 	<classpathentry kind="src" output="plugins/core/validate/bin" path="plugins/core/validate/src"/>
-	<classpathentry kind="src" output="plugins/connectors/webdav/bin" path="plugins/connectors/webdav/src"/>
 	<classpathentry kind="src" output="plugins/core/distinct/bin" path="plugins/core/distinct/src"/>
 	<classpathentry kind="src" output="plugins/core/join/bin" path="plugins/core/join/src"/>
-	<classpathentry kind="src" output="plugins/connectors/msexcel/bin" path="plugins/connectors/msexcel/src"/>
-	<classpathentry kind="src" output="plugins/connectors/firebird/bin" path="plugins/connectors/firebird/src"/>
-	<classpathentry kind="src" output="plugins/connectors/odbcgeneric/bin" path="plugins/connectors/odbcgeneric/src"/>
-	<classpathentry kind="src" output="plugins/connectors/enterprisedb/bin" path="plugins/connectors/enterprisedb/src"/>
-	<classpathentry kind="src" output="plugins/connectors/testConnector/bin" path="plugins/connectors/testConnector/src"/>
-	<classpathentry kind="src" output="plugins/connectors/googleMaps/bin" path="plugins/connectors/googleMaps/src"/>
-	<classpathentry kind="src" output="plugins/connectors/cdyne/bin" path="plugins/connectors/cdyne/src"/>
-	<classpathentry kind="src" output="plugins/connectors/buzzsaw/bin" path="plugins/connectors/buzzsaw/src"/>
-	<classpathentry kind="src" output="plugins/connectors/as400/bin" path="plugins/connectors/as400/src"/>
-	<classpathentry kind="src" output="plugins/connectors/oracle/bin" path="plugins/connectors/oracle/src"/>
-	<classpathentry kind="src" output="plugins/connectors/customtable/bin" path="plugins/connectors/customtable/src"/>
-	<classpathentry kind="src" output="plugins/connectors/strikeiron/bin" path="plugins/connectors/strikeiron/src"/>
-	<classpathentry kind="src" output="plugins/connectors/mysql/bin" path="plugins/connectors/mysql/src"/>
-	<classpathentry kind="src" output="plugins/connectors/salesforcecom/bin" path="plugins/connectors/salesforcecom/src"/>
 	<classpathentry kind="src" output="plugins/core/functions/bin" path="plugins/core/functions/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="lib" path="lib/commons-logging.jar"/>
@@ -64,40 +29,6 @@
 	<classpathentry kind="lib" path="lib/jxp.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.8.jar"/>
 	<classpathentry kind="lib" path="lib/nsisant-1.2.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/amazon/lib/jSh3ll.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/as400/lib/jt400.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/db2/lib/db2jcc.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/dbf/lib/jdbf.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/enterprisedb/lib/edb-jdbc14.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/firebird/lib/firebirdjmx.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/firebird/lib/firebirdsql-full.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/firebird/lib/firebirdsql-pool.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/firebird/lib/firebirdsql-test.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/firebird/lib/firebirdsql.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/firebird/lib/jaas.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/firebird/lib/log4j-core.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/firebird/lib/mini-j2ee.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/flickr/lib/flickrapi-1.0b1.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/ftp/lib/finj.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/ldap/lib/ldapjdbc.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/msexcel/lib/jxl.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/mssql/lib/jtds-1.2.2.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/mysql/lib/mysql-connector-java-5.1.12-bin.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/postgresql/lib/postgresql.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/salesforcecom/lib/axis-ant.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/salesforcecom/lib/commons-httpclient-3.0-rc2.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/salesforcecom/lib/wsc-17_0.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/salesforcecom/lib/wsdlGenFiles.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/sybase/lib/jconn3.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/vertica/lib/vertica_2.1_jdk_5.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/vertica/lib/vertica.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/webdav/lib/antlr.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/webdav/lib/commons-httpclient-contrib.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/webdav/lib/commons-logging.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/webdav/lib/commons-transaction-1.0.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/webdav/lib/jakarta-slide-commandline-2.1.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/webdav/lib/jakarta-slide-webdavlib-2.1.jar"/>
-	<classpathentry kind="lib" path="plugins/connectors/webdav/lib/xml-im-exporter1.1.jar"/>
 	<classpathentry kind="lib" path="plugins/core/core/lib/activation.jar"/>
 	<classpathentry kind="lib" path="plugins/core/core/lib/axis.jar"/>
 	<classpathentry kind="lib" path="plugins/core/core/lib/commons-discovery-0.2.jar"/>

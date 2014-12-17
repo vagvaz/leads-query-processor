@@ -1,7 +1,7 @@
 package eu.leads.processor.core.plan;
 
 import eu.leads.processor.core.DataType;
-import org.apache.tajo.engine.planner.logical.*;
+import org.apache.tajo.plan.logical.*;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
@@ -259,14 +259,25 @@ public class SQLPlan extends DataType implements Plan {
 
     @Override
     public void setRootNode(JsonObject rootNode) {
-        data.putObject("rootNode", rootNode);
+        ;
     }
 
     @Override
     public void setRootNode(LogicalRootNode rootNode) {
-        JsonObject jsonObject = new JsonObject(rootNode.toJson());
-        setRootNode(jsonObject);
+        data.putObject("rootNode", new JsonObject(rootNode.toJson()));
     }
+    //@Override
+   // public void setRootNode(JsonObject rootNode) {
+    //    data.putObject("rootNode", rootNode);
+    //}
+
+
+
+//    @Override
+//    public void setRootNode(LogicalRootNode rootNode) {
+//        JsonObject jsonObject = new JsonObject(rootNode.toJson());
+//        setRootNode(jsonObject);
+//    }
 
     @Override
     public JsonObject getPlanGraph() {

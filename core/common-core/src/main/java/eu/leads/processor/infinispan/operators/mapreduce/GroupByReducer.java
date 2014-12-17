@@ -2,7 +2,6 @@ package eu.leads.processor.infinispan.operators.mapreduce;
 
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
-import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.LeadsReducer;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.math.MathUtils;
@@ -76,7 +75,7 @@ public class GroupByReducer extends LeadsReducer<String, String> {
       while(funcIterator.hasNext()){
          JsonObject current = (JsonObject) funcIterator.next();
          aggregates.add(current);
-         String funcType = current.getObject("funcDesc").getString("signature");
+         String funcType = current.getObject("funcDesc").getObject("signature").getString("name");
 
          JsonObject argument = null;
          if(current.getArray("argEvals").size() > 0){
@@ -107,18 +106,18 @@ public class GroupByReducer extends LeadsReducer<String, String> {
             count++;
          }
          typesOfaggregates.put(funcType,count);
-         JsonArray params = ((JsonObject) current.getObject("funcDesc")).getArray("params");
+         JsonArray params = ((JsonObject) current.getObject("funcDesc")).getObject("signature").getArray("paramTypes");
          JsonObject parameter = null;
          if(params.size() > 0 ) {
             parameter = params.get(0);
             columnTypes.add(parameter.getString("type"));
-            Object object = MathUtils.getInitialValue(parameter.getString("type"), current.getObject("funcDesc").getString("signature"));
+            Object object = MathUtils.getInitialValue(parameter.getString("type"), current.getObject("funcDesc").getObject("signature").getString("name"));
             aggregateValues.add(object);
          }
          else{
             //Should be done only for count
             columnTypes.add("INT8");
-            Object object = MathUtils.getInitialValue("INT8",current.getObject("funcDesc").getString("signature"));
+            Object object = MathUtils.getInitialValue("INT8",current.getObject("funcDesc").getObject("signature").getString("name"));
             aggregateValues.add(object);
          }
       }

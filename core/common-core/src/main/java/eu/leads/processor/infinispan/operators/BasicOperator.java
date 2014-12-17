@@ -21,7 +21,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     protected Cache statisticsCache;
     protected LogProxy log;
     private String finalOperatorName, statInputSizeKey, statOutputSizeKey, statExecTimeKey;
-    private long startTime;
+    long startTime;
 
 
     protected BasicOperator(Action action) {
@@ -55,6 +55,7 @@ public abstract class BasicOperator extends Thread implements Operator{
    @Override
    public void execute() {
        startTime = System.currentTimeMillis();
+       System.out.println("Execution Start! ");
        start();
    }
 
@@ -71,6 +72,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     public void updateStatistics(Cache input1,Cache input2, Cache output)
     {
         long endTime = System.currentTimeMillis();
+
         long inputSize = 1;
         long outputSize = 1;
         if(input1 != null)
@@ -80,6 +82,7 @@ public abstract class BasicOperator extends Thread implements Operator{
         if(outputSize != 0){
             outputSize = output.size();
         }
+        System.out.println("In#: " +inputSize + " Out#:"+outputSize+" Execution time: " + (endTime-startTime)/1000.0 + " s");
         updateStatisticsCache(inputSize,outputSize,(endTime-startTime));
     }
 

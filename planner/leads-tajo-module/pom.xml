@@ -12,12 +12,12 @@
    <groupId>gr.tuc.softnet</groupId>
    <artifactId>leads-query-processor-tajo-module</artifactId>
    <packaging>jar</packaging>
-   <version>0.0.1-SNAPSHOT</version>
+   <version>0.0.2-SNAPSHOT</version>
    <scm>
       <url>https://git-wip-us.apache.org/repos/asf/tajo.git</url>
       <connection>scm:git:https://git-wip-us.apache.org/repos/asf/tajo.git</connection>
-      <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/tajo.git
-      </developerConnection>
+      <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/tajo.git</developerConnection>
+      <tag>HEAD</tag>
    </scm>
    <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -42,7 +42,7 @@
       <dependency>
          <groupId>org.antlr</groupId>
          <artifactId>antlr4</artifactId>
-         <version>4.2.2</version>
+         <version>4.1</version>
          <type>maven-plugin</type>
          <exclusions>
             <exclusion>
@@ -253,62 +253,6 @@
             </exclusion>
          </exclusions>
       </dependency>
-      <!--dependency>
-         <groupId>org.apache.tajo</groupId>
-         <artifactId>tajo-core</artifactId>
-         <version>0.9.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.tajo</groupId>
-         <artifactId>tajo-algebra</artifactId>
-         <version>0.9.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.tajo</groupId>
-         <artifactId>tajo-catalog-common</artifactId>
-         <version>0.9.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.tajo</groupId>
-         <artifactId>tajo-catalog-client</artifactId>
-         <version>0.9.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.tajo</groupId>
-         <artifactId>tajo-catalog-server</artifactId>
-         <version>0.9.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.tajo</groupId>
-         <artifactId>tajo-storage</artifactId>
-         <version>0.9.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.tajo</groupId>
-         <artifactId>tajo-jdbc</artifactId>
-         <version>0.9.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.tajo</groupId>
-         <artifactId>tajo-rpc</artifactId>
-         <version>0.9.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-         <groupId>org.slf4j</groupId>
-         <artifactId>slf4j-api</artifactId>
-         <version>1.7.7</version>
-      </dependency>
-      <dependency>
-         <groupId>org.slf4j</groupId>
-         <artifactId>slf4j-log4j12</artifactId>
-         <version>1.7.7</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.tajo</groupId>
-         <artifactId>tajo-catalog</artifactId>
-         <version>0.9.0-SNAPSHOT</version>
-         <type>pom</type-->
-<!--       </dependency> -->
    </dependencies>
 
 
@@ -326,7 +270,7 @@
          <plugin>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-maven-plugin</artifactId>
-            <version>4.2.2</version>
+            <version>4.1</version>
             <executions>
                <execution>
                   <id>antlr</id>

@@ -1,20 +1,17 @@
 package eu.leads.processor.infinispan.operators;
 
-import eu.leads.processor.common.*;
+import eu.leads.processor.common.LeadsCollector;
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.core.*;
+import eu.leads.processor.core.Action;
+import eu.leads.processor.core.LeadsMapper;
+import eu.leads.processor.core.LeadsReducer;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import org.infinispan.Cache;
-import org.infinispan.distexec.DefaultExecutorService;
-import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.distexec.mapreduce.MapReduceTask;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**

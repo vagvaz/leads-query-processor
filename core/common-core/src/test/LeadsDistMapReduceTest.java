@@ -1,25 +1,13 @@
 package eu.leads.processor.common.test;
 
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
-import com.martiansoftware.jsap.Parameter;
-import com.martiansoftware.jsap.SimpleJSAP;
-
-import eu.leads.processor.common.LeadsCollector;
-import eu.leads.processor.common.LeadsMapper;
-import eu.leads.processor.common.LeadsMapperCallable;
-import eu.leads.processor.common.LeadsReduceCallable;
-import eu.leads.processor.common.LeadsReducer;
-import eu.leads.processor.common.infinispan.InfinispanManager;
+import com.martiansoftware.jsap.*;
+import eu.leads.processor.common.*;
 import eu.leads.processor.common.infinispan.InfinispanCluster;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
+import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
-
 import org.infinispan.Cache;
-
 import org.infinispan.commons.util.Util;
 import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.Configuration;

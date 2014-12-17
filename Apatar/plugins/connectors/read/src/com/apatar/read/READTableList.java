@@ -82,7 +82,7 @@ public class READTableList {
                             		"Column Key Data are not correct! Key line must be at Tablename:Column name space ColumnType, form");
                             continue;
                         }else{
-                        	 columns[index] = pair[0];
+                        	 columns[index] = tableName+"."+pair[0];
                         	 columnsTypes[index]= pair[1];
                         	 index++;
                         }
