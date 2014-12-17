@@ -87,7 +87,7 @@
    </dependencies>
 
    <properties>
-      <infinispan.version>7.0.0-SNAPSHOT</infinispan.version>
+      <infinispan.version>7.0.1-SNAPSHOT</infinispan.version>
       <processor.version>1.0-SNAPSHOT</processor.version>
        <vertx.version>2.1.5</vertx.version>
        <vertx.testtools.version>2.0.3-final</vertx.testtools.version>

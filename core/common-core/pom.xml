@@ -41,12 +41,12 @@
 
    </properties>
 
-   <repositories>
+   <!--repositories>
       <repository>
          <id>sonatype-nexus-snapshots</id>
          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
       </repository>
-   </repositories>
+   </repositories-->
 
    <dependencies>
       <dependency>
@@ -345,7 +345,7 @@
                   <artifactId>infinispan-atomic-factory</artifactId>
                   <version>${infinispan.version}</version>
               </dependency>
-       <dependency>
+       <!--dependency>
            <groupId>org.infinispan</groupId>
            <artifactId>infinispan-lucene-v4</artifactId>
            <version>${infinispan.version}</version>
@@ -368,7 +368,7 @@
              </exclusion>
           </exclusions>
 
-       </dependency>
+       </dependency-->
        <dependency>
            <groupId>org.infinispan</groupId>
            <artifactId>infinispan-remote-query-server</artifactId>
