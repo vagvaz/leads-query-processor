@@ -3,7 +3,7 @@ package leads.tajo.module;
 import org.apache.tajo.algebra.Expr;
 import org.apache.tajo.algebra.JsonHelper;
 import org.apache.tajo.engine.parser.SQLSyntaxError;
-import org.apache.tajo.master.session.Session;
+import org.apache.tajo.session.Session;
 
 import java.io.*;
 

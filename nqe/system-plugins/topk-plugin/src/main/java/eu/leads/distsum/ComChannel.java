@@ -1,8 +1,9 @@
 package eu.leads.distsum;
 
 import org.infinispan.Cache;
-import org.infinispan.filter.KeyValueFilter;
 import org.infinispan.metadata.Metadata;
+import org.infinispan.notifications.cachelistener.filter.CacheEventFilter;
+import org.infinispan.notifications.cachelistener.filter.EventType;
 
 /**
  *
@@ -23,7 +24,12 @@ public class ComChannel {
 
     // Add a node to the map
     public void register(final String id, Node node){
-        KeyValueFilter<String,Message> filter= new KeyValueFilter<String,Message>(){
+        CacheEventFilter<String,Message> filter= new CacheEventFilter<String,Message>(){
+            @Override
+            public boolean accept(String key, Message oldValue, Metadata oldMetadata, Message newValue, Metadata newMetadata, EventType eventType) {
+                return id.equals(key);
+            }
+
             public boolean accept(String i, Message msg, Metadata metadata){
                 return id.equals(i);
             }

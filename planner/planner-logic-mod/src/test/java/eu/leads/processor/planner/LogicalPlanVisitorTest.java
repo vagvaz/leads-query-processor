@@ -15,7 +15,7 @@ import org.apache.tajo.catalog.proto.CatalogProtos;
 import org.apache.tajo.common.TajoDataTypes;
 import org.apache.tajo.conf.TajoConf;
 import org.apache.tajo.engine.json.CoreGsonHelper;
-import org.apache.tajo.master.session.Session;
+import org.apache.tajo.session.Session;
 import org.apache.tajo.plan.PlanningException;
 import org.apache.tajo.plan.logical.LogicalRootNode;
 import org.vertx.java.core.json.JsonArray;
