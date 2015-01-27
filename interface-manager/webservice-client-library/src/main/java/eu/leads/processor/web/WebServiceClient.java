@@ -10,8 +10,11 @@ import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.plugins.PluginPackage;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang.SerializationUtils;
+import org.vertx.java.core.http.HttpClient;
+import org.vertx.java.core.http.WebSocket;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.platform.PlatformManager;
 
 import javax.ws.rs.core.MediaType;
 import java.io.*;
@@ -26,19 +29,20 @@ import java.util.*;
  * Created by vagvaz on 8/15/14.
  */
 public class WebServiceClient {
+    private static PlatformManager pm;
     private final static String prefix = "/rest/";
     private final static ObjectMapper mapper = new ObjectMapper();
     private static String host;
     private static String port;
     private static URL address;
-
+    HttpClient httpClient;
+    
     public static boolean initialize(String url, int p) throws MalformedURLException {
-        host = url;
-        port = String.valueOf(p);
-        address = new URL(host + ":" + port);
-        return checkIfOnline();
+      host = url;
+      port = String.valueOf(p);
+      address = new URL(host + ":" + port);
+      return true;
     }
-
     private static boolean checkIfOnline() {
         HttpURLConnection connection = null;
         try {
