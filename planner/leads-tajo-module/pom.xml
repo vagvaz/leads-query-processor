@@ -10,7 +10,7 @@
 
    <modelVersion>4.0.0</modelVersion>
    <groupId>gr.tuc.softnet</groupId>
-   <artifactId>leads-query-processor-tajo-module</artifactId>
+   <artifactId>leads-tajo-module</artifactId>
    <packaging>jar</packaging>
    <version>0.0.2-SNAPSHOT</version>
    <scm>

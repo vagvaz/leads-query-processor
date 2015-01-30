@@ -29,7 +29,8 @@ public class CqlWindow extends Expr {
     private WindowType type;
 
     public CqlWindow(String str, WindowType type) {
-        super(OpType.CqlWindow);
+        //super(OpType.CqlWindow);
+        super(OpType.DataType);
         this.exprStr = str;
         this.type = type;
     }

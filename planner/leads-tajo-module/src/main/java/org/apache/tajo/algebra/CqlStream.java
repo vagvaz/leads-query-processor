@@ -31,7 +31,7 @@ public class CqlStream extends UnaryOperator implements JsonSerializable {
 
 
     public CqlStream(String str, Expr child) {
-        super(OpType.CqlStream);
+        super(OpType.DataType);//super(OpType.CqlStream);
         this.exprStr = str;
         this.child = child;
     }
