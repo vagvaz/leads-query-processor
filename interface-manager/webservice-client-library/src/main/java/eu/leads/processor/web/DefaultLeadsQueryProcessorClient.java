@@ -33,11 +33,7 @@ public class DefaultLeadsQueryProcessorClient implements LeadsQueryProcessorClie
     System.getProperties().put("vertx.clusterManagerFactory","org.vertx.java.spi.cluster.impl.hazelcast.HazelcastClusterManagerFactory");
     platformManager = PlatformLocator.factory.createPlatformManager();
     vertx = platformManager.vertx();
-    httpClient = vertx.createHttpClient().setPort(port).setHost(host).connectWebsocket("/myapp", new Handler<WebSocket>() {
-      @Override
-      public void handle(WebSocket websocket) {
-        websocket.
-        });;
+    httpClient = vertx.createHttpClient().setPort(port).setHost(host);
 
 
 
