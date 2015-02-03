@@ -1,14 +1,19 @@
 package eu.leads.processor.web;
 
+import com.hazelcast.logging.Slf4jFactory;
 import data.MetaData;
 import data.PluginStatus;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.PluginPackage;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.vertx.java.core.Handler;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.WebSocket;
 import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.core.sockjs.SockJSSocket;
 import org.vertx.java.platform.PlatformLocator;
 import org.vertx.java.platform.PlatformManager;
 
@@ -23,17 +28,46 @@ import java.util.concurrent.Future;
 public class DefaultLeadsQueryProcessorClient implements LeadsQueryProcessorClient {
   private HttpClient httpClient =null;
   private WebSocket webSocket = null;
+
   private PlatformManager platformManager = null;
   private Vertx vertx = null;
   private String clientId = "";
+   private String host = "";
+   private int port = -1;
+   private static Logger logger = LoggerFactory.getLogger(DefaultLeadsQueryProcessorClient.class.toString());
   @Override public void initialiaze(String host, int port) {
     clientId = UUID.randomUUID().toString();
+     if(!host.startsWith("http://")){
+        this.host = "http://"+ host;
+     }
+     else{
+        this.host = host;
+     }
+     if(port <= 0){
+        logger.error("Could not connect to LEADS webservice: Invalid port " + port);
+     }
+     this.port = port;
+
+   //Initialize necessary environment properties needed by vertx when running in embedded mode.
     System.getProperties().put("vertx.home",System.getenv("HOME")+"/.vertx_mods/");
     System.getProperties().put("vertx.mods",System.getenv("HOME")+"/.vertx_mods/");
     System.getProperties().put("vertx.clusterManagerFactory","org.vertx.java.spi.cluster.impl.hazelcast.HazelcastClusterManagerFactory");
-    platformManager = PlatformLocator.factory.createPlatformManager();
+    //Get platform Manager almost same api as vertx terminal
+     platformManager = PlatformLocator.factory.createPlatformManager();
+     //set vertx variable
     vertx = platformManager.vertx();
-    httpClient = vertx.createHttpClient().setPort(port).setHost(host);
+     //Initialize REST API client
+    httpClient = vertx.createHttpClient().setPort(port).setHost(host).connectWebsocket(host + ":" + port + "/app/", new Handler<WebSocket>() {
+       @Override
+       public void handle(WebSocket socket) {
+          webSocket = socket;
+          webSocket.dataHandler(dataHandler);
+          webSocket.endHandler(endHandler);
+          clientId = webSocket.binaryHandlerID();
+          webSocket.exceptionHandler(exceptionHandler);
+          webSocket.frameHandler(frameHandler);
+       }
+    });
 
 
 
@@ -41,7 +75,7 @@ public class DefaultLeadsQueryProcessorClient implements LeadsQueryProcessorClie
   }
 
   @Override public String getClientId() {
-    return null;
+    return clientId;
   }
 
   @Override
