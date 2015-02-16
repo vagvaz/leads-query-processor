@@ -178,11 +178,23 @@ public class Apatar2Tajo {
 //                if(projecID!=null)
 //                    id = projecID;
                 print("", true, id, ReverseArrowTree, nodesMap);
-                System.out.println("Search for MapReduceNode node result:  ");
-                String MR = FindnRaiseNode(id, ReverseArrowTree, nodesMap, "com.apatar.mapReduce.MapReduceNode");
-//                if(MR!=null)
-//                    id = MR;
-                print("", true, id, ReverseArrowTree, nodesMap);
+                String MR = id;
+
+                while(MR!=null){
+
+                    System.out.println("Search for MapReduceNode node starting from node: "+ MR + " result: ");
+
+                    MR = FindnRaiseNode(MR, ReverseArrowTree, nodesMap, "com.apatar.mapReduce.MapReduceNode");
+                    print("", true, id, ReverseArrowTree, nodesMap);
+//                    List<String> children = ReverseArrowTree.get(MR);
+//                    if(children!=null) {
+//                        MR = children.get(0);
+//                    }else
+//                        break;
+
+                }
+
+                //print("", true, id, ReverseArrowTree, nodesMap);
 
                 //Recursive nodes traversing
                 Expr ret = recursiveTree(id, ReverseArrowTree, nodesMap, ArrowConnections);
@@ -222,7 +234,7 @@ public class Apatar2Tajo {
     }
 
     //Use only in Unary operators
-    private static String FindnRaiseNode(String head, HashMap<String, List<String>> nodesTree, HashMap<String, Element> nodesMap, String nodeClass) {
+    private static String FindnRaiseNode(String head, HashMap<String, List<String>> nodesTree, HashMap<String, Element> nodesMap, String SearchClass) {
 
         //Traverse the tree
         //Search for projection node
@@ -237,8 +249,8 @@ public class Apatar2Tajo {
                 Element childElement = nodesMap.get(child);
                 String childNodeType = childElement.getAttributeValue("nodeClass");
 
-                if (childNodeType.equals(nodeClass)) {
-                    System.out.println("Found node " + nodeClass);
+                if (childNodeType.equals(SearchClass)) {
+                    System.out.println("Found node " + SearchClass);
                     searchNodeId = child; //Found
 
                     List<String> childrenNext = nodesTree.get(child);
@@ -248,31 +260,31 @@ public class Apatar2Tajo {
                             return null;
                         }
 
-                        if (!nodeType.equals("com.apatar.output.OutputNode")) {
+                        if (!(nodeType.equals("com.apatar.output.OutputNode") || nodeType.equals(SearchClass))) {
                             nodesTree.remove(head);
                             nodesTree.remove(child);
                             nodesTree.put(head, childrenNext);
                             //remove the child and return so another one will insert it
                         } else {
-                            System.out.println(nodeClass + " node @ top ! *");
+                            System.out.println(SearchClass + " node @ top ! *");
                             return searchNodeId;
                         }
                         break;
                     } else {
-                        System.err.println("Found " + nodeClass + " node with no children error");
+                        System.err.println("Found " + SearchClass + " node with no children error");
                     }
                 }
-                searchNodeId = FindnRaiseNode(child, nodesTree, nodesMap, nodeClass);
+                searchNodeId = FindnRaiseNode(child, nodesTree, nodesMap, SearchClass);
             }
         }
 
-        if (nodeType.equals("com.apatar.output.OutputNode") && searchNodeId != null && !alreadyPushed) {
+        if ((nodeType.equals("com.apatar.output.OutputNode")|| nodeType.equals(SearchClass))&& searchNodeId != null && !alreadyPushed) {
             nodesTree.remove(head);
             List<String> childrenNew = new ArrayList<>();
             childrenNew.add(searchNodeId);
             nodesTree.put(head, childrenNew);
             nodesTree.put(searchNodeId, children);
-            System.out.println(nodeClass + " node @ top ! ");
+            System.out.println(SearchClass + " node @ top ! ");
         }
 
 
@@ -705,6 +717,7 @@ public class Apatar2Tajo {
 
                     mrData.add(new NamedExpr(new LiteralValue(value, LiteralValue.LiteralType.String), functionType));
                 }
+
                 if (mrData.size() > 0) {
                     exprs = new NamedExpr[mrData.size()];
                     mrData.toArray(exprs);
@@ -720,7 +733,7 @@ public class Apatar2Tajo {
     static private void print(String prefix, boolean isTail, String head, HashMap<String, List<String>> nodesTree, HashMap<String, Element> nodesMap) {
         Element cur = nodesMap.get(head);
         //System.out.print(cur.toString() + " " + cur.getAttributeValue("title"));
-        String name = cur.getAttributeValue("title");
+        String name = head+": "+ cur.getAttributeValue("title");
         List<String> children = nodesTree.get(head);
 
         System.out.println(prefix + (isTail ? "└── " : "├── ") + name);

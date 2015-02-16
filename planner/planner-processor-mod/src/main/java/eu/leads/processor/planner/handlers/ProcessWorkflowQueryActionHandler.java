@@ -16,6 +16,7 @@ import org.apache.tajo.session.Session;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -58,33 +59,34 @@ public class ProcessWorkflowQueryActionHandler implements ActionHandler {
         //Optimize plan
         String planAsString = null;
       boolean hasMapReduce = false;
-      JsonObject mapReduceOpConfiguration = null;
+      ArrayList<JsonObject> mapReduceOpConfigurations = new ArrayList<JsonObject>(0);
         try {
             Session session =
                 new Session(workflowQuery.getId(), workflowQuery.getUser(),StringConstants.DEFAULT_DATABASE_NAME);
-            if(expr.getType()== OpType.Filter) {
+            while(expr.getType()== OpType.Filter) { //map reduce@
                 Expr qual = ((Selection)expr).getQual();
                 if(qual.getType() == OpType.ValueList) {
                     hasMapReduce = true;
-                    mapReduceOpConfiguration = new JsonObject();
+                    JsonObject MRConfiguration = new JsonObject();
                     ValueListExpr mapReduceData = (ValueListExpr) qual;
                     Expr[] mapReduceConfiguration = mapReduceData.getValues();
 
                   for(Expr e : mapReduceConfiguration){
                     NamedExpr namedExpr = (NamedExpr)e;
                     if(namedExpr.getAlias().equals("MapperFunction")){
-                      mapReduceOpConfiguration = getMapperConfig(namedExpr,mapReduceOpConfiguration);
+                      MRConfiguration = getMapperConfig(namedExpr,MRConfiguration);
                     }
                     else if (namedExpr.getAlias().equals("ReducerFunction")){
-                      mapReduceOpConfiguration = getReducerConfig(namedExpr,mapReduceOpConfiguration);
+                      MRConfiguration = getReducerConfig(namedExpr,MRConfiguration);
                     }
                     else if (namedExpr.getAlias().equals("JarPathFunction")){
-                      mapReduceOpConfiguration = getJarPathFunction(namedExpr,mapReduceOpConfiguration);
+                      MRConfiguration = getJarPathFunction(namedExpr,MRConfiguration);
                     }
                     else if (namedExpr.getAlias().equals("MRConfPathFunction")){
-                      mapReduceOpConfiguration = getMRConfPathFunction(namedExpr,mapReduceOpConfiguration);
+                      MRConfiguration = getMRConfPathFunction(namedExpr,MRConfiguration);
                     }
                   }
+                  mapReduceOpConfigurations.add(MRConfiguration);
                 }
 
                 expr=((Selection) expr).getChild();
@@ -97,8 +99,8 @@ public class ProcessWorkflowQueryActionHandler implements ActionHandler {
         }
         LogicalRootNode n = CoreGsonHelper.fromJson(planAsString, LogicalRootNode.class);
         WorkflowPlan plan = new WorkflowPlan(workflowQuery.getId(), n);
-        if(hasMapReduce && mapReduceOpConfiguration != null){
-          plan.injectMapReduce(mapReduceOpConfiguration);
+        if(hasMapReduce && !mapReduceOpConfigurations.isEmpty()){
+          plan.injectMapReduce(mapReduceOpConfigurations.get(0)); //TODO FIX FOR MORE THAN 1 MR
         }
         Set<WorkflowPlan> candidatePlans = new HashSet<WorkflowPlan>();
         candidatePlans.add(plan);
