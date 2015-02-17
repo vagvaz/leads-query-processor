@@ -24,6 +24,7 @@ public class Apatar2Tajo {
     private static HashMap<String, Sort.SortSpec> ApatarTajoSortFunctMap = new HashMap<String, Sort.SortSpec>();
 
     private static HashMap<String, Expr> GroupByOther = new HashMap<String, Expr>();
+    private static HashMap<String, String> MRTableName= new HashMap<>();
     private static boolean foundHaving;
     private int funtionsCount = 0;
 
@@ -197,7 +198,7 @@ public class Apatar2Tajo {
                 //print("", true, id, ReverseArrowTree, nodesMap);
 
                 //Recursive nodes traversing
-                Expr ret = recursiveTree(id, ReverseArrowTree, nodesMap, ArrowConnections, InitialReverseArrowTree);
+                Expr ret = recursiveTree(id, ReverseArrowTree, nodesMap, ArrowConnections, InitialReverseArrowTree,ArrowMap);
 
                 //Select everything
                 if (projecID == null && ret != null && ret.getType() != OpType.Projection) {
@@ -292,7 +293,7 @@ public class Apatar2Tajo {
 
     }
 
-    private static Expr recursiveTree(String head, HashMap<String, List<String>> nodesTree, HashMap<String, Element> nodesMap, String[][] arrowConnections, HashMap<String,List<String>> InitNodesTree) {
+    private static Expr recursiveTree(String head, HashMap<String, List<String>> nodesTree, HashMap<String, Element> nodesMap, String[][] arrowConnections, HashMap<String,List<String>> InitNodesTree, HashMap<String, String> ArrowMap) {
         Element cur = nodesMap.get(head);
         System.out.print(" ID " + head + " " + cur.getAttributeValue("title"));
         int currentID = Integer.parseInt(head);
@@ -307,7 +308,7 @@ public class Apatar2Tajo {
         Expr ChildExpr = null;
         if (children != null)
             for (String child : children) {
-                ChildExpr = recursiveTree(child, nodesTree, nodesMap, arrowConnections,InitNodesTree);
+                ChildExpr = recursiveTree(child, nodesTree, nodesMap, arrowConnections,InitNodesTree,ArrowMap);
                 if (ChildExpr != null)
                     childrenExpr.add(ChildExpr);
             }
@@ -475,7 +476,23 @@ public class Apatar2Tajo {
             System.out.println("READNode ");
 
             Expr[] relations = new Expr[1];
-            relations[0] = new Relation(cur.getAttributeValue("title"));
+
+            System.out.println("Prev node: " + InitNodesTree.get(head));
+            String prev = ArrowMap.get(head);
+            Element prevE = nodesMap.get(prev);
+            System.out.print(" Prev " + prev + " " + prevE.getAttributeValue("title"));
+            String prevNodeType = prevE.getAttributeValue("nodeClass");
+            System.out.println(" prevNodeType: " + prevNodeType);
+            if(prevNodeType.equals("com.apatar.mapReduce.MapReduceNode"))
+            {
+                String oldTableName=cur.getAttributeValue("title");
+                String newTableName = oldTableName+":"+UUID.randomUUID().toString();
+                MRTableName.put(oldTableName,newTableName);
+                relations[0] = new Relation(newTableName);
+            }else{
+                relations[0] = new Relation(cur.getAttributeValue("title"));
+            }
+
             return new RelationList(relations);
 
         } else if (nodeType.equals("com.apatar.limit.LimitNode")) {
@@ -495,7 +512,7 @@ public class Apatar2Tajo {
                 String next = InitNodesTree.get(head).get(0);
                 Element nextE = nodesMap.get(next);
                 System.out.print(" Next " + next + " " + nextE.getAttributeValue("title"));
-
+                ColumnReferenceExpr[] columns = new ColumnReferenceExpr[0];
 
                 String nextNodeType = nextE.getAttributeValue("nodeClass");
                 System.out.println(" nextNodeType: " + nextNodeType);
@@ -503,11 +520,36 @@ public class Apatar2Tajo {
                     NamedExpr[] oldVLE = (NamedExpr[])((ValueListExpr)subExpr).getValues();
 
                     NamedExpr[] exprs = new NamedExpr[oldVLE.length];
-                    for(int ex=0; ex<oldVLE.length;ex++){
+                    for(int ex=0; ex<oldVLE.length;ex++)
                         exprs[ex]=oldVLE[ex];
+
+                    Element node = cur.getChild("OutputConnectionPoints");
+                    node = node.getChild("ConnectionPoint");
+                    node = node.getChild("tableInfo");
+                    node = node.getChild("records");
+                    System.out.println("ProjectNode  " + ((List<Element>) node.getChildren("com.apatar.core.Record")).size());
+                    List<Element> recordslist;
+
+                    String columnName, columnType;
+                    boolean isPrimary;
+                    if ((recordslist = (List<Element>) node.getChildren("com.apatar.core.Record")).size() > 0) {
+                        List<String> targetnames = new ArrayList<>();
+                        columns = new ColumnReferenceExpr[recordslist.size()];
+                        int count = 0;
+                        for (Element temp : recordslist) {
+                            columnName = temp.getAttributeValue("fieldName");
+                            columnType = temp.getAttributeValue("type");
+                            isPrimary = temp.getAttributeValue("primaryKey").equals("true");
+                            System.out.println("Record  " + columnName);
+                            columns[count] = new ColumnReferenceExpr(columnType,columnName);
+                            count++;
+                        }
+
+
                     }
-                    exprs[exprs.length-1] = new NamedExpr(new LiteralValue("Begin", LiteralValue.LiteralType.String), "Position");
-                    return new ValueListExpr(exprs);
+
+                    exprs[exprs.length-1] = new NamedExpr(new ValueListExpr(columns),"AfterTable:"+MRTableName.get(nextE.getAttributeValue("title")));
+                    subExpr= new ValueListExpr(exprs);
                 }
 
 
@@ -650,8 +692,13 @@ public class Apatar2Tajo {
 
                         Expr rec = recursiveGroupByFunction(id, SubReverseArrowTree, subnodesMap, ArrowConnections, subArrowMap, GroupByCollumns);
                         if (rec != null) {
-                            if (rec.getType() == OpType.Target)
-                                GroupByOther.put(((NamedExpr) rec).getAlias(), ((NamedExpr) rec).getExpr());
+                            if (rec.getType() == OpType.Target){
+                                String qualifier = ((NamedExpr) rec).getAlias();
+                                if(MRTableName.containsKey(qualifier))
+                                    qualifier=MRTableName.get(qualifier);
+                                GroupByOther.put(qualifier, ((NamedExpr) rec).getExpr());
+                            }
+
 
                             if (rec.getType() == OpType.CountRowsFunction)
                                 GroupByOther.put("CountRowsFunction", rec);
@@ -942,9 +989,13 @@ public class Apatar2Tajo {
     }
 
     public static ColumnReferenceExpr CreateColumnReference(String fullColumnName) {
-        String attrNames[] = fullColumnName.split(".");
+        String attrNames[] = fullColumnName.split("\\.");
         if (attrNames.length >= 2) {
-            return new ColumnReferenceExpr(attrNames[attrNames.length - 2], attrNames[attrNames.length - 1]);
+            String qualifier = attrNames[0];
+            if(MRTableName.containsKey(qualifier))
+                qualifier = MRTableName.get(qualifier);
+            String col = attrNames[1];
+            return new ColumnReferenceExpr(qualifier, col);
         }
         return new ColumnReferenceExpr(fullColumnName);
     }
