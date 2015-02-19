@@ -3,7 +3,7 @@ package eu.leads.processor.core;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Created by vagvaz on 8/4/14.
+ * Created by angelos on 22/01/15.
  */
 public abstract class DataType {
     protected JsonObject data;
