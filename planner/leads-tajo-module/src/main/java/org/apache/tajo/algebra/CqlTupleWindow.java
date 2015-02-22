@@ -30,7 +30,7 @@ public class CqlTupleWindow extends Expr {
     private int rows;
 
     public CqlTupleWindow(String str, int rows) {
-        super(OpType.CqlTupleWindow);
+        super(OpType.DataType);//super(OpType.CqlTupleWindow);
         this.exprStr = str;
         this.rows = rows;
     }

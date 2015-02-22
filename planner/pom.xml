@@ -8,8 +8,8 @@
       <module>planner-comp-mod</module>
       <module>planner-logic-mod</module>
       <module>planner-processor-mod</module>
-      <module>leads-tajo-catalog</module>
       <module>leads-tajo-module</module>
+      <module>leads-tajo-catalog</module>
       <module>planner-catalog-mod</module>
    </modules>
 

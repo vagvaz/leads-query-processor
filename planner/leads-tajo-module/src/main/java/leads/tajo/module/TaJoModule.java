@@ -5,9 +5,6 @@ package leads.tajo.module;
 
 import com.google.protobuf.TextFormat.ParseException;
 import eu.leads.processor.common.StringConstants;
-import grammar.LeadsSQLParser;
-import grammar.LeadsSQLParser.SqlContext;
-import grammar.SQLLexer;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.apache.hadoop.fs.Path;
@@ -22,13 +19,13 @@ import org.apache.tajo.catalog.proto.CatalogProtos;
 import org.apache.tajo.common.TajoDataTypes;
 import org.apache.tajo.conf.TajoConf;
 import org.apache.tajo.engine.json.CoreGsonHelper;
-import org.apache.tajo.engine.parser.SQLSyntaxError;
-import org.apache.tajo.engine.planner.LeadsLogicalOptimizer;
+import org.apache.tajo.engine.parser.*;
 import org.apache.tajo.engine.query.QueryContext;
-import org.apache.tajo.session.Session;
+import org.apache.tajo.plan.LogicalOptimizer;
 import org.apache.tajo.plan.LogicalPlan;
 import org.apache.tajo.plan.LogicalPlanner;
 import org.apache.tajo.plan.PlanningException;
+import org.apache.tajo.session.Session;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -44,7 +41,7 @@ public class TaJoModule {
 
     private static LeadsSQLAnalyzer sqlAnalyzer = null;
     private static LogicalPlanner planner;
-    private static LeadsLogicalOptimizer optimizer = null;
+    private static LogicalOptimizer optimizer = null;
     private static CatalogClient catalog = null;
     private static TajoConf c = null;
     private static HashMap<String,Set<String>> primaryKeys = null;
@@ -64,7 +61,7 @@ public class TaJoModule {
 
     public TaJoModule() {
         c = new TajoConf();
-        optimizer = new LeadsLogicalOptimizer(c);
+        optimizer = new LogicalOptimizer(c);
         sqlAnalyzer = new LeadsSQLAnalyzer();
         defaultContext = createContext(c,null);
         initializePrimaryColumns();
@@ -98,28 +95,83 @@ public class TaJoModule {
         System.out.print(sql.length());
         sql=check_insert(  sql);
         ANTLRInputStream input = new ANTLRInputStream(sql);
-        SQLLexer lexer = new SQLLexer(input);
+        LeadsSQLLexer lexer = new LeadsSQLLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         LeadsSQLParser parser = new LeadsSQLParser(tokens);
         parser.setBuildParseTree(true);
         LeadsSQLAnalyzer visitor = new LeadsSQLAnalyzer();
-        SqlContext context = parser.sql();
+        LeadsSQLParser.SqlContext context = parser.sql();
         if (context.statement() != null)
             return visitor.visitSql(context);
 
         return null;
     }
 
-    private static String check_insert(String sql){
+    protected static String check_insert(String sql){
         sql = sql.trim();
         final String[] arr = sql.split(" ", 2);
-        if(arr[0].equalsIgnoreCase("insert"))
-            if(sql.toLowerCase().contains(" values")) {
+        if(arr[0].equalsIgnoreCase("insert")) {
+            //
+            if(sql.toLowerCase().contains("values")) {
                 String[] newsql = sql.split("(?i)VALUES");
                 sql = newsql[0] + " select " + newsql[1].replaceAll("\\(|\\)", "");
+                System.out.print("Fixed sql: "+sql);
+            }
+//			else{
+//				System.out.print("Error incorrect insert syntax "+sql);
+//				return null;
+//			}
+
+        }
+        if(arr[0].equalsIgnoreCase("update")) {
+            //
+            String tablename = sql.trim().split(" ")[1]; //assuming after update is tablename
+            if(!sql.toLowerCase().contains("set") ||!sql.toLowerCase().contains("where") ) {
+                System.out.print("Error incorrect update syntax "+sql);
+                return null;
+            }
+            int start = sql.toLowerCase().indexOf("set")+3;
+            int end = sql.toLowerCase().indexOf("where");
+            String columnValuePairs = sql.substring(start,end);
+            String [] pairs = columnValuePairs.split(",");
+            String collumns = " (";
+            String values = " SELECT ";
+            for(String pair:pairs)
+            {
+                if(collumns.length()>2) {
+                    collumns += ", ";
+                    values +=  ", ";
+                }
+                String [] collumnValue = pair.trim().split("=");
+                if(collumnValue.length!=2){
+                    System.out.print("Error incorrect update syntax "+sql);
+                    return null;
+                }
+                collumns += collumnValue[0] ;
+                values += collumnValue[1];
+            }
+            collumns+=")";
+            sql = " INSERT OVERWRITE INTO "+ tablename  + " " + collumns + values + " FROM " + tablename + " "+ sql.substring(end);
+            System.out.print("Fixed sql: "+sql);
+        }
+        if(arr[0].equalsIgnoreCase("delete")){
+            //
+            String tablename = sql.trim().split(" ")[2]; //assuming after update is tablename
+            if(!sql.toLowerCase().contains("from") ||!sql.toLowerCase().contains("where") ) {
+                System.out.print("Error incorrect update syntax "+sql);
+                return null;
             }
 
+            int end = sql.toLowerCase().indexOf("where");
+
+            String values = " SELECT *";
+
+            sql = " DELETE FROM "+ tablename  + " SELECT * FROM " + tablename + " "+ sql.substring(end);
+            System.out.print("Fixed sql: "+sql);
+        }
+
         return sql;
+
     }
 
     public static boolean createTable(CreateTable ctCommand)

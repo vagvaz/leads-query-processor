@@ -49,13 +49,13 @@ import static org.apache.tajo.catalog.proto.CatalogProtos.TablespaceProto;
  * So, we don't need to consider concurrency problem here.
  */
 public class LeadsMemStore implements CatalogStore {
-    private Map<String, String> tablespaces = Maps.newHashMap();
+    private Map<String, String> tablespaces = null;
     //private Map<String, Map<String, CatalogProtos.TableDescProto>> databases = Maps.newHashMap();
     private  Map<String, String> databases  = null ;
     private Map<String, CatalogProtos.FunctionDescProto> functions = Maps.newHashMap();
-//    private Map<String, Map<String, IndexDescProto>> indexes = Maps.newHashMap();
-//    private Map<String, Map<String, IndexDescProto>> indexesByColumn = Maps.newHashMap();
-private  Map<String, String> indexes = null ;
+    //    private Map<String, Map<String, IndexDescProto>> indexes = Maps.newHashMap();
+    //    private Map<String, Map<String, IndexDescProto>> indexesByColumn = Maps.newHashMap();
+    private  Map<String, String> indexes = null ;
     private  Map<String, String> indexesByColumn = null ;
     private InfinispanManager manager;
 

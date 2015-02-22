@@ -31,7 +31,7 @@ public class CqlPartitionedWindow extends Expr {
     private BinaryOperator data;
 
     public CqlPartitionedWindow(String str, BinaryOperator a) {
-        super(OpType.CqlPartitionedWindow);
+        super(OpType.DataType);//super(OpType.CqlPartitionedWindow);
         this.exprStr = str;
         this.data = a;
     }
