@@ -115,7 +115,6 @@ public class DeployPluginHandler implements Handler<HttpServerRequest> {
         public void handle(Buffer body) {
             // String data = body..getString(0, body.length());
             String Request = body.getString(0, body.length());
-
             JsonObject deployRequest = new JsonObject(Request);
             String pluginname = request.params().get("pluginname");
             String cachename = request.params().get("cachename");
@@ -128,6 +127,7 @@ public class DeployPluginHandler implements Handler<HttpServerRequest> {
             }
             deployRequest.putString("pluginname", pluginname);
             deployRequest.putString("cachename", cachename);
+
 
             Action action = new Action();
             action.setId(requestId);

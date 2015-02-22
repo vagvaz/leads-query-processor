@@ -22,23 +22,23 @@
    <artifactId>leads-query-processor-nqe</artifactId>
    <version>1.0-SNAPSHOT</version>
 
-    <dependencies>
+   <dependencies>
 
-    <dependency>
-        <groupId>gr.tuc.softnet</groupId>
-        <artifactId>leads-query-processor-common</artifactId>
-        <version>${processor.version}</version>
-    </dependency>
-<!--        <dependency>
-            <groupId>gr.tuc.softnet</groupId>
-            <artifactId>leads-query-processor-core</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>-->
+      <dependency>
+         <groupId>gr.tuc.softnet</groupId>
+         <artifactId>leads-query-processor-common</artifactId>
+         <version>${processor.version}</version>
+      </dependency>
+      <!--        <dependency>
+                  <groupId>gr.tuc.softnet</groupId>
+                  <artifactId>leads-query-processor-core</artifactId>
+                  <version>1.0-SNAPSHOT</version>
+              </dependency>-->
 
-        <dependency>
-            <groupId>gr.tuc.softnet</groupId>
-            <artifactId>common-core</artifactId>
-            <version>${processor.version}</version>
-        </dependency>
-    </dependencies>
+      <dependency>
+         <groupId>gr.tuc.softnet</groupId>
+         <artifactId>common-core</artifactId>
+         <version>${processor.version}</version>
+      </dependency>
+   </dependencies>
 </project>

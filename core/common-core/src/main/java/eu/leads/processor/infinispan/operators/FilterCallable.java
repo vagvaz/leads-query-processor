@@ -15,9 +15,7 @@ import java.util.*;
 /**
  * Created by vagvaz on 9/24/14.
  */
-public class FilterCallable<K,V> implements
-
-        DistributedCallable<K, V, String>, Serializable {
+public class FilterCallable<K,V> implements DistributedCallable<K, V, String>, Serializable {
    transient protected Cache<K,V> inputCache;
    transient protected Cache outputCache;
    transient protected FilterOperatorTree tree;

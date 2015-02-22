@@ -62,7 +62,8 @@ public class FilterOperator extends BasicOperator {
       Cache outputCache = (Cache)manager.getPersisentCache(getOutput());
 
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
-      FilterCallable callable = new FilterCallable(conf.toString(),getOutput(),conf.getObject("body").getObject("qual").toString());
+      FilterCallableUpdated<String,String> callable = new FilterCallableUpdated<>(conf.toString(),getOutput(),conf.getObject("body").getObject("qual").toString());
+//      FilterCallable callable = new FilterCallable(conf.toString(),getOutput(),conf.getObject("body").getObject("qual").toString());
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder( callable);
       builder.timeout(1, TimeUnit.HOURS);
       DistributedTask task = builder.build();

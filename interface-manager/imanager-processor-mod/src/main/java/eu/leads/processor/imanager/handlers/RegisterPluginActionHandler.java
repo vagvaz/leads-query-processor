@@ -9,8 +9,8 @@ import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.QueryState;
 import eu.leads.processor.core.plan.QueryStatus;
-import eu.leads.processor.plugins.PluginManager;
-import eu.leads.processor.plugins.PluginPackage;
+import eu.leads.processor.common.plugins.PluginManager;
+import eu.leads.processor.common.plugins.PluginPackage;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 

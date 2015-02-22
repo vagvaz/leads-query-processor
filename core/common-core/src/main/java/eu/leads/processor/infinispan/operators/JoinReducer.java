@@ -1,7 +1,7 @@
 package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
-import eu.leads.processor.core.LeadsReducer;
+import eu.leads.processor.infinispan.LeadsReducer;
 import eu.leads.processor.core.Tuple;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;

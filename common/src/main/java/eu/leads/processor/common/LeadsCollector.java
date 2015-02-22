@@ -1,7 +1,12 @@
 package eu.leads.processor.common;
 
 
-import java.io.IOException;
+import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
+import eu.leads.processor.common.infinispan.InfinispanManager;
+import org.infinispan.Cache;
+import org.infinispan.distexec.mapreduce.Collector;
+import org.infinispan.manager.EmbeddedCacheManager;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,22 +14,43 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
-import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
-import eu.leads.processor.common.infinispan.InfinispanManager;
-import org.infinispan.Cache;
-import org.infinispan.distexec.mapreduce.Collector;
-import org.infinispan.manager.EmbeddedCacheManager;
-
 public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
         Serializable {
 
     private static final long serialVersionUID = -602082107893975415L;
     private final AtomicInteger emitCount;
     private final int maxCollectorSize;
-    private transient Cache<KOut, List<VOut>> store_cache;
+    private transient Cache storeCache;
     private transient InfinispanManager imanager;
-    private String cache_name;
+    private boolean onMap = true;
+//  private LeadsCombiner combiner;
+
+  public String getCacheName() {
+    return cacheName;
+  }
+
+  public void setCacheName(String cacheName) {
+    this.cacheName = cacheName;
+  }
+
+  public boolean isOnMap() {
+    return onMap;
+  }
+
+  public void setOnMap(boolean onMap) {
+    this.onMap = onMap;
+  }
+
+  public InfinispanManager getImanager() {
+    return imanager;
+  }
+
+  public void setImanager(InfinispanManager imanager) {
+    this.imanager = imanager;
+  }
+
+  private String cacheName;
+
 
     public LeadsCollector(int maxCollectorSize,
                           Cache<KOut, List<VOut>> collectorCache) {
@@ -32,38 +58,55 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
 
         emitCount = new AtomicInteger();
         this.maxCollectorSize = maxCollectorSize;
-        store_cache = collectorCache;
-        cache_name = collectorCache.getName();
+        storeCache = collectorCache;
+        cacheName = collectorCache.getName();
+    }
+
+    public LeadsCollector(int maxCollectorSize, String cacheName,InfinispanManager manager){
+      this.maxCollectorSize = maxCollectorSize;
+      emitCount = new AtomicInteger();
+      this.imanager = manager;
+      this.cacheName = cacheName;
+      storeCache = (Cache<KOut, List<VOut>>) this.imanager.getPersisentCache(cacheName);
     }
 
     public Cache<KOut, List<VOut>> getCache() {
-        return store_cache;
+        return storeCache;
     }
 
     public void emit(KOut key, VOut value) {
 
+        if(onMap) {
+          List<VOut> list = (List<VOut>) storeCache.get(key);
 
-        List<VOut> list = store_cache.get(key);
-
-        if (list == null) {
+          if (list == null) {
             list = new ArrayList<VOut>(128);
-            store_cache.put(key, list);
+            storeCache.put(key, list);
+          }
+          list.add(value);
+          emitCount.incrementAndGet();
         }
-        list.add(value);
-        emitCount.incrementAndGet();
+      else{
+          storeCache.put(key,value);
+          emitCount.incrementAndGet();
+        }
         // if (isOverflown() && mcc.hasCombiner()) {
         // combine(mcc, this);
         // }
     }
 
 
-    public void initialize_cache(EmbeddedCacheManager manager) {
+    public void initializeCache(EmbeddedCacheManager manager) {
        imanager = new ClusterInfinispanManager(manager);
-        store_cache = (Cache<KOut, List<VOut>>) imanager.getPersisentCache(cache_name);
+        storeCache = (Cache) imanager.getPersisentCache(cacheName);
     }
 
+  public void initializeCache(InfinispanManager imanager){
+    this.imanager = imanager;
+    storeCache = (Cache) imanager.getPersisentCache(cacheName);
+  }
     public void reset() {
-        store_cache.clear();
+        storeCache.clear();
         emitCount.set(0);
     }
 
@@ -81,4 +124,11 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
         return emitCount.get() > maxCollectorSize;
     }
 
+//  public void setCombiner(eu.leads.processor.infinispan.LeadsCombiner combiner) {
+//    this.combiner = combiner;
+//  }
+//
+//  public LeadsCombiner getCombiner() {
+//    return combiner;
+//  }
 }

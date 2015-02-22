@@ -1,8 +1,10 @@
-package eu.leads.processor.core;
+package eu.leads.processor.infinispan;
 
+import eu.leads.processor.common.LeadsCollector;
 import eu.leads.processor.common.ProgressReport;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.core.Tuple;
 import org.infinispan.Cache;
 import org.infinispan.distexec.mapreduce.Reducer;
 import org.infinispan.manager.EmbeddedCacheManager;
@@ -20,7 +22,7 @@ import java.util.concurrent.ConcurrentMap;
  * Time: 6:08 AM
  * To change this template use File | Settings | File Templates.
  */
-public class LeadsReducer<kOut, vOut> implements Reducer<kOut, vOut>,Serializable {
+public class LeadsReducer<K, V> implements Reducer<K, V>,Serializable {
    /**
     *
     */
@@ -55,7 +57,7 @@ public class LeadsReducer<kOut, vOut> implements Reducer<kOut, vOut>,Serializabl
    }
 
    @Override
-   public vOut reduce(kOut reducedKey, Iterator<vOut> iter) {
+   public V reduce(K reducedKey, Iterator<V> iter) {
       return null;
    }
 
@@ -169,4 +171,7 @@ public class LeadsReducer<kOut, vOut> implements Reducer<kOut, vOut>,Serializabl
 //        }
       }
    }
+
+  public void reduce(K key, Iterator<V> iterator, LeadsCollector collector) {
+  }
 }

@@ -1,6 +1,6 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
-import eu.leads.processor.core.LeadsMapper;
+import eu.leads.processor.infinispan.LeadsMapper;
 import org.infinispan.distexec.mapreduce.Collector;
 import org.vertx.java.core.json.JsonObject;
 

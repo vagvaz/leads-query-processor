@@ -6,4 +6,5 @@ common/conf
 **/.project
 **/.classpath
 **/.settings/*
-
+**/*.log.*
+**/*.log

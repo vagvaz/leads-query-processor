@@ -2,7 +2,7 @@ package eu.leads.processor.infinispan.operators.mapreduce;
 
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.core.LeadsMapper;
+import eu.leads.processor.infinispan.LeadsMapper;
 import eu.leads.processor.core.Tuple;
 import org.infinispan.Cache;
 import org.infinispan.distexec.mapreduce.Collector;

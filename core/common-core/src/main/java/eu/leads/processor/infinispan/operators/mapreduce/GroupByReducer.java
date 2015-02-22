@@ -1,9 +1,10 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
+import eu.leads.processor.common.LeadsCollector;
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
-import eu.leads.processor.core.LeadsReducer;
 import eu.leads.processor.core.Tuple;
+import eu.leads.processor.infinispan.LeadsReducer;
 import eu.leads.processor.math.MathUtils;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonArray;
@@ -148,11 +149,11 @@ public class GroupByReducer extends LeadsReducer<String, String> {
   }
 
   @Override
-    public String reduce(String key, Iterator<String> iterator) {
+    public void reduce(String key, Iterator<String> iterator,LeadsCollector collector) {
        //Reduce takes all the grouped Typles per key
 //      System.out.println("running for " + key + " .");
       if(key == null || key.equals(""))
-        return "";
+        return ;
         if (!isInitialized) initialize();
         resetValues();
         Tuple t = null;
@@ -203,8 +204,8 @@ public class GroupByReducer extends LeadsReducer<String, String> {
 //        System.err.println("t: " + t.toString());
         t = prepareOutput(t);
 //        System.err.println("tout: " + t.toString());
-        data.put(prefix + key, t.asString());
-        return "";
+        collector.emit(prefix + key, t.asString());
+        return ;
     }
 
    private void resetValues() {

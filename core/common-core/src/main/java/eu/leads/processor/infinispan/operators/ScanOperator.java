@@ -1,10 +1,9 @@
-package eu.leads.processor.infinispan.operators.mapreduce;
+package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
-import eu.leads.processor.infinispan.operators.BasicOperator;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
@@ -48,7 +47,8 @@ public class ScanOperator extends BasicOperator {
          return;
       }
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
-      ScanCallable callable = new ScanCallable(conf.toString(),getOutput());
+      ScanCallableUpdate<String,String> callable = new ScanCallableUpdate<>(conf.toString(),getOutput());
+//      ScanCallable callable = new ScanCallable(conf.toString(),getOutput());
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder( callable);
       builder.timeout(1, TimeUnit.HOURS);
       DistributedTask task = builder.build();

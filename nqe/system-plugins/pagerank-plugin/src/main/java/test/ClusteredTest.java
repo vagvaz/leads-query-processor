@@ -1,16 +1,8 @@
 package test;
 
-import eu.leads.processor.common.infinispan.CacheManagerFactory;
-import eu.leads.processor.common.infinispan.InfinispanCluster;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.plugins.EventType;
-import eu.leads.processor.plugins.PluginManager;
-import eu.leads.processor.plugins.PluginPackage;
-import org.apache.commons.configuration.XMLConfiguration;
-import org.infinispan.Cache;
 
 import java.util.ArrayList;
 public class ClusteredTest {

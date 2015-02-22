@@ -24,7 +24,7 @@ public class CacheManagerFactory {
     //                logger.info("Starting Clustered Infinispan Manager");
     //                result = new ClusterInfinispanManager();
     //                break;
-    //            case MULTICLUSTER:
+    //            case ENSEMBLE:
     //                logger.info("Creatting ISPN manager multi");
     ////                result = new MuliClusterInfinispanWrapper();
     //
@@ -58,7 +58,7 @@ public class CacheManagerFactory {
                 logger.info("Starting Clustered Infinispan Manager");
                 result = new ClusterInfinispanManager();
                 break;
-            case MULTICLUSTER:
+            case ENSEMBLE:
                 logger.info("Creatting ISPN manager multi");
                 break;
             default:
@@ -86,8 +86,9 @@ public class CacheManagerFactory {
             logger.info("Starting Clustered Infinispan Manager");
             result = new ClusterInfinispanManager();
             break;
-         case MULTICLUSTER:
-            logger.info("Creatting ISPN manager multi");
+         case ENSEMBLE:
+            logger.info("Creatting ISPN manager for Ensemble");
+           result = new EnsembleInfinispanManager();
             break;
          default:
             logger.info("Creatting ISPN manager def");

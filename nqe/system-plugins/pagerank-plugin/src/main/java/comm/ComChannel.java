@@ -25,6 +25,7 @@ public class ComChannel {
   // Add a node to the map
   public void register(final String id, Node node){
       CacheEventFilter<String,Message> filter= new CacheEventFilter<String,Message>(){
+
           @Override
           public boolean accept(String key, Message oldValue, Metadata oldMetadata, Message newValue, Metadata newMetadata, EventType eventType) {
               return id.equals(key);
@@ -36,6 +37,7 @@ public class ComChannel {
       };
       nodes.put(id, Message.EMPTYMSG); // to create the entry
       nodes.addListener(node, filter, null);
+
   }
 
   //Send messsage to node id

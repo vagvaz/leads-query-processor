@@ -1,5 +1,5 @@
 import eu.leads.processor.plugins.EventType;
-import eu.leads.processor.plugins.PluginPackage;
+import eu.leads.processor.common.plugins.PluginPackage;
 import eu.leads.processor.web.QueryStatus;
 import eu.leads.processor.web.WebServiceClient;
 import org.apache.commons.configuration.XMLConfiguration;

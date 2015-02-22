@@ -1,11 +1,10 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
 
-import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
+import eu.leads.processor.common.LeadsCollector;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.common.utils.PrintUtilities;
-import eu.leads.processor.core.LeadsReducer;
+import eu.leads.processor.infinispan.LeadsReducer;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -33,7 +32,7 @@ public class WGSReducer extends LeadsReducer<String, String> {
       outputCache = (Cache<String, String>) imanager.getPersisentCache(conf.getString("realOutput"));
    }
    @Override
-   public String reduce(String reducedKey, Iterator<String> iter) {
+   public void reduce(String reducedKey, Iterator<String> iter,LeadsCollector collector) {
       if(!isInitialized)
          initialize();
       progress();
@@ -47,16 +46,17 @@ public class WGSReducer extends LeadsReducer<String, String> {
 
       result.putArray("result",resultArray);
 
-         outputCache.put(Integer.toString(iteration),result.toString());
-      System.err.println(Integer.toString(iteration) + " ------------------------- cache mememres ------------------------ ");
-       PrintUtilities.printList(outputCache.getAdvancedCache().getRpcManager().getMembers());
+         collector.emit(Integer.toString(iteration),result.toString());
+//         outputCache.put(Integer.toString(iteration),result.toString());
+//      System.err.println(Integer.toString(iteration) + " ------------------------- cache mememres ------------------------ ");
+//       PrintUtilities.printList(outputCache.getAdvancedCache().getRpcManager().getMembers());
+//
+//       System.err.println(Integer.toString(iteration) + " -++++++++++++++++++++++++++++man mememres ------------------------ ");
+//        PrintUtilities.printList(imanager.getMembers());
 
-       System.err.println(Integer.toString(iteration) + " -++++++++++++++++++++++++++++man mememres ------------------------ ");
-        PrintUtilities.printList(imanager.getMembers());
-
-       System.err.println(Integer.toString(iteration) + " ==========================================");
-       System.err.println("Just written " + outputCache.get(Integer.toString(iteration)));
-      System.out.println(outputCache.getName() + " new depths " + outputCache.size() + " with " + resultArray.size() + "links");
-      return null;
+//       System.err.println(Integer.toString(iteration) + " ==========================================");
+//       System.err.println("Just written " + outputCache.get(Integer.toString(iteration)));
+//      System.out.println(outputCache.getName() + " new depths " + outputCache.size() + " with " + resultArray.size() + "links");
+//      return null;
    }
 }

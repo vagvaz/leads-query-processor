@@ -1,24 +1,22 @@
 package eu.leads.processor.web;
 
-import com.hazelcast.logging.Slf4jFactory;
 import data.MetaData;
 import data.PluginStatus;
 import eu.leads.processor.core.Tuple;
-import eu.leads.processor.plugins.PluginPackage;
+import eu.leads.processor.common.plugins.PluginPackage;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.Handler;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.WebSocket;
 import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.sockjs.SockJSSocket;
 import org.vertx.java.platform.PlatformLocator;
 import org.vertx.java.platform.PlatformManager;
 
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
 
@@ -28,6 +26,8 @@ import java.util.concurrent.Future;
 public class DefaultLeadsQueryProcessorClient implements LeadsQueryProcessorClient {
   private HttpClient httpClient =null;
   private WebSocket webSocket = null;
+  private Set<String> pendingQueries ;
+  private Set<String> registeredEvents;
 
   private PlatformManager platformManager = null;
   private Vertx vertx = null;
@@ -35,6 +35,8 @@ public class DefaultLeadsQueryProcessorClient implements LeadsQueryProcessorClie
    private String host = "";
    private int port = -1;
    private static Logger logger = LoggerFactory.getLogger(DefaultLeadsQueryProcessorClient.class.toString());
+
+
   @Override public void initialiaze(String host, int port) {
     clientId = UUID.randomUUID().toString();
      if(!host.startsWith("http://")){
@@ -56,18 +58,12 @@ public class DefaultLeadsQueryProcessorClient implements LeadsQueryProcessorClie
      platformManager = PlatformLocator.factory.createPlatformManager();
      //set vertx variable
     vertx = platformManager.vertx();
+//    MultiMap wsSocketMaps
      //Initialize REST API client
-    httpClient = vertx.createHttpClient().setPort(port).setHost(host).connectWebsocket(host + ":" + port + "/app/", new Handler<WebSocket>() {
-       @Override
-       public void handle(WebSocket socket) {
-          webSocket = socket;
-          webSocket.dataHandler(dataHandler);
-          webSocket.endHandler(endHandler);
-          clientId = webSocket.binaryHandlerID();
-          webSocket.exceptionHandler(exceptionHandler);
-          webSocket.frameHandler(frameHandler);
-       }
-    });
+//    httpClient = vertx.createHttpClient().setPort(port).setHost(host).connectWebsocket(host + ":"
+//                                                                                         + port
+//                                                                                         + "/app/",
+
 
 
 

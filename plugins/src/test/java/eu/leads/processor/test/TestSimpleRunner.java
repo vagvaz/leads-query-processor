@@ -5,12 +5,13 @@ import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.PluginHandlerListener;
+import eu.leads.processor.common.plugins.PluginManager;
+import eu.leads.processor.common.plugins.PluginPackage;
 import eu.leads.processor.common.utils.PrintUtilities;
+import eu.leads.processor.common.utils.storage.LeadsStorageFactory;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.plugins.PluginBaseImpl;
-import eu.leads.processor.plugins.PluginManager;
-import eu.leads.processor.plugins.PluginPackage;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.infinispan.Cache;
@@ -21,6 +22,7 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.File;
+import java.util.Properties;
 
 /**
  * Created by vagvaz on 6/3/14.
@@ -31,6 +33,9 @@ public class TestSimpleRunner {
         LQPConfiguration.getInstance().getConfiguration()
             .setProperty(StringConstants.CRAWLER_DEFAULT_CACHE, "webpages:");
 
+        Properties properties = new Properties();
+        properties.setProperty("prefix","/tmp/leads/");
+        PluginManager.initialize(LeadsStorageFactory.LOCAL, properties);
 //        PersistentCrawl.main(null);
         File pluginf =
             new File(PluginBaseImpl.class.getProtectionDomain().getCodeSource().getLocation()
@@ -40,7 +45,7 @@ public class TestSimpleRunner {
         if (args.length == 0) {
             configPath = "/home/vagvaz/Projects/idea/basic_plugin.xml";
             jarPath =
-                "/home/vagvaz/Projects/idea/leads-query-processor/plugins/target/leads-query-processor-plugins-1.0.0-SNAPSHOT.jar";
+                "/home/vagvaz/Projects/idea/leads-query-processor/plugins/target/leads-query-processor-plugins-1.0-SNAPSHOT.jar";
 
         } else {
             configPath = args[0];
@@ -57,7 +62,7 @@ public class TestSimpleRunner {
             e.printStackTrace();
         }
         PluginManager.deployPlugin(PluginBaseImpl.class.getCanonicalName(), config, "testCache",
-                                      EventType.CREATEANDMODIFY);
+                                      EventType.CREATEANDMODIFY,"defaultUser");
 
         putter.putValues();
         ConfigurationBuilder builder = new ConfigurationBuilder();
@@ -73,7 +78,7 @@ public class TestSimpleRunner {
         filterconfiguration.putArray("types", new JsonArray());
         filterconfiguration.putString("targetCache","testCache");
         PluginHandlerListener listener = new PluginHandlerListener();
-        remoteCache.addClientListener(listener,new Object[]{filterconfiguration.toString()},new Object[0]);
+//        remoteCache.addClientListener(listener,new Object[]{filterconfiguration.toString()},new Object[0]);
         System.out.println("Listener registered. Press <enter> to exit.");
         System.out.println("Exiting");
 
@@ -93,6 +98,7 @@ public class TestSimpleRunner {
         remoteCache.removeClientListener(listener);
 
         PrintUtilities.printMap(c);
+        PrintUtilities.printMap(logCache);
         PersistentCrawl.stop();
         System.exit(0);
     }
@@ -128,7 +134,7 @@ public class TestSimpleRunner {
             e.printStackTrace();
         }
         PluginManager.deployPlugin(PluginBaseImpl.class.getCanonicalName(), config, "webpages:",
-                                      EventType.CREATEANDMODIFY);
+                                      EventType.CREATEANDMODIFY,"defaultUser");
         putter.putValues();
         try {
             Thread.sleep(1000);

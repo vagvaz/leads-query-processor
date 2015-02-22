@@ -1,12 +1,11 @@
 package eu.leads.processor.infinispan.operators;
 
-import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.core.*;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.comp.LogProxy;
+import eu.leads.processor.infinispan.LeadsMapper;
 import eu.leads.processor.core.net.Node;
 import org.infinispan.Cache;
-import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.distexec.DistributedTask;
@@ -76,7 +75,8 @@ public class SortOperator extends BasicOperator {
       Cache beforeMerge = (Cache)this.manager.getPersisentCache(getOutput()+".merge");
       Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
-      SortCallable callable = new SortCallable(sortColumns,asceding,types,getOutput()+".merge",UUID.randomUUID().toString());
+      SortCallableUpdated<String,String> callable = new SortCallableUpdated(sortColumns,asceding,types,getOutput()+".merge",UUID.randomUUID().toString());
+//      SortCallable callable = new SortCallable(sortColumns,asceding,types,getOutput()+".merge",UUID.randomUUID().toString());
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder( callable);
       builder.timeout(1, TimeUnit.HOURS);
       DistributedTask task = builder.build();
