@@ -62,7 +62,7 @@ public class GroupByReducer extends LeadsReducer<String, String> {
       typesOfaggregates = new HashMap<>();
       aggregateNames = new ArrayList<>();
       aggregates = new ArrayList<>();
-      JsonArray columns = conf.getObject("body").getArray("groupingColumns");
+      JsonArray columns = conf.getObject("body").getArray("groupingKeys");
       Iterator<Object> columnIterator = columns.iterator();
       groupByColumns = new ArrayList<>(columns.size());
 

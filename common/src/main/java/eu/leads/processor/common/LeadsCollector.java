@@ -8,7 +8,6 @@ import org.infinispan.distexec.mapreduce.Collector;
 import org.infinispan.manager.EmbeddedCacheManager;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -80,8 +79,9 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
           List<VOut> list = (List<VOut>) storeCache.get(key);
 
           if (list == null) {
-            list = new ArrayList<VOut>(128);
+
             storeCache.put(key, list);
+            storeCache.getAdvancedCache().applyDelta();
           }
           list.add(value);
           emitCount.incrementAndGet();

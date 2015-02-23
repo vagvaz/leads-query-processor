@@ -1,7 +1,6 @@
 package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
-import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.math.FilterOperatorTree;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
@@ -17,7 +16,10 @@ import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by vagvaz on 2/20/15.
@@ -31,7 +33,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
   transient protected double totalSum;
   transient protected Cache approxSumCache;
   protected String qualString;
-  transient protected InfinispanManager manager;
+//  transient protected InfinispanManager manager;
   protected Logger log = LoggerFactory.getLogger(ScanCallableUpdate.class.toString());
 
   public ScanCallableUpdate(String configString, String output) {
@@ -42,9 +44,9 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
     super.initialize();
     versionedCache = new VersionedCacheTreeMapImpl(inputCache,new VersionScalarGenerator(),inputCache.getName());
 
-    pageRankCache = (Cache) manager.getPersisentCache("pagerankCache");
+    pageRankCache = (Cache) imanager.getPersisentCache("pagerankCache");
     log.info("--------------------    get approxSum cache ------------------------");
-    approxSumCache = (Cache) manager.getPersisentCache("approx_sum_cache");
+    approxSumCache = (Cache) imanager.getPersisentCache("approx_sum_cache");
     totalSum = -1f;
 
     if(conf.getObject("body").containsField("qual"))

@@ -32,7 +32,7 @@ public class GroupByOperator extends MapReduceOperator {
 
        super(com, persistence,log, action);
 
-       JsonArray columns = conf.getObject("body").getArray("groupingColumns");
+       JsonArray columns = conf.getObject("body").getArray("groupingKeys");
        Iterator<Object> columnIterator = columns.iterator();
        groupByColumns = new ArrayList<>(columns.size());
 

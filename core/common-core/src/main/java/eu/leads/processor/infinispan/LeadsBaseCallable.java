@@ -43,8 +43,10 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     outputCache = (Cache) imanager.getPersisentCache(output);
     keys = inputKeys;
     this.inputCache = cache;
-    emanager = new EnsembleCacheManager(ensembleHost);
-    ecache = emanager.getCache(output);
+    if(ensembleHost != null && !ensembleHost.equals("")) {
+      emanager = new EnsembleCacheManager(ensembleHost);
+      ecache = emanager.getCache(output);
+    }
     initialize();
   }
 
