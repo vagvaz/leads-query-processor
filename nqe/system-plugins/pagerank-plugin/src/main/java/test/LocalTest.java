@@ -1,7 +1,5 @@
 package test;
 
-import comm.Message;
-import comm.Node;
 import comm.Worker;
 import eu.leads.crawler.PersistentCrawl;
 import eu.leads.processor.common.StringConstants;
@@ -9,11 +7,10 @@ import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.plugins.PluginInterface;
-import eu.leads.processor.plugins.PluginManager;
+import eu.leads.processor.common.plugins.PluginManager;
 import eu.leads.processor.plugins.pagerank.PagerankPlugin;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
 import org.apache.commons.configuration.XMLConfiguration;
-import org.infinispan.Cache;
 
 import java.util.Iterator;
 import java.util.Map;

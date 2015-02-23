@@ -7,7 +7,7 @@ import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.plugins.PluginInterface;
-import eu.leads.processor.plugins.PluginManager;
+import eu.leads.processor.common.plugins.PluginManager;
 import eu.leads.processor.plugins.transform.TransformPlugin;
 import org.apache.commons.configuration.XMLConfiguration;
 

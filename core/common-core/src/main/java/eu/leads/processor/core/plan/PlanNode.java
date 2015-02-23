@@ -105,7 +105,7 @@ public class PlanNode extends DataType {
     public Integer getPid() {
         String result = "";
         JsonObject conf = getConfiguration();
-        return conf.getObject("body").getInteger("pid");
+        return conf.getObject("body").getInteger("nodeId");
     }
 
     public String getNodeId() {

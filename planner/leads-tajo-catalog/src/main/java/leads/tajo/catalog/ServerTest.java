@@ -259,6 +259,12 @@ public class ServerTest {
         catalog.createTable(new TableDesc(
                 CatalogUtil.buildFQName("adidas", "keywords"),schema,meta, getTestDir().toUri()));
 //
+
+         schema = new Schema();
+        schema.addColumn("koukou", Type.INT4);
+        schema.addColumn("ver", Type.TIMESTAMP);
+        catalog.createTable(new TableDesc(
+        CatalogUtil.buildFQName("default", "aname"),schema,meta, getTestDir().toUri()));
 //		TableDesc score = new org.apache.tajo.catalog.TableDesc(
 //				CatalogUtil.buildFQName(DEFAULT_DATABASE_NAME, "score"),
 //				schema3, StoreType.MEM, new KeyValueSet(), getTestDir("score"));

@@ -8,7 +8,7 @@ import java.util.List;
  * Created by vagvaz on 3/7/14.
  */
 @JsonAutoDetect
-public class ObjectQuery {
+public class ObjectQuery  {
     private String table;
     private String key;
     private List<String> attributes;

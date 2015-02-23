@@ -4,11 +4,11 @@ import eu.leads.processor.common.LeadsCollector;
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
-import eu.leads.processor.core.LeadsMapperCallable;
-import eu.leads.processor.core.LeadsReduceCallable;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.infinispan.LeadsMapperCallable;
+import eu.leads.processor.infinispan.LeadsReducerCallable;
 import eu.leads.processor.infinispan.operators.mapreduce.WGSMapper;
 import eu.leads.processor.infinispan.operators.mapreduce.WGSReducer;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
@@ -16,14 +16,15 @@ import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
-import org.infinispan.distexec.mapreduce.MapReduceTask;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by vagvaz on 9/26/14.
@@ -50,8 +51,8 @@ public class WGSOperator extends MapReduceOperator {
       init_statistics(this.getClass().getCanonicalName());
    }
 
-//   @Override
-   public void run2() {
+   @Override
+   public void run() {
       int count = 0;
       inputCacheName = getName() +".iter0";
       inputCache = (Cache) manager.getPersisentCache(inputCacheName);
@@ -78,8 +79,8 @@ public class WGSOperator extends MapReduceOperator {
       }
      cleanup();
    }
-   @Override
-   public void run() {
+//   @Override
+   public void run1() {
       int count = 0;
       inputCacheName = getName() +".iter0";
       inputCache = (Cache) manager.getPersisentCache(inputCacheName);
@@ -161,53 +162,53 @@ public class WGSOperator extends MapReduceOperator {
    }
 
   private void executeMapReducePhase(JsonObject jobConfig) {
-     MapReduceTask task = new MapReduceTask(inputCache);
-     task.mappedWith(new WGSMapper(jobConfig.toString()));
-     task.reducedWith(new WGSReducer(jobConfig.toString()));
-     task.timeout(1, TimeUnit.HOURS);
-     task.execute();
-//    DistributedExecutorService des = new DefaultExecutorService(inputCache);
-//    intermediateCacheName = inputCache.getName()+".intermediate";
-//    collector = new LeadsCollector(0, intermediateCache);
-//    LeadsMapperCallable mapperCallable = new LeadsMapperCallable(inputCache,collector,new WGSMapper(jobConfig.toString()));
-//    List<Future<?>> res = des.submitEverywhere(mapperCallable);
-//    try {
-//      if (res != null) {
-//        for (Future<?> result : res) {
-//          result.get();
-//        }
-//        System.out.println("mapper Execution is done");
-//      }
-//      else
-//      {
-//        System.out.println("mapper Execution not done");
-//      }
-//    } catch (InterruptedException e) {
-//      e.printStackTrace();
-//    } catch (ExecutionException e) {
-//      e.printStackTrace();
-//    }
+//     MapReduceTask task = new MapReduceTask(inputCache);
+//     task.mappedWith(new WGSMapper(jobConfig.toString()));
+//     task.reducedWith(new WGSReducer(jobConfig.toString()));
+//     task.timeout(1, TimeUnit.HOURS);
+//     task.execute();
+    DistributedExecutorService des = new DefaultExecutorService(inputCache);
+    intermediateCacheName = inputCache.getName()+".intermediate";
+    collector = new LeadsCollector(0, intermediateCache);
+    LeadsMapperCallable mapperCallable = new LeadsMapperCallable(inputCache,collector,new WGSMapper(jobConfig.toString()));
+    List<Future<?>> res = des.submitEverywhere(mapperCallable);
+    try {
+      if (res != null) {
+        for (Future<?> result : res) {
+          result.get();
+        }
+        System.out.println("mapper Execution is done");
+      }
+      else
+      {
+        System.out.println("mapper Execution not done");
+      }
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    } catch (ExecutionException e) {
+      e.printStackTrace();
+    }
 //    //Reduce
 //
-//    LeadsReduceCallable reducerCacllable = new LeadsReduceCallable(outputCache, new WGSReducer(jobConfig.toString()));
-//    DistributedExecutorService des_inter = new DefaultExecutorService(intermediateCache);
-//    List<Future<?>> reducers_res;
-//    res = des_inter
-//            .submitEverywhere(reducerCacllable);
-//    try {
-//      if (res != null) {
-//        for (Future<?> result : res) {
-//          result.get();
-//        }
-//        System.out.println("reducer Execution is done");
-//      } else {
-//        System.out.println("reducer Execution not done");
-//      }
-//    } catch (InterruptedException e) {
-//      e.printStackTrace();
-//    } catch (ExecutionException e) {
-//      e.printStackTrace();
-//    }
+    LeadsReducerCallable reducerCacllable = new LeadsReducerCallable(outputCache, new WGSReducer(jobConfig.toString()));
+    DistributedExecutorService des_inter = new DefaultExecutorService(intermediateCache);
+    List<Future<?>> reducers_res;
+    res = des_inter
+            .submitEverywhere(reducerCacllable);
+    try {
+      if (res != null) {
+        for (Future<?> result : res) {
+          result.get();
+        }
+        System.out.println("reducer Execution is done");
+      } else {
+        System.out.println("reducer Execution not done");
+      }
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    } catch (ExecutionException e) {
+      e.printStackTrace();
+    }
 
   }
 

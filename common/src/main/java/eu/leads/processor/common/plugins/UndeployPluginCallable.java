@@ -1,5 +1,6 @@
-package eu.leads.processor.plugins;
+package eu.leads.processor.common.plugins;
 
+import eu.leads.processor.plugins.SimplePluginRunner;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DistributedCallable;
 

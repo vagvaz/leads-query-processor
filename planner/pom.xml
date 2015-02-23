@@ -5,11 +5,12 @@
    <modelVersion>4.0.0</modelVersion>
    <packaging>pom</packaging>
    <modules>
+
       <module>planner-comp-mod</module>
+      <module>leads-tajo-module</module>
+      <module>leads-tajo-catalog</module>
       <module>planner-logic-mod</module>
       <module>planner-processor-mod</module>
-      <module>leads-tajo-catalog</module>
-      <module>leads-tajo-module</module>
       <module>planner-catalog-mod</module>
    </modules>
 

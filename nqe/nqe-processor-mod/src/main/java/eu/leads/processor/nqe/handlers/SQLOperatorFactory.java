@@ -7,7 +7,7 @@ import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.LeadsNodeType;
 import eu.leads.processor.infinispan.operators.*;
 import eu.leads.processor.infinispan.operators.mapreduce.IntersectOperator;
-import eu.leads.processor.infinispan.operators.mapreduce.ScanOperator;
+import eu.leads.processor.infinispan.operators.ScanOperator;
 import eu.leads.processor.infinispan.operators.mapreduce.UnionOperator;
 import org.apache.tajo.algebra.OpType;
 

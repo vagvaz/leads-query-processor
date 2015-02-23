@@ -7,7 +7,7 @@ import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.imanager.IManagerConstants;
-import eu.leads.processor.plugins.PluginPackage;
+import eu.leads.processor.common.plugins.PluginPackage;
 import org.apache.commons.lang.SerializationUtils;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;

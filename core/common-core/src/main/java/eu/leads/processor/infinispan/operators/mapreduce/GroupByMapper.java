@@ -1,6 +1,6 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
-import eu.leads.processor.core.LeadsMapper;
+import eu.leads.processor.infinispan.LeadsMapper;
 import eu.leads.processor.core.Tuple;
 import org.infinispan.distexec.mapreduce.Collector;
 import org.vertx.java.core.json.JsonArray;
@@ -60,7 +60,7 @@ public class GroupByMapper extends LeadsMapper<String, String, String, String> {
        isInitialized = true;
 //       System.err.println("-------------Initialize");
        super.initialize();
-       JsonArray columnArray = conf.getObject("body").getArray("groupingColumns");
+       JsonArray columnArray = conf.getObject("body").getArray("groupingKeys");
        Iterator<Object> columnsIterator = columnArray.iterator();
        columns = new ArrayList<String>(columnArray.size());
        while(columnsIterator.hasNext()){

@@ -5,8 +5,8 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.plugins.NutchTransformPlugin;
-import eu.leads.processor.plugins.PluginManager;
-import eu.leads.processor.plugins.PluginPackage;
+import eu.leads.processor.common.plugins.PluginManager;
+import eu.leads.processor.common.plugins.PluginPackage;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ public class ClusteredTest {
         PluginManager.uploadPlugin(ntplugin);
 
         //distributed deployment  ( plugin id, cache to install, events)
-        PluginManager.deployPlugin(id,"defaultCache", EventType.ALL);
+        PluginManager.deployPlugin(id,"defaultCache", EventType.ALL,"defaultUser");
 
         /*Start putting values to the cache */
         System.out.println("waiting to finish with nutch press enter");

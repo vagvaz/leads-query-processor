@@ -2,13 +2,12 @@ package eu.leads.processor.data;
 
 import eu.leads.crawler.PersistentCrawl;
 import eu.leads.processor.common.StringConstants;
-import eu.leads.processor.common.infinispan.CacheManagerFactory;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.plugins.EventType;
-import eu.leads.processor.plugins.PluginManager;
-import eu.leads.processor.plugins.PluginPackage;
+import eu.leads.processor.common.plugins.PluginManager;
+import eu.leads.processor.common.plugins.PluginPackage;
 import org.infinispan.Cache;
 
 import java.io.IOException;
@@ -64,9 +63,9 @@ public class DataCollection {
            PluginPackage pagerankPlugin = new PluginPackage(pagerankPluginClassName, pagerankPluginClassName, pagerankJar, pagerankConf);
            PluginPackage sentimentPlugin = new PluginPackage(sentimentPluginClassName, sentimentPluginClassName, sentimentJar, sentimentConf);
            PluginManager.uploadPlugin(pagerankPlugin);
-           PluginManager.deployPlugin(pagerankPluginClassName, webCacheName, EventType.CREATEANDMODIFY);
+           PluginManager.deployPlugin(pagerankPluginClassName, webCacheName, EventType.CREATEANDMODIFY,"defaultUser");
            PluginManager.uploadPlugin(sentimentPlugin);
-           PluginManager.deployPlugin(sentimentPluginClassName, webCacheName, EventType.CREATEANDMODIFY);
+           PluginManager.deployPlugin(sentimentPluginClassName, webCacheName, EventType.CREATEANDMODIFY,"defaultUser");
 
 
        }catch(Exception e){

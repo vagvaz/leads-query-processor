@@ -1,10 +1,9 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
-import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.core.LeadsMapper;
+import eu.leads.processor.infinispan.LeadsMapper;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
 import org.infinispan.Cache;

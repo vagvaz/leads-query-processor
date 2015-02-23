@@ -72,39 +72,39 @@
          <version>1.1.2</version>
       </dependency>
       <!--<dependency>-->
-         <!--<groupId>org.slf4j</groupId>-->
-         <!--<artifactId>slf4j-jdk14</artifactId>-->
-         <!--<version>1.7.5</version>-->
+      <!--<groupId>org.slf4j</groupId>-->
+      <!--<artifactId>slf4j-jdk14</artifactId>-->
+      <!--<version>1.7.5</version>-->
       <!--</dependency>-->
 
 
-<!--      <dependency>
-         <groupId>org.slf4j</groupId>
-         <artifactId>slf4j-log4j12</artifactId>
-         <version>1.7.7</version>
-      </dependency>-->
+      <!--      <dependency>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+               <version>1.7.7</version>
+            </dependency>-->
 
    </dependencies>
 
    <properties>
       <infinispan.version>7.0.1-SNAPSHOT</infinispan.version>
       <processor.version>1.0-SNAPSHOT</processor.version>
-       <vertx.version>2.1.5</vertx.version>
-       <vertx.testtools.version>2.0.3-final</vertx.testtools.version>
-       <junit.version>4.11</junit.version>
+      <vertx.version>2.1.5</vertx.version>
+      <vertx.testtools.version>2.0.3-final</vertx.testtools.version>
+      <junit.version>4.11</junit.version>
 
-       <tajo.version>0.10.0-SNAPSHOT</tajo.version>
-       <maven.compiler.plugin.version>3.2</maven.compiler.plugin.version>
-       <maven.resources.plugin.version>2.7</maven.resources.plugin.version>
-       <maven.clean.plugin.version>2.6</maven.clean.plugin.version>
-       <maven.vertx.plugin.version>2.0.4-final</maven.vertx.plugin.version>
-       <maven.surefire.plugin.version>2.17</maven.surefire.plugin.version>
-       <maven.failsafe.plugin.version>2.17</maven.failsafe.plugin.version>
-       <maven.surefire.report.plugin.version>2.17</maven.surefire.report.plugin.version>
-       <maven.javadoc.plugin.version>2.9</maven.javadoc.plugin.version>
-       <maven.dependency.plugin.version>2.9</maven.dependency.plugin.version>
-       <maven.install.plugin.version>2.5.2</maven.install.plugin.version>
-       <maven.jar.plugin.version>2.5</maven.jar.plugin.version>
+      <tajo.version>0.10.0-SNAPSHOT</tajo.version>
+      <maven.compiler.plugin.version>3.2</maven.compiler.plugin.version>
+      <maven.resources.plugin.version>2.7</maven.resources.plugin.version>
+      <maven.clean.plugin.version>2.6</maven.clean.plugin.version>
+      <maven.vertx.plugin.version>2.0.4-final</maven.vertx.plugin.version>
+      <maven.surefire.plugin.version>2.17</maven.surefire.plugin.version>
+      <maven.failsafe.plugin.version>2.17</maven.failsafe.plugin.version>
+      <maven.surefire.report.plugin.version>2.17</maven.surefire.report.plugin.version>
+      <maven.javadoc.plugin.version>2.9</maven.javadoc.plugin.version>
+      <maven.dependency.plugin.version>2.9</maven.dependency.plugin.version>
+      <maven.install.plugin.version>2.5.2</maven.install.plugin.version>
+      <maven.jar.plugin.version>2.5</maven.jar.plugin.version>
 
 
    </properties>
@@ -125,7 +125,7 @@
                <target>1.7</target>
                <encoding>UTF-8</encoding>
             </configuration>
-         </plugin>    
+         </plugin>
       </plugins>
    </build>
 </project>

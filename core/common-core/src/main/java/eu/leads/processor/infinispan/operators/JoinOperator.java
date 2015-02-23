@@ -55,7 +55,11 @@ public class JoinOperator extends BasicOperator {
         Cache outerCache = (Cache) manager.getPersisentCache(outerCacheName);
         Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
         DistributedExecutorService des = new DefaultExecutorService(innerCache);
-        JoinCallable2 callable = new JoinCallable2(conf.toString(),getOutput(),outerCache.getName(),isLeft);
+        JoinCallableUpdated<String,String> callable = new JoinCallableUpdated(conf.toString(),getOutput(),
+                                                                          outerCache
+                                                                                            .getName(),
+                                                       isLeft);
+//        JoinCallable2 callable = new JoinCallable2(conf.toString(),getOutput(),outerCache.getName(),isLeft);
        DistributedTaskBuilder builder = des.createDistributedTaskBuilder(callable);
        builder.timeout(1, TimeUnit.HOURS);
        DistributedTask task = builder.build();

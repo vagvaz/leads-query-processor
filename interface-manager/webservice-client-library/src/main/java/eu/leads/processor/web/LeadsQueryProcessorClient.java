@@ -1,9 +1,9 @@
+package eu.leads.processor.web;
+
 import data.MetaData;
 import data.PluginStatus;
 import eu.leads.processor.core.Tuple;
-import eu.leads.processor.plugins.PluginPackage;
-import eu.leads.processor.web.ActionResult;
-import eu.leads.processor.web.QueryStatus;
+import eu.leads.processor.common.plugins.PluginPackage;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.vertx.java.core.json.JsonObject;
 

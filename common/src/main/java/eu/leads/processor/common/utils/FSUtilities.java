@@ -47,7 +47,7 @@ public class FSUtilities {
     }
 
     public static void flushToTmpDisk(String path, byte[] filebytes) {
-        FSUtilities.flushToDisk(System.getProperty("java.io.tmpdir") + "/" + path, filebytes);
+        FSUtilities.flushToDisk(path, filebytes);
     }
 
     public static byte[] getBytesFromConfiguration(XMLConfiguration config) {

@@ -29,7 +29,7 @@ public class CqlTimeWindow extends Expr {
     private Expr TimeDate; //null means NOW
 
     public CqlTimeWindow(String str, Expr TimeDate) {
-        super(OpType.CqlTimeWindow);
+        super(OpType.DataType);//super(OpType.CqlTimeWindow);
         this.exprStr = str;
         this.TimeDate = TimeDate;
     }

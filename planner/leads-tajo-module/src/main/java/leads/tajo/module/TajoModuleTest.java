@@ -11,7 +11,7 @@ import static org.apache.tajo.TajoConstants.DEFAULT_DATABASE_NAME;
 
 
 public class TajoModuleTest {
-	private static   TaJoModule Mymodule;
+	private static TaJoModule Mymodule;
 	public static void main(String[] args) {
 		
 		// TODO Auto-generated method stub
@@ -46,7 +46,7 @@ public class TajoModuleTest {
 
                              res_expr= JsonHelper.fromJson(everything.toString(), Expr.class);//
                         }else{
-                            line = check_insert(line);
+                            line = TaJoModule.check_insert(line);
                              res_expr = TaJoModule.parseQuery(line);
                         }
                         System.out.println("END");
@@ -102,20 +102,5 @@ public class TajoModuleTest {
 	}
 
 
-    private static String check_insert(String sql){
-        sql = sql.trim();
-        final String[] arr = sql.split(" ", 2);
-        if(arr[0].equalsIgnoreCase("insert")) {
-            //
-            if(sql.toLowerCase().contains("values")) {
-                String[] newsql = sql.split("(?i)VALUES");
-                sql = newsql[0] + " select " + newsql[1].replaceAll("\\(|\\)", "");
-                System.out.print("Fixed sql: "+sql);
-            }
 
-        }
-
-        return sql;
-
-    }
 }
