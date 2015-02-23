@@ -8,8 +8,7 @@ import org.infinispan.distexec.mapreduce.Collector;
 import org.infinispan.manager.EmbeddedCacheManager;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -74,14 +73,20 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
     }
 
     public void emit(KOut key, VOut value) {
+      boolean locked = false;
+      while(!locked) {
 
-        if(onMap) {
+
+        locked = storeCache.getAdvancedCache().lock(key);
+
+      }
+      if(onMap) {
           List<VOut> list = (List<VOut>) storeCache.get(key);
 
           if (list == null) {
+            list = new LinkedList<>();
+            //storeCache.put(key, list);
 
-            storeCache.put(key, list);
-            storeCache.getAdvancedCache().applyDelta();
           }
           list.add(value);
           emitCount.incrementAndGet();
@@ -93,6 +98,9 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
         // if (isOverflown() && mcc.hasCombiner()) {
         // combine(mcc, this);
         // }
+      Set<Object> keys = new HashSet<>();
+      keys.add(key);
+       storeCache.getAdvancedCache().getLockManager().unlock(keys,storeCache.getAdvancedCache());
     }
 
 
