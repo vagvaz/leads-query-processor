@@ -55,7 +55,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
    */
   public ClusterInfinispanManager() {
     host = "0.0.0.0";
-    serverPort = 11225;
+    serverPort = 11222;
   }
 
   public ClusterInfinispanManager(EmbeddedCacheManager manager) {
