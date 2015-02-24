@@ -33,11 +33,18 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
   transient protected double totalSum;
   transient protected Cache approxSumCache;
   protected String qualString;
+  transient  boolean versioning;
+  boolean onVersionedCache;
+
 //  transient protected InfinispanManager manager;
   protected Logger log = LoggerFactory.getLogger(ScanCallableUpdate.class.toString());
 
   public ScanCallableUpdate(String configString, String output) {
     super(configString, output);
+  }
+  public ScanCallableUpdate(String configString, String output,boolean onVersionedCache) {
+    super(configString, output);
+    this.onVersionedCache = onVersionedCache;
   }
 
   @Override public void initialize() {
@@ -56,46 +63,95 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
     else{
       tree =null;
     }
+
+    versioning = getVersionPredicate(conf);
+  }
+
+  /**
+   * This method shoul read the Versions if any , from the configuration of the Scan operator and return true
+   * if there are specific versions required, false otherwise
+   * @param conf the configuration of the operator
+   * @return returns true if there is a query on specific versions false otherwise
+   */
+  private boolean getVersionPredicate(JsonObject conf) {
+    return false;
   }
 
   @Override public void executeOn(K key, V ivalue) {
     //         System.err.println(manager.getCacheManager().getAddress().toString() + " "+ entry.getKey() + "       " + entry.getValue());
-    //VERSIONING
-    //          String versionedKey = (String) key;
-    //          String ikey = pruneVersion(versionedKey);
-    //          Version latestVersion = versionedCache.getLatestVersion(ikey);
-    //          if(latestVersion == null){
-    //           continue;
-    //           }
-    //          Version currentVersion = getVersion(versionedKey);
-    //       Object objectValue = versionedCache.get(ikey);
-    //       String value = (String)objectValue;
-    //END VERSIONING
-    //NONVERSIONING
-    String ikey = (String)key;
-    String value = (String) inputCache.get(ikey);
-    //ENDNONVERSIONDING
-    //         String value = (String) entry.getValue();
-
-    //          String value = (String) entry.getValue();
-    //          String value = (String)inputCache.get(key);
-    Tuple tuple = new Tuple(value);
-    namesToLowerCase(tuple);
-    renameAllTupleAttributes(tuple);
-    if (tree != null) {
-      if(tree.accept(tuple)) {
-        tuple = prepareOutput(tuple);
-        //               log.info("--------------------    put into output with filter ------------------------");
-        if(key != null && tuple != null)
-          outputCache.put(key.toString(), tuple.asString());
+    String toRunValue = null;
+    if(onVersionedCache){
+      String versionedKey = (String) key;
+      String ikey = pruneVersion(versionedKey);
+      Version currentVersion = getVersion(versionedKey);
+      if(versioning){
+        if(isInVersionRange(currentVersion)){
+          toRunValue = (String)ivalue;
+        }
+      }
+      else{
+        Version latestVersion = versionedCache.getLatestVersion(ikey);
+        if (latestVersion == null) {
+          return;
+        }
+        Object objectValue = versionedCache.get(ikey);
+        toRunValue = (String) objectValue;
       }
     }
     else{
-      tuple = prepareOutput(tuple);
-      //            log.info("--------------------    put into output without tree ------------------------");
-      if(key != null && tuple != null)
-        outputCache.put(key.toString(), tuple.asString());
+      toRunValue = (String)ivalue;
     }
+//    if(versioning) {
+//      String versionedKey = (String) key;
+//      String ikey = pruneVersion(versionedKey);
+//      Version latestVersion = versionedCache.getLatestVersion(ikey);
+//      if (latestVersion == null) {
+//        continue;
+//      }
+//      Version currentVersion = getVersion(versionedKey);
+//      Object objectValue = versionedCache.get(ikey);
+//      String value = (String) objectValue;
+//    }
+//    else {
+
+//      String ikey = (String) key;
+//      String value = (String) inputCache.get(ikey);
+      //ENDNONVERSIONDING
+      //         String value = (String) entry.getValue();
+
+      //          String value = (String) entry.getValue();
+      //          String value = (String)inputCache.get(key);
+      Tuple tuple = new Tuple(toRunValue);
+      namesToLowerCase(tuple);
+      renameAllTupleAttributes(tuple);
+      if (tree != null) {
+        if (tree.accept(tuple)) {
+          tuple = prepareOutput(tuple);
+          //               log.info("--------------------    put into output with filter ------------------------");
+          if (key != null && tuple != null)
+            outputCache.put(key.toString(), tuple.asString());
+        }
+      } else {
+        tuple = prepareOutput(tuple);
+        //            log.info("--------------------    put into output without tree ------------------------");
+        if (key != null && tuple != null)
+          outputCache.put(key.toString(), tuple.asString());
+//      }
+    }
+  }
+
+  /**
+   *
+   * @param currentVersion the version of the tuple currently processed by the operator
+   * @return true if it satisfies the version range defined in the operator false otherwise
+   */
+  private boolean isInVersionRange(Version currentVersion) {
+    //SAMPLE CODE NOT NECESSARILY exactly like that
+    //if(currentVersion >= minVersion && <= maxVersion)
+//      return true;
+//    else
+//      return false;
+    return false;
   }
 
   private Version getVersion(String versionedKey) {
