@@ -3,7 +3,6 @@ package eu.leads.processor.infinispan.operators;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.TupleComparator;
 import eu.leads.processor.infinispan.LeadsBaseCallable;
-import org.infinispan.Cache;
 import org.infinispan.context.Flag;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 
@@ -40,7 +39,8 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
   @Override public void initialize() {
     super.initialize();
     address = inputCache.getCacheManager().getAddress().toString();
-    outputCache = (Cache) imanager.getPersisentCache(prefix+"."+address);
+//    outputCache = (Cache) imanager.getPersisentCache(prefix+"."+address);
+    outputCache = emanager.getCache(prefix+"."+address);
     tuples = new ArrayList<>(100);
   }
 

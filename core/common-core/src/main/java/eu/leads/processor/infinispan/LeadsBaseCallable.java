@@ -2,6 +2,7 @@ package eu.leads.processor.infinispan;
 
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.Cache;
 import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
@@ -28,7 +29,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   transient protected InfinispanManager imanager;
   transient protected Set<K> keys;
   transient protected  Cache<K,V> inputCache;
-  transient protected Cache outputCache;
+  transient protected EnsembleCache outputCache;
   protected String ensembleHost;
   transient protected EnsembleCacheManager emanager;
   transient protected EnsembleCache ecache;
@@ -40,12 +41,18 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   @Override public void setEnvironment(Cache<K, V> cache, Set<K> inputKeys) {
     embeddedCacheManager = cache.getCacheManager();
     imanager = new ClusterInfinispanManager(embeddedCacheManager);
-    outputCache = (Cache) imanager.getPersisentCache(output);
+//    outputCache = (Cache) imanager.getPersisentCache(output);
     keys = inputKeys;
     this.inputCache = cache;
     if(ensembleHost != null && !ensembleHost.equals("")) {
       emanager = new EnsembleCacheManager(ensembleHost);
       ecache = emanager.getCache(output);
+    }
+    else{
+      LQPConfiguration.initialize();
+      emanager = new EnsembleCacheManager(LQPConfiguration.getInstance().getHostname()+":11222");
+      ecache = emanager.getCache(output);
+      outputCache =  emanager.getCache(output);
     }
     initialize();
   }

@@ -225,7 +225,7 @@ public class LQPConfiguration {
      * @return Value for property 'hostname'.
      */
     public String getHostname() {
-        return configuration.getString("hostname");
+        return configuration.getString("node.hostname");
     }
 
     public void loadFile(String filename) {
