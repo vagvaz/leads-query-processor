@@ -42,7 +42,7 @@ public class SortMapper extends LeadsMapper<String, String, String, String> {
 //       Collections.sort(tuples,comparator);
 //       for (Tuple t : tuples) {
 //          handlePagerank(t);
-//          out.put(key + ":" + counter, t.asString());
+//          out.put(key + ":" + counter, t);
 //          counter++;
 //       }
 //       tuples.clear();

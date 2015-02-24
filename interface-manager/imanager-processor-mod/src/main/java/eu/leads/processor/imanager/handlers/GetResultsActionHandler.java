@@ -106,7 +106,7 @@ public class GetResultsActionHandler implements ActionHandler {
    private JsonObject batchGet(String cacheName, boolean isSorted, Long min) {
       JsonObject result = new JsonObject();
       JsonArray listOfValues = new JsonArray();
-     log.info("GetResults batch get only min");
+      log.info("GetResults batch get only min");
 
       Cache cache = (Cache) persistence.getPersisentCache(cacheName);
         if(isSorted) {

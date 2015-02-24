@@ -78,7 +78,7 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
     Collections.sort(tuples, comparator);
     int counter = 0;
     for (Tuple t : tuples) {
-      outputCache.put(outputCache.getName()  + counter, t.asString());
+      outputCache.put(outputCache.getName()  + counter, t);
       counter++;
     }
     tuples.clear();

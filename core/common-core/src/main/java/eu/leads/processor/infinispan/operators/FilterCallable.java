@@ -72,11 +72,13 @@ public class FilterCallable<K,V> implements DistributedCallable<K, V, String>, S
          if(!cdl.localNodeIsPrimaryOwner(ikey))
             continue;
          String key = (String) ikey;
-         String value = (String)inputCache.get(key);
-         Tuple tuple = new Tuple(value);
+//          String value = (String)inputCache.get(key);
+         Tuple tuple = (Tuple)inputCache.get(key);
+
+//         Tuple tuple = new Tuple(value);
          if(tree.accept(tuple)){
 //            tuple = prepareOutput(tuple);
-            outputCache.put(key,tuple.asString());
+            outputCache.put(key,tuple);
          }
 
       }

@@ -71,7 +71,7 @@ public class JoinCallableUpdated<K,V> extends LeadsSQLCallable<K,V> {
         String outerKey = outerEntry.getKey().substring(outerEntry.getKey().indexOf(":") + 1);
         String combinedKey = prefix + outerKey + "-" + currentKey;
         resultTuple = prepareOutput(resultTuple);
-        outputCache.put(combinedKey, resultTuple.asJsonObject().toString());
+        outputCache.put(combinedKey, resultTuple);
       }
       iterable.close();
 

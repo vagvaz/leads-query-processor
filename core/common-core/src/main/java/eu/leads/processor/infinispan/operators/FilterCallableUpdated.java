@@ -31,7 +31,7 @@ public class FilterCallableUpdated<K,V> extends LeadsSQLCallable<K,V> implements
     Tuple tuple = new Tuple(value);
     if(tree.accept(tuple)){
                   tuple = prepareOutput(tuple);
-      outputCache.put(key,tuple.asString());
+      outputCache.put(key,tuple);
     }
   }
 }

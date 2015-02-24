@@ -23,7 +23,7 @@ public class SortReducer extends LeadsReducer<String, String> {
     private List<Boolean> isAscending;
     private List<Boolean> arithmetic;
     private String output;
-    ConcurrentMap<String, String> out;
+    ConcurrentMap<String, Tuple> out;
 
     public SortReducer(JsonObject configuration) {
         super(configuration);
@@ -67,7 +67,7 @@ public class SortReducer extends LeadsReducer<String, String> {
 //        Collections.sort(tuples, comparator);
         int counter = 0;
         for (Tuple t : tuples) {
-            out.put(key + ":" + counter, t.asString());
+            out.put(key + ":" + counter, t);
             counter++;
         }
         tuples.clear();

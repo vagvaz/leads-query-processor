@@ -2,13 +2,13 @@ package eu.leads.processor.infinispan.operators.mapreduce;
 
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.infinispan.LeadsMapper;
 import eu.leads.processor.core.Tuple;
+import eu.leads.processor.infinispan.LeadsMapper;
 import org.infinispan.Cache;
 import org.infinispan.distexec.mapreduce.Collector;
 import org.vertx.java.core.json.JsonObject;
 
-import java.io.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class ProjectMapper extends LeadsMapper<String, String, String, String> implements Serializable {
-    transient private Cache<String, String> output = null;
+    transient private Cache<String, Tuple> output = null;
     transient private String prefix = "";
 
 
@@ -38,7 +38,7 @@ public class ProjectMapper extends LeadsMapper<String, String, String, String> i
 
         imanager = new ClusterInfinispanManager(manager);
         prefix = conf.getString("output") + ":";
-        output = (Cache<String, String>) imanager.getPersisentCache(conf.getString("output"));
+        output = (Cache<String, Tuple>) imanager.getPersisentCache(conf.getString("output"));
     }
 
     @Override
@@ -51,7 +51,8 @@ public class ProjectMapper extends LeadsMapper<String, String, String, String> i
         Tuple projected = new Tuple(value);
         handlePagerank(projected);
         projected = prepareOutput(projected);
-        output.put(prefix + tupleId, projected.asString());
+//        output.put(prefix + tupleId, projected.asString());
+        output.put(prefix + tupleId, projected);
     }
 
    protected Tuple prepareOutput(Tuple tuple) {
