@@ -37,8 +37,12 @@ public class Tuple extends DataType_bson implements Serializable{
         }
         data.putAll(tr.data);
     }
+//
+//  public Tuple(Tuple tmp) {
+//
+//  }
 
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         // Serialize it
 //        BasicBSONEncoder encoder = new BasicBSONEncoder();
         byte[] array = encoder.encode(data);

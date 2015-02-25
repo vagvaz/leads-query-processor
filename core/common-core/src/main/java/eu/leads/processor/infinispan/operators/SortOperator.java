@@ -75,7 +75,7 @@ public class SortOperator extends BasicOperator {
       Cache beforeMerge = (Cache)this.manager.getPersisentCache(getOutput()+".merge");
       Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
-      SortCallableUpdated<String,String> callable = new SortCallableUpdated(sortColumns,asceding,types,getOutput()+".merge",UUID.randomUUID().toString());
+      SortCallableUpdated<String,Tuple> callable = new SortCallableUpdated(sortColumns,asceding,types,getOutput()+".merge",UUID.randomUUID().toString());
 //      SortCallable callable = new SortCallable(sortColumns,asceding,types,getOutput()+".merge",UUID.randomUUID().toString());
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder( callable);
       builder.timeout(1, TimeUnit.HOURS);

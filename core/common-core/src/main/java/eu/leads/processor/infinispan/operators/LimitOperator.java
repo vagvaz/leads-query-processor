@@ -69,11 +69,12 @@ public class LimitOperator extends BasicOperator {
 //              System.err.println("e: " + entry.getKey().toString() + " ---> " + entry.getValue().toString());
 //            }
             for (counter = 0; counter < rowCount ; counter++) {
-                String tupleValue = (String) inputMap.get(inputPrefix + counter);
+//                String tupleValue = (String) inputMap.get(inputPrefix + counter);
+                Tuple tupleValue = (Tuple) inputMap.get(inputPrefix + counter);
                 if(tupleValue == null)
                    break;
 //                System.err.println("Read " + inputPrefix + counter + " --> " +tupleValue);
-                Tuple t = new Tuple(tupleValue);
+                Tuple t = tupleValue;
                 handlePagerank(t);
 //                System.err.println(prefix+counter);
                 data.put(prefix + Integer.toString(counter), t.asString());

@@ -1,5 +1,6 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.infinispan.LeadsMapper;
 import org.infinispan.distexec.mapreduce.Collector;
 import org.vertx.java.core.json.JsonObject;
@@ -11,7 +12,7 @@ import org.vertx.java.core.json.JsonObject;
  * Time: 10:22 AM
  * To change this template use File | Settings | File Templates.
  */
-public class SortMapper extends LeadsMapper<String, String, String, String> {
+public class SortMapper extends LeadsMapper<String, Tuple, String, Tuple> {
 
     transient protected String[] sortColumns;
     transient protected Boolean[] asceding;
@@ -32,7 +33,7 @@ public class SortMapper extends LeadsMapper<String, String, String, String> {
     }
 
     @Override
-    public void map(String key, String value, Collector<String, String> collector) {
+    public void map(String key, Tuple value, Collector<String, Tuple> collector) {
 //        if (!isInitialized)
 //            initialize();
 //        progress();

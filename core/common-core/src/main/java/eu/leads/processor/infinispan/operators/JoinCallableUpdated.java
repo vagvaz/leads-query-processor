@@ -45,7 +45,7 @@ public class JoinCallableUpdated<K,V> extends LeadsSQLCallable<K,V> {
   }
 
   @Override public void executeOn(K ikey, V ivalue) {
-    CloseableIterable<Map.Entry<String, String>> iterable = null;
+    CloseableIterable<Map.Entry<String, Tuple>> iterable = null;
     try{
       Tuple current = new Tuple((String)inputCache.get(ikey));
       //          String columnValue = current.getGenericAttribute(innerColumn).toString();
@@ -65,8 +65,9 @@ public class JoinCallableUpdated<K,V> extends LeadsSQLCallable<K,V> {
 
       iterable =
         outerCache.getAdvancedCache().filterEntries(new QualFilter(tree.getJson().toString()));
-      for (Map.Entry<String, String> outerEntry : iterable) {
-        Tuple outerTuple = new Tuple(outerEntry.getValue());
+      for (Map.Entry<String, Tuple> outerEntry : iterable) {
+//        Tuple outerTuple = new Tuple(outerEntry.getValue());
+        Tuple outerTuple = outerEntry.getValue();
         Tuple resultTuple = new Tuple(current, outerTuple, ignoreColumns);
         String outerKey = outerEntry.getKey().substring(outerEntry.getKey().indexOf(":") + 1);
         String combinedKey = prefix + outerKey + "-" + currentKey;

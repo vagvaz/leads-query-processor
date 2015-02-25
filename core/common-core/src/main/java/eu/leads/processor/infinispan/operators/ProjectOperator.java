@@ -3,6 +3,7 @@ package eu.leads.processor.infinispan.operators;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.infinispan.LeadsMapper;
@@ -54,7 +55,8 @@ public class ProjectOperator extends BasicOperator {
         return;
       }
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
-      ProjectCallableUpdated<String,String> callable = new ProjectCallableUpdated<>(conf.toString(),getOutput());
+      ProjectCallableUpdated<String,Tuple> callable = new ProjectCallableUpdated<>(conf.toString(),getOutput
+                                                                                                    ());
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder( callable);
       builder.timeout(1, TimeUnit.HOURS);
       DistributedTask task = builder.build();

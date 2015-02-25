@@ -21,7 +21,7 @@ import java.util.Map;
  * Time: 8:12 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ProjectMapper extends LeadsMapper<String, String, String, String> implements Serializable {
+public class ProjectMapper extends LeadsMapper<String, Tuple, String, Tuple> implements Serializable {
     transient private Cache<String, Tuple> output = null;
     transient private String prefix = "";
 
@@ -42,13 +42,14 @@ public class ProjectMapper extends LeadsMapper<String, String, String, String> i
     }
 
     @Override
-    public void map(String key, String value, Collector<String, String> collector) {
+    public void map(String key, Tuple value, Collector<String, Tuple> collector) {
         if (!isInitialized)
             initialize();
 
         progress();
         String tupleId = key.substring(key.indexOf(':') + 1);
-        Tuple projected = new Tuple(value);
+        Tuple projected = value;
+//        Tuple projected = new Tuple(value);
         handlePagerank(projected);
         projected = prepareOutput(projected);
 //        output.put(prefix + tupleId, projected.asString());

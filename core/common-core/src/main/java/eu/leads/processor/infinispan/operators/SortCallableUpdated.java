@@ -65,10 +65,12 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
   @Override public void executeOn(K key, V value) {
 
 
-      String valueString = (String)value;
-      if(!valueString.equals("")){
-
-      tuples.add(new Tuple(valueString));
+//      String valueString = (String)value;
+//      if(!valueString.equals("")){
+//
+//      tuples.add(new Tuple(valueString));
+    if(value != null ){
+      tuples.add((Tuple) value);
     }
 
   }

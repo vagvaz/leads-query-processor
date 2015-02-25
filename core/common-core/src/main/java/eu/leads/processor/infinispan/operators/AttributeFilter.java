@@ -9,7 +9,7 @@ import java.io.Serializable;
 /**
  * Created by vagvaz on 9/28/14.
  */
-public class AttributeFilter implements KeyValueFilter<String,String>,Serializable {
+public class AttributeFilter implements KeyValueFilter<String,Tuple>,Serializable {
     String columnValue;
     String columnKey;
     public AttributeFilter(String columnKey,String columnValue) {
@@ -19,12 +19,13 @@ public class AttributeFilter implements KeyValueFilter<String,String>,Serializab
 
 
    @Override
-    public boolean accept(String key, String value, Metadata metadata) {
+    public boolean accept(String key, Tuple value, Metadata metadata) {
        if(value == null){
 //          System.err.println("key " + key + " had null " + value);
           return false;
        }
-       Tuple tuple = new Tuple(value);
+       Tuple tuple = value;
+//       Tuple tuple = new Tuple(value);
         if(tuple.getGenericAttribute(columnKey).toString().equals(columnValue))
             return true;
         return false;

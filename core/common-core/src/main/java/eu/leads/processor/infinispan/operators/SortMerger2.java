@@ -3,7 +3,6 @@ package eu.leads.processor.infinispan.operators;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.TupleComparator;
-import org.apache.commons.collections.iterators.ReverseListIterator;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 
@@ -16,16 +15,16 @@ public class SortMerger2 {
    //    private Map<String, String> input;
 //    private String output;
    private final String prefix;
-   private final Map<String, String> outputCache;
+   private final Map<String, Tuple> outputCache;
    private Vector<Integer> counters;
    private List<Tuple> values;
    private Vector<String> keys;
-   private Vector<Map<String, String>> caches;
+   private Vector<Map<String, Tuple>> caches;
    private final TupleComparator comparator;
    private Vector<String> cacheNames;
    protected JsonObject inputSchema;
    protected JsonObject outputSchema;
-   protected Map<String,String> outputMap;
+   protected Map<String,Tuple> outputMap;
    protected Map<String,JsonObject> targetsMap;
    InfinispanManager manager;
    private long batchSize = 10000;
@@ -43,7 +42,7 @@ public class SortMerger2 {
       outputCache = manager.getPersisentCache(output);
       counters = new Vector<Integer>(inputCaches.size());
       values = new Vector<Tuple>(inputCaches.size());
-      caches = new Vector<Map<String, String>>();
+      caches = new Vector<Map<String, Tuple>>();
       cacheNames = new Vector<String>(inputCaches.size());
       keys = new Vector<String>(inputCaches.size());
       comparator = comp;
@@ -75,17 +74,22 @@ public class SortMerger2 {
    private Tuple getCurrentValue(int cacheIndex) {
       String key = keys.get(cacheIndex);
       Integer counter = counters.get(cacheIndex);
-      String tmp = caches.get(cacheIndex).get(key  + counter.toString());
+//      String tmp = caches.get(cacheIndex).get(key  + counter.toString());
+//      if(tmp == null || tmp.equals(""))
+//         return null;
+     Tuple tmp = caches.get(cacheIndex).get(key  + counter.toString());
       if(tmp == null || tmp.equals(""))
          return null;
-      return new Tuple(tmp);
+//      return new Tuple(tmp);
+      return tmp;
    }
 
    private Tuple getNextValue(int cacheIndex) {
       String key = keys.get(cacheIndex);
       Integer counter = counters.get(cacheIndex);
       counter = counter + 1;
-      String tmp = caches.get(cacheIndex).get(key +  counter.toString());
+//      String tmp = caches.get(cacheIndex).get(key +  counter.toString());
+      Tuple tmp = caches.get(cacheIndex).get(key +  counter.toString());
 //      if (tmp == null) {
 //         counters.remove(cacheIndex);
 //         caches.remove(cacheIndex);
@@ -97,8 +101,10 @@ public class SortMerger2 {
 //      }
       counters.set(cacheIndex, counter);
 //        String tmp = caches.get(cacheIndex).get(key +  counter.toString());
-      if(tmp!= null && !tmp.equals(""))
-         return new Tuple(tmp);
+//      if(tmp!= null && !tmp.equals(""))
+//         return new Tuple(tmp);
+     if(tmp != null)
+       return tmp;
       else
          return null;
    }
@@ -171,7 +177,8 @@ public class SortMerger2 {
          while (cmp < 0) {
 
             Tuple t = batchTuples.remove(0);
-            outputCache.put(prefix + counter, t.asString());
+            outputCache.put(prefix + counter, t);
+//            outputCache.put(prefix + counter, t.asString());
             if(batchTuples.size() == 0){
                return;
             }
@@ -183,7 +190,8 @@ public class SortMerger2 {
          if(oldcounter == counter){
 
             Tuple t = currentTuple;
-            outputCache.put(prefix + counter, t.asString());
+            outputCache.put(prefix + counter, t);
+//            outputCache.put(prefix + counter, t.asString());
             counter++;
             if(counter > rowcount)
                return;
@@ -202,7 +210,7 @@ public class SortMerger2 {
       String key = keys.get(cacheIndex);
       Integer counter = counters.get(cacheIndex);
       counter = counter + 1;
-      String tmp = caches.get(cacheIndex).get(key +  counter.toString());
+      Tuple tmp = caches.get(cacheIndex).get(key +  counter.toString());
       if (tmp == null) {
          counters.remove(cacheIndex);
          caches.remove(cacheIndex);
@@ -214,13 +222,14 @@ public class SortMerger2 {
       }
       counters.set(cacheIndex, counter);
 //        String tmp = caches.get(cacheIndex).get(key +  counter.toString());
-         return new Tuple(tmp);
+         return tmp;
    }
 
    private void splitTuples(List<Tuple> batchTuples) {
       for (Tuple t : batchTuples){
 //            t = prepareOutput(t);
-         outputCache.put(prefix + counter, t.asString());
+         outputCache.put(prefix + counter, t);
+//         outputCache.put(prefix + counter, t.asString());
          counter++;
          if(rowcount < counter)
             return;

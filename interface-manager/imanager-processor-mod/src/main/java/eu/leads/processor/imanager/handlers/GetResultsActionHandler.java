@@ -6,6 +6,7 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import org.infinispan.Cache;
@@ -114,23 +115,26 @@ public class GetResultsActionHandler implements ActionHandler {
             String prefix = cache.getName() + ":";
 //            long cacheSize = cache.size();
            long index = 0;
-           String value = (String) cache.get(prefix+String.valueOf(index));
+          Tuple value = (Tuple) cache.get(prefix+String.valueOf(index));
+//           String value = (String) cache.get(prefix+String.valueOf(index));
             while(value != null){
-               listOfValues.add(value);
+               listOfValues.add(value.toString());
+//               listOfValues.add(value);
                index++;
-               value =  (String) cache.get(prefix+String.valueOf(index));
+               value =  (Tuple) cache.get(prefix+String.valueOf(index));
             }
            log.info("End of reading values");
         }
         else{
           log.info("GetResults batchet with iterator");
-           CloseableIterable<Map.Entry<String, String>> iterable = null;
+           CloseableIterable<Map.Entry<String, Tuple>> iterable = null;
             try {
                  iterable =
                     cache.getAdvancedCache().filterEntries(new AcceptAllFilter());
               log.info("GetResults batchget before iterate over values");
-                for (Map.Entry<String, String> entry : iterable) {
-                    listOfValues.add(entry.getValue());
+                for (Map.Entry<String, Tuple> entry : iterable) {
+                    listOfValues.add(entry.getValue().toString());
+//                    listOfValues.add(entry.getValue());
                 }
                iterable.close();
               log.info("GetResults after iteration");

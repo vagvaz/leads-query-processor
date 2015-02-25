@@ -117,13 +117,15 @@ public class ScanCallable <K,V> implements
 //END VERSIONING
        //NONVERSIONING
         String ikey = (String)key;
-        String value = (String) inputCache.get(ikey);
+//        String value = (String) inputCache.get(ikey);
+       Tuple value = (Tuple) inputCache.get(ikey);
 //ENDNONVERSIONDING
           //         String value = (String) entry.getValue();
 
 //          String value = (String) entry.getValue();
 //          String value = (String)inputCache.get(key);
-        Tuple tuple = new Tuple(value);
+//        Tuple tuple = new Tuple(value);
+        Tuple tuple = value;
         namesToLowerCase(tuple);
         renameAllTupleAttributes(tuple);
         if (tree != null) {

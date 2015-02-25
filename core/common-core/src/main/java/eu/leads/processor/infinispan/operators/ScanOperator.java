@@ -2,6 +2,7 @@ package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import org.infinispan.Cache;
@@ -47,7 +48,7 @@ public class ScanOperator extends BasicOperator {
          return;
       }
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
-      ScanCallableUpdate<String,String> callable = new ScanCallableUpdate<>(conf.toString(),getOutput());
+      ScanCallableUpdate<String,Tuple> callable = new ScanCallableUpdate<>(conf.toString(),getOutput());
 //      ScanCallable callable = new ScanCallable(conf.toString(),getOutput());
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder( callable);
       builder.timeout(1, TimeUnit.HOURS);

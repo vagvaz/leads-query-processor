@@ -28,7 +28,8 @@ public class QualFilter implements KeyValueFilter, Serializable {
          return false;
       }
       else{
-         Tuple tuple = new Tuple((String)value);
+//         Tuple tuple = new Tuple((String)value);
+         Tuple tuple = (Tuple) value;
 //         System.out.println("accept?");
          boolean result = tree.accept(tuple);
 //         System.out.println("="+result);

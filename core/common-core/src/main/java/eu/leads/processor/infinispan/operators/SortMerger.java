@@ -20,11 +20,11 @@ public class SortMerger {
 //    private Map<String, String> input;
 //    private String output;
     private final String prefix;
-    private final Map<String, String> outputCache;
+    private final Map<String, Tuple> outputCache;
     private Vector<Integer> counters;
     private Vector<Tuple> values;
     private Vector<String> keys;
-    private Vector<Map<String, String>> caches;
+    private Vector<Map<String, Tuple>> caches;
     private final TupleComparator comparator;
     private Vector<String> cacheNames;
    protected JsonObject inputSchema;
@@ -43,7 +43,7 @@ public class SortMerger {
         outputCache = manager.getPersisentCache(output);
         counters = new Vector<Integer>(inputCaches.size());
         values = new Vector<Tuple>(inputCaches.size());
-        caches = new Vector<Map<String, String>>();
+        caches = new Vector<Map<String, Tuple>>();
         cacheNames = new Vector<String>(inputCaches.size());
         keys = new Vector<String>(inputCaches.size());
         comparator = comp;
@@ -85,17 +85,22 @@ public class SortMerger {
     private Tuple getCurrentValue(int cacheIndex) {
         String key = keys.get(cacheIndex);
         Integer counter = counters.get(cacheIndex);
-        String tmp = caches.get(cacheIndex).get(key  + counter.toString());
-        if(tmp == null || tmp.equals(""))
+//        String tmp = caches.get(cacheIndex).get(key  + counter.toString());
+//        if(tmp == null || tmp.equals(""))
+//           return null;
+//        return new Tuple(tmp);
+      Tuple tmp = caches.get(cacheIndex).get(key  + counter.toString());
+        if(tmp == null)
            return null;
-        return new Tuple(tmp);
+        return tmp;
     }
 
     private Tuple getNextValue(int cacheIndex) {
         String key = keys.get(cacheIndex);
         Integer counter = counters.get(cacheIndex);
         counter = counter + 1;
-       String tmp = caches.get(cacheIndex).get(key +  counter.toString());
+       Tuple tmp = caches.get(cacheIndex).get(key +  counter.toString());
+//       String tmp = caches.get(cacheIndex).get(key +  counter.toString());
         if (tmp == null) {
             counters.remove(cacheIndex);
             caches.remove(cacheIndex);
@@ -107,7 +112,7 @@ public class SortMerger {
         }
         counters.set(cacheIndex, counter);
 //        String tmp = caches.get(cacheIndex).get(key +  counter.toString());
-        return new Tuple(tmp);
+        return tmp;
     }
 
     public void merge() {
@@ -119,7 +124,8 @@ public class SortMerger {
 
             t = values.get(minIndex);
 //            t = prepareOutput(t);
-            outputCache.put(prefix + counter, t.asString());
+            outputCache.put(prefix + counter, t);
+//            outputCache.put(prefix + counter, t.asString());
             counter++;
             nextValue = getNextValue(minIndex);
             if (nextValue != null)
@@ -136,7 +142,7 @@ public class SortMerger {
         values = null;
         cacheNames.clear();
         cacheNames = null;
-        for (Map<String, String> map : caches) {
+        for (Map<String, Tuple> map : caches) {
             map.clear();
         }
         caches.clear();

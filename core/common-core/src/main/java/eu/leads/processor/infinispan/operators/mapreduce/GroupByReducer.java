@@ -21,7 +21,7 @@ import java.util.*;
  * Time: 9:36 AM
  * To change this template use File | Settings | File Templates.
  */
-public class GroupByReducer extends LeadsReducer<String, String> {
+public class GroupByReducer extends LeadsReducer<String, Tuple> {
 
 
 
@@ -149,7 +149,7 @@ public class GroupByReducer extends LeadsReducer<String, String> {
   }
 
   @Override
-    public void reduce(String key, Iterator<String> iterator,LeadsCollector collector) {
+    public void reduce(String key, Iterator<Tuple> iterator,LeadsCollector collector) {
        //Reduce takes all the grouped Typles per key
 //      System.out.println("running for " + key + " .");
       if(key == null || key.equals(""))
@@ -161,7 +161,8 @@ public class GroupByReducer extends LeadsReducer<String, String> {
        //Iterate overall values
         while (iterator.hasNext()) {
 
-            t = new Tuple(iterator.next());
+            t = iterator.next();
+//            t = new Tuple(iterator.next());
            //handle pagerank
 //           handlePagerank(t);
            Iterator<String> funcTypeIterator= functionType.iterator();
@@ -204,7 +205,8 @@ public class GroupByReducer extends LeadsReducer<String, String> {
 //        System.err.println("t: " + t.toString());
         t = prepareOutput(t);
 //        System.err.println("tout: " + t.toString());
-        collector.emit(prefix + key, t.asString());
+//        collector.emit(prefix + key, t.asString());
+        collector.emit(prefix + key, t);
         return ;
     }
 

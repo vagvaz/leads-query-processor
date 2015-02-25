@@ -20,9 +20,10 @@ public class ProjectCallableUpdated<K,V> extends LeadsSQLCallable<K,V> {
 
   @Override public void executeOn(K ikey, V ivalue) {
     String key = (String)ikey;
-    String value = (String)ivalue;
+//    String value = (String)ivalue;
     String tupleId = key.substring(key.indexOf(':') + 1);
-    Tuple projected = new Tuple(value);
+//    Tuple projected = new Tuple(value);
+    Tuple projected = (Tuple)ivalue;
 //    handlePagerank(projected);
     projected = prepareOutput(projected);
     outputCache.put(prefix + tupleId, projected.asString());

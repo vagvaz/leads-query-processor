@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * Created by vagvaz on 11/21/14.
  */
-public class JoinReducer extends LeadsReducer<String,String> {
+public class JoinReducer extends LeadsReducer<String,Tuple> {
    transient Cache outputCache;
    transient JsonObject conf;
    String configString;
@@ -32,13 +32,14 @@ public class JoinReducer extends LeadsReducer<String,String> {
    }
 
    @Override
-   public String reduce(String reducedKey, Iterator<String> iter) {
+   public Tuple reduce(String reducedKey, Iterator<Tuple> iter) {
     if(!isInitialized)
        initialize();
       Map<String,List<Tuple>> relations = new HashMap<>();
       while(iter.hasNext()){
-         String jsonTuple = iter.next();
-         Tuple t = new Tuple(jsonTuple);
+//         String jsonTuple = iter.next();
+//         Tuple t = new Tuple(jsonTuple);
+        Tuple t = iter.next();
          String table = t.getAttribute("TableId");
          t.removeAttribute("TableId");
          List<Tuple> tuples = relations.get(table);
@@ -49,7 +50,7 @@ public class JoinReducer extends LeadsReducer<String,String> {
          relations.put(table,tuples);
       }
       if(relations.size() < 2)
-         return "";
+         return null;
       ArrayList<List<Tuple>> arrays = new ArrayList<>(2);
       for(List<Tuple> a : relations.values()){
          arrays.add(a);
@@ -70,6 +71,6 @@ public class JoinReducer extends LeadsReducer<String,String> {
             outputCache.put(combinedKey, resultTuple.asJsonObject().toString());
          }
       }
-      return  "";
+      return  null;
    }
 }

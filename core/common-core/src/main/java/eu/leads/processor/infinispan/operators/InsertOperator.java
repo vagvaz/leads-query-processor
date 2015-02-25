@@ -97,7 +97,8 @@ public class InsertOperator extends BasicOperator {
              log.info("inserting into " + targetCache.getName() + " "
 
                      + key  +"     \n"+data.toString());
-                targetCache.put(key,data.toString());
+                targetCache.put(key,data);
+//                targetCache.put(key,data.toString());
 //                        versionedCache.put(key,data.toString(),version);
                 if(targetCache.size() < size + 1 ){
                     log.error("Insert Failed " + targetCache.size());
