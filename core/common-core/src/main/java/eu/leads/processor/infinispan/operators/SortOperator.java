@@ -1,19 +1,25 @@
 package eu.leads.processor.infinispan.operators;
 
-import eu.leads.processor.core.*;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.core.Action;
+import eu.leads.processor.core.Tuple;
+import eu.leads.processor.core.TupleComparator;
 import eu.leads.processor.core.comp.LogProxy;
-import eu.leads.processor.infinispan.LeadsMapper;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.infinispan.LeadsMapper;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.distexec.DistributedTask;
 import org.infinispan.distexec.DistributedTaskBuilder;
+import org.infinispan.remoting.transport.Address;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -75,11 +81,16 @@ public class SortOperator extends BasicOperator {
       Cache beforeMerge = (Cache)this.manager.getPersisentCache(getOutput()+".merge");
       Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
-      SortCallableUpdated<String,Tuple> callable = new SortCallableUpdated(sortColumns,asceding,types,getOutput()+".merge",UUID.randomUUID().toString());
+     String prefix = UUID.randomUUID().toString();
+      SortCallableUpdated<String,Tuple> callable = new SortCallableUpdated(sortColumns,asceding,types,getOutput()+".merge",prefix);
 //      SortCallable callable = new SortCallable(sortColumns,asceding,types,getOutput()+".merge",UUID.randomUUID().toString());
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder( callable);
       builder.timeout(1, TimeUnit.HOURS);
       DistributedTask task = builder.build();
+      for(Address cacheNodes : inputCache.getAdvancedCache().getRpcManager().getMembers()){
+        String tmpCacheName = prefix+"."+cacheNodes.toString();
+        manager.getPersisentCache(tmpCacheName);
+      }
       List<Future<String>> res = des.submitEverywhere(task);
       List<String> addresses = new ArrayList<String>();
       try {

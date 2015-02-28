@@ -30,6 +30,7 @@ public abstract class DataType_bson {
         return objectJSON;
     }
 
+
     public String asString() {
         return data.toString();
     }
@@ -42,5 +43,9 @@ public abstract class DataType_bson {
     @Override
     public String toString() {
         return data.toString();
+    }
+
+    public Object getValue(String key){
+      return data.get(key);
     }
 }
