@@ -26,6 +26,7 @@ public class ProjectCallableUpdated<K,V> extends LeadsSQLCallable<K,V> {
     Tuple projected = (Tuple)ivalue;
 //    handlePagerank(projected);
     projected = prepareOutput(projected);
-    outputCache.put(prefix + tupleId, projected.asString());
+//    outputCache.put(prefix + tupleId, projected.asString());
+    outputToCache(prefix + tupleId, projected);
   }
 }

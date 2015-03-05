@@ -19,12 +19,13 @@ public class LeadsMapperCallable<K, V, kOut, vOut> extends LeadsBaseCallable<K,V
 
 	Set<K> keys;
 	LeadsMapper<K, V, kOut, vOut> mapper = null;
+   String site;
 
 	public LeadsMapperCallable(Cache<K, V> cache,
 			LeadsCollector<kOut, vOut> collector,
-			LeadsMapper<K, V, kOut, vOut> mapper) {
+			LeadsMapper<K, V, kOut, vOut> mapper,String site) {
     super("{}",collector.getCache().getName());
-
+      this.site = site;
 		this.collector = collector;
 		this.mapper = mapper;
 	}

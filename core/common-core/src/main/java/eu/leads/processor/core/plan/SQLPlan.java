@@ -42,6 +42,7 @@ public class SQLPlan extends DataType implements Plan {
     private void computeInternalStructures(LogicalRootNode rootNode, String queryId) {
         JsonObject planGraph = generatePlan(rootNode);
         setPlanGraph(planGraph);
+       System.out.println("PLAN$$\n"+ planGraph.encodePrettily() );
         JsonArray nodes = new JsonArray();
         for (String node : planGraph.getFieldNames()) {
             nodes.add(planGraph.getObject(node));
@@ -164,13 +165,16 @@ public class SQLPlan extends DataType implements Plan {
             left.setOutput(top.getNodeId());
             right.setOutput(top.getNodeId());
             if (current instanceof JoinNode) {
+               System.out.println("\n\n\n\n\n\n\n\nJOIN\n\n\n\n\n\n\n\n\n"+current.toJson());
                 JoinNode joinNode = (JoinNode) current;
-                LogicalNode leftNode = joinNode.getLeftChild();
+               System.out.println("\n\n\n\n\n\n\n\nJOIN\n\n\n\n\n\n\n\n\n"+current.toJson());
+               LogicalNode leftNode = joinNode.getLeftChild();
                 LogicalNode rightNode = joinNode.getRightChild();
                 JsonObject leftSchema = new JsonObject(leftNode.getOutSchema().toJson());
                 JsonObject rightSchema = new JsonObject(rightNode.getOutSchema().toJson());
                 top.asJsonObject().getObject("configuration").getObject("body").putObject("leftSchema", leftSchema);
                 top.asJsonObject().getObject("configuration").getObject("body").putObject("rightSchema", rightSchema);
+
             }
             top.asJsonObject().getObject("configuration").getObject("body").removeField("leftChild");
             top.asJsonObject().getObject("configuration").getObject("body").removeField("rightChild");

@@ -373,7 +373,7 @@ public class PluginManager {
 
   private static RemoteCacheManager createRemoteCacheManager() {
     ConfigurationBuilder builder = new ConfigurationBuilder();
-    builder.addServer().host(LQPConfiguration.getConf().getString("node.ip")).port(11225);
+    builder.addServer().host(LQPConfiguration.getConf().getString("node.ip")).port(11222);
     return new RemoteCacheManager(builder.build());
   }
 

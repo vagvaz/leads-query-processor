@@ -91,6 +91,7 @@ public class SortOperator extends BasicOperator {
         String tmpCacheName = prefix+"."+cacheNodes.toString();
         manager.getPersisentCache(tmpCacheName);
       }
+      manager.getPersisentCache(prefix+"."+manager.getMemberName().toString());
       List<Future<String>> res = des.submitEverywhere(task);
       List<String> addresses = new ArrayList<String>();
       try {

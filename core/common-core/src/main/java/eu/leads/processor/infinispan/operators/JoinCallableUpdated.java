@@ -38,7 +38,7 @@ public class JoinCallableUpdated<K,V> extends LeadsSQLCallable<K,V> {
   @Override public void initialize() {
     super.initialize();
     outerCache = (Cache) imanager.getPersisentCache(outerCacheName);
-    JsonObject object = conf.getObject("body").getObject("joinQual");
+    JsonObject object = conf.getObject("body").getObject("qual");
     joinQual = new JsonObject();
     joinQual.mergeIn(object);
     tree = new FilterOperatorTree(object);

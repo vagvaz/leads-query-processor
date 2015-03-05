@@ -37,8 +37,8 @@ public class TupleComparator implements Comparator<Tuple> {
          Object value2 = o2.getValue(column);
         if(value1 == null || value2 == null)
         {
-          System.err.println("Comparing tuple " + o1.toString()+"\ntuple " + o2.toString() +"\ncurrent "
-                               + "columnt" + column + "has null");
+//          System.err.println("Comparing tuple " + o1.toString()+"\ntuple " + o2.toString() +"\ncurrent "
+//                               + "columnt" + column + "has null");
           return 0;
         }
          int comparison = TupleUtils.compareValues(value1,value2,types[i]);

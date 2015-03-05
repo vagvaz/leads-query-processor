@@ -39,6 +39,8 @@ public interface InfinispanManager {
 
     public ConcurrentMap getPersisentCache(String name, Configuration configuration);
 
+    public ConcurrentMap getIndexedPersistentCache(String name);
+    public ConcurrentMap getIndexedPersistentCache(String name,Configuration configuration);
     //    public ConcurrentMap getVersionedCache(String name);
     //    public ConcurrentMap getVersionedCache(String name, Configuration configuration);
     //    public ConcurrentMap getWeaklyConsistentCache(String name);

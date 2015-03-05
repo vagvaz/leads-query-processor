@@ -123,7 +123,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
       //          String value = (String) entry.getValue();
       //          String value = (String)inputCache.get(key);
 //      Tuple tuple = new Tuple(toRunValue);
-      Tuple tuple = toRunValue;
+      Tuple tuple = new Tuple(toRunValue);
       namesToLowerCase(tuple);
       renameAllTupleAttributes(tuple);
       if (tree != null) {
@@ -136,11 +136,13 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
       } else {
         tuple = prepareOutput(tuple);
         //            log.info("--------------------    put into output without tree ------------------------");
-        if (key != null && tuple != null)
-          outputCache.put(key.toString(), tuple);
-//      }
+        if (key != null && tuple != null){
+          outputToCache(key,tuple);
+      }
     }
   }
+
+
 
   /**
    *

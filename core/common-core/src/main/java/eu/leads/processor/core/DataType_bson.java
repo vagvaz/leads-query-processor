@@ -48,4 +48,8 @@ public abstract class DataType_bson {
     public Object getValue(String key){
       return data.get(key);
     }
+
+    public BSONObject asBsonObject() {
+        return data;
+    }
 }
