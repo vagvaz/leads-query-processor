@@ -13,12 +13,7 @@
    <artifactId>leads-query-processor-tajo-module</artifactId>
    <packaging>jar</packaging>
    <version>0.0.2-SNAPSHOT</version>
-   <scm>
-      <url>https://git-wip-us.apache.org/repos/asf/tajo.git</url>
-      <connection>scm:git:https://git-wip-us.apache.org/repos/asf/tajo.git</connection>
-      <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/tajo.git</developerConnection>
-      <tag>HEAD</tag>
-   </scm>
+
    <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
