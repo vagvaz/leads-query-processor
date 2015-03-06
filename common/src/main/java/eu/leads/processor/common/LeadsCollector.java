@@ -19,6 +19,10 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
   private final AtomicInteger emitCount;
   private final int maxCollectorSize;
   private transient Cache storeCache;
+  protected transient Cache  keysCache;
+  protected transient Cache intermediateDataCache;
+  protected transient Cache indexSiteCache;
+  protected transient  Cache counterCache;
   private transient InfinispanManager imanager;
   private boolean onMap = true;
   //  private LeadsCombiner combiner;

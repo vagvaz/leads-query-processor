@@ -3,6 +3,7 @@ package eu.leads.processor.infinispan.operators;
 import eu.leads.processor.common.LeadsCollector;
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
@@ -170,7 +171,10 @@ public class WGSOperator extends MapReduceOperator {
     DistributedExecutorService des = new DefaultExecutorService(inputCache);
     intermediateCacheName = inputCache.getName()+".intermediate";
     collector = new LeadsCollector(0, intermediateCache);
-    LeadsMapperCallable mapperCallable = new LeadsMapperCallable(inputCache,collector,new WGSMapper(jobConfig.toString()));
+    LeadsMapperCallable mapperCallable = new LeadsMapperCallable(inputCache,collector,new WGSMapper
+                                                                                        (jobConfig.toString
+                                                                                                     ()),
+                                                                  LQPConfiguration.getInstance().getMicroClusterName());
     List<Future<?>> res = des.submitEverywhere(mapperCallable);
     try {
       if (res != null) {

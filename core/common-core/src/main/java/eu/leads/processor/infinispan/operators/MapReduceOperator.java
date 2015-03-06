@@ -2,6 +2,7 @@ package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.LeadsCollector;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.*;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.infinispan.LeadsMapper;
@@ -25,6 +26,9 @@ public abstract class MapReduceOperator extends BasicOperator{
     protected transient Cache<?, ?> inputCache;
     protected transient Cache<?, List<?>> intermediateCache;
     protected transient Cache<?, ?> outputCache;
+    protected transient Cache  keysCache;
+    protected transient Cache intermediateDataCache;
+    protected transient Cache indexSiteCache;
     protected String inputCacheName;
     protected String outputCacheName;
     protected String intermediateCacheName;
@@ -56,6 +60,12 @@ public abstract class MapReduceOperator extends BasicOperator{
         inputCache = (Cache<?, ?>) manager.getPersisentCache(inputCacheName);
         intermediateCache = (Cache<?, List<?>>) manager
                                                           .getPersisentCache(intermediateCacheName);
+        //create Intermediate cache name for data on the same Sites as outputCache
+        intermediateDataCache = (Cache) manager.getPersisentCache(intermediateCacheName+".data");
+        //create Intermediate  keys cache name for data on the same Sites as outputCache;
+        keysCache = (Cache)manager.getPersisentCache(intermediateCacheName+".keys");
+        //createIndexCache for getting all the nodes that contain values with the same key! in a mc
+        indexSiteCache = (Cache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
           outputCache = (Cache<?, ?>) manager.getPersisentCache(outputCacheName);
           collector = new LeadsCollector(0, intermediateCache);
     }
@@ -71,7 +81,9 @@ public abstract class MapReduceOperator extends BasicOperator{
 //       task.timeout(1, TimeUnit.HOURS);
 //       task.execute();
        DistributedExecutorService des = new DefaultExecutorService(inputCache);
-       LeadsMapperCallable mapperCallable = new LeadsMapperCallable(inputCache,collector,mapper);
+       LeadsMapperCallable mapperCallable = new LeadsMapperCallable(inputCache,collector,mapper,
+                                                                     LQPConfiguration.getInstance().getMicroClusterName());
+
        List<Future<?>> res = des.submitEverywhere(mapperCallable);
        try {
             if (res != null) {
