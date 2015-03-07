@@ -9,13 +9,13 @@ import java.io.Serializable;
  */
 @Indexed
 public class LeadsIndexString implements Serializable, LeadsIndex {
-//    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
+    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
     private String cacheName;
     @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
     private String  attributeName;
     @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
     private String attributeValue;
-//    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
+    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
     private String keyName;
 
     public LeadsIndexString(){
