@@ -11,6 +11,17 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
    private String key;
    private Integer counter;
 
+   public ComplexIntermediateKey(String site, String node) {
+      this.site = site;
+      this.node = node;
+   }
+
+   public ComplexIntermediateKey(String site, String node,String key, Integer counter) {
+      this.site = site;
+      this.node = node;
+      this.key = key;
+      this.counter = counter;
+   }
    public String getSite() {
       return site;
    }

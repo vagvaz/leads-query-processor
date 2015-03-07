@@ -1,6 +1,5 @@
 package eu.leads.processor.infinispan;
 
-import eu.leads.processor.common.LeadsCollector;
 import org.infinispan.Cache;
 
 import java.io.Serializable;

@@ -1,6 +1,6 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
-import eu.leads.processor.common.LeadsCollector;
+import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.core.Tuple;

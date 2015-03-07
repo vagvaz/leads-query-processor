@@ -17,6 +17,18 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
    private String key;
 
+   public IndexedComplexIntermediateKey(String site, String node) {
+      this.site = site;
+      this.node = node;
+   }
+
+   public IndexedComplexIntermediateKey(String site, String node,String key) {
+      this.site = site;
+      this.node = node;
+      this.key = key;
+   }
+
+
    public String getSite() {
       return site;
    }
@@ -82,5 +94,8 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
          return  key.compareTo(that.key);
       }
       return -1;
+   }
+   String getUniqueKey(){
+      return site+node+key;
    }
 }

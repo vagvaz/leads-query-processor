@@ -2,11 +2,11 @@ package eu.leads.processor.common.test;
 
 
 import com.martiansoftware.jsap.*;
-import eu.leads.processor.common.*;
 import eu.leads.processor.common.infinispan.InfinispanCluster;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.infinispan.LeadsCollector;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.Util;
 import org.infinispan.configuration.cache.CacheMode;

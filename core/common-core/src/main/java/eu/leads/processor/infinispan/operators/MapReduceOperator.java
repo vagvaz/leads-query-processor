@@ -1,6 +1,6 @@
 package eu.leads.processor.infinispan.operators;
 
-import eu.leads.processor.common.LeadsCollector;
+import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.*;
