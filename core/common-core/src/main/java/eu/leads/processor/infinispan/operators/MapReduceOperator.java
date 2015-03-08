@@ -1,21 +1,19 @@
 package eu.leads.processor.infinispan.operators;
 
-import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.core.*;
+import eu.leads.processor.core.Action;
 import eu.leads.processor.core.comp.LogProxy;
-import eu.leads.processor.infinispan.LeadsMapper;
-import eu.leads.processor.infinispan.LeadsMapperCallable;
-import eu.leads.processor.infinispan.LeadsReducerCallable;
-import eu.leads.processor.infinispan.LeadsReducer;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.infinispan.*;
 import org.infinispan.Cache;
+import org.infinispan.commons.api.BasicCache;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -23,18 +21,19 @@ import java.util.concurrent.Future;
  * Created by tr on 19/9/2014.
  */
 public abstract class MapReduceOperator extends BasicOperator{
-    protected transient Cache<?, ?> inputCache;
-    protected transient Cache<?, List<?>> intermediateCache;
-    protected transient Cache<?, ?> outputCache;
-    protected transient Cache  keysCache;
-    protected transient Cache intermediateDataCache;
-    protected transient Cache indexSiteCache;
+    protected transient BasicCache inputCache;
+    protected transient BasicCache intermediateCache;
+    protected transient BasicCache  outputCache;
+    protected transient BasicCache  keysCache;
+    protected transient BasicCache intermediateDataCache;
+    protected transient BasicCache indexSiteCache;
     protected String inputCacheName;
     protected String outputCacheName;
     protected String intermediateCacheName;
     protected LeadsMapper<?, ?, ?, ?> mapper;
     protected LeadsCollector<?, ?> collector;
     protected LeadsReducer<?,?> reducer;
+    protected String uuid;
 
 
     public MapReduceOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
@@ -43,6 +42,7 @@ public abstract class MapReduceOperator extends BasicOperator{
        inputCacheName = getInput();
        outputCacheName = action.getData().getObject("operator").getString("id");
        intermediateCacheName = action.getData().getObject("operator").getString("id")+".intermediate";
+       uuid = UUID.randomUUID().toString();
     }
 
     public void setMapper(LeadsMapper<?, ?, ?, ?> mapper) {
@@ -57,17 +57,16 @@ public abstract class MapReduceOperator extends BasicOperator{
     @Override
     public void init(JsonObject config) {
        conf.putString("output",getOutput());
-        inputCache = (Cache<?, ?>) manager.getPersisentCache(inputCacheName);
-        intermediateCache = (Cache<?, List<?>>) manager
-                                                          .getPersisentCache(intermediateCacheName);
+        inputCache = (BasicCache) manager.getPersisentCache(inputCacheName);
+        intermediateCache = (BasicCache) manager.getPersisentCache(intermediateCacheName);
         //create Intermediate cache name for data on the same Sites as outputCache
-        intermediateDataCache = (Cache) manager.getPersisentCache(intermediateCacheName+".data");
+        intermediateDataCache = (BasicCache) manager.getPersisentCache(intermediateCacheName+".data");
         //create Intermediate  keys cache name for data on the same Sites as outputCache;
-        keysCache = (Cache)manager.getPersisentCache(intermediateCacheName+".keys");
+        keysCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".keys");
         //createIndexCache for getting all the nodes that contain values with the same key! in a mc
-        indexSiteCache = (Cache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
-          outputCache = (Cache<?, ?>) manager.getPersisentCache(outputCacheName);
-          collector = new LeadsCollector(0, intermediateCache);
+        indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
+          outputCache = (BasicCache) manager.getPersisentCache(outputCacheName);
+          collector = new LeadsCollector(0, intermediateCacheName);
     }
 
     @Override
@@ -80,8 +79,8 @@ public abstract class MapReduceOperator extends BasicOperator{
 //               .reducedWith((org.infinispan.distexec.mapreduce.Reducer<String, String>) reducer);
 //       task.timeout(1, TimeUnit.HOURS);
 //       task.execute();
-       DistributedExecutorService des = new DefaultExecutorService(inputCache);
-       LeadsMapperCallable mapperCallable = new LeadsMapperCallable(inputCache,collector,mapper,
+       DistributedExecutorService des = new DefaultExecutorService((Cache<?, ?>) inputCache);
+       LeadsMapperCallable mapperCallable = new LeadsMapperCallable((Cache) inputCache,collector,mapper,
                                                                      LQPConfiguration.getInstance().getMicroClusterName());
 
        List<Future<?>> res = des.submitEverywhere(mapperCallable);
@@ -103,8 +102,9 @@ public abstract class MapReduceOperator extends BasicOperator{
         }
 
        if(reducer != null) {
-          LeadsReducerCallable reducerCacllable = new LeadsReducerCallable(outputCache, reducer);
-          DistributedExecutorService des_inter = new DefaultExecutorService(intermediateCache);
+          LeadsReducerCallable reducerCacllable = new LeadsReducerCallable(outputCache.getName(), reducer,
+                                                                            intermediateCacheName);
+          DistributedExecutorService des_inter = new DefaultExecutorService((Cache<?, ?>) keysCache);
           List<Future<?>> reducers_res;
           res = des_inter
                         .submitEverywhere(reducerCacllable);

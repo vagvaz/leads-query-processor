@@ -8,6 +8,7 @@ import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.infinispan.Cache;
+import org.infinispan.commons.api.BasicCache;
 import org.vertx.java.core.json.JsonObject;
 
 /**
@@ -69,7 +70,7 @@ public abstract class BasicOperator extends Thread implements Operator{
          System.err.println("PROBLEM Uninitialized com");
    }
 
-    public void updateStatistics(Cache input1,Cache input2, Cache output)
+    public void updateStatistics(BasicCache input1,BasicCache input2, BasicCache output)
     {
         long endTime = System.currentTimeMillis();
 

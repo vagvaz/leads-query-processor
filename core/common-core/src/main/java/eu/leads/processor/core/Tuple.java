@@ -13,8 +13,8 @@ import java.util.*;
 
 public class Tuple extends DataType_bson implements Serializable{
 
-    static BasicBSONEncoder encoder = new BasicBSONEncoder();
-    static BasicBSONDecoder decoder = new BasicBSONDecoder();
+//    static BasicBSONEncoder encoder = new BasicBSONEncoder();
+//    static BasicBSONDecoder decoder = new BasicBSONDecoder();
 
     public Tuple(){
         super();
@@ -48,7 +48,7 @@ public class Tuple extends DataType_bson implements Serializable{
 
   private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         // Serialize it
-//        BasicBSONEncoder encoder = new BasicBSONEncoder();
+        BasicBSONEncoder encoder = new BasicBSONEncoder();
         byte[] array = encoder.encode(data);
         out.write(array);
 //      out.writeInt(data.toString().length());
@@ -57,7 +57,7 @@ public class Tuple extends DataType_bson implements Serializable{
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException{
         // Deserialize it
-//        BasicBSONDecoder decoder = new BasicBSONDecoder();
+        BasicBSONDecoder decoder = new BasicBSONDecoder();
         data = decoder.readObject(in);
 //         int size = in.readInt();
 //         byte[] bb =  new byte[size];

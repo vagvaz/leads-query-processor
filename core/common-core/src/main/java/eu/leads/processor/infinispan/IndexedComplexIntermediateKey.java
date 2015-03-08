@@ -28,8 +28,12 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
       this.key = key;
    }
 
+  public IndexedComplexIntermediateKey() {
 
-   public String getSite() {
+  }
+
+
+  public String getSite() {
       return site;
    }
 

@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentMap;
 public class LimitOperator extends BasicOperator {
     boolean sorted = false;
     Cache inputMap=null;
-    ConcurrentMap<String, String> data=null;
+    ConcurrentMap data=null;
     public String prefix;
     public String inputPrefix;
     public long rowCount;
@@ -77,18 +77,19 @@ public class LimitOperator extends BasicOperator {
                 Tuple t = tupleValue;
                 handlePagerank(t);
 //                System.err.println(prefix+counter);
-                data.put(prefix + Integer.toString(counter), t.asString());
+                data.put(prefix + Integer.toString(counter), t);
+//                data.put(prefix + Integer.toString(counter), t.asString());
             }
         } else {
-          CloseableIterable<Map.Entry<String, String>> iterable =
+          CloseableIterable<Map.Entry<String, Tuple>> iterable =
             inputMap.getAdvancedCache().filterEntries(new AcceptAllFilter());
-          for (Map.Entry<String, String> entry : iterable) {
+          for (Map.Entry<String, Tuple> entry : iterable) {
             if (counter >= rowCount)
               break;
             String tupleId = entry.getKey().substring(entry.getKey().indexOf(":") + 1);
-            Tuple t = new Tuple(entry.getValue());
+            Tuple t = entry.getValue();
             handlePagerank(t);
-            data.put(prefix + tupleId, t.asString());
+            data.put(prefix + tupleId, t);
             counter++;
           }
 

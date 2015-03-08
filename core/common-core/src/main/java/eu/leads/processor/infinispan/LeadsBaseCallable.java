@@ -1,10 +1,10 @@
 package eu.leads.processor.infinispan;
 
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
+import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.Cache;
-import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.context.Flag;
@@ -34,9 +34,9 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   transient protected  Cache<K,V> inputCache;
 //  transient protected EnsembleCache outputCache;
   protected String ensembleHost;
-  transient protected RemoteCache outputCache;
-  transient protected RemoteCache ecache;
-  transient protected RemoteCacheManager emanager;
+  transient protected EnsembleCache outputCache;
+  transient protected EnsembleCache ecache;
+  transient protected EnsembleCacheManager emanager;
 //  transient protected EnsembleCacheManager emanager;
 //  transient protected EnsembleCache ecache;
 
@@ -57,17 +57,18 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     keys = inputKeys;
     this.inputCache = cache;
     if(ensembleHost != null && !ensembleHost.equals("")) {
-//      emanager = new EnsembleCacheManager(ensembleHost);
-      emanager = createRemoteCacheManager();
-      ecache = emanager.getCache(output);
+      emanager = new EnsembleCacheManager(ensembleHost);
+//      emanager = createRemoteCacheManager();
+//      ecache = emanager.getCache(output);
     }
-    else{
+    else {
       LQPConfiguration.initialize();
-//      emanager = new EnsembleCacheManager(LQPConfiguration.getInstance().getHostname()+":11222");
-      emanager = createRemoteCacheManager();
+      emanager = new EnsembleCacheManager(LQPConfiguration.getInstance().getHostname() + ":11222");
+    }
+//      emanager = createRemoteCacheManager();
       ecache = emanager.getCache(output);
       outputCache =  emanager.getCache(output);
-    }
+
     initialize();
   }
 
@@ -99,21 +100,17 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   }
 
   @Override public void finalize(){
-    ecache.stop();
-    outputCache.stop();
-    emanager.stop();
+    try {
+      emanager.stop();
+//
+//      ecache.stop();
+//      outputCache.stop();
+    }catch(Exception e){
+        System.err.println("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage());
+      }
   }
 
   public void outputToCache(Object key, Object value){
-    boolean isok = false;
-    while(!isok) {
-      try {
-        outputCache.put(key.toString(), value);
-        isok =true;
-      } catch (Exception e) {
-        isok = false;
-        System.err.println("OUTPUT " + e.getMessage());
-      }
-    }
+    EnsembleCacheUtils.putToCache(outputCache,key.toString(),value  );
   }
 }

@@ -5,12 +5,15 @@ import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import org.infinispan.Cache;
+import org.infinispan.commons.api.BasicCache;
 import org.infinispan.distexec.mapreduce.Collector;
+import org.infinispan.ensemble.EnsembleCacheManager;
+import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.manager.EmbeddedCacheManager;
 
 import java.io.Serializable;
-import java.util.*;
-import java.util.Map.Entry;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
@@ -19,29 +22,29 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
   private static final long serialVersionUID = -602082107893975415L;
   private final AtomicInteger emitCount;
   private final int maxCollectorSize;
-  private transient Cache storeCache;
-  protected transient Cache  keysCache;
-  protected transient Cache intermediateDataCache;
-  protected transient Cache indexSiteCache;
+  private transient BasicCache storeCache;
+  protected transient BasicCache  keysCache;
+  protected transient BasicCache intermediateDataCache;
+  protected transient BasicCache indexSiteCache;
   protected transient  Cache counterCache;
   private transient InfinispanManager imanager;
-   private transient EmbeddedCacheManager manager;
+  private transient EmbeddedCacheManager manager;
+  private transient EnsembleCacheManager emanager;
   private boolean onMap = true;
-   private String site;
-   private String node;
+  private String site;
+  private String node;
   private String cacheName;
-   private ComplexIntermediateKey baseIntermKey;
-   private IndexedComplexIntermediateKey  baseIndexedKey;
+  private ComplexIntermediateKey baseIntermKey;
+  private IndexedComplexIntermediateKey  baseIndexedKey;
 
 
   public LeadsCollector(int maxCollectorSize,
-                         Cache<KOut, List<VOut>> collectorCache) {
+                         String collectorCacheName) {
     super();
 
     emitCount = new AtomicInteger();
     this.maxCollectorSize = maxCollectorSize;
-    storeCache = collectorCache;
-    cacheName = collectorCache.getName();
+    cacheName = collectorCacheName;
   }
 
   public LeadsCollector(int maxCollectorSize, String cacheName,InfinispanManager manager){
@@ -49,106 +52,147 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
     emitCount = new AtomicInteger();
     this.imanager = manager;
     this.cacheName = cacheName;
-    storeCache = (Cache<KOut, List<VOut>>) this.imanager.getPersisentCache(cacheName);
+    storeCache = (BasicCache) emanager.getCache(cacheName);
+//    storeCache = (BasicCache) this.imanager.getPersisentCache(cacheName);
+  }
+  public Cache getCounterCache() {
+    return counterCache;
   }
 
-  public Cache<KOut, List<VOut>> getCache() {
+  public void setCounterCache(Cache counterCache) {
+    this.counterCache = counterCache;
+  }
+
+  public BasicCache getIndexSiteCache() {
+    return indexSiteCache;
+  }
+
+  public void setIndexSiteCache(BasicCache indexSiteCache) {
+    this.indexSiteCache = indexSiteCache;
+  }
+
+  public BasicCache getIntermediateDataCache() {
+    return intermediateDataCache;
+  }
+
+  public void setIntermediateDataCache(BasicCache intermediateDataCache) {
+    this.intermediateDataCache = intermediateDataCache;
+  }
+
+  public BasicCache getKeysCache() {
+    return keysCache;
+  }
+
+  public void setKeysCache(EnsembleCache keysCache) {
+    this.keysCache = keysCache;
+  }
+
+  public BasicCache getCache() {
     return storeCache;
   }
 
-   public EmbeddedCacheManager getManager() {
-      return manager;
-   }
+  public EnsembleCacheManager getEmanager() {
+    return emanager;
+  }
 
-   public void setManager(EmbeddedCacheManager manager) {
-      this.manager = manager;
-   }
+  public void setEmanager(EnsembleCacheManager emanager) {
+    this.emanager = emanager;
+  }
 
-   public String getSite() {
-      return site;
-   }
+  public EmbeddedCacheManager getManager() {
+    return manager;
+  }
 
-   public void setSite(String site) {
-      this.site = site;
-   }
+  public void setManager(EmbeddedCacheManager manager) {
+    this.manager = manager;
+  }
 
-   public String getNode() {
-      return node;
-   }
+  public String getSite() {
+    return site;
+  }
 
-   public void setNode(String node) {
-      this.node = node;
-   }
-   //  private LeadsCombiner combiner;
+  public void setSite(String site) {
+    this.site = site;
+  }
 
-   public String getCacheName() {
-      return cacheName;
-   }
+  public String getNode() {
+    return node;
+  }
 
-   public void setCacheName(String cacheName) {
-      this.cacheName = cacheName;
-   }
+  public void setNode(String node) {
+    this.node = node;
+  }
+  //  private LeadsCombiner combiner;
 
-   public boolean isOnMap() {
-      return onMap;
-   }
+  public String getCacheName() {
+    return cacheName;
+  }
 
-   public void setOnMap(boolean onMap) {
-      this.onMap = onMap;
-   }
+  public void setCacheName(String cacheName) {
+    this.cacheName = cacheName;
+  }
 
-   public InfinispanManager getImanager() {
-      return imanager;
-   }
+  public boolean isOnMap() {
+    return onMap;
+  }
 
-   public void setImanager(InfinispanManager imanager) {
-      this.imanager = imanager;
-   }
+  public void setOnMap(boolean onMap) {
+    this.onMap = onMap;
+  }
 
-   public void initializeCache(InfinispanManager imanager){
-      this.imanager = imanager;
-      storeCache = (Cache) imanager.getPersisentCache(cacheName);
-      if(onMap) {
-         intermediateDataCache = (Cache) imanager.getPersisentCache(storeCache.getName() + ".data");
-         //create Intermediate  keys cache name for data on the same Sites as outputCache;
-         keysCache = (Cache) imanager.getPersisentCache(storeCache.getName() + ".keys");
-         //createIndexCache for getting all the nodes that contain values with the same key! in a mc
-         indexSiteCache = (Cache) imanager.getIndexedPersistentCache(storeCache.getName() + ".indexed");
-         counterCache = manager.getCache(manager.getAddress().toString() + ".counters");
-         baseIndexedKey = new IndexedComplexIntermediateKey(site, manager.getAddress().toString());
-         baseIntermKey = new ComplexIntermediateKey(site, manager.getAddress().toString());
-      }
-   }
-   public void emit(KOut key, VOut value) {
+  public InfinispanManager getImanager() {
+    return imanager;
+  }
+
+  public void setImanager(InfinispanManager imanager) {
+    this.imanager = imanager;
+  }
+
+  public void initializeCache(InfinispanManager imanager){
+    this.imanager = imanager;
+//    storeCache = (Cache) imanager.getPersisentCache(cacheName);
+    storeCache = emanager.getCache(cacheName);
+    if(onMap) {
+      intermediateDataCache = (BasicCache) emanager.getCache(storeCache.getName() + ".data");
+      //create Intermediate  keys cache name for data on the same Sites as outputCache;
+      keysCache = (BasicCache) emanager.getCache(storeCache.getName() + ".keys");
+      //createIndexCache for getting all the nodes that contain values with the same key! in a mc
+      indexSiteCache = (BasicCache) emanager.getCache(storeCache.getName() + ".indexed");
+      counterCache = manager.getCache(cacheName+"."+manager.getAddress().toString() + ".counters");
+      baseIndexedKey = new IndexedComplexIntermediateKey(site, manager.getAddress().toString());
+      baseIntermKey = new ComplexIntermediateKey(site, manager.getAddress().toString());
+    }
+  }
+  public void emit(KOut key, VOut value) {
 
     if(onMap) {
-//      List<VOut> list = (List<VOut>) storeCache.get(key);
+      //      List<VOut> list = (List<VOut>) storeCache.get(key);
 
-//      if (list == null) {
-//        list = new LinkedList<>();
-//        //storeCache.put(key, list);
-//
-//      }
-//      list.add(value);
-//      emitCount.incrementAndGet();
-       Integer currentCount = (Integer) counterCache.get(key);
-       if(currentCount == null)
-       {
-          currentCount = new Integer(1);
-          baseIndexedKey.setKey(key.toString());
-          EnsembleCacheUtils.putToCache(keysCache,baseIndexedKey.getUniqueKey(), baseIndexedKey.getUniqueKey());
-          EnsembleCacheUtils.putToCache(indexSiteCache,baseIndexedKey.getUniqueKey(), baseIndexedKey);
-       }
-       else{
-          currentCount = currentCount+1;
-       }
-       counterCache.put(key.toString(),currentCount);
-       baseIntermKey.setKey(key.toString());
-       baseIntermKey.setCounter(currentCount);
-       EnsembleCacheUtils.putToCache(intermediateDataCache,baseIntermKey,value);
+      //      if (list == null) {
+      //        list = new LinkedList<>();
+      //        //storeCache.put(key, list);
+      //
+      //      }
+      //      list.add(value);
+      //      emitCount.incrementAndGet();
+      Integer currentCount = (Integer) counterCache.get(key);
+      if(currentCount == null)
+      {
+        currentCount = new Integer(1);
+        baseIndexedKey.setKey(key.toString());
+        EnsembleCacheUtils.putIfAbsentToCache(keysCache, key, key);
+        EnsembleCacheUtils.putToCache(indexSiteCache,baseIndexedKey.getUniqueKey(), baseIndexedKey);
+      }
+      else{
+        currentCount = currentCount+1;
+      }
+      counterCache.put(key.toString(),currentCount);
+      baseIntermKey.setKey(key.toString());
+      baseIntermKey.setCounter(currentCount);
+      EnsembleCacheUtils.putToCache(intermediateDataCache,baseIntermKey,value);
     }
     else{
-      storeCache.put(key,value);
+      EnsembleCacheUtils.putToCache(storeCache, key, value);
       emitCount.incrementAndGet();
     }
     // if (isOverflown() && mcc.hasCombiner()) {
@@ -170,15 +214,15 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
     emitCount.set(0);
   }
 
-  public void emit(Map<KOut, List<VOut>> combined) {
-    for (Entry<KOut, List<VOut>> e : combined.entrySet()) {
-      KOut k = e.getKey();
-      List<VOut> values = e.getValue();
-      for (VOut v : values) {
-        emit(k, v);
-      }
-    }
-  }
+  //  public void emit(Map<KOut, List<VOut>> combined) {
+  //    for (Entry<KOut, List<VOut>> e : combined.entrySet()) {
+  //      KOut k = e.getKey();
+  //      List<VOut> values = e.getValue();
+  //      for (VOut v : values) {
+  //        emit(k, v);
+  //      }
+  //    }
+  //  }
 
   public boolean isOverflown() {
     return emitCount.get() > maxCollectorSize;

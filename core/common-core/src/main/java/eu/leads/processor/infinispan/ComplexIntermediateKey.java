@@ -22,7 +22,19 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
       this.key = key;
       this.counter = counter;
    }
-   public String getSite() {
+
+  public ComplexIntermediateKey() {
+
+  }
+
+  public ComplexIntermediateKey(IndexedComplexIntermediateKey currentChunk) {
+    this.site = currentChunk.getSite();
+    this.node = currentChunk.getNode();
+    this.key = currentChunk.getKey();
+    this.counter = 0;
+  }
+
+  public String getSite() {
       return site;
    }
 
@@ -102,4 +114,8 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
       }
       return -1;
    }
+
+  public void next() {
+    counter++;
+  }
 }

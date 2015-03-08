@@ -559,7 +559,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
                             .clustering()
                             .cacheMode(CacheMode.DIST_SYNC)
                             .hash().numOwners(2)
-                            .indexing().index(Index.ALL).transaction().transactionMode(TransactionMode
+                            .indexing().setProperty("auto-config", "true") .setProperty("default.directory_provider", "ram").index(Index.ALL).transaction().transactionMode(TransactionMode
                                                                                                  .NON_TRANSACTIONAL)
                             .persistence()
                                      //                            .addStore(LevelDBStoreConfigurationBuilder.class
