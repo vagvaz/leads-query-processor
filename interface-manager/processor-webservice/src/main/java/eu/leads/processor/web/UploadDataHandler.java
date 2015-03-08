@@ -20,16 +20,16 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Created by vagvaz on 8/4/14.
+ * Created by vagvaz on 3/8/15.
  */
-public class UndeployPluginHandler implements Handler<HttpServerRequest> {
+public class UploadDataHandler implements Handler<HttpServerRequest> {
   Node com;
   Logger log;
-  Map<String, UndeployPluginBodyHandler> bodyHandlers;
-  Map<String, UndeployPluginReplyHandler> replyHandlers;
+  Map<String, UploadDataBodyHandler> bodyHandlers;
+  Map<String, UploadDataReplyHandler> replyHandlers;
 
 
-  public UndeployPluginHandler(final Node com, Logger log) {
+  public UploadDataHandler(final Node com, Logger log) {
     this.com = com;
     this.log = log;
     replyHandlers = new HashMap<>();
@@ -42,26 +42,26 @@ public class UndeployPluginHandler implements Handler<HttpServerRequest> {
     request.response().putHeader(WebStrings.CONTENT_TYPE, WebStrings.APP_JSON);
     log.info("Deploy Plugin Request");
     String reqId = UUID.randomUUID().toString();
-    UndeployPluginReplyHandler replyHandler = new UndeployPluginReplyHandler(reqId, request);
-    UndeployPluginBodyHandler bodyHanlder = new UndeployPluginBodyHandler(reqId, replyHandler);
+    UploadDataReplyHandler replyHandler = new UploadDataReplyHandler(reqId, request);
+    UploadDataBodyHandler bodyHanlder = new UploadDataBodyHandler(reqId, replyHandler);
     replyHandlers.put(reqId, replyHandler);
     bodyHandlers.put(reqId, bodyHanlder);
     request.bodyHandler(bodyHanlder);
   }
 
   public void cleanup(String id) {
-    UndeployPluginReplyHandler rh = replyHandlers.remove(id);
-    UndeployPluginBodyHandler bh = bodyHandlers.remove(id);
+    UploadDataReplyHandler rh = replyHandlers.remove(id);
+    UploadDataBodyHandler bh = bodyHandlers.remove(id);
     rh = null;
     bh = null;
   }
 
 
-  private class UndeployPluginReplyHandler implements LeadsMessageHandler {
+  private class UploadDataReplyHandler implements LeadsMessageHandler {
     HttpServerRequest request;
     String requestId;
 
-    public UndeployPluginReplyHandler(String requestId, HttpServerRequest request) {
+    public UploadDataReplyHandler(String requestId, HttpServerRequest request) {
       this.request = request;
       this.requestId = requestId;
     }
@@ -93,13 +93,13 @@ public class UndeployPluginHandler implements Handler<HttpServerRequest> {
   }
 
 
-  private class UndeployPluginBodyHandler implements Handler<Buffer> {
+  private class UploadDataBodyHandler implements Handler<Buffer> {
 
 
-    private final UndeployPluginReplyHandler replyHandler;
+    private final UploadDataReplyHandler replyHandler;
     private final String requestId;
 
-    public UndeployPluginBodyHandler(String requestId,UndeployPluginReplyHandler replyHandler) {
+    public UploadDataBodyHandler(String requestId,UploadDataReplyHandler replyHandler) {
       this.replyHandler = replyHandler;
       this.requestId = requestId;
     }
@@ -116,7 +116,7 @@ public class UndeployPluginHandler implements Handler<HttpServerRequest> {
       Action action = new Action();
       action.setId(requestId);
       action.setCategory(StringConstants.ACTION);
-      action.setLabel(IManagerConstants.UNDEPLOY_PLUGIN);
+      action.setLabel(IManagerConstants.UPLOAD_DATA);
       action.setOwnerId(com.getId());
       action.setComponentType("webservice");
       action.setTriggered("");
