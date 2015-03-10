@@ -37,53 +37,11 @@
       </dependencies>
    </dependencyManagement>
    <dependencies>
-      <dependency>
-         <groupId>org.slf4j</groupId>
-         <artifactId>slf4j-api</artifactId>
-         <version>1.7.5</version>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-
-            </exclusion>
-         </exclusions>
-      </dependency>
-      <dependency>
-         <groupId>ch.qos.logback</groupId>
-         <artifactId>logback-classic</artifactId>
-         <version>1.1.2</version>
-      </dependency>
-      <dependency>
-         <groupId>ch.qos.logback</groupId>
-         <artifactId>logback-core</artifactId>
-         <version>1.1.2</version>
-      </dependency>
-      <!--<dependency>-->
-      <!--<groupId>org.slf4j</groupId>-->
-      <!--<artifactId>slf4j-jdk14</artifactId>-->
-      <!--<version>1.7.5</version>-->
-      <!--</dependency>-->
-
-
-      <!--      <dependency>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-               <version>1.7.7</version>
-            </dependency>-->
-
+       <dependency>
+           <groupId>org.slf4j</groupId>
+           <artifactId>jcl-over-slf4j</artifactId>
+           <version>${slf4j.version}</version>
+       </dependency>
    </dependencies>
 
    <properties>
@@ -92,9 +50,13 @@
       <vertx.version>2.1.5</vertx.version>
       <vertx.testtools.version>2.0.3-final</vertx.testtools.version>
       <junit.version>4.11</junit.version>
-
+      <hadoop.version>2.5.1</hadoop.version>
+      <protobuf.version>2.5.0</protobuf.version>
       <tajo.version>0.10.0-SNAPSHOT</tajo.version>
-      <maven.compiler.plugin.version>3.2</maven.compiler.plugin.version>
+      <netty.version>4.0.25.Final</netty.version>
+       <slf4j.version>1.7.5</slf4j.version>
+
+       <maven.compiler.plugin.version>3.2</maven.compiler.plugin.version>
       <maven.resources.plugin.version>2.7</maven.resources.plugin.version>
       <maven.clean.plugin.version>2.6</maven.clean.plugin.version>
       <maven.vertx.plugin.version>2.0.4-final</maven.vertx.plugin.version>
