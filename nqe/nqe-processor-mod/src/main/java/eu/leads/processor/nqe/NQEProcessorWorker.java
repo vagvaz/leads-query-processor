@@ -119,7 +119,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
        handlers = new HashMap<String,ActionHandler>();
       handlers.put(NQEConstants.DEPLOY_OPERATOR,new OperatorActionHandler(com,log,persistence,id));
       handlers.put(NQEConstants.DEPLOY_PLUGIN,new DeployPluginActionHandler(com,log,persistence,id));
-      handlers.put(NQEConstants.UNDEPLOY_PLUGIN,new UnDeployPluginActionHandler(com,log,persistence,id));
+      handlers.put(NQEConstants.UNDEPLOY_PLUGIN,new DeployPluginActionHandler(com,log,persistence,id));
 
 
       bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {

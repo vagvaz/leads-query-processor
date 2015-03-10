@@ -1,6 +1,6 @@
-import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.common.plugins.PluginPackage;
-import eu.leads.processor.web.QueryStatus;
+import eu.leads.processor.plugins.EventType;
+import eu.leads.processor.web.ActionResult;
 import eu.leads.processor.web.WebServiceClient;
 import org.apache.commons.configuration.XMLConfiguration;
 
@@ -64,7 +64,7 @@ public class WebServiceClientTestPlugins {
 
 
         System.out.print("Serialized size: " + barray.length);
-       QueryStatus currentStatus = WebServiceClient.submitPlugin("vagvaz", testpackage);
+       ActionResult currentStatus = WebServiceClient.submitPlugin("vagvaz", testpackage);
 
 
 
