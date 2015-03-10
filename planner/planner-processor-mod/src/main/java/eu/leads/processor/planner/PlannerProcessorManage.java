@@ -38,7 +38,7 @@ public class PlannerProcessorManage extends ManageVerticle {
                     public void handle(AsyncResult<String> event) {
                         if (event.succeeded()) {
                             workerId = event.result();
-                            logProxy.info("8PlannerProcessorWorker " + config.getString("id")
+                            logProxy.info("99999999PlannerProcessorWorker " + config.getString("id")
                                               + " has been deployed");
                             com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id,
                                                                                           serviceType));

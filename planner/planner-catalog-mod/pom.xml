@@ -47,52 +47,6 @@
 
    <dependencies>
       <!--Vertx provided dependencies-->
-        <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.1.1</version>
-    </dependency>
-    
-      <dependency>
-    <groupId>org.slf4j</groupId>
-    <artifactId>slf4j-api</artifactId>
-    <version>${slf4j.version}</version>
-</dependency>
-             <dependency>
-           <groupId>org.slf4j</groupId>
-           <artifactId>slf4j-log4j12</artifactId>
-
-           <version>${slf4j.version}</version>
-       </dependency>
-            <dependency>
-         <groupId>gr.tuc.softnet</groupId>
-         <artifactId>leads-query-processor-tajo-module</artifactId>
-         <version>0.0.2-SNAPSHOT</version>
-      </dependency>
-       <dependency>
-           <groupId>io.netty</groupId>
-           <artifactId>netty-transport</artifactId>
-           <version>${netty.version}</version>
-       </dependency>
-       <dependency>
-           <groupId>io.netty</groupId>
-           <artifactId>netty-codec</artifactId>
-           <version>${netty.version}</version>
-
-       </dependency>
-       <dependency>
-           <groupId>io.netty</groupId>
-           <artifactId>netty-handler</artifactId>
-           <version>${netty.version}</version>
-
-       </dependency>
-
-       <dependency>
-           <groupId>io.netty</groupId>
-           <artifactId>netty-codec-http</artifactId>
-           <version>${netty.version}</version>
-
-       </dependency>
       <dependency>
          <groupId>io.vertx</groupId>
          <artifactId>vertx-core</artifactId>
