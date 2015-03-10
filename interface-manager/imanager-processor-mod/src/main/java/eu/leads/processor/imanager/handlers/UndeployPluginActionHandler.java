@@ -18,7 +18,7 @@ public class UndeployPluginActionHandler implements ActionHandler {
     private final LogProxy log;
     private final InfinispanManager persistence;
     private final String id;
-    private Cache<String, String> queriesCache;
+    private Cache ownersCache;
     private Cache activePluginCache;
     public UndeployPluginActionHandler(Node com, LogProxy log, InfinispanManager persistence,
                                        String id) {
@@ -26,7 +26,7 @@ public class UndeployPluginActionHandler implements ActionHandler {
         this.log = log;
         this.persistence = persistence;
         this.id = id;
-        queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
+        ownersCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.OWNERSCACHE);
         activePluginCache = (Cache) persistence.getPersisentCache(StringConstants.PLUGIN_ACTIVE_CACHE);
     }
 
@@ -36,35 +36,48 @@ public class UndeployPluginActionHandler implements ActionHandler {
 
         Action result = action;
         JsonObject actionResult = new JsonObject();
+        JsonObject reply = new JsonObject();
+        reply.putString("status","UNKNOWN");
+        actionResult.putObject("reply",reply);
+        JsonObject undeployAction = new JsonObject();
+        JsonObject undeployPlugin = action.getData();
         //READ parameters;
-        String cacheName = ""; //action.getData().getString("");
-        String pluginId = "";
-        String username = "";
-        JsonObject status = new JsonObject();
-        if(activePluginCache.containsKey(cacheName+":"+pluginId+":jar")){
-            if(activePluginCache.containsKey(cacheName+":"+pluginId+":owner")) {
+//      req.putString("pluginid",pluginId);
+//      req.putString("cachename",cacheName);
+//      req.putString("user",username);
+        String cacheName = undeployPlugin.getString("cachename");
+        String pluginId = undeployPlugin.getString("pluginid");
+        String username = undeployPlugin.getString("user");
+
+        if(activePluginCache.containsKey(activePluginCache.getName()+":"+pluginId+username)){
+            if(ownersCache.containsKey(pluginId+username)) {
                 //Everything are fine so read the NQEProcessor that deployed the plugin
-                String nqeOwner = (String) activePluginCache.get(cacheName + ":" + pluginId + ":owner");
+                String nqeOwner = (String) ownersCache.get(pluginId+username);
                 //Create Action to undeployPlugin
-                JsonObject undeployAction = action.getData();
+                undeployAction = action.getData();
                 undeployAction.putString("owner",nqeOwner);
                 actionResult.putObject("undeployAction",undeployAction);
-                status.putString("status",ActionStatus.COMPLETED.toString());
-
+                result.setStatus(ActionStatus.COMPLETED.toString());
+                reply.putString("status","SUCCESS");
+                actionResult.putObject("reply",reply);
+                actionResult.putObject("undeployAction",undeployAction);
             }
             else{
-                status.putString("status",ActionStatus.FAILED.toString());
+                reply.putString("status","FAIL");
+                reply.putString("message","could find owner of plugin");
+                result.setStatus(ActionStatus.COMPLETED.toString());
+                actionResult.putObject("reply",reply);
+
             }
         }
         else{
-            status.putString("status",ActionStatus.FAILED.toString());
+          reply.putString("status","FAIL");
+          reply.putString("message","could find owner of plugin");
+          result.setStatus(ActionStatus.COMPLETED.toString());
+          actionResult.putObject("reply", reply);
         }
-        actionResult.putObject("status",status);
         result.setResult(actionResult);
         result.setStatus(ActionStatus.COMPLETED.toString());
         return result;
     }
-
-
-
 }

@@ -465,4 +465,14 @@ public class PluginManager {
     manager.addListener(runner, cacheName);
 
   }
+
+  public static boolean uploadInternalPlugin(PluginPackage plugin) {
+    if (!validatePlugin(plugin)) {
+      log.error("Could validate Plugin " + plugin.getId() + " with class name " + plugin.getClassName());
+      return false;
+    }
+    upload(StringConstants.PLUGIN_CACHE, plugin);
+    return true;
+
+  }
 }

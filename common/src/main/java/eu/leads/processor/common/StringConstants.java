@@ -34,4 +34,5 @@ public class StringConstants {
    public static final String DEFAULT_TABLESPACE_NAME = "defaultTableSpace";
    public static final String STATISTICS_CACHE = "statisticsCache";
   public static final String TMPPREFIX = "leads/processor/tmp/";
+  public static final java.lang.String OWNERSCACHE = "ownersCache";
 }
