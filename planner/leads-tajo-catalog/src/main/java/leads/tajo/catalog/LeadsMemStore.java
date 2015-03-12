@@ -676,8 +676,8 @@ public class LeadsMemStore implements CatalogStore {
     }
 
     @Override
-    public List<CatalogProtos.IndexProto> getAllIndexes() throws CatalogException {
-        List<CatalogProtos.IndexProto> indexList = new ArrayList<CatalogProtos.IndexProto>();
+    public List<CatalogProtos.IndexDescProto> getAllIndexes() throws CatalogException {
+        List<CatalogProtos.IndexDescProto> indexList = new ArrayList<CatalogProtos.IndexDescProto>();
         Set<String> databases = indexes.keySet();
 
         //TODO

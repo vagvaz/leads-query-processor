@@ -594,8 +594,8 @@ public class LeadsMemStore2 implements CatalogStore {
     }
 
     @Override
-    public List<CatalogProtos.IndexProto> getAllIndexes() throws CatalogException {
-        List<CatalogProtos.IndexProto> indexList = new ArrayList<CatalogProtos.IndexProto>();
+    public List<CatalogProtos.IndexDescProto> getAllIndexes() throws CatalogException {
+        List<CatalogProtos.IndexDescProto> indexList = new ArrayList<CatalogProtos.IndexDescProto>();
         Set<String> databases = indexes.keySet();
 
         for (String databaseName: databases) {
@@ -603,12 +603,12 @@ public class LeadsMemStore2 implements CatalogStore {
 
             for (String indexName: indexMap.keySet()) {
                 IndexDescProto indexDesc = indexMap.get(indexName);
-                CatalogProtos.IndexProto.Builder builder = CatalogProtos.IndexProto.newBuilder();
+                CatalogProtos.IndexDescProto.Builder builder = CatalogProtos.IndexDescProto.newBuilder();
 
-                builder.setColumnName(indexDesc.getColumn().getName());
-                builder.setDataType(indexDesc.getColumn().getDataType().getType().toString());
+              //  builder.setColumnName(indexDesc.getColumn().getName());
+               // builder.setDataType(indexDesc.getColumn().getDataType().getType().toString());
                 builder.setIndexName(indexName);
-                builder.setIndexType(indexDesc.getIndexMethod().toString());
+               // builder.setIndexType(indexDesc.getIndexMethod().toString());
                 builder.setIsAscending(indexDesc.hasIsAscending() && indexDesc.getIsAscending());
                 builder.setIsClustered(indexDesc.hasIsClustered() && indexDesc.getIsClustered());
                 builder.setIsUnique(indexDesc.hasIsUnique() && indexDesc.getIsUnique());
