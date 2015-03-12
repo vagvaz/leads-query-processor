@@ -67,10 +67,14 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
             switch (ActionStatus.valueOf(action.getStatus())) {
                 case PENDING: //probably received an action from an external source
                     if (label.equals(NQEConstants.DEPLOY_OPERATOR)) {
-                        action.getData().putString("replyTo",action.getData().getString("monitor"));
+                        action.getData().putString("replyTo", action.getData().getString("monitor"));
                         action.setStatus(ActionStatus.INPROCESS.toString());
                         com.sendWithEventBus(workQueueAddress, action.asJsonObject());
-                    } else {
+                    }else if( (label.equals(NQEConstants.DEPLOY_PLUGIN)) || (label.equals(NQEConstants.UNDEPLOY_PLUGIN))){
+                      action.setStatus(ActionStatus.INPROCESS.toString());
+                      com.sendWithEventBus(workQueueAddress,action.asJsonObject());
+                    }
+                    else {
                         log.error("Unknown PENDING Action received " + action.toString());
                         return;
                     }
@@ -85,6 +89,9 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
                 case COMPLETED: // the action either a part of a multistep workflow (INPROCESSING) or it could be processed.
                     if (label.equals(NQEConstants.DEPLOY_OPERATOR)) {
                         com.sendTo(action.getData().getString("replyTo"), action.getResult());
+                    }else if( (label.equals(NQEConstants.DEPLOY_PLUGIN)) || (label.equals(NQEConstants.UNDEPLOY_PLUGIN))){
+//                      action.setStatus(ActionStatus.INPROCESS.toString());
+//                      com.sendWithEventBus((workQueueAddress,action.asJsonObject());
                     }
 
                     else {

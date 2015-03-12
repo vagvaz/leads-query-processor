@@ -34,6 +34,8 @@ import static eu.leads.processor.plugins.EventType.*;
  */
 public class PluginRunnerFilter implements CacheEventFilter,Serializable {
 
+
+
   private JsonObject conf;
   private String configString;
   transient private final EmbeddedCacheManager manager;
@@ -93,9 +95,9 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
     } catch (IOException e) {
       e.printStackTrace();
     }
-    initializePlugin(pluginsCache,pluginName,user);
     targetCacheName = conf.getString("targetCache");
     targetCache = (Cache) imanager.getPersisentCache(targetCacheName);
+    initializePlugin(pluginsCache,pluginName,user);
     System.err.println("Initialized plugin " + pluginName + " on " + targetCacheName);
   }
 
@@ -120,7 +122,7 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
 //      jarFileName = System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugName
 //                      + ".jar";
 //    }
-    PluginPackage pluginPackage = (PluginPackage) cache.get(cache.getName()+":"+plugName+user);
+    PluginPackage pluginPackage = (PluginPackage) cache.get(targetCacheName+":"+plugName+user);
     String tmpdir = System.getProperties().getProperty("java.io.tmpdir")+"/"+StringConstants
                                                                           .TMPPREFIX+"/runningPlugins/"+ UUID
                                                                                                      .randomUUID()

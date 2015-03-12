@@ -45,7 +45,7 @@ public class DeployPluginActionHandler implements ActionHandler {
   @Override
   public Action process(Action action) {
 
-      System.out.println("New deploy plugin action arrived: " + action.toString());
+      System.out.println("New deploy plugin action arrived ");
       Action result = action;
       JsonObject actionResult = new JsonObject();
       actionResult.putString("status","UNKNOWN");

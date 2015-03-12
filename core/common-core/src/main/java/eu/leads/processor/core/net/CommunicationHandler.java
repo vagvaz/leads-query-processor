@@ -43,10 +43,10 @@ public class CommunicationHandler implements Handler<Message> {
         }
         else if(incoming.getString(MessageUtils.MSGTYPE).equals("msg")){
 //            logger.info(owner.getId() + " Received Message from " + from + " with id " + incoming.getLong(MessageUtils.MSGID));
-            boolean alreadyDelivered = owner.checkIfDelivered(incoming);
-            owner.ack(incoming);
-            if(alreadyDelivered)
-                return;
+          boolean alreadyDelivered = owner.checkIfDelivered(incoming);
+          owner.ack(incoming);
+          if(alreadyDelivered)
+              return;
         }
 
 

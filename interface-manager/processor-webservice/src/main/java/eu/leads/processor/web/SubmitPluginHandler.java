@@ -41,7 +41,7 @@ public class SubmitPluginHandler implements Handler<HttpServerRequest> {
   public void handle(HttpServerRequest request) {
     request.response().setStatusCode(200);
     request.response().putHeader(WebStrings.CONTENT_TYPE, WebStrings.APP_JSON);
-    log.info("Deploy Plugin Request");
+    log.info("Submit Plugin Request");
     String reqId = UUID.randomUUID().toString();
     SubmitPluginReplyHandler replyHandler = new SubmitPluginReplyHandler(reqId, request);
     SubmitPluginBodyHandler bodyHanlder = new SubmitPluginBodyHandler(reqId, replyHandler);

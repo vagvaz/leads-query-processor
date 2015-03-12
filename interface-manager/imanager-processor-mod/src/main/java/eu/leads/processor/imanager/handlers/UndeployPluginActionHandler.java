@@ -52,7 +52,7 @@ public class UndeployPluginActionHandler implements ActionHandler {
         if(activePluginCache.containsKey(activePluginCache.getName()+":"+pluginId+username)){
             if(ownersCache.containsKey(pluginId+username)) {
                 //Everything are fine so read the NQEProcessor that deployed the plugin
-                String nqeOwner = (String) ownersCache.get(pluginId+username);
+                String nqeOwner = (String) ownersCache.get(cacheName+":"+pluginId+username);
                 //Create Action to undeployPlugin
                 undeployAction = action.getData();
                 undeployAction.putString("owner",nqeOwner);

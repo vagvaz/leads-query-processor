@@ -366,25 +366,26 @@ public class ClusterInfinispanManager implements InfinispanManager {
    */
   @Override
   public void removeListener(Object listener, Cache cache) {
-    DistributedExecutorService des = new DefaultExecutorService(cache);
-    List<Future<Void>> list = new LinkedList<Future<Void>>();
-    for (Address a : getMembers()) {
-      //            des.submitEverywhere(new AddListenerCallable(cache.getName(),listener));
-      try {
-        list.add(des.submit(a, new RemoveListenerCallable(cache.getName(), listener)));
-      } catch (Exception e) {
-        log.error(e.getMessage());
-      }
-    }
-
-
-    for (Future<Void> future : list) {
-      try {
-        future.get(); // wait for task to complete
-      } catch (InterruptedException e) {
-      } catch (ExecutionException e) {
-      }
-    }
+//    DistributedExecutorService des = new DefaultExecutorService(cache);
+//    List<Future<Void>> list = new LinkedList<Future<Void>>();
+//    for (Address a : getMembers()) {
+//      //            des.submitEverywhere(new AddListenerCallable(cache.getName(),listener));
+//      try {
+//        list.add(des.submit(a, new RemoveListenerCallable(cache.getName(), listener)));
+//      } catch (Exception e) {
+//        log.error(e.getMessage());
+//      }
+//    }
+//
+//
+//    for (Future<Void> future : list) {
+//      try {
+//        future.get(); // wait for task to complete
+//      } catch (InterruptedException e) {
+//      } catch (ExecutionException e) {
+//      }
+//    }
+    cache.removeListener(listener);
   }
 
   /**

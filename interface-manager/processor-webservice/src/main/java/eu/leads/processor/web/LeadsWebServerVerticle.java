@@ -69,6 +69,7 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         matcher.noMatch(failHandler);
         matcher.post("/rest/object/get/", getObjectHandler);
         matcher.post("/rest/object/put/", putObjectHandler);
+        matcher.post("/rest/data/upload/",uploadDataHandler);
         matcher.post("/rest/data/upload",uploadDataHandler);
         matcher.post("/rest/data/submit/plugin",submitPluginHandler);
 

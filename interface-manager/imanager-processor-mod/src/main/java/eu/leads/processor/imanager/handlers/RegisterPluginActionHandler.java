@@ -38,7 +38,7 @@ public class RegisterPluginActionHandler implements ActionHandler {
   }
   @Override
   public Action process(Action action) {
-    System.out.println("s New action arrived: " + action.toString());
+    System.out.println("register plugin ");
     Action result = action;
     JsonObject actionResult = new JsonObject();
     actionResult.putString("message","");
@@ -54,8 +54,6 @@ public class RegisterPluginActionHandler implements ActionHandler {
       PluginPackage newPlugin = new PluginPackage(pluginId,pluginClass);
       newPlugin.setJarFilename(jarPath);
       newPlugin.setConfig(configbytes);
-
-
 
       if (PluginManager.uploadInternalPlugin(newPlugin)) {
         result.setStatus(ActionStatus.COMPLETED.toString());

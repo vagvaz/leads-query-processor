@@ -1,8 +1,10 @@
+import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.plugins.PluginPackage;
-import eu.leads.processor.plugins.EventType;
-import eu.leads.processor.web.ActionResult;
+import eu.leads.processor.common.utils.PrintUtilities;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.web.WebServiceClient;
-import org.apache.commons.configuration.XMLConfiguration;
+import org.infinispan.Cache;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -30,69 +32,49 @@ public class WebServiceClientTestPlugins {
             e.printStackTrace();
         }
 
-//        JsonObject object = new JsonObject();
-//        object.putString("name", "vag");
-//        object.putString("surname", "vaz");
-//        object.putString("age", "18");
-//        object.putString("id", "91818111");
-//        try {
-//            WebServiceClient.putObject("testCache", object.getString("id"), object);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        JsonObject mapObject =
-//            WebServiceClient.getObject("testCache", object.getString("id"), null);
-//        if (mapObject.toString().equals(object.toString())) {
-//            System.out.println("Equals " + object.toString() + "\n" + mapObject.toString());
-//        } else {
-//            System.out.println("PROBLEM");
-//            System.out.println(object.toString());
-//            System.out.println(mapObject.toString());
-//        }
-
-        String Example =  " SELECT deptname from dept" + "\r\n";
-
-        byte [] barray = new byte[2000];
-
-        for(int i =0; i < barray.length; i++)
-            barray[i]=120;
-        String Query=new String(barray,0,barray.length);
-        System.out.println("Query Size " + Query.length());
-
-        PluginPackage testpackage = new PluginPackage("56", "aclass");
-        testpackage.setJar(barray);
+      PluginPackage plugin = new PluginPackage("eu.leads.processor.plugins.transform.TransformPlugin",
+                                                "eu.leads.processor.plugins.transform.TransformPlugin",
+                                                "/home/vagvaz/Projects/idea/transform-plugin/target/transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar",
+                                                "/home/vagvaz/Projects/idea/transform-plugin/transform-plugin-conf.xml");
 
 
-        System.out.print("Serialized size: " + barray.length);
-       ActionResult currentStatus = WebServiceClient.submitPlugin("vagvaz", testpackage);
+      //upload plugin
+      WebServiceClient.submitPlugin("vagvaz",plugin);
+      System.out.println("Uploaded plugin");
+      //distributed deployment  ( plugin id, cache to install, events)
+      //PluginManager.deployPlugin();
+//      PluginManager.deployPlugin("eu.leads.processor.plugins.transform.TranformPlugin", "webpages",
+//                                  EventType.CREATEANDMODIFY,"vagvaz");
 
+        /*Start putting values to the cache */
+      LQPConfiguration.initialize();
+      //Put some configuration properties for crawler
+      LQPConfiguration.getConf().setProperty("crawler.seed",
+                                              "http://www.bbc.co.uk"); //For some reason it is ignored news.yahoo.com is used by default
+      LQPConfiguration.getConf().setProperty("crawler.depth", 3);
+      //Set desired target cache
+      LQPConfiguration.getConf().setProperty(StringConstants.CRAWLER_DEFAULT_CACHE, "default.webpages");
+      //start crawler
 
+      //Sleep for an amount of time to test if everything is working fine
+      try {
+        int sleepingPeriod = 30;
+        Thread.sleep(sleepingPeriod * 1000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
 
-//        WebServiceClient.submitQuery("vagvaz",
-//                Example);
-       // QueryStatus currentStatus = WebServiceClient.getQueryStatus(status.getId());
-        //System.out.println("s: " + status.toString());
-        System.out.println("o: " + currentStatus.toString());
-        XMLConfiguration config = new XMLConfiguration();
+      //Iterate through local cache entries to ensure things went as planned
+      Cache cache = (Cache) InfinispanClusterSingleton.getInstance().getManager()
+                              .getPersisentCache("mycache");
+      PrintUtilities.printMap(cache);
 
-        System.out.println("Query Size " + Query.length());
-
-
-        System.out.print("Serialized size: " + barray.length);
-
-        currentStatus = WebServiceClient.deployPlugin("vagvaz", testpackage.getId(),config,"webpages", EventType.CREATEANDMODIFY);
-        System.out.println("o: " + currentStatus.toString());
-
+	    /*Cleanup and close....*/
+//      PersistentCrawl.stop();
+      System.out
+        .println("Local cache " + cache.entrySet().size() + " --- global --- " + cache.size());
+      InfinispanClusterSingleton.getInstance().getManager().stopManager();
+      System.exit(0);
     }
 
-    private static String createDataSize(int msgSize) {
-    // Java chars are 2 bytes
-    msgSize = msgSize/2;
-    msgSize = msgSize * 1024;
-    StringBuilder sb = new StringBuilder(msgSize);
-    for (int i=0; i<msgSize; i++) {
-        sb.append('a');
-    }
-    return sb.toString();
-  }
 }

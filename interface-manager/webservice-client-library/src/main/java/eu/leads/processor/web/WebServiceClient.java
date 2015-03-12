@@ -235,20 +235,16 @@ public class WebServiceClient {
     try {
       BufferedInputStream input = new BufferedInputStream(new FileInputStream(jarPath));
       ByteArrayOutputStream array = new ByteArrayOutputStream();
-      byte[] buffer = null;
+      byte[] buffer = new byte[20*1024*1024];
+      byte[] toWrite = null;
       int size = input.available();
       int counter = -1;
       while( size > 0){
         counter++;
-        if(size > 1024*1024*20)
-        {
-          buffer = new byte[1024*1024*20];
-        }
-        else{
-          buffer = new byte[size];
-        }
-        input.read(buffer);
-        if(!uploadData(username,buffer,prefix+"/"+counter)) {
+
+        int readSize = input.read(buffer);
+        toWrite = Arrays.copyOfRange(buffer,0,readSize);
+        if(!uploadData(username,toWrite,prefix+"/"+counter)) {
           return false;
         }
         size = input.available();
@@ -374,11 +370,12 @@ public class WebServiceClient {
 //    byte[] data = SerializationUtils.serialize(pluginPackage);
     String jarFileName = pluginPackage.getJarFilename();
     String jarTarget = "plugins/"+pluginPackage.getId()+"/";
-    if(uploadJar(username,jarFileName,jarTarget)){
+    if(!uploadJar(username,jarFileName,jarTarget)){
       result.setMessage("Failed to Upload Jar");
       result.setStatus("FAILED");
       return result;
     }
+    System.out.println("jar uploaded successfully");
     address = new URL(host + ":" + port + prefix + "data/submit/plugin");
     HttpURLConnection connection = (HttpURLConnection) address.openConnection();
     connection = setUp(connection, "POST", MediaType.APPLICATION_JSON, true, true);

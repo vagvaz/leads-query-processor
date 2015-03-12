@@ -102,16 +102,16 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
     @Override
     public void handle(Message<JsonObject> message) {
         try {
-          log.info("processor received msg");
+//          log.info("processor received msg");
             JsonObject body = message.body();
             if (body.containsField("type")) {
                 if (body.getString("type").equals("action")) {
                     Action action = new Action(body);
                     ActionHandler ac = handlers.get(action.getLabel());
                     Action result = ac.process(action);
-                  log.info("processed");
+//                  log.info("processed");
                     result.setStatus(ActionStatus.COMPLETED.toString());
-                  log.info("reply to logic");
+//                  log.info("reply to logic");
                     com.sendTo(logic, result.asJsonObject());
                     message.reply();
                 }
