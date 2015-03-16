@@ -18,12 +18,12 @@ import java.util.concurrent.ConcurrentMap;
  * Time: 10:29 AM
  * To change this template use File | Settings | File Templates.
  */
-public class SortReducer extends LeadsReducer<String, String> {
+public class SortReducer extends LeadsReducer<String, Tuple> {
     transient private List<String> sortColumns;
     private List<Boolean> isAscending;
     private List<Boolean> arithmetic;
     private String output;
-    ConcurrentMap<String, String> out;
+    ConcurrentMap<String, Tuple> out;
 
     public SortReducer(JsonObject configuration) {
         super(configuration);
@@ -52,7 +52,7 @@ public class SortReducer extends LeadsReducer<String, String> {
     }
 
     @Override
-    public String reduce(String key, Iterator<String> iterator) {
+    public Tuple reduce(String key, Iterator<Tuple> iterator) {
         if (!isInitialized)
             initialize();
 
@@ -60,19 +60,22 @@ public class SortReducer extends LeadsReducer<String, String> {
         ArrayList<Tuple> tuples = new ArrayList<Tuple>();
 //        Comparator<Tuple> comparator = new TupleComparator(sortColumns, isAscending, arithmetic);
         while (iterator.hasNext()) {
-            String tmp = iterator.next();
-            tuples.add(new Tuple(tmp));
+//            String tmp = iterator.next();
+          Tuple tmp = iterator.next();
+            tuples.add(tmp);
+//            tuples.add(new Tuple(tmp));
             progress();
         }
 //        Collections.sort(tuples, comparator);
         int counter = 0;
         for (Tuple t : tuples) {
-            out.put(key + ":" + counter, t.asString());
+            out.put(key + ":" + counter, t);
             counter++;
         }
         tuples.clear();
         tuples = null;
 //        comparator = null;
-        return output + key;
+//        return output + key;
+      return null;
     }
 }

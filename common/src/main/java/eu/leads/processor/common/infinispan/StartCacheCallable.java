@@ -22,11 +22,16 @@ public class StartCacheCallable<K, V> implements DistributedCallable<K, V, Void>
     private final String cacheName;
     //    private final Configuration configuration;
     private transient Cache<K, V> cache;
-
+    private boolean isIndexed = false;
 
     public StartCacheCallable(String cacheName) {
         this.cacheName = cacheName;
         //        this.configuration = configuration;
+    }
+
+    public StartCacheCallable(String cacheName, boolean isIndexed){
+        this.cacheName = cacheName;
+        this.isIndexed =isIndexed;
     }
 
     /**
@@ -43,9 +48,18 @@ public class StartCacheCallable<K, V> implements DistributedCallable<K, V, Void>
            //Check that the configuration is the same;
            return null;
         }
-        Configuration configuration = manager.getCacheDefaultConfiguration(cacheName);
-        manager.getCacheManager().defineConfiguration(cacheName,configuration);
-        Cache startedCache = manager.getCacheManager().getCache(cacheName);
+        Configuration configuration = null;
+        if(!isIndexed) {
+            configuration = manager.getCacheDefaultConfiguration(cacheName);
+//            manager.getCacheManager().defineConfiguration(cacheName, configuration);
+//            Cache startedCache = manager.getCacheManager().getCache(cacheName);
+        }
+        else {
+            configuration = manager.getIndexedCacheDefaultConfiguration(cacheName);
+        }
+            manager.getCacheManager().defineConfiguration(cacheName,configuration);
+            Cache startedCache = manager.getCacheManager().getCache(cacheName);
+
 
 //        Cache newCache = manager.getCache(cacheName,true);
 //        if(newCache != null){

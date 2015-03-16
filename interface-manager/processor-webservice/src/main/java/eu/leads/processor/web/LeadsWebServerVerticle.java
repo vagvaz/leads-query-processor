@@ -46,6 +46,8 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
 
         Handler<HttpServerRequest> deployPluginHandler  = new DeployPluginHandler(com, log);
         Handler<HttpServerRequest> undeployPluginHandler = new UndeployPluginHandler(com, log);
+        Handler<HttpServerRequest> uploadDataHandler = new UploadDataHandler(com, log);
+        Handler<HttpServerRequest> submitPluginHandler = new SubmitPluginHandler(com, log);
 
         SubmitQueryHandler submitQueryHandler = new SubmitQueryHandler(com, log);
         SubmitSpecialCallHandler submitSpecialCallHandler = new SubmitSpecialCallHandler(com, log);
@@ -67,6 +69,9 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         matcher.noMatch(failHandler);
         matcher.post("/rest/object/get/", getObjectHandler);
         matcher.post("/rest/object/put/", putObjectHandler);
+        matcher.post("/rest/data/upload",uploadDataHandler);
+        matcher.post("/rest/data/submit/plugin",submitPluginHandler);
+
         //
         //      //query   [a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+
         matcher.get("/rest/query/status/:id", getQueryStatusHandler);
@@ -78,8 +83,10 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         matcher.post("/rest/query/wgs/:type", submitSpecialCallHandler);
         //
 
-        matcher.post("/rest/deploy/plugin/:pluginname/:cachename", deployPluginHandler);
-        matcher.get("/rest/undeploy/plugin/:pluginname/:cachename", undeployPluginHandler);
+//        matcher.post("/rest/deploy/plugin/:pluginname/:cachename", deployPluginHandler);
+//        matcher.post("/rest/deploy/plugin/:pluginname/:cachename", deployPluginHandler);
+        matcher.post("/rest/undeploy/plugin/", undeployPluginHandler);
+        matcher.post("/rest/deploy/plugin/", deployPluginHandler);
 
 
         matcher.get("/rest/checkOnline", new Handler<HttpServerRequest>() {

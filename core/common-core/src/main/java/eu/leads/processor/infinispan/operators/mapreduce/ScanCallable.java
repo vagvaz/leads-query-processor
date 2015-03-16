@@ -116,30 +116,32 @@ public class ScanCallable <K,V> implements
 //       String value = (String)objectValue;
 //END VERSIONING
        //NONVERSIONING
-       String ikey = (String)key;
-       String value = (String) inputCache.get(ikey);
+        String ikey = (String)key;
+//        String value = (String) inputCache.get(ikey);
+       Tuple value = (Tuple) inputCache.get(ikey);
 //ENDNONVERSIONDING
           //         String value = (String) entry.getValue();
 
 //          String value = (String) entry.getValue();
 //          String value = (String)inputCache.get(key);
-          Tuple tuple = new Tuple(value);
-          namesToLowerCase(tuple);
-          renameAllTupleAttributes(tuple);
-         if (tree != null) {
+//        Tuple tuple = new Tuple(value);
+        Tuple tuple = value;
+        namesToLowerCase(tuple);
+        renameAllTupleAttributes(tuple);
+        if (tree != null) {
             if(tree.accept(tuple)) {
                tuple = prepareOutput(tuple);
-//               log.info("--------------------    put into output with filter ------------------------");
+            //               log.info("--------------------    put into output with filter ------------------------");
                if(key != null && tuple != null)
-               outputCache.put(key.toString(), tuple.asString());
+               outputCache.put(key.toString(), tuple);
             }
-         }
-         else{
+        }
+        else{
             tuple = prepareOutput(tuple);
-//            log.info("--------------------    put into output without tree ------------------------");
+            //            log.info("--------------------    put into output without tree ------------------------");
             if(key != null && tuple != null)
-            outputCache.put(key.toString(), tuple.asString());
-         }
+                outputCache.put(key.toString(), tuple);
+        }
 
       }
       return inputCache.getCacheManager().getAddress().toString();

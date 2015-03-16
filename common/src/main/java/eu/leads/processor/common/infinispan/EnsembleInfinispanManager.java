@@ -48,6 +48,16 @@ public class EnsembleInfinispanManager implements InfinispanManager {
     return manager.getCache(name);
   }
 
+  @Override
+  public ConcurrentMap getIndexedPersistentCache(String name) {
+    return null;
+  }
+
+  @Override
+  public ConcurrentMap getIndexedPersistentCache(String name, Configuration configuration) {
+    return null;
+  }
+
   @Override public void removePersistentCache(String name) {
 
   }

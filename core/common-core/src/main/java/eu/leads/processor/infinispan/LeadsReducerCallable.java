@@ -1,10 +1,6 @@
 package eu.leads.processor.infinispan;
 
-import eu.leads.processor.common.LeadsCollector;
-import org.infinispan.Cache;
-
 import java.io.Serializable;
-import java.util.List;
 
 public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut,Object> implements
                                                                               Serializable {
@@ -15,23 +11,28 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut,Obj
     private static final long serialVersionUID = 3724554288677416505L;
     private LeadsReducer<kOut, vOut> reducer = null;
     private LeadsCollector collector;
+    private String prefix;
 
 
-    public LeadsReducerCallable(Cache<kOut, vOut> outCache,
-                                 LeadsReducer<kOut, vOut> reducer) {
-        super("{}",outCache.getName());
+    public LeadsReducerCallable(String cacheName,
+                                 LeadsReducer<kOut, vOut> reducer,String prefix) {
+        super("{}",cacheName);
         this.reducer = reducer;
-        collector = new LeadsCollector(1000,outCache);
+        collector = new LeadsCollector(1000,cacheName);
+        collector.setOnMap(false);
+        this.prefix = prefix;
     }
 
   @Override public void executeOn(kOut key, Object value) {
-    List<vOut> values = (List<vOut>) value;
-    reducer.reduce(key,values.iterator(),collector);
+    LeadsIntermediateIterator<vOut> values = new LeadsIntermediateIterator<>((String) key,prefix,imanager);
+    reducer.reduce(key,values,collector);
   }
 
   @Override public void initialize() {
     super.initialize();
+    collector.setEmanager(emanager);
     collector.initializeCache(imanager);
+
     collector.setOnMap(false);
   }
   //    public vOut call() throws Exception {

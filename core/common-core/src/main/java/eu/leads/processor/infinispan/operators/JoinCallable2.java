@@ -4,7 +4,6 @@ import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.core.Tuple;
-import eu.leads.processor.infinispan.QualFilter;
 import eu.leads.processor.math.FilterOperatorTree;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
@@ -96,15 +95,16 @@ public class JoinCallable2<K,V> implements
    }
 
    @Override public String call() throws Exception {
-      CloseableIterable<Map.Entry<String, String>> iterable = null;
+      CloseableIterable<Map.Entry<String, Tuple>> iterable = null;
       System.out.println("Iterating in " + outerCache.getCacheManager().getAddress().toString());
       try {
          //Load other data
          iterable =
                  outerCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
          Map<String,Tuple> buffer = new HashMap();
-         for (Map.Entry<String, String> outerEntry : iterable) {
-            Tuple outerTuple = new Tuple(outerEntry.getValue());
+         for (Map.Entry<String, Tuple> outerEntry : iterable) {
+//            Tuple outerTuple = new Tuple(outerEntry.getValue());
+            Tuple outerTuple = outerEntry.getValue();
             buffer.put(outerEntry.getKey(),outerTuple);
          }
          iterable.close();

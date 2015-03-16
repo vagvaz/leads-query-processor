@@ -54,6 +54,7 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
       if (!cdl.localNodeIsPrimaryOwner(key))
         continue;
       V value = inputCache.get(key);
+
       if (value != null) {
         executeOn((K)key, value);
       }
@@ -65,10 +66,12 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
   @Override public void executeOn(K key, V value) {
 
 
-      String valueString = (String)value;
-      if(!valueString.equals("")){
-
-      tuples.add(new Tuple(valueString));
+//      String valueString = (String)value;
+//      if(!valueString.equals("")){
+//
+//      tuples.add(new Tuple(valueString));
+    if(value != null ){
+      tuples.add((Tuple) value);
     }
 
   }
@@ -77,11 +80,14 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
     Comparator<Tuple> comparator = new TupleComparator(sortColumns,asceding,types);
     Collections.sort(tuples, comparator);
     int counter = 0;
+    String prefix = outputCache.getName();
     for (Tuple t : tuples) {
-      outputCache.put(outputCache.getName()  + counter, t.asString());
+      outputToCache(prefix  + counter, t);
+
+//      outputCache.put(outputCache.getName()  + counter, t);
       counter++;
     }
     tuples.clear();
-
+    super.finalize();
   }
 }

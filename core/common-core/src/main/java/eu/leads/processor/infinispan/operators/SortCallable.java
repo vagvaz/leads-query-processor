@@ -56,16 +56,20 @@ public class SortCallable<K,V> implements
          if(!cdl.localNodeIsPrimaryOwner(key))
             continue;
       
-        String valueString = (String)cache.get(key);
-        if(valueString.equals(""))
-          continue;
-         tuples.add(new Tuple(valueString));
+//        String valueString = (String)cache.get(key);
+//        if(valueString.equals(""))
+//          continue;
+//         tuples.add(new Tuple(valueString));
+        Tuple tuple = (Tuple) cache.get(key);
+        if(tuple!= null)
+          tuples.add(tuple);
       }
       Comparator<Tuple> comparator = new TupleComparator(sortColumns,asceding,types);
       Collections.sort(tuples, comparator);
       int counter = 0;
       for (Tuple t : tuples) {
-         out.put(out.getName()  + counter, t.asString());
+         out.put(out.getName()  + counter, t);
+//         out.put(out.getName()  + counter, t.asString());
          counter++;
       }
       tuples.clear();

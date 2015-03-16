@@ -1,6 +1,5 @@
 package eu.leads.processor.infinispan;
 
-import eu.leads.processor.common.LeadsCollector;
 import org.infinispan.Cache;
 
 import java.io.Serializable;
@@ -15,16 +14,17 @@ public class LeadsMapperCallable<K, V, kOut, vOut> extends LeadsBaseCallable<K,V
 	 */
 	private static final long serialVersionUID = 1242145345234214L;
 	 
-	LeadsCollector<kOut, vOut> collector = null;
+	private LeadsCollector<kOut, vOut> collector = null;
 
-	Set<K> keys;
-	LeadsMapper<K, V, kOut, vOut> mapper = null;
+	private Set<K> keys;
+	private LeadsMapper<K, V, kOut, vOut> mapper = null;
+   String site;
 
 	public LeadsMapperCallable(Cache<K, V> cache,
 			LeadsCollector<kOut, vOut> collector,
-			LeadsMapper<K, V, kOut, vOut> mapper) {
-    super("{}",collector.getCache().getName());
-
+			LeadsMapper<K, V, kOut, vOut> mapper,String site) {
+    super("{}",collector.getCacheName());
+      this.site = site;
 		this.collector = collector;
 		this.mapper = mapper;
 	}
@@ -40,6 +40,10 @@ public class LeadsMapperCallable<K, V, kOut, vOut> extends LeadsBaseCallable<K,V
   @Override
   public void initialize(){
 //    collector.initializeCache(inputCache.getCacheManager());
+    collector.setOnMap(true);
+    collector.setManager(this.embeddedCacheManager);
+    collector.setEmanager(emanager);
+    collector.setSite(site);
     collector.initializeCache(imanager);
   }
 
@@ -72,5 +76,6 @@ public class LeadsMapperCallable<K, V, kOut, vOut> extends LeadsBaseCallable<K,V
   @Override public void finalize() {
     super.finalize();
     mapper.finalize();
+    collector.getCounterCache().stop();
   }
 }

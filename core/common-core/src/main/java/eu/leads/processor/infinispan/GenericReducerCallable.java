@@ -1,6 +1,5 @@
 package eu.leads.processor.infinispan;
 
-import eu.leads.processor.common.LeadsCollector;
 import eu.leads.processor.common.utils.storage.LeadsStorage;
 import eu.leads.processor.common.utils.storage.LeadsStorageFactory;
 

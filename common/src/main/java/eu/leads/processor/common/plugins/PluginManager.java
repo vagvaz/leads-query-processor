@@ -373,7 +373,7 @@ public class PluginManager {
 
   private static RemoteCacheManager createRemoteCacheManager() {
     ConfigurationBuilder builder = new ConfigurationBuilder();
-    builder.addServer().host(LQPConfiguration.getConf().getString("node.ip")).port(11225);
+    builder.addServer().host(LQPConfiguration.getConf().getString("node.ip")).port(11222);
     return new RemoteCacheManager(builder.build());
   }
 
@@ -463,6 +463,16 @@ public class PluginManager {
     int eventmask = computeEventMask(events);
     runner.addPlugin(plugin, config, eventmask);
     manager.addListener(runner, cacheName);
+
+  }
+
+  public static boolean uploadInternalPlugin(PluginPackage plugin) {
+    if (!validatePlugin(plugin)) {
+      log.error("Could validate Plugin " + plugin.getId() + " with class name " + plugin.getClassName());
+      return false;
+    }
+    upload(StringConstants.PLUGIN_CACHE, plugin);
+    return true;
 
   }
 }

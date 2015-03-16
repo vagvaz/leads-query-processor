@@ -28,10 +28,11 @@ public class FilterCallableUpdated<K,V> extends LeadsSQLCallable<K,V> implements
   @Override public void executeOn(K ikey, V ivalue) {
     String key = (String) ikey;
     String value = (String)ivalue;
-    Tuple tuple = new Tuple(value);
+//    Tuple tuple = new Tuple(value);
+    Tuple tuple = (Tuple) ivalue;
     if(tree.accept(tuple)){
                   tuple = prepareOutput(tuple);
-      outputCache.put(key,tuple.asString());
+      outputCache.put(key,tuple);
     }
   }
 }

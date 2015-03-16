@@ -13,8 +13,8 @@ import java.util.*;
 
 public class Tuple extends DataType_bson implements Serializable{
 
-    static transient BasicBSONEncoder encoder = new BasicBSONEncoder();
-    static transient BasicBSONDecoder decoder = new BasicBSONDecoder();
+//    static BasicBSONEncoder encoder = new BasicBSONEncoder();
+//    static BasicBSONDecoder decoder = new BasicBSONDecoder();
 
     public Tuple(){
         super();
@@ -38,17 +38,32 @@ public class Tuple extends DataType_bson implements Serializable{
         data.putAll(tr.data);
     }
 
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+   public Tuple(Tuple tuple) {
+      data = new BasicBSONObject(tuple.asBsonObject().toMap());
+   }
+//
+//  public Tuple(Tuple tmp) {
+//
+//  }
+
+  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         // Serialize it
-//        BasicBSONEncoder encoder = new BasicBSONEncoder();
+        BasicBSONEncoder encoder = new BasicBSONEncoder();
         byte[] array = encoder.encode(data);
         out.write(array);
+//      out.writeInt(data.toString().length());
+//      out.writeBytes(data.toString());
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException{
         // Deserialize it
-//        BasicBSONDecoder decoder = new BasicBSONDecoder();
+        BasicBSONDecoder decoder = new BasicBSONDecoder();
         data = decoder.readObject(in);
+//         int size = in.readInt();
+//         byte[] bb =  new byte[size];
+//         in.readFully(bb);
+//         String fromString = new String(bb);
+//       data =
     }
 
     private void readObjectNoData() throws ObjectStreamException {
@@ -129,7 +144,13 @@ public class Tuple extends DataType_bson implements Serializable{
     }
 
     public void setAttribute(String name, Object tupleValue) {
-        data.put(name, tupleValue);
+       if(tupleValue != null)
+       {
+          data.put(name, tupleValue);
+       }
+       else{
+          System.err.println("set " + name + " has tupleValue null");
+       }
     }
 
     public void renameAttributes(Map<String, List<String>> toRename) {

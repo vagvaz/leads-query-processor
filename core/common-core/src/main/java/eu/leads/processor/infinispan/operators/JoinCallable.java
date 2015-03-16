@@ -89,7 +89,7 @@ public class JoinCallable<K,V> implements
     }
 
     @Override public String call() throws Exception {
-       CloseableIterable<Map.Entry<String, String>>iterable = null;
+       CloseableIterable<Map.Entry<String, Tuple>>iterable = null;
       try {
         Map<String, List<Tuple>> buffer = new HashMap<String, List<Tuple>>();
         int size = 0;
@@ -112,8 +112,9 @@ public class JoinCallable<K,V> implements
 //                                                                             columnValue));
             iterable =
             outerCache.getAdvancedCache().filterEntries(new QualFilter(tree.getJson().toString()));
-          for (Map.Entry<String, String> outerEntry : iterable) {
-            Tuple outerTuple = new Tuple(outerEntry.getValue());
+          for (Map.Entry<String, Tuple> outerEntry : iterable) {
+            Tuple outerTuple = outerEntry.getValue();
+//            Tuple outerTuple = new Tuple(outerEntry.getValue());
             Tuple resultTuple = new Tuple(current, outerTuple, ignoreColumns);
             String outerKey = outerEntry.getKey().substring(outerEntry.getKey().indexOf(":") + 1);
             String combinedKey = prefix + outerKey + "-" + currentKey;

@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
-public class TransformMapper extends LeadsMapper<String, String, String, String> {
+public class TransformMapper extends LeadsMapper<String, Tuple, String, Tuple> {
 
     public TransformMapper(JsonObject configuration) {
         super(configuration);
@@ -22,13 +22,14 @@ public class TransformMapper extends LeadsMapper<String, String, String, String>
 
 
     @Override
-    public void map(String key, String value, Collector<String, String> collector) {
+    public void map(String key, Tuple value, Collector<String, Tuple> collector) {
 //      System.out.println("Called for " + key + "     " + value);
 //        if (!isInitialized)
 //            intialize();
         StringBuilder builder = new StringBuilder();
 //        String tupleId = key.substring(key.indexOf(":"));
-        Tuple t = new Tuple(value);
+//        Tuple t = new Tuple(value);
+        Tuple t =value;
         for(String attribute : t.getFieldNames()) {
             try {
                 if (attribute.endsWith("uri"))
@@ -44,7 +45,8 @@ public class TransformMapper extends LeadsMapper<String, String, String, String>
             }
         }
 
-        collector.emit(key, t.asString());
+        collector.emit(key, t);
+//        collector.emit(key, t.asString());
 
     }
 

@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * Created by vagvaz on 11/21/14.
  */
-public class JoinMapper extends LeadsMapper<String,String,String,String> {
+public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
 
 //   private String configString;
    transient private String tableName;
@@ -29,23 +29,25 @@ public class JoinMapper extends LeadsMapper<String,String,String,String> {
    }
 
    @Override
-   public void map(String key,String value, Collector<String,String> collector) {
+   public void map(String key,Tuple value, Collector<String,Tuple> collector) {
       if(!isInitialized)
          initialize();
 //      conf = new JsonObject(configString);
       System.out.println("k " + key + " " + value);
-      CloseableIterable<Map.Entry<String, String>> iterable = null;
+      CloseableIterable<Map.Entry<String, Tuple>> iterable = null;
       Cache cache = (Cache) iimanager.getPersisentCache(key);
       iterable =
               cache.getAdvancedCache().filterEntries(new AcceptAllFilter());
-      for (Map.Entry<String, String> outerEntry : iterable) {
-         Tuple t = new Tuple(outerEntry.getValue());
+      for (Map.Entry<String, Tuple> outerEntry : iterable) {
+//         Tuple t = new Tuple(outerEntry.getValue());
+         Tuple t = outerEntry.getValue();
         String outkey = getOutkey(conf,t);
          t.setAttribute("TableId",tableName);
          String tkey = outerEntry.getKey().substring(outerEntry.getKey().indexOf(":")+1,outerEntry.getKey().length());
          t.setAttribute("tupleKey",tkey);
          System.out.println(key +  " outkey " + outkey + " " + t.asJsonObject().toString());
-         collector.emit(outkey,t.asString());
+//         collector.emit(outkey,t.asString());
+         collector.emit(outkey,t);
       }
       iterable.close();
       System.out.println(tableName);

@@ -79,14 +79,14 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
 
   @Override public void executeOn(K key, V ivalue) {
     //         System.err.println(manager.getCacheManager().getAddress().toString() + " "+ entry.getKey() + "       " + entry.getValue());
-    String toRunValue = null;
+    Tuple toRunValue = null;
     if(onVersionedCache){
       String versionedKey = (String) key;
       String ikey = pruneVersion(versionedKey);
       Version currentVersion = getVersion(versionedKey);
       if(versioning){
         if(isInVersionRange(currentVersion)){
-          toRunValue = (String)ivalue;
+          toRunValue = (Tuple) ivalue;
         }
       }
       else{
@@ -95,11 +95,12 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
           return;
         }
         Object objectValue = versionedCache.get(ikey);
-        toRunValue = (String) objectValue;
+        toRunValue = (Tuple) objectValue;
+//        toRunValue = (String) objectValue;
       }
     }
     else{
-      toRunValue = (String)ivalue;
+      toRunValue = (Tuple)ivalue;
     }
 //    if(versioning) {
 //      String versionedKey = (String) key;
@@ -121,6 +122,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
 
       //          String value = (String) entry.getValue();
       //          String value = (String)inputCache.get(key);
+//      Tuple tuple = new Tuple(toRunValue);
       Tuple tuple = new Tuple(toRunValue);
       namesToLowerCase(tuple);
       renameAllTupleAttributes(tuple);
@@ -129,16 +131,18 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
           tuple = prepareOutput(tuple);
           //               log.info("--------------------    put into output with filter ------------------------");
           if (key != null && tuple != null)
-            outputCache.put(key.toString(), tuple.asString());
+            outputCache.put(key.toString(), tuple);
         }
       } else {
         tuple = prepareOutput(tuple);
         //            log.info("--------------------    put into output without tree ------------------------");
-        if (key != null && tuple != null)
-          outputCache.put(key.toString(), tuple.asString());
-//      }
+        if (key != null && tuple != null){
+          outputToCache(key,tuple);
+      }
     }
   }
+
+
 
   /**
    *

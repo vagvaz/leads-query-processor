@@ -4,6 +4,7 @@ import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
 import org.infinispan.Cache;
 import org.infinispan.client.hotrod.RemoteCache;
@@ -73,12 +74,12 @@ public class UberSnapshot {
 
       FileWriter writer;
 
-      CloseableIterable<Map.Entry<String, String>> iterable =
+      CloseableIterable<Map.Entry<String, Tuple>> iterable =
               cache.getAdvancedCache().filterEntries(new AcceptAllFilter());
       long counter = 0;
-      for (Map.Entry<String, String> entry : iterable) {
+      for (Map.Entry<String, Tuple> entry : iterable) {
          keyOut.write(entry.getKey()+"\n");
-         valueOut.write(entry.getValue()+"\n");
+         valueOut.write(entry.getValue().toString()+"\n");
          System.out.println(counter++);
       }
       keyOut.flush();
@@ -219,7 +220,9 @@ public class UberSnapshot {
             if(keyLine != null && !keyLine.trim().equals("")){
                if(valueLine != null && !valueLine.trim().equals("")) {
                   JsonObject ob = new JsonObject(valueLine);
-                  cache.put(keyLine.trim(), valueLine.trim());
+                 Tuple tuple = new Tuple(valueLine.trim());
+                  cache.put(keyLine.trim(), tuple);
+//                  cache.put(keyLine.trim(), valueLine.trim());
                }
             }
 
@@ -391,7 +394,9 @@ public class UberSnapshot {
             if(keyLine != null && !keyLine.trim().equals("")){
                if(valueLine != null && !valueLine.trim().equals("")) {
                   JsonObject ob = new JsonObject(valueLine);
-                  cache.put(keyLine.trim(), valueLine.trim());
+                 Tuple tuple = new Tuple(valueLine.trim());
+                  cache.put(keyLine.trim(), tuple);
+//                  cache.put(keyLine.trim(), valueLine.trim());
                   System.out.println(counter++);
                }
             }
@@ -433,7 +438,9 @@ public class UberSnapshot {
             if(keyLine != null && !keyLine.trim().equals("")){
                if(valueLine != null && !valueLine.trim().equals("")) {
                   JsonObject ob = new JsonObject(valueLine);
-                  cache.put(keyLine.trim(), valueLine.trim());
+                 Tuple tuple = new Tuple(valueLine.trim());
+                  cache.put(keyLine.trim(), tuple);
+//                  cache.put(keyLine.trim(), valueLine.trim());
                }
             }
 

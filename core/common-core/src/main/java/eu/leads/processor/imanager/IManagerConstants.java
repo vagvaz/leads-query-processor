@@ -23,4 +23,5 @@ public class IManagerConstants {
    public static final String PUT_ENC_OBJECT ="encPut";
    public static final String SUBMIT_ENC_QUERY = "encQuery";
    public static final String CREATE_NEW_ENC_QUERY = "newEncQuery";
+  public static final String UPLOAD_DATA = "uploadData";
 }

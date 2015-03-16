@@ -1,6 +1,6 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
-import eu.leads.processor.common.LeadsCollector;
+import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.infinispan.LeadsReducer;
@@ -18,7 +18,7 @@ import java.util.Iterator;
  * Time: 9:36 AM
  * To change this template use File | Settings | File Templates.
  */
-public class TransformReducer extends LeadsReducer<String, String> {
+public class TransformReducer extends LeadsReducer<String, Tuple> {
 
     transient Cache<String, String> data;
     transient String prefix;
@@ -46,7 +46,7 @@ public class TransformReducer extends LeadsReducer<String, String> {
     }
 
     @Override
-    public void reduce(String key, Iterator<String> iterator,LeadsCollector collector) {
+    public void reduce(String key, Iterator<Tuple> iterator,LeadsCollector collector) {
         //Reduce takes all the grouped Typles per key
 //      System.out.println("running for " + key + " .");
         if (key == null || key.equals(""))
@@ -57,12 +57,14 @@ public class TransformReducer extends LeadsReducer<String, String> {
         Tuple t = null;
         //Iterate overall values
         while (iterator.hasNext()) {
-            t = new Tuple(iterator.next()); //Check
+//            t = new Tuple(iterator.next()); //Check
+            t = iterator.next(); //Check
         }
 
         key = key.split(":")[1]; // Get the key without the cachename
 //        System.err.println("tout: " + t.toString());
-        collector.emit(prefix + key, t.asString());
+//        collector.emit(prefix + key, t.asString());
+        collector.emit(prefix + key, t);
         return ;
     }
 

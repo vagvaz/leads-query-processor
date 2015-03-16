@@ -4,6 +4,7 @@ import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.core.Tuple;
 import org.infinispan.Cache;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
@@ -122,12 +123,12 @@ public class Snapshot {
 
         FileWriter writer;
 
-        CloseableIterable<Map.Entry<String, String>> iterable =
+        CloseableIterable<Map.Entry<String, Tuple>> iterable =
                 cache.getAdvancedCache().filterEntries(new AcceptAllFilter());
         long counter = 0;
-        for (Map.Entry<String, String> entry : iterable) {
+        for (Map.Entry<String, Tuple> entry : iterable) {
             keyOut.write(entry.getKey()+"\n");
-            valueOut.write(entry.getValue()+"\n");
+            valueOut.write(entry.getValue().toString()+"\n");
             System.out.println(counter++);
         }
         keyOut.close();

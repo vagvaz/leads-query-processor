@@ -2,6 +2,7 @@ package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.math.FilterOperatorTree;
@@ -55,7 +56,7 @@ public class JoinOperator extends BasicOperator {
         Cache outerCache = (Cache) manager.getPersisentCache(outerCacheName);
         Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
         DistributedExecutorService des = new DefaultExecutorService(innerCache);
-        JoinCallableUpdated<String,String> callable = new JoinCallableUpdated(conf.toString(),getOutput(),
+        JoinCallableUpdated<String,Tuple> callable = new JoinCallableUpdated(conf.toString(),getOutput(),
                                                                           outerCache
                                                                                             .getName(),
                                                        isLeft);

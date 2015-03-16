@@ -99,6 +99,16 @@ public class LocalInfinispanManager implements InfinispanManager {
         return this.getPersisentCache(name);
     }
 
+    @Override
+    public ConcurrentMap getIndexedPersistentCache(String name) {
+        return null;
+    }
+
+    @Override
+    public ConcurrentMap getIndexedPersistentCache(String name, Configuration configuration) {
+        return null;
+    }
+
 
     /**
      * {@inheritDoc}
