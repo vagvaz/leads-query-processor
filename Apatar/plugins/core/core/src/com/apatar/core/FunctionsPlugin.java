@@ -53,6 +53,9 @@ public class FunctionsPlugin extends Plugin {
 	static List<NodeFactory> listFunctionMapReduce;
 	static List<NodeFactory> listFunctionFilter;
 	static List<NodeFactory> listFunctionGroupBy;
+	static List<NodeFactory> listFunctionSliding_window;
+	static List<NodeFactory> listFunctionVersion;
+	
 	
 	public static Map<String, ClassLoader> functionLoaders = new Hashtable<String, ClassLoader>();
 	
@@ -162,6 +165,12 @@ public class FunctionsPlugin extends Plugin {
 				//@@--->
 				if(cvParam.valueAsString().equals("com.apatar.functions.constant.LimitFunction")){
 					listFunction2.add(factory);
+				}
+				if(factory.getCategory().contains("Sliding_window")){
+					listFunctionSliding_window.add(factory);
+				}
+				if(factory.getCategory().contains("Version")){
+					listFunctionVersion.add(factory);
 				}
 				if(factory.getCategory().contains("Filter")){
 					listFunctionFilter.add(factory);
@@ -280,6 +289,12 @@ public class FunctionsPlugin extends Plugin {
 	public static List<NodeFactory> getNodesFunction2() {
 		return listFunction2;
 	}
+	public static List<NodeFactory> getNodesFunctionSliding_window() {
+		return listFunctionSliding_window;
+	}
+	public static List<NodeFactory> getNodesFunctionVersion() {
+		return listFunctionVersion;
+	}
 	public static List<NodeFactory> getNodesFunctionOrderBy() {
 		return listFunctionOrderBy;
 	}
@@ -299,6 +314,8 @@ public class FunctionsPlugin extends Plugin {
 		listFunctionMapReduce = new LinkedList<NodeFactory>(); 
 		listFunctionFilter = new LinkedList<NodeFactory>(); 
 		listFunctionGroupBy= new LinkedList<NodeFactory>(); 
+		listFunctionSliding_window= new LinkedList<NodeFactory>(); 
+		listFunctionVersion= new LinkedList<NodeFactory>(); 
 		
 		loadFunctionNodesPlugins();
 		loadFunctionConstNodesPlugins();
