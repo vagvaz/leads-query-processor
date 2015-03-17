@@ -69,7 +69,6 @@ public class RegisterPluginActionHandler implements ActionHandler {
       result.setResult(actionResult);
 
     } catch (Exception e) {
-
       actionResult.putString("error", "");
       actionResult.putString("message",
                               "Failed to add query " + action.getData().toString() + "\n"

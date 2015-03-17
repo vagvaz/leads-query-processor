@@ -115,7 +115,8 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             newAction.setProcessedBy(id);
             newAction.setData(action.getData());
             newAction.getData().putString("replyTo", msg.getString("from"));
-//            System.out.println("Plugin send " + newAction.asJsonObject().toString());
+
+            System.out.println("Plugin send " + newAction.asJsonObject().toString());
             com.sendWithEventBus(workQueueAddress, newAction.asJsonObject());
           } else if (label.equals(IManagerConstants.SUBMIT_SPECIAL)) {
             newAction = createNewAction(action);
@@ -253,6 +254,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             }
           } else if (label.equals(IManagerConstants.REGISTER_PLUGIN)) {
             System.out.println(action.toString());
+
             JsonObject webServiceReply = action.getResult();
             //Reply to the SUBMIT Query Action to the webservice
             com.sendTo(action.getData().getString("replyTo"), webServiceReply);

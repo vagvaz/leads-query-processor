@@ -126,7 +126,6 @@ public class DeployPluginActionHandler implements ActionHandler {
 //       ownerAction.setLabel(NQEConstants.OPERATOR_FAILED);
 //       com.sendTo(action.getData().getString("monitor"),ownerAction.asJsonObject());
 //     }
-
      return result;
 
    }
