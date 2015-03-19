@@ -10,14 +10,10 @@ import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
-import eu.leads.processor.plugins.EventType;
 import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.commons.lang.SerializationUtils;
 import org.infinispan.commons.api.BasicCache;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -38,7 +34,7 @@ public class DeployPluginActionHandler implements ActionHandler {
     this.id = id;
     pluginsCache = (BasicCache) persistence.getPersisentCache(StringConstants.PLUGIN_CACHE);
     Properties storageConf = new Properties();
-    storageConf.setProperty("prefix", "/tmp/leads-tmp/");
+    storageConf.setProperty("prefix", "/tmp/leads/");
     PluginManager.initialize(LeadsStorageFactory.LOCAL,storageConf);
   }
 
@@ -58,14 +54,15 @@ public class DeployPluginActionHandler implements ActionHandler {
       String pluginId = deployPlugin.getString("pluginid");
       String targetCache = deployPlugin.getString("cachename");
       XMLConfiguration config = null;
-      if(deployPlugin.containsField("config")) {
-        config = (XMLConfiguration) SerializationUtils.deserialize(deployPlugin.getBinary("config"));
-      }
-      List<EventType> eventList= new ArrayList<>(3);
-      for (int index = 0; index < deployPlugin.getArray("events").size(); index++) {
-        eventList.add((EventType) deployPlugin.getArray("events").get(index));
-      }
-      EventType[] events = (EventType[]) eventList.toArray();
+//      if(deployPlugin.containsField("config")) {
+//        config = (XMLConfiguration) SerializationUtils.deserialize(deployPlugin.getBinary("config"));
+//      }
+//      List<EventType> eventList= new ArrayList<>(3);
+//      for (int index = 0; index < deployPlugin.getArray("events").size(); index++) {
+//        String eventString = deployPlugin.getArray("events").get(index);
+//        eventList.add(EventType.valueOf(eventString));
+//      }
+//      EventType[] events = (EventType[]) eventList.toArray();
       //CHeck plugin if exists
       PluginPackage plugin = (PluginPackage) pluginsCache.get(pluginId);
       if(plugin == null) {

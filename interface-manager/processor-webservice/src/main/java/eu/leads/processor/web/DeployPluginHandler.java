@@ -72,6 +72,7 @@ public class DeployPluginHandler implements Handler<HttpServerRequest> {
     public void handle(JsonObject message) {
       if (message.containsField("error")) {
         replyForError(message);
+        return;
       }
       message.removeField(MessageUtils.FROM);
       message.removeField(MessageUtils.TO);
@@ -86,6 +87,7 @@ public class DeployPluginHandler implements Handler<HttpServerRequest> {
       if (message != null) {
         log.error(message.getString("message"));
         request.response().end("{}");
+
       } else {
         log.error("Empty Request");
         request.response().setStatusCode(400);

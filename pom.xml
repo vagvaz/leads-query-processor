@@ -27,6 +27,7 @@
       <module>interface-manager</module>
       <module>leads-base-modules</module>
       <!--<module>leads-query-processor-interfaces</module>-->
+      <module>webservice-client-library</module>
       <module>leads-results-gui</module>
       <module>leads-cli</module>
       <module>leads-aux-tools</module>

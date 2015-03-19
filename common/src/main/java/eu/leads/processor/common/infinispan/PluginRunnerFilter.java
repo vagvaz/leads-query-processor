@@ -5,7 +5,6 @@ import eu.leads.processor.common.plugins.PluginPackage;
 import eu.leads.processor.common.utils.FSUtilities;
 import eu.leads.processor.common.utils.storage.LeadsStorage;
 import eu.leads.processor.common.utils.storage.LeadsStorageFactory;
-import eu.leads.processor.conf.ConfigurationUtilities;
 import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.plugins.PluginInterface;
 import org.apache.commons.configuration.ConfigurationException;
@@ -20,11 +19,14 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 
 import static eu.leads.processor.plugins.EventType.*;
@@ -34,46 +36,53 @@ import static eu.leads.processor.plugins.EventType.*;
  */
 public class PluginRunnerFilter implements CacheEventFilter,Serializable {
 
-
-
-  private JsonObject conf;
+  transient private JsonObject conf;
   private String configString;
   transient private final EmbeddedCacheManager manager;
   transient private ClusterInfinispanManager imanager;
   transient private Cache pluginsCache;
-  transient Cache targetCache;
-  transient String targetCacheName;
-  transient Logger log = LoggerFactory.getLogger(PluginRunnerFilter.class) ;
-  transient PluginInterface plugin;
-  transient String pluginsCacheName;
-  transient String pluginName;
-  transient List<EventType> type;
-  transient  boolean isInitialized = false;
-  transient LeadsStorage storageLayer = null;
-  transient String user;
+  transient private  Cache targetCache;
+  transient private String targetCacheName;
+  transient private Logger log = LoggerFactory.getLogger(PluginRunnerFilter.class) ;
+  transient private PluginInterface plugin;
+  transient private String pluginsCacheName;
+  transient private String pluginName;
+  transient private List<EventType> type;
+  transient private boolean isInitialized = false;
+  transient private LeadsStorage storageLayer = null;
+  transient private String user;
   public PluginRunnerFilter(EmbeddedCacheManager manager,String confString){
+    log = LoggerFactory.getLogger(manager.getAddress().toString()+":"+PluginRunnerFilter.class.toString());
+    log.error("Manager init");
     this.manager = manager;
+    log.error("set config string");
     this.configString = confString;
+    log.error("initJson conf");
     this.conf = new JsonObject(configString);
+    log.error("init Imanager");
     imanager = new ClusterInfinispanManager(manager);
-
-
+    log.error("init");
     initialize();
   }
 
   private void initialize() {
     isInitialized = true;
+    log.error("get activePluginCache");
     pluginsCacheName = conf.getString("activePluginCache");//StringConstants.PLUGIN_ACTIVE_CACHE);
-
+    log.error("get pluginName");
     pluginName = conf.getString("pluginName");
+    log.error("get user");
     user = conf.getString("user");
+    log.error("get types");
     JsonArray types = conf.getArray("types");
     //InferTypes
+
     type = new ArrayList<EventType>(3);
     if(types != null ) {
       Iterator<Object> iterator = types.iterator();
       if (iterator.hasNext()) {
-        type.add( EventType.valueOf((String)iterator.next()));
+        log.error("READ EVent type ");
+        type.add( EventType.valueOf(iterator.next().toString()));
       }
     }
 
@@ -83,8 +92,12 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
       type.add(MODIFIED);
     }
 
+    log.error("init pluginscache");
     pluginsCache = (Cache) imanager.getPersisentCache(pluginsCacheName);
-    log = LoggerFactory.getLogger( "PluginRunner."+pluginName+":"+ pluginsCacheName);
+    log.error("init logger");
+    log = LoggerFactory.getLogger(manager.getAddress().toString()+ " PluginRunner."+pluginName+":"+
+                                    pluginsCacheName);
+    log.error("init storage");
     String storagetype = this.conf.getString("storageType");
     Properties storageConfiguration = new Properties();
     byte[] storageConfBytes =  this.conf.getBinary("storageConfiguration");
@@ -95,82 +108,98 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
     } catch (IOException e) {
       e.printStackTrace();
     }
+    log.error("init targetCacheName");
     targetCacheName = conf.getString("targetCache");
+    log.error("init Targetcache");
     targetCache = (Cache) imanager.getPersisentCache(targetCacheName);
-    initializePlugin(pluginsCache,pluginName,user);
+    log.error("init plugin");
+    initializePlugin(pluginsCache, pluginName, user);
+    log.error("Initialized plugin " + pluginName + " on " + targetCacheName);
     System.err.println("Initialized plugin " + pluginName + " on " + targetCacheName);
   }
 
 
   private void initializePlugin(Cache cache, String plugName, String user) {
-//    String jarFileName = null;
-//    if (plugName.equals("eu.leads.processor.plugins.pagerank.PagerankPlugin")) {
-//      //            ConfigurationUtilities
-//      //                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar");
-//      jarFileName = System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "pagerank-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
-//    } else if (plugName.equals("eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin")) {
-//      //            ConfigurationUtilities
-//      //                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar");
-//      jarFileName = System.getProperty("java.io.tmpdir") + "/leads/plugins/" + "sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar";
-//    } else {
-//      byte[] jarAsBytes = (byte[]) cache.get(plugName + ":jar");
-//      FSUtilities.flushPluginToDisk(plugName + ".jar", jarAsBytes);
-//
-//      //            ConfigurationUtilities
-//      //                    .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugin
-//      //                            + ".jar");
-//      jarFileName = System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugName
-//                      + ".jar";
-//    }
+
+    log.error("INITPLUG:" + targetCacheName + ":" + plugName + user);
     PluginPackage pluginPackage = (PluginPackage) cache.get(targetCacheName+":"+plugName+user);
+    log.error("INITPLUG:" + (pluginPackage == null));
     String tmpdir = System.getProperties().getProperty("java.io.tmpdir")+"/"+StringConstants
                                                                           .TMPPREFIX+"/runningPlugins/"+ UUID
                                                                                                      .randomUUID()
                                                                                     .toString()+"/";
+    log.error("using tmpdir " + tmpdir);
     String  jarFileName = tmpdir+pluginPackage.getClassName()+".jar";
+    log.error("Download... " + "plugins/" + plugName + " -> " + jarFileName);
     storageLayer.download("plugins/"+plugName,jarFileName);
     ClassLoader classLoader = null;
+    File file = new File(jarFileName);
     try {
-      classLoader = ConfigurationUtilities.getClassLoaderFor(jarFileName);
-    } catch (URISyntaxException e) {
+      classLoader =
+        new URLClassLoader(new URL[] {file.toURI().toURL()}, PluginRunnerFilter.class.getClassLoader());
+    } catch (MalformedURLException e) {
+      log.error("exception " + e.getClass().toString());
+      log.error("exception " + e.getMessage());
       e.printStackTrace();
     }
 
 
-    ConfigurationUtilities.addToClassPath(jarFileName);
+    //    ConfigurationUtilities.addToClassPath(jarFileName);
 //      .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugName
 //                        + ".jar");
 
 //    byte[] config = (byte[]) cache.get(plugName + ":conf");
+
     byte[] config = pluginPackage.getConfig();
+    log.error("Flush config to dist " + tmpdir + plugName + "-conf.xml " + config.length);
     FSUtilities.flushToTmpDisk(tmpdir + plugName + "-conf.xml", config);
+    log.error("read config");
     XMLConfiguration pluginConfig = null;
     try {
       pluginConfig =
         new XMLConfiguration(tmpdir + plugName + "-conf.xml");
     } catch (ConfigurationException e) {
+      log.error("exception " + e.getClass().toString());
+      log.error("exception " + e.getMessage());
       e.printStackTrace();
     }
 //    String className = (String) cache.get(plugName + ":className");
     String className = pluginPackage.getClassName();
+    log.error("Init plugClass");
     if (className != null && !className.equals("")) {
       try {
         Class<?> plugClass =
           Class.forName(className, true, classLoader);
         Constructor<?> con = plugClass.getConstructor();
+        log.error("get plugin new Instance");
         plugin = (PluginInterface) con.newInstance();
+        log.error("initialize plugin ");
         plugin.initialize(pluginConfig, imanager);
 
       } catch (ClassNotFoundException e) {
+        log.error("exception " + e.getClass().toString());
+        log.error("exception " + e.getMessage());
         e.printStackTrace();
       } catch (NoSuchMethodException e) {
+        log.error("exception " + e.getClass().toString());
+        log.error("exception " + e.getMessage());
         e.printStackTrace();
       } catch (InvocationTargetException e) {
+        log.error("exception " + e.getClass().toString());
+        log.error("exception " + e.getMessage());
         e.printStackTrace();
       } catch (InstantiationException e) {
+        log.error("exception " + e.getClass().toString());
+        log.error("exception " + e.getMessage());
         e.printStackTrace();
       } catch (IllegalAccessException e) {
+        log.error("exception " + e.getClass().toString());
+        log.error("exception " + e.getMessage());
         e.printStackTrace();
+      }
+      catch (Exception e){
+        log.error("exception " + e.getClass().toString());
+        log.error("exception " + e.getMessage());
       }
     } else {
       log.error("Could not find the name for " + plugName);

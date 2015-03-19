@@ -40,7 +40,7 @@ public class UploadDataHandler implements Handler<HttpServerRequest> {
   public void handle(HttpServerRequest request) {
     request.response().setStatusCode(200);
     request.response().putHeader(WebStrings.CONTENT_TYPE, WebStrings.APP_JSON);
-    log.info("Deploy Plugin Request");
+    log.info("Upload data Request");
     String reqId = UUID.randomUUID().toString();
     UploadDataReplyHandler replyHandler = new UploadDataReplyHandler(reqId, request);
     UploadDataBodyHandler bodyHanlder = new UploadDataBodyHandler(reqId, replyHandler);

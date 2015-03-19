@@ -15,6 +15,7 @@
       <module>pagerank-plugin</module>
       <module>topk-plugin</module>
       <module>synopses-test-plugin</module>
+      <module>adidas-processing-plugin</module>
    </modules>
 
 

@@ -116,7 +116,8 @@ public class LocalFileStorage implements LeadsStorage {
         File[] parts = file.listFiles();
         results = new String[parts.length];
         for (int index = 0; index < parts.length; index++) {
-          results[index] = parts[index].getPath().toString().replaceFirst(basePath,"");
+//          results[index] = parts[index].getPath().toString().replaceFirst(basePath,"");
+          results[index] = uri+"/"+index;//parts[index].getPath().toString().replaceFirst(basePath,"");
         }
       }
       else{

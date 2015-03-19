@@ -40,7 +40,7 @@ public class UndeployPluginHandler implements Handler<HttpServerRequest> {
   public void handle(HttpServerRequest request) {
     request.response().setStatusCode(200);
     request.response().putHeader(WebStrings.CONTENT_TYPE, WebStrings.APP_JSON);
-    log.info("Deploy Plugin Request");
+    log.info("UnDeploy Plugin Request");
     String reqId = UUID.randomUUID().toString();
     UndeployPluginReplyHandler replyHandler = new UndeployPluginReplyHandler(reqId, request);
     UndeployPluginBodyHandler bodyHanlder = new UndeployPluginBodyHandler(reqId, replyHandler);

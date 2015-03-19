@@ -19,10 +19,9 @@ public class LeadsIntermediateIterator<V> implements Iterator<V> {
   private String key;
   private ComplexIntermediateKey baseIntermKey;
   private IndexedComplexIntermediateKey currentChunk;
-  private List<IndexedComplexIntermediateKey> list;
   private Integer currentCounter = 0;
   private Iterator<IndexedComplexIntermediateKey> chunkIterator;
-
+  private List<IndexedComplexIntermediateKey> list;
 
   public LeadsIntermediateIterator(String key, String prefix, InfinispanManager imanager){
     intermediateDataCache = (Cache) imanager.getPersisentCache(prefix + ".data");
@@ -37,7 +36,11 @@ public class LeadsIntermediateIterator<V> implements Iterator<V> {
     org.infinispan.query.dsl.Query lucenequery = qf.from(IndexedComplexIntermediateKey.class)
                                                    .having("key").eq(key)
                                                    .toBuilder().build();
-    List<IndexedComplexIntermediateKey> list = lucenequery.list();
+    List<IndexedComplexIntermediateKey> alist = lucenequery.list();
+    Iterator<IndexedComplexIntermediateKey> alistIterator = alist.iterator();
+    while(alistIterator.hasNext()){
+      list.add(alistIterator.next());
+    }
     chunkIterator = list.iterator();
     if(chunkIterator.hasNext()) {
       currentChunk = chunkIterator.next();

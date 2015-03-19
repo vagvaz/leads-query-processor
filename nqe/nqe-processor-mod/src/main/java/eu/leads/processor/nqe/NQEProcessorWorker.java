@@ -149,7 +149,8 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
             log.error(id + " received message from eventbus that does not contain type field  \n" + message.toString());
          }
       } catch (Exception e) {
-         e.printStackTrace();
+         log.error(e.getClass().toString());
+         log.error(e.getMessage());
       }
    }
 

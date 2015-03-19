@@ -33,7 +33,7 @@ public class RegisterPluginActionHandler implements ActionHandler {
     this.id = id;
     queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
     Properties storageConf = new Properties();
-    storageConf.setProperty("prefix", "/tmp/leads-tmp/");
+    storageConf.setProperty("prefix", "/tmp/leads/");
     PluginManager.initialize(LeadsStorageFactory.LOCAL,storageConf);
   }
   @Override

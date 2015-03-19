@@ -55,7 +55,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
     //        persistence.start();
     mapper = new ObjectMapper();
     Properties storageConf = new Properties();
-    storageConf.setProperty("prefix", "/tmp/leads-tmp/");
+    storageConf.setProperty("prefix", "/tmp/leads/");
     storage = LeadsStorageFactory.getInitializedStorage(LeadsStorageFactory.LOCAL,storageConf);
   }
 

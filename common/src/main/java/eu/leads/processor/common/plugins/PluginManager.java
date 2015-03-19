@@ -208,7 +208,7 @@ public class PluginManager {
     File file = new File(name);
     ClassLoader cl = null;
     try {
-      cl = new URLClassLoader(new URL[] {file.toURI().toURL()});
+      cl = new URLClassLoader(new URL[] {file.toURI().toURL()},PluginManager.class.getClassLoader());
 
 
       Class<?> plugClass = null;
@@ -369,18 +369,74 @@ public class PluginManager {
     //            return;
     //        }
     //
-    remoteCache.addClientListener(runner, new Object[] {configuration.toString()}, new Object[0]);
+    remoteCache.addClientListener(runner, new Object[] {configuration.toString()}, null);
     return runner;
   }
-  private static void deployPluginListener(String pluginId, String cacheName,String user,
-                                            InfinispanManager manager) {
+
+  public static PluginHandlerListener deployPluginListenerWithEvents(String pluginId, String cacheName,String
+                                                                                                     user,
+                                                            EventType[] events,
+                                                            InfinispanManager manager, LeadsStorage storage) {
     Properties conf = new Properties();
     conf.put("target", cacheName);
     conf.put("config", StringConstants.PLUGIN_ACTIVE_CACHE);
-    conf.put("user",user);
+    conf.put("user", user);
     ArrayList<String> alist = new ArrayList<String>();
     alist.add(pluginId);
     conf.put("pluginName", alist);
+    JsonObject configuration = new JsonObject();
+    configuration.putString("targetCache", cacheName);
+    configuration.putString("activePluginCache", StringConstants.PLUGIN_ACTIVE_CACHE);
+    configuration.putString("pluginName", pluginId);
+    configuration.putArray("types", new JsonArray());
+    configuration.putString("id", UUID.randomUUID().toString());
+    configuration.putString("user", user);
+    for(EventType e : events){
+      configuration.getArray("types").add(e.toString());
+    }
+    configuration.putString("storageType", storage.getStorageType());
+    ByteArrayOutputStream storageConfigurationStream = new ByteArrayOutputStream();
+    try {
+      storage.getConfiguration().store(storageConfigurationStream, "");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    configuration.putBinary("storageConfiguration", storageConfigurationStream.toByteArray());
+    //        configuration.getArray("types").add(EventType.MODIFIED);
+    //    SimplePluginRunner listener = new SimplePluginRunner("TestSimplePluginDeployer", conf);
+    PluginHandlerListener runner = new PluginHandlerListener();
+
+    //    manager.addListener(listener, cacheName);
+    RemoteCacheManager remoteCacheManager = createRemoteCacheManager();
+    RemoteCache<Object, Object> remoteCache = remoteCacheManager.getCache(cacheName);
+    //
+    System.out.println("Using cache " + cacheName);
+    //
+    if (remoteCache == null) {
+      System.err.println("Cache " + cacheName + " not found!");
+      System.exit(1);
+    }
+    //        if (remoteCache == null) {
+    //            System.err.println("Cache " + cacheName + " not found!");
+    //            return;
+    //        }
+    //
+    remoteCache.addClientListener(runner, new Object[] {configuration.toString()}, new Object[0]);
+    return runner;
+  }
+
+
+
+
+  private static void deployPluginListener(String pluginId, String cacheName,String user,
+                                            InfinispanManager manager) {
+//    Properties conf = new Properties();
+//    conf.put("target", cacheName);
+//    conf.put("config", StringConstants.PLUGIN_ACTIVE_CACHE);
+//    conf.put("user",user);
+    ArrayList<String> alist = new ArrayList<String>();
+    alist.add(pluginId);
+//    conf.put("pluginName", alist);
     JsonObject configuration = new JsonObject();
     configuration.putString("targetCache",cacheName);
     configuration.putString("activePluginCache",StringConstants.PLUGIN_ACTIVE_CACHE);

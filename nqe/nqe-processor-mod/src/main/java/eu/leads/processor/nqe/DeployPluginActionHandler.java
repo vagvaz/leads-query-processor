@@ -67,10 +67,15 @@ public class DeployPluginActionHandler implements ActionHandler {
        }
        List<EventType> eventList= new ArrayList<>(3);
        for (int index = 0; index < deployPlugin.getArray("events").size(); index++) {
-         eventList.add((EventType) deployPlugin.getArray("events").get(index));
+         eventList.add(EventType.valueOf(deployPlugin.getArray("events").get(index).toString()));
        }
-       EventType[] events = (EventType[]) eventList.toArray();
+       EventType[] events =  new EventType[eventList.size()];
+       int counter = 0;
+       for(EventType event : eventList){
+         events[counter++] = event;
+       }
        //CHeck plugin if exists
+
        PluginPackage plugin = (PluginPackage) pluginRepository.get(pluginId);
        if(plugin == null){
          result.setStatus(ActionStatus.FAILED.toString());
@@ -79,8 +84,11 @@ public class DeployPluginActionHandler implements ActionHandler {
          result.setResult(reply);
          return result;
        }
-       activePlugins.put(activePlugins.getName()+":"+plugin.getId()+plugin.getUser(),plugin);
-       PluginHandlerListener listener = PluginManager.deployPluginListener(pluginId,targetCache,user,
+
+       plugin.setUser(user);
+       activePlugins.put(targetCache+":"+plugin.getId()+plugin.getUser(),plugin);
+       PluginHandlerListener listener = PluginManager.deployPluginListenerWithEvents(pluginId,targetCache,
+                                                                                      user,events,
                                                                             persistence,storage);
        reply.putString("status","SUCCESS");
        reply.putString("message","");
