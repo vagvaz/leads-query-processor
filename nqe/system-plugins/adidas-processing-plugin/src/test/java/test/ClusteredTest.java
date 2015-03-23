@@ -1,6 +1,8 @@
 package test;
 
+import eu.leads.crawler.PersistentCrawl;
 import eu.leads.processor.AdidasProcessingPlugin;
+import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.plugins.PluginManager;
@@ -28,9 +30,7 @@ public class ClusteredTest {
      ArrayList<InfinispanManager> cluster = new ArrayList<InfinispanManager>();
      cluster.add(InfinispanClusterSingleton.getInstance().getManager());  //must add because it is used from the rest of the system
      //Crucial for joining infinispan cluster
-     for ( InfinispanManager manager : cluster ) {
-        manager.getPersisentCache("clustered");
-     }
+
      //Create plugin package for upload (id,class name, jar file path, xml configuration)
         /*PluginPackage plugin = new PluginPackage();*/
      PluginPackage plugin = new PluginPackage(AdidasProcessingPlugin.class.getCanonicalName(), AdidasProcessingPlugin.class.getCanonicalName(),
@@ -55,21 +55,27 @@ public class ClusteredTest {
 
 
      //Put some configuration properties for crawler
-     
-//     LQPConfiguration.getConf().setProperty("crawler.seed", seed); //For some reason it is ignored news.yahoo.com is used by default
-//     LQPConfiguration.getConf().setProperty("crawler.depth", 1);
-//     //Set desired target cache
-//     LQPConfiguration.getConf().setProperty(StringConstants.CRAWLER_DEFAULT_CACHE, "webpages");
-//     
-//     //start crawler
-//     PersistentCrawl.main(null);
+
+    LQPConfiguration.getConf().setProperty("crawler.seed",
+                                            "http://www.bbc.co.uk"); //For some reason it is ignored news.yahoo.com is used by default
+    LQPConfiguration.getConf().setProperty("crawler.depth", 3);
+    //Set desired target cache
+    LQPConfiguration.getConf().setProperty(StringConstants.CRAWLER_DEFAULT_CACHE, "default.webpages");
+    //start crawler
+    PersistentCrawl.main(null);
+    //Sleep for an amount of time to test if everything is working fine
+    try {
+      int sleepingPeriod = 20;
+      Thread.sleep(sleepingPeriod * 1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
      InfinispanManager menago = InfinispanClusterSingleton.getInstance().getManager();
      ConcurrentMap map = menago.getPersisentCache("default.webpages");
      
      System.out.println("Putting values to cache...");
      
-     map.put("earga", "syf");
-     map.put("werg", "kibel");
+
 //    try {
 //      Thread.sleep(initPeriod * 1000);
 //    } catch ( InterruptedException e ) {
@@ -89,11 +95,7 @@ public class ClusteredTest {
 //     PersistentCrawl.stop();
      
      //Sleep for an amount of time to let processing run
-     try {
-        Thread.sleep(processingPeriod * 1000);
-     } catch ( InterruptedException e ) {
-        e.printStackTrace();
-     }     
+
      InfinispanClusterSingleton.getInstance().getManager().stopManager();
      System.exit(0);
 

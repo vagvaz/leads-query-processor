@@ -1,19 +1,10 @@
 package eu.leads.processor;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-
-import eu.leads.PropertiesSingleton;
 import eu.leads.infext.proc.realtime.env.pojo.PageProcessingPojo;
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.PluginInterface;
-
 import org.apache.commons.configuration.Configuration;
 import org.infinispan.Cache;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by vagvaz on 10/14/14.
@@ -110,7 +101,7 @@ public class AdidasProcessingPlugin implements PluginInterface {
 
    @Override
    public void created(Object key, Object value, Cache<Object, Object> cache) {
-	   System.out.println("XXXcreated()");
+	   System.out.println("XXXcreated() " + key.toString());
       processTuple(key,value);
    }
 
@@ -121,6 +112,7 @@ public class AdidasProcessingPlugin implements PluginInterface {
    private void processTuple(Object key, Object value) {
 //	   try {
 		   System.out.println("######## processTuple");
+        System.err.println("key; " + key.toString() + "\n" + value.toString());
 //		   String uri = (String) key;
 //			String webpageJson = (String)value;
 //			Tuple webpage = new Tuple(webpageJson);
