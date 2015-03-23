@@ -70,9 +70,14 @@ public class ClusteredTest {
         PluginManager.addPluginToCache(plugin,7, (Cache) clusters.get(0).getPersisentCache(StringConstants
                                                                                     .PLUGIN_ACTIVE_CACHE),
                                         "default.webpages");
-        PluginManager.deployPluginListener(plugin.getId(),"default.webpages","vagvaz",clusters.get(0),
-                                            storage);
-        /*Start putting values to the cache */
+try {
+  PluginManager.deployPluginListener(plugin.getId(), "default.webpages", "vagvaz", clusters.get(0),
+                                      storage);
+}catch (Exception e){
+  e.printStackTrace();
+  System.exit(-1);
+}
+    /*Start putting values to the cache */
 
         //Put some configuration properties for crawler
         LQPConfiguration.getConf().setProperty("crawler.seed",
