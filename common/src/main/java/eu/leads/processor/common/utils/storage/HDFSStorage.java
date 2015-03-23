@@ -56,6 +56,8 @@ public class HDFSStorage implements LeadsStorage {
     try {
       hdfsConfiguration = new org.apache.hadoop.conf.Configuration(false);
       hdfsConfiguration.set("fs.defaultFS", configuration.getProperty("hdfs.url"));
+      hdfsConfiguration.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+      hdfsConfiguration.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
       fileSystem = FileSystem.get(hdfsConfiguration);
 
       if(!fileSystem.exists(basePath))

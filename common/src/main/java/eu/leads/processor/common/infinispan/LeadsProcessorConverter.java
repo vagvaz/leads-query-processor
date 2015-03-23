@@ -4,11 +4,13 @@ import org.infinispan.metadata.Metadata;
 import org.infinispan.notifications.cachelistener.filter.CacheEventConverter;
 import org.infinispan.notifications.cachelistener.filter.EventType;
 
+import java.io.Serializable;
+
 
 /**
  * Created by vagvaz on 9/29/14.
  */
-public class LeadsProcessorConverter implements CacheEventConverter {
+public class LeadsProcessorConverter implements CacheEventConverter,Serializable {
 
 
   @Override
