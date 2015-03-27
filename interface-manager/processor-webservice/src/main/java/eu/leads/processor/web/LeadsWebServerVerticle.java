@@ -22,12 +22,14 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
     String id;
 
     public void start() {
-        id = "webservice-" + LQPConfiguration.getInstance().getHostname() + container.config()
-                                                                                .getNumber("port",
-                                                                                              8080)
-                                                                                .toString();
+
         LQPConfiguration.initialize(true);
-        container.logger().info("Leads Processor REST service is starting..");
+      id = "webservice-" + LQPConfiguration.getInstance().getHostname() + container.config()
+                                                                            .getNumber("port",
+                                                                                        8080)
+                                                                            .toString();
+
+      container.logger().info("Leads Processor REST service is starting..");
         com = new DefaultNode();
 
         log = container.logger();

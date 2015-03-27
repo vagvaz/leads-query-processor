@@ -151,7 +151,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
   @Override
     public void reduce(String key, Iterator<Tuple> iterator,LeadsCollector collector) {
        //Reduce takes all the grouped Typles per key
-//      System.out.println("running for " + key + " .");
+      System.out.println("running for " + key + " .");
       if(key == null || key.equals(""))
         return ;
         if (!isInitialized) initialize();
@@ -160,53 +160,79 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
 //        progress();
        //Iterate overall values
         while (iterator.hasNext()) {
+        try{
+          t = new Tuple(iterator.next());
+          if (t == null) {
+            System.err.println("Iterator got next and it was null..." + iterator.toString());
+          }
+          //            t = new Tuple(iterator.next());
+          //handle pagerank
+          //           handlePagerank(t);
 
-            t = iterator.next();
-//            t = new Tuple(iterator.next());
-           //handle pagerank
-//           handlePagerank(t);
-           Iterator<String> funcTypeIterator= functionType.iterator();
-//           Iterator<Object> aggValuesIterator = aggregateValues.iterator();
-           Iterator<String> columnTypesIterator = columnTypes.iterator();
-           Iterator<String> columnNameiterator =  columnParams.iterator();
-           int counter = 0;
-           //for each function
-           while(funcTypeIterator.hasNext()){
+            Iterator<String> funcTypeIterator = functionType.iterator();
+            //           Iterator<Object> aggValuesIterator = aggregateValues.iterator();
+            Iterator<String> columnTypesIterator = columnTypes.iterator();
+            Iterator<String> columnNameiterator = columnParams.iterator();
+            int counter = 0;
+            //for each function
+            while (funcTypeIterator.hasNext()) {
 
-              String funcType= funcTypeIterator.next();
+              String funcType = funcTypeIterator.next();
               String columnType = columnTypesIterator.next();
               String column = columnNameiterator.next();
               //set new aggvalue according to function type, columnt Type, old agg value, currentValue
-              aggregateValues.set(counter,MathUtils.updateFunctionValue(funcType, columnType, aggregateValues.get(counter),t.getGenericAttribute(column)));
+              aggregateValues.set(counter, MathUtils.updateFunctionValue(funcType, columnType,
+                                                                          aggregateValues.get(counter),
+                                                                          t.getGenericAttribute(column)));
               counter++; //inc counter for the next agg value
-           }
+            }
+
+          }catch(Exception e ){
+            System.err.println("after updating agg value");
+            System.err.println(e.getClass() + " " + e.getMessage());
+          System.err.println(iterator.toString());
+          System.err.println(t.toString());
 
         }
 
-       Iterator<String> nameIterator= aggregateInferred.iterator();
-       Iterator<Object> aggValuesIterator = aggregateValues.iterator();
-       Iterator<String> funcTypeIterator = functionType.iterator();
+          Iterator<String> nameIterator = aggregateInferred.iterator();
+          Iterator<Object> aggValuesIterator = aggregateValues.iterator();
+          Iterator<String> funcTypeIterator = functionType.iterator();
 
-       //compute final values and put agg values to tuple
-       while(nameIterator.hasNext()){
-          String name = nameIterator.next();
-          Object value = aggValuesIterator.next();
-          String funcType = funcTypeIterator.next();
-          Object tupleValue = value;
-          //if function is avg compute value
-          if(funcType.equals("avg")){
-             Map<String,Object> avgMap = (Map<String, Object>) value;
-             Double avgValue = MathUtils.computeAvg(avgMap);
-             tupleValue = avgValue;
+          //compute final values and put agg values to tuple
+          try {
+            while (nameIterator.hasNext()) {
+              String name = nameIterator.next();
+              Object value = aggValuesIterator.next();
+              String funcType = funcTypeIterator.next();
+              Object tupleValue = value;
+              //if function is avg compute value
+              if (funcType.equals("avg")) {
+                Map<String, Object> avgMap = (Map<String, Object>) value;
+                Double avgValue = MathUtils.computeAvg(avgMap);
+                tupleValue = avgValue;
+              }
+              t.setAttribute(name, tupleValue);
+            }
+          }catch (Exception e ){
+
+              System.err.println("on setting agg value");
+              System.err.println(e.getClass() + " " + e.getMessage());
+            System.err.println(iterator.toString());
+            System.err.println(t.toString());
+
+
           }
-          t.setAttribute(name,tupleValue);
-       }
-       //prepare output
-//        System.err.println("t: " + t.toString());
-        t = prepareOutput(t);
-//        System.err.println("tout: " + t.toString());
-//        collector.emit(prefix + key, t.asString());
-        collector.emit(prefix + key, t);
+          //prepare output
+          //        System.err.println("t: " + t.toString());
+          t = prepareOutput(t);
+          //        System.err.println("tout: " + t.toString());
+          //        collector.emit(prefix + key, t.asString());
+          collector.emit(prefix + key, t);
+        }
+
+
+
         return ;
     }
 

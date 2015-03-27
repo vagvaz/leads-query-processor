@@ -7,10 +7,8 @@ import eu.leads.processor.plugins.pagerank.node.DSPMNode;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.versioning.VersionedCache;
-import org.infinispan.versioning.impl.VersionedCacheTreeMapImpl;
 import org.infinispan.versioning.utils.version.Version;
 import org.infinispan.versioning.utils.version.VersionScalar;
-import org.infinispan.versioning.utils.version.VersionScalarGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
@@ -49,7 +47,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
 
   @Override public void initialize() {
     super.initialize();
-    versionedCache = new VersionedCacheTreeMapImpl(inputCache,new VersionScalarGenerator(),inputCache.getName());
+//    versionedCache = new VersionedCacheTreeMapImpl(inputCache,new VersionScalarGenerator(),inputCache.getName());
 
     pageRankCache = (Cache) imanager.getPersisentCache("pagerankCache");
     log.info("--------------------    get approxSum cache ------------------------");

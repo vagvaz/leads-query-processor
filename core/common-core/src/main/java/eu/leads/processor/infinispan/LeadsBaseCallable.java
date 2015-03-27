@@ -63,9 +63,10 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     }
     else {
       LQPConfiguration.initialize();
-      emanager = new EnsembleCacheManager(LQPConfiguration.getInstance().getHostname() + ":11222");
+      emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
+//            emanager = createRemoteCacheManager();
     }
-//      emanager = createRemoteCacheManager();
+
       ecache = emanager.getCache(output);
       outputCache =  emanager.getCache(output);
 
@@ -106,7 +107,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //      ecache.stop();
 //      outputCache.stop();
     }catch(Exception e){
-        System.err.println("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage());
+        System.err.println("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage() + " cause "
+                             + e.getCause().toString());
       }
   }
 

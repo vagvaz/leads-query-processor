@@ -1,27 +1,37 @@
 package eu.leads.processor.common.infinispan;
 
 import org.infinispan.commons.api.BasicCache;
-
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by vagvaz on 3/7/15.
  */
 public class EnsembleCacheUtils {
 
-   public static void putToCache(Map cache, Object key, Object value){
+   static Logger log  = LoggerFactory.getLogger(EnsembleCacheUtils.class);
+   public static void putToCache(BasicCache cache, Object key, Object value){
       boolean isok = false;
       while(!isok) {
          try {
-            cache.put(key, value);
-            isok =true;
+           if(cache != null) {
+             cache.put(key, value);
+             isok = true;
+           }
+           else {
+             log.error("CACHE IS NULL IN PUT TO CACHE for " + key.toString() + " " + value.toString());
+             isok = true;
+           }
          }catch(NullPointerException npe){
-           isok = true;
-           System.out.println("NPE: cache " + cache.toString() + " \nkey: " + key.toString()+" value: " +
+           isok = false;
+           log.error("NPE: cache " + cache.toString() + " \nkey: " + key.toString() + " value: " +
+                       value.toString() + "\n-----");
+           System.err.println("NPE: cache " + cache.toString() + " \nkey: " + key.toString()+" value: " +
                                 value.toString()+"\n-----");
          }
          catch (Exception e) {
             isok = false;
+            log.error("PUT TO CACHE " + e.getMessage());
             System.err.println("PUT TO CACHE " + e.getMessage());
          }
       }

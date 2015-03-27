@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.plugins.PluginPackage;

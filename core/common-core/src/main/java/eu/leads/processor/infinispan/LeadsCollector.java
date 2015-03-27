@@ -178,7 +178,7 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
       Integer currentCount = (Integer) counterCache.get(key);
       if(currentCount == null)
       {
-        currentCount = new Integer(1);
+        currentCount = new Integer(0);
         baseIndexedKey.setKey(key.toString());
         EnsembleCacheUtils.putIfAbsentToCache(keysCache, key, key);
         EnsembleCacheUtils.putToCache(indexSiteCache,baseIndexedKey.getUniqueKey(), baseIndexedKey);

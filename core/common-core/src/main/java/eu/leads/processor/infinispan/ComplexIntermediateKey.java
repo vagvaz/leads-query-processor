@@ -24,7 +24,10 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
    }
 
   public ComplexIntermediateKey() {
-
+      site = "";
+    node = "";
+      key = "";
+    counter = -1;
   }
 
   public ComplexIntermediateKey(IndexedComplexIntermediateKey currentChunk) {
@@ -78,11 +81,16 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
 
       ComplexIntermediateKey that = (ComplexIntermediateKey) o;
 
-      if (site != null ? !site.equals(that.site) : that.site != null) return false;
-      if (node != null ? !node.equals(that.node) : that.node != null) return false;
-      if (key != null ? !key.equals(that.key) : that.key != null) return false;
-      return !(counter != null ? !counter.equals(that.counter) : that.counter != null);
-
+//      if (site != null ? !site.equals(that.site) : that.site != null) return false;
+//      if (node != null ? !node.equals(that.node) : that.node != null) return false;
+//      if (key != null ? !key.equals(that.key) : that.key != null) return false;
+//      return !(counter != null ? !counter.equals(that.counter) : that.counter != null);
+      if(site.equals(that.getSite()))
+        if(node.equals(that.getNode()))
+          if(key.equals(that.getKey()))
+            if(counter.equals(that.getCounter()))
+              return true;
+     return false;
    }
 
    @Override
@@ -97,17 +105,26 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
          if(result != 0)
             return result;
       }
+      else{
+        return -1;
+      }
 
       if (node != null){
          result = node.compareTo(that.node);
          if(result != 0)
             return result;
       }
+     else{
+        return -1;
+      }
       if (key != null )
       {
          result = key.compareTo(that.key);
          if(result != 0)
             return result;
+      }
+     else{
+        return -1;
       }
       if(counter != null){
          return counter.compareTo(that.counter);
@@ -117,5 +134,14 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
 
   public void next() {
     counter++;
+  }
+
+  @Override public String toString() {
+    return "ComplexIntermediateKey{" +
+             "site='" + site + '\'' +
+             ", node='" + node + '\'' +
+             ", key='" + key + '\'' +
+             ", counter=" + counter +
+             '}';
   }
 }

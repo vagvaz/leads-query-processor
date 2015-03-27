@@ -102,4 +102,12 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
    String getUniqueKey(){
       return site+node+key;
    }
+
+  @Override public String toString() {
+    return "IndexedComplexIntermediateKey{" +
+             "site='" + site + '\'' +
+             ", node='" + node + '\'' +
+             ", key='" + key + '\'' +
+             '}';
+  }
 }
