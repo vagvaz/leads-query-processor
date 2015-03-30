@@ -1,5 +1,8 @@
 package eu.leads.processor.infinispan;
 
+import org.infinispan.commons.hash.MurmurHash3;
+
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -10,7 +13,7 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
    private String node;
    private String key;
    private Integer counter;
-
+   private static final long  serialVersionUID = -81923791823178123L;
    public ComplexIntermediateKey(String site, String node) {
       this.site = site;
       this.node = node;
@@ -21,6 +24,9 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
       this.node = node;
       this.key = key;
       this.counter = counter;
+   }
+   public ComplexIntermediateKey(ComplexIntermediateKey other){
+      this(other.getSite(),other.getNode(),other.getKey(),other.getCounter());
    }
 
   public ComplexIntermediateKey() {
@@ -34,8 +40,30 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
     this.site = currentChunk.getSite();
     this.node = currentChunk.getNode();
     this.key = currentChunk.getKey();
-    this.counter = 0;
+    this.counter = new Integer(0);
   }
+//   private void writeObject(java.io.ObjectOutputStream out)
+//           throws IOException{
+////      out.writeObject(site);
+////      out.writeObject(node);
+////      out.writeObject(key);
+////      out.writeInt(counter);
+//      String toWrite =  site+"--"+node+"--"+key+"--"+counter;
+//      out.writeObject(toWrite);
+//   }
+//   private void readObject(java.io.ObjectInputStream in)
+//           throws IOException, ClassNotFoundException{
+////         site = (String) in.readObject();
+////         node = (String) in.readObject();
+////         key = (String) in.readObject();
+////         counter = new Integer(in.readInt());
+//      String stringRead = (String) in.readObject();
+//      String[] values = stringRead.split("--");
+//      site = values[0].trim();
+//      node = values[1].trim();
+//      key = values[2].trim();
+//      counter = Integer.parseInt(values[3].trim());
+//   }
 
   public String getSite() {
       return site;
@@ -66,19 +94,17 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
    }
 
    public void setCounter(Integer counter) {
-      this.counter = counter;
+      this.counter = new Integer(counter);
    }
 
    @Override
    public int hashCode() {
-      return key.hashCode();
+      return site.hashCode()+node.hashCode()+key.hashCode()+counter.hashCode();
    }
 
    @Override
    public boolean equals(Object o) {
-      if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
-
       ComplexIntermediateKey that = (ComplexIntermediateKey) o;
 
 //      if (site != null ? !site.equals(that.site) : that.site != null) return false;
@@ -91,11 +117,11 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
             if(counter.equals(that.getCounter()))
               return true;
      return false;
+//     return that.toString().equals(this.toString());
    }
 
    @Override
    public int compareTo(Object o) {
-      if (this == o) return 0;
       if (o == null || getClass() != o.getClass()) return -1;
 
       ComplexIntermediateKey that = (ComplexIntermediateKey) o;
@@ -130,18 +156,14 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
          return counter.compareTo(that.counter);
       }
       return -1;
+//      return o.toString().compareTo(this.toString());
    }
 
   public void next() {
-    counter++;
+    counter = new Integer(counter+1);
   }
 
   @Override public String toString() {
-    return "ComplexIntermediateKey{" +
-             "site='" + site + '\'' +
-             ", node='" + node + '\'' +
-             ", key='" + key + '\'' +
-             ", counter=" + counter +
-             '}';
+    return site+"--"+node+"--"+key+"--"+counter;
   }
 }

@@ -9,12 +9,12 @@ import java.io.Serializable;
  */
 @Indexed
 public class IndexedComplexIntermediateKey implements Comparable,Serializable {
-   @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
+   @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES,name="site")
    private String site;
 
-   @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
+   @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES,name="node")
    private String node;
-   @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
+   @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES,name="key")
    private String key;
 
    public IndexedComplexIntermediateKey(String site, String node) {
@@ -26,6 +26,9 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
       this.site = site;
       this.node = node;
       this.key = key;
+   }
+   public IndexedComplexIntermediateKey(IndexedComplexIntermediateKey other){
+      this(other.getSite(),other.getNode(),other.getKey());
    }
 
   public IndexedComplexIntermediateKey() {
@@ -72,7 +75,8 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
 
    @Override
    public int hashCode() {
-      return key.hashCode();
+      int result = site.hashCode()+node.hashCode()+key.hashCode();
+      return result;
    }
 
    @Override
@@ -99,7 +103,7 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
       }
       return -1;
    }
-   String getUniqueKey(){
+   public String getUniqueKey(){
       return site+node+key;
    }
 

@@ -4,6 +4,7 @@ import eu.leads.processor.common.ProgressReport;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Tuple;
+import org.apache.commons.configuration.XMLConfiguration;
 import org.infinispan.Cache;
 import org.infinispan.distexec.mapreduce.Reducer;
 import org.infinispan.manager.EmbeddedCacheManager;
@@ -173,4 +174,8 @@ public class LeadsReducer<K, V> implements Reducer<K, V>,Serializable {
 
   public void reduce(K key, Iterator<V> iterator, LeadsCollector collector) {
   }
+
+   public void initialize(XMLConfiguration pluginConfig) {
+
+   }
 }

@@ -34,6 +34,7 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut,Obj
     collector.initializeCache(imanager);
 
     collector.setOnMap(false);
+     this.reducer.initialize();
   }
   //    public vOut call() throws Exception {
 //        if (reducer == null) {

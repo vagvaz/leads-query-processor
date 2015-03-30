@@ -107,7 +107,9 @@ public abstract class MapReduceOperator extends BasicOperator{
     } catch (ExecutionException e) {
       e.printStackTrace();
     }
-
+    System.err.println("keysCache " + keysCache.size());
+    System.err.println("dataCache " + intermediateDataCache.size());
+    System.err.println("indexedCache " + indexSiteCache.size());
     if(reducer != null) {
 
       LeadsReducerCallable reducerCacllable = new LeadsReducerCallable(outputCache.getName(), reducer,
@@ -119,9 +121,11 @@ public abstract class MapReduceOperator extends BasicOperator{
       List<Future<?>> reducers_res= des_inter
                                       .submitEverywhere(reduceTask);
       try {
-        if (res != null) {
+        if (reducers_res != null) {
           for (Future<?> result : reducers_res) {
-            result.get();
+            System.err.println("wait " + System.currentTimeMillis());
+            System.err.println(result.get());
+            System.err.println("wait end" + System.currentTimeMillis());
           }
           System.out.println("reducer Execution is done");
         } else {
@@ -148,5 +152,8 @@ public abstract class MapReduceOperator extends BasicOperator{
   public void cleanup() {
     super.cleanup();
     intermediateCache.stop();
+    indexSiteCache.stop();
+    intermediateDataCache.stop();
+    keysCache.stop();
   }
 }

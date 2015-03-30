@@ -1,6 +1,7 @@
 package eu.leads.processor.common.test;
 
 
+import eu.leads.processor.infinispan.LeadsReducer;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.Iterator;

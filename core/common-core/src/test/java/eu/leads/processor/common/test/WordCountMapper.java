@@ -1,6 +1,7 @@
 package eu.leads.processor.common.test;
 
-import eu.leads.processor.common.LeadsMapper;
+
+import eu.leads.processor.infinispan.LeadsMapper;
 import org.infinispan.distexec.mapreduce.Collector;
 import org.vertx.java.core.json.JsonObject;
 

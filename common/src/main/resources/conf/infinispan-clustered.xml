@@ -28,7 +28,7 @@
                          statistics="true">
          <compatibility></compatibility>
           <indexing index="NONE">
-              <property name="default.directory_provider">ram</property>
+              <property name="default.directory_provider">infinispan</property>
           </indexing>
             <eviction max-entries="1000" strategy="LIRS" />
             <transaction mode="NONE"/>
