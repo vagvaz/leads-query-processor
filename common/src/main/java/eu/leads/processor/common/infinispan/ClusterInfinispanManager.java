@@ -518,7 +518,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
         if(defaultConfig == null){
           initDefaultCacheConfig();
         }
-        defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).indexing().index(Index.ALL).build();
+        defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).indexing().index(Index.ALL)
+                                .compatibility().enable().build();
     }
 
 
@@ -565,7 +566,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
                             .persistence()
                                      //                            .addStore(LevelDBStoreConfigurationBuilder.class
                                      //                            .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
-                            .addSingleFileStore().location("/tmp/" + manager.getAddress().toString()+"/").shared(false).preload(false).compatibility().enable()
+                            .addSingleFileStore().location("/tmp/" + manager.getAddress().toString()+"/")
+                      .shared(false).preload(false).compatibility().enable()
                             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
                             .build();
     }

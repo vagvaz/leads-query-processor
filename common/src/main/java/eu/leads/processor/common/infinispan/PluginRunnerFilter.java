@@ -60,7 +60,7 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
     log.error("initJson conf");
     this.conf = new JsonObject(configString);
     log.error("init Imanager");
-    imanager = new ClusterInfinispanManager(manager);
+    imanager = new ClusterInfinispanManager(InfinispanClusterSingleton.getInstance().getManager().getCacheManager());
     log.error("init");
     initialize();
   }

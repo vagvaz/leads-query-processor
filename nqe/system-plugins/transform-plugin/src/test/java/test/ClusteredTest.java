@@ -2,7 +2,6 @@ package test;
 
 import eu.leads.crawler.PersistentCrawl;
 import eu.leads.processor.common.StringConstants;
-import eu.leads.processor.common.infinispan.CacheManagerFactory;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.plugins.PluginManager;
@@ -29,7 +28,7 @@ public class ClusteredTest {
         ArrayList<InfinispanManager> clusters = new ArrayList<InfinispanManager>();
         clusters.add(InfinispanClusterSingleton.getInstance()
                          .getManager());  //must add because it is used from the rest of the system
-        clusters.add(CacheManagerFactory.createCacheManager());
+//        clusters.add(CacheManagerFactory.createCacheManager());
 
         //Crucial for joining infinispan cluster
         for (InfinispanManager cluster : clusters) {
