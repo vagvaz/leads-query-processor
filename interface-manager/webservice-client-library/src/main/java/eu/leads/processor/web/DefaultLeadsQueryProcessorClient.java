@@ -58,6 +58,7 @@ public class DefaultLeadsQueryProcessorClient implements LeadsQueryProcessorClie
      platformManager = PlatformLocator.factory.createPlatformManager();
      //set vertx variable
     vertx = platformManager.vertx();
+
 //    MultiMap wsSocketMaps
      //Initialize REST API client
 //    httpClient = vertx.createHttpClient().setPort(port).setHost(host).connectWebsocket(host + ":"

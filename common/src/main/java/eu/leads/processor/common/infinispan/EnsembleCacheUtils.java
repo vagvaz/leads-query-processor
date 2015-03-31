@@ -12,9 +12,8 @@ import org.slf4j.LoggerFactory;
 public class EnsembleCacheUtils {
 
    static Logger log  = LoggerFactory.getLogger(EnsembleCacheUtils.class);
-   public static void putToCache(BasicCache cache1, Object key, Object value){
+   public static void putToCache(BasicCache cache, Object key, Object value){
       boolean isok = false;
-      RemoteCache cache = (RemoteCache)cache1;
       while(!isok) {
          try {
            if(cache != null) {
@@ -42,6 +41,8 @@ public class EnsembleCacheUtils {
          }catch (Exception e) {
             isok = false;
             log.error("PUT TO CACHE " + e.getMessage() + " " + key);
+            log.error("key " + (key == null) + " value " + (value == null) + " cache " + (cache == null) + " log " + (log == null));
+
             try {
                Thread.sleep(5);
             } catch (InterruptedException e1) {
