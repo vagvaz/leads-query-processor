@@ -9,10 +9,10 @@ import java.io.Serializable;
  */
 @Indexed
 public class IndexedComplexIntermediateKey implements Comparable,Serializable {
-   @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES,name="site")
+   @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
    private String site;
 
-   @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES,name="node")
+   @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
    private String node;
    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES,name="key")
    private String key;
@@ -62,7 +62,7 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
 
    @Override
    public boolean equals(Object o) {
-      if (this == o) return true;
+
       if (o == null || getClass() != o.getClass()) return false;
 
       IndexedComplexIntermediateKey that = (IndexedComplexIntermediateKey) o;
@@ -75,17 +75,16 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
 
    @Override
    public int hashCode() {
-      int result = site.hashCode()+node.hashCode()+key.hashCode();
+      int result = key.hashCode();
       return result;
    }
 
    @Override
    public int compareTo(Object o) {
-      if (this == o) return 0;
       if (o == null || getClass() != o.getClass()) return -1;
 
       IndexedComplexIntermediateKey that = (IndexedComplexIntermediateKey) o;
-      int result = 0;
+      int result = -1;
       if (site != null){
          result = site.compareTo(that.site);
          if(result != 0)

@@ -108,6 +108,7 @@ public class LeadsIntermediateIterator<V> implements Iterator<V> {
       throw new NoSuchElementException("LeadsIntermediateIterator read from cache returned NULL");
     }
     baseIntermKey.next();
+//    baseIntermKey = baseIntermKey.next();
 //    Object o = intermediateDataCache.get(baseIntermKey);
 //    if(o == null){
 //

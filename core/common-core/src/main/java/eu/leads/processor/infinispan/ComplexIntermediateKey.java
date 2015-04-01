@@ -26,7 +26,10 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
       this.counter = counter;
    }
    public ComplexIntermediateKey(ComplexIntermediateKey other){
-      this(other.getSite(),other.getNode(),other.getKey(),other.getCounter());
+     this.site = other.getSite();
+      this.node = other.getNode();
+      this.key = other.getKey();
+      this.counter = other.getCounter();
    }
 
   public ComplexIntermediateKey() {
@@ -99,7 +102,7 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
 
    @Override
    public int hashCode() {
-      return site.hashCode()+node.hashCode()+key.hashCode()+counter.hashCode();
+      return key.hashCode();// site.hashCode()+node.hashCode()+key.hashCode()+counter.hashCode();
    }
 
    @Override
@@ -161,6 +164,7 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
 
   public void next() {
     counter = new Integer(counter+1);
+//     return new ComplexIntermediateKey(site,node,key,counter);
   }
 
   @Override public String toString() {

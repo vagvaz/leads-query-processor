@@ -192,7 +192,7 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
           log.error("Could not add to indexedCache indexedKey " + baseIndexedKey.toString());
         }
         else{
-          log.error("successfully added to indexed cache " + baseIndexedKey.getUniqueKey() + "\n" + baseIndexedKey.toString());
+          log.error("successfully added to indexed cache " + baseIndexedKey.getUniqueKey() + "\n" + o.toString());
         }
       }
       else{

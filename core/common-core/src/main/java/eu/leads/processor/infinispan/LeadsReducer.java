@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentMap;
  * Time: 6:08 AM
  * To change this template use File | Settings | File Templates.
  */
-public class LeadsReducer<K, V> implements Reducer<K, V>,Serializable {
+public  class LeadsReducer<K, V> implements Reducer<K, V>,Serializable {
    /**
     *
     */
@@ -42,6 +42,9 @@ public class LeadsReducer<K, V> implements Reducer<K, V>,Serializable {
    transient protected Map<String, String> outputMap;
    transient protected Map<String, List<JsonObject>> targetsMap;
    transient protected EmbeddedCacheManager manager;
+   transient  protected XMLConfiguration xmlConfiguration;
+   public LeadsReducer(){}
+
    public LeadsReducer(JsonObject configuration) {
       this.conf = configuration;
 
@@ -59,6 +62,13 @@ public class LeadsReducer<K, V> implements Reducer<K, V>,Serializable {
    @Override
    public V reduce(K reducedKey, Iterator<V> iter) {
       return null;
+   }
+
+   public void reduce(K key, Iterator<V> iterator, LeadsCollector collector) {
+   }
+
+   public void initialize(XMLConfiguration xmlConfiguration) {
+      this.xmlConfiguration = xmlConfiguration;
    }
 
    public void initialize() {
@@ -172,10 +182,6 @@ public class LeadsReducer<K, V> implements Reducer<K, V>,Serializable {
       }
    }
 
-  public void reduce(K key, Iterator<V> iterator, LeadsCollector collector) {
-  }
 
-   public void initialize(XMLConfiguration pluginConfig) {
 
-   }
 }

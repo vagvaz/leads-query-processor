@@ -518,7 +518,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
         if(defaultConfig == null){
           initDefaultCacheConfig();
         }
-        defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).indexing().index(Index.ALL).build();
+        defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).clustering()
+                                      .cacheMode(CacheMode.REPL_SYNC).l1().disable().indexing().index(Index.ALL).compatibility().enable().build();
     }
 
 
