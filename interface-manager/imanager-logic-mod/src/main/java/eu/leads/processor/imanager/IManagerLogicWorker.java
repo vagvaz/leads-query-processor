@@ -12,6 +12,7 @@ import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.deployer.DeployerConstants;
 import eu.leads.processor.nqe.NQEConstants;
 import eu.leads.processor.planner.QueryPlannerConstants;
 import org.vertx.java.core.json.JsonArray;
@@ -161,6 +162,14 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             result.putString("message","");
             com.sendTo(action.getData().getString("replyTo"), result);
           }
+          else if(label.equals(IManagerConstants.EXECUTE_MAPREDUCE)){
+            action.getData().putString("replyTo", msg.getString("from"));
+            com.sendWithEventBus(workQueueAddress, action.asJsonObject());
+          }
+          else if (label.equals(IManagerConstants.COMPLETED_MAPREDUCE)){
+            action.getData().putString("replyTo", msg.getString("from"));
+            com.sendWithEventBus(workQueueAddress, action.asJsonObject());
+          }
           else {
             log.error("Unknown PENDING Action received " + action.toString());
             return;
@@ -187,8 +196,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             log.info("completed reply get query status");
             com.sendTo(action.getData().getString("replyTo"), action.getResult());
 
-          }
-          else if (label.equals(IManagerConstants.DEPLOY_PLUGIN)) {
+          } else if (label.equals(IManagerConstants.DEPLOY_PLUGIN)) {
             com.sendTo(action.getData().getString("replyTo"), action.getResult());
             if(action.getResult().getString("status").equals("SUCCESS")) {
               newAction = new Action(action);
@@ -196,8 +204,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
               newAction.setStatus(ActionStatus.PENDING.toString());
               com.sendTo(StringConstants.NODEEXECUTORQUEUE, newAction.asJsonObject());
             }
-          }
-          else if (label.equals(IManagerConstants.UNDEPLOY_PLUGIN)) {
+          } else if (label.equals(IManagerConstants.UNDEPLOY_PLUGIN)) {
             JsonObject result = action.getResult();
             com.sendTo(action.getData().getString("replyTo"),result.getObject("reply"));
             if(result.getObject("reply").getString("status").equals("SUCCESS")){
@@ -205,7 +212,8 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
               undeployAction.setData(result.getObject("undeployAction"));
               undeployAction.setLabel(NQEConstants.UNDEPLOY_PLUGIN);
               undeployAction.setDestination(undeployAction.getData().getString("owner"));
-              com.sendTo(undeployAction.getData().getString("owner"),undeployAction.asJsonObject());
+              newAction = undeployAction;
+              com.sendTo(undeployAction.getData().getString("owner"), undeployAction.asJsonObject());
             }
           } else if (label.equals(IManagerConstants.GET_RESULTS)) {
             log.info("completed reply get query results");
@@ -221,6 +229,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
               plannerAction.setLabel(QueryPlannerConstants.PROCESS_SQL_QUERY);
               plannerAction.setDestination(StringConstants.PLANNERQUEUE);
               plannerAction.setData(action.getResult());
+              newAction = plannerAction;
               com.sendTo(plannerAction.getDestination(),
                           plannerAction.asJsonObject());
             }
@@ -235,6 +244,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
               plannerAction.setLabel(QueryPlannerConstants.PROCESS_WORKFLOW_QUERY);
               plannerAction.setDestination(StringConstants.PLANNERQUEUE);
               plannerAction.setData(action.getResult());
+              newAction = plannerAction;
               com.sendTo(plannerAction.getDestination(),
                           plannerAction.asJsonObject());
             }
@@ -249,6 +259,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
               plannerAction.setLabel(QueryPlannerConstants.PROCESS_SPECIAL_QUERY);
               plannerAction.setDestination(StringConstants.PLANNERQUEUE);
               plannerAction.setData(action.getResult());
+              newAction = plannerAction;
               com.sendTo(plannerAction.getDestination(),
                           plannerAction.asJsonObject());
             }
@@ -275,14 +286,38 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
               plannerAction.setLabel(QueryPlannerConstants.PROCESS_SPECIAL_QUERY);
               plannerAction.setDestination(StringConstants.PLANNERQUEUE);
               plannerAction.setData(action.getResult());
+              newAction = plannerAction;
               com.sendTo(plannerAction.getDestination(),
                           plannerAction.asJsonObject());
             }
+          }
+          else if (label.equals(IManagerConstants.EXECUTE_MAPREDUCE)){
+            JsonObject webServiceReply = action.getResult().getObject("status");
+            com.sendTo(action.getData().getString("replyTo"),webServiceReply);
+            newAction = createNewAction(action);
+            newAction.setLabel(DeployerConstants.DEPLOY_SINGLE_MR);
+            newAction.setDestination((StringConstants.DEPLOYERQUEUE));
+            newAction.setData(action.getResult().getObject("result"));
+            com.sendTo(newAction.getDestination(),newAction.asJsonObject());
+
+          }
+          else if (label.equals(IManagerConstants.COMPLETED_MAPREDUCE)){
+            JsonObject webServiceReply = action.getResult().getObject("status");
+            com.sendTo(action.getData().getString("replyTo"),webServiceReply);
+            newAction = createNewAction(action);
+            newAction.setLabel(DeployerConstants.COMPLETED_SINGLE_MR);
+            newAction.setDestination(action.getResult().getString("deployerID"));
+            newAction.setData(action.getResult().getObject("result"));
+            com.sendTo(newAction.getDestination(),newAction.asJsonObject());
           }
           else {
             log.error("Unknown COMPLETED OR INPROCESS Action received " + action
                                                                             .toString());
             return;
+          }
+          if(newAction != null)
+          {
+            logAction(newAction);
           }
           finalizeAction(action);
       }
