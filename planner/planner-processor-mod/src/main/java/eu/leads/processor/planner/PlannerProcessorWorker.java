@@ -32,6 +32,8 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
     String gr;
     String workqueue;
     String logic;
+   String schedHost;
+   String schedPort;
     JsonObject config;
     EventBus bus;
     LeadsMessageHandler leadsHandler;
@@ -72,13 +74,16 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
         bus.registerHandler(id + ".process", this);
        LQPConfiguration.initialize();
         persistence = InfinispanClusterSingleton.getInstance().getManager();
+       schedHost = config.getString("schedulerHost");
+       schedPort = config.getString("schedulerPort");
+
         JsonObject msg = new JsonObject();
         msg.putString("processor", id + ".process");
         handlers = new HashMap<String, ActionHandler>();
         handlers.put(QueryPlannerConstants.PROCESS_SQL_QUERY,
-                        new ProcessSQLQueryActionHandler(com, log, persistence, id, module));
+                        new ProcessSQLQueryActionHandler(com, log, persistence, id, module,schedHost,schedPort));
         handlers.put(QueryPlannerConstants.PROCESS_WORKFLOW_QUERY,
-                        new ProcessWorkflowQueryActionHandler(com, log, persistence, id, module));
+                        new ProcessWorkflowQueryActionHandler(com, log, persistence, id, module,schedHost,schedPort));
         handlers.put(QueryPlannerConstants.PROCESS_SPECIAL_QUERY,
                         new ProcessSpecialQueryActionHandler(com, log, persistence, id, module));
         log = new LogProxy(config.getString("log"), com);

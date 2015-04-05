@@ -7,6 +7,8 @@ import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.infinispan.ComplexIntermediateKey;
 import eu.leads.processor.infinispan.IndexedComplexIntermediateKey;
 import eu.leads.processor.infinispan.LeadsIntermediateIterator;
+import org.infinispan.client.hotrod.RemoteCacheManager;
+import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.commons.api.BasicCache;
 
 /**
@@ -17,24 +19,28 @@ public class IntermediateResultsTest {
   static BasicCache indexedCache;
   static BasicCache dataCache;
   static BasicCache keysCache;
-  static String[] nodes= {"node0","node1","node2","node3","node00","node11","node22","node33"};
-  static String[] microClouds = {"mc0","mc1"};//,"mc2","mc01","mc11","mc21"};
+  static String[] nodes= {"node0","node1","node2","node3","node00"};//,"node11","node22","node33"};
+  static String[] microClouds = {"mc0"};//,"mc1"};//,"mc2","mc01","mc11","mc21"};
   static String[] keys;
-  static int numOfkeys = 2;
-  static int valuesPerKey = 380;
+  static int numOfkeys = 1;
+  static int valuesPerKey = 70;
+  static RemoteCacheManager rmanager;
   public static void main(String[] args) {
     LQPConfiguration.initialize();
+    rmanager = createRemoteCacheManager();
     InfinispanManager manager = InfinispanClusterSingleton.getInstance().getManager();
     InfinispanManager manager11 = CacheManagerFactory.createCacheManager();
     InfinispanManager manager12 = CacheManagerFactory.createCacheManager();
     InfinispanManager manager13 = CacheManagerFactory.createCacheManager();
     InfinispanManager manager14 = CacheManagerFactory.createCacheManager();
-     indexedCache = (BasicCache) manager.getIndexedPersistentCache("prefix.indexed");
-     dataCache = (BasicCache)manager.getPersisentCache("prefix.data");
-     keysCache = (BasicCache)manager.getPersisentCache("keysCache");
+    indexedCache = (BasicCache) manager.getIndexedPersistentCache("prefix.indexed");
+    dataCache = (BasicCache)manager.getPersisentCache("prefix.data");
+    keysCache = (BasicCache)manager.getPersisentCache("keysCache");
+    indexedCache = rmanager.getCache("prefix.indexed");
+    dataCache = rmanager.getCache("prefix.data");
+    keysCache = rmanager.getCache("keysCache");
 
-
-     keys = new String[numOfkeys];
+    keys = new String[numOfkeys];
     for (int index = 0; index < numOfkeys; index++) {
       keys[index] = "key"+index;
       keysCache.put(keys[index],keys[index]);
@@ -59,8 +65,8 @@ public class IntermediateResultsTest {
   }
 
   private static void generateIntermKeyValue(BasicCache keysCache, BasicCache dataCache,
-                                              BasicCache indexedCache, int valuesPerKey, String[] keys,
-                                              String[] nodes, String[] microClouds) {
+                                             BasicCache indexedCache, int valuesPerKey, String[] keys,
+                                             String[] nodes, String[] microClouds) {
 //    IndexedComplexIntermediateKey indexedKey = new IndexedComplexIntermediateKey();
 //    ComplexIntermediateKey ikey = new ComplexIntermediateKey();
     for(String node : nodes){
@@ -86,4 +92,11 @@ public class IntermediateResultsTest {
     }
 
   }
+
+  private static RemoteCacheManager createRemoteCacheManager() {
+    ConfigurationBuilder builder = new ConfigurationBuilder();
+    builder.addServer().host(LQPConfiguration.getConf().getString("node.ip")).port(11222);
+    return new RemoteCacheManager(builder.build());
+  }
+
 }

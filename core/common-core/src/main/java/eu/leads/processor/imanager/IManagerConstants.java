@@ -24,4 +24,6 @@ public class IManagerConstants {
    public static final String SUBMIT_ENC_QUERY = "encQuery";
    public static final String CREATE_NEW_ENC_QUERY = "newEncQuery";
   public static final String UPLOAD_DATA = "uploadData";
+   public static final String EXECUTE_MAPREDUCE = "executeMapReduce";
+   public static final String COMPLETED_MAPREDUCE = "completedMapReduce";
 }

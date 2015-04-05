@@ -8,6 +8,7 @@ import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.*;
+import eu.leads.processor.web.WP4Client;
 import leads.tajo.module.TaJoModule;
 import org.apache.tajo.TajoConstants;
 import org.apache.tajo.algebra.*;
@@ -36,13 +37,14 @@ public class ProcessWorkflowQueryActionHandler implements ActionHandler {
     private final TaJoModule module;
     private Cache<String,String> queriesCache;
     public ProcessWorkflowQueryActionHandler(Node com, LogProxy log, InfinispanManager persistence,
-                                             String id, TaJoModule module) {
+                                             String id, TaJoModule module,String schedHost,String schedport) {
         this.com = com;
         this.log = log;
         this.persistence = persistence;
         this.id = id;
         this.module = module;
        queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
+       WP4Client.initialize(schedHost,schedHost);
     }
 
     @Override
@@ -246,7 +248,15 @@ public class ProcessWorkflowQueryActionHandler implements ActionHandler {
         //Transform each plan to scheduler like format.
         //Annotate each operator with k,q
         //Send Request to Scheduler and receive Evaluations.
-        return candidatePlans;
+       Set<WorkflowPlan> result = new HashSet<>();
+       for(WorkflowPlan plan : candidatePlans){
+//          JsonObject schedulerRep = plan.getSchedulerRep();
+//          schedulerRep = annotatePlan(schedulerRep,persistence);
+//          JsonObject annotatedPlan = WP4Client.evaluatePlan(schedulerRep);
+//          plan.updateWithAnnotations(annotatedPlan);
+          result.add(plan);
+       }
+       return result;
     }
 
     private JsonObject createFailResult(Exception e, Query query) {

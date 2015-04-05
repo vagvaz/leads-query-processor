@@ -9,6 +9,7 @@ import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.*;
+import eu.leads.processor.web.WP4Client;
 import leads.tajo.module.TaJoModule;
 import org.apache.tajo.algebra.*;
 import org.apache.tajo.catalog.Column;
@@ -34,9 +35,10 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
     private final String id;
     private final TaJoModule module;
     private Cache<String,String> queriesCache;
-    private static Session session;
+    private  Session session;
+    private WP4Client wp4Client;
     public ProcessSQLQueryActionHandler(Node com, LogProxy log, InfinispanManager persistence,
-                                           String id, TaJoModule module) {
+                                           String id, TaJoModule module,String schedHost,String schedPort) {
         this.com = com;
         this.log = log;
         this.persistence = persistence;
@@ -44,6 +46,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         this.module = module;
         queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
         session = new Session("defaultQueryId", "defaultUser",StringConstants.DEFAULT_DATABASE_NAME);
+        WP4Client.initialize(schedHost,schedPort);
     }
 
     @Override
@@ -216,6 +219,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
 
     private SQLPlan choosePlan(Set<SQLPlan> evaluatedPlans) {
         //Iterate over the evaluated plans and use a heuristic method to choose a plan.
+
         SQLPlan plan = evaluatedPlans.iterator().next();
         return plan;
     }
@@ -224,7 +228,15 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         //Transform each plan to scheduler like format.
         //Annotate each operator with k,q
         //Send Request to Scheduler and receive Evaluations.
-        return candidatePlans;
+        Set<SQLPlan> result = new HashSet<>();
+        for(SQLPlan plan : candidatePlans){
+//            JsonObject schedulerRep = plan.getSchedulerRep();
+//            schedulerRep = annotatePlan(schedulerRep,persistence);
+//            JsonObject annotatedPlan = WP4Client.evaluatePlan(schedulerRep);
+//            plan.updateWithAnnotations(annotatedPlan);
+            result.add(plan);
+        }
+        return result;
     }
 
     private JsonObject createFailResult(Exception e, SQLQuery sqlQuery) {

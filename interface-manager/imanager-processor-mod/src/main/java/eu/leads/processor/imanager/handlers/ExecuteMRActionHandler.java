@@ -5,6 +5,7 @@ import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
+import org.vertx.java.core.json.JsonObject;
 
 /**
  * Created by vagvaz on 4/2/15.
@@ -24,6 +25,32 @@ public class ExecuteMRActionHandler implements ActionHandler {
 
    @Override
    public Action process(Action action) {
-      return null;
+      Action result = new Action(action);
+      JsonObject actionResult = new JsonObject();
+      JsonObject statusResult = new JsonObject();
+
+      try {
+         JsonObject data = action.getData();
+
+         statusResult.putString("status","SUCCESS");
+         statusResult.putString("message","");
+         actionResult.putObject("status", statusResult);
+         actionResult.putObject("result",data.getObject("MROperator"));
+
+
+         if (!(actionResult == null || actionResult.equals(""))) {
+            //               com.sendTo(from, result.getObject("result"));
+            result.setResult(actionResult);
+         } else {
+            actionResult.putString("error", "");
+            result.setResult(actionResult);
+         }
+      } catch (Exception e) {
+//            e.printStackTrace();
+         JsonObject object = new JsonObject();
+         object.putString("error",e.getMessage());
+         result.setResult(object);
+      }
+      return result;
    }
 }
