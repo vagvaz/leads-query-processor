@@ -1,5 +1,5 @@
 conf/
-conf/*.java
+!processor/conf/
 *.iml
 .idea/
 .project/
