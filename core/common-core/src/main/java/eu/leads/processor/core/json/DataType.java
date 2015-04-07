@@ -1,4 +1,4 @@
-package eu.leads.processor.core;
+package eu.leads.processor.core.json;
 
 /**
  * Created by angelos on 02/04/15.
