@@ -1,5 +1,5 @@
 conf/
-!eu/leads/processor/conf/
+conf/*.java
 *.iml
 .idea/
 .project/
