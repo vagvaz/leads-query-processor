@@ -63,11 +63,11 @@ public class PersistentCrawler extends DefaultCrawler {
 
         try {
 
-            String htmlString = new String(page.getBody());
-            Document doc = Jsoup.parse(htmlString);
-            String body = doc.body().text();
+//            String htmlString = new String(page.getBody());
+//            Document doc = Jsoup.parse(htmlString);
+//            String body = doc.body().text();
             Page page2 = new Page(page.getUrl(), page.getHeaders(), page.getResponseCode(),
-                                     page.getCharset(), page.getResponseTime(), body.getBytes());
+                                     page.getCharset(), page.getResponseTime(), page.getBody().getBytes());
             page2.setLinks(page.getLinks());
             page2.setTitle(page.getTitle());
             page2.setPublished(getPublished(page2));

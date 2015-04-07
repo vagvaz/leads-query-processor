@@ -116,8 +116,8 @@ public class JZC {
             for (int i=0; i<json.length(); i++)
                 returnList.add( json.get(i) );
         }
-        else
-        	returnList = null;
+//        else
+//        	returnList = null;
         request.destroy();
         ctx.destroy();
         

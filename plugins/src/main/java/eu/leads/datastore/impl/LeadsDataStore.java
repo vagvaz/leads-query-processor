@@ -10,6 +10,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
 import org.json.JSONObject;
 
 import eu.leads.datastore.AbstractDataStore;
@@ -25,7 +26,7 @@ public class LeadsDataStore extends AbstractDataStore {
 		
 		boolean connected = LeadsQueryInterface.initialize(hosts[0], port);
 		
-		System.out.printf((connected?"":"!NOT! ")+"Connected to host: %s:%d\n", 
+		System.out.printf("Bzzzzzzzz "+connected+" Connected to host: %s:%d\n", 
 				hosts[0], port);
 	}
 
@@ -64,7 +65,7 @@ public class LeadsDataStore extends AbstractDataStore {
 		QueryResults rs;
 		rs = LeadsQueryInterface.send_query_and_wait(query);
 		
-		if(rs.getResult().size() == 0) {
+		if(rs == null || rs.getResult().size() == 0) {
 			reverse = true;
 			//
 			queryP04 = "";
@@ -78,27 +79,29 @@ public class LeadsDataStore extends AbstractDataStore {
 			rs = LeadsQueryInterface.send_query_and_wait(query);		
 		}
 		
-		for(String row : rs.getResult()) {
-			JSONObject jsonRow = new JSONObject(row);
-			Map<String,Cell> columnsMap = new HashMap<String, Cell>();
-			Set<String> columns = jsonRow.keySet();
-			for(String col : columns) {
-				String name = col;
-				Object value = jsonRow.get(name);
-				// To be extended to any type...
-				if(value instanceof java.lang.String){
-					Cell cell = new Cell(name, value, 0);
-					columnsMap.put(name, cell);
+		if(rs != null) {
+			for(String row : rs.getResult()) {
+				JSONObject jsonRow = new JSONObject(row);
+				Map<String,Cell> columnsMap = new HashMap<String, Cell>();
+				Set<String> columns = jsonRow.keySet();
+				for(String col : columns) {
+					String name = col;
+					Object value = jsonRow.get(name);
+					// To be extended to any type...
+					if(value instanceof java.lang.String){
+						Cell cell = new Cell(name, value, 0);
+						columnsMap.put(name, cell);
+					}
+					else {
+						Cell cell = new Cell(name, value, 0);
+						columnsMap.put(name, cell);
+					}
 				}
-				else {
-					Cell cell = new Cell(name, value, 0);
-					columnsMap.put(name, cell);
-				}
+				Long ts = new Long(jsonRow.getLong("ts"));
+				
+				URIVersion uriVersion = new URIVersion(ts.toString(), columnsMap);
+				uriVersions.add(uriVersion);
 			}
-			Long ts = new Long(jsonRow.getLong("ts"));
-			
-			URIVersion uriVersion = new URIVersion(ts.toString(), columnsMap);
-			uriVersions.add(uriVersion);
 		}
 		
 		if(reverse) {
@@ -142,14 +145,14 @@ public class LeadsDataStore extends AbstractDataStore {
 		//
 		String queryP08 = "";
 		for(i=0; i<cells.size()-1; i++)
-			queryP08 += "%s, ";
-		queryP08 += "%s);";
+			queryP08 += "'%s', ";
+		queryP08 += "'%s');";
 		String query = queryP01+queryP02+queryP03+queryP04+queryP05+queryP06+queryP07+queryP08;
 		
-		System.out.printf(query,valuesList.toArray());
+		query = String.format(query,valuesList.toArray());
 		
 		QueryResults rs = LeadsQueryInterface.send_query_and_wait(query);
-		if(rs.getResult().size() == 0)
+		if(rs == null || rs.getResult().size() == 0)
 			return false;		
 		
 		return true;
@@ -179,16 +182,18 @@ public class LeadsDataStore extends AbstractDataStore {
 
 		QueryResults rs = LeadsQueryInterface.send_query_and_wait(query);
 		
-		for(String row : rs.getResult()) {
-			JSONObject jsonRow = new JSONObject(row);
-			
-			String type = jsonRow.getString(mapping.getProperty("leads_resourcepart-type"));
-			String value= jsonRow.getString(mapping.getProperty("leads_resourcepart-value"));
-			List<Object> values = returnMap.get(type);
-			if(values == null)
-				values = new ArrayList<Object>();
-			values.add(value);
-			returnMap.put(type, values);
+		if(rs != null) {
+			for(String row : rs.getResult()) {
+				JSONObject jsonRow = new JSONObject(row);
+				
+				String type = jsonRow.getString(mapping.getProperty("leads_resourcepart-type"));
+				String value= jsonRow.getString(mapping.getProperty("leads_resourcepart-value"));
+				List<Object> values = returnMap.get(type);
+				if(values == null)
+					values = new ArrayList<Object>();
+				values.add(value);
+				returnMap.put(type, values);
+			}
 		}
 		
 		return returnMap;
@@ -229,7 +234,7 @@ public class LeadsDataStore extends AbstractDataStore {
 			
 			System.out.println();
 			QueryResults rs = LeadsQueryInterface.send_query_and_wait(query);
-			if(rs.getResult().size() == 0)
+			if(rs == null || rs.getResult().size() == 0)
 				return false;
 		}
 		
@@ -251,22 +256,24 @@ public class LeadsDataStore extends AbstractDataStore {
 		
 		QueryResults rs = LeadsQueryInterface.send_query_and_wait(query);
 		
-		for(String row : rs.getResult()) {
-			JSONObject jsonRow = new JSONObject(row);
-			
-			Map<String,Object> keysValues = new HashMap<>();
-			String url		 = jsonRow.getString("uri");
-			Long ts		 	 = jsonRow.getLong("ts");
-			String partid	 = jsonRow.getString("partid");
-			String sentiment = jsonRow.getString(mapping.getProperty("leads_keywords-sentiment"));
-			String relevance = jsonRow.getString(mapping.getProperty("leads_keywords-relevance"));
-			
-			keysValues.put("uri"	, url);
-			keysValues.put("ts" 	, ts);
-			keysValues.put("partid"	, partid);
-			keysValues.put(mapping.getProperty("leads_keywords-sentiment"), sentiment);
-			keysValues.put(mapping.getProperty("leads_keywords-relevance"), relevance);
-			returnMapsList.add(keysValues);
+		if(rs != null) {
+			for(String row : rs.getResult()) {
+				JSONObject jsonRow = new JSONObject(row);
+				
+				Map<String,Object> keysValues = new HashMap<>();
+				String url		 = jsonRow.getString("uri");
+				Long ts		 	 = jsonRow.getLong("ts");
+				String partid	 = jsonRow.getString("partid");
+				String sentiment = jsonRow.getString(mapping.getProperty("leads_keywords-sentiment"));
+				String relevance = jsonRow.getString(mapping.getProperty("leads_keywords-relevance"));
+				
+				keysValues.put("uri"	, url);
+				keysValues.put("ts" 	, ts);
+				keysValues.put("partid"	, partid);
+				keysValues.put(mapping.getProperty("leads_keywords-sentiment"), sentiment);
+				keysValues.put(mapping.getProperty("leads_keywords-relevance"), relevance);
+				returnMapsList.add(keysValues);
+			}
 		}
 		
 		return returnMapsList;
@@ -309,7 +316,7 @@ public class LeadsDataStore extends AbstractDataStore {
 		
 		System.out.println(query);
 		QueryResults rs = LeadsQueryInterface.send_query_and_wait(query);
-		if(rs.getResult().size() == 0)
+		if(rs == null || rs.getResult().size() == 0)
 			return false;
 		
 		return true;
@@ -331,11 +338,13 @@ public class LeadsDataStore extends AbstractDataStore {
 
 		QueryResults rs = LeadsQueryInterface.send_query_and_wait(query);
 		
-		for(String row : rs.getResult()) {
-			JSONObject jsonRow = new JSONObject(row);
-			
-			String uri= jsonRow.getString("uri");
-			uris.add(uri);
+		if(rs != null) {
+			for(String row : rs.getResult()) {
+				JSONObject jsonRow = new JSONObject(row);
+				
+				String uri= jsonRow.getString("uri");
+				uris.add(uri);
+			}
 		}
 		
 		return uris;

@@ -1,3 +1,4 @@
+**/*.pyc
 conf/
 common/conf
 **/*.iml
@@ -9,3 +10,4 @@ common/conf
 **/*.log.*
 **/*.log
 target/
+**/classifiers/*

@@ -18,7 +18,7 @@ public class StdLoggerRedirect {
 	private static PrintStream stdout;                                        
 	private static PrintStream stderr;
 	
-	private static boolean isExecuted = false;
+	private static boolean isExecuted = true;
 	
 	private static Handler fileHandler = null;
 	

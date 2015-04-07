@@ -16,6 +16,7 @@ public class LeadsQueryInterface {
 	public static boolean initialize(String url, int p) {
 		try {
 			if(!isInitialized) {
+				System.out.println("Initializing WebServiceClient with "+url+":"+p);
 				if(!WebServiceClient.initialize(url, p))
 					System.exit(-1);
 				isInitialized = true;
@@ -54,10 +55,10 @@ public class LeadsQueryInterface {
     		e.printStackTrace();
     	}
         
-    	if(res == null) {
-    		res = new QueryResults();
-    		res.setResult(new ArrayList<String>());
-    	}
+//    	if(res == null) {
+//    		res = new QueryResults();
+//    		res.setResult(new ArrayList<String>());
+//    	}
     	
         return res;
 

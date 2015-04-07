@@ -257,6 +257,8 @@ public class LEADSUtils {
 	
 	public static String propertyValueToKey(Properties p, String v) {
 		String key = null;
+		for(Object x : p.keySet())
+			System.out.println(x+"="+p.getProperty(x.toString()));
 		Collection<Object> values = p.values();
 		if(values.contains(v)) {
 			for(Entry<Object, Object> e : p.entrySet()) {

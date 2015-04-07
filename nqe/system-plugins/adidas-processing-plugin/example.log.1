@@ -1,0 +1,1055 @@
+INFO main org.infinispan.eviction.impl.PassivationManagerImpl - ISPN000029: Passivating all entries to disk
+INFO main org.infinispan.eviction.impl.PassivationManagerImpl - ISPN000030: Passivated 0 entries in 1 milliseconds
+INFO main org.infinispan.eviction.impl.PassivationManagerImpl - ISPN000029: Passivating all entries to disk
+INFO main org.infinispan.eviction.impl.PassivationManagerImpl - ISPN000030: Passivated 0 entries in 0 milliseconds
+INFO main org.infinispan.eviction.impl.PassivationManagerImpl - ISPN000029: Passivating all entries to disk
+INFO main org.infinispan.eviction.impl.PassivationManagerImpl - ISPN000030: Passivated 0 entries in 0 milliseconds
+INFO main org.infinispan.eviction.impl.PassivationManagerImpl - ISPN000029: Passivating all entries to disk
+INFO main org.infinispan.eviction.impl.PassivationManagerImpl - ISPN000030: Passivated 0 entries in 1 milliseconds
+INFO main org.infinispan.eviction.impl.PassivationManagerImpl - ISPN000029: Passivating all entries to disk
+INFO main org.infinispan.eviction.impl.PassivationManagerImpl - ISPN000030: Passivated 1 entries in 20 milliseconds
+INFO main org.infinispan.eviction.impl.PassivationManagerImpl - ISPN000029: Passivating all entries to disk
+INFO main org.infinispan.eviction.impl.PassivationManagerImpl - ISPN000030: Passivated 0 entries in 0 milliseconds
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000080: Disconnecting JGroups channel ISPN
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000082: Stopping the RpcDispatcher for channel ISPN
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000078: Starting JGroups channel ISPN
+WARN main org.jgroups.stack.Configurator - JGRP000014: TP.loopback has been deprecated: enabled by default
+WARN main org.jgroups.protocols.TCP - JGRP000046: bundler_type=new has been removed; using transfer-queue
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000094: Received new cluster view for channel ISPN: [leads-ps-812|0] (1) [leads-ps-812]
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000079: Channel ISPN local address is leads-ps-812, physical addresses are [10.0.2.15:57423]
+INFO main org.infinispan.factories.GlobalComponentRegistry - ISPN000128: Infinispan version: Infinispan 'Guinness' 7.0.1-SNAPSHOT
+WARN main org.infinispan.transaction.lookup.GenericTransactionManagerLookup - ISPN000104: Falling back to DummyTransactionManager from Infinispan
+INFO main org.infinispan.eviction.impl.EvictionManagerImpl - ISPN000025: wakeUpInterval is <= 0, not starting expired purge thread
+INFO main org.infinispan.eviction.impl.EvictionManagerImpl - ISPN000025: wakeUpInterval is <= 0, not starting expired purge thread
+INFO main org.infinispan.client.hotrod.impl.protocol.Codec20 - ISPN004006: /10.0.2.15:11222 sent new topology view (id=0) containing 1 addresses: [/10.0.2.15:11222]
+INFO main org.infinispan.client.hotrod.RemoteCacheManager - ISPN004021: Infinispan version: 7.0.1-SNAPSHOT
+INFO main org.infinispan.client.hotrod.impl.protocol.Codec20 - ISPN004006: /10.0.2.15:11222 sent new topology view (id=0) containing 1 addresses: [/10.0.2.15:11222]
+INFO main eu.leads.crawler.PersistentCrawl - Seed : http://www.bbc.com/news/uk-31545744
+INFO main eu.leads.crawler.PersistentCrawl - Depth 1
+INFO main eu.leads.crawler.PersistentCrawl - Number of crawler threads 1
+INFO main eu.leads.crawler.PersistentCrawl - Document earler than 10 day(s)
+INFO main eu.leads.crawler.PersistentCrawl - 0
+INFO main eu.leads.crawler.CrawlerController - Starting crawling..
+INFO main eu.leads.crawler.CrawlerController - Initializing crawler controller
+INFO main eu.leads.crawler.CrawlerController - Initializing task queue
+INFO main eu.leads.crawler.CrawlerController - Queue is overriden, setting it instead of default inner task queue
+INFO main eu.leads.crawler.CrawlerController - Initializing scheduler
+INFO main eu.leads.crawler.frontier.DefaultScheduler - Scheduler was successfully initialized and started
+INFO main eu.leads.crawler.CrawlerController - Initializing crawler workers
+INFO main eu.leads.crawler.CrawlerController$CrawlerWorker - Thread-29 set task queue
+INFO main eu.leads.crawler.CrawlerController - Task queue initialized
+INFO main eu.leads.crawler.CrawlerController - Crawler controller initialized
+INFO main eu.leads.crawler.CrawlerController$CrawlerWorker - Thread-29 is started
+INFO Thread-29 eu.leads.crawler.CrawlerController$CrawlerWorker - Thread-29 start do work loop
+INFO Thread-29 eu.leads.crawler.PersistentCrawler - Crawled: http://www.bbc.com/news/uk-31545744
+ERROR HotRodServerWorker-3-2 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-3 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-4 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-5 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-6 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-7 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-8 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-1 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-2 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-3 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-4 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-5 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-6 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-7 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-8 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-1 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-2 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-3 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR Thread-29 org.infinispan.interceptors.InvocationContextInterceptor - ISPN000136: Execution error
+java.lang.UnsatisfiedLinkError: no jzmq in java.library.path
+	at java.lang.ClassLoader.loadLibrary(ClassLoader.java:1857)
+	at java.lang.Runtime.loadLibrary0(Runtime.java:870)
+	at java.lang.System.loadLibrary(System.java:1119)
+	at org.zeromq.ZMQ.<clinit>(ZMQ.java:40)
+	at org.zeromq.ZContext.createSocket(ZContext.java:86)
+	at eu.leads.infext.python.JZC.tryRequest(JZC.java:31)
+	at eu.leads.infext.python.JZC.send(JZC.java:100)
+	at eu.leads.infext.python.PythonQueueCall.call(PythonQueueCall.java:158)
+	at eu.leads.infext.proc.com.categorization.newsblog.NewsBlogArticleAnalysis.getPublishDate(NewsBlogArticleAnalysis.java:35)
+	at eu.leads.infext.proc.realtime.hook.impl.PageCheckHook.checkForNewsblogArticlePage(PageCheckHook.java:162)
+	at eu.leads.infext.proc.realtime.hook.impl.PageCheckHook.process(PageCheckHook.java:126)
+	at eu.leads.infext.proc.realtime.wrapper.AllAtOnceProcessing.process(AllAtOnceProcessing.java:23)
+	at eu.leads.infext.proc.realtime.env.pojo.PageProcessingPojo.execute(PageProcessingPojo.java:55)
+	at eu.leads.processor.AdidasProcessingPlugin.processTuple(AdidasProcessingPlugin.java:141)
+	at eu.leads.processor.AdidasProcessingPlugin.created(AdidasProcessingPlugin.java:116)
+	at eu.leads.processor.common.infinispan.PluginRunnerFilter.accept(PluginRunnerFilter.java:221)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl$BaseCacheEntryListenerInvocation.shouldInvoke(CacheNotifierImpl.java:1028)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl$BaseCacheEntryListenerInvocation.invoke(CacheNotifierImpl.java:976)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl.notifyCacheEntryCreated(CacheNotifierImpl.java:266)
+	at org.infinispan.interceptors.locking.ClusteringDependentLogic$AbstractClusteringDependentLogic.notifyCommitEntry(ClusteringDependentLogic.java:116)
+	at org.infinispan.interceptors.locking.ClusteringDependentLogic$DistributionLogic.commitEntry(ClusteringDependentLogic.java:475)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitContextEntry(EntryWrappingInterceptor.java:359)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitEntryIfNeeded(EntryWrappingInterceptor.java:577)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitContextEntries(EntryWrappingInterceptor.java:336)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.invokeNextAndApplyChanges(EntryWrappingInterceptor.java:410)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.setSkipRemoteGetsAndInvokeNextForDataCommand(EntryWrappingInterceptor.java:464)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.visitPutKeyValueCommand(EntryWrappingInterceptor.java:177)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.distribution.L1LastChanceInterceptor.visitDataWriteCommand(L1LastChanceInterceptor.java:79)
+	at org.infinispan.interceptors.distribution.L1LastChanceInterceptor.visitPutKeyValueCommand(L1LastChanceInterceptor.java:65)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.locking.AbstractLockingInterceptor.visitPutKeyValueCommand(AbstractLockingInterceptor.java:48)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.base.CommandInterceptor.handleDefault(CommandInterceptor.java:112)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.base.CommandInterceptor.handleDefault(CommandInterceptor.java:112)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.statetransfer.StateTransferInterceptor.handleNonTxWriteCommand(StateTransferInterceptor.java:172)
+	at org.infinispan.statetransfer.StateTransferInterceptor.visitPutKeyValueCommand(StateTransferInterceptor.java:95)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.CacheMgmtInterceptor.updateStoreStatistics(CacheMgmtInterceptor.java:148)
+	at org.infinispan.interceptors.CacheMgmtInterceptor.visitPutKeyValueCommand(CacheMgmtInterceptor.java:134)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.compat.BaseTypeConverterInterceptor.visitPutKeyValueCommand(BaseTypeConverterInterceptor.java:61)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.InvocationContextInterceptor.handleAll(InvocationContextInterceptor.java:102)
+	at org.infinispan.interceptors.InvocationContextInterceptor.handleDefault(InvocationContextInterceptor.java:71)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.InterceptorChain.invoke(InterceptorChain.java:333)
+	at org.infinispan.cache.impl.CacheImpl.executeCommandAndCommitIfNeeded(CacheImpl.java:1576)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsentInternal(CacheImpl.java:1079)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:1069)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:1661)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:275)
+	at eu.leads.crawler.PersistentCrawler.afterCrawl(PersistentCrawler.java:77)
+	at eu.leads.crawler.DefaultCrawler.crawl(DefaultCrawler.java:110)
+	at eu.leads.crawler.CrawlerController$CrawlerWorker.doWork(CrawlerController.java:350)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker.doWorkLoop(BaseTaskQueueWorker.java:43)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker.access$0(BaseTaskQueueWorker.java:35)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker$1.run(BaseTaskQueueWorker.java:25)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR Thread-29 eu.leads.crawler.CrawlerController$CrawlerWorker - Error in doWork
+eu.leads.crawler.concurrent.TaskQueueException: Exception in doWork
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker.doWorkLoop(BaseTaskQueueWorker.java:49)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker.access$0(BaseTaskQueueWorker.java:35)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker$1.run(BaseTaskQueueWorker.java:25)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: org.infinispan.commons.CacheException: java.lang.UnsatisfiedLinkError: no jzmq in java.library.path
+	at org.infinispan.interceptors.InterceptorChain.invoke(InterceptorChain.java:341)
+	at org.infinispan.cache.impl.CacheImpl.executeCommandAndCommitIfNeeded(CacheImpl.java:1576)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsentInternal(CacheImpl.java:1079)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:1069)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:1661)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:275)
+	at eu.leads.crawler.PersistentCrawler.afterCrawl(PersistentCrawler.java:77)
+	at eu.leads.crawler.DefaultCrawler.crawl(DefaultCrawler.java:110)
+	at eu.leads.crawler.CrawlerController$CrawlerWorker.doWork(CrawlerController.java:350)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker.doWorkLoop(BaseTaskQueueWorker.java:43)
+	... 3 more
+Caused by: java.lang.UnsatisfiedLinkError: no jzmq in java.library.path
+	at java.lang.ClassLoader.loadLibrary(ClassLoader.java:1857)
+	at java.lang.Runtime.loadLibrary0(Runtime.java:870)
+	at java.lang.System.loadLibrary(System.java:1119)
+	at org.zeromq.ZMQ.<clinit>(ZMQ.java:40)
+	at org.zeromq.ZContext.createSocket(ZContext.java:86)
+	at eu.leads.infext.python.JZC.tryRequest(JZC.java:31)
+	at eu.leads.infext.python.JZC.send(JZC.java:100)
+	at eu.leads.infext.python.PythonQueueCall.call(PythonQueueCall.java:158)
+	at eu.leads.infext.proc.com.categorization.newsblog.NewsBlogArticleAnalysis.getPublishDate(NewsBlogArticleAnalysis.java:35)
+	at eu.leads.infext.proc.realtime.hook.impl.PageCheckHook.checkForNewsblogArticlePage(PageCheckHook.java:162)
+	at eu.leads.infext.proc.realtime.hook.impl.PageCheckHook.process(PageCheckHook.java:126)
+	at eu.leads.infext.proc.realtime.wrapper.AllAtOnceProcessing.process(AllAtOnceProcessing.java:23)
+	at eu.leads.infext.proc.realtime.env.pojo.PageProcessingPojo.execute(PageProcessingPojo.java:55)
+	at eu.leads.processor.AdidasProcessingPlugin.processTuple(AdidasProcessingPlugin.java:141)
+	at eu.leads.processor.AdidasProcessingPlugin.created(AdidasProcessingPlugin.java:116)
+	at eu.leads.processor.common.infinispan.PluginRunnerFilter.accept(PluginRunnerFilter.java:221)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl$BaseCacheEntryListenerInvocation.shouldInvoke(CacheNotifierImpl.java:1028)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl$BaseCacheEntryListenerInvocation.invoke(CacheNotifierImpl.java:976)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl.notifyCacheEntryCreated(CacheNotifierImpl.java:266)
+	at org.infinispan.interceptors.locking.ClusteringDependentLogic$AbstractClusteringDependentLogic.notifyCommitEntry(ClusteringDependentLogic.java:116)
+	at org.infinispan.interceptors.locking.ClusteringDependentLogic$DistributionLogic.commitEntry(ClusteringDependentLogic.java:475)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitContextEntry(EntryWrappingInterceptor.java:359)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitEntryIfNeeded(EntryWrappingInterceptor.java:577)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitContextEntries(EntryWrappingInterceptor.java:336)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.invokeNextAndApplyChanges(EntryWrappingInterceptor.java:410)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.setSkipRemoteGetsAndInvokeNextForDataCommand(EntryWrappingInterceptor.java:464)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.visitPutKeyValueCommand(EntryWrappingInterceptor.java:177)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.distribution.L1LastChanceInterceptor.visitDataWriteCommand(L1LastChanceInterceptor.java:79)
+	at org.infinispan.interceptors.distribution.L1LastChanceInterceptor.visitPutKeyValueCommand(L1LastChanceInterceptor.java:65)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.locking.AbstractLockingInterceptor.visitPutKeyValueCommand(AbstractLockingInterceptor.java:48)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.base.CommandInterceptor.handleDefault(CommandInterceptor.java:112)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.base.CommandInterceptor.handleDefault(CommandInterceptor.java:112)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.statetransfer.StateTransferInterceptor.handleNonTxWriteCommand(StateTransferInterceptor.java:172)
+	at org.infinispan.statetransfer.StateTransferInterceptor.visitPutKeyValueCommand(StateTransferInterceptor.java:95)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.CacheMgmtInterceptor.updateStoreStatistics(CacheMgmtInterceptor.java:148)
+	at org.infinispan.interceptors.CacheMgmtInterceptor.visitPutKeyValueCommand(CacheMgmtInterceptor.java:134)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.compat.BaseTypeConverterInterceptor.visitPutKeyValueCommand(BaseTypeConverterInterceptor.java:61)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.InvocationContextInterceptor.handleAll(InvocationContextInterceptor.java:102)
+	at org.infinispan.interceptors.InvocationContextInterceptor.handleDefault(InvocationContextInterceptor.java:71)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.InterceptorChain.invoke(InterceptorChain.java:333)
+	... 12 more
+ERROR HotRod-client-async-pool-0 org.infinispan.client.hotrod.event.ClientListenerNotifier - ISPN004043: Unrecoverable error reading event from server /10.0.2.15:11222, exiting event reader thread
+org.infinispan.client.hotrod.exceptions.TransportException:: java.net.SocketTimeoutException
+	at org.infinispan.client.hotrod.impl.transport.tcp.TcpTransport.readByte(TcpTransport.java:184)
+	at org.infinispan.client.hotrod.impl.protocol.Codec20.readMagic(Codec20.java:259)
+	at org.infinispan.client.hotrod.impl.protocol.Codec20.readEvent(Codec20.java:103)
+	at org.infinispan.client.hotrod.event.ClientListenerNotifier$EventDispatcher.run(ClientListenerNotifier.java:229)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: java.net.SocketTimeoutException
+	at sun.nio.ch.SocketAdaptor$SocketInputStream.read(SocketAdaptor.java:211)
+	at sun.nio.ch.ChannelInputStream.read(ChannelInputStream.java:103)
+	at java.io.BufferedInputStream.fill(BufferedInputStream.java:246)
+	at java.io.BufferedInputStream.read(BufferedInputStream.java:265)
+	at org.infinispan.client.hotrod.impl.transport.tcp.TcpTransport.readByte(TcpTransport.java:179)
+	... 8 more
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000078: Starting JGroups channel ISPN
+WARN main org.jgroups.stack.Configurator - JGRP000014: TP.loopback has been deprecated: enabled by default
+WARN main org.jgroups.protocols.TCP - JGRP000046: bundler_type=new has been removed; using transfer-queue
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000094: Received new cluster view for channel ISPN: [leads-ps-61770|0] (1) [leads-ps-61770]
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000079: Channel ISPN local address is leads-ps-61770, physical addresses are [10.0.2.15:53859]
+INFO main org.infinispan.factories.GlobalComponentRegistry - ISPN000128: Infinispan version: Infinispan 'Guinness' 7.0.1-SNAPSHOT
+WARN main org.infinispan.transaction.lookup.GenericTransactionManagerLookup - ISPN000104: Falling back to DummyTransactionManager from Infinispan
+INFO main org.infinispan.eviction.impl.EvictionManagerImpl - ISPN000025: wakeUpInterval is <= 0, not starting expired purge thread
+INFO main org.infinispan.eviction.impl.EvictionManagerImpl - ISPN000025: wakeUpInterval is <= 0, not starting expired purge thread
+INFO main org.infinispan.client.hotrod.impl.protocol.Codec20 - ISPN004006: /10.0.2.15:11222 sent new topology view (id=0) containing 1 addresses: [/10.0.2.15:11222]
+INFO main org.infinispan.client.hotrod.RemoteCacheManager - ISPN004021: Infinispan version: 7.0.1-SNAPSHOT
+INFO main org.infinispan.client.hotrod.impl.protocol.Codec20 - ISPN004006: /10.0.2.15:11222 sent new topology view (id=0) containing 1 addresses: [/10.0.2.15:11222]
+INFO main eu.leads.crawler.PersistentCrawl - Seed : http://www.bbc.com/news/uk-31545744
+INFO main eu.leads.crawler.PersistentCrawl - Depth 1
+INFO main eu.leads.crawler.PersistentCrawl - Number of crawler threads 1
+INFO main eu.leads.crawler.PersistentCrawl - Document earler than 10 day(s)
+INFO main eu.leads.crawler.PersistentCrawl - 0
+INFO main eu.leads.crawler.CrawlerController - Starting crawling..
+INFO main eu.leads.crawler.CrawlerController - Initializing crawler controller
+INFO main eu.leads.crawler.CrawlerController - Initializing task queue
+INFO main eu.leads.crawler.CrawlerController - Queue is overriden, setting it instead of default inner task queue
+INFO main eu.leads.crawler.CrawlerController - Initializing scheduler
+INFO main eu.leads.crawler.frontier.DefaultScheduler - Scheduler was successfully initialized and started
+INFO main eu.leads.crawler.CrawlerController - Initializing crawler workers
+INFO main eu.leads.crawler.CrawlerController$CrawlerWorker - Thread-29 set task queue
+INFO main eu.leads.crawler.CrawlerController - Task queue initialized
+INFO main eu.leads.crawler.CrawlerController - Crawler controller initialized
+INFO main eu.leads.crawler.CrawlerController$CrawlerWorker - Thread-29 is started
+INFO Thread-29 eu.leads.crawler.CrawlerController$CrawlerWorker - Thread-29 start do work loop
+INFO Thread-29 eu.leads.crawler.PersistentCrawler - Crawled: http://www.bbc.com/news/uk-31545744
+ERROR Thread-29 org.infinispan.interceptors.InvocationContextInterceptor - ISPN000136: Execution error
+java.lang.NullPointerException
+	at eu.leads.processor.AdidasProcessingPlugin.processTuple(AdidasProcessingPlugin.java:141)
+	at eu.leads.processor.AdidasProcessingPlugin.created(AdidasProcessingPlugin.java:116)
+	at eu.leads.processor.common.infinispan.PluginRunnerFilter.accept(PluginRunnerFilter.java:221)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl$BaseCacheEntryListenerInvocation.shouldInvoke(CacheNotifierImpl.java:1028)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl$BaseCacheEntryListenerInvocation.invoke(CacheNotifierImpl.java:976)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl.notifyCacheEntryCreated(CacheNotifierImpl.java:266)
+	at org.infinispan.interceptors.locking.ClusteringDependentLogic$AbstractClusteringDependentLogic.notifyCommitEntry(ClusteringDependentLogic.java:116)
+	at org.infinispan.interceptors.locking.ClusteringDependentLogic$DistributionLogic.commitEntry(ClusteringDependentLogic.java:475)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitContextEntry(EntryWrappingInterceptor.java:359)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitEntryIfNeeded(EntryWrappingInterceptor.java:577)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitContextEntries(EntryWrappingInterceptor.java:336)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.invokeNextAndApplyChanges(EntryWrappingInterceptor.java:410)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.setSkipRemoteGetsAndInvokeNextForDataCommand(EntryWrappingInterceptor.java:464)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.visitPutKeyValueCommand(EntryWrappingInterceptor.java:177)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.distribution.L1LastChanceInterceptor.visitDataWriteCommand(L1LastChanceInterceptor.java:79)
+	at org.infinispan.interceptors.distribution.L1LastChanceInterceptor.visitPutKeyValueCommand(L1LastChanceInterceptor.java:65)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.locking.AbstractLockingInterceptor.visitPutKeyValueCommand(AbstractLockingInterceptor.java:48)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.base.CommandInterceptor.handleDefault(CommandInterceptor.java:112)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.base.CommandInterceptor.handleDefault(CommandInterceptor.java:112)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.statetransfer.StateTransferInterceptor.handleNonTxWriteCommand(StateTransferInterceptor.java:172)
+	at org.infinispan.statetransfer.StateTransferInterceptor.visitPutKeyValueCommand(StateTransferInterceptor.java:95)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.CacheMgmtInterceptor.updateStoreStatistics(CacheMgmtInterceptor.java:148)
+	at org.infinispan.interceptors.CacheMgmtInterceptor.visitPutKeyValueCommand(CacheMgmtInterceptor.java:134)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.compat.BaseTypeConverterInterceptor.visitPutKeyValueCommand(BaseTypeConverterInterceptor.java:61)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.InvocationContextInterceptor.handleAll(InvocationContextInterceptor.java:102)
+	at org.infinispan.interceptors.InvocationContextInterceptor.handleDefault(InvocationContextInterceptor.java:71)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.InterceptorChain.invoke(InterceptorChain.java:333)
+	at org.infinispan.cache.impl.CacheImpl.executeCommandAndCommitIfNeeded(CacheImpl.java:1576)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsentInternal(CacheImpl.java:1079)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:1069)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:1661)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:275)
+	at eu.leads.crawler.PersistentCrawler.afterCrawl(PersistentCrawler.java:77)
+	at eu.leads.crawler.DefaultCrawler.crawl(DefaultCrawler.java:110)
+	at eu.leads.crawler.CrawlerController$CrawlerWorker.doWork(CrawlerController.java:350)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker.doWorkLoop(BaseTaskQueueWorker.java:43)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker.access$0(BaseTaskQueueWorker.java:35)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker$1.run(BaseTaskQueueWorker.java:25)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR Thread-29 eu.leads.crawler.CrawlerController$CrawlerWorker - Error in doWork
+eu.leads.crawler.concurrent.TaskQueueException: Exception in doWork
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker.doWorkLoop(BaseTaskQueueWorker.java:49)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker.access$0(BaseTaskQueueWorker.java:35)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker$1.run(BaseTaskQueueWorker.java:25)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: java.lang.NullPointerException
+	at eu.leads.processor.AdidasProcessingPlugin.processTuple(AdidasProcessingPlugin.java:141)
+	at eu.leads.processor.AdidasProcessingPlugin.created(AdidasProcessingPlugin.java:116)
+	at eu.leads.processor.common.infinispan.PluginRunnerFilter.accept(PluginRunnerFilter.java:221)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl$BaseCacheEntryListenerInvocation.shouldInvoke(CacheNotifierImpl.java:1028)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl$BaseCacheEntryListenerInvocation.invoke(CacheNotifierImpl.java:976)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl.notifyCacheEntryCreated(CacheNotifierImpl.java:266)
+	at org.infinispan.interceptors.locking.ClusteringDependentLogic$AbstractClusteringDependentLogic.notifyCommitEntry(ClusteringDependentLogic.java:116)
+	at org.infinispan.interceptors.locking.ClusteringDependentLogic$DistributionLogic.commitEntry(ClusteringDependentLogic.java:475)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitContextEntry(EntryWrappingInterceptor.java:359)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitEntryIfNeeded(EntryWrappingInterceptor.java:577)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitContextEntries(EntryWrappingInterceptor.java:336)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.invokeNextAndApplyChanges(EntryWrappingInterceptor.java:410)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.setSkipRemoteGetsAndInvokeNextForDataCommand(EntryWrappingInterceptor.java:464)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.visitPutKeyValueCommand(EntryWrappingInterceptor.java:177)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.distribution.L1LastChanceInterceptor.visitDataWriteCommand(L1LastChanceInterceptor.java:79)
+	at org.infinispan.interceptors.distribution.L1LastChanceInterceptor.visitPutKeyValueCommand(L1LastChanceInterceptor.java:65)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.locking.AbstractLockingInterceptor.visitPutKeyValueCommand(AbstractLockingInterceptor.java:48)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.base.CommandInterceptor.handleDefault(CommandInterceptor.java:112)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.base.CommandInterceptor.handleDefault(CommandInterceptor.java:112)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.statetransfer.StateTransferInterceptor.handleNonTxWriteCommand(StateTransferInterceptor.java:172)
+	at org.infinispan.statetransfer.StateTransferInterceptor.visitPutKeyValueCommand(StateTransferInterceptor.java:95)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.CacheMgmtInterceptor.updateStoreStatistics(CacheMgmtInterceptor.java:148)
+	at org.infinispan.interceptors.CacheMgmtInterceptor.visitPutKeyValueCommand(CacheMgmtInterceptor.java:134)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.compat.BaseTypeConverterInterceptor.visitPutKeyValueCommand(BaseTypeConverterInterceptor.java:61)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.InvocationContextInterceptor.handleAll(InvocationContextInterceptor.java:102)
+	at org.infinispan.interceptors.InvocationContextInterceptor.handleDefault(InvocationContextInterceptor.java:71)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.InterceptorChain.invoke(InterceptorChain.java:333)
+	at org.infinispan.cache.impl.CacheImpl.executeCommandAndCommitIfNeeded(CacheImpl.java:1576)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsentInternal(CacheImpl.java:1079)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:1069)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:1661)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:275)
+	at eu.leads.crawler.PersistentCrawler.afterCrawl(PersistentCrawler.java:77)
+	at eu.leads.crawler.DefaultCrawler.crawl(DefaultCrawler.java:110)
+	at eu.leads.crawler.CrawlerController$CrawlerWorker.doWork(CrawlerController.java:350)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker.doWorkLoop(BaseTaskQueueWorker.java:43)
+	... 3 more
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000078: Starting JGroups channel ISPN
+WARN main org.jgroups.stack.Configurator - JGRP000014: TP.loopback has been deprecated: enabled by default
+WARN main org.jgroups.protocols.TCP - JGRP000046: bundler_type=new has been removed; using transfer-queue
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000094: Received new cluster view for channel ISPN: [leads-ps-46802|0] (1) [leads-ps-46802]
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000079: Channel ISPN local address is leads-ps-46802, physical addresses are [10.0.2.15:36396]
+INFO main org.infinispan.factories.GlobalComponentRegistry - ISPN000128: Infinispan version: Infinispan 'Guinness' 7.0.1-SNAPSHOT
+WARN main org.infinispan.transaction.lookup.GenericTransactionManagerLookup - ISPN000104: Falling back to DummyTransactionManager from Infinispan
+INFO main org.infinispan.eviction.impl.EvictionManagerImpl - ISPN000025: wakeUpInterval is <= 0, not starting expired purge thread
+INFO main org.infinispan.eviction.impl.EvictionManagerImpl - ISPN000025: wakeUpInterval is <= 0, not starting expired purge thread
+INFO main org.infinispan.client.hotrod.impl.protocol.Codec20 - ISPN004006: /10.0.2.15:11222 sent new topology view (id=0) containing 1 addresses: [/10.0.2.15:11222]
+INFO main org.infinispan.client.hotrod.RemoteCacheManager - ISPN004021: Infinispan version: 7.0.1-SNAPSHOT
+INFO main org.infinispan.client.hotrod.impl.protocol.Codec20 - ISPN004006: /10.0.2.15:11222 sent new topology view (id=0) containing 1 addresses: [/10.0.2.15:11222]
+INFO main eu.leads.crawler.PersistentCrawl - Seed : http://www.bbc.com/news/uk-31545744
+INFO main eu.leads.crawler.PersistentCrawl - Depth 1
+INFO main eu.leads.crawler.PersistentCrawl - Number of crawler threads 1
+INFO main eu.leads.crawler.PersistentCrawl - Document earler than 10 day(s)
+INFO main eu.leads.crawler.PersistentCrawl - 0
+INFO main eu.leads.crawler.CrawlerController - Starting crawling..
+INFO main eu.leads.crawler.CrawlerController - Initializing crawler controller
+INFO main eu.leads.crawler.CrawlerController - Initializing task queue
+INFO main eu.leads.crawler.CrawlerController - Queue is overriden, setting it instead of default inner task queue
+INFO main eu.leads.crawler.CrawlerController - Initializing scheduler
+INFO main eu.leads.crawler.frontier.DefaultScheduler - Scheduler was successfully initialized and started
+INFO main eu.leads.crawler.CrawlerController - Initializing crawler workers
+INFO main eu.leads.crawler.CrawlerController$CrawlerWorker - Thread-29 set task queue
+INFO main eu.leads.crawler.CrawlerController - Task queue initialized
+INFO main eu.leads.crawler.CrawlerController - Crawler controller initialized
+INFO main eu.leads.crawler.CrawlerController$CrawlerWorker - Thread-29 is started
+INFO Thread-29 eu.leads.crawler.CrawlerController$CrawlerWorker - Thread-29 start do work loop
+INFO Thread-29 eu.leads.crawler.PersistentCrawler - Crawled: http://www.bbc.com/news/uk-31545744
+ERROR Thread-29 org.infinispan.interceptors.InvocationContextInterceptor - ISPN000136: Execution error
+java.lang.NullPointerException
+	at eu.leads.processor.AdidasProcessingPlugin.processTuple(AdidasProcessingPlugin.java:141)
+	at eu.leads.processor.AdidasProcessingPlugin.created(AdidasProcessingPlugin.java:116)
+	at eu.leads.processor.common.infinispan.PluginRunnerFilter.accept(PluginRunnerFilter.java:221)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl$BaseCacheEntryListenerInvocation.shouldInvoke(CacheNotifierImpl.java:1028)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl$BaseCacheEntryListenerInvocation.invoke(CacheNotifierImpl.java:976)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl.notifyCacheEntryCreated(CacheNotifierImpl.java:266)
+	at org.infinispan.interceptors.locking.ClusteringDependentLogic$AbstractClusteringDependentLogic.notifyCommitEntry(ClusteringDependentLogic.java:116)
+	at org.infinispan.interceptors.locking.ClusteringDependentLogic$DistributionLogic.commitEntry(ClusteringDependentLogic.java:475)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitContextEntry(EntryWrappingInterceptor.java:359)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitEntryIfNeeded(EntryWrappingInterceptor.java:577)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitContextEntries(EntryWrappingInterceptor.java:336)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.invokeNextAndApplyChanges(EntryWrappingInterceptor.java:410)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.setSkipRemoteGetsAndInvokeNextForDataCommand(EntryWrappingInterceptor.java:464)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.visitPutKeyValueCommand(EntryWrappingInterceptor.java:177)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.distribution.L1LastChanceInterceptor.visitDataWriteCommand(L1LastChanceInterceptor.java:79)
+	at org.infinispan.interceptors.distribution.L1LastChanceInterceptor.visitPutKeyValueCommand(L1LastChanceInterceptor.java:65)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.locking.AbstractLockingInterceptor.visitPutKeyValueCommand(AbstractLockingInterceptor.java:48)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.base.CommandInterceptor.handleDefault(CommandInterceptor.java:112)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.base.CommandInterceptor.handleDefault(CommandInterceptor.java:112)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.statetransfer.StateTransferInterceptor.handleNonTxWriteCommand(StateTransferInterceptor.java:172)
+	at org.infinispan.statetransfer.StateTransferInterceptor.visitPutKeyValueCommand(StateTransferInterceptor.java:95)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.CacheMgmtInterceptor.updateStoreStatistics(CacheMgmtInterceptor.java:148)
+	at org.infinispan.interceptors.CacheMgmtInterceptor.visitPutKeyValueCommand(CacheMgmtInterceptor.java:134)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.compat.BaseTypeConverterInterceptor.visitPutKeyValueCommand(BaseTypeConverterInterceptor.java:61)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.InvocationContextInterceptor.handleAll(InvocationContextInterceptor.java:102)
+	at org.infinispan.interceptors.InvocationContextInterceptor.handleDefault(InvocationContextInterceptor.java:71)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.InterceptorChain.invoke(InterceptorChain.java:333)
+	at org.infinispan.cache.impl.CacheImpl.executeCommandAndCommitIfNeeded(CacheImpl.java:1576)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsentInternal(CacheImpl.java:1079)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:1069)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:1661)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:275)
+	at eu.leads.crawler.PersistentCrawler.afterCrawl(PersistentCrawler.java:77)
+	at eu.leads.crawler.DefaultCrawler.crawl(DefaultCrawler.java:110)
+	at eu.leads.crawler.CrawlerController$CrawlerWorker.doWork(CrawlerController.java:350)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker.doWorkLoop(BaseTaskQueueWorker.java:43)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker.access$0(BaseTaskQueueWorker.java:35)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker$1.run(BaseTaskQueueWorker.java:25)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR Thread-29 eu.leads.crawler.CrawlerController$CrawlerWorker - Error in doWork
+eu.leads.crawler.concurrent.TaskQueueException: Exception in doWork
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker.doWorkLoop(BaseTaskQueueWorker.java:49)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker.access$0(BaseTaskQueueWorker.java:35)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker$1.run(BaseTaskQueueWorker.java:25)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: java.lang.NullPointerException
+	at eu.leads.processor.AdidasProcessingPlugin.processTuple(AdidasProcessingPlugin.java:141)
+	at eu.leads.processor.AdidasProcessingPlugin.created(AdidasProcessingPlugin.java:116)
+	at eu.leads.processor.common.infinispan.PluginRunnerFilter.accept(PluginRunnerFilter.java:221)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl$BaseCacheEntryListenerInvocation.shouldInvoke(CacheNotifierImpl.java:1028)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl$BaseCacheEntryListenerInvocation.invoke(CacheNotifierImpl.java:976)
+	at org.infinispan.notifications.cachelistener.CacheNotifierImpl.notifyCacheEntryCreated(CacheNotifierImpl.java:266)
+	at org.infinispan.interceptors.locking.ClusteringDependentLogic$AbstractClusteringDependentLogic.notifyCommitEntry(ClusteringDependentLogic.java:116)
+	at org.infinispan.interceptors.locking.ClusteringDependentLogic$DistributionLogic.commitEntry(ClusteringDependentLogic.java:475)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitContextEntry(EntryWrappingInterceptor.java:359)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitEntryIfNeeded(EntryWrappingInterceptor.java:577)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.commitContextEntries(EntryWrappingInterceptor.java:336)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.invokeNextAndApplyChanges(EntryWrappingInterceptor.java:410)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.setSkipRemoteGetsAndInvokeNextForDataCommand(EntryWrappingInterceptor.java:464)
+	at org.infinispan.interceptors.EntryWrappingInterceptor.visitPutKeyValueCommand(EntryWrappingInterceptor.java:177)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.distribution.L1LastChanceInterceptor.visitDataWriteCommand(L1LastChanceInterceptor.java:79)
+	at org.infinispan.interceptors.distribution.L1LastChanceInterceptor.visitPutKeyValueCommand(L1LastChanceInterceptor.java:65)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.locking.AbstractLockingInterceptor.visitPutKeyValueCommand(AbstractLockingInterceptor.java:48)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.base.CommandInterceptor.handleDefault(CommandInterceptor.java:112)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.base.CommandInterceptor.handleDefault(CommandInterceptor.java:112)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.statetransfer.StateTransferInterceptor.handleNonTxWriteCommand(StateTransferInterceptor.java:172)
+	at org.infinispan.statetransfer.StateTransferInterceptor.visitPutKeyValueCommand(StateTransferInterceptor.java:95)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.CacheMgmtInterceptor.updateStoreStatistics(CacheMgmtInterceptor.java:148)
+	at org.infinispan.interceptors.CacheMgmtInterceptor.visitPutKeyValueCommand(CacheMgmtInterceptor.java:134)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.compat.BaseTypeConverterInterceptor.visitPutKeyValueCommand(BaseTypeConverterInterceptor.java:61)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.base.CommandInterceptor.invokeNextInterceptor(CommandInterceptor.java:98)
+	at org.infinispan.interceptors.InvocationContextInterceptor.handleAll(InvocationContextInterceptor.java:102)
+	at org.infinispan.interceptors.InvocationContextInterceptor.handleDefault(InvocationContextInterceptor.java:71)
+	at org.infinispan.commands.AbstractVisitor.visitPutKeyValueCommand(AbstractVisitor.java:35)
+	at org.infinispan.commands.write.PutKeyValueCommand.acceptVisitor(PutKeyValueCommand.java:71)
+	at org.infinispan.interceptors.InterceptorChain.invoke(InterceptorChain.java:333)
+	at org.infinispan.cache.impl.CacheImpl.executeCommandAndCommitIfNeeded(CacheImpl.java:1576)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsentInternal(CacheImpl.java:1079)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:1069)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:1661)
+	at org.infinispan.cache.impl.CacheImpl.putIfAbsent(CacheImpl.java:275)
+	at eu.leads.crawler.PersistentCrawler.afterCrawl(PersistentCrawler.java:77)
+	at eu.leads.crawler.DefaultCrawler.crawl(DefaultCrawler.java:110)
+	at eu.leads.crawler.CrawlerController$CrawlerWorker.doWork(CrawlerController.java:350)
+	at eu.leads.crawler.concurrent.BaseTaskQueueWorker.doWorkLoop(BaseTaskQueueWorker.java:43)
+	... 3 more
+ERROR HotRod-client-async-pool-0 org.infinispan.client.hotrod.event.ClientListenerNotifier - ISPN004043: Unrecoverable error reading event from server /10.0.2.15:11222, exiting event reader thread
+org.infinispan.client.hotrod.exceptions.TransportException:: java.net.SocketTimeoutException
+	at org.infinispan.client.hotrod.impl.transport.tcp.TcpTransport.readByte(TcpTransport.java:184)
+	at org.infinispan.client.hotrod.impl.protocol.Codec20.readMagic(Codec20.java:259)
+	at org.infinispan.client.hotrod.impl.protocol.Codec20.readEvent(Codec20.java:103)
+	at org.infinispan.client.hotrod.event.ClientListenerNotifier$EventDispatcher.run(ClientListenerNotifier.java:229)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: java.net.SocketTimeoutException
+	at sun.nio.ch.SocketAdaptor$SocketInputStream.read(SocketAdaptor.java:211)
+	at sun.nio.ch.ChannelInputStream.read(ChannelInputStream.java:103)
+	at java.io.BufferedInputStream.fill(BufferedInputStream.java:246)
+	at java.io.BufferedInputStream.read(BufferedInputStream.java:265)
+	at org.infinispan.client.hotrod.impl.transport.tcp.TcpTransport.readByte(TcpTransport.java:179)
+	... 8 more
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000078: Starting JGroups channel ISPN
+WARN main org.jgroups.stack.Configurator - JGRP000014: TP.loopback has been deprecated: enabled by default
+WARN main org.jgroups.protocols.TCP - JGRP000046: bundler_type=new has been removed; using transfer-queue
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000094: Received new cluster view for channel ISPN: [leads-ps-40525|0] (1) [leads-ps-40525]
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000079: Channel ISPN local address is leads-ps-40525, physical addresses are [10.0.2.15:52326]
+INFO main org.infinispan.factories.GlobalComponentRegistry - ISPN000128: Infinispan version: Infinispan 'Guinness' 7.0.1-SNAPSHOT
+WARN main org.infinispan.transaction.lookup.GenericTransactionManagerLookup - ISPN000104: Falling back to DummyTransactionManager from Infinispan
+INFO main org.infinispan.eviction.impl.EvictionManagerImpl - ISPN000025: wakeUpInterval is <= 0, not starting expired purge thread
+INFO main org.infinispan.eviction.impl.EvictionManagerImpl - ISPN000025: wakeUpInterval is <= 0, not starting expired purge thread
+INFO main org.infinispan.client.hotrod.impl.protocol.Codec20 - ISPN004006: /10.0.2.15:11222 sent new topology view (id=0) containing 1 addresses: [/10.0.2.15:11222]
+INFO main org.infinispan.client.hotrod.RemoteCacheManager - ISPN004021: Infinispan version: 7.0.1-SNAPSHOT
+INFO main org.infinispan.client.hotrod.impl.protocol.Codec20 - ISPN004006: /10.0.2.15:11222 sent new topology view (id=0) containing 1 addresses: [/10.0.2.15:11222]
+INFO main eu.leads.crawler.PersistentCrawl - Seed : http://www.bbc.com/news/uk-31545744
+INFO main eu.leads.crawler.PersistentCrawl - Depth 1
+INFO main eu.leads.crawler.PersistentCrawl - Number of crawler threads 1
+INFO main eu.leads.crawler.PersistentCrawl - Document earler than 10 day(s)
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000078: Starting JGroups channel ISPN
+WARN main org.jgroups.stack.Configurator - JGRP000014: TP.loopback has been deprecated: enabled by default
+WARN main org.jgroups.protocols.TCP - JGRP000046: bundler_type=new has been removed; using transfer-queue
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000094: Received new cluster view for channel ISPN: [leads-ps-16971|0] (1) [leads-ps-16971]
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000079: Channel ISPN local address is leads-ps-16971, physical addresses are [10.0.2.15:58844]
+INFO main org.infinispan.factories.GlobalComponentRegistry - ISPN000128: Infinispan version: Infinispan 'Guinness' 7.0.1-SNAPSHOT
+WARN main org.infinispan.transaction.lookup.GenericTransactionManagerLookup - ISPN000104: Falling back to DummyTransactionManager from Infinispan
+INFO main org.infinispan.eviction.impl.EvictionManagerImpl - ISPN000025: wakeUpInterval is <= 0, not starting expired purge thread
+INFO main org.infinispan.eviction.impl.EvictionManagerImpl - ISPN000025: wakeUpInterval is <= 0, not starting expired purge thread
+INFO main org.infinispan.client.hotrod.impl.protocol.Codec20 - ISPN004006: /10.0.2.15:11222 sent new topology view (id=0) containing 1 addresses: [/10.0.2.15:11222]
+INFO main org.infinispan.client.hotrod.RemoteCacheManager - ISPN004021: Infinispan version: 7.0.1-SNAPSHOT
+INFO main org.infinispan.client.hotrod.impl.protocol.Codec20 - ISPN004006: /10.0.2.15:11222 sent new topology view (id=0) containing 1 addresses: [/10.0.2.15:11222]
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.configuration.parsing.Parser70 - ISPN000293: Ignoring XML attribute START, please remove from configuration file
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000078: Starting JGroups channel ISPN
+WARN main org.jgroups.stack.Configurator - JGRP000014: TP.loopback has been deprecated: enabled by default
+WARN main org.jgroups.protocols.TCP - JGRP000046: bundler_type=new has been removed; using transfer-queue
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000094: Received new cluster view for channel ISPN: [leads-ps-18054|0] (1) [leads-ps-18054]
+INFO main org.infinispan.remoting.transport.jgroups.JGroupsTransport - ISPN000079: Channel ISPN local address is leads-ps-18054, physical addresses are [10.0.2.15:43987]
+INFO main org.infinispan.factories.GlobalComponentRegistry - ISPN000128: Infinispan version: Infinispan 'Guinness' 7.0.1-SNAPSHOT
+WARN main org.infinispan.transaction.lookup.GenericTransactionManagerLookup - ISPN000104: Falling back to DummyTransactionManager from Infinispan
+INFO main org.infinispan.eviction.impl.EvictionManagerImpl - ISPN000025: wakeUpInterval is <= 0, not starting expired purge thread
+INFO main org.infinispan.eviction.impl.EvictionManagerImpl - ISPN000025: wakeUpInterval is <= 0, not starting expired purge thread
+INFO main org.infinispan.client.hotrod.impl.protocol.Codec20 - ISPN004006: /10.0.2.15:11222 sent new topology view (id=0) containing 1 addresses: [/10.0.2.15:11222]
+INFO main org.infinispan.client.hotrod.RemoteCacheManager - ISPN004021: Infinispan version: 7.0.1-SNAPSHOT
+INFO main org.infinispan.client.hotrod.impl.protocol.Codec20 - ISPN004006: /10.0.2.15:11222 sent new topology view (id=0) containing 1 addresses: [/10.0.2.15:11222]
+INFO main eu.leads.crawler.PersistentCrawl - Seed : http://www.bbc.com/news/uk-31545744
+INFO main eu.leads.crawler.PersistentCrawl - Depth 1
+INFO main eu.leads.crawler.PersistentCrawl - Number of crawler threads 1
+INFO main eu.leads.crawler.PersistentCrawl - Document earler than 10 day(s)
+INFO main eu.leads.crawler.PersistentCrawl - 0
+INFO main eu.leads.crawler.CrawlerController - Starting crawling..
+INFO main eu.leads.crawler.CrawlerController - Initializing crawler controller
+INFO main eu.leads.crawler.CrawlerController - Initializing task queue
+INFO main eu.leads.crawler.CrawlerController - Queue is overriden, setting it instead of default inner task queue
+INFO main eu.leads.crawler.CrawlerController - Initializing scheduler
+INFO main eu.leads.crawler.frontier.DefaultScheduler - Scheduler was successfully initialized and started
+INFO main eu.leads.crawler.CrawlerController - Initializing crawler workers
+INFO main eu.leads.crawler.CrawlerController$CrawlerWorker - Thread-29 set task queue
+INFO main eu.leads.crawler.CrawlerController - Task queue initialized
+INFO main eu.leads.crawler.CrawlerController - Crawler controller initialized
+INFO main eu.leads.crawler.CrawlerController$CrawlerWorker - Thread-29 is started
+INFO Thread-29 eu.leads.crawler.CrawlerController$CrawlerWorker - Thread-29 start do work loop
+INFO Thread-29 eu.leads.crawler.PersistentCrawler - Crawled: http://www.bbc.com/news/uk-31545744
+ERROR HotRodServerWorker-3-2 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-3 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
+ERROR HotRodServerWorker-3-4 org.infinispan.server.hotrod.HotRodDecoder - ISPN005003: Exception reported
+org.infinispan.server.hotrod.InvalidMagicIdException: Error reading magic byte or message id: 80
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:48)
+	at org.infinispan.server.hotrod.HotRodDecoder.readHeader(HotRodDecoder.scala:29)
+	at org.infinispan.server.core.AbstractProtocolDecoder.org$infinispan$server$core$AbstractProtocolDecoder$$decodeHeader(AbstractProtocolDecoder.scala:123)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decodeDispatch(AbstractProtocolDecoder.scala:70)
+	at org.infinispan.server.core.AbstractProtocolDecoder.decode(AbstractProtocolDecoder.scala:61)
+	at io.netty.handler.codec.ReplayingDecoder.callDecode(ReplayingDecoder.java:363)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:149)
+	at org.infinispan.server.core.AbstractProtocolDecoder.channelRead(AbstractProtocolDecoder.scala:459)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:333)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:319)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:787)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:125)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137)
+	at java.lang.Thread.run(Thread.java:745)
