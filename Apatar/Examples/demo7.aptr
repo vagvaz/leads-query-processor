@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document version="Apatar_v1.12.12">
+  <DateAndTime createWithApplication="false" dateFormat="" dateSeparator="" timeFormat="" timeStandart="">
+    <pattern>M/d/yy h:mm a</pattern>
+  </DateAndTime>
+  <node id="1" posX="52" posY="296" width="60" height="60" nodeClass="com.apatar.read.READNode" title="keywords">
+    <OutputConnectionPoints>
+      <ConnectionPoint inbound="false" name="output" isMultipleConnection="true" positionNumber="1">
+        <tableInfo>
+          <tableName>temp1416864689037</tableName>
+          <records>
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="65000" fieldName="keywords.partid" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="65000" fieldName="keywords.uri" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="65000" fieldName="keywords.ts" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="65000" fieldName="keywords.keywords" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="65000" fieldName="keywords.sentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="65000" fieldName="keywords.relevance" primaryKey="false" signed="false" nullable="false" readonly="false" />
+          </records>
+        </tableInfo>
+      </ConnectionPoint>
+    </OutputConnectionPoints>
+    <InputConnectionPoints />
+    <ExtConnectionPoints />
+    <com.apatar.core.RDBTable tableName="keywords" mode="ReadWrite" />
+    <mode>0</mode>
+    <isDelete>false</isDelete>
+    <conID>1416864698980</conID>
+    <iFields />
+  </node>
+  <node id="2" posX="41" posY="88" width="60" height="60" nodeClass="com.apatar.read.READNode" title="page_core">
+    <OutputConnectionPoints>
+      <ConnectionPoint inbound="false" name="output" isMultipleConnection="true" positionNumber="1">
+        <tableInfo>
+          <tableName>temp1416864693284</tableName>
+          <records>
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="65000" fieldName="page_core.type" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="65000" fieldName="page_core.maincontent" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="65000" fieldName="page_core.lang" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="65000" fieldName="page_core.fqdnurl" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="65000" fieldName="page_core.oldsentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="65000" fieldName="page_core.ts" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="65000" fieldName="page_core.sentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="65000" fieldName="page_core.pagerank" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="65000" fieldName="page_core.textcontent" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="65000" fieldName="page_core.uri" primaryKey="false" signed="false" nullable="false" readonly="false" />
+          </records>
+        </tableInfo>
+      </ConnectionPoint>
+    </OutputConnectionPoints>
+    <InputConnectionPoints />
+    <ExtConnectionPoints />
+    <com.apatar.core.RDBTable tableName="page_core" mode="ReadWrite" />
+    <mode>0</mode>
+    <isDelete>false</isDelete>
+    <conID>1416864704619</conID>
+    <iFields />
+  </node>
+  <node id="3" posX="200" posY="149" width="60" height="60" nodeClass="com.apatar.join.JoinNode" title="Join" subProject="&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;&#xD;&#xA;&amp;lt;document version=&amp;quot;Apatar_v1.12.12&amp;quot;&amp;gt;&#xD;&#xA;  &amp;lt;DateAndTime createWithApplication=&amp;quot;false&amp;quot; dateFormat=&amp;quot;&amp;quot; dateSeparator=&amp;quot;&amp;quot; timeFormat=&amp;quot;&amp;quot; timeStandart=&amp;quot;&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;pattern&amp;gt;M/d/yy h:mm a&amp;lt;/pattern&amp;gt;&#xD;&#xA;  &amp;lt;/DateAndTime&amp;gt;&#xD;&#xA;  &amp;lt;ProjectDatas /&amp;gt;&#xD;&#xA;&amp;lt;/document&amp;gt;&#xD;&#xA;&#xD;&#xA;">
+    <OutputConnectionPoints>
+      <ConnectionPoint inbound="false" name="output" isMultipleConnection="true" positionNumber="1">
+        <tableInfo>
+          <tableName>temp1416864716500</tableName>
+          <records>
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.type" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.maincontent" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.lang" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.fqdnurl" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.oldsentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="page_core.ts" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="page_core.sentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="page_core.pagerank" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.textcontent" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.uri" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="keywords.partid" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="keywords.uri" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="keywords.ts" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="keywords.keywords" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="keywords.sentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="keywords.relevance" primaryKey="false" signed="false" nullable="false" readonly="false" />
+          </records>
+        </tableInfo>
+      </ConnectionPoint>
+    </OutputConnectionPoints>
+    <InputConnectionPoints>
+      <ConnectionPoint inbound="true" name="input1" isMultipleConnection="false" positionNumber="1">
+        <Comment>Table 1</Comment>
+      </ConnectionPoint>
+      <ConnectionPoint inbound="true" name="input2" isMultipleConnection="false" positionNumber="2">
+        <Comment>Table 2</Comment>
+      </ConnectionPoint>
+    </InputConnectionPoints>
+    <ExtConnectionPoints />
+    <tableJoinType>left</tableJoinType>
+    <Condition column1="page_core.uri" column2="keywords.uri" />
+  </node>
+  <node id="4" posX="564" posY="565" width="60" height="60" nodeClass="com.apatar.output.OutputNode" title="Output">
+    <OutputConnectionPoints />
+    <InputConnectionPoints>
+      <ConnectionPoint inbound="true" name="input" isMultipleConnection="false" positionNumber="1" />
+    </InputConnectionPoints>
+    <ExtConnectionPoints />
+    <com.apatar.core.RDBTable tableName="" mode="ReadWrite" />
+    <mode>0</mode>
+    <isDelete>false</isDelete>
+    <conID>-1</conID>
+    <iFields />
+  </node>
+  <node id="7" posX="426" posY="331" width="60" height="60" nodeClass="com.apatar.limit.OrderByNode" title="Sort" subProject="&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;&#xD;&#xA;&amp;lt;document version=&amp;quot;Apatar_v1.12.12&amp;quot;&amp;gt;&#xD;&#xA;  &amp;lt;DateAndTime createWithApplication=&amp;quot;false&amp;quot; dateFormat=&amp;quot;&amp;quot; dateSeparator=&amp;quot;&amp;quot; timeFormat=&amp;quot;&amp;quot; timeStandart=&amp;quot;&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;pattern&amp;gt;M/d/yy h:mm a&amp;lt;/pattern&amp;gt;&#xD;&#xA;  &amp;lt;/DateAndTime&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;2&amp;quot; posX=&amp;quot;447&amp;quot; posY=&amp;quot;145&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.functions.FunctionNode&amp;quot; title=&amp;quot;ASC&amp;quot; countOutput=&amp;quot;1&amp;quot; countInput=&amp;quot;1&amp;quot; classFunction=&amp;quot;com.apatar.functions.String.AscFunction&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;Output1&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;true&amp;quot; name=&amp;quot;Input1&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/InputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.functions.String.AscFunction /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;3&amp;quot; posX=&amp;quot;136&amp;quot; posY=&amp;quot;161&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;GroupBy.avg_sentiment&amp;quot; inbound=&amp;quot;false&amp;quot; connectionName=&amp;quot;input&amp;quot; category=&amp;quot;GroupBy&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;true&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;Numeric&amp;quot; originalType=&amp;quot;BIGINT&amp;quot; lengthMin=&amp;quot;8&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;avg_sentiment&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;arrow id=&amp;quot;1&amp;quot; begin_id=&amp;quot;3&amp;quot; begin_conn_name=&amp;quot;point&amp;quot; end_id=&amp;quot;2&amp;quot; end_conn_name=&amp;quot;Input1&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;ProjectDatas /&amp;gt;&#xD;&#xA;&amp;lt;/document&amp;gt;&#xD;&#xA;&#xD;&#xA;">
+    <OutputConnectionPoints>
+      <ConnectionPoint inbound="false" name="outputTrue" isMultipleConnection="true" positionNumber="1">
+        <Comment>True</Comment>
+        <tableInfo>
+          <tableName>temp1416864907170True</tableName>
+          <records>
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="avg_sentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.type" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.maincontent" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.lang" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.fqdnurl" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.oldsentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="page_core.ts" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="page_core.sentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="page_core.pagerank" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.textcontent" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.uri" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="keywords.partid" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="keywords.uri" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="keywords.ts" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="keywords.keywords" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="keywords.sentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="keywords.relevance" primaryKey="false" signed="false" nullable="false" readonly="false" />
+          </records>
+        </tableInfo>
+      </ConnectionPoint>
+    </OutputConnectionPoints>
+    <InputConnectionPoints>
+      <ConnectionPoint inbound="true" name="input" isMultipleConnection="false" positionNumber="1" />
+    </InputConnectionPoints>
+    <ExtConnectionPoints />
+  </node>
+  <node id="8" posX="472" posY="469" width="60" height="60" nodeClass="com.apatar.project.ProjectNode" title="Project" subProject="&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;&#xD;&#xA;&amp;lt;document version=&amp;quot;Apatar_v1.12.12&amp;quot;&amp;gt;&#xD;&#xA;  &amp;lt;DateAndTime createWithApplication=&amp;quot;false&amp;quot; dateFormat=&amp;quot;&amp;quot; dateSeparator=&amp;quot;&amp;quot; timeFormat=&amp;quot;&amp;quot; timeStandart=&amp;quot;&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;pattern&amp;gt;M/d/yy h:mm a&amp;lt;/pattern&amp;gt;&#xD;&#xA;  &amp;lt;/DateAndTime&amp;gt;&#xD;&#xA;  &amp;lt;ProjectDatas /&amp;gt;&#xD;&#xA;&amp;lt;/document&amp;gt;&#xD;&#xA;&#xD;&#xA;">
+    <OutputConnectionPoints>
+      <ConnectionPoint inbound="false" name="output" isMultipleConnection="true" positionNumber="1">
+        <tableInfo>
+          <tableName>temp1416864912386</tableName>
+          <records>
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="avg_sentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.fqdnurl" primaryKey="false" signed="false" nullable="false" readonly="false" />
+          </records>
+        </tableInfo>
+      </ConnectionPoint>
+    </OutputConnectionPoints>
+    <InputConnectionPoints>
+      <ConnectionPoint inbound="true" name="input" isMultipleConnection="false" positionNumber="1" />
+    </InputConnectionPoints>
+    <ExtConnectionPoints />
+  </node>
+  <node id="9" posX="316" posY="169" width="60" height="60" nodeClass="com.apatar.validate.FilterNode" title="Filter" subProject="&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;&#xD;&#xA;&amp;lt;document version=&amp;quot;Apatar_v1.12.12&amp;quot;&amp;gt;&#xD;&#xA;  &amp;lt;DateAndTime createWithApplication=&amp;quot;false&amp;quot; dateFormat=&amp;quot;&amp;quot; dateSeparator=&amp;quot;&amp;quot; timeFormat=&amp;quot;&amp;quot; timeStandart=&amp;quot;&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;pattern&amp;gt;M/d/yy h:mm a&amp;lt;/pattern&amp;gt;&#xD;&#xA;  &amp;lt;/DateAndTime&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;1&amp;quot; posX=&amp;quot;462&amp;quot; posY=&amp;quot;189&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.functions.FunctionNode&amp;quot; title=&amp;quot;Like&amp;quot; countOutput=&amp;quot;1&amp;quot; countInput=&amp;quot;1&amp;quot; classFunction=&amp;quot;com.apatar.functions.Logic.LikeValidateFunction&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;Output1&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;true&amp;quot; name=&amp;quot;Input1&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/InputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.functions.Logic.LikeValidateFunction Value=&amp;quot;ecom_prod_name:000&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;3&amp;quot; posX=&amp;quot;204&amp;quot; posY=&amp;quot;112&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;Join.keywords.partid&amp;quot; inbound=&amp;quot;false&amp;quot; connectionName=&amp;quot;input&amp;quot; category=&amp;quot;Join&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;true&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;Text&amp;quot; originalType=&amp;quot;VARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;keywords.partid&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;5&amp;quot; posX=&amp;quot;230&amp;quot; posY=&amp;quot;424&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;Join.keywords.sentiment&amp;quot; inbound=&amp;quot;false&amp;quot; connectionName=&amp;quot;input&amp;quot; category=&amp;quot;Join&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;true&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;Numeric&amp;quot; originalType=&amp;quot;BIGINT&amp;quot; lengthMin=&amp;quot;8&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;keywords.sentiment&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;6&amp;quot; posX=&amp;quot;500&amp;quot; posY=&amp;quot;428&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.functions.FunctionNode&amp;quot; title=&amp;quot;Greater Than&amp;quot; countOutput=&amp;quot;1&amp;quot; countInput=&amp;quot;2&amp;quot; classFunction=&amp;quot;com.apatar.functions.Logic.GreaterThanValidateFunction&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;Output1&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;true&amp;quot; name=&amp;quot;Input1&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;true&amp;quot; name=&amp;quot;Input2&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;2&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/InputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.functions.Logic.GreaterThanValidateFunction /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;7&amp;quot; posX=&amp;quot;280&amp;quot; posY=&amp;quot;560&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.functions.ConstantFunctionNode&amp;quot; title=&amp;quot;Numeric Constant&amp;quot; countOutput=&amp;quot;1&amp;quot; countInput=&amp;quot;0&amp;quot; classFunction=&amp;quot;com.apatar.functions.constant.NumericFunction&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;Output1&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.functions.constant.NumericFunction value=&amp;quot;0.0&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;8&amp;quot; posX=&amp;quot;651&amp;quot; posY=&amp;quot;330&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.functions.FunctionNode&amp;quot; title=&amp;quot;And&amp;quot; countOutput=&amp;quot;1&amp;quot; countInput=&amp;quot;2&amp;quot; classFunction=&amp;quot;com.apatar.functions.Logic.AndValidateFunction&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;Output1&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;true&amp;quot; name=&amp;quot;Input1&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;true&amp;quot; name=&amp;quot;Input2&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;2&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/InputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.functions.Logic.AndValidateFunction /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;arrow id=&amp;quot;1&amp;quot; begin_id=&amp;quot;3&amp;quot; begin_conn_name=&amp;quot;point&amp;quot; end_id=&amp;quot;1&amp;quot; end_conn_name=&amp;quot;Input1&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;arrow id=&amp;quot;2&amp;quot; begin_id=&amp;quot;5&amp;quot; begin_conn_name=&amp;quot;point&amp;quot; end_id=&amp;quot;6&amp;quot; end_conn_name=&amp;quot;Input1&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;arrow id=&amp;quot;3&amp;quot; begin_id=&amp;quot;7&amp;quot; begin_conn_name=&amp;quot;Output1&amp;quot; end_id=&amp;quot;6&amp;quot; end_conn_name=&amp;quot;Input2&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;arrow id=&amp;quot;4&amp;quot; begin_id=&amp;quot;1&amp;quot; begin_conn_name=&amp;quot;Output1&amp;quot; end_id=&amp;quot;8&amp;quot; end_conn_name=&amp;quot;Input1&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;arrow id=&amp;quot;5&amp;quot; begin_id=&amp;quot;6&amp;quot; begin_conn_name=&amp;quot;Output1&amp;quot; end_id=&amp;quot;8&amp;quot; end_conn_name=&amp;quot;Input2&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;ProjectDatas /&amp;gt;&#xD;&#xA;&amp;lt;/document&amp;gt;&#xD;&#xA;&#xD;&#xA;">
+    <OutputConnectionPoints>
+      <ConnectionPoint inbound="false" name="outputTrue" isMultipleConnection="true" positionNumber="1">
+        <Comment>True</Comment>
+        <tableInfo>
+          <tableName>temp1416898888423True</tableName>
+          <records>
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.type" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.maincontent" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.lang" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.fqdnurl" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.oldsentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="page_core.ts" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="page_core.sentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="page_core.pagerank" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.textcontent" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.uri" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="keywords.partid" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="keywords.uri" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="keywords.ts" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="keywords.keywords" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="keywords.sentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="keywords.relevance" primaryKey="false" signed="false" nullable="false" readonly="false" />
+          </records>
+        </tableInfo>
+      </ConnectionPoint>
+    </OutputConnectionPoints>
+    <InputConnectionPoints>
+      <ConnectionPoint inbound="true" name="input" isMultipleConnection="false" positionNumber="1" />
+    </InputConnectionPoints>
+    <ExtConnectionPoints />
+  </node>
+  <node id="10" posX="440" posY="193" width="60" height="60" nodeClass="com.apatar.groupByNew.GroupByNewNode" title="GroupBy" subProject="&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;&#xD;&#xA;&amp;lt;document version=&amp;quot;Apatar_v1.12.12&amp;quot;&amp;gt;&#xD;&#xA;  &amp;lt;DateAndTime createWithApplication=&amp;quot;false&amp;quot; dateFormat=&amp;quot;&amp;quot; dateSeparator=&amp;quot;&amp;quot; timeFormat=&amp;quot;&amp;quot; timeStandart=&amp;quot;&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;pattern&amp;gt;M/d/yy h:mm a&amp;lt;/pattern&amp;gt;&#xD;&#xA;  &amp;lt;/DateAndTime&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;1&amp;quot; posX=&amp;quot;518&amp;quot; posY=&amp;quot;249&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;GroupBy.avg_sentiment&amp;quot; inbound=&amp;quot;true&amp;quot; connectionName=&amp;quot;output&amp;quot; category=&amp;quot;GroupBy&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;true&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/InputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;Numeric&amp;quot; originalType=&amp;quot;BIGINT&amp;quot; lengthMin=&amp;quot;8&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;avg_sentiment&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;4&amp;quot; posX=&amp;quot;330&amp;quot; posY=&amp;quot;165&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.functions.FunctionNode&amp;quot; title=&amp;quot;Avg&amp;quot; countOutput=&amp;quot;1&amp;quot; countInput=&amp;quot;1&amp;quot; classFunction=&amp;quot;com.apatar.functions.String.AvgFunction&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;Output1&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;true&amp;quot; name=&amp;quot;Input1&amp;quot; isMultipleConnection=&amp;quot;false&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/InputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.functions.String.AvgFunction /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;5&amp;quot; posX=&amp;quot;142&amp;quot; posY=&amp;quot;156&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;Filter.keywords.sentiment&amp;quot; inbound=&amp;quot;false&amp;quot; connectionName=&amp;quot;input&amp;quot; category=&amp;quot;Filter&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;true&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;Numeric&amp;quot; originalType=&amp;quot;BIGINT&amp;quot; lengthMin=&amp;quot;8&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;keywords.sentiment&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;node id=&amp;quot;6&amp;quot; posX=&amp;quot;215&amp;quot; posY=&amp;quot;58&amp;quot; width=&amp;quot;70&amp;quot; height=&amp;quot;30&amp;quot; nodeClass=&amp;quot;com.apatar.core.ColumnNode&amp;quot; title=&amp;quot;Filter.page_core.fqdnurl&amp;quot; inbound=&amp;quot;false&amp;quot; connectionName=&amp;quot;input&amp;quot; category=&amp;quot;Filter&amp;quot;&amp;gt;&#xD;&#xA;    &amp;lt;OutputConnectionPoints&amp;gt;&#xD;&#xA;      &amp;lt;ConnectionPoint inbound=&amp;quot;false&amp;quot; name=&amp;quot;point&amp;quot; isMultipleConnection=&amp;quot;true&amp;quot; positionNumber=&amp;quot;1&amp;quot; /&amp;gt;&#xD;&#xA;    &amp;lt;/OutputConnectionPoints&amp;gt;&#xD;&#xA;    &amp;lt;InputConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;ExtConnectionPoints /&amp;gt;&#xD;&#xA;    &amp;lt;com.apatar.core.Record type=&amp;quot;Text&amp;quot; originalType=&amp;quot;VARCHAR&amp;quot; lengthMin=&amp;quot;1&amp;quot; length=&amp;quot;255&amp;quot; fieldName=&amp;quot;page_core.fqdnurl&amp;quot; primaryKey=&amp;quot;false&amp;quot; signed=&amp;quot;false&amp;quot; nullable=&amp;quot;false&amp;quot; readonly=&amp;quot;false&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;/node&amp;gt;&#xD;&#xA;  &amp;lt;arrow id=&amp;quot;1&amp;quot; begin_id=&amp;quot;4&amp;quot; begin_conn_name=&amp;quot;Output1&amp;quot; end_id=&amp;quot;1&amp;quot; end_conn_name=&amp;quot;point&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;arrow id=&amp;quot;2&amp;quot; begin_id=&amp;quot;5&amp;quot; begin_conn_name=&amp;quot;point&amp;quot; end_id=&amp;quot;4&amp;quot; end_conn_name=&amp;quot;Input1&amp;quot; /&amp;gt;&#xD;&#xA;  &amp;lt;ProjectDatas /&amp;gt;&#xD;&#xA;&amp;lt;/document&amp;gt;&#xD;&#xA;&#xD;&#xA;">
+    <OutputConnectionPoints>
+      <ConnectionPoint inbound="false" name="output" isMultipleConnection="true" positionNumber="1">
+        <tableInfo>
+          <tableName>temp1416898939278</tableName>
+          <records>
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="avg_sentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.type" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.maincontent" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.lang" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.fqdnurl" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.oldsentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="page_core.ts" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="page_core.sentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="page_core.pagerank" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.textcontent" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="page_core.uri" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="keywords.partid" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="keywords.uri" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="keywords.ts" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="keywords.keywords" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Numeric" originalType="BIGINT" lengthMin="8" length="255" fieldName="keywords.sentiment" primaryKey="false" signed="false" nullable="false" readonly="false" />
+            <com.apatar.core.Record type="Text" originalType="VARCHAR" lengthMin="1" length="255" fieldName="keywords.relevance" primaryKey="false" signed="false" nullable="false" readonly="false" />
+          </records>
+        </tableInfo>
+      </ConnectionPoint>
+    </OutputConnectionPoints>
+    <InputConnectionPoints>
+      <ConnectionPoint inbound="true" name="input" isMultipleConnection="false" positionNumber="1" />
+    </InputConnectionPoints>
+    <ExtConnectionPoints />
+  </node>
+  <arrow id="1" begin_id="7" begin_conn_name="outputTrue" end_id="8" end_conn_name="input" />
+  <arrow id="2" begin_id="8" begin_conn_name="output" end_id="4" end_conn_name="input" />
+  <arrow id="3" begin_id="3" begin_conn_name="output" end_id="9" end_conn_name="input" />
+  <arrow id="4" begin_id="9" begin_conn_name="outputTrue" end_id="10" end_conn_name="input" />
+  <arrow id="5" begin_id="10" begin_conn_name="output" end_id="7" end_conn_name="input" />
+  <arrow id="6" begin_id="2" begin_conn_name="output" end_id="3" end_conn_name="input1" />
+  <arrow id="7" begin_id="1" begin_conn_name="output" end_id="3" end_conn_name="input2" />
+  <ProjectDatas>
+    <com.apatar.core.ProjectData id="1416864698980" type="" subtype="" name="default connection" />
+    <com.apatar.core.ProjectData id="1416864704619" type="" subtype="" name="default connection" />
+  </ProjectDatas>
+</document>
+
