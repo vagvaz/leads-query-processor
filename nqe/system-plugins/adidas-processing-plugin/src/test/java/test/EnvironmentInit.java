@@ -14,7 +14,7 @@ public class EnvironmentInit {
 	
 	public static void initiateEnv(boolean initPython) throws ConfigurationException, IOException {
 		Configuration config = 
-				new XMLConfiguration("/data/workspace/leads-query-processor-plugins/plugin-examples/adidas-processing-plugin/adidas-processing-plugin-conf.xml"); 
+				new XMLConfiguration("/tmp/adidas-processing-plugin/adidas-processing-plugin-conf.xml"); 
 		DataStoreSingleton.configureDataStore(config);	
 	    PropertiesSingleton.setResourcesDir(config.getString("resources_path"));
 	    PropertiesSingleton.setConfig(config);

@@ -24,9 +24,9 @@ public class QueriesTest {
 		AbstractDataStore ds = DataStoreSingleton.getDataStore();
 		Properties mapping = DataStoreSingleton.getMapping();
 		
-//		final Cell cell = new Cell(mapping.getProperty("leads_core-lang"), "en", 0);
-//		List<Cell> cells = new ArrayList<Cell>() {{ add(cell); }};
-//		ds.putLeadsResourceMDFamily("abc", "123", mapping.getProperty("leads_core"), cells);
+		final Cell cell = new Cell(mapping.getProperty("leads_core-lang"), "en", 0);
+		List<Cell> cells = new ArrayList<Cell>() {{ add(cell); }};
+		ds.putLeadsResourceMDFamily("abc", "123", mapping.getProperty("leads_core"), cells);
 		
 		SortedSet<URIVersion> familyVersions = ds.getLeadsResourceMDFamily("abc", mapping.getProperty("leads_core"), 1, null);
 		for(URIVersion uriv : familyVersions)
