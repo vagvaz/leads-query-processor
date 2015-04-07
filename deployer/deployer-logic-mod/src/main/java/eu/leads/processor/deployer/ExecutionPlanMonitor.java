@@ -21,6 +21,8 @@ public class ExecutionPlanMonitor {
     private Action action;
     String outputCacheName;
     private boolean isSpecial;
+    private boolean hasFirstMapReduce;
+    private boolean isMRFinished = false;
 
 
   public SQLPlan getPlan() {
@@ -75,6 +77,7 @@ public class ExecutionPlanMonitor {
     public ExecutionPlanMonitor(SQLPlan plan) {
         this.queryId = plan.getQueryId();
         this.plan = plan;
+       this.hasFirstMapReduce = shouldRunMapReduceFirst();
        groupingCandidate  = new HashSet<>();
        groupingCandidate.add(LeadsNodeType.GROUP_BY);
        groupingCandidate.add(LeadsNodeType.HAVING);
@@ -116,11 +119,11 @@ public class ExecutionPlanMonitor {
        PlanNode node = plan.getNode(nodeId.getNodeId());
        node.setStatus(NodeStatus.COMPLETED);
        LeadsNodeType currentType = node.getNodeType();
-        if(currentType.equals(LeadsNodeType.SORT))
+      if(currentType.equals(LeadsNodeType.SORT))
             isSorted = true;
        if(currentType != LeadsNodeType.OUTPUT_NODE) {
           if (currentType == LeadsNodeType.ROOT) {
-             if (node.getConfiguration().containsField("mapreduce")) {
+             if (node.getConfiguration().containsField("mapreduce") && !node.getConfiguration().getObject("mapreduce").containsField("after")) {
                 outputCacheName = node.getNodeId();
              }
           } else {
@@ -134,7 +137,29 @@ public class ExecutionPlanMonitor {
       if(node.getNodeType().equals(LeadsNodeType.OUTPUT_NODE))
         return result;
 
-       result = plan.getNode(node.getOutput());
+       if(!node.getNodeType().equals(LeadsNodeType.ROOT)) {
+          result = plan.getNode(node.getOutput());
+       }
+       else{
+          if(!node.getConfiguration().containsField("mapreduce")){
+             result = plan.getNode(node.getOutput());
+          }
+          else{
+             if(!node.getConfiguration().getObject("mapreduce").containsField("after")){
+                result = plan.getNode(node.getOutput());
+             }
+             else if(isMRFinished){
+                result = plan.getNode(node.getOutput());
+             }
+             else{
+                isMRFinished = true;
+                List<PlanNode> sources= this.getSources();
+                result = sources.get(0);
+             }
+          }
+
+       }
+
       return result;
     }
     public PlanNode getNextExecutableOperator(PlanNode node) {
@@ -245,5 +270,34 @@ public class ExecutionPlanMonitor {
 
    public String getCacheName() {
       return outputCacheName;
+   }
+
+   public boolean shouldRunMapReduceFirst() {
+      boolean result = false;
+      JsonObject planNodes = plan.getPlanGraph();
+      for(String nodeId : planNodes.getFieldNames()){
+         PlanNode node = plan.getNode(nodeId);
+         if(node.getNodeType().equals(LeadsNodeType.ROOT)){
+            if(node.getConfiguration().containsField("mapreduce")){
+               if(node.getConfiguration().getObject("mapreduce").containsField("after"))
+                  result = true;
+            }
+         }
+      }
+      return result;
+   }
+
+   public PlanNode getMROperator() {
+      PlanNode result = null;
+      JsonObject planNodes = plan.getPlanGraph();
+      for(String nodeId : planNodes.getFieldNames()) {
+         PlanNode node = plan.getNode(nodeId);
+         if (node.getNodeType().equals(LeadsNodeType.ROOT)) {
+            if (node.getConfiguration().containsField("mapreduce")) {
+               result = node;
+            }
+         }
+      }
+      return result;
    }
 }

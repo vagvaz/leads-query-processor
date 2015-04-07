@@ -5,6 +5,7 @@ import org.infinispan.Cache;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.Search;
 import org.infinispan.commons.api.BasicCache;
+import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.query.SearchManager;
 import org.infinispan.query.dsl.QueryFactory;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ public class LeadsIntermediateIterator<V> implements Iterator<V> {
     this.imanager = imanager;
     intermediateDataCache = (Cache) imanager.getPersisentCache(prefix + ".data");
     //createIndexCache for getting all the nodes that contain values with the same key! in a mc
-    indexSiteCache = (Cache) imanager.getIndexedPersistentCache(prefix + ".indexed");
+    indexSiteCache = (Cache) imanager.getPersisentCache(prefix + ".indexed");
     baseIntermKey = new ComplexIntermediateKey();
     baseIntermKey.setCounter(currentCounter);
     baseIntermKey.setKey(key);
@@ -42,30 +43,55 @@ public class LeadsIntermediateIterator<V> implements Iterator<V> {
     }
     // create query
 //    SearchManager sm = org.infinispan.query.Search.getSearchManager((Cache<?, ?>) indexSiteCache);
-    QueryFactory qf = org.infinispan.query.Search.getQueryFactory((Cache<?, ?>) indexSiteCache); //Search.getQueryFactory((RemoteCache) indexSiteCache);
-    org.infinispan.query.dsl.Query lucenequery = qf.from(IndexedComplexIntermediateKey.class)
-                                                   .having("key").eq(key)
-                                                   .toBuilder().build();
-    ListIterator<Object> anIterator = lucenequery.list().listIterator();
+//    QueryFactory qf = org.infinispan.query.Search.getQueryFactory((Cache<?, ?>) indexSiteCache); //Search.getQueryFactory((RemoteCache) indexSiteCache);
+//    org.infinispan.query.dsl.Query lucenequery = qf.from(IndexedComplexIntermediateKey.class)
+//                                                   .having("key").eq(key)
+//                                                   .toBuilder().build();
+//    ListIterator<Object> anIterator = lucenequery.list().listIterator();
 
     this.list = new ArrayList<>();
-    while(anIterator.hasNext()){
-      Object o = anIterator.next();
-      log.error("Adding to list " + o.toString());
-      if(o instanceof IndexedComplexIntermediateKey) {
-        IndexedComplexIntermediateKey ikey = (IndexedComplexIntermediateKey) o;
-        list.add(ikey);
+    try{
+      CloseableIterable<Map.Entry<String, Object>> myIterable = ((Cache)indexSiteCache).getAdvancedCache().filterEntries(new IndexedComplexIntermKeyFilter(key));
+      for (Map.Entry<String, Object> entry : myIterable) {
+        System.err.println("ADDING TO LIST key: " + entry.getKey() + " value " + entry.getValue().toString());
+        if(entry.getValue() instanceof  IndexedComplexIntermediateKey) {
+          list.add((IndexedComplexIntermediateKey) entry.getValue());
+        }
+        else{
+          IndexedComplexIntermediateKey unserializedKey = new IndexedComplexIntermediateKey();
+          unserializedKey.unserialize((byte[]) entry.getValue());
+          System.err.println("ADDING [B] TO LIST key: " + entry.getKey() + " value " + unserializedKey.toString());
+          list.add(unserializedKey);
+        }
       }
-      else{
-        log.error("Error in indexSiteCache found class of type " + o.getClass().toString());
-      }
-
+    } catch (Exception e) {
+      System.err.println("Exception on LeadsIntermediateIterator " + e.getClass().toString());
+      System.err.println("Message: " + e.getMessage());
+      log.error("Exception on LeadsIntermediateIterator " + e.getClass().toString());
+      log.error("Message: " + e.getMessage());
     }
+
+//    this.list = new ArrayList<>();
+//    while(anIterator.hasNext()){
+//      Object o = anIterator.next();
+//      log.error("Adding to list " + o.toString());
+//      if(o instanceof IndexedComplexIntermediateKey) {
+//        IndexedComplexIntermediateKey ikey = (IndexedComplexIntermediateKey) o;
+//        list.add(ikey);
+//      }
+//      else{
+//        log.error("Error in indexSiteCache found class of type " + o.getClass().toString());
+//      }
+//
+//    }
     chunkIterator = list.iterator();
 
     if(chunkIterator.hasNext()) {
       currentChunk = chunkIterator.next();
       baseIntermKey = new ComplexIntermediateKey(currentChunk);
+    }
+    else{
+      currentChunk = null;
     }
 
   }

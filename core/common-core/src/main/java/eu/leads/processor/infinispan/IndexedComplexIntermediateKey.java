@@ -2,7 +2,7 @@ package eu.leads.processor.infinispan;
 
 import org.hibernate.search.annotations.*;
 
-import java.io.Serializable;
+import java.io.*;
 
 /**
  * Created by vagvaz on 3/7/15.
@@ -31,12 +31,35 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
       this(other.getSite(),other.getNode(),other.getKey());
    }
 
-  public IndexedComplexIntermediateKey() {
+   public IndexedComplexIntermediateKey() {
 
-  }
+   }
+   private void readObject(ObjectInputStream in
+   ) throws ClassNotFoundException, IOException {
+      this.site = in.readUTF();
+      this.node = in.readUTF();
+      this.key = in.readUTF();
+   }
 
+   /**
+    * This is the default implementation of writeObject.
+    * Customise if necessary.
+    */
+   private void writeObject(ObjectOutputStream out ) throws IOException {
+      out.writeUTF(site);
+      out.writeUTF(node);
+      out.writeUTF(key);
+   }
 
-  public String getSite() {
+   public void unserialize(byte[] asbytes) throws IOException {
+      ByteArrayInputStream input = new ByteArrayInputStream(asbytes);
+      ObjectInputStream ios = new ObjectInputStream(input);
+      this.site = ios.readUTF();
+      this.node = ios.readUTF();
+      this.key = ios.readUTF();
+   }
+
+   public String getSite() {
       return site;
    }
 
@@ -106,11 +129,11 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
       return site+node+key;
    }
 
-  @Override public String toString() {
-    return "IndexedComplexIntermediateKey{" +
-             "site='" + site + '\'' +
-             ", node='" + node + '\'' +
-             ", key='" + key + '\'' +
-             '}';
-  }
+   @Override public String toString() {
+      return "IndexedComplexIntermediateKey{" +
+                     "site='" + site + '\'' +
+                     ", node='" + node + '\'' +
+                     ", key='" + key + '\'' +
+                     '}';
+   }
 }

@@ -189,8 +189,8 @@ public class ProcessWorkflowQueryActionHandler implements ActionHandler {
         String newTableName = CreateTempTable(namedExpr);
         if(newTableName!=null) {
             JsonObject tmp = new JsonObject(namedExpr.toJson());
-            result.putObject("After", tmp.getObject("Expr"));
-            result.putString("OutPutOnTempTable",newTableName);
+            result.putObject("after", tmp.getObject("Expr"));
+            result.putString("outputOnTempTable",newTableName);
         }else{
             System.err.println("MR configuration: Unable to find original table name");
         }

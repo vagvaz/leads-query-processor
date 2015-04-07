@@ -47,6 +47,14 @@ public class WebServiceClient {
     address = new URL(host + ":" + port);
     return true;
   }
+
+  public static boolean initialize(String uri) throws MalformedURLException {
+    int lastIndex = uri.lastIndexOf(":");
+    host = uri.substring(0,lastIndex);
+    port = uri.substring(lastIndex+1);
+    address = new URL(host+":"+port);
+    return true;
+  }
   private static boolean checkIfOnline() {
     HttpURLConnection connection = null;
     try {

@@ -308,6 +308,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             newAction.setLabel(DeployerConstants.COMPLETED_SINGLE_MR);
             newAction.setDestination(action.getResult().getString("deployerID"));
             newAction.setData(action.getResult().getObject("result"));
+            newAction.setStatus(ActionStatus.COMPLETED.toString());
             com.sendTo(newAction.getDestination(),newAction.asJsonObject());
           }
           else {

@@ -67,7 +67,8 @@ public abstract class MapReduceOperator extends BasicOperator{
     //create Intermediate  keys cache name for data on the same Sites as outputCache;
     keysCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".keys");
     //createIndexCache for getting all the nodes that contain values with the same key! in a mc
-    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
+    indexSiteCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".indexed");
+//    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
     outputCache = (BasicCache) manager.getPersisentCache(outputCacheName);
     collector = new LeadsCollector(0, intermediateCacheName);
   }
