@@ -1,5 +1,0 @@
-* Build 
-mvn compile
- 
-* test run
- mvn exec:java

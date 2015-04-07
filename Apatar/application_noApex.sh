@@ -1,1 +1,0 @@
-java -Djpf.boot.config="boot1noApex.properties" -cp lib/jpf-boot.jar:plugins/core/core/lib/jdic.jar org.java.plugin.boot.Boot setting="boot1noApex.properties" $1 $2 $3 $4
