@@ -5,11 +5,13 @@ import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import org.infinispan.Cache;
+import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.distexec.mapreduce.Collector;
-import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.manager.EmbeddedCacheManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -29,7 +31,8 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
   protected transient  Cache counterCache;
   private transient InfinispanManager imanager;
   private transient EmbeddedCacheManager manager;
-  private transient EnsembleCacheManager emanager;
+  private transient RemoteCacheManager emanager;
+  private transient Logger log = null;
   private boolean onMap = true;
   private String site;
   private String node;
@@ -91,11 +94,11 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
     return storeCache;
   }
 
-  public EnsembleCacheManager getEmanager() {
+  public RemoteCacheManager getEmanager() {
     return emanager;
   }
 
-  public void setEmanager(EnsembleCacheManager emanager) {
+  public void setEmanager(RemoteCacheManager emanager) {
     this.emanager = emanager;
   }
 
@@ -150,6 +153,7 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
 
   public void initializeCache(InfinispanManager imanager){
     this.imanager = imanager;
+    log = LoggerFactory.getLogger(LeadsCollector.class);
 //    storeCache = (Cache) imanager.getPersisentCache(cacheName);
     storeCache = emanager.getCache(cacheName);
     if(onMap) {
@@ -178,10 +182,18 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
       Integer currentCount = (Integer) counterCache.get(key);
       if(currentCount == null)
       {
-        currentCount = new Integer(1);
+        currentCount = new Integer(0);
         baseIndexedKey.setKey(key.toString());
         EnsembleCacheUtils.putIfAbsentToCache(keysCache, key, key);
-        EnsembleCacheUtils.putToCache(indexSiteCache,baseIndexedKey.getUniqueKey(), baseIndexedKey);
+        EnsembleCacheUtils.putToCache(indexSiteCache,baseIndexedKey.getUniqueKey(), new IndexedComplexIntermediateKey(baseIndexedKey));
+        Object o = indexSiteCache.get(baseIndexedKey.getUniqueKey());
+        if(o == null)
+        {
+          log.error("Could not add to indexedCache indexedKey " + baseIndexedKey.toString());
+        }
+        else{
+          log.error("successfully added to indexed cache " + baseIndexedKey.getUniqueKey() + "\n" + o.toString());
+        }
       }
       else{
         currentCount = currentCount+1;
@@ -189,7 +201,7 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
       counterCache.put(key.toString(),currentCount);
       baseIntermKey.setKey(key.toString());
       baseIntermKey.setCounter(currentCount);
-      EnsembleCacheUtils.putToCache(intermediateDataCache,baseIntermKey,value);
+      EnsembleCacheUtils.putToCache(intermediateDataCache,new ComplexIntermediateKey(baseIntermKey),value);
     }
     else{
       EnsembleCacheUtils.putToCache(storeCache, key, value);

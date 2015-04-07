@@ -53,6 +53,5 @@ public class HDFSByteChunk implements Writable {
     int size = in.readInt();
     data = new byte[size];
     in.readFully(data);
-
   }
 }

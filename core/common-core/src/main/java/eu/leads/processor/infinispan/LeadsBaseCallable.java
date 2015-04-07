@@ -5,6 +5,7 @@ import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.Cache;
+import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.context.Flag;
@@ -34,9 +35,9 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   transient protected  Cache<K,V> inputCache;
 //  transient protected EnsembleCache outputCache;
   protected String ensembleHost;
-  transient protected EnsembleCache outputCache;
-  transient protected EnsembleCache ecache;
-  transient protected EnsembleCacheManager emanager;
+  transient protected RemoteCache outputCache;
+  transient protected RemoteCache ecache;
+  transient protected RemoteCacheManager emanager;
 //  transient protected EnsembleCacheManager emanager;
 //  transient protected EnsembleCache ecache;
 
@@ -57,15 +58,16 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     keys = inputKeys;
     this.inputCache = cache;
     if(ensembleHost != null && !ensembleHost.equals("")) {
-      emanager = new EnsembleCacheManager(ensembleHost);
-//      emanager = createRemoteCacheManager();
+//      emanager = new EnsembleCacheManager(ensembleHost);
+      emanager = createRemoteCacheManager();
 //      ecache = emanager.getCache(output);
     }
     else {
       LQPConfiguration.initialize();
-      emanager = new EnsembleCacheManager(LQPConfiguration.getInstance().getHostname() + ":11222");
+//      emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
+            emanager = createRemoteCacheManager();
     }
-//      emanager = createRemoteCacheManager();
+
       ecache = emanager.getCache(output);
       outputCache =  emanager.getCache(output);
 
@@ -106,7 +108,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //      ecache.stop();
 //      outputCache.stop();
     }catch(Exception e){
-        System.err.println("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage());
+        System.err.println("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage() + " cause "
+                             + e.getCause().toString());
       }
   }
 

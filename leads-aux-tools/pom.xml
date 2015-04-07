@@ -17,6 +17,7 @@
        <module>data-snapshot</module>
        <module>uber-snapshot</module>
        <module>load-csv</module>
+      <module>wp4-scheduler-client</module>
    </modules>
     <dependencies>
         <dependency>

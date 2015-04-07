@@ -22,12 +22,14 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
     String id;
 
     public void start() {
-        id = "webservice-" + LQPConfiguration.getInstance().getHostname() + container.config()
-                                                                                .getNumber("port",
-                                                                                              8080)
-                                                                                .toString();
+
         LQPConfiguration.initialize(true);
-        container.logger().info("Leads Processor REST service is starting..");
+      id = "webservice-" + LQPConfiguration.getInstance().getHostname() + container.config()
+                                                                            .getNumber("port",
+                                                                                        8080)
+                                                                            .toString();
+
+      container.logger().info("Leads Processor REST service is starting..");
         com = new DefaultNode();
 
         log = container.logger();
@@ -53,6 +55,8 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         SubmitSpecialCallHandler submitSpecialCallHandler = new SubmitSpecialCallHandler(com, log);
         Handler<HttpServerRequest> uploadEncryptedData = new UploadEncryptedDataHandler(com,log);
         Handler<HttpServerRequest> privacyPointQueryHandler = new PrivacyPointQueryHandler(com,log);
+        Handler<HttpServerRequest> executeMRHandler = new ExecuteMRHandler(com,log);
+        Handler<HttpServerRequest> completedMRHandler = new CompletedMRHandler(com,log);
         //object
         failHandler = new Handler<HttpServerRequest>() {
             @Override
@@ -72,7 +76,8 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         matcher.post("/rest/data/upload/",uploadDataHandler);
         matcher.post("/rest/data/upload",uploadDataHandler);
         matcher.post("/rest/data/submit/plugin",submitPluginHandler);
-
+        matcher.post("/rest/internal/executemr",executeMRHandler);
+        matcher.post("/rest/internal/completedmr",completedMRHandler);
         //
         //      //query   [a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+
         matcher.get("/rest/query/status/:id", getQueryStatusHandler);

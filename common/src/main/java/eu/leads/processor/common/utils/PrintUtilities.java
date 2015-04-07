@@ -57,13 +57,13 @@ public class PrintUtilities {
    }
 
     public static void printList(List<?> list) {
-        System.out.println("List{");
+        System.err.println("List{");
         Iterator<?> it = list.iterator();
         while (it.hasNext()) {
-            System.out.println("\t" + it.next().toString());
+            System.err.println("\t" + it.next().toString());
         }
 
-        System.out.println("end of list}");
+        System.err.println("end of list}");
     }
 
     public static void printIterable(Iterator<Object> testCache) {

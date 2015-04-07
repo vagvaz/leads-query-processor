@@ -15,8 +15,8 @@
       <cached-thread-pool name="infinispan-cached" thread-factory="infinispan-factory"/>
       <blocking-bounded-queue-thread-pool name="infinispan-transport"
                                           thread-factory="infinispan-factory"
-                                          core-threads="30" max-threads="60" queue-length="300"
-                                          keepalive-time="30000"/>
+                                          core-threads="60" max-threads="80" queue-length="100"
+                                          keepalive-time="50000"/>
       <scheduled-thread-pool name="infinispan-eviction" thread-factory="infinispan-factory"/>
    </threads>
    <cache-container name="defaultContainer" statistics="false" default-cache="defaultCache"
@@ -34,7 +34,6 @@
             <transaction mode="NONE"/>
             <expiration lifespan="-1" max-idle="-1" interval="-1"/>
            <state-transfer enabled="true" await-initial-transfer="true"/>
-
       </distributed-cache>
 
    </cache-container>

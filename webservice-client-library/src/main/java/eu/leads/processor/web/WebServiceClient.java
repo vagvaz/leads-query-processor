@@ -47,6 +47,14 @@ public class WebServiceClient {
     address = new URL(host + ":" + port);
     return true;
   }
+
+  public static boolean initialize(String uri) throws MalformedURLException {
+    int lastIndex = uri.lastIndexOf(":");
+    host = uri.substring(0,lastIndex);
+    port = uri.substring(lastIndex+1);
+    address = new URL(host+":"+port);
+    return true;
+  }
   private static boolean checkIfOnline() {
     HttpURLConnection connection = null;
     try {
@@ -130,6 +138,26 @@ public class WebServiceClient {
 
     os.flush();
     os.close();
+  }
+
+  public static ActionResult executeMapReduce(JsonObject mrAction,String host, String port) throws IOException {
+    address = new URL(host+":"+port+prefix+"internal/executemr");
+    HttpURLConnection connection = (HttpURLConnection)address.openConnection();
+    connection = setUp(connection,"POST",MediaType.APPLICATION_JSON,true,true);
+    setBody(connection, mrAction);
+    String response = getResult(connection);
+    ActionResult result = mapper.readValue(response,ActionResult.class);
+    return result;
+  }
+
+  public static ActionResult completeMapReduce(JsonObject mrAction,String host, String port) throws IOException {
+    address = new URL(host+":"+port+prefix+"internal/completedmr");
+    HttpURLConnection connection = (HttpURLConnection)address.openConnection();
+    connection = setUp(connection,"POST",MediaType.APPLICATION_JSON,true,true);
+    setBody(connection,mrAction);
+    String response = getResult(connection);
+    ActionResult result = mapper.readValue(response,ActionResult.class);
+    return result;
   }
 
   public static JsonObject getObject(String table, String key, List<String> attributes)

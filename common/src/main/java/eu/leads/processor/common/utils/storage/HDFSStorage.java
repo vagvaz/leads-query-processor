@@ -78,6 +78,8 @@ public class HDFSStorage implements LeadsStorage {
     try {
       SequenceFile.Reader reader = new SequenceFile.Reader(hdfsConfiguration);
       HDFSByteChunk chunk = new HDFSByteChunk();
+      IntWritable key = new IntWritable();
+      reader.next(key,chunk);
       reader.getCurrentValue(chunk);
       result = chunk.getData();
     } catch (IOException e) {
