@@ -1,6 +1,5 @@
 package eu.leads.processor.core;
 import org.vertx.java.core.json.JsonObject;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,6 +48,7 @@ public class Method_test_avro {
         tavro.setNumberAttribute(attributeName10, value10);
         System.out.println("############Runtime setAttribute: " + (stopTime-startTime)/1000000 + " ns\n");
         System.out.println(tavro.toString());
+
 // json to avro
         JsonObject job = new JsonObject();
         job.putString(attributeName1, value1);
@@ -56,6 +56,7 @@ public class Method_test_avro {
         job.putString(attributeName3, value3);
         Tuple tavroJ = new Tuple(job.toString());
         System.out.println("\n\n******************tavroJ"+tavroJ);
+
 // copy test
         Tuple tavroNew = new Tuple();
         tavroNew.copy(tavro.AvroRec);
@@ -66,8 +67,10 @@ public class Method_test_avro {
         tavroNew.removeAttribute(attributeName8);
         System.out.println("\n\n******************tavroNew"+tavroNew);
         System.out.println("\n\n******************tavroNew2"+tavroNew2);
+
 // asJsonObject test
         System.out.println("\n\nAs JSON Object: "+tavro.asJsonObject());
+
 // constructor test
         ArrayList<String> ignoreColumns = new ArrayList<>();
         ignoreColumns.add(attributeName1);
