@@ -38,73 +38,63 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
 
   transient private JsonObject conf;
   private String configString;
-  private String managerAddress ;
+  private String UUIDname;
   transient private EmbeddedCacheManager manager;
   transient private ClusterInfinispanManager imanager;
   transient private Cache pluginsCache;
   transient private  Cache targetCache;
   transient private String targetCacheName;
 
-  transient private Logger log = LoggerFactory.getLogger(PluginRunnerFilter.class) ;
+  transient private Logger log ;//= LoggerFactory.getLogger(PluginRunnerFilter.class) ;
   transient private PluginInterface plugin;
   transient private String pluginsCacheName;
   transient private String pluginName;
   transient private List<EventType> type;
-  transient private boolean isInitialized = false;
-  transient private LeadsStorage storageLayer = null;
+  transient private boolean isInitialized ;
+  transient private LeadsStorage storageLayer;// = null;
   transient private String user;
   public PluginRunnerFilter(EmbeddedCacheManager manager,String confString){
-//    log = LoggerFactory.getLogger(manager.getAddress().toString()+":"+PluginRunnerFilter.class.toString());
-//    log.error("Manager init");
-//    this.manager = manager;
-//    log.error("set config string");
+    log = LoggerFactory.getLogger(manager.getAddress().toString()+":"+PluginRunnerFilter.class.toString());
+    log.error("Manager init");
+    this.manager = manager;
+    log.error("set config string");
     this.configString = confString;
-//    log.error("initJson conf");
-//    this.conf = new JsonObject(configString);
-//    log.error("init Imanager");
-//    imanager = new ClusterInfinispanManager(InfinispanClusterSingleton.getInstance().getManager().getCacheManager());
-//    managerAddress = manager.getAddress().toString();
-//    log.error("init");
-    System.err.println("Construct");
+    log.error("initJson conf");
+    this.conf = new JsonObject(configString);
+    log.error("init Imanager");
+    imanager = new ClusterInfinispanManager(InfinispanClusterSingleton.getInstance().getManager().getCacheManager());
 
-    //initialize();
+    log.error("init");
+    UUIDname = UUID.randomUUID().toString();
+
+    System.err.println(UUIDname + " Construct " + confString);
+    storageLayer=null;
+    initialize();
   }
 
-//  private void writeObject(ObjectOutputStream o)
-//          throws IOException {
-//    o.defaultWriteObject();
-//    o.writeObject(configString);
-//    System.err.println("Serialize");
-//  //  o.writeObject(managerAddress);
-//
-//
-//  }
-//
-//  private void readObject(ObjectInputStream i)
-//          throws IOException, ClassNotFoundException {
-//    i.defaultReadObject();
-//    System.err.println("DeSerialize");
-//
-//    configString = (String) i.readObject();
-//    //managerAddress= (String) i.readObject()+"Deserialized";
-//
-//    //this.conf = new JsonObject(configString);
-//  //  log = LoggerFactory.getLogger(PluginRunnerFilter.class);
-//   // imanager = new ClusterInfinispanManager(InfinispanClusterSingleton.getInstance().getManager().getCacheManager());
-//
-////    ParserRegistry registry = new ParserRegistry();
-////    ConfigurationBuilderHolder holder  = registry.parseFile(StringConstants.ISPN_CLUSTER_FILE);
-////    manager = new DefaultCacheManager(holder, true);
-//  //  manager = InfinispanClusterSingleton.getInstance().getManager().getCacheManager();
-//  //  initialize();
-//  }
+  private void writeObject(ObjectOutputStream o)
+          throws IOException {
+    o.defaultWriteObject(); //is enough for no transient objects but anyway
+    o.writeUTF(UUIDname);
+    o.writeUTF(configString);
+    System.err.println(UUIDname+" Serialize " + configString);
+  }
+
+  private void readObject(ObjectInputStream i)
+          throws IOException, ClassNotFoundException {
+    i.defaultReadObject();
+    UUIDname =  i.readUTF();
+    configString =  i.readUTF();
+    isInitialized = false;
+    UUIDname = UUID.randomUUID().toString();
+    System.err.println(UUIDname+" DeSerialize " + configString);
+  }
 
   private void initialize() {
-    System.err.println("Initilize");
-
-    isInitialized = true;
-
-    this.manager = InfinispanClusterSingleton.getInstance().getManager().getCacheManager();
+    System.err.println("Initilize " + UUIDname);
+    log = LoggerFactory.getLogger(PluginRunnerFilter.class);
+    log = LoggerFactory.getLogger(UUIDname + " PluginRunner." + pluginName + ":" +  pluginsCacheName);
+            this.manager = InfinispanClusterSingleton.getInstance().getManager().getCacheManager();
     this.conf = new JsonObject(configString);
     imanager = new ClusterInfinispanManager(manager);
 
@@ -134,11 +124,11 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
       type.add(MODIFIED);
     }
 
-    log.error("init pluginscache");
+    log.error("init pluginscache "  + UUIDname);
     pluginsCache = (Cache) imanager.getPersisentCache(pluginsCacheName);
     log.error("init logger");
-    log = LoggerFactory.getLogger(managerAddress+ " PluginRunner."+pluginName+":"+
-                                    pluginsCacheName);
+//    log = LoggerFactory.getLogger(managerAddress+ " PluginRunner."+pluginName+":"+
+//                                    pluginsCacheName);
     log.error("init storage");
     String storagetype = this.conf.getString("storageType");
     Properties storageConfiguration = new Properties();
@@ -158,6 +148,9 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
     initializePlugin(pluginsCache, pluginName, user);
     log.error("Initialized plugin " + pluginName + " on " + targetCacheName);
     System.err.println("Initialized plugin " + pluginName + " on " + targetCacheName);
+
+    isInitialized = true;
+
   }
 
 
@@ -253,8 +246,27 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
   public boolean accept(Object key, Object oldValue, Metadata oldMetadata, Object newValue,
                          Metadata newMetadata,
                          org.infinispan.notifications.cachelistener.filter.EventType eventType) {
+
+
     if(!isInitialized)
       initialize();
+    System.err.println(UUIDname + " Accept: Manager Address " + manager.getAddress());
+    log.error( UUIDname + "Accept: Manager Address " + manager.getAddress());
+
+    if(key==null){
+      log.error("null key:");
+      return false;
+    }
+
+    if(newValue==null) {
+      System.out.println("newValue is null key:" + (String) key);
+      log.error("Accept newValue is null key:" + (String)key);
+      return false;
+    }
+//    else{
+//      System.out.println("key:" + (String)key+", newValue is " + newValue);
+//      log.info("Accept, key:" + (String)key+", newValue is " + newValue);
+//    }
     String o1 = (String)key;
     String value = (String)newValue;
     switch (eventType.getType()) {
@@ -263,8 +275,14 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
           plugin.created(key, value, targetCache);
         break;
       case CACHE_ENTRY_REMOVED:
-        if(type.contains(REMOVED))
+        if(type.contains(REMOVED)) {
+          if(oldValue==null) {
+            log.error("Accept old value is null");
+            return false;
+          }
+          value = (String) oldValue;
           plugin.removed(key, value, targetCache);
+        }
         break;
       case CACHE_ENTRY_MODIFIED:
         if(type.contains(MODIFIED))

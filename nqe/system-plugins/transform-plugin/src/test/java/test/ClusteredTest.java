@@ -2,6 +2,7 @@ package test;
 
 import eu.leads.crawler.PersistentCrawl;
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.infinispan.CacheManagerFactory;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.plugins.PluginManager;
@@ -28,7 +29,7 @@ public class ClusteredTest {
         ArrayList<InfinispanManager> clusters = new ArrayList<InfinispanManager>();
         clusters.add(InfinispanClusterSingleton.getInstance()
                          .getManager());  //must add because it is used from the rest of the system
-//        clusters.add(CacheManagerFactory.createCacheManager());
+        //clusters.add(CacheManagerFactory.createCacheManager());
 
         //Crucial for joining infinispan cluster
         for (InfinispanManager cluster : clusters) {
@@ -40,8 +41,8 @@ public class ClusteredTest {
         System.out.println("PLUGIN ID: " + TransformPlugin.class.getCanonicalName());
         PluginPackage plugin = new PluginPackage(TransformPlugin.class.getCanonicalName(),
                                                     TransformPlugin.class.getCanonicalName(),
-                                                    "/home/vagvaz/Projects/idea/transform-plugin/target/transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar",
-                                                    "/home/vagvaz/Projects/idea/transform-plugin/transform-plugin-conf.xml");
+                "/home/trs/Projects/LEADS/leads-query-processor/nqe/system-plugins/transform-plugin/transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar",
+                "/home/trs/Projects/LEADS/leads-query-processor/nqe/system-plugins/transform-plugin/transform-plugin-conf.xml" );
       Properties conf = new Properties();
       conf.setProperty("prefix","/tmp/leads/");
       PluginManager.initialize(LeadsStorageFactory.LOCAL, conf);
@@ -65,17 +66,17 @@ public class ClusteredTest {
 //        PluginManager.deployPluginListener(TransformPlugin.class.getCanonicalName(), "default.webpages",
 //
 //                                      EventType.CREATEANDMODIFY,"defaultUser");
-        plugin.setUser("vagvaz");
-        PluginManager.addPluginToCache(plugin,7, (Cache) clusters.get(0).getPersisentCache(StringConstants
-                                                                                    .PLUGIN_ACTIVE_CACHE),
-                                        "default.webpages");
-try {
-  PluginManager.deployPluginListener(plugin.getId(), "default.webpages", "vagvaz", clusters.get(0),
-                                      storage);
-}catch (Exception e){
-  e.printStackTrace();
-  System.exit(-1);
-}
+    plugin.setUser("vagvaz");
+    PluginManager.addPluginToCache(plugin,7, (Cache) clusters.get(0).getPersisentCache(StringConstants
+                                                                                .PLUGIN_ACTIVE_CACHE),
+                                    "default.webpages");
+    try {
+      PluginManager.deployPluginListener(plugin.getId(), "default.webpages", "vagvaz", clusters.get(0),
+                                          storage);
+    }catch (Exception e){
+      e.printStackTrace();
+      System.exit(-1);
+    }
     /*Start putting values to the cache */
 
         //Put some configuration properties for crawler
@@ -88,7 +89,7 @@ try {
         PersistentCrawl.main(null);
         //Sleep for an amount of time to test if everything is working fine
         try {
-            int sleepingPeriod = 20;
+            int sleepingPeriod = 32;
             Thread.sleep(sleepingPeriod * 1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -98,9 +99,31 @@ try {
         Cache cache = (Cache) InfinispanClusterSingleton.getInstance().getManager()
                                   .getPersisentCache("mycache");
         PrintUtilities.printMap(cache);
+         System.out
+            .println("Local cache " + cache.entrySet().size() + " --- global --- " + cache.size());
+        //PersistentCrawl.stop();
 
+        System.out.print("STARTING NEW MANAGER");
+        clusters.add(CacheManagerFactory.createCacheManager());
+
+        for (InfinispanManager cluster : clusters) {
+            cluster.getPersisentCache("clustered");
+        }
+
+       // PersistentCrawl.main(null);
+
+
+        try {
+            int sleepingPeriod = 60;
+            Thread.sleep(sleepingPeriod * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.print("Print with NEW MANAGER");
+
+        PrintUtilities.printMap(cache);
 	    /*Cleanup and close....*/
-        PersistentCrawl.stop();
+        //PersistentCrawl.stop();
         System.out
             .println("Local cache " + cache.entrySet().size() + " --- global --- " + cache.size());
         InfinispanClusterSingleton.getInstance().getManager().stopManager();
