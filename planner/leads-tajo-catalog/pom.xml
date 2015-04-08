@@ -39,6 +39,11 @@
    </repositories>
 
    <dependencies>
+       <dependency>
+           <groupId>io.netty</groupId>
+           <artifactId>netty</artifactId>
+           <version>3.6.6.Final</version>
+       </dependency>
       <dependency>
          <groupId>gr.tuc.softnet</groupId>
          <artifactId>leads-query-processor-common</artifactId>
@@ -67,25 +72,8 @@
          <groupId>gr.tuc.softnet</groupId>
          <artifactId>leads-query-processor-tajo-module</artifactId>
          <version>0.0.2-SNAPSHOT</version>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
 
-            </exclusion>
-         </exclusions>
+
       </dependency>
 	</dependencies>
 

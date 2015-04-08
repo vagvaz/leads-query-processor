@@ -120,8 +120,8 @@ public class PlannerCatalogWorker extends Verticle {
           System.out.println("Found Builtin Functions  = " + k );
       }
       for (FunctionDesc funcDesc : builtin) {
-        container.logger().info(funcDesc.toString());
-        System.out.println(funcDesc.getFuncType());
+        container.logger().info(funcDesc.toString()+" " + funcDesc.getFuncType());
+       // System.out.println(funcDesc.getFuncType());
         catalog.createFunction(funcDesc);
       }
     } catch (ServiceException e) {

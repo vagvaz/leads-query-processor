@@ -594,32 +594,13 @@ public class LeadsMemStore2 implements CatalogStore {
     }
 
     @Override
-    public List<CatalogProtos.IndexProto> getAllIndexes() throws CatalogException {
-        List<CatalogProtos.IndexProto> indexList = new ArrayList<CatalogProtos.IndexProto>();
-        Set<String> databases = indexes.keySet();
-
-        for (String databaseName: databases) {
-            Map<String, IndexDescProto> indexMap = indexes.get(databaseName);
-
-            for (String indexName: indexMap.keySet()) {
-                IndexDescProto indexDesc = indexMap.get(indexName);
-                CatalogProtos.IndexProto.Builder builder = CatalogProtos.IndexProto.newBuilder();
-
-                builder.setColumnName(indexDesc.getColumn().getName());
-                builder.setDataType(indexDesc.getColumn().getDataType().getType().toString());
-                builder.setIndexName(indexName);
-                builder.setIndexType(indexDesc.getIndexMethod().toString());
-                builder.setIsAscending(indexDesc.hasIsAscending() && indexDesc.getIsAscending());
-                builder.setIsClustered(indexDesc.hasIsClustered() && indexDesc.getIsClustered());
-                builder.setIsUnique(indexDesc.hasIsUnique() && indexDesc.getIsUnique());
-
-                indexList.add(builder.build());
-            }
+    public List<IndexDescProto> getAllIndexes() throws CatalogException {
+        List<IndexDescProto> indexDescProtos = TUtil.newList();
+        for (Map<String,IndexDescProto> indexMap : indexes.values()) {
+            indexDescProtos.addAll(indexMap.values());
         }
-
-        return indexList;
+        return indexDescProtos;
     }
-
     @Override
     public void addFunction(FunctionDesc func) throws CatalogException {
         // to be implemented

@@ -1,0 +1,9 @@
+content:uri TEXT,ts NUMERIC,content TEXT
+page:uri TEXT,ts NUMERIC,pagetypeassumption TEXT,ecomfeatures TEXT,extractioncandidates TEXT,successfulextractions TEXT
+urldirectory:uri TEXT,ts NUMERIC,dirassumption TEXT,ecomassumptionpagesno TEXT,pagesno TEXT
+urldirectory_ecom:uri TEXT,ts NUMERIC,isatbbuttonindir TEXT,atbbuttonextractionlog TEXT,nameextractiontuples TEXT,priceextractiontuples TEXT,productclustercenter TEXT,categoryclustercenter TEXT,productcluster50pcdist TEXT,productcluster80pcdist TEXT,categorycluster50pcdist TEXT,categorycluster80pcdist TEXT,scalermean TEXT,scalerstd TEXT
+keywords:uri TEXT,ts NUMERIC,partid TEXT,keywords TEXT,relevance TEXT,sentiment NUMERIC
+page_core:uri TEXT,ts NUMERIC,fqdnurl TEXT,lang TEXT,maincontent TEXT,oldsentiment TEXT,textcontent TEXT,type TEXT,sentiment NUMERIC,pagerank NUMERIC
+resourcepart:uri TEXT,ts NUMERIC,partid TEXT,resourceparttype TEXT,resourcepartvalue TEXT
+site:uri TEXT,ts NUMERIC,category TEXT,country TEXT,domaincountry TEXT,ipgeoinfo TEXT,mainlanguages TEXT,whoiscountry TEXT
+adidas_keywords:keywords TEXT

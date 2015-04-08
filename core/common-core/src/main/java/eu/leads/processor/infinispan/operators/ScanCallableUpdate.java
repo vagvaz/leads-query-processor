@@ -33,11 +33,15 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
   protected String qualString;
   transient  boolean versioning;
   boolean onVersionedCache;
+  transient protected long versionStart=-1,versionFinish=-1,range=-1;
 
-//  transient protected InfinispanManager manager;
+
+    //  transient protected InfinispanManager manager;
   protected Logger log = LoggerFactory.getLogger(ScanCallableUpdate.class.toString());
+    private VersionScalar minVersion=null;
+    private VersionScalar maxVersion=null;
 
-  public ScanCallableUpdate(String configString, String output) {
+    public ScanCallableUpdate(String configString, String output) {
     super(configString, output);
   }
   public ScanCallableUpdate(String configString, String output,boolean onVersionedCache) {
@@ -53,6 +57,24 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
     log.info("--------------------    get approxSum cache ------------------------");
     approxSumCache = (Cache) imanager.getPersisentCache("approx_sum_cache");
     totalSum = -1f;
+
+      if(conf.getObject("body").containsField("versionStart"))
+      {
+          versionStart=conf.getObject("body").getLong("versionStart");
+          if (versionStart>0) {
+              versioning = true;
+              minVersion=new VersionScalar(versionStart);
+          }
+      }
+      if(conf.getObject("body").containsField("versionFinish"))
+      {
+          versionFinish=conf.getObject("body").getLong("versionFinish");
+          if (versionFinish>0) {
+              versioning = true;
+              maxVersion=new VersionScalar(versionFinish);
+          }
+      }
+
 
     if(conf.getObject("body").containsField("qual"))
     {
@@ -149,11 +171,14 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
    */
   private boolean isInVersionRange(Version currentVersion) {
     //SAMPLE CODE NOT NECESSARILY exactly like that
-    //if(currentVersion >= minVersion && <= maxVersion)
-//      return true;
-//    else
-//      return false;
-    return false;
+    if(minVersion!=null)
+      if(currentVersion.compareTo(minVersion)<0) {
+        return false;
+    }
+    if(maxVersion!=null)
+        if(currentVersion.compareTo(maxVersion)>0)
+            return false;
+    return true;
   }
 
   private Version getVersion(String versionedKey) {
