@@ -1,10 +1,31 @@
 package leads.tajo.catalog;
 
 /**
- * Created by tr on 15/12/2014.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ *
  */
 
 import com.google.common.collect.Maps;
+import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
+import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.tajo.TajoConstants;
@@ -16,6 +37,7 @@ import org.apache.tajo.catalog.proto.CatalogProtos.*;
 import org.apache.tajo.catalog.store.CatalogStore;
 import org.apache.tajo.rpc.protocolrecords.PrimitiveProtos.KeyValueProto;
 import org.apache.tajo.util.TUtil;
+import org.infinispan.Cache;
 
 import java.io.IOException;
 import java.util.*;
@@ -27,20 +49,58 @@ import static org.apache.tajo.catalog.proto.CatalogProtos.AlterTablespaceProto.A
  * So, we don't need to consider concurrency problem here.
  */
 public class LeadsMemStore implements CatalogStore {
-    private final Map<String, String> tablespaces = Maps.newHashMap();
-  private final Map<String, Map<String, TableDescProto>> databases = Maps.newHashMap();
-  private final Map<String, FunctionDescProto> functions = Maps.newHashMap();
-    private final Map<String, Map<String, IndexDescProto>> indexes = Maps.newHashMap();
-    private final Map<String, Map<String, IndexDescProto>> indexesByColumn = Maps.newHashMap();
+    private Map<String, String> tablespaces = null;
+    private Map<String, Map<String, TableDescProto>> databases = Maps.newHashMap();
+    private  Map<String, String> leadsdatabases  = null ;
 
-    public LeadsMemStore(Configuration conf) {
+    private Map<String, FunctionDescProto> functions = Maps.newHashMap();
+
+    private Map<String, Map<String, IndexDescProto>> indexes = Maps.newHashMap();
+    private Map<String, Map<String, IndexDescProto>> indexesByColumn = Maps.newHashMap();
+
+    private final String databasePrefix = "leads.processor.databases.sub.";
+    private InfinispanManager manager;
+    public LeadsMemStore(Configuration conf) throws Exception {
+        LQPConfiguration.initialize();
+        boolean isManagerStarted = false;
+        int count = 0;
+        while(!isManagerStarted) {
+
+            try {
+                manager = InfinispanClusterSingleton.getInstance().getManager();
+                isManagerStarted = manager.isStarted();
+                if (count > 2) {
+                    System.err.println("Exiting we could not start LeadsMemStore for CatalogServer so we exit");
+                    throw new Exception("Could not start InfinispanManager");
+                }
+            }catch(Exception e ){
+                System.err.println("Failed Starting LeadsMemStore Manager retrying for " +  ++count);
+                throw new Exception("Problem with getting maps for Leads Memstore " + e.getMessage());
+            }
+        }
+//        try {
+            tablespaces = manager.getPersisentCache("leads.processor.catalog.tablespaces");
+            databases = manager.getPersisentCache("leads.processor.catalog.databases");
+            functions = manager.getPersisentCache("leads.processor.catalog.functions");
+            indexes = manager.getPersisentCache("leads.processor.catalog.indexes");
+            indexesByColumn = manager.getPersisentCache("leads.processor.catalog.indexesByColumn");
+//        }
+//        catch(Exception e){
+//            System.err.println("Problem with starting the Catalog maps exiting...\n" + e.getMessage());
+//            System.exit(-1);
+//        }
     }
 
 
     public void close() throws IOException {
-        databases.clear();
-        functions.clear();
-        indexes.clear();
+//        databases.clear();
+//        functions.clear();
+//        indexes.clear();
+        manager.removePersistentCache("leads.processor.catalog.tablespaces");
+        manager.removePersistentCache("leads.processor.catalog.databases");
+        manager.removePersistentCache("leads.processor.catalog.functions");
+        manager.removePersistentCache("leads.processor.catalog.indexes");
+        manager.removePersistentCache("leads.processor.catalog.indexesByColumn");
     }
 
     @Override
@@ -119,6 +179,9 @@ public class LeadsMemStore implements CatalogStore {
         if (databases.containsKey(databaseName)) {
             throw new AlreadyExistsDatabaseException(databaseName);
         }
+  //TODO FIX
+    Cache newDb = (Cache) manager.getPersisentCache(databasePrefix+databaseName);
+    leadsdatabases.put(databaseName, newDb.getName());
 
     databases.put(databaseName, new HashMap<String, TableDescProto>());
     indexes.put(databaseName, new HashMap<String, IndexDescProto>());
@@ -135,6 +198,10 @@ public class LeadsMemStore implements CatalogStore {
         if (!databases.containsKey(databaseName)) {
             throw new NoSuchDatabaseException(databaseName);
         }
+        //TODO FIX
+        Object ldatabase = leadsdatabases.get(databaseName);
+        manager.removePersistentCache((String) ldatabase);
+
         databases.remove(databaseName);
     indexes.remove(databaseName);
     indexesByColumn.remove(databaseName);
@@ -169,7 +236,9 @@ public class LeadsMemStore implements CatalogStore {
     private <T> Map<String, T> checkAndGetDatabaseNS(final Map<String, Map<String, T>> databaseMap,
                                                      String databaseName) {
         if (databaseMap.containsKey(databaseName)) {
-            return databaseMap.get(databaseName);
+            return databaseMap.get(databaseName);// TODO FIX update database
+            //Object databaseN = leadsdatabases.get(databaseName);
+            //return manager.getPersisentCache((String) databaseN);
         } else {
             throw new NoSuchDatabaseException(databaseName);
         }
@@ -223,6 +292,8 @@ public class LeadsMemStore implements CatalogStore {
     Map<String, TableDescProto> database = checkAndGetDatabaseNS(databases, dbName);
 
         if (database.containsKey(tbName)) {
+            //TODO FIX
+            //manager.removePersistentCache(dbName+"."+tbName);
             database.remove(tbName);
         } else {
             throw new NoSuchTableException(tbName);
