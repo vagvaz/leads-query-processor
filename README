@@ -127,3 +127,26 @@ douleyei giati ola ta instances koitazoun to idio arxeio...)
 
 4. gia na testarete to clustered deployment prepei prwta na ftiaksete 1 jar me 
 ola ta dependencies mvn assembly:single) kai ena xml configuration arxeio. auta
+
+
+--UPLOADING (new)
+-Setup
+install swift, sudo apt-get install python-swiftclient
+get the LEADS-openrc.sh from the C&H Dashboard->Access & Security->API Access
+run it and set the password 
+get the repo from https://github.com/skarab7/leads_query-engine.git (check the branches I used develop)
+make upload.sh executable
+
+
+-Execution
+run "source pathto/tools/openstack_cli/bin/activate"
+run ./upload.sh
+
+-Extended Setup (if above does not work)
+check the URL of the cluster tha you are uploading hamm5,6 !
+run "source pathto/tools/openstack_cli/bin/activate"
+pip install -r  openstack_cli/requirements.txt
+install necessary libraries if above fails
+eg. sudo apt-get install libffi-dev libssl-dev python-dev
+good luck
+
