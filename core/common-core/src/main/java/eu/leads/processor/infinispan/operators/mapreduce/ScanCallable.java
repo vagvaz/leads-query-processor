@@ -47,6 +47,7 @@ public class ScanCallable <K,V> implements
    protected String qualString;
    transient protected InfinispanManager manager;
    protected Logger log;
+
    public ScanCallable(String configString, String output) {
       this.configString = configString;
       this.output = output;
@@ -60,6 +61,7 @@ public class ScanCallable <K,V> implements
        manager =  new ClusterInfinispanManager(cache.getCacheManager());
       log = LoggerFactory.getLogger("###### ScanCallable: " + manager.getMemberName().toString());
       log.info("--------------------    get output cache ------------------------");
+       System.out.println(output);
       outputCache = (Cache) manager.getPersisentCache(output);
       log.info("--------------------    get pagerank cache ------------------------");
       pageRankCache = (Cache) manager.getPersisentCache("pagerankCache");

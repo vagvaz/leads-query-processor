@@ -107,7 +107,7 @@ public class WebServiceClient {
     }
     rd.close();
     response.trimToSize();
-    //        System.out.println("received: " + response);
+           // System.out.println("received: " + response);
     return response.toString();
   }
 

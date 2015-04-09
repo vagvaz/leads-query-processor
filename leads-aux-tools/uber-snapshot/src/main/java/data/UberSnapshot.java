@@ -220,7 +220,11 @@ public class UberSnapshot {
             if(keyLine != null && !keyLine.trim().equals("")){
                if(valueLine != null && !valueLine.trim().equals("")) {
                   JsonObject ob = new JsonObject(valueLine);
-                 Tuple tuple = new Tuple(valueLine.trim());
+                  Tuple tuple = new Tuple(valueLine.trim());
+//                  System.out.println("Tuple to store: " + tuple.getFieldNames());
+//                  for(String fname : tuple.getFieldNames()){
+//                     System.out.println(fname+"--"+tuple.getValue(fname));
+//                  }
                   cache.put(keyLine.trim(), tuple);
 //                  cache.put(keyLine.trim(), valueLine.trim());
                }

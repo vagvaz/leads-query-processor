@@ -149,8 +149,11 @@ public class Method_test_avro {
         System.out.println(tavro.hasField(attributeName8));// false
 // renameAttribute
         startTime = System.nanoTime();
+        System.out.println("tuple avro: " + tavro + "\n");
         tavro.renameAttribute(attributeName5, "longnumX");
         stopTime = System.nanoTime();
+
+//getGenericAttribute
         System.out.println("############Runtime renameAttribute: " + (stopTime - startTime) / 1000 + " μs\n");
         System.out.println("tuple avro: " + tavro + "\n");
 //getGenericAttribute
