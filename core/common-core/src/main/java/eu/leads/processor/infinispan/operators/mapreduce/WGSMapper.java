@@ -63,17 +63,24 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
    public void map(String key, String value, Collector<String, String> collector) {
      if(!isInitialized)
        this.initialize();
-      String jsonString = (String) webCache.get(prefix+key);
-      if (jsonString==null || jsonString.equals("")){
-         return;
-      }
-      Tuple t = new Tuple(jsonString);
+//      String jsonString = (String) webCache.get(prefix+key);
+//      if (jsonString==null || jsonString.equals("")){
+//         return;
+//      }
+      Tuple webpage = (Tuple) webCache.get(prefix+key);
+//      Tuple t = new Tuple(jsonString);
+      Tuple t = new Tuple(webpage);
       handlePagerank(t);
       JsonObject result = new JsonObject();
       result.putString("url", t.getAttribute("url"));
       result.putString("pagerank", computePagerank(result.getString("url")));
       result.putString("sentiment", t.getGenericAttribute("sentiment").toString());
-      result.putValue("links",t.getGenericAttribute("links"));
+      ArrayList<Object> linksArray = (ArrayList<Object>) t.getGenericAttribute("links");
+      JsonArray array = new JsonArray();
+      for(Object o : linksArray){
+         array.add(o.toString());
+      }
+      result.putValue("links",array);
       collector.emit(String.valueOf(iteration),result.toString());
       if(outputCache != null){
          if (!result.getElement("links").isArray())
@@ -82,6 +89,7 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
          Iterator<Object> iterator = links.iterator();
          while(iterator.hasNext()){
             String link = (String) iterator.next();
+
             outputCache.put(link,link);
          }
       }
