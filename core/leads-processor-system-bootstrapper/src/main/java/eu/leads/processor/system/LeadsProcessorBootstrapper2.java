@@ -119,14 +119,26 @@ public class LeadsProcessorBootstrapper2 {
         //System.out.println(" componentType: " + subconf.getString("componentType"));
         Iterator it = null;
         JsonObject ret = new JsonObject();
+        JsonArray otherGroups = null;
 
         if (subconf.containsKey("componentType")) {
             String componentType = subconf.getString("componentType");
             ret.putString("id", componentType + "-default-" + UUID.randomUUID().toString());
             ret.putString("group", componentType);
+
+
             ret.putString("version", LQPConfiguration.getInstance().getConf().getString("processor.version"));
             ret.putString("groupId", LQPConfiguration.getConf().getString("processor.groupId"));
 
+            if(componentType.toLowerCase().equals("leads.log.sink")){ //Special case for the log sink module
+                if (subconf.containsKey("groups")) {
+                    otherGroups = new JsonArray();
+                    for (String group : subconf.getStringArray("groups"))
+                        otherGroups.addString(group);
+                    ret.putArray("groups", otherGroups);
+                }
+                return ret;
+            }
             ret.putString("componentType", componentType);
             List<HierarchicalConfiguration> servicenodes = subconf.configurationsAt("service");
 
@@ -135,7 +147,7 @@ public class LeadsProcessorBootstrapper2 {
             List<HierarchicalConfiguration> nodes = subconf.configurationsAt("service.conf");
 
             // System.out.println("service  size " + servicenodes.size());
-            JsonArray otherGroups = null;
+
             if (subconf.containsKey("otherGroups")) {
                 otherGroups = new JsonArray();
                 for (String group : subconf.getStringArray("otherGroups")) {
@@ -237,7 +249,7 @@ public class LeadsProcessorBootstrapper2 {
 
         //System.out.println(command);
 
-        runRemotely(modJson.getString("id"), ip, command);
+        //runRemotely(modJson.getString("id"), ip, command);
 
     }
 
