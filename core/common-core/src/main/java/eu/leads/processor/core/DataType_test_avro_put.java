@@ -1,4 +1,5 @@
 package eu.leads.processor.core;
+
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
@@ -16,8 +17,8 @@ public class DataType_test_avro_put {
         LQPConfiguration.initialize();
         InfinispanManager man = InfinispanClusterSingleton.getInstance().getManager();
         Cache map = (Cache) man.getPersisentCache("queriesfoo");
-        // InfinispanManager man2 = CacheManagerFactory.createCacheManager();
-        // Cache map2 = (Cache) man2.getPersisentCache("queriesfoo");
+//         InfinispanManager man2 = CacheManagerFactory.createCacheManager();
+//         Cache map2 = (Cache) man2.getPersisentCache("queriesfoo");
 /*Create attribute names*/
         String attributeName1 = "name1";
         String attributeName2 = "name2";

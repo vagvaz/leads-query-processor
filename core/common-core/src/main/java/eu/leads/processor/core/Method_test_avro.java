@@ -11,16 +11,16 @@ import java.util.Map;
 public class Method_test_avro {
     public static void main(String[] args) throws IOException {
 // Create attribute names
-        String attributeName1 = "default.leads.name1";
-        String attributeName2 = "default.leads.name2";
-        String attributeName3 = "default.leads.name3";
+        String attributeName1 = "name1";
+        String attributeName2 = "name2";
+        String attributeName3 = "name3";
         String attributeName4 = "name4";
         String attributeName5 = "name5";
         String attributeName6 = "name6";
-        String attributeName7 = "default.leads.longnum1";
+        String attributeName7 = "longnum1";
         String attributeName8 = "longnum2";
         String attributeName9 = "doublenum1";
-        String attributeName10 = "default.leads.doublenum2";
+        String attributeName10 = "doublenum2";
 // Create attributes' values
         String value1 = "b9re9dmqls44ced";
         String value2 = "q2vklxkkexqxh1m";
