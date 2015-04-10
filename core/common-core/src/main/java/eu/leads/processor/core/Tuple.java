@@ -28,7 +28,14 @@ public class Tuple extends DataTypeAvro implements Serializable{
         String[] st;
 
         st = str.split("\\.");
-        Schema schema_new = Schema.createRecord("LeadsName","LeadsDoc",st[0]+"."+st[1],false);
+        String namespace;
+        if(st.length>2){
+            namespace = st[0]+"."+st[1];
+        } else{
+            namespace = "defaultLeadsNamespace";
+        }
+
+        Schema schema_new = Schema.createRecord("LeadsName","LeadsDoc",namespace,false);
         List<Schema.Field> newFieldList = new ArrayList<>();
 
         for(String jstr: jobstr){
@@ -45,10 +52,10 @@ public class Tuple extends DataTypeAvro implements Serializable{
 
 
         for(Schema.Field field: schema.getFields()){
-            st = str.split("\\.");
-            this.AvroRec.put(field.name(), job.getField(st[0]+"."+st[1]+"."+field.name()).toString());
-            if(it.hasNext()){
-                str = it.next();
+            if(st.length>2) {
+                this.AvroRec.put(field.name(), job.getField(namespace + "." + field.name()).toString());
+            } else{
+                this.AvroRec.put(field.name(), job.getField(field.name()).toString());
             }
         }
     }
@@ -352,6 +359,17 @@ public class Tuple extends DataTypeAvro implements Serializable{
         return false;
     }
     public void renameAttribute(String oldName, String newName) {
+
+        String[] attN = newName.split("\\.");
+        String[] attO = oldName.split("\\.");
+        if(attN.length>2){
+            newName = attN[2];
+        }
+
+        if(attO.length>2){
+            oldName = attO[2];
+        }
+
         if(oldName == newName)
             return;
         Schema schema_new = Schema.createRecord("LeadsName","LeadsDoc","LeadsNamespace",false);
