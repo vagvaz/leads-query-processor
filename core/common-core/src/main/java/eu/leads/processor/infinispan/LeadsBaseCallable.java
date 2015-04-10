@@ -33,13 +33,13 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   transient protected InfinispanManager imanager;
   transient protected Set<K> keys;
   transient protected  Cache<K,V> inputCache;
-//  transient protected EnsembleCache outputCache;
+  transient protected EnsembleCache outputCache;
   protected String ensembleHost;
-  transient protected RemoteCache outputCache;
-  transient protected RemoteCache ecache;
-  transient protected RemoteCacheManager emanager;
-//  transient protected EnsembleCacheManager emanager;
-//  transient protected EnsembleCache ecache;
+//  transient protected RemoteCache outputCache;
+//  transient protected RemoteCache ecache;
+//  transient protected RemoteCacheManager emanager;
+  transient protected EnsembleCacheManager emanager;
+  transient protected EnsembleCache ecache;
 
   public LeadsBaseCallable(String configString, String output){
     this.configString = configString;
@@ -58,14 +58,14 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     keys = inputKeys;
     this.inputCache = cache;
     if(ensembleHost != null && !ensembleHost.equals("")) {
-//      emanager = new EnsembleCacheManager(ensembleHost);
-      emanager = createRemoteCacheManager();
-//      ecache = emanager.getCache(output);
+      emanager = new EnsembleCacheManager(ensembleHost);
+//      emanager = createRemoteCacheManager();
+      ecache = emanager.getCache(output);
     }
     else {
       LQPConfiguration.initialize();
-//      emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
-            emanager = createRemoteCacheManager();
+      emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
+//            emanager = createRemoteCacheManager();
     }
 
       ecache = emanager.getCache(output);

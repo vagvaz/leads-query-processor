@@ -8,6 +8,7 @@ import org.infinispan.Cache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.distexec.mapreduce.Collector;
+import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
   protected transient  Cache counterCache;
   private transient InfinispanManager imanager;
   private transient EmbeddedCacheManager manager;
-  private transient RemoteCacheManager emanager;
+  private transient EnsembleCacheManager emanager;
   private transient Logger log = null;
   private boolean onMap = true;
   private String site;
@@ -94,11 +95,11 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
     return storeCache;
   }
 
-  public RemoteCacheManager getEmanager() {
+  public EnsembleCacheManager getEmanager() {
     return emanager;
   }
 
-  public void setEmanager(RemoteCacheManager emanager) {
+  public void setEmanager(EnsembleCacheManager emanager) {
     this.emanager = emanager;
   }
 

@@ -2,25 +2,39 @@ package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.infinispan.LeadsCollector;
+import eu.leads.processor.infinispan.LeadsMapperCallable;
+import eu.leads.processor.infinispan.LeadsReducerCallable;
+import eu.leads.processor.infinispan.operators.mapreduce.WGSMapper;
+import eu.leads.processor.infinispan.operators.mapreduce.WGSReducer;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
 import org.infinispan.Cache;
+import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.CloseableIterable;
+import org.infinispan.distexec.DefaultExecutorService;
+import org.infinispan.distexec.DistributedExecutorService;
+import org.infinispan.distexec.DistributedTask;
+import org.infinispan.distexec.DistributedTaskBuilder;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by vagvaz on 9/26/14.
  */
 public class WGSOperator extends MapReduceOperator {
-   private Cache inputCache  ;
    private JsonArray attributesArray;
    private double totalSum = -1.0f;
    Cache pagerank = null;
@@ -41,23 +55,45 @@ public class WGSOperator extends MapReduceOperator {
       init_statistics(this.getClass().getCanonicalName());
    }
 
+   public void setupMapReduceJob(String inputCacheName,String outputCacheName,String intermediateCacheName){
+      inputCache = (BasicCache) manager.getPersisentCache(inputCacheName);
+      intermediateCache = (BasicCache) manager.getPersisentCache(intermediateCacheName);
+      //create Intermediate cache name for data on the same Sites as outputCache
+      intermediateDataCache = (BasicCache) manager.getPersisentCache(intermediateCacheName+".data");
+      //create Intermediate  keys cache name for data on the same Sites as outputCache;
+      keysCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".keys");
+      //createIndexCache for getting all the nodes that contain values with the same key! in a mc
+      indexSiteCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".indexed");
+//    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
+      outputCache = (BasicCache) manager.getPersisentCache(outputCacheName);
+      collector = new LeadsCollector(0, intermediateCacheName);
+   }
 //   @Override
-   public void run1() {
+   public void run() {
       int count = 0;
+      String currentInput = getName() +".iter0";
+      String currentOutput = "";
+      String currentIntermediate = getName()+".itermediate0";
       inputCacheName = getName() +".iter0";
       inputCache = (Cache) manager.getPersisentCache(inputCacheName);
       JsonObject configBody = conf.getObject("body");
       inputCache.put(configBody.getString("url"),configBody.getString("url"));
       Cache realOutput = (Cache) manager.getPersisentCache(conf.getString("realOutput"));
       for ( count = 0; count < configBody.getInteger("depth"); count++) {
-         inputCache = (Cache)manager.getPersisentCache(getName()+".iter"+String.valueOf(count));
+         currentInput = getName() +".iter"+count;
+         currentOutput = getName() +".iter"+(count+1);
+         currentIntermediate = getName()+".itermediate"+count;
+//         inputCache = (Cache)manager.getPersisentCache(currentInput);
+//         inputCache = (Cache)manager.getPersisentCache(getName()+".iter"+String.valueOf(count));
          System.out.println("realOutput " + conf.getString("realOutput") +" \nsize" + realOutput.size());
+
          JsonObject jobConfig = new JsonObject();
          jobConfig.putNumber("iteration", count);
          jobConfig.putNumber("depth", configBody.getInteger("depth"));
-         jobConfig.putArray("attributes",attributesArray);
+         jobConfig.putArray("attributes", attributesArray);
+         setupMapReduceJob(currentInput,currentIntermediate,currentOutput);
          if(count < configBody.getInteger("depth")){
-            jobConfig.putString("outputCache",getName()+".iter"+String.valueOf(count+1));
+            jobConfig.putString("outputCache",currentOutput);
          }
          else
          {
@@ -69,8 +105,8 @@ public class WGSOperator extends MapReduceOperator {
       }
      cleanup();
    }
-   @Override
-   public void run() {
+//   @Override
+   public void run2() {
       int count = 0;
       inputCacheName = getName() +".iter0";
       inputCache = (Cache) manager.getPersisentCache(inputCacheName);
@@ -162,51 +198,61 @@ public class WGSOperator extends MapReduceOperator {
 
 
 
-//    DistributedExecutorService des = new DefaultExecutorService(inputCache);
+    DistributedExecutorService des = new DefaultExecutorService((Cache<?, ?>) inputCache);
 //    intermediateCacheName = inputCache.getName()+".intermediate";
 //    collector = new LeadsCollector(0, intermediateCache);
-//    LeadsMapperCallable mapperCallable = new LeadsMapperCallable(inputCache,collector,new WGSMapper
-//                                                                                        (jobConfig.toString
-//                                                                                                     ()),
-//                                                                  LQPConfiguration.getInstance().getMicroClusterName());
-//    List<Future<?>> res = des.submitEverywhere(mapperCallable);
-//    try {
-//      if (res != null) {
-//        for (Future<?> result : res) {
-//          result.get();
-//        }
-//        System.out.println("mapper Execution is done");
-//      }
-//      else
-//      {
-//        System.out.println("mapper Execution not done");
-//      }
-//    } catch (InterruptedException e) {
-//      e.printStackTrace();
-//    } catch (ExecutionException e) {
-//      e.printStackTrace();
-//    }
+    LeadsMapperCallable mapperCallable = new LeadsMapperCallable((Cache) inputCache,collector,new WGSMapper
+                                                                                        (jobConfig.toString()),
+                                                                  LQPConfiguration.getInstance().getMicroClusterName());
+     DistributedTaskBuilder builder =des.createDistributedTaskBuilder(mapperCallable);
+     builder.timeout(1, TimeUnit.HOURS);
+     DistributedTask task = builder.build();
+     List<Future<?>> res = des.submitEverywhere(task);
+     try {
+        if (res != null) {
+           for (Future<?> result : res) {
+              result.get();
+           }
+           System.out.println("mapper Execution is done");
+        }
+        else
+        {
+           System.out.println("mapper Execution not done");
+        }
+     } catch (InterruptedException e) {
+        e.printStackTrace();
+     } catch (ExecutionException e) {
+        e.printStackTrace();
+     }
+     System.err.println("keysCache " + keysCache.size());
+     System.err.println("dataCache " + intermediateDataCache.size());
+     System.err.println("indexedCache " + indexSiteCache.size());
 ////    //Reduce
 ////
-//    LeadsReducerCallable reducerCacllable = new LeadsReducerCallable(outputCache, new WGSReducer(jobConfig.toString()));
-//    DistributedExecutorService des_inter = new DefaultExecutorService(intermediateCache);
-//    List<Future<?>> reducers_res;
-//    res = des_inter
-//            .submitEverywhere(reducerCacllable);
-//    try {
-//      if (res != null) {
-//        for (Future<?> result : res) {
-//          result.get();
-//        }
-//        System.out.println("reducer Execution is done");
-//      } else {
-//        System.out.println("reducer Execution not done");
-//      }
-//    } catch (InterruptedException e) {
-//      e.printStackTrace();
-//    } catch (ExecutionException e) {
-//      e.printStackTrace();
-//    }
+    LeadsReducerCallable reducerCacllable = new LeadsReducerCallable(outputCache.getName(), new WGSReducer(jobConfig.toString()),intermediateCacheName);
+     DistributedExecutorService des_inter = new DefaultExecutorService((Cache<?, ?>) keysCache);
+     DistributedTaskBuilder reduceTaskBuilder = des_inter.createDistributedTaskBuilder(reducerCacllable);
+     reduceTaskBuilder.timeout(1,TimeUnit.HOURS);
+     DistributedTask reduceTask = reduceTaskBuilder.build();
+     List<Future<?>> reducers_res= des_inter
+                                           .submitEverywhere(reduceTask);
+     try {
+        if (reducers_res != null) {
+           for (Future<?> result : reducers_res) {
+              System.err.println("wait " + System.currentTimeMillis());
+              System.err.println(result.get());
+              System.err.println("wait end" + System.currentTimeMillis());
+           }
+           System.out.println("reducer Execution is done");
+        } else {
+           System.out.println("reducer Execution not done");
+        }
+     } catch (InterruptedException e) {
+        e.printStackTrace();
+     } catch (ExecutionException e) {
+        e.printStackTrace();
+     }
+
 
   }
 
