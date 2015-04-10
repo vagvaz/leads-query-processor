@@ -1,14 +1,18 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
+import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.infinispan.LeadsMapper;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.distexec.mapreduce.Collector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
@@ -34,6 +38,8 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
   protected transient double totalSum;
     protected transient Cache pagerankCache;
     protected transient InfinispanManager imanager;
+   protected transient Logger log ;
+   @Override
   public  void initialize() {
       imanager = InfinispanClusterSingleton.getInstance().getManager();
       isInitialized = true;
@@ -57,6 +63,8 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
       while(iterator.hasNext()){
          attributes.add((String) iterator.next());
       }
+      LQPConfiguration.initialize();
+     log = LoggerFactory.getLogger(WGSMapper.class);
    }
 
    @Override
@@ -69,28 +77,34 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
 //      }
       Tuple webpage = (Tuple) webCache.get(prefix+key);
 //      Tuple t = new Tuple(jsonString);
+      if(webpage == null)
+         return;
       Tuple t = new Tuple(webpage);
       handlePagerank(t);
       JsonObject result = new JsonObject();
       result.putString("url", t.getAttribute("url"));
       result.putString("pagerank", computePagerank(result.getString("url")));
       result.putString("sentiment", t.getGenericAttribute("sentiment").toString());
+      result.putString("micro-cluster",LQPConfiguration.getInstance().getMicroClusterName());
       ArrayList<Object> linksArray = (ArrayList<Object>) t.getGenericAttribute("links");
       JsonArray array = new JsonArray();
       for(Object o : linksArray){
+         log.error("ADDING TO LINKS " + o.toString());
          array.add(o.toString());
       }
       result.putValue("links",array);
       collector.emit(String.valueOf(iteration),result.toString());
       if(outputCache != null){
          if (!result.getElement("links").isArray())
-             return;
+         {log.error("SERIOUS ERROR links is not an array WGSMAPPER");
+            return;
+         }
          JsonArray links = result.getArray("links");
          Iterator<Object> iterator = links.iterator();
          while(iterator.hasNext()){
             String link = (String) iterator.next();
-
-            outputCache.put(link,link);
+            log.error("Inserting into next iteration cache " + outputCache.getName() + " l " + link);
+            EnsembleCacheUtils.putToCache(outputCache,link, link);
          }
       }
 

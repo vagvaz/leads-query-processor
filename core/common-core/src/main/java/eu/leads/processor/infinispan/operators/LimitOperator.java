@@ -63,8 +63,8 @@ public class LimitOperator extends BasicOperator {
         int counter = 0;
         if (sorted) {
 //            int sz = inputMap.size();
-          CloseableIterable<Map.Entry<String, String>> iterable =
-            inputMap.getAdvancedCache().filterEntries(new AcceptAllFilter());
+//          CloseableIterable<Map.Entry<String, String>> iterable =
+//            inputMap.getAdvancedCache().filterEntries(new AcceptAllFilter());
 //          for (Map.Entry<String, String> entry : iterable) {
 //              System.err.println("e: " + entry.getKey().toString() + " ---> " + entry.getValue().toString());
 //            }

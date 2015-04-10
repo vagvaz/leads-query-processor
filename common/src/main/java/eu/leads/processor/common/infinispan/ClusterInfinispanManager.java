@@ -4,10 +4,16 @@ import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.Cache;
+import org.infinispan.commons.equivalence.AnyEquivalence;
+import org.infinispan.commons.marshall.Marshaller;
+import org.infinispan.commons.util.LegacyKeySupportSystemProperties;
+import org.infinispan.commons.util.Util;
+import org.infinispan.commons.util.concurrent.jdk8backported.EquivalentConcurrentHashMapV8;
 import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.cache.Index;
+import org.infinispan.configuration.global.GlobalConfiguration;
 import org.infinispan.configuration.parsing.ConfigurationBuilderHolder;
 import org.infinispan.configuration.parsing.ParserRegistry;
 import org.infinispan.distexec.DefaultExecutorService;
@@ -17,19 +23,30 @@ import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.persistence.leveldb.configuration.LevelDBStoreConfiguration;
 import org.infinispan.persistence.leveldb.configuration.LevelDBStoreConfigurationBuilder;
+import org.infinispan.query.remote.avro.AvroQueryFacade;
+import org.infinispan.query.remote.client.avro.AvroMarshaller;
 import org.infinispan.remoting.transport.Address;
 import org.infinispan.server.hotrod.HotRodServer;
 import org.infinispan.server.hotrod.configuration.HotRodServerConfigurationBuilder;
+import org.infinispan.server.hotrod.test.HotRodTestingUtil;
+import org.infinispan.test.fwk.TestCacheManagerFactory;
+import org.infinispan.test.fwk.TransactionSetup;
 import org.infinispan.transaction.TransactionMode;
+import org.infinispan.transaction.lookup.GenericTransactionManagerLookup;
+import org.infinispan.transaction.lookup.JBossStandaloneJTAManagerLookup;
+import org.infinispan.transaction.lookup.TransactionManagerLookup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
+import static org.infinispan.test.AbstractCacheTest.getDefaultClusteredCacheConfig;
 
 /**
  * Created by vagvaz on 5/23/14.
@@ -51,6 +68,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
   private String host;
   private Configuration defaultConfig = null;
   private Configuration defaultIndexConfig = null;
+  private ConfigurationBuilderHolder holder = null;
+  private String uniquePath = UUID.randomUUID().toString();
+//  private static final EquivalentConcurrentHashMapV8<String, TestResources> testResources = new EquivalentConcurrentHashMapV8<>(AnyEquivalence.getInstance(), AnyEquivalence.getInstance());
 
   /**
    * Constructs a new ClusterInfinispanManager.
@@ -82,8 +102,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
 
     ParserRegistry registry = new ParserRegistry();
-    ConfigurationBuilderHolder holder = null;
-    ConfigurationBuilder builder = null;
+//    ConfigurationBuilderHolder holder = null;
+
     try {
       if (configurationFile != null && !configurationFile.equals("")) {
         holder = registry.parseFile(configurationFile);
@@ -95,15 +115,63 @@ public class ClusterInfinispanManager implements InfinispanManager {
     }catch(IOException e){
       e.printStackTrace();
     }
-    manager = new DefaultCacheManager(holder, true);
+//    GlobalConfigurationBuilder gbuilder = GlobalConfigurationBuilder.defaultClusteredBuilder();
+//    Transport transport = gbuilder.transport().getTransport();
+//    gbuilder.transport().transport(transport);
+//    gbuilder.transport().clusterName("cluster");
+//    TransportFlags transportFlags = new TransportFlags();
+//    transportFlags.withReplay2(false);
+
+
+
+    TestCacheManagerFactory.amendMarshaller(holder.getGlobalConfigurationBuilder());
+    holder.getDefaultConfigurationBuilder().transaction().transactionManagerLookup(new JBossStandaloneJTAManagerLookup());
+    GlobalConfiguration gc = holder.getGlobalConfigurationBuilder().build();
+    manager = new DefaultCacheManager(gc, initDefaultCacheConfigBuilder().build(gc), true);
+
+
+
+//    manager = TestCacheManagerFactory.createClusteredCacheManager(holder.getGlobalConfigurationBuilder(),initDefaultCacheConfigBuilder());
+//    TestCacheManagerFactory.amendGlobalConfiguration(holder.getGlobalConfigurationBuilder(),transportFlags);
+
+
+//    manager.getCache();
+//    startHotRodServer(manager,host,serverPort);
+    if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
+    {
+      host = LQPConfiguration.getConf().getString("node.ip");
+      startHotRodServer(manager,host, serverPort);
+    }
     //Join Infinispan Cluster
     //      manager.start();
-    manager.getCache();
+    ConfigurationBuilder builder = HotRodTestingUtil.hotRodCacheConfiguration(getDefaultClusteredCacheConfig(CacheMode.DIST_SYNC, false));
+//    builder.read(holder.getGlobalConfigurationBuilder().serialization().marshaller(marshaller).build());
+    builder.indexing()
+            .enable()
+            .index(Index.LOCAL)
+            .addProperty("default.directory_provider", "filesystem")
+            .addProperty("hibernate.search.default.indexBase","/tmp/infinispan/webpage/"+uniquePath)
+            .addProperty("hibernate.search.default.exclusive_index_use", "true")
+            .addProperty("hibernate.search.default.indexmanager", "near-real-time")
+            .addProperty("hibernate.search.default.indexwriter.ram_buffer_size", "128")
+            .addProperty("lucene_version", "LUCENE_CURRENT");
+    builder.clustering().hash().numOwners(1);
+    builder.jmxStatistics().enable();
+    builder.transaction().transactionMode(TransactionMode.TRANSACTIONAL)
+//            .persistence().passivation(true)
+            .persistence().passivation(true).addSingleFileStore().location("/tmp/webpage/" + uniquePath + "/")
+//            .fetchPersistentState(true)
+            .shared(false).purgeOnStartup(false).preload(false).expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false);
+//    builder.transaction().transactionManagerLookup(new GenericTransactionManagerLookup()).dataContainer().valueEquivalence(AnyEquivalence.getInstance());
+    Configuration configuration = builder.build();
+    manager.defineConfiguration("WebPage", configuration);
+    manager.getCache("WebPage", true);
+
     getPersisentCache("clustered");
     getPersisentCache("pagerankCache");
     getPersisentCache("approx_sum_cache");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".webpages");
-    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".entities");
+    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".entities");
 
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".content");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".page");
@@ -114,12 +182,20 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".resourcepart");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".site");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".adidas_keywords");
+//    getPersisentCache("WebPage");
+//    Marshaller marshaller = null;
+//    try {
+//      marshaller = Util.getInstanceStrict(MARSHALLER, Thread.currentThread().getContextClassLoader());
+//    } catch (ClassNotFoundException e) {
+//      e.printStackTrace();
+//    } catch (InstantiationException e) {
+//      e.printStackTrace();
+//    } catch (IllegalAccessException e) {
+//      e.printStackTrace();
+//    }
 
-    if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
-    {
-      host = LQPConfiguration.getConf().getString("node.ip");
-      startHotRodServer(manager,host, serverPort);
-    }
+
+
 
     //I might want to sleep here for a little while
     PrintUtilities.printList(manager.getMembers());
@@ -128,6 +204,61 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     System.out.println("We have started host:" + host);
 
+  }
+
+  private ConfigurationBuilder initDefaultCacheConfigBuilder() {
+
+    ConfigurationBuilder result = null;
+    if (LQPConfiguration.getConf().getBoolean("leads.processor.infinispan.persistence", true)) { //perssistence
+      if (!LQPConfiguration.getConf().getBoolean("leads.processor.infinispan.useLevelDB", false)) {
+        result = new ConfigurationBuilder();
+        GlobalConfiguration gc = holder.getGlobalConfigurationBuilder().build();
+        Configuration  c = holder.getDefaultConfigurationBuilder().build(gc);
+                                result.read(c).clustering()
+                                .cacheMode(CacheMode.DIST_SYNC)
+                                .hash().numOwners(1)
+                                .indexing().index(Index.NONE).transaction().transactionMode
+                                                                                    (TransactionMode
+                                                                                             .NON_TRANSACTIONAL)
+                                .persistence().passivation(true)
+                                                       //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
+//                                                                      .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
+
+                                .addSingleFileStore().location("/tmp/leadsproc" + uniquePath + "/")
+//                                .fetchPersistentState(true)
+                                .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false);
+
+      } else { //Use leveldb
+        result = new ConfigurationBuilder();
+        result.read(holder.getDefaultConfigurationBuilder().build())
+                                .clustering()
+                                .cacheMode(CacheMode.DIST_SYNC)
+                                .hash().numOwners(1)
+                                .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
+                                .persistence().passivation(true)
+                                .addStore(LevelDBStoreConfigurationBuilder.class)
+                                .location("/tmp/leveldb/data-" + uniquePath + "/")
+                                         //                                 .location("/tmp/leveldb/data-foo/" + "/")
+                                .expiredLocation("/tmp/leveldb/expired-" + uniquePath + "/")
+                                         //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
+                                .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
+                                .fetchPersistentState(false)
+                                .shared(false).purgeOnStartup(false).preload(true).compatibility().enable()
+                                .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
+                                .build();
+      }
+    } else { //do not use persistence
+      result = new ConfigurationBuilder();
+      result.read(holder.getDefaultConfigurationBuilder().build())
+                              .clustering()
+                              .cacheMode(CacheMode.DIST_SYNC)
+                              .hash().numOwners(1)
+                              .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility().enable()
+                              .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
+                              .build();
+    }
+
+    return result;
   }
 
   public HotRodServer getServer() {
@@ -158,9 +289,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
     log.info("Starting HotRod Server");
     System.err.println("Starting HotRod Server");
     serverPort = port;
-    server = new HotRodServer();
+
     boolean isStarted = false;
     while (!isStarted) {
+      server = new HotRodServer();
       HotRodServerConfigurationBuilder serverConfigurationBuilder =
         new HotRodServerConfigurationBuilder();
       serverConfigurationBuilder.host(localhost).port(serverPort).defaultCacheName("defaultCache");
@@ -168,7 +300,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
       //                 .converterFactory("leads-processor-converter-factory",new LeadsProcessorConverterFactory());
 
       try {
-        server.start(serverConfigurationBuilder.build(), targetManager);
+//       server = TestHelper.startHotRodServer(manager);
+
+        server.start(serverConfigurationBuilder.build(),targetManager);
         server.addCacheEventConverterFactory("leads-processor-converter-factory", new LeadsProcessorConverterFactory());
         server.addCacheEventFilterFactory("leads-processor-filter-factory", new
                                                                               LeadsProcessorKeyValueFilterFactory(manager));
@@ -480,8 +614,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                                        //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
                                                        //               .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
 
-                                .addSingleFileStore().location("/tmp/" + manager.getAddress().toString() + "/")
-                                .fetchPersistentState(true)
+                                .addSingleFileStore().location("/tmp/leadsproc" + uniquePath + "/")
+                                .fetchPersistentState(false)
                                 .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
                                 .build();
 
@@ -493,12 +627,12 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                 .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
                                 .persistence().passivation(true)
                                 .addStore(LevelDBStoreConfigurationBuilder.class)
-                                .location("/tmp/leveldb/data-" + manager.getAddress().toString() + "/")
+                                .location("/tmp/leveldb/data-" + uniquePath + "/")
                                          //                                 .location("/tmp/leveldb/data-foo/" + "/")
-                                .expiredLocation("/tmp/leveldb/expired-" + manager.getAddress().toString() + "/")
+                                .expiredLocation("/tmp/leveldb/expired-" + uniquePath + "/")
                                          //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
                                 .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
-                                .fetchPersistentState(true)
+                                .fetchPersistentState(false)
                                 .shared(false).purgeOnStartup(false).preload(true).compatibility().enable()
                                 .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
                                 .build();
@@ -538,7 +672,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
                       .persistence()
                          //                            .addStore(LevelDBStoreConfigurationBuilder.class
                          //                            .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
-                      .addSingleFileStore().location("/tmp/" + manager.getAddress().toString()+"/").shared(false).preload(false).compatibility().enable()
+                      .addSingleFileStore().location("/tmp/leadsproc" + uniquePath+"/").shared(false).preload(false).compatibility().enable()
                       .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
                       .build();
     }
@@ -566,7 +700,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
                             .persistence()
                                      //                            .addStore(LevelDBStoreConfigurationBuilder.class
                                      //                            .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
-                            .addSingleFileStore().location("/tmp/" + manager.getAddress().toString()+"/")
+                            .addSingleFileStore().location("/tmp/leadsproc" +uniquePath+"/")
                       .shared(false).preload(false).compatibility().enable()
                             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
                             .build();

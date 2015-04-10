@@ -270,7 +270,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                         log.info("next is used");
                         if (next != null) {
                            tobeDeployed = plan.getNextExecutableOperator(next);
-                           log.info("To be deployed");
+                           log.info("To be depl oyed");
                         }
                         else{
                            log.info("Todeployed is null");

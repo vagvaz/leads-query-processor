@@ -55,20 +55,20 @@ public class WGSOperator extends MapReduceOperator {
       init_statistics(this.getClass().getCanonicalName());
    }
 
-   public void setupMapReduceJob(String inputCacheName,String outputCacheName,String intermediateCacheName){
+   public void setupMapReduceJob(String inputCacheName,String intermediateCacheName1, String outputCacheName){
       inputCache = (BasicCache) manager.getPersisentCache(inputCacheName);
-      intermediateCache = (BasicCache) manager.getPersisentCache(intermediateCacheName);
+      intermediateCache = (BasicCache) manager.getPersisentCache(intermediateCacheName1);
       //create Intermediate cache name for data on the same Sites as outputCache
-      intermediateDataCache = (BasicCache) manager.getPersisentCache(intermediateCacheName+".data");
+      intermediateDataCache = (BasicCache) manager.getPersisentCache(intermediateCacheName1+".data");
       //create Intermediate  keys cache name for data on the same Sites as outputCache;
-      keysCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".keys");
+      keysCache = (BasicCache)manager.getPersisentCache(intermediateCacheName1+".keys");
       //createIndexCache for getting all the nodes that contain values with the same key! in a mc
-      indexSiteCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".indexed");
+      indexSiteCache = (BasicCache)manager.getPersisentCache(intermediateCacheName1+".indexed");
 //    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
       outputCache = (BasicCache) manager.getPersisentCache(outputCacheName);
-      collector = new LeadsCollector(0, intermediateCacheName);
+      collector = new LeadsCollector(0, intermediateCacheName1);
    }
-//   @Override
+   @Override
    public void run() {
       int count = 0;
       String currentInput = getName() +".iter0";
@@ -85,13 +85,12 @@ public class WGSOperator extends MapReduceOperator {
          currentIntermediate = getName()+".itermediate"+count;
 //         inputCache = (Cache)manager.getPersisentCache(currentInput);
 //         inputCache = (Cache)manager.getPersisentCache(getName()+".iter"+String.valueOf(count));
-         System.out.println("realOutput " + conf.getString("realOutput") +" \nsize" + realOutput.size());
+         System.out.println("realOutput " + conf.getString("realOutput") + " \nsize" + realOutput.size());
 
          JsonObject jobConfig = new JsonObject();
          jobConfig.putNumber("iteration", count);
          jobConfig.putNumber("depth", configBody.getInteger("depth"));
          jobConfig.putArray("attributes", attributesArray);
-         setupMapReduceJob(currentInput,currentIntermediate,currentOutput);
          if(count < configBody.getInteger("depth")){
             jobConfig.putString("outputCache",currentOutput);
          }
@@ -101,8 +100,10 @@ public class WGSOperator extends MapReduceOperator {
          }
          jobConfig.putString("realOutput",conf.getString("realOutput"));
          jobConfig.putString("webCache","default.webpages");
+         setupMapReduceJob(currentInput,currentIntermediate,currentOutput);
          executeMapReducePhase(jobConfig);
       }
+
      cleanup();
    }
 //   @Override
@@ -200,7 +201,7 @@ public class WGSOperator extends MapReduceOperator {
 
     DistributedExecutorService des = new DefaultExecutorService((Cache<?, ?>) inputCache);
 //    intermediateCacheName = inputCache.getName()+".intermediate";
-//    collector = new LeadsCollector(0, intermediateCache);
+
     LeadsMapperCallable mapperCallable = new LeadsMapperCallable((Cache) inputCache,collector,new WGSMapper
                                                                                         (jobConfig.toString()),
                                                                   LQPConfiguration.getInstance().getMicroClusterName());
@@ -229,7 +230,7 @@ public class WGSOperator extends MapReduceOperator {
      System.err.println("indexedCache " + indexSiteCache.size());
 ////    //Reduce
 ////
-    LeadsReducerCallable reducerCacllable = new LeadsReducerCallable(outputCache.getName(), new WGSReducer(jobConfig.toString()),intermediateCacheName);
+    LeadsReducerCallable reducerCacllable = new LeadsReducerCallable(outputCache.getName(), new WGSReducer(jobConfig.toString()),intermediateCache.getName());
      DistributedExecutorService des_inter = new DefaultExecutorService((Cache<?, ?>) keysCache);
      DistributedTaskBuilder reduceTaskBuilder = des_inter.createDistributedTaskBuilder(reducerCacllable);
      reduceTaskBuilder.timeout(1,TimeUnit.HOURS);

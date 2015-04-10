@@ -260,6 +260,7 @@ public class PlannerCatalogWorker extends Verticle {
       schema.addColumn("fqdnurl", Type.TEXT);
       schema.addColumn("lang", Type.TEXT);
       schema.addColumn("maincontent", Type.TEXT);
+      schema.addColumn("contentdate",Type.TEXT);
       schema.addColumn("oldsentiment", Type.TEXT);
       schema.addColumn("textcontent", Type.TEXT);
       schema.addColumn("type", Type.TEXT);

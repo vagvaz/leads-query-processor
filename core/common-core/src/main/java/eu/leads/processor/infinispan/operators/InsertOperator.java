@@ -6,6 +6,7 @@ package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.math.MathUtils;
@@ -32,7 +33,7 @@ public class InsertOperator extends BasicOperator {
                 super(com,persistence,log,action);
             }
         Cache  targetCache;
-        JsonObject data;
+        Tuple data;
         String key = "";
     String tableName;
         Version version = null;
@@ -40,7 +41,7 @@ public class InsertOperator extends BasicOperator {
                 @Override
         public void init(JsonObject config) {
 //                            super.init(config);
-                    data = new JsonObject();
+                    data = new Tuple();
                     JsonArray columnNames = conf.getObject("body").getArray("columnNames");
                     JsonArray values = conf.getObject("body").getArray("exprs");
                     JsonArray primaryArray = conf.getObject("body").getArray("primaryColumns");
@@ -80,7 +81,7 @@ public class InsertOperator extends BasicOperator {
                         if (primaryColumns.contains(column)) {
                             key = key + "," + value.toString();
                         }
-                        data.putValue(column,value);
+                        data.setAttribute(column,value);
                     }
 
                 }

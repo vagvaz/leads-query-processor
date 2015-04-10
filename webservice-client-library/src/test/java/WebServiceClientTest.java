@@ -18,6 +18,7 @@ public class WebServiceClientTest {
     public static void main(String[] args) throws IOException {
         host = "http://localhost";
 //        host = "http://5.147.254.198";
+//       host = "http://5.147.254.161";
         port = 8080;
         if (args.length == 2) {
             host = args[0];
@@ -52,24 +53,24 @@ public class WebServiceClientTest {
             System.out.println(mapObject.toString());
         }
 
-        String workflow = "{ \"SelectCondition\": { \"Values\": [ { \"AliasName\": \"MapperFunction\", \"Expr\": { \"Value\": \"TestMapper\", \"ValueType\": \"String\", \"OpType\": \"Literal\" }, \"OpType\": \"Target\" }, { \"AliasName\": \"JarPathFunction\", \"Expr\": { \"Value\": \"/home/tr/Projects/LEADs/leads-query-processor/leads-cli/target/leads-cli-1.0-SNAPSHOT-jar-with-dependencies.jar\", \"ValueType\": \"String\", \"OpType\": \"Literal\" }, \"OpType\": \"Target\" }, { \"AliasName\": \"MRConfPathFunction\", \"Expr\": { \"Value\": \"/home/tr/Projects/LEADs/leads-query-processor/leads-cli/pom.xml\", \"ValueType\": \"String\", \"OpType\": \"Literal\" }, \"OpType\": \"Target\" }, { \"AliasName\": \"ReducerFunction\", \"Expr\": { \"Value\": \"TestReducer\", \"ValueType\": \"String\", \"OpType\": \"Literal\" }, \"OpType\": \"Target\" } ], \"OpType\": \"ValueList\" }, \"Expr\": { \"IsDistinct\": false, \"Projections\": [ { \"Expr\": { \"ColumnName\": \"url\", \"OpType\": \"Column\" }, \"OpType\": \"Target\" }, { \"Expr\": { \"ColumnName\": \"sentiment\", \"OpType\": \"Column\" }, \"OpType\": \"Target\" } ], \"Expr\": { \"SortSpecs\": [ { \"SortKey\": { \"ColumnName\": \"sentiment\", \"OpType\": \"Column\" }, \"IsAsc\": false, \"IsNullFirst\": false } ], \"Expr\": { \"Relations\": [ { \"TableName\": \"webpages\", \"OpType\": \"Relation\" } ], \"OpType\": \"RelationList\" }, \"OpType\": \"Sort\" }, \"OpType\": \"Projection\" }, \"OpType\": \"Filter\" } ";
-        QueryStatus  currentStatus = WebServiceClient.submitWorkflow("testUser", workflow);
+//        String workflow = "{ \"SelectCondition\": { \"Values\": [ { \"AliasName\": \"MapperFunction\", \"Expr\": { \"Value\": \"TestMapper\", \"ValueType\": \"String\", \"OpType\": \"Literal\" }, \"OpType\": \"Target\" }, { \"AliasName\": \"JarPathFunction\", \"Expr\": { \"Value\": \"/home/tr/Projects/LEADs/leads-query-processor/leads-cli/target/leads-cli-1.0-SNAPSHOT-jar-with-dependencies.jar\", \"ValueType\": \"String\", \"OpType\": \"Literal\" }, \"OpType\": \"Target\" }, { \"AliasName\": \"MRConfPathFunction\", \"Expr\": { \"Value\": \"/home/tr/Projects/LEADs/leads-query-processor/leads-cli/pom.xml\", \"ValueType\": \"String\", \"OpType\": \"Literal\" }, \"OpType\": \"Target\" }, { \"AliasName\": \"ReducerFunction\", \"Expr\": { \"Value\": \"TestReducer\", \"ValueType\": \"String\", \"OpType\": \"Literal\" }, \"OpType\": \"Target\" } ], \"OpType\": \"ValueList\" }, \"Expr\": { \"IsDistinct\": false, \"Projections\": [ { \"Expr\": { \"ColumnName\": \"url\", \"OpType\": \"Column\" }, \"OpType\": \"Target\" }, { \"Expr\": { \"ColumnName\": \"sentiment\", \"OpType\": \"Column\" }, \"OpType\": \"Target\" } ], \"Expr\": { \"SortSpecs\": [ { \"SortKey\": { \"ColumnName\": \"sentiment\", \"OpType\": \"Column\" }, \"IsAsc\": false, \"IsNullFirst\": false } ], \"Expr\": { \"Relations\": [ { \"TableName\": \"webpages\", \"OpType\": \"Relation\" } ], \"OpType\": \"RelationList\" }, \"OpType\": \"Sort\" }, \"OpType\": \"Projection\" }, \"OpType\": \"Filter\" } ";
+//        QueryStatus  currentStatus = WebServiceClient.submitWorkflow("testUser", workflow);
 
-        while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")){
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
-        }
-        if(currentStatus.getStatus().equals("COMPLETED")) {
-            QueryResults results = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
-            System.out.println("worflow query results size " + results.getResult().size());
-        }
+//        while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")){
+//            try {
+//                Thread.sleep(2000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
+//        }
+//        if(currentStatus.getStatus().equals("COMPLETED")) {
+//            QueryResults results = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
+//            System.out.println("worflow query results size " + results.getResult().size());
+//        }
         String sampleQuery =  " SELECT url from webpages order by url";
 
-        currentStatus = WebServiceClient.submitQuery("webServiceTest",sampleQuery);
+        QueryStatus currentStatus = WebServiceClient.submitQuery("webServiceTest",sampleQuery);
         while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")){
           try {
             Thread.sleep(2000);
