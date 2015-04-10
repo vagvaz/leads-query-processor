@@ -11,16 +11,16 @@ import java.util.Map;
 public class Method_test_avro {
     public static void main(String[] args) throws IOException {
 // Create attribute names
-        String attributeName1 = "name1";
-        String attributeName2 = "name2";
-        String attributeName3 = "name3";
+        String attributeName1 = "default.leads.name1";
+        String attributeName2 = "default.leads.name2";
+        String attributeName3 = "default.leads.name3";
         String attributeName4 = "name4";
         String attributeName5 = "name5";
         String attributeName6 = "name6";
-        String attributeName7 = "longnum1";
+        String attributeName7 = "default.leads.longnum1";
         String attributeName8 = "longnum2";
         String attributeName9 = "doublenum1";
-        String attributeName10 = "doublenum2";
+        String attributeName10 = "default.leads.doublenum2";
 // Create attributes' values
         String value1 = "b9re9dmqls44ced";
         String value2 = "q2vklxkkexqxh1m";
@@ -114,7 +114,7 @@ public class Method_test_avro {
         tavro.setAttribute(attributeName3,value3);
         tavro.setAttribute(attributeName4, value4);
         tavro.setAttribute(attributeName5,value5);
-        tavro.setAttribute(attributeName6,value6);
+        tavro.setAttribute(attributeName6, value6);
         tavro.setNumberAttribute(attributeName7, value7);
         tavro.setNumberAttribute(attributeName8, value8);
         tavro.setNumberAttribute(attributeName9, value9);
@@ -125,12 +125,11 @@ public class Method_test_avro {
         keepCol.add(attributeName8);
         keepCol.add(attributeName9);
         keepCol.add(attributeName10);
-        System.out.println(tavro);
         startTime = System.nanoTime();
         tavro.keepOnly(keepCol);
         stopTime = System.nanoTime();
-        System.out.println(tavro);
         System.out.println("############Runtime keepOnly: " + (stopTime-startTime)/1000 + " μs\n");
+        System.out.println(tavro);
 // getFieldNames
         List<String> fieldNames;
         startTime = System.nanoTime();
@@ -144,16 +143,14 @@ public class Method_test_avro {
         stopTime = System.nanoTime();
         System.out.println("############Runtime hasField: " + (stopTime-startTime)/1000 + " μs\n");
         System.out.println(attributeName8);
-        System.out.println(tavro.hasField(attributeName2));// true
+        System.out.println(tavro.hasField(attributeName2));// false
         System.out.println(attributeName1);
-        System.out.println(tavro.hasField(attributeName8));// false
+        System.out.println(tavro.hasField(attributeName8));// true
 // renameAttribute
-        startTime = System.nanoTime();
         System.out.println("tuple avro: " + tavro + "\n");
+        startTime = System.nanoTime();
         tavro.renameAttribute(attributeName5, "longnumX");
         stopTime = System.nanoTime();
-
-//getGenericAttribute
         System.out.println("############Runtime renameAttribute: " + (stopTime - startTime) / 1000 + " μs\n");
         System.out.println("tuple avro: " + tavro + "\n");
 //getGenericAttribute
