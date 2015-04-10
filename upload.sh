@@ -24,11 +24,7 @@ elif [ "$#" -eq 1 ]; then
 		swift --os-auth-url=${OS_AUTH_URL}  --os-username=${OS_USERNAME}  --os-password=${OS_PASSWORD}  --os-tenant-name=${OS_TENANT_NAME}  list ${LEADS_QUERY_ENGINE_CONTAINER_NAME};
 	elif [ $1 = "uploadallmods"]; then
 			#statements
-			find * -name '*mod.zip' -type f | xargs -I {} -P 3  swift   --os-auth-url=${OS_AUTH_URL} \
-		     --os-username=${OS_USERNAME} \
-		     --os-password=${OS_PASSWORD} \
-		     --os-tenant-name=${OS_TENANT_NAME} \
-		     upload --skip-identical --changed $LEADS_QUERY_ENGINE_CONTAINER_NAME {}
+			find * -name '*mod.zip' -type f | xargs -I {} -P 3  swift   --os-auth-url=${OS_AUTH_URL}  --os-username=${OS_USERNAME} --os-password=${OS_PASSWORD}  --os-tenant-name=${OS_TENANT_NAME}  upload --skip-identical --changed $LEADS_QUERY_ENGINE_CONTAINER_NAME {}
 	fi
 elif [ "$#" -eq 2 ]; then
 	
