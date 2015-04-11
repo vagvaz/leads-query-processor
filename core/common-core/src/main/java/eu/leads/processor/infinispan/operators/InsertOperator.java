@@ -79,7 +79,13 @@ public class InsertOperator extends BasicOperator {
 
                         }
                         if (primaryColumns.contains(column)) {
-                            key = key + "," + value.toString();
+                           if(value != null)
+                           {
+                              key = key + "," + value.toString();
+                           }
+                           else{
+                              key = key +",null";
+                           }
                         }
                         data.setAttribute(column,value);
                     }
