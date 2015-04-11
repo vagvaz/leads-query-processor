@@ -41,8 +41,8 @@ public class ClusteredTest {
         System.out.println("PLUGIN ID: " + TransformPlugin.class.getCanonicalName());
         PluginPackage plugin = new PluginPackage(TransformPlugin.class.getCanonicalName(),
                                                     TransformPlugin.class.getCanonicalName(),
-                "/home/trs/Projects/LEADS/leads-query-processor/nqe/system-plugins/transform-plugin/transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar",
-                "/home/trs/Projects/LEADS/leads-query-processor/nqe/system-plugins/transform-plugin/transform-plugin-conf.xml" );
+                "/home/vagvaz/Projects/idea/transform-plugin/target/transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar",
+                "/home/vagvaz/Projects/idea/transform-plugin/transform-plugin-conf.xml" );
       Properties conf = new Properties();
       conf.setProperty("prefix","/tmp/leads/");
       PluginManager.initialize(LeadsStorageFactory.LOCAL, conf);
