@@ -1,7 +1,7 @@
 package eu.leads.processor.system;
 
 import com.jcraft.jsch.*;
-import eu.leads.processor.conf.LQPConfiguration;
+//import eu.leads.processor.conf.LQPConfiguration;
 import org.apache.commons.configuration.*;
 import org.apache.commons.configuration.tree.ConfigurationNode;
 import org.slf4j.Logger;
@@ -28,22 +28,35 @@ public class LeadsProcessorBootstrapper2 {
     static Map<String, JsonObject> componentsJson;
 
     static Map<String, String> screensIPmap;
+    static Configuration xmlConfiguration=null;
+    static CompositeConfiguration conf=null;
 
     static int pagecounter= 0;
-    public static void main(String[] args){
+    public static void main(String[] args)  {
+        conf = new CompositeConfiguration();
+        org.apache.log4j.BasicConfigurator.configure();
         if (checkArguments(args)) {
-            LQPConfiguration.initialize(true);
+            //LQPConfiguration.initialize(true);
             filename = args[0];
-            LQPConfiguration.getInstance().loadFile(filename);
-            ips = LQPConfiguration.getInstance().getConfiguration().getStringArray("processor.ips");
+            //LQPConfiguration.getInstance().loadFile(filename);
+            //ips = LQPConfiguration.getInstance().getConfiguration().getStringArray("processor.ips");
           /*  components =
                     LQPConfiguration.getInstance().getConf().getStringArray("processor.components");
             configurationFiles = LQPConfiguration.getInstance().getConf()
                     .getStringArray("processor.configurationFiles");*/
         }
-        XMLConfiguration xmlConfiguration = (XMLConfiguration) LQPConfiguration.getInstance().getConfigurations().get(filename);
+        try {
+            xmlConfiguration = new XMLConfiguration(filename);
+        } catch (ConfigurationException e) {
+            e.printStackTrace();
+            System.err.println("Unable to load configuration, Please check the file: " + filename);
+            System.exit(-1);
+        }
+        conf.addConfiguration(xmlConfiguration);
+        ips = conf.getStringArray("processor.ips");
+        //XMLConfiguration xmlConfiguration = (XMLConfiguration) LQPConfiguration.getInstance().getConfigurations().get(filename);
 
-        List<HierarchicalConfiguration> nodes = xmlConfiguration.configurationsAt("processor.component");
+        List<HierarchicalConfiguration> nodes = ((XMLConfiguration) xmlConfiguration).configurationsAt("processor.component");
 
 
 
@@ -51,7 +64,8 @@ public class LeadsProcessorBootstrapper2 {
         componentsConf = new HashMap<>();
         componentsJson = new HashMap<>();
         screensIPmap= new HashMap<>();
-        String baseDir = LQPConfiguration.getInstance().getConf().getString("processor.ssh.baseDir");
+        //String baseDir = LQPConfiguration.getInstance().getConf().getString("processor.ssh.baseDir");
+        String baseDir = conf.getString("processor.ssh.baseDir");
 
          for (HierarchicalConfiguration c : nodes) {
             ConfigurationNode node = c.getRootNode();
@@ -81,7 +95,8 @@ public class LeadsProcessorBootstrapper2 {
         }
         //runRemotely("test","localhost","vertx");
         int ip = 0;
-        String sleep = LQPConfiguration.getInstance().getConf().getString("processor.ssh.startWaitSeconds");
+        //String sleep = LQPConfiguration.getInstance().getConf().getString("processor.ssh.startWaitSeconds");
+        String sleep = conf.getString("processor.ssh.startWaitSeconds");
         int sleepTime = 5;
         if(sleep!=null)
         {
@@ -127,8 +142,12 @@ public class LeadsProcessorBootstrapper2 {
             ret.putString("group", componentType);
 
 
-            ret.putString("version", LQPConfiguration.getInstance().getConf().getString("processor.version"));
-            ret.putString("groupId", LQPConfiguration.getConf().getString("processor.groupId"));
+//            ret.putString("version", LQPConfiguration.getInstance().getConf().getString("processor.version"));
+//            ret.putString("groupId", LQPConfiguration.getConf().getString("processor.groupId"));
+            ret.putString("version", conf.getString("processor.version"));
+            ret.putString("groupId", conf.getString("processor.groupId"));
+
+
 
             if(componentType.toLowerCase().equals("leads.log.sink")){ //Special case for the log sink module
                 if (subconf.containsKey("groups")) {
@@ -231,12 +250,12 @@ public class LeadsProcessorBootstrapper2 {
         JsonObject modJson = componentsJson.get(component); //generateConfiguration(component);
 
         sendConfigurationTo(modJson, ip);
-        Configuration c = LQPConfiguration.getInstance().getConf();
+       // Configuration c = LQPConfiguration.getInstance().getConf();
 
-        String group = c.getString("processor.groupId");
-        String version = c.getString("processor.version");
+        String group = conf.getString("processor.groupId");
+        String version = conf.getString("processor.version");
         //      String command = "vertx runMod " + group +"~"+ component + "-mod~" + version + " -conf /tmp/"+config.getString("id")+".json";
-        String remotedir = c.getString("processor.ssh.remoteDir");
+        String remotedir = conf.getString("processor.ssh.remoteDir");
         String vertxComponent = null;
         if (modJson.containsField("modName"))
             vertxComponent = group + "~" + modJson.getString("modName") + "~" + version;
@@ -244,12 +263,12 @@ public class LeadsProcessorBootstrapper2 {
             vertxComponent = group + "~" + component + "-comp-mod~" + version;
 
         String command = "vertx runMod " + vertxComponent + " -conf " + remotedir + "R" + modJson.getString("id") + ".json";
-        if (c.containsKey("processor.vertxArg"))
-            command += " -" + c.getString("processor.vertxArg");
+        if (conf.containsKey("processor.vertxArg"))
+            command += " -" + conf.getString("processor.vertxArg");
 
         //System.out.println(command);
 
-        //runRemotely(modJson.getString("id"), ip, command);
+        runRemotely(modJson.getString("id"), ip, command);
 
     }
 
@@ -286,9 +305,15 @@ public class LeadsProcessorBootstrapper2 {
             command1 = command0 + " && " + "screen -S shell_" + id + " -p 0 -X stuff $\"" + command + "\\r\"";//ping 147.27.18.1";
         }
 
-        System.out.print("Cmd" + command1);
+        System.out.print("Cmd: " + command1);
         logger.info("Execution command: " + command1);
         //command1 =command;
+        remoteExecute( ip,  command1);
+
+    }
+
+    private static String remoteExecute(String ip, String command1){
+        String ret=null;
         try {
             JSch jsch = new JSch();
 
@@ -305,8 +330,10 @@ public class LeadsProcessorBootstrapper2 {
                 while (in.available() > 0) {
                     int i = in.read(tmp, 0, 1024);
                     if (i < 0) break;
-                    System.out.print(new String(tmp, 0, i));
+                   // System.out.print(new String(tmp, 0, i));
+                    ret+=new String(tmp, 0, i);
                 }
+
                 if (channel.isClosed()) {
                     logger.info("exit-status: " + channel.getExitStatus());
                     break;
@@ -316,23 +343,32 @@ public class LeadsProcessorBootstrapper2 {
                 } catch (Exception ee) {
                 }
             }
+            if(ret!=null){
+                System.out.println(ret);
+            }
             channel.disconnect();
             session.disconnect();
-            logger.info("Remote execution DONE");
-            //if(channel.getExitStatus()==-1)
+
+
+            if(channel.getExitStatus()==0)
+                logger.info("Remote execution DONE");
+            else
+                logger.error("Unsuccessful execution");
+
 
 
         } catch (Exception e) {
             logger.error("Remote execution error: " + e.getMessage());
 
         }
-
+        return ret;
     }
 
 
     private static boolean sendConfigurationTo(JsonObject config, String ip) {
         RandomAccessFile file = null;
-        String remoteDir = LQPConfiguration.getInstance().getConf().getString("processor.ssh.remoteDir");
+        //String remoteDir = LQPConfiguration.getInstance().getConf().getString("processor.ssh.remoteDir");
+        String remoteDir = conf.getString("processor.ssh.remoteDir");
         String tmpFile = remoteDir + config.getString("id") + ".json";
         //System.out.println("Write " + tmpFile +" Final ModJson: " + config.encodePrettily().toString());
         try {
@@ -350,8 +386,9 @@ public class LeadsProcessorBootstrapper2 {
             return false;
         }
 
-        String username = LQPConfiguration.getInstance().getConf()
-                .getString("processor.ssh.username");
+//        String username = LQPConfiguration.getInstance().getConf()
+//                .getString("processor.ssh.username");
+        String username = conf.getString("processor.ssh.username");
 
         JSch jsch = new JSch();
         Session session = null;
@@ -385,21 +422,19 @@ public class LeadsProcessorBootstrapper2 {
 
     private static Session createSession(JSch jsch, String ip ) throws JSchException {
 
-        String username = LQPConfiguration.getInstance().getConf()
-                .getString("processor.ssh.username");
+//        String username = LQPConfiguration.getInstance().getConf()
+//                .getString("processor.ssh.username");
+        String username = conf.getString("processor.ssh.username");
         Session session = jsch.getSession(username, ip, 22);
 
-        if (LQPConfiguration.getInstance().getConf()
-                .containsKey("processor.ssh.rsa")) {
-            String privateKey = LQPConfiguration.getInstance().getConf().getString("processor.ssh.rsa");
+        if (xmlConfiguration.containsKey("processor.ssh.rsa")) {
+            String privateKey = conf.getString("processor.ssh.rsa");
             logger.info("ssh identity added: " + privateKey);
             jsch.addIdentity(privateKey);
             session = jsch.getSession(username, ip, 22);
 
-        } else if (LQPConfiguration.getInstance().getConf()
-                .containsKey("processor.ssh.password"))
-            session.setPassword(LQPConfiguration.getInstance().getConf()
-                    .getString("processor.ssh.password"));
+        } else if (xmlConfiguration.containsKey("processor.ssh.password"))
+            session.setPassword(conf.getString("processor.ssh.password"));
         else
         {
             logger.error("No ssh credentials, no password either key ");

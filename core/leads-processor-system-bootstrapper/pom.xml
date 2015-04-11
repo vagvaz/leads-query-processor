@@ -14,77 +14,59 @@
    <packaging>jar</packaging>
 
    <dependencies>
-      <dependency>
-         <groupId>gr.tuc.softnet</groupId>
-         <artifactId>leads-query-processor-common</artifactId>
-         <version>${processor.version}</version>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
+       <dependency>
+           <groupId>commons-configuration</groupId>
+           <artifactId>commons-configuration</artifactId>
+           <version>1.10</version>
+       </dependency>
+       <dependency>
+           <groupId>commons-beanutils</groupId>
+           <artifactId>commons-beanutils</artifactId>
+           <version>1.9.2</version>
+       </dependency>
+       <dependency>
+           <groupId>commons-jxpath</groupId>
+           <artifactId>commons-jxpath</artifactId>
+           <version>1.3</version>
+       </dependency>
 
-            </exclusion>
-         </exclusions>
-      </dependency>
+
+
+       <!--<dependency>-->
+         <!--<groupId>gr.tuc.softnet</groupId>-->
+         <!--<artifactId>leads-query-processor-common</artifactId>-->
+         <!--<version>${processor.version}</version>-->
+         <!--<exclusions>-->
+            <!--<exclusion>-->
+               <!--<groupId>log4j</groupId>-->
+               <!--<artifactId>log4j</artifactId>-->
+            <!--</exclusion>-->
+            <!--<exclusion>-->
+               <!--<groupId>org.apache.logging.log4j</groupId>-->
+               <!--<artifactId>log4j-core</artifactId>-->
+            <!--</exclusion>-->
+            <!--<exclusion>-->
+               <!--<groupId>org.slf4j</groupId>-->
+               <!--<artifactId>slf4j-log4j12</artifactId>-->
+            <!--</exclusion>-->
+            <!--<exclusion>-->
+               <!--<groupId>org.apache.tajo</groupId>-->
+               <!--<artifactId>tajo-jdbc</artifactId>-->
+
+            <!--</exclusion>-->
+         <!--</exclusions>-->
+      <!--</dependency>-->
       <dependency>
          <groupId>io.vertx</groupId>
          <artifactId>vertx-core</artifactId>
          <version>${vertx.version}</version>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
 
-            </exclusion>
-         </exclusions>
       </dependency>
        <dependency>
            <groupId>com.jcraft</groupId>
            <artifactId>jsch</artifactId>
            <version>0.1.51</version>
-          <exclusions>
-             <exclusion>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.tajo</groupId>
-                <artifactId>tajo-jdbc</artifactId>
 
-             </exclusion>
-          </exclusions>
        </dependency>
    </dependencies>
 
