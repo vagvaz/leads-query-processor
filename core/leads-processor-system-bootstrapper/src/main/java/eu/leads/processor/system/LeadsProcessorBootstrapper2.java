@@ -1,7 +1,6 @@
 package eu.leads.processor.system;
 
 import com.jcraft.jsch.*;
-//import eu.leads.processor.conf.LQPConfiguration;
 import org.apache.commons.configuration.*;
 import org.apache.commons.configuration.tree.ConfigurationNode;
 import org.slf4j.Logger;
@@ -12,6 +11,8 @@ import org.vertx.java.core.json.JsonObject;
 import java.io.*;
 import java.util.*;
 
+//import eu.leads.processor.conf.LQPConfiguration;
+
 /**
  * Created by vagvaz on 8/21/14.
  */
@@ -20,38 +21,45 @@ public class LeadsProcessorBootstrapper2 {
     static String[] components;
     static String[] configurationFiles;
     static String filename;
-    static Logger logger =
-            LoggerFactory.getLogger(LeadsProcessorBootstrapper2.class.getCanonicalName());
-
+    static Logger logger;
     static Map<String, HierarchicalConfiguration> componentsXml;
     static Map<String, Configuration> componentsConf;
     static Map<String, JsonObject> componentsJson;
-    static JsonObject webserviceJson=null;
+    static JsonObject webserviceJson = null;
 
     static Map<String, String> screensIPmap;
-    static Configuration xmlConfiguration=null;
-    static CompositeConfiguration conf=null;
+    static Configuration xmlConfiguration = null;
+    static CompositeConfiguration conf = null;
     static JsonObject globalJson;
     static String baseDir = "";
     static int sleepTime = 5;
 
-    static int pagecounter= 0;
-    static HashMap<String,JsonArray> allmcIps = new HashMap<>();
+    static int pagecounter = 0;
+    static HashMap<String, JsonArray> allmcIps = new HashMap<>();
     static HashSet<String> webservicesIps = new HashSet<>();
-    public static void main(String[] args)  {
+    private static boolean norun;
+
+    public static void main(String[] args) {
+        org.apache.log4j.BasicConfigurator.configure();
+
+        logger = LoggerFactory.getLogger(LeadsProcessorBootstrapper2.class.getCanonicalName());
+
+        componentsXml = new HashMap<>();
+        componentsConf = new HashMap<>();
+        componentsJson = new HashMap<>();
+        screensIPmap = new HashMap<>();
+
         globalJson = new JsonObject();
         conf = new CompositeConfiguration();
-        org.apache.log4j.BasicConfigurator.configure();
-        if (checkArguments(args)) {
-            //LQPConfiguration.initialize(true);
+
+        if (checkArguments(args))
             filename = args[0];
-            //LQPConfiguration.getInstance().loadFile(filename);
-            //ips = LQPConfiguration.getInstance().getConfiguration().getStringArray("processor.ips");
-          /*  components =
-                    LQPConfiguration.getInstance().getConf().getStringArray("processor.components");
-            configurationFiles = LQPConfiguration.getInstance().getConf()
-                    .getStringArray("processor.configurationFiles");*/
+        else {
+            logger.error("Incorrect arguments  ");
+            System.err.println("Incorrect arguments  ");
+            System.exit(-1);
         }
+
         try {
             xmlConfiguration = new XMLConfiguration(filename);
         } catch (ConfigurationException e) {
@@ -60,41 +68,40 @@ public class LeadsProcessorBootstrapper2 {
             System.exit(-1);
         }
         conf.addConfiguration(xmlConfiguration);
-        ips = conf.getStringArray("processor.ips");
-        baseDir = conf.getString("processor.ssh.baseDir");
+        ips = conf.getStringArray("ips");
 
-        //XMLConfiguration xmlConfiguration = (XMLConfiguration) LQPConfiguration.getInstance().getConfigurations().get(filename);
+        if (ips == null) {
+            logger.error("no Ips value in the configuration file, Exiting");
+            System.exit(-1);
+        }
 
-        List<HierarchicalConfiguration> nodes = ((XMLConfiguration) xmlConfiguration).configurationsAt("processor.component");
 
-        globalJson = checkandget(conf,"hdfsuser",globalJson);
-        globalJson = checkandget(conf,"hdfsprefix",globalJson);
-        globalJson = checkandget(conf,"scheduler",globalJson);
-        globalJson = checkandget(conf,"hdfsuri",globalJson);
-        if(globalJson.getString("hdfsuri").equals("obtain")) {
-            JsonObject tmpIps =  salt_get("leads_yarn.map",false);
-            if(tmpIps!=null)
+        baseDir = conf.getString("baseDir");
+        globalJson = checkandget(conf, "hdfsuser", globalJson);
+        globalJson = checkandget(conf, "hdfsprefix", globalJson);
+        globalJson = checkandget(conf, "scheduler", globalJson);
+        globalJson = checkandget(conf, "hdfsuri", globalJson);
+        if (globalJson.getString("hdfsuri").equals("obtain")) {
+            JsonObject tmpIps = salt_get("leads_yarn.map", false);
+            if (tmpIps != null)
                 globalJson.putString("hdfsuri", tmpIps.getString("leads-yarn-1")); //Fix it hardcode for the moment
 
         }
-        globalJson.putObject("microclouds",salt_get("leads_query-engine.map",true));
+        List<HierarchicalConfiguration> nodes = ((XMLConfiguration) xmlConfiguration).configurationsAt("processor.component");
 
-        componentsXml = new HashMap<>();
-        componentsConf = new HashMap<>();
-        componentsJson = new HashMap<>();
-        screensIPmap= new HashMap<>();
-        //String baseDir = LQPConfiguration.getInstance().getConf().getString("processor.ssh.baseDir");
+        if (conf.getString("deploymentType").equals("multicloud"))
+            if (ips[0].equals("obtain"))
+                globalJson.putObject("microclouds", salt_get("leads_query-engine.map", true));
 
-         for (HierarchicalConfiguration c : nodes) {
+        for (HierarchicalConfiguration c : nodes) {
             ConfigurationNode node = c.getRootNode();
             logger.info("Loading configuration, Name: " + c.getString("name") + " Processors " + c.getString("numberOfProcessors"));
             componentsXml.put(c.getString("name"), c);
             if (c.containsKey("configurationFile")) {
-                //LQPConfiguration.getInstance().loadFile(c.getString("configurationFile"));
 
-                String filePathname = baseDir+c.getString("configurationFile");
-                //LQPConfiguration.getInstance().loadFile(filePathname);
-                XMLConfiguration subconf = null;//(XMLConfiguration) LQPConfiguration.getInstance().getConfigurations().get(filePathname);
+                String filePathname = baseDir + c.getString("configurationFile");
+
+                XMLConfiguration subconf = null;
                 try {
                     subconf = new XMLConfiguration(filePathname);
                 } catch (ConfigurationException e) {
@@ -108,7 +115,7 @@ public class LeadsProcessorBootstrapper2 {
                     modjson.putString("id", c.getString("modName") + "-default-" + UUID.randomUUID().toString());
                     modjson.putString("modName", c.getString("modName"));
                 }
-                if(c.getString("modName").equals("processor-webservice"))
+                if (c.getString("name").equals("webservice"))
                     webserviceJson = modjson;
                 else
                     componentsJson.put(c.getString("name"), modjson);
@@ -116,51 +123,45 @@ public class LeadsProcessorBootstrapper2 {
         }
         int ip = 0;
 
-        String sleep = conf.getString("processor.ssh.startWaitSeconds");
-        if(sleep!=null)
-        {
+        String sleep = conf.getString("startWaitSeconds");
+        if (sleep != null) {
             try {
                 int parsedInt = Integer.parseInt(sleep);
-                sleepTime= parsedInt;
-            }catch (NumberFormatException e){
-                ;
+                sleepTime = parsedInt;
+            } catch (NumberFormatException e) {
             }
         }
+        ips = conf.getStringArray("processor.ips");
 
-        boolean started = false;
-        if(conf.containsKey("deploymentType")){
-            if(conf.getString("deploymentType").equals("multycloud")){
+        if (conf.containsKey("deploymentType")) {
+            if (conf.getString("deploymentType").equals("multicloud")) {
                 //multicloud deployment
-                System.out.println("Multi cloud deployment");
+                System.out.println("Multi-cloud deployment");
                 //execute webservice in all clouds
                 JsonArray jwebServiceIps = new JsonArray();
                 HashSet<String> allips = new HashSet<>();
-                for (Map.Entry<String, JsonArray> entry : allmcIps.entrySet()){
+                for (Map.Entry<String, JsonArray> entry : allmcIps.entrySet()) {
                     JsonArray pIps = entry.getValue();
-                    for(int s=0; s<pIps.size();s++)
-                        allips.add((String)pIps.get(s));
-
-                    if(pIps.size()==0)
+                    if (pIps.size() == 0)
                         continue;
-                    System.out.println(" Deploying webservice to: " + entry.getKey() + " Ip: " + pIps.get(0));
-                    deployComponent("processor-webservice",webserviceJson,pIps.get(0).toString());
-                    //TODO Check if successfull deployment
-                    webservicesIps.add((String)pIps.get(0));
-                    jwebServiceIps.addString((String)pIps.get(0));
-                }
-               // .putArray("webserviceIps", jwebServiceIps);
-                //now replace the
+                    for (int s = 0; s < pIps.size(); s++)
+                        allips.add((String) pIps.get(s));
 
-                allips.toArray(ips);
+                    System.out.println(" Deploying webservice to: " + entry.getKey() + " Ip: " + pIps.get(0));
+                    deployComponent("processor-webservice", webserviceJson, pIps.get(0).toString());
+                    //TODO Check if successfull deployment
+                    webservicesIps.add((String) pIps.get(0));
+                    jwebServiceIps.addString((String) pIps.get(0));
+                }
+
+                ips = allips.toArray(ips);
 
                 for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
                     JsonObject modJson = componentsJson.get(e.getKey());
                     modJson.putArray("webserviceIps", jwebServiceIps);
-                    deployComponent(e.getKey(),modJson, ips[ip]);
+                    deployComponent(e.getKey(), modJson, ips[ip]);
                     ip = (ip + 1) % ips.length;
                     System.out.print("\nWaiting for " + sleepTime + " seconds to start the next module.");
-
-
                 }
             }
             return;
@@ -176,42 +177,41 @@ public class LeadsProcessorBootstrapper2 {
     private static JsonObject salt_get(String salt_file, boolean addtomap) {
         //System.out.println(remoteExecute("localhost", "ls /tmp/boot-conf/"));
         //fix it
-        HashMap<String,JsonArray> mcIps = new HashMap<>();
-        JsonObject microclouds=new JsonObject();
-        String remoteJson = remoteExecute("localhost", "sudo salt-cloud -l 'quiet' --out='json' -c "+ baseDir+"salt -m "+ baseDir+"salt/"+salt_file+" --query\n");
-        if(remoteJson.isEmpty())
+        HashMap<String, JsonArray> mcIps = new HashMap<>();
+        JsonObject microclouds = new JsonObject();
+        String remoteJson = remoteExecute("localhost", "sudo salt-cloud -l 'quiet' --out='json' -c " + baseDir + "salt -m " + baseDir + "salt/" + salt_file + " --query\n");
+        if (remoteJson.isEmpty())
             return null;
-      //  JsonArray microclouds = new JsonArray();
-        if(remoteJson!=null)
-        {
+
+        if (remoteJson != null) {
             JsonObject remoteJ = new JsonObject(remoteJson);
             Set<String> MicroClouds = remoteJ.getFieldNames();
 
-            for(String mc : MicroClouds){
+            for (String mc : MicroClouds) {
                 System.out.print("Found microcloud " + mc + " ");
                 JsonObject stacj = remoteJ.getObject(mc);
                 Set<String> open_stacks = stacj.getFieldNames();
-                for(String stack : open_stacks) {
+                for (String stack : open_stacks) {
                     System.out.print(" Found openstack " + stack);
                     JsonObject machinesJ = stacj.getObject(stack);
                     Set<String> McMachines = machinesJ.getFieldNames();
-                    for(String machine : McMachines) {
+                    for (String machine : McMachines) {
                         JsonObject machineDesc = machinesJ.getObject(machine);
                         System.out.print("machine " + machine + " Ip " + machineDesc.getArray("public_ips").toString());
                         //to do fix
-                        mcIps.put(mc,machineDesc.getArray("public_ips"));
+                        mcIps.put(mc, machineDesc.getArray("public_ips"));
                     }
                 }
                 microclouds.putArray(mc, mcIps.get(mc));
             }
         }
-        if(addtomap)
-        allmcIps = mcIps;
+        if (addtomap)
+            allmcIps = mcIps;
 //        globalJson.putObject("microclouds", newmc);
         return microclouds;
     }
 
-    private static JsonObject checkandget(Configuration conf, String attribute, JsonObject inputJson){
+    private static JsonObject checkandget(Configuration conf, String attribute, JsonObject inputJson) {
         if (conf.containsKey(attribute))
             inputJson.putString(attribute, conf.getString(attribute));
         return inputJson;
@@ -222,21 +222,15 @@ public class LeadsProcessorBootstrapper2 {
         Iterator it = null;
         JsonObject ret = new JsonObject();
         JsonArray otherGroups = null;
-        ret.putObject("global",globalJson);
+        ret.putObject("global", globalJson);
         if (subconf.containsKey("componentType")) {
             String componentType = subconf.getString("componentType");
             ret.putString("id", componentType + "-default-" + UUID.randomUUID().toString());
             ret.putString("group", componentType);
-
-
-//            ret.putString("version", LQPConfiguration.getInstance().getConf().getString("processor.version"));
-//            ret.putString("groupId", LQPConfiguration.getConf().getString("processor.groupId"));
             ret.putString("version", conf.getString("processor.version"));
             ret.putString("groupId", conf.getString("processor.groupId"));
 
-
-
-            if(componentType.toLowerCase().equals("leads.log.sink")){ //Special case for the log sink module
+            if (componentType.toLowerCase().equals("leads.log.sink")) { //Special case for the log sink module
                 if (subconf.containsKey("groups")) {
                     otherGroups = new JsonArray();
                     for (String group : subconf.getStringArray("groups"))
@@ -278,9 +272,6 @@ public class LeadsProcessorBootstrapper2 {
                 }
                 conf.putString("id", componentType + ".$id." + type);
                 conf.putString("group", "$group");
-
-                //JsonArray confa = new JsonArray();
-                //confa.addObject(conf);
                 service.putObject("conf", conf);
 
                 serviceA = new JsonArray();
@@ -298,8 +289,6 @@ public class LeadsProcessorBootstrapper2 {
                 ret = checkNumberInsert(ret, key, subconf);
             }
         }
-        //System.out.println("ret Json:" + ret.encodePrettily().toString());
-
         return ret;
     }
 
@@ -337,12 +326,11 @@ public class LeadsProcessorBootstrapper2 {
         //JsonObject modJson = componentsJson.get(component); //generateConfiguration(component);
 
         sendConfigurationTo(modJson, ip);
-       // Configuration c = LQPConfiguration.getInstance().getConf();
 
         String group = conf.getString("processor.groupId");
         String version = conf.getString("processor.version");
         //      String command = "vertx runMod " + group +"~"+ component + "-mod~" + version + " -conf /tmp/"+config.getString("id")+".json";
-        String remotedir = conf.getString("processor.ssh.remoteDir");
+        String remotedir = conf.getString("ssh.remoteDir");
         String vertxComponent = null;
         if (modJson.containsField("modName"))
             vertxComponent = group + "~" + modJson.getString("modName") + "~" + version;
@@ -353,10 +341,8 @@ public class LeadsProcessorBootstrapper2 {
         if (conf.containsKey("processor.vertxArg"))
             command += " -" + conf.getString("processor.vertxArg");
 
-        //System.out.println(command);
-
-        //runRemotely(modJson.getString("id"), ip, command);
-        for(int t = 0; t<sleepTime; t++) {
+        runRemotely(modJson.getString("id"), ip, command);
+        for (int t = 0; t < sleepTime; t++) {
             System.out.print(" .");
             try {
                 Thread.sleep(1000);
@@ -365,36 +351,32 @@ public class LeadsProcessorBootstrapper2 {
             }
         }
 
-  }
+    }
 
-    public static void runRemotely(String id, String ip, String command){
-        runRemotely( id,  ip,  command, false);
+    public static void runRemotely(String id, String ip, String command) {
+        runRemotely(id, ip, command, false);
     }
 
     public static void runRemotely(String id, String ip, String command, boolean existingWindow) {
         String command1;
-        if(existingWindow)
-        {
+        if (existingWindow) {
             String session_name;
-            if(screensIPmap.containsKey(ip)) {
+            if (screensIPmap.containsKey(ip)) {
                 session_name = screensIPmap.get(ip);
                 // run top within that bash session
-                String command0 = "cd ~/.vertx_mods && screen -S " + session_name ;
+                String command0 = "cd ~/.vertx_mods && screen -S " + session_name;
                 // run top within that bash session
-                command1 = command0 +   " screen -S  " + session_name + " -p " + (pagecounter++) +" -X stuff $\"" + " bash -l &&" +command + "\\r\"";//ping 147.27.18.1";
-            }
-            else
-            {
+                command1 = command0 + " screen -S  " + session_name + " -p " + (pagecounter++) + " -X stuff $\"" + " bash -l &&" + command + "\\r\"";//ping 147.27.18.1";
+            } else {
                 session_name = "shell_" + ip;
-                screensIPmap.put(ip, session_name );
+                screensIPmap.put(ip, session_name);
                 String command0 = "cd ~/.vertx_mods && screen -AmdS " + session_name + " bash -l";
                 // run top within that bash session
                 command1 = command0 + " && " + "screen -S  " + session_name + " -p \" + (pagecounter++) +\" -X stuff $\"" + command + "\\r\"";//ping 147.27.18.1";
             }
 
 
-
-        }else {
+        } else {
             String command0 = "cd ~/.vertx_mods &&  screen -AmdS shell_" + id + " bash -l";
             // run top within that bash session
             command1 = command0 + " && " + "screen -S shell_" + id + " -p 0 -X stuff $\"" + command + "\\r\"";//ping 147.27.18.1";
@@ -403,23 +385,27 @@ public class LeadsProcessorBootstrapper2 {
         System.out.print("Cmd: " + command1);
         logger.info("Execution command: " + command1);
         //command1 =command;
-        remoteExecute( ip,  command1);
+        remoteExecute(ip, command1);
 
     }
 
-    private static String remoteExecute(String ip, String command1){
-        String ret="";
+    private static String remoteExecute(String ip, String command1) {
+        String ret = "";
+        if (norun && !command1.contains("salt")) {
+            System.out.print("Just local test, no remote execution");
+            return ret;
+        }
         try {
             JSch jsch = new JSch();
 
             Session session = createSession(jsch, ip);
             Channel channel = session.openChannel("exec");
 
-            if(command1.contains("sudo") && conf.containsKey("processor.ssh.password"))
-                command1 = command1.replace("sudo","sudo -S -p '' "); //check if works always
+            if (command1.contains("sudo") && conf.containsKey("ssh.password"))
+                command1 = command1.replace("sudo", "sudo -S -p '' "); //check if works always
 
             ((ChannelExec) channel).setCommand(command1);
-            OutputStream out=channel.getOutputStream();
+            OutputStream out = channel.getOutputStream();
             channel.setInputStream(null);
             ((ChannelExec) channel).setErrStream(System.err);
             //((ChannelExec) channel).setPty(true);
@@ -427,9 +413,8 @@ public class LeadsProcessorBootstrapper2 {
 
             InputStream in = channel.getInputStream();
             channel.connect();
-            if(command1.contains("sudo") && conf.containsKey("processor.ssh.password"))
-            {
-                out.write((conf.getString("processor.ssh.password")+"\n").getBytes());
+            if (command1.contains("sudo") && conf.containsKey("ssh.password")) {
+                out.write((conf.getString("ssh.password") + "\n").getBytes());
                 out.flush();
             }
             byte[] tmp = new byte[1024];
@@ -437,8 +422,8 @@ public class LeadsProcessorBootstrapper2 {
                 while (in.available() > 0) {
                     int i = in.read(tmp, 0, 1024);
                     if (i < 0) break;
-                   // System.out.print(new String(tmp, 0, i));
-                    ret+=new String(tmp, 0, i);
+                    // System.out.print(new String(tmp, 0, i));
+                    ret += new String(tmp, 0, i);
                 }
 
                 if (channel.isClosed()) {
@@ -450,18 +435,17 @@ public class LeadsProcessorBootstrapper2 {
                 } catch (Exception ee) {
                 }
             }
-            if(!ret.isEmpty()){
+            if (!ret.isEmpty()) {
                 System.out.println(ret);
             }
             channel.disconnect();
             session.disconnect();
 
 
-            if(channel.getExitStatus()==0)
+            if (channel.getExitStatus() == 0)
                 logger.info("Remote execution DONE");
             else
                 logger.error("Unsuccessful execution");
-
 
 
         } catch (Exception e) {
@@ -474,8 +458,8 @@ public class LeadsProcessorBootstrapper2 {
 
     private static boolean sendConfigurationTo(JsonObject config, String ip) {
         RandomAccessFile file = null;
-        //String remoteDir = LQPConfiguration.getInstance().getConf().getString("processor.ssh.remoteDir");
-        String remoteDir = conf.getString("processor.ssh.remoteDir");
+        //String remoteDir = LQPConfiguration.getInstance().getConf().getString("ssh.remoteDir");
+        String remoteDir = conf.getString("ssh.remoteDir");
         String tmpFile = remoteDir + config.getString("id") + ".json";
         //System.out.println("Write " + tmpFile +" Final ModJson: " + config.encodePrettily().toString());
         try {
@@ -493,16 +477,17 @@ public class LeadsProcessorBootstrapper2 {
             return false;
         }
 
-//        String username = LQPConfiguration.getInstance().getConf()
-//                .getString("processor.ssh.username");
-        String username = conf.getString("processor.ssh.username");
+        String username = conf.getString("ssh.username");
 
+        if (norun) {
+            System.out.println("No configuration upload, just testing, file created  " + tmpFile);
+            return true;
+        }
         JSch jsch = new JSch();
-        Session session = null;
+        Session session;
         try {
-            session = createSession( jsch,  ip );
-            ChannelSftp channel = null;
-            channel = (ChannelSftp) session.openChannel("sftp");
+            session = createSession(jsch, ip);
+            ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
             channel.connect();
             File localFile = new File(tmpFile);
             //If you want you can change the directory using the following line.
@@ -527,23 +512,20 @@ public class LeadsProcessorBootstrapper2 {
 
     }
 
-    private static Session createSession(JSch jsch, String ip ) throws JSchException {
+    private static Session createSession(JSch jsch, String ip) throws JSchException {
 
-//        String username = LQPConfiguration.getInstance().getConf()
-//                .getString("processor.ssh.username");
-        String username = conf.getString("processor.ssh.username");
+        String username = conf.getString("ssh.username");
         Session session = jsch.getSession(username, ip, 22);
 
-        if (xmlConfiguration.containsKey("processor.ssh.rsa")) {
-            String privateKey = conf.getString("processor.ssh.rsa");
+        if (xmlConfiguration.containsKey("ssh.rsa")) {
+            String privateKey = conf.getString("ssh.rsa");
             logger.info("ssh identity added: " + privateKey);
             jsch.addIdentity(privateKey);
             session = jsch.getSession(username, ip, 22);
 
-        } else if (xmlConfiguration.containsKey("processor.ssh.password"))
-            session.setPassword(conf.getString("processor.ssh.password"));
-        else
-        {
+        } else if (xmlConfiguration.containsKey("ssh.password"))
+            session.setPassword(conf.getString("ssh.password"));
+        else {
             logger.error("No ssh credentials, no password either key ");
             System.out.println("No ssh credentials, no password either key ");
         }
@@ -556,12 +538,15 @@ public class LeadsProcessorBootstrapper2 {
     }
 
 
-
     private static boolean checkArguments(String[] args) {
         boolean result = false;
-        if (args.length == 1)
+        if (args.length >= 1) {
             if (args[0].endsWith(".xml") || args[0].endsWith(".properties"))
                 result = true;
+            if (args.length >= 2)
+                if (args[1].contains("norun"))
+                    norun = true;
+        }
 
         return result;
     }
