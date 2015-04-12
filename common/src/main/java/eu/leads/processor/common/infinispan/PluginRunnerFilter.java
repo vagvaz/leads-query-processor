@@ -268,7 +268,9 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
 //      log.info("Accept, key:" + (String)key+", newValue is " + newValue);
 //    }
     String o1 = (String)key;
-    String value = (String)newValue;
+    Object value = newValue;
+
+
     switch (eventType.getType()) {
       case CACHE_ENTRY_CREATED:
         if(type.contains(CREATED))
