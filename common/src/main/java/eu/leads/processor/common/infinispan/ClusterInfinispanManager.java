@@ -3,6 +3,7 @@ package eu.leads.processor.common.infinispan;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.plugins.NutchLocalListener;
 import org.infinispan.Cache;
 import org.infinispan.commons.equivalence.AnyEquivalence;
 import org.infinispan.commons.marshall.Marshaller;
@@ -182,6 +183,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".resourcepart");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".site");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".adidas_keywords");
+    NutchLocalListener listener = new NutchLocalListener(this,"default.webpages");
+    manager.getCache("WebPage").addListener(listener);
 //    getPersisentCache("WebPage");
 //    Marshaller marshaller = null;
 //    try {

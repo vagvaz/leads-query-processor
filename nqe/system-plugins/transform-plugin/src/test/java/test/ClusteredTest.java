@@ -86,14 +86,14 @@ public class ClusteredTest {
         //Set desired target cache
         LQPConfiguration.getConf().setProperty(StringConstants.CRAWLER_DEFAULT_CACHE, "default.webpages");
         //start crawler
-        PersistentCrawl.main(null);
-        //Sleep for an amount of time to test if everything is working fine
-        try {
-            int sleepingPeriod = 32;
-            Thread.sleep(sleepingPeriod * 1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        PersistentCrawl.main(null);
+//        //Sleep for an amount of time to test if everything is working fine
+//        try {
+//            int sleepingPeriod = 32;
+//            Thread.sleep(sleepingPeriod * 1000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 
         //Iterate through local cache entries to ensure things went as planned
         Cache cache = (Cache) InfinispanClusterSingleton.getInstance().getManager()
@@ -114,7 +114,7 @@ public class ClusteredTest {
 
 
         try {
-            int sleepingPeriod = 60;
+            int sleepingPeriod = 180;
             Thread.sleep(sleepingPeriod * 1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
