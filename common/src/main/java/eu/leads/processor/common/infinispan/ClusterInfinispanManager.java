@@ -62,7 +62,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
   private Configuration defaultConfig = null;
   private Configuration defaultIndexConfig = null;
   private ConfigurationBuilderHolder holder = null;
-  private String uniquePath = UUID.randomUUID().toString();
+  private static String uniquePath;
   private String currentComponent;
 //  private static final EquivalentConcurrentHashMapV8<String, TestResources> testResources = new EquivalentConcurrentHashMapV8<>(AnyEquivalence.getInstance(), AnyEquivalence.getInstance());
 
@@ -147,7 +147,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .enable()
             .index(Index.LOCAL)
             .addProperty("default.directory_provider", "filesystem")
-            .addProperty("hibernate.search.default.indexBase","/tmp/leadsprocessor-data/infinispan/webpage/"+uniquePath)
+            .addProperty("hibernate.search.default.indexBase","/tmp/leadsprocessor-data/"+uniquePath+"/infinispan/webpage/")
             .addProperty("hibernate.search.default.exclusive_index_use", "true")
             .addProperty("hibernate.search.default.indexmanager", "near-real-time")
             .addProperty("hibernate.search.default.indexwriter.ram_buffer_size", "128")
@@ -156,7 +156,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     builder.jmxStatistics().enable();
     builder.transaction().transactionMode(TransactionMode.TRANSACTIONAL)
 //            .persistence().passivation(true)
-            .persistence().passivation(true).addSingleFileStore().location("/tmp/leadsprocessor-data/webpage/" + uniquePath + "/")
+            .persistence().passivation(true).addSingleFileStore().location("/tmp/leadsprocessor-data/"+uniquePath+"/webpage/")
 //            .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false);
 //    builder.transaction().transactionManagerLookup(new GenericTransactionManagerLookup()).dataContainer().valueEquivalence(AnyEquivalence.getInstance());
@@ -211,7 +211,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
   private String resolveUniquePath() {
 
     if(currentComponent.startsWith("testing")){
-      uniquePath = UUID.randomUUID().toString();
+      uniquePath = "testing-"+UUID.randomUUID().toString();
     }
     else{
 //      System.err.println("uniquePath: " + uniquePath + " " + "currentComponent " + currentComponent)
@@ -233,7 +233,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             uniquePath = files[0].toString();
           }
           else{
-            uniquePath = currentComponent +"-"+uniquePath;
+            uniquePath = currentComponent +"-"+UUID.randomUUID().toString();
           }
           for(int i = 1; i < files.length;i++){
             files[i].delete();
@@ -247,8 +247,11 @@ public class ClusterInfinispanManager implements InfinispanManager {
           file.mkdir();
           uniquePath = currentComponent + "-"+UUID.randomUUID().toString();
         }
+      }else{
+        uniquePath = currentComponent +"-"+UUID.randomUUID().toString();
       }
     }
+
     return uniquePath;
   }
 

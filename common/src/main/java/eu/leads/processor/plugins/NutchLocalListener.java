@@ -47,7 +47,7 @@ public class NutchLocalListener {
    private FileOutputStream tupleOutputKeys = null;
    private FileOutputStream nutchData = null;
    private FileOutputStream nutchKeys = null;
-
+   private HashMap<String,Tuple> webpagesTuple;
    private static Logger log = LoggerFactory.getLogger(NutchLocalListener.class);
    private long nextRoll = 900;
 
@@ -66,7 +66,7 @@ public class NutchLocalListener {
          nutchToLQE.put(keyValue[0].trim(),keyValue[1].trim());
       }
       transformer = new NutchTransformer(nutchToLQE);
-      rolloverFiles();
+//      rolloverFiles();
    }
 
    public void outputToFile(String key, Tuple tuple){
@@ -80,9 +80,10 @@ public class NutchLocalListener {
 
    }
 
-   public void outputToFile(String key, GenericData.Record page){
+   public void outputToFile(byte[] key, GenericData.Record page){
       try{
-         nutchKeysWriter.writeUTF(key + "\n");
+         nutchKeysWriter.writeInt(key.length);
+         nutchKeysWriter.write(key);
          byte[] schemaBytes  = page.getSchema().toString().getBytes();
 
          nutchDataWriter.writeInt(schemaBytes.length);
@@ -108,10 +109,10 @@ public class NutchLocalListener {
             file = getOrCreate(prefix + "/" + component + "-"+ webpageFileName + "-" + tupleCounter + ".keys");
             tupleOutputKeys = new FileOutputStream(file);
             tupleKeysWriter =new ObjectOutputStream((tupleOutputKeys));
-            file = getOrCreate(prefix + "/" + component + "-"+ nutchKeys + "-" + nutchCounter + ".keys");
+            file = getOrCreate(prefix + "/" + component + "-"+ nutchOutputFileName + "-" + nutchCounter + ".keys");
             nutchKeys = new FileOutputStream(file);
             nutchKeysWriter = new ObjectOutputStream( (nutchKeys));
-            file = getOrCreate(prefix + "/" + component + "-"+ nutchData + "-" + nutchCounter + ".data");
+            file = getOrCreate(prefix + "/" + component + "-"+ nutchOutputFileName + "-" + nutchCounter + ".data");
             nutchData = new FileOutputStream(file);
             nutchDataWriter = new ObjectOutputStream( (nutchData));
 
@@ -127,11 +128,11 @@ public class NutchLocalListener {
             tupleKeysWriter.close();
             tupleOutputKeys = new FileOutputStream(file);
             tupleKeysWriter =new ObjectOutputStream( (tupleOutputKeys));
-            file = getOrCreate(prefix + "/" + component + "-"+ nutchKeys + "-" + nutchCounter + ".keys");
+            file = getOrCreate(prefix + "/" + component + "-"+ nutchOutputFileName + "-" + nutchCounter + ".keys");
             nutchKeysWriter.close();
             nutchKeys = new FileOutputStream(file);
             nutchKeysWriter = new ObjectOutputStream( (nutchKeys));
-            file = getOrCreate(prefix + "/" + component + "-"+ nutchData + "-" + nutchCounter + ".data");
+            file = getOrCreate(prefix + "/" + component + "-"+ nutchOutputFileName + "-" + nutchCounter + ".data");
             nutchDataWriter.close();
             nutchData = new FileOutputStream(file);
             nutchDataWriter = new ObjectOutputStream( (nutchData));
@@ -150,7 +151,7 @@ public class NutchLocalListener {
       {
          result.delete();
          try {
-
+            result.getParentFile().mkdir();
             result.createNewFile();
          } catch (IOException e) {
             e.printStackTrace();
@@ -158,6 +159,7 @@ public class NutchLocalListener {
       }
       else{
          try {
+            result.getParentFile().mkdir();
             result.createNewFile();
          } catch (IOException e) {
             e.printStackTrace();
@@ -178,26 +180,27 @@ public class NutchLocalListener {
 
 
       GenericData.Record page = (GenericData.Record) value;
-      System.err.println("LIstener  " + key.toString());
+      System.err.println("LIstener  " +  new String((byte[]) key) + " " + value.getClass().toString());
 
-      if(page!=null) {
+//      if(page!=null) {
          Tuple object = transformer.transform(page);
 //         BasicBSONEncoder encoder = new BasicBSONEncoder();
 //         byte[] array = encoder.encode(object);
          //output to outputCache Tuple repr
-         outputCache.put(outputCacheName+":"+object.getAttribute("url"),object);
+         outputCache.put(outputCacheName + ":" + object.getAttribute("url"), object);
          System.err.println("outputting to " + outputCacheName + "tuple " + object.toString());
 
-         globalCounter  = (globalCounter+1) % Long.MAX_VALUE-1;
+
          if(globalCounter % nextRoll == 0){
             rolloverFiles();
          }
+         globalCounter  = (globalCounter+1) % (Long.MAX_VALUE-1);
          //output to outputFile for our repr
          outputToFile(outputCacheName+":"+object.getAttribute("url"),object);
 
-         outputToFile(key.toString(), page);
+         outputToFile((byte[])key, page);
 
-      }
+//      }
    }
 
    @CacheEntryModified

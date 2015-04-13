@@ -5,6 +5,7 @@ import org.apache.avro.generic.GenericData;
 import org.apache.nutch.storage.WebPage;
 import org.bson.BasicBSONObject;
 
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -32,6 +33,14 @@ public class NutchTransformer {
             }
             tuple.setAttribute("links",links);
 
+         }
+         else if(entry.getValue().equals("body")){
+            ByteBuffer byteBuffer = (ByteBuffer) wp.get(entry.getKey());
+            if(byteBuffer != null)
+            tuple.setAttribute("body",new String(byteBuffer.toString() ));
+            else{
+               tuple.setAttribute("body",null);
+            }
          }
          else if(entry.getValue().equals("published")) {
             Date  date = new Date((long)wp.get(entry.getKey()));
