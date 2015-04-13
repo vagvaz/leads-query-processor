@@ -37,7 +37,7 @@ public class NutchTransformer {
          else if(entry.getValue().equals("body")){
             ByteBuffer byteBuffer = (ByteBuffer) wp.get(entry.getKey());
             if(byteBuffer != null)
-            tuple.setAttribute("body",new String(byteBuffer.toString() ));
+            tuple.setAttribute("body",new String(byteBuffer.array () ));
             else{
                tuple.setAttribute("body",null);
             }
