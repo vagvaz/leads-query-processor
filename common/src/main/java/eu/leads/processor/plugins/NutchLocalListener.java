@@ -46,7 +46,7 @@ public class NutchLocalListener {
 
 
       GenericData.Record page = (GenericData.Record) value;
-      System.err.println("LIstener  " + key.toString());
+      System.err.println("LIstener  " + key.toString()); 
 
       if(page!=null) {
          BasicBSONObject object = transformer.transform(page);

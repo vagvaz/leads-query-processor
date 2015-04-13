@@ -171,6 +171,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache("clustered");
     getPersisentCache("pagerankCache");
     getPersisentCache("approx_sum_cache");
+    getPersisentCache(StringConstants.STATISTICS_CACHE);
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".webpages");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".entities");
 
