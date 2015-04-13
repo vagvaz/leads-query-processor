@@ -150,6 +150,7 @@ public class Tuple extends DataType_bson implements Serializable{
        }
        else{
           System.err.println("set " + name + " has tupleValue null");
+          data.put(name,tupleValue);
        }
     }
 

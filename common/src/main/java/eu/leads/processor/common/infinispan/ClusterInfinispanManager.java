@@ -5,11 +5,6 @@ import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.plugins.NutchLocalListener;
 import org.infinispan.Cache;
-import org.infinispan.commons.equivalence.AnyEquivalence;
-import org.infinispan.commons.marshall.Marshaller;
-import org.infinispan.commons.util.LegacyKeySupportSystemProperties;
-import org.infinispan.commons.util.Util;
-import org.infinispan.commons.util.concurrent.jdk8backported.EquivalentConcurrentHashMapV8;
 import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
@@ -24,21 +19,18 @@ import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.persistence.leveldb.configuration.LevelDBStoreConfiguration;
 import org.infinispan.persistence.leveldb.configuration.LevelDBStoreConfigurationBuilder;
-import org.infinispan.query.remote.avro.AvroQueryFacade;
-import org.infinispan.query.remote.client.avro.AvroMarshaller;
 import org.infinispan.remoting.transport.Address;
 import org.infinispan.server.hotrod.HotRodServer;
 import org.infinispan.server.hotrod.configuration.HotRodServerConfigurationBuilder;
 import org.infinispan.server.hotrod.test.HotRodTestingUtil;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
-import org.infinispan.test.fwk.TransactionSetup;
 import org.infinispan.transaction.TransactionMode;
-import org.infinispan.transaction.lookup.GenericTransactionManagerLookup;
 import org.infinispan.transaction.lookup.JBossStandaloneJTAManagerLookup;
-import org.infinispan.transaction.lookup.TransactionManagerLookup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -71,6 +63,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
   private Configuration defaultIndexConfig = null;
   private ConfigurationBuilderHolder holder = null;
   private String uniquePath = UUID.randomUUID().toString();
+  private String currentComponent;
 //  private static final EquivalentConcurrentHashMapV8<String, TestResources> testResources = new EquivalentConcurrentHashMapV8<>(AnyEquivalence.getInstance(), AnyEquivalence.getInstance());
 
   /**
@@ -101,7 +94,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
   @Override
   public void startManager(String configurationFile)  {
 
-
+    currentComponent = LQPConfiguration.getInstance().getConfiguration().getString("node.current.component");
+    if(currentComponent == null)
+      currentComponent = "testingComponents-"+UUID.randomUUID();
+    uniquePath = resolveUniquePath();
     ParserRegistry registry = new ParserRegistry();
 //    ConfigurationBuilderHolder holder = null;
 
@@ -151,7 +147,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .enable()
             .index(Index.LOCAL)
             .addProperty("default.directory_provider", "filesystem")
-            .addProperty("hibernate.search.default.indexBase","/tmp/infinispan/webpage/"+uniquePath)
+            .addProperty("hibernate.search.default.indexBase","/tmp/leadsprocessor-data/infinispan/webpage/"+uniquePath)
             .addProperty("hibernate.search.default.exclusive_index_use", "true")
             .addProperty("hibernate.search.default.indexmanager", "near-real-time")
             .addProperty("hibernate.search.default.indexwriter.ram_buffer_size", "128")
@@ -160,7 +156,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     builder.jmxStatistics().enable();
     builder.transaction().transactionMode(TransactionMode.TRANSACTIONAL)
 //            .persistence().passivation(true)
-            .persistence().passivation(true).addSingleFileStore().location("/tmp/webpage/" + uniquePath + "/")
+            .persistence().passivation(true).addSingleFileStore().location("/tmp/leadsprocessor-data/webpage/" + uniquePath + "/")
 //            .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false);
 //    builder.transaction().transactionManagerLookup(new GenericTransactionManagerLookup()).dataContainer().valueEquivalence(AnyEquivalence.getInstance());
@@ -184,7 +180,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".resourcepart");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".site");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".adidas_keywords");
-    NutchLocalListener listener = new NutchLocalListener(this,"default.webpages");
+
+    NutchLocalListener listener = new NutchLocalListener(this,"default.webpages",LQPConfiguration.getInstance().getConfiguration().getString("nutch.listener.prefix"),currentComponent);
+
     manager.getCache("WebPage").addListener(listener);
 //    getPersisentCache("WebPage");
 //    Marshaller marshaller = null;
@@ -210,6 +208,50 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
   }
 
+  private String resolveUniquePath() {
+
+    if(currentComponent.startsWith("testing")){
+      uniquePath = UUID.randomUUID().toString();
+    }
+    else{
+//      System.err.println("uniquePath: " + uniquePath + " " + "currentComponent " + currentComponent)
+      File file = new File("/tmp/leadsprocessor-data/");
+      if(file.exists()){
+        if(file.isDirectory()){
+          File[] files = file.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+              if(name.startsWith(currentComponent)){
+                return true;
+              }
+              else {
+                return false;
+              }
+            }
+          });
+          if(files.length > 0){
+            uniquePath = files[0].toString();
+          }
+          else{
+            uniquePath = currentComponent +"-"+uniquePath;
+          }
+          for(int i = 1; i < files.length;i++){
+            files[i].delete();
+          }
+
+        }
+        else{
+          log.error("/tmp/leadsprocessor-data is not a directory deleting...");
+          file.delete();
+          file.mkdirs();
+          file.mkdir();
+          uniquePath = currentComponent + "-"+UUID.randomUUID().toString();
+        }
+      }
+    }
+    return uniquePath;
+  }
+
   private ConfigurationBuilder initDefaultCacheConfigBuilder() {
 
     ConfigurationBuilder result = null;
@@ -218,48 +260,48 @@ public class ClusterInfinispanManager implements InfinispanManager {
         result = new ConfigurationBuilder();
         GlobalConfiguration gc = holder.getGlobalConfigurationBuilder().build();
         Configuration  c = holder.getDefaultConfigurationBuilder().build(gc);
-                                result.read(c).clustering()
-                                .cacheMode(CacheMode.DIST_SYNC)
-                                .hash().numOwners(1)
-                                .indexing().index(Index.NONE).transaction().transactionMode
-                                                                                    (TransactionMode
-                                                                                             .NON_TRANSACTIONAL)
-                                .persistence().passivation(true)
-                                                       //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
+        result.read(c).clustering()
+                .cacheMode(CacheMode.DIST_SYNC)
+                .hash().numOwners(1)
+                .indexing().index(Index.NONE).transaction().transactionMode
+                                                                    (TransactionMode
+                                                                             .NON_TRANSACTIONAL)
+                .persistence().passivation(true)
+                                       //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
 //                                                                      .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
 
-                                .addSingleFileStore().location("/tmp/leadsproc" + uniquePath + "/")
+                .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath + "/")
 //                                .fetchPersistentState(true)
-                                .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false);
+                .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false);
 
       } else { //Use leveldb
         result = new ConfigurationBuilder();
         result.read(holder.getDefaultConfigurationBuilder().build())
-                                .clustering()
-                                .cacheMode(CacheMode.DIST_SYNC)
-                                .hash().numOwners(1)
-                                .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
-                                .persistence().passivation(true)
-                                .addStore(LevelDBStoreConfigurationBuilder.class)
-                                .location("/tmp/leveldb/data-" + uniquePath + "/")
-                                         //                                 .location("/tmp/leveldb/data-foo/" + "/")
-                                .expiredLocation("/tmp/leveldb/expired-" + uniquePath + "/")
-                                         //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
-                                .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
-                                .fetchPersistentState(false)
-                                .shared(false).purgeOnStartup(false).preload(true).compatibility().enable()
-                                .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
-                                .build();
+                .clustering()
+                .cacheMode(CacheMode.DIST_SYNC)
+                .hash().numOwners(1)
+                .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
+                .persistence().passivation(true)
+                .addStore(LevelDBStoreConfigurationBuilder.class)
+                .location("/tmp/leadsprocessor-data/leveldb/" + uniquePath + "-data/")
+                         //                                 .location("/tmp/leveldb/data-foo/" + "/")
+                .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "-expired/")
+                         //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
+                .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
+                .fetchPersistentState(false)
+                .shared(false).purgeOnStartup(false).preload(true).compatibility().enable()
+                .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
+                .build();
       }
     } else { //do not use persistence
       result = new ConfigurationBuilder();
       result.read(holder.getDefaultConfigurationBuilder().build())
-                              .clustering()
-                              .cacheMode(CacheMode.DIST_SYNC)
-                              .hash().numOwners(1)
-                              .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility().enable()
-                              .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
-                              .build();
+              .clustering()
+              .cacheMode(CacheMode.DIST_SYNC)
+              .hash().numOwners(1)
+              .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility().enable()
+              .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
+              .build();
     }
 
     return result;
@@ -298,7 +340,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     while (!isStarted) {
       server = new HotRodServer();
       HotRodServerConfigurationBuilder serverConfigurationBuilder =
-        new HotRodServerConfigurationBuilder();
+              new HotRodServerConfigurationBuilder();
       serverConfigurationBuilder.host(localhost).port(serverPort).defaultCacheName("defaultCache");
       //                 .keyValueFilterFactory("leads-processor-filter-factory",new LeadsProcessorKeyValueFilterFactory(manager))
       //                 .converterFactory("leads-processor-converter-factory",new LeadsProcessorConverterFactory());
@@ -309,7 +351,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         server.start(serverConfigurationBuilder.build(),targetManager);
         server.addCacheEventConverterFactory("leads-processor-converter-factory", new LeadsProcessorConverterFactory());
         server.addCacheEventFilterFactory("leads-processor-filter-factory", new
-                                                                              LeadsProcessorKeyValueFilterFactory(manager));
+                                                                                    LeadsProcessorKeyValueFilterFactory(manager));
         isStarted = true;
       } catch (Exception e) {
         System.out.println("Exception e " + e.getClass().getCanonicalName() + e.getMessage());
@@ -562,7 +604,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
   private void createCache(String cacheName, Configuration cacheConfiguration) {
     if (!cacheConfiguration.clustering().cacheMode().isClustered()) {
       log.warn("Configuration given for " + cacheName
-                 + " is not clustered so using default cluster configuration");
+                       + " is not clustered so using default cluster configuration");
       //            cacheConfiguration = new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_ASYNC).async().l1().lifespan(100000L).hash().numOwners(3).build();
     }
     //      if(manager.cacheExists(cacheName))
@@ -618,7 +660,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                                        //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
                                                        //               .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
 
-                                .addSingleFileStore().location("/tmp/leadsproc" + uniquePath + "/")
+                                .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath + "/")
                                 .fetchPersistentState(false)
                                 .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
                                 .build();
@@ -631,9 +673,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                 .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
                                 .persistence().passivation(true)
                                 .addStore(LevelDBStoreConfigurationBuilder.class)
-                                .location("/tmp/leveldb/data-" + uniquePath + "/")
+                                .location("/tmp/leadsprocessor-data/leveldb/data-" + uniquePath + "/")
                                          //                                 .location("/tmp/leveldb/data-foo/" + "/")
-                                .expiredLocation("/tmp/leveldb/expired-" + uniquePath + "/")
+                                .expiredLocation("/tmp/leadsprocessor-data/expired-" + uniquePath + "/")
                                          //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
                                 .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
                                 .fetchPersistentState(false)
@@ -652,13 +694,13 @@ public class ClusterInfinispanManager implements InfinispanManager {
     }
   }
 
-    private void initIndexDefaultCacheConfig() {
-        if(defaultConfig == null){
-          initDefaultCacheConfig();
-        }
-        defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).clustering()
-                                      .cacheMode(CacheMode.REPL_SYNC).l1().disable().indexing().index(Index.ALL).compatibility().enable().build();
+  private void initIndexDefaultCacheConfig() {
+    if(defaultConfig == null){
+      initDefaultCacheConfig();
     }
+    defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).clustering()
+                                  .cacheMode(CacheMode.REPL_SYNC).l1().disable().indexing().index(Index.ALL).compatibility().enable().build();
+  }
 
 
 
@@ -668,17 +710,17 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
 
       cacheConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
-                      .clustering()
-                      .cacheMode(CacheMode.DIST_SYNC)
-                      .hash().numOwners(2)
-                      .indexing().index(Index.LOCAL).transaction().transactionMode(TransactionMode
-                                                                                     .NON_TRANSACTIONAL)
-                      .persistence()
-                         //                            .addStore(LevelDBStoreConfigurationBuilder.class
-                         //                            .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
-                      .addSingleFileStore().location("/tmp/leadsproc" + uniquePath+"/").shared(false).preload(false).compatibility().enable()
-                      .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
-                      .build();
+                            .clustering()
+                            .cacheMode(CacheMode.DIST_SYNC)
+                            .hash().numOwners(2)
+                            .indexing().index(Index.LOCAL).transaction().transactionMode(TransactionMode
+                                                                                                 .NON_TRANSACTIONAL)
+                            .persistence()
+                                     //                            .addStore(LevelDBStoreConfigurationBuilder.class
+                                     //                            .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
+                            .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath+"/").shared(false).preload(false).compatibility().enable()
+                            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
+                            .build();
     }
     else{
       if(defaultConfig == null) {
@@ -700,12 +742,12 @@ public class ClusterInfinispanManager implements InfinispanManager {
                             .cacheMode(CacheMode.DIST_SYNC)
                             .hash().numOwners(2)
                             .indexing().setProperty("auto-config", "true") .setProperty("default.directory_provider", "ram").index(Index.ALL).transaction().transactionMode(TransactionMode
-                                                                                                 .NON_TRANSACTIONAL)
+                                                                                                                                                                                    .NON_TRANSACTIONAL)
                             .persistence()
                                      //                            .addStore(LevelDBStoreConfigurationBuilder.class
                                      //                            .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
-                            .addSingleFileStore().location("/tmp/leadsproc" +uniquePath+"/")
-                      .shared(false).preload(false).compatibility().enable()
+                            .addSingleFileStore().location("/tmp/leadsprocessor-data/" +uniquePath+"/")
+                            .shared(false).preload(false).compatibility().enable()
                             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
                             .build();
     }

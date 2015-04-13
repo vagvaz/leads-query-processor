@@ -5,14 +5,12 @@ import eu.leads.processor.common.plugins.PluginPackage;
 import eu.leads.processor.common.utils.FSUtilities;
 import eu.leads.processor.common.utils.storage.LeadsStorage;
 import eu.leads.processor.common.utils.storage.LeadsStorageFactory;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.plugins.PluginInterface;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.infinispan.Cache;
-import org.infinispan.configuration.parsing.ConfigurationBuilderHolder;
-import org.infinispan.configuration.parsing.ParserRegistry;
-import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.metadata.Metadata;
 import org.infinispan.notifications.cachelistener.filter.CacheEventFilter;
@@ -268,9 +266,25 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
 //      log.info("Accept, key:" + (String)key+", newValue is " + newValue);
 //    }
     String o1 = (String)key;
-    Object value = newValue;
+//    Object value = newValue;
+    Object value = null;
+    switch (eventType.getType()) {
+      case CACHE_ENTRY_CREATED:
+        value = newValue;
+        break;
+      case CACHE_ENTRY_REMOVED:
+        value = oldValue;
+        break;
+      case CACHE_ENTRY_MODIFIED:
+        value = newValue;
+        break;
+      default:
+        break;
+    }
 
-
+    if(value instanceof Tuple){
+      value = value.toString();
+    }
     switch (eventType.getType()) {
       case CACHE_ENTRY_CREATED:
         if(type.contains(CREATED))
@@ -282,7 +296,7 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
             log.error("Accept old value is null");
             return false;
           }
-          value = (String) oldValue;
+//          value = (String) oldValue;
           plugin.removed(key, value, targetCache);
         }
         break;

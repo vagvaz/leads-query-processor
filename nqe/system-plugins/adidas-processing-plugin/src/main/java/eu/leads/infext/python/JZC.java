@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
@@ -42,11 +43,15 @@ public class JZC {
         	System.out.println("PollItem is readable");
         }
         JSONArray jsonReply = null;
+        try{
         if(reply != null) {
 	        String strReply = reply.popString();
 	        if(strReply != null)
 	        	jsonReply = new JSONArray(strReply);
 	        reply.destroy();
+        }
+        }catch(JSONException e){
+            System.err.println(e.getMessage());
         }
         //  Close socket in any case, we're done with it now
         ctx.destroySocket(client);
@@ -113,8 +118,12 @@ public class JZC {
 //            }
             System.out.println("Received: <<"+reply+">>");
             JSONArray json = reply;
+            try{
             for (int i=0; i<json.length(); i++)
                 returnList.add( json.get(i) );
+            }catch(JSONException e){
+                System.err.println(e.getMessage());
+            }
         }
         else
         	returnList = null;

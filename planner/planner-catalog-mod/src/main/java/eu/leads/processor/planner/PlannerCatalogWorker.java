@@ -3,6 +3,7 @@ package eu.leads.processor.planner;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ServiceException;
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.conf.LQPConfiguration;
 import leads.tajo.catalog.LeadsCatalog;
 import org.apache.hadoop.fs.Path;
 import org.apache.tajo.catalog.*;
@@ -33,7 +34,8 @@ public class PlannerCatalogWorker extends Verticle {
   @Override
   public void start() {
     super.start();
-
+    LQPConfiguration.initialize();
+    LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component", "catalog-worker");
     //Read configuration
     JsonObject config = container.config();
     TajoConf conf = new TajoConf();

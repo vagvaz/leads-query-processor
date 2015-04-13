@@ -50,6 +50,7 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
             }
          }
       };
+
       bus = vertx.eventBus();
       config = container.config();
       id = config.getString("id");
@@ -60,6 +61,7 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
       com.initialize(id, gr, null, leadsHandler, leadsHandler, vertx);
       bus.registerHandler(id + ".process", this);
       LQPConfiguration.initialize();
+      LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component","imanager");
       persistence = InfinispanClusterSingleton.getInstance().getManager();
       log = new LogProxy(config.getString("log"), com);
       JsonObject msg = new JsonObject();
