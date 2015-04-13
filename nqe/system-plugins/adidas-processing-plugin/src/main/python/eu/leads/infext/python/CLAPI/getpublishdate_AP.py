@@ -168,13 +168,15 @@ if __name__=='__main__':
     pages = [
             "http://www.bbc.com/news/blogs-trending-31019565",
             "http://wiadomosci.onet.pl/kraj/siemoniak-ostrzega-czekaja-nas-trudne-lata-polityka-rosji-stwarza-zagrozenie/nfvxq",
-            "http://www.spiegel.de/wirtschaft/unternehmen/deutsche-bank-bilanz-von-anshu-jain-und-juergen-fitschen-a-1015665.html",
+#             "http://www.spiegel.de/wirtschaft/unternehmen/deutsche-bank-bilanz-von-anshu-jain-und-juergen-fitschen-a-1015665.html",
             "http://edition.cnn.com/2015/01/28/africa/boko-haram-raids/index.html",
             "http://www.runnersworld.com/other-gear/6-gym-bags-for-runners",
             "http://thebullrunner.com/2015/01/dream-chasers-2015/#.VMpKBGjF-So",
             "http://www.sbnation.com/lookit/2015/1/29/7938937/new-england-patriots-hotel-fire-alarm-prank",
             "http://www.thystride.com/nnautica-malibu-international-triathlon.html",
-            "http://strengthrunning.com/2015/01/running-for-weight-loss/"
+            "http://strengthrunning.com/2015/01/running-for-weight-loss/",
+            "http://www.bbc.com/news/uk-31545744",
+            "http://www.theguardian.com/sport/2015/apr/09/lewis-hamilton-new-mercedes-f1-contract",
              ]
     
     for page in pages:

@@ -37,13 +37,13 @@ public class PageProcessingPojo extends AbstractExecutionPojo {
 	}
 
 	@Override
-	public void execute(String uri, String timestamp, String cacheName, HashMap<String, String> cacheColumns) {
+	public void execute(String uri, String timestamp, String cacheName, HashMap<String, Object> cacheColumns) {
 		
-		HashMap<String, String> newMain = new HashMap<>();
+		HashMap<String, Object> newMain = new HashMap<>();
 		newMain.put("uri", uri);
 		newMain.put("timestamp", timestamp);
 		
-		HashMap<String, HashMap<String, String>> metadata = new HashMap<>();
+		HashMap<String, HashMap<String, Object>> metadata = new HashMap<>();
 		metadata.put("new",	newMain);
 		metadata.put("new:"+LEADSUtils.propertyValueToKey(mapping,cacheName), cacheColumns);
 		HashMap<String,MDFamily> editableFamilies = new HashMap<>();
@@ -51,8 +51,12 @@ public class PageProcessingPojo extends AbstractExecutionPojo {
 		try {
 			/* Process */
 			System.out.println("Processing...");
-			for(AbstractProcessing proc : processingQueue)
+			for(AbstractProcessing proc : processingQueue) {
+				long start = System.currentTimeMillis();
 				proc.process(uri, timestamp, metadata, editableFamilies);
+				double duration   = (System.currentTimeMillis()-start)/1000.0;
+				System.err.println("Execution time of "+proc.getHookName()+": "+duration+" s");
+			}
 			
 			/* Store */
 			System.out.println("Storing...");
@@ -64,7 +68,7 @@ public class PageProcessingPojo extends AbstractExecutionPojo {
 		}
 	}
 	
-	public void store(HashMap<String, HashMap<String, String>> metadata, HashMap<String,MDFamily> editableFamilies, String timestamp) {
+	public void store(HashMap<String, HashMap<String, Object>> metadata, HashMap<String,MDFamily> editableFamilies, String timestamp) {
 		
 		String now = timestamp;
 		
@@ -81,30 +85,31 @@ public class PageProcessingPojo extends AbstractExecutionPojo {
 			System.out.println(familyName);
 			
 			if(familyKey.equals("new:leads_resourceparts")) {
-				HashMap<String, String> resourceParts = metadata.get("new:leads_resourceparts");
+				HashMap<String, Object> resourceParts = metadata.get("new:leads_resourceparts");
 				
 				HashMap<String, Object> partsTypeValuesMap = new HashMap<>();
-				for(Entry<String, String> resPart : resourceParts.entrySet()) {
+				for(Entry<String, Object> resPart : resourceParts.entrySet()) {
 					String resTypeNIndex = resPart.getKey();
 //					String resType = resTypeNIndex.substring(0, resTypeNIndex.length()-4); // cut ':xxx'
 //					String restIndex = resTypeNIndex.substring(0, resTypeNIndex.length()-4);
-					String resValue = resPart.getValue();
+					Object resValue = resPart.getValue();
 					partsTypeValuesMap.put(resTypeNIndex, resValue);
 				}
 				DataStoreSingleton.getDataStore().putLeadsResourcePartsMD(url, ts, partsTypeValuesMap);
 			}
 			else if(familyKey.equals("new:leads_keywords")) {
-				HashMap<String, String> keywords = metadata.get("new:leads_keywords");
+				HashMap<String, Object> keywords = metadata.get("new:leads_keywords");
 				
 				for(String key : keywords.keySet()) {
 					String [] keyparts = key.split(":");
 					String element = keyparts[2];
 					String partid = keyparts[0]+":"+keyparts[1];
-					HashMap<String, String> keywordFamilyMap = metadata.get("new:leads_keywords:"+key);
+					HashMap<String, Object> keywordFamilyMap = metadata.get("new:leads_keywords:"+key);
 					List<Cell> cells = new ArrayList<>();
-					for(Entry<String, String> newMetaColumn : keywordFamilyMap.entrySet()) {
+					for(Entry<String, Object> newMetaColumn : keywordFamilyMap.entrySet()) {
 						cells.add(new Cell(newMetaColumn.getKey(), newMetaColumn.getValue(), 0));
-						System.out.println(newMetaColumn.getKey()+" -> "+ (newMetaColumn.getValue().length()>80 ? newMetaColumn.getValue().replace("\n", "").replace("\r", "").substring(0, 80) : newMetaColumn.getValue()));
+						String value = newMetaColumn.getValue().toString();
+						System.out.println(newMetaColumn.getKey()+" -> "+ (value.length()>80 ? value.replace("\n", "").replace("\r", "").substring(0, 80) : newMetaColumn.getValue()));
 					}					
 					DataStoreSingleton.getDataStore().putLeadsResourceElementsMDFamily(url, ts, partid, element, null, cells);
 				}
@@ -113,13 +118,15 @@ public class PageProcessingPojo extends AbstractExecutionPojo {
 			else {
 				if(familyKey.startsWith("new:leads_keywords:")) continue;
 				
-				HashMap<String,String> mdFamilyMap = metadata.get(familyKey);
+				HashMap<String,Object> mdFamilyMap = metadata.get(familyKey);
 				
 				List<Cell> cells = new ArrayList<>();
-				for(Entry<String, String> newMetaColumn : mdFamilyMap.entrySet()) {
-					if(newMetaColumn.getValue() != null && !newMetaColumn.getKey().equals("uri") && !newMetaColumn.getKey().equals("ts")) {
-					cells.add(new Cell(newMetaColumn.getKey(), newMetaColumn.getValue(), 0));
-					System.out.println(newMetaColumn.getKey()+" -> "+ (newMetaColumn.getValue().length()>80 ? newMetaColumn.getValue().replace("\n", "").replace("\r", "").substring(0, 80) : newMetaColumn.getValue()));
+				for(Entry<String, Object> newMetaColumn : mdFamilyMap.entrySet()) {
+					if(newMetaColumn.getValue() != null)
+						if(newMetaColumn.getKey() != null && !newMetaColumn.getKey().equals("uri"))
+							if(!newMetaColumn.getKey().equals("ts")) {
+								cells.add(new Cell(newMetaColumn.getKey(), newMetaColumn.getValue(), 0));
+								System.out.println(newMetaColumn.getKey()+" -> "+ (newMetaColumn.getValue().toString().length()>80 ? newMetaColumn.getValue().toString().replace("\n", "").replace("\r", "").substring(0, 80) : newMetaColumn.getValue()));
 					}
 				}
 				

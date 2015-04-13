@@ -1,6 +1,9 @@
 package eu.leads.utils;
 
+import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.MalformedURLException;
+import java.net.ServerSocket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -45,7 +48,7 @@ public class LEADSUtils {
 		
 		String urlparts[] = url.split("/");
 		String result = "";
-		for(int i=0; i<=urlparts.length-1; i++) {
+		for(int i=0; i<=/*urlparts.length-1*/0; i++) {
 			result += urlparts[i] + "/";
 			generalizationsList.add(result);
 		}
@@ -181,16 +184,16 @@ public class LEADSUtils {
 			return 1.0;
 	}
 	
-	public static List<HashMap<String,String>> getMetadataOfDirectories(HashMap<String, HashMap<String, String>> urlParameters, String suffix) {
-		List<HashMap<String,String>> generalParametersList = new ArrayList<>();
+	public static List<HashMap<String,Object>> getMetadataOfDirectories(HashMap<String, HashMap<String, Object>> urlParameters, String suffix) {
+		List<HashMap<String,Object>> generalParametersList = new ArrayList<>();
 		
 		int number = 0;
 		boolean isMoreGeneral = true;
 		while(isMoreGeneral) {
 			String key = "general"+number;
 			key += (suffix == null) ? "" : ":"+suffix;
-			HashMap<String,String> generalParameters = urlParameters.get(key);
-			if(generalParameters == null)
+			HashMap<String,Object> generalParameters = urlParameters.get(key);
+			if(generalParameters == null || generalParameters.isEmpty())
 				isMoreGeneral = false;
 			else
 				generalParametersList.add(generalParameters);
@@ -315,6 +318,30 @@ public class LEADSUtils {
 		Pattern r = Pattern.compile(pattern);
 		java.util.regex.Matcher m = r.matcher(uuidCand);
 		return m.matches();
+	}
+
+	public static boolean isNumber(Object value) {
+		if(value instanceof java.lang.Integer)
+			return true;
+		if(value instanceof java.lang.Long)
+			return true;
+		if(value instanceof java.lang.Double)
+			return true;
+		if(value instanceof java.lang.Float)
+			return true;
+		return false;
+	}
+	
+	public static List<Object> getMatchingStrings(List<Object> list, String regex) {
+		List<Object> filteredList = new ArrayList<>();
+		Pattern p = Pattern.compile(regex);
+		for(Object obj : list) {
+			String str = obj.toString();
+			if (p.matcher(str).matches()) {
+				filteredList.add(str);
+			}
+		}
+		return filteredList;
 	}
 	
 }

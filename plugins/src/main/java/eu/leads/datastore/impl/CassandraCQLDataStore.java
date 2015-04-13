@@ -431,4 +431,10 @@ public class CassandraCQLDataStore extends AbstractDataStore {
 		return session;
 	}
 
+	@Override
+	public List<String> getUsersKeywordsList() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

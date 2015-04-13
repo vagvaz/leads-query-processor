@@ -15,28 +15,29 @@ public class AllAtOnceProcessing extends AbstractProcessing {
 	}
 
 	@Override
-	public void process(String url, String timestamp, HashMap<String, HashMap<String,String>> metadata, HashMap<String, MDFamily> editableFamilies) {
+	public void process(String url, String timestamp, HashMap<String, HashMap<String,Object>> metadata, HashMap<String, MDFamily> editableFamilies) {
 		
 		/* 2. Process accordingly  */
-		HashMap<String, HashMap<String,String>> retrievedMetadata = hook.retrieveMetadata(url, timestamp, metadata, editableFamilies);
+		HashMap<String, HashMap<String,Object>> retrievedMetadata = hook.retrieveMetadata(url, timestamp, metadata, editableFamilies);
 		extendMetadata(metadata, retrievedMetadata, true, editableFamilies);
-		HashMap<String,HashMap<String, String>> newMetadata = hook.process(metadata);
+		HashMap<String,HashMap<String, Object>> newMetadata = hook.process(metadata);
 		extendMetadata(metadata, newMetadata, true, editableFamilies); // the next hack... should be false and solved another way
 	}
 	
-	public HashMap<String, HashMap<String, String>> extendMetadata(HashMap<String, HashMap<String, 
-			String>> metadata, HashMap<String, HashMap<String, String>> newMetadata, boolean isRetrievedMetadata, HashMap<String, MDFamily> editableFamilies) {
-		for(Entry<String, HashMap<String, String>> newMetaFamilyEntry : newMetadata.entrySet()) {
+	public HashMap<String, HashMap<String, Object>> extendMetadata(
+			HashMap<String, HashMap<String, Object>> metadata, HashMap<String, HashMap<String, Object>> newMetadata, 
+			boolean isRetrievedMetadata, HashMap<String, MDFamily> editableFamilies) {
+		for(Entry<String, HashMap<String, Object>> newMetaFamilyEntry : newMetadata.entrySet()) {
 			String familyKey = newMetaFamilyEntry.getKey();
-			HashMap<String, String> newMetaFamily = newMetaFamilyEntry.getValue();
-			HashMap<String, String> metaFamily = metadata.get(familyKey);
+			HashMap<String, Object> newMetaFamily = newMetaFamilyEntry.getValue();
+			HashMap<String, Object> metaFamily = metadata.get(familyKey);
 			if(editableFamilies.containsKey(familyKey) && metadata.containsKey(familyKey)) {
 				if(metadata.get(familyKey) == null)
 					metadata.put(familyKey, newMetaFamily);
 				else {
-					for(Entry<String, String> metaColumn : newMetaFamily.entrySet()) {
+					for(Entry<String, Object> metaColumn : newMetaFamily.entrySet()) {
 						String columnKey = metaColumn.getKey();
-						String columnValue = metaColumn.getValue();
+						Object columnValue = metaColumn.getValue();
 						metaFamily.put(columnKey, columnValue);
 						metadata.put(familyKey, metaFamily);
 					}

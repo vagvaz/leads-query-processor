@@ -24,8 +24,8 @@ public abstract class AbstractHook {
 //	String queryTimeTempl = queryTempl + " AND timestamp='%s'";
 //	String fieldTempl = "%s AS %s";
 
-	public abstract HashMap<String, HashMap<String, String>> retrieveMetadata(String url, String timestamp, HashMap<String, HashMap<String, String>> currentMetadata, HashMap<String, MDFamily> editableFamilies);
-	public abstract HashMap<String, HashMap<String, String>> process(HashMap<String, HashMap<String, String>> parameters);
+	public abstract HashMap<String, HashMap<String, Object>> retrieveMetadata(String url, String timestamp, HashMap<String, HashMap<String, Object>> currentMetadata, HashMap<String, MDFamily> editableFamilies);
+	public abstract HashMap<String, HashMap<String, Object>> process(HashMap<String, HashMap<String, Object>> parameters);
 	
 	private List<String> nonRetrievableFamilies = new ArrayList<String>()
 			{{ add("leads_resourceparts"); add("leads_keywords"); }};
@@ -46,16 +46,16 @@ public abstract class AbstractHook {
 	 * @return
 	 */
 	protected void putLeadsMDIfNeeded(String url, String versionName, String family, int versionOfInterest, 
-			String beforeTimestamp, HashMap<String, HashMap<String, String>> currentMetadata,  
-			HashMap<String, HashMap<String, String>> newMetadata, HashMap<String, MDFamily> editableFamilies) {
+			String beforeTimestamp, HashMap<String, HashMap<String, Object>> currentMetadata,  
+			HashMap<String, HashMap<String, Object>> newMetadata, HashMap<String, MDFamily> editableFamilies) {
 		
 		String familyKey = versionName+":"+family;
 		int lastVersionsNeeded = 1 - versionOfInterest;
 		
-		HashMap<String, String> newMetadataFamily = null;
+		HashMap<String, Object> newMetadataFamily = null;
 		
 		if(currentMetadata.get(familyKey) == null) {
-			newMetadataFamily = new HashMap<String, String>();
+			newMetadataFamily = new HashMap<String, Object>();
 			
 			if(nonRetrievableFamilies.contains(family)) {
 				System.err.println("Not retrieving from family "+family);

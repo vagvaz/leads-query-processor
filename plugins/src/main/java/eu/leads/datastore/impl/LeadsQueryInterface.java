@@ -28,8 +28,10 @@ public class LeadsQueryInterface {
 		return true;
 	}
 
-    public static QueryResults send_query_and_wait(String sql) {
+    public static QueryResults sendQuery(String sql) {
     	QueryResults res = null;
+    	
+    	/* TIME */ long start = System.currentTimeMillis();
     	
     	try {
     		System.err.println(sql);
@@ -54,11 +56,8 @@ public class LeadsQueryInterface {
     	} catch (IOException | InterruptedException e) {
     		e.printStackTrace();
     	}
-        
-//    	if(res == null) {
-//    		res = new QueryResults();
-//    		res.setResult(new ArrayList<String>());
-//    	}
+    	
+    	/* TIME */ System.err.println("LeadsQueryInterface.sendQuery() time: "+((System.currentTimeMillis()-start)/1000.0)+" s");
     	
         return res;
 

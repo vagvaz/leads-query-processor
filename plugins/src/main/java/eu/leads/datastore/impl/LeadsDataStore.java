@@ -10,16 +10,22 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import org.json.JSONObject;
+
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 
 import eu.leads.datastore.AbstractDataStore;
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.URIVersion;
 import eu.leads.processor.web.QueryResults;
+import eu.leads.utils.LEADSUtils;
 
 public class LeadsDataStore extends AbstractDataStore {
 
+	private Map<String,List<String>> tablesColumns = new HashMap<>();
 	
 	public LeadsDataStore(Properties mapping, int port, String... hosts) {
 		super(mapping);
@@ -28,6 +34,9 @@ public class LeadsDataStore extends AbstractDataStore {
 		
 		System.out.printf("Bzzzzzzzz "+connected+" Connected to host: %s:%d\n", 
 				hosts[0], port);
+		
+		listColumnsPerTable();
+		System.out.println(tablesColumns);
 	}
 
 	@Override
@@ -39,7 +48,7 @@ public class LeadsDataStore extends AbstractDataStore {
 		
 		String queryP01 = "SELECT * FROM " + family;
 		//
-		String queryP02 = "\nWHERE ";
+		String queryP02 = " WHERE ";
 		//
 		String queryP03 = "uri = '" + uri + "'";
 		//
@@ -48,9 +57,9 @@ public class LeadsDataStore extends AbstractDataStore {
 			queryP04 += " AND ts < " + beforeTimestamp;
 		}
 		//
-		String queryP05 = "\nORDER BY ts DESC";
+		String queryP05 = " ORDER BY ts DESC";
 		//
-		String queryP06 = "\nLIMIT " + lastVersions;
+		String queryP06 = " LIMIT " + lastVersions;
 		//
 		String query = queryP01+queryP02+queryP03+queryP04+queryP05+queryP06;
 
@@ -63,20 +72,20 @@ public class LeadsDataStore extends AbstractDataStore {
 //			rs = new TreeSet<Row>();
 //		}
 		QueryResults rs;
-		rs = LeadsQueryInterface.send_query_and_wait(query);
+		rs = LeadsQueryInterface.sendQuery(query);
 		
 		if(rs == null || rs.getResult().size() == 0) {
 			reverse = true;
 			//
 			queryP04 = "";
 			//
-			queryP05 = "\nORDER BY ts ASC";
+			queryP05 = " ORDER BY ts ASC";
 			//
 			query = queryP01+queryP02+queryP03+queryP04+queryP05+queryP06;
 
 			System.out.println(query);
 			
-			rs = LeadsQueryInterface.send_query_and_wait(query);		
+			rs = LeadsQueryInterface.sendQuery(query);		
 		}
 		
 		if(rs != null) {
@@ -117,11 +126,24 @@ public class LeadsDataStore extends AbstractDataStore {
 	public boolean putLeadsResourceMDFamily(String uri, String ts,
 			String family, List<Cell> cells) {
 		
+		List<String> fullColumnsList = tablesColumns.get(family);
 		List<String> columnsList = new ArrayList<String>();
 		List<Object> valuesList  = new ArrayList<Object>();
 		for(Cell cell : cells) {
-			columnsList.add(cell.getKey());
-			valuesList.add(cell.getValue());
+			String columnName = cell.getKey();
+			Object value = cell.getValue();
+			//
+			columnsList.add(columnName);
+			//
+			if(LEADSUtils.isNumber(value))
+				valuesList.add(value);
+			else
+				valuesList.add("'"+value+"'");
+			fullColumnsList.remove(columnName);
+		}
+		for(String columnName : fullColumnsList) {
+			columnsList.add(columnName);
+			valuesList.add("NULL");
 		}
 		
 		int i=0;
@@ -130,12 +152,12 @@ public class LeadsDataStore extends AbstractDataStore {
 		//
 		String queryP02 = family;
 		//
-		String queryP03 = "\n (uri, ts, ";
+		String queryP03 = "  (uri, ts, ";
 		//
 		String queryP04 = "";
-		for(i=0; i<cells.size()-1; i++)
+		for(i=0; i<columnsList.size()-1; i++)
 			queryP04 += columnsList.get(i) + ", ";
-		queryP04 += columnsList.get(i) + ")\n";
+		queryP04 += columnsList.get(i) + ") ";
 		//
 		String queryP05 = "VALUES (";
 		//
@@ -144,14 +166,14 @@ public class LeadsDataStore extends AbstractDataStore {
 		String queryP07 = ts + ", ";
 		//
 		String queryP08 = "";
-		for(i=0; i<cells.size()-1; i++)
-			queryP08 += "'%s', ";
-		queryP08 += "'%s');";
+		for(i=0; i<columnsList.size()-1; i++)
+			queryP08 += "%s, ";
+		queryP08 += "%s);";
 		String query = queryP01+queryP02+queryP03+queryP04+queryP05+queryP06+queryP07+queryP08;
 		
 		query = String.format(query,valuesList.toArray());
 		
-		QueryResults rs = LeadsQueryInterface.send_query_and_wait(query);
+		QueryResults rs = LeadsQueryInterface.sendQuery(query);
 		if(rs == null || rs.getResult().size() == 0)
 			return false;		
 		
@@ -164,9 +186,9 @@ public class LeadsDataStore extends AbstractDataStore {
 
 		HashMap<String, List<Object>> returnMap = new HashMap<String, List<Object>>();
 		
-		String queryP01 = "SELECT * FROM " + mapping.getProperty("leads_resourcepart");
+		String queryP01 = "SELECT * FROM " + mapping.getProperty("leads_resourceparts");
 		//
-		String queryP02 = "\nWHERE ";
+		String queryP02 = " WHERE ";
 		//
 		String queryP03 = "uri = '" + uri + "'";
 		//
@@ -180,7 +202,7 @@ public class LeadsDataStore extends AbstractDataStore {
 		
 		System.out.println(query);
 
-		QueryResults rs = LeadsQueryInterface.send_query_and_wait(query);
+		QueryResults rs = LeadsQueryInterface.sendQuery(query);
 		
 		if(rs != null) {
 			for(String row : rs.getResult()) {
@@ -205,12 +227,12 @@ public class LeadsDataStore extends AbstractDataStore {
 		
 		String queryP01 = "INSERT INTO ";
 		//
-		String queryP02 = mapping.getProperty("leads_resourcepart");
+		String queryP02 = mapping.getProperty("leads_resourceparts");
 		//
-		String queryP03 = "\n (uri, ts, partid, ";
+		String queryP03 = "  (uri, ts, partid, ";
 		//
 		String queryP04 = mapping.getProperty("leads_resourcepart-type") + ", ";
-		queryP04       += mapping.getProperty("leads_resourcepart-value") + ")\n";
+		queryP04       += mapping.getProperty("leads_resourcepart-value") + ") ";
 		//
 		for(Entry<String, Object> partTypeValues : partsTypeValuesMap.entrySet()) {
 			String queryP05 = "VALUES ";
@@ -233,7 +255,7 @@ public class LeadsDataStore extends AbstractDataStore {
 			System.out.printf(query, value.toString());
 			
 			System.out.println();
-			QueryResults rs = LeadsQueryInterface.send_query_and_wait(query);
+			QueryResults rs = LeadsQueryInterface.sendQuery(query);
 			if(rs == null || rs.getResult().size() == 0)
 				return false;
 		}
@@ -251,10 +273,10 @@ public class LeadsDataStore extends AbstractDataStore {
 		List<Map<String,Object>> returnMapsList = new ArrayList<>();
 		
 		String query = "SELECT * FROM " + mapping.getProperty("leads_keywords")
-				+ "\nWHERE keywords = '" + element + "'";
+				+ " WHERE keywords = '" + element + "'";
 		System.out.println(query);
 		
-		QueryResults rs = LeadsQueryInterface.send_query_and_wait(query);
+		QueryResults rs = LeadsQueryInterface.sendQuery(query);
 		
 		if(rs != null) {
 			for(String row : rs.getResult()) {
@@ -296,12 +318,12 @@ public class LeadsDataStore extends AbstractDataStore {
 		//
 		String queryP02 = mapping.getProperty("leads_keywords");
 		//
-		String queryP03 = "\n (uri, ts, partid, keywords, ";
+		String queryP03 = "  (uri, ts, partid, keywords, ";
 		//
 		String queryP04 = "";
 		for(i=0; i<cells.size()-1; i++)
 			queryP04 += columnsList.get(i) + ", ";
-		queryP04 += columnsList.get(i) + ")\n";
+		queryP04 += columnsList.get(i) + ") ";
 		//
 		String queryP05 = "VALUES (";
 		//
@@ -310,12 +332,12 @@ public class LeadsDataStore extends AbstractDataStore {
 		String queryP07 = ", ";
 		for(i=0; i<cells.size()-1; i++)
 			queryP07 += "'" + valuesList.get(i) + "', ";
-		queryP07 += "'" + valuesList.get(i) + "')\n";
+		queryP07 += "'" + valuesList.get(i) + "') ";
 		//
 		String query = queryP01+queryP02+queryP03+queryP04+queryP05+queryP06+queryP07;
 		
 		System.out.println(query);
-		QueryResults rs = LeadsQueryInterface.send_query_and_wait(query);
+		QueryResults rs = LeadsQueryInterface.sendQuery(query);
 		if(rs == null || rs.getResult().size() == 0)
 			return false;
 		
@@ -328,7 +350,7 @@ public class LeadsDataStore extends AbstractDataStore {
 		
 		String queryP01 = "SELECT uri FROM " + mapping.getProperty("leads_core");
 		//
-		String queryP02 = "\nWHERE ";
+		String queryP02 = " WHERE ";
 		//
 		String queryP03 = mapping.getProperty("leads_core-fqdnurl") + " = '" + dirUri + "'";
 		//
@@ -336,7 +358,7 @@ public class LeadsDataStore extends AbstractDataStore {
 		
 		System.out.println(query);
 
-		QueryResults rs = LeadsQueryInterface.send_query_and_wait(query);
+		QueryResults rs = LeadsQueryInterface.sendQuery(query);
 		
 		if(rs != null) {
 			for(String row : rs.getResult()) {
@@ -363,5 +385,44 @@ public class LeadsDataStore extends AbstractDataStore {
 	public Object getFamilyStorageHandle(String familyName) {
 		throw new UnsupportedOperationException("Use eu.leads.processor.web.WebServiceClient singleton for this storage");
 	}
+	
+	/*
+	 * PRIVATE METHODS
+	 */
 
+	private void listColumnsPerTable() {
+		Set<Object> keySet = mapping.keySet();
+		List<Object> keyList = new ArrayList<>(keySet);
+		
+		List<Object> tableList = LEADSUtils.getMatchingStrings(keyList, "((?!-).)*");
+		keyList.removeAll(tableList);
+		
+		for(Object obj : tableList) {
+			String tableAlias = obj.toString();
+			String tableName = mapping.getProperty(tableAlias);
+			final List<Object> objList = LEADSUtils.getMatchingStrings(keyList, tableAlias+"-"+"((?!-).)*");
+			List<String> columnsList = new ArrayList<String>() {{ for(Object o : objList) add(mapping.getProperty(o.toString())); }};
+			tablesColumns.put(tableName, columnsList);
+			keyList.removeAll(columnsList);
+		}
+	}
+
+	@Override
+	public List<String> getUsersKeywordsList() {
+		List<String> keywords = new ArrayList<String>();
+		
+		QueryResults rs = LeadsQueryInterface.sendQuery("SELECT * FROM default.adidas_keywords");
+		
+		if(rs != null) {
+			for(String row : rs.getResult()) {
+				JSONObject jsonRow 	= new JSONObject(row);
+				
+				String keyword		= jsonRow.getString("default.adidas_keywords.keywords");
+				keywords.add(keyword.toLowerCase());
+			}
+		}
+		
+		return keywords;
+	}
+	
 }

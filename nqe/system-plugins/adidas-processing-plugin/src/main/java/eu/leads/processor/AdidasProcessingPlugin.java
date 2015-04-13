@@ -7,6 +7,7 @@ import java.util.List;
 import eu.leads.PropertiesSingleton;
 import eu.leads.datastore.DataStoreSingleton;
 import eu.leads.infext.proc.realtime.env.pojo.PageProcessingPojo;
+import eu.leads.infext.python.PZSStart;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.PluginInterface;
@@ -57,36 +58,21 @@ public class AdidasProcessingPlugin implements PluginInterface {
 //	      
 //	      // READ Configuration for the plugin
 	      PropertiesSingleton.setResourcesDir(config.getString("resources_path"));
-//	      // TODO something more ??
-//	      
-//	      try {
+
 	      if(pageProcessingPojo == null)
 	    	  pageProcessingPojo = new PageProcessingPojo();
-//		  } catch (Exception e) {
-//			  e.printStackTrace();
-//			  //TODO
-//		  }
-////	      try {
-////	      System.setOut(outputFile("/data/leads.out"));
-////	      System.setErr(outputFile("/data/leads.err"));
-//	      System.out.println("Let's start the party!");
-////	      } catch (java.io.FileNotFoundException e) {
-////	         e.printStackTrace();
-////	      }
-//	      
-//	      if(!isPZSStarted) {
-//		      // Start Python ZeroMQ Server processes!
-//		      List<String> endpoints = config.getList("pzsEndpoints");
-//		      String pythonPath = "PYTHONPATH="+config.getString("pythonPath");
-//		      String commandBase = "/usr/bin/python -m eu.leads.infext.python.CLAPI.pzs ";
-//		      String[] envp = {pythonPath};
-//			  for(int i=0; i<endpoints.size(); i++) {
-//		    	  String endpoint = endpoints.get(i);
-//		    	  String command  = commandBase+endpoint;
-//		    	  Runtime.getRuntime().exec(command, envp);
-//			  }
-//			  isPZSStarted = true;
+
+//	      try {
+//	      	 System.setOut(outputFile("/data/leads.out"));
+//	      	 System.setErr(outputFile("/data/leads.err"));
+//	      	 System.out.println("Let's start the party!");
+//	      } catch (java.io.FileNotFoundException e) {
+//	         e.printStackTrace();
 //	      }
+      
+	      // START Python ZeroMQ Server!
+	      PZSStart.start(config);
+	      
       } 
       catch (Exception e) {
     	  System.out.println("Exception during initializing the plugin!");
@@ -132,10 +118,9 @@ public class AdidasProcessingPlugin implements PluginInterface {
 			
 			String content = webpage.getAttribute("body");
 			String timestamp = new Long(System.currentTimeMillis()).toString();
-			HashMap<String,String> cacheColumns = new HashMap<>();
+			HashMap<String,Object> cacheColumns = new HashMap<>();
 			cacheColumns.put("default.content.content", content);
-			cacheColumns.put("default.content.ts", timestamp);
-				
+			
 			// Here Do the heavy processing stuff
 			System.out.println("########:"+getClassName().toString() + " calls a processing POJO on a key " + key);
 			pageProcessingPojo.execute(uri, timestamp, table, cacheColumns);
@@ -166,75 +151,5 @@ public class AdidasProcessingPlugin implements PluginInterface {
    public void setConfiguration(Configuration config) {
       this.configuration = config;
    }
-//	
-//	  private String id;
-//	  private Cache targetCache;
-//	  private List<String> attributes;
-//	  private Logger log = LoggerFactory.getLogger(AdidasProcessingPlugin.class);
-//
-//	  @Override
-//	  public String getId() {
-//	    return id;
-//	  }
-//
-//	  @Override
-//	  public void setId(String s) {
-//	    this.id = s;
-//	  }
-//
-//	  @Override
-//	  public String getClassName() {
-//	    return AdidasProcessingPlugin.class.getCanonicalName();
-//	  }
-//
-//	  @Override
-//	  public void initialize(Configuration configuration, InfinispanManager infinispanManager) {
-//	    String targetCacheName = configuration.getString("cache");
-//	    if ( targetCacheName != null || !targetCacheName.equals("") ) {
-//	      targetCache = (Cache) infinispanManager.getPersisentCache(targetCacheName);
-//	    } else {
-//	      System.out.println("TargetCache is not defined using default for not breaking");
-//	      targetCache = (Cache) infinispanManager.getPersisentCache("default");
-//	    }
-//	    attributes = configuration.getList("attributes");
-//	  }
-//
-//	  @Override
-//	  public void cleanup() {
-//
-//	  }
-//
-//	  @Override
-//	  public void modified(Object key, Object value, Cache<Object, Object> objectObjectCache) {
-//		  System.out.println("YXY");
-//	    Tuple t = new Tuple(value.toString());
-//	    processTuple(key.toString(), t);
-//	  }
-//
-//	  protected void processTuple(String key, Tuple tuple) {
-//	    tuple.keepOnly(attributes);
-//	    targetCache.put(key, tuple.asString());
-//	  }
-//
-//	  @Override
-//	  public void created(Object key, Object value, Cache<Object, Object> objectObjectCache) {
-//		  System.out.println("YXX");
-//	    Tuple t = new Tuple(value.toString());
-//	    processTuple(key.toString(), t);
-//	  }
-//
-//	  @Override
-//	  public void removed(Object o, Object o2, Cache<Object, Object> objectObjectCache) {
-//
-//	  }
-//
-//	  @Override
-//	  public Configuration getConfiguration() {
-//	    return null;
-//	  }
-//
-//	  @Override
-//	  public void setConfiguration(Configuration configuration) {
-//
-//	  }
+
 }

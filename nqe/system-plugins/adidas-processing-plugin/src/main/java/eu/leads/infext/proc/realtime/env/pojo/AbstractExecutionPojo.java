@@ -22,6 +22,6 @@ public abstract class AbstractExecutionPojo {
 		StdLoggerRedirect.initLogging();
 	}
 
-	public abstract void execute(String uri, String timestamp, String cacheName, HashMap<String, String> cacheColumns);
+	public abstract void execute(String uri, String timestamp, String cacheName, HashMap<String, Object> cacheColumns);
 	
 }

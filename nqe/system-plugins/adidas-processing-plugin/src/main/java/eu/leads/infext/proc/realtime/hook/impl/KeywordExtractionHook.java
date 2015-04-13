@@ -19,12 +19,12 @@ public class KeywordExtractionHook extends AbstractHook {
 	private RelevanceScore relevanceScorer = new RelevanceScore();
 	
 	@Override
-	public HashMap<String, HashMap<String, String>> retrieveMetadata(
+	public HashMap<String, HashMap<String, Object>> retrieveMetadata(
 			String url, String timestamp,
-			HashMap<String, HashMap<String, String>> currentMetadata,
+			HashMap<String, HashMap<String, Object>> currentMetadata,
 			HashMap<String, MDFamily> editableFamilies) {
 		
-		HashMap<String, HashMap<String, String>> newMetadata = new HashMap<>();		
+		HashMap<String, HashMap<String, Object>> newMetadata = new HashMap<>();		
 
 		putLeadsMDIfNeeded(url, "new", "leads_core", 0, null, currentMetadata, newMetadata, null);
 		putLeadsMDIfNeeded(url, "new", "leads_resourceparts", 0, null, currentMetadata, newMetadata, null);
@@ -34,31 +34,34 @@ public class KeywordExtractionHook extends AbstractHook {
 	}
 
 	@Override
-	public HashMap<String, HashMap<String, String>> process(
-			HashMap<String, HashMap<String, String>> parameters) {
+	public HashMap<String, HashMap<String, Object>> process(
+			HashMap<String, HashMap<String, Object>> parameters) {
 
-		HashMap<String, HashMap<String, String>> result = new HashMap<>();
-		HashMap<String, String> newKeywordsResult = new HashMap<>();
-		HashMap<String,HashMap<String, String>> newSpecificKeywordsResultsList = new HashMap<String,HashMap<String,String>>();
+		HashMap<String, HashMap<String, Object>> result = new HashMap<>();
+		HashMap<String, Object> newKeywordsResult = new HashMap<>();
+		HashMap<String,HashMap<String, Object>> newSpecificKeywordsResultsList = new HashMap<String,HashMap<String, Object>>();
 		
 		List<String> keywordsList = KeywordsListSingleton.getInstance().getKeywordsList();
 		
+		/* TEMP */ keywordsList.add("Grand Prix"); 
+		
 		DocumentKeywordSearch keywordSearch = new DocumentKeywordSearch();
 		
-		HashMap<String, String> newResourceParts = parameters.get("new:leads_resourceparts");
-		HashMap<String, String> newCore = parameters.get("new:leads_core");
-		HashMap<String, String> newMD = parameters.get("new");
+		HashMap<String, Object> newResourceParts = parameters.get("new:leads_resourceparts");
+		HashMap<String, Object> newCore = parameters.get("new:leads_core");
+		HashMap<String, Object> newMD = parameters.get("new");
 		
-		for(Entry<String, String> resPart : newResourceParts.entrySet()) {
+		for(Entry<String, Object> resPart : newResourceParts.entrySet()) {
 			String resTypeNIndex = resPart.getKey();
 			String resType  = resTypeNIndex.substring(0, resTypeNIndex.length()-4); // cut ':xxx'
 			String resIndex = resTypeNIndex.substring(resTypeNIndex.length()-3);
-			String resValue = resPart.getValue();
+			Object resValue = resPart.getValue();
 			
-			keywordSearch.addDocument(resType, resIndex, resValue);
+			if(resValue != null)
+				keywordSearch.addDocument(resType, resIndex, resValue.toString());
 		}
 		
-		String lang = newCore.get(mapping.get(("leads_core-lang")));
+		String lang = newCore.get(mapping.get(("leads_core-lang"))).toString();
 		
 		for(String keywords : keywordsList) {
 			String [] keywordsArray = keywords.split("\\s+");
@@ -68,7 +71,7 @@ public class KeywordExtractionHook extends AbstractHook {
 			
 			for(UrlTimestamp partId : partsIds.keySet()) {
 				String key = partId.url+":"+partId.timestamp;
-				String content = newResourceParts.get(key);
+				String content = newResourceParts.get(key).toString();
 				
 				Double sentimentScore = Double.NaN;
 				Double relevanceScore = Double.NaN;
@@ -85,9 +88,9 @@ public class KeywordExtractionHook extends AbstractHook {
 				
 				String keyWord = key+":"+keywords;
 				
-				HashMap<String, String> keywordMap = new HashMap<>();
-				keywordMap.put(mapping.getProperty("leads_keywords-sentiment"), sentimentScore.toString());
-				keywordMap.put(mapping.getProperty("leads_keywords-relevance"), relevanceScore.toString());
+				HashMap<String, Object> keywordMap = new HashMap<>();
+				keywordMap.put(mapping.getProperty("leads_keywords-sentiment"), sentimentScore);
+				keywordMap.put(mapping.getProperty("leads_keywords-relevance"), relevanceScore);
 				
 				newSpecificKeywordsResultsList.put("new:leads_keywords:"+keyWord, keywordMap);
 				newKeywordsResult.put(keyWord, null);

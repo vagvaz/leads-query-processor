@@ -109,6 +109,12 @@ public abstract class AbstractDataStore {
 	public abstract List<String> getFQDNList();
 	
 	/**
+	 * 	
+	 * @return
+	 */
+	public abstract List<String> getUsersKeywordsList();
+	
+	/**
 	 * Returns an object representing family storage handle, in case some method runs some custom retrieval/storage functionality
 	 * 
 	 * @return
