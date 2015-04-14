@@ -72,16 +72,17 @@ public class ReplayTool {
                   Schema schema = new Schema.Parser().parse(schemaJson);
 
                   // rebuild GenericData.Record
-                  DatumReader<Object> reader = new GenericDatumReader<>(schema);
+                  DatumReader<WebPage> reader = new GenericDatumReader<>(WebPage.SCHEMA$);
                   Decoder decoder = DecoderFactory.get().directBinaryDecoder(dataFileIS, null);
-                  GenericData.Record page = new GenericData.Record(schema);
+                  WebPage page = new WebPage();
                   reader.read(page, decoder);
                   System.err.println("Read key: " + new String(key) + "\n" + "value " + page.toString());
 
                   if(load)
                   {
-                     Tuple t  = nutchTransformer.transform(page);
-                     webpageCache.put(webpageCache.getName()+":"+t.getAttribute("url"),t);
+//                     Tuple t  = nutchTransformer.transform(page);
+//                     webpageCache.put(webpageCache.getName()+":"+t.getAttribute("url"),t);
+                     nutchCache.put(key,page);
                   }
                }
                currentCounter++;
