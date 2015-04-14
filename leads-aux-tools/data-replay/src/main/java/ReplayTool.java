@@ -87,10 +87,12 @@ public class ReplayTool {
 
                      if (load) {
                         Tuple t = nutchTransformer.transform(page);
-                        webpageCache.put(webpageCache.getName() + ":" + t.getAttribute("url"), t);
-                        counter++;
-                        if(counter % 1000 == 0){
-                           System.err.println("loaded " + counter + " tuples");
+                        if(t.getAttribute("body") != null) {
+                           webpageCache.put(webpageCache.getName() + ":" + t.getAttribute("url"), t);
+                           counter++;
+                           if (counter % 1000 == 0) {
+                              System.err.println("loaded " + counter + " tuples");
+                           }
                         }
                      }
                   }
