@@ -36,6 +36,11 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
   transient  protected Map<String,String> outputMap;
   transient  protected Map<String,List<JsonObject>> targetsMap;
   transient protected EmbeddedCacheManager manager;
+  transient protected XMLConfiguration xmlConfiguration;
+
+  public LeadsMapper() {
+
+  }
 
   public LeadsMapper(JsonObject configuration) {
     this.conf = configuration;
@@ -45,6 +50,12 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
   public void  setCacheManager(EmbeddedCacheManager manager){
     this.manager = manager;
   }
+
+  public void initialize(XMLConfiguration xmlConfiguration) {
+    this.xmlConfiguration = xmlConfiguration;
+
+  }
+
   public void initialize() {
 
     conf = new JsonObject(configString);
@@ -162,7 +173,5 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
     }
   }
 
-  public void initialize(XMLConfiguration pluginConfig) {
 
-  }
 }

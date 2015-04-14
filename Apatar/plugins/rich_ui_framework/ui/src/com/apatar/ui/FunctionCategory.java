@@ -31,5 +31,5 @@
 package com.apatar.ui;
 
 public enum FunctionCategory {
-	String, Date_and_Time, Boolean, ALL, General, Number, Constant, Function, Math, Aggregation_functions , Map_Reduce , Filter, Limit, Sort
+	String, Date_and_Time, Boolean, ALL, General, Number, Constant, Function, Math, Aggregation_functions , Map_Reduce , Filter, Limit, Sort, Sliding_window, Version
 }

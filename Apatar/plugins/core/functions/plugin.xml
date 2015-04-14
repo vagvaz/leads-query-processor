@@ -286,6 +286,18 @@
 		<parameter id="classFunction" value="com.apatar.functions.constant.LimitFunction" />
 	</extension>
 	
+	<extension plugin-id="com.apatar.core" point-id="functionConstFactory" id="functionFactoryConstSliding_window">
+		<parameter id="classFunction" value="com.apatar.functions.constant.Sliding_windowFunction" />
+	</extension>
+	
+	<extension plugin-id="com.apatar.core" point-id="functionConstFactory" id="functionFactoryConstVersionFrom">
+		<parameter id="classFunction" value="com.apatar.functions.constant.VersionFromFunction" />
+	</extension>
+	
+	<extension plugin-id="com.apatar.core" point-id="functionConstFactory" id="functionFactoryConstVersionTo">
+		<parameter id="classFunction" value="com.apatar.functions.constant.VersionToFunction" />
+	</extension>
+	
 	<!--extension plugin-id="com.apatar.core" point-id="functionConstFactory" id="functionFactoryConstDateTime">
 		<parameter id="classFunction" value="com.apatar.functions.constant.DateTimeFunction" />
 	</extension-->

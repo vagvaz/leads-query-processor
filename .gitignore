@@ -1,5 +1,6 @@
 conf/
 !/common/src/main/java/eu/leads/processor/conf
+!/common/src/main/resources/conf
 *.iml
 .idea/
 .project/

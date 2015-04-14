@@ -5,6 +5,7 @@ import eu.leads.processor.common.plugins.PluginPackage;
 import eu.leads.processor.common.utils.FSUtilities;
 import eu.leads.processor.common.utils.storage.LeadsStorage;
 import eu.leads.processor.common.utils.storage.LeadsStorageFactory;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.plugins.PluginInterface;
 import org.apache.commons.configuration.ConfigurationException;
@@ -18,10 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
@@ -38,18 +36,20 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
 
   transient private JsonObject conf;
   private String configString;
-  transient private final EmbeddedCacheManager manager;
+  private String UUIDname;
+  transient private EmbeddedCacheManager manager;
   transient private ClusterInfinispanManager imanager;
   transient private Cache pluginsCache;
   transient private  Cache targetCache;
   transient private String targetCacheName;
-  transient private Logger log = LoggerFactory.getLogger(PluginRunnerFilter.class) ;
+
+  transient private Logger log ;//= LoggerFactory.getLogger(PluginRunnerFilter.class) ;
   transient private PluginInterface plugin;
   transient private String pluginsCacheName;
   transient private String pluginName;
   transient private List<EventType> type;
-  transient private boolean isInitialized = false;
-  transient private LeadsStorage storageLayer = null;
+  transient private boolean isInitialized ;
+  transient private LeadsStorage storageLayer;// = null;
   transient private String user;
   public PluginRunnerFilter(EmbeddedCacheManager manager,String confString){
     log = LoggerFactory.getLogger(manager.getAddress().toString()+":"+PluginRunnerFilter.class.toString());
@@ -60,15 +60,45 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
     log.error("initJson conf");
     this.conf = new JsonObject(configString);
     log.error("init Imanager");
-    imanager = new ClusterInfinispanManager(manager);
+    imanager = new ClusterInfinispanManager(InfinispanClusterSingleton.getInstance().getManager().getCacheManager());
+
     log.error("init");
+    UUIDname = UUID.randomUUID().toString();
+
+    System.err.println(UUIDname + " Construct " + confString);
+    storageLayer=null;
     initialize();
   }
 
+  private void writeObject(ObjectOutputStream o)
+          throws IOException {
+    o.defaultWriteObject(); //is enough for no transient objects but anyway
+    o.writeUTF(UUIDname);
+    o.writeUTF(configString);
+    System.err.println(UUIDname+" Serialize " + configString);
+  }
+
+  private void readObject(ObjectInputStream i)
+          throws IOException, ClassNotFoundException {
+    i.defaultReadObject();
+    UUIDname =  i.readUTF();
+    configString =  i.readUTF();
+    isInitialized = false;
+    UUIDname = UUID.randomUUID().toString();
+    System.err.println(UUIDname+" DeSerialize " + configString);
+  }
+
   private void initialize() {
-    isInitialized = true;
+    System.err.println("Initilize " + UUIDname);
+    log = LoggerFactory.getLogger(PluginRunnerFilter.class);
+    log = LoggerFactory.getLogger(UUIDname + " PluginRunner." + pluginName + ":" +  pluginsCacheName);
+            this.manager = InfinispanClusterSingleton.getInstance().getManager().getCacheManager();
+    this.conf = new JsonObject(configString);
+    imanager = new ClusterInfinispanManager(manager);
+
     log.error("get activePluginCache");
     pluginsCacheName = conf.getString("activePluginCache");//StringConstants.PLUGIN_ACTIVE_CACHE);
+
     log.error("get pluginName");
     pluginName = conf.getString("pluginName");
     log.error("get user");
@@ -92,11 +122,11 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
       type.add(MODIFIED);
     }
 
-    log.error("init pluginscache");
+    log.error("init pluginscache "  + UUIDname);
     pluginsCache = (Cache) imanager.getPersisentCache(pluginsCacheName);
     log.error("init logger");
-    log = LoggerFactory.getLogger(manager.getAddress().toString()+ " PluginRunner."+pluginName+":"+
-                                    pluginsCacheName);
+//    log = LoggerFactory.getLogger(managerAddress+ " PluginRunner."+pluginName+":"+
+//                                    pluginsCacheName);
     log.error("init storage");
     String storagetype = this.conf.getString("storageType");
     Properties storageConfiguration = new Properties();
@@ -116,6 +146,9 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
     initializePlugin(pluginsCache, pluginName, user);
     log.error("Initialized plugin " + pluginName + " on " + targetCacheName);
     System.err.println("Initialized plugin " + pluginName + " on " + targetCacheName);
+
+    isInitialized = true;
+
   }
 
 
@@ -211,18 +244,61 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
   public boolean accept(Object key, Object oldValue, Metadata oldMetadata, Object newValue,
                          Metadata newMetadata,
                          org.infinispan.notifications.cachelistener.filter.EventType eventType) {
+
+
     if(!isInitialized)
       initialize();
+    System.err.println(UUIDname + " Accept: Manager Address " + manager.getAddress());
+    log.error( UUIDname + "Accept: Manager Address " + manager.getAddress());
+
+    if(key==null){
+      log.error("null key:");
+      return false;
+    }
+
+    if(newValue==null) {
+      System.out.println("newValue is null key:" + (String) key);
+      log.error("Accept newValue is null key:" + (String)key);
+      return false;
+    }
+//    else{
+//      System.out.println("key:" + (String)key+", newValue is " + newValue);
+//      log.info("Accept, key:" + (String)key+", newValue is " + newValue);
+//    }
     String o1 = (String)key;
-    String value = (String)newValue;
+//    Object value = newValue;
+    Object value = null;
+    switch (eventType.getType()) {
+      case CACHE_ENTRY_CREATED:
+        value = newValue;
+        break;
+      case CACHE_ENTRY_REMOVED:
+        value = oldValue;
+        break;
+      case CACHE_ENTRY_MODIFIED:
+        value = newValue;
+        break;
+      default:
+        break;
+    }
+
+    if(value instanceof Tuple){
+      value = value.toString();
+    }
     switch (eventType.getType()) {
       case CACHE_ENTRY_CREATED:
         if(type.contains(CREATED))
           plugin.created(key, value, targetCache);
         break;
       case CACHE_ENTRY_REMOVED:
-        if(type.contains(REMOVED))
+        if(type.contains(REMOVED)) {
+          if(oldValue==null) {
+            log.error("Accept old value is null");
+            return false;
+          }
+//          value = (String) oldValue;
           plugin.removed(key, value, targetCache);
+        }
         break;
       case CACHE_ENTRY_MODIFIED:
         if(type.contains(MODIFIED))

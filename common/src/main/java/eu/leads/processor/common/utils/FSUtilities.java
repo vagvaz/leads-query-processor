@@ -19,7 +19,12 @@ public class FSUtilities {
     public static void flushToDisk(String path, byte[] data) {
         File f = new File(path);
         f.getParentFile().mkdirs();
-        try {
+      try {
+        f.createNewFile();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      try {
             FileOutputStream os = new FileOutputStream(f);
             OutputStreamWriter writer = new OutputStreamWriter(os);
             os.write(data);

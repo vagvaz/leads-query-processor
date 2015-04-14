@@ -113,29 +113,44 @@ public class MathUtils {
 
    public static boolean lessThan(JsonObject left, JsonObject right) {
       String type = left.getObject("body").getObject("datum").getString("type");
-      if(type.startsWith("TEXT")){
-         String leftValue = getTextFrom(left);
+      String rightType = right.getObject("body").getObject("datum").getString("type");
+      if(type.startsWith(rightType.substring(0, 3))) {
+         if (type.startsWith("TEXT")) {
+            String leftValue = getTextFrom(left);
 
-                 //left.getObject("body").getObject("datum").getObject("body").getString("val");
-         String rightValue = getTextFrom(right);
-         //right.getObject("body").getObject("datum").getObject("body").getString("val");
-         return leftValue.compareTo(rightValue) < 0;
+            //left.getObject("body").getObject("datum").getObject("body").getString("val");
+            String rightValue = getTextFrom(right);
+            //right.getObject("body").getObject("datum").getObject("body").getString("val");
+            return leftValue.compareTo(rightValue) < 0;
+         } else if (type.startsWith("INT")) {
+            Long leftValue = left.getObject("body").getObject("datum").getObject("body").getLong("val");
+            Long rightValue = right.getObject("body").getObject("datum").getObject("body").getLong("val");
+            return leftValue.compareTo(rightValue) < 0;
+         } else if (type.startsWith("FLOAT") || type.startsWith("DOUBLE")) {
+            Number leftValue = left.getObject("body").getObject("datum").getObject("body").getNumber("val");
+            Number rightValue = right.getObject("body").getObject("datum").getObject("body").getNumber("val");
+            return leftValue.doubleValue() < rightValue.doubleValue();
+         } else {
+            System.out.println("Unknonw type " + type);
+            Object leftValue = left.getObject("body").getObject("datum").getObject("body").getValue("val");
+            Object rightValue = right.getObject("body").getObject("datum").getObject("body").getValue("val");
+            return leftValue.toString().compareTo(rightValue.toString()) < 0;
+         }
       }
-      else if (type.startsWith("INT")){
-         Long leftValue = left.getObject("body").getObject("datum").getObject("body").getLong("val");
-         Long rightValue = right.getObject("body").getObject("datum").getObject("body").getLong("val");
-         return leftValue.compareTo(rightValue) < 0;
-      }
-      else if (type.startsWith("FLOAT") || type.startsWith("DOUBLE")){
-         Number leftValue = left.getObject("body").getObject("datum").getObject("body").getNumber("val");
-         Number rightValue = right.getObject("body").getObject("datum").getObject("body").getNumber("val");
-         return leftValue.doubleValue() < rightValue.doubleValue();
-      }
-      else{
-         System.out.println("Unknonw type " + type);
-         Object leftValue = left.getObject("body").getObject("datum").getObject("body").getValue("val");
-         Object rightValue = right.getObject("body").getObject("datum").getObject("body").getValue("val");
-         return leftValue.toString().compareTo(rightValue.toString()) < 0;
+      else
+      {
+         if(type.equals("NULL_TYPE")){
+            return false;
+         }
+         else if (rightType.equals("NULL_TYPE")) {
+            return false;
+         }
+         else {
+            System.out.println("Unknonw type " + type);
+            Object leftValue = left.getObject("body").getObject("datum").getObject("body").getValue("val");
+            Object rightValue = right.getObject("body").getObject("datum").getObject("body").getValue("val");
+            return leftValue.toString().compareTo(rightValue.toString()) < 0;
+         }
       }
    }
     public static Object getValueFrom(JsonObject json){
@@ -153,6 +168,12 @@ public class MathUtils {
         else if(datum.getString("type").equals("BLOB")){
             result = getTextFrom(json.getObject("expr"));
         }
+        else if (datum.getString("type").equals("NULL_TYPE")){
+           result = null;
+        }
+        else if (datum.getString("type").equals("VERSION")){
+
+        }
         else
         {
             System.err.println("Unknown type");
@@ -165,6 +186,9 @@ public class MathUtils {
         if(value.getString("type").equals("FIELD"))
         {
             result = value.getObject("body").getObject("datum").getObject("body").getValue("val").toString();
+        }
+        else if (value.getString("type").equals("NULL_TYPE")){
+           result = "null";
         }
         else if(value.getString("type").equals("CONST") ){
             byte[] patternBytes = null;
@@ -194,48 +218,80 @@ public class MathUtils {
 
     public static boolean lessEqualThan(JsonObject left, JsonObject right) {
       String type = left.getObject("body").getObject("datum").getString("type");
-      if (type.startsWith("TEXT")) {
-          String leftValue = getTextFrom(left);
+       String rightType = right.getObject("body").getObject("datum").getString("type");
+       if(type.startsWith(rightType.substring(0,3))) {
+          if (type.startsWith("TEXT")) {
+             String leftValue = getTextFrom(left);
 
-          //left.getObject("body").getObject("datum").getObject("body").getString("val");
-          String rightValue = getTextFrom(right);
-         return leftValue.compareTo(rightValue) <= 0;
-      } else if (type.startsWith("INT")) {
-         Long leftValue = left.getObject("body").getObject("datum").getObject("body").getLong("val");
-         Long rightValue = right.getObject("body").getObject("datum").getObject("body").getLong("val");
-         return leftValue.compareTo(rightValue) <= 0;
-      } else if (type.startsWith("FLOAT") || type.startsWith("DOUBLE")) {
-         Number leftValue = left.getObject("body").getObject("datum").getObject("body").getNumber("val");
-         Number rightValue = right.getObject("body").getObject("datum").getObject("body").getNumber("val");
-         return leftValue.doubleValue() <= rightValue.doubleValue();
-      } else {
-         System.out.println("Unknonw type leq " + type);
-         Object leftValue = left.getObject("body").getObject("datum").getObject("body").getValue("val");
-         Object rightValue = right.getObject("body").getObject("datum").getObject("body").getValue("val");
-         return leftValue.toString().compareTo(rightValue.toString()) <= 0;
-      }
+             //left.getObject("body").getObject("datum").getObject("body").getString("val");
+             String rightValue = getTextFrom(right);
+             return leftValue.compareTo(rightValue) <= 0;
+          } else if (type.startsWith("INT")) {
+             Long leftValue = left.getObject("body").getObject("datum").getObject("body").getLong("val");
+             Long rightValue = right.getObject("body").getObject("datum").getObject("body").getLong("val");
+             return leftValue.compareTo(rightValue) <= 0;
+          } else if (type.startsWith("FLOAT") || type.startsWith("DOUBLE")) {
+             Number leftValue = left.getObject("body").getObject("datum").getObject("body").getNumber("val");
+             Number rightValue = right.getObject("body").getObject("datum").getObject("body").getNumber("val");
+             return leftValue.doubleValue() <= rightValue.doubleValue();
+          } else {
+             System.out.println("Unknonw type leq " + type);
+             Object leftValue = left.getObject("body").getObject("datum").getObject("body").getValue("val");
+             Object rightValue = right.getObject("body").getObject("datum").getObject("body").getValue("val");
+             return leftValue.toString().compareTo(rightValue.toString()) <= 0;
+          }
+       }
+       else {
+          if(type.equals("NULL_TYPE")){
+             return false;
+          }
+          else if (rightType.equals("NULL_TYPE")) {
+             return false;
+          }
+          else {
+             System.out.println("Unknonw type " + type);
+             Object leftValue = left.getObject("body").getObject("datum").getObject("body").getValue("val");
+             Object rightValue = right.getObject("body").getObject("datum").getObject("body").getValue("val");
+             return leftValue.toString().compareTo(rightValue.toString()) < 0;
+          }
+       }
    }
    public static boolean equals(JsonObject left, JsonObject right) {
       String type = left.getObject("body").getObject("datum").getString("type");
-      if (type.startsWith("TEXT")) {
-         String leftValue = getTextFrom(left);
+      String rightType = right.getObject("body").getObject("datum").getString("type");
+      if(type.startsWith(rightType.substring(0,3))) {
+         if (type.startsWith("TEXT")) {
+            String leftValue = getTextFrom(left);
 
-         //left.getObject("body").getObject("datum").getObject("body").getString("val");
-         String rightValue = getTextFrom(right);
-         return leftValue.compareTo(rightValue) == 0;
-      } else if (type.startsWith("INT")) {
-         Long leftValue = left.getObject("body").getObject("datum").getObject("body").getLong("val");
-         Long rightValue = right.getObject("body").getObject("datum").getObject("body").getLong("val");
-         return leftValue.compareTo(rightValue) == 0;
-      } else if (type.startsWith("FLOAT") || type.startsWith("DOUBLE")) {
-         Number leftValue = left.getObject("body").getObject("datum").getObject("body").getNumber("val");
-         Number rightValue = right.getObject("body").getObject("datum").getObject("body").getNumber("val");
-         return leftValue.doubleValue() == rightValue.doubleValue();
-      } else {
-         System.out.println("Unknonw type equals " + type);
-         Object leftValue = left.getObject("body").getObject("datum").getObject("body").getValue("val");
-         Object rightValue = right.getObject("body").getObject("datum").getObject("body").getValue("val");
-         return leftValue.toString().compareTo(rightValue.toString()) == 0;
+            //left.getObject("body").getObject("datum").getObject("body").getString("val");
+            String rightValue = getTextFrom(right);
+            return leftValue.compareTo(rightValue) == 0;
+         } else if (type.startsWith("INT")) {
+            Long leftValue = left.getObject("body").getObject("datum").getObject("body").getLong("val");
+            Long rightValue = right.getObject("body").getObject("datum").getObject("body").getLong("val");
+            return leftValue.compareTo(rightValue) == 0;
+         } else if (type.startsWith("FLOAT") || type.startsWith("DOUBLE")) {
+            Number leftValue = left.getObject("body").getObject("datum").getObject("body").getNumber("val");
+            Number rightValue = right.getObject("body").getObject("datum").getObject("body").getNumber("val");
+            return leftValue.doubleValue() == rightValue.doubleValue();
+         } else {
+            System.out.println("Unknonw type equals " + type);
+            Object leftValue = left.getObject("body").getObject("datum").getObject("body").getValue("val");
+            Object rightValue = right.getObject("body").getObject("datum").getObject("body").getValue("val");
+            return leftValue.toString().compareTo(rightValue.toString()) == 0;
+         }
+      }
+      else{
+         if(type.equals("NULL_TYPE")){
+            return right.getObject("body").getObject("datum").getObject("body").getValue("val") == null;
+         }
+         else if( rightType.equals("NULL_TYPE"))
+         {
+            return left.getObject("body").getObject("datum").getObject("body").getValue("val") == null;
+         }
+         else {
+            return false;
+         }
       }
    }
 
@@ -250,6 +306,8 @@ public class MathUtils {
    public static boolean like(JsonObject leftValue, JsonObject rightValue, JsonObject value) {
       boolean result = false;
       byte[] patternBytes = null;
+      if(leftValue.getString("type").equals("NULL_TYPE") || rightValue.getString("type").equals("NULL_TYPE"))
+         return true;
       if(leftValue.getString("type").equals("CONST")){
         JsonObject body = leftValue.getObject("body").getObject("datum").getObject("body");
         org.vertx.java.core.json.JsonArray bytes = body.getArray("bytes");

@@ -56,6 +56,8 @@ public class HDFSStorage implements LeadsStorage {
     try {
       hdfsConfiguration = new org.apache.hadoop.conf.Configuration(false);
       hdfsConfiguration.set("fs.defaultFS", configuration.getProperty("hdfs.url"));
+      hdfsConfiguration.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+      hdfsConfiguration.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
       fileSystem = FileSystem.get(hdfsConfiguration);
 
       if(!fileSystem.exists(basePath))
@@ -76,6 +78,8 @@ public class HDFSStorage implements LeadsStorage {
     try {
       SequenceFile.Reader reader = new SequenceFile.Reader(hdfsConfiguration);
       HDFSByteChunk chunk = new HDFSByteChunk();
+      IntWritable key = new IntWritable();
+      reader.next(key,chunk);
       reader.getCurrentValue(chunk);
       result = chunk.getData();
     } catch (IOException e) {

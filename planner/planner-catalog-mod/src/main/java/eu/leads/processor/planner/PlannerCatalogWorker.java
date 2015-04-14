@@ -3,6 +3,7 @@ package eu.leads.processor.planner;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ServiceException;
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.conf.LQPConfiguration;
 import leads.tajo.catalog.LeadsCatalog;
 import org.apache.hadoop.fs.Path;
 import org.apache.tajo.catalog.*;
@@ -33,7 +34,8 @@ public class PlannerCatalogWorker extends Verticle {
   @Override
   public void start() {
     super.start();
-
+    LQPConfiguration.initialize();
+    LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component", "catalog-worker");
     //Read configuration
     JsonObject config = container.config();
     TajoConf conf = new TajoConf();
@@ -120,8 +122,8 @@ public class PlannerCatalogWorker extends Verticle {
           System.out.println("Found Builtin Functions  = " + k );
       }
       for (FunctionDesc funcDesc : builtin) {
-        container.logger().info(funcDesc.toString());
-        System.out.println(funcDesc.getFuncType());
+        container.logger().info(funcDesc.toString()+" " + funcDesc.getFuncType());
+       // System.out.println(funcDesc.getFuncType());
         catalog.createFunction(funcDesc);
       }
     } catch (ServiceException e) {
@@ -144,7 +146,7 @@ public class PlannerCatalogWorker extends Verticle {
     webPagesSchema.addColumn("responsetime",Type.INT4);
     webPagesSchema.addColumn("links",Type.TEXT);
     webPagesSchema.addColumn("title",Type.TEXT);
-    webPagesSchema.addColumn("published",Type.DATE);
+    webPagesSchema.addColumn("published",Type.INT8);
     webPagesSchema.addColumn("pagerank",Type.FLOAT8);
     webPagesSchema.addColumn("sentiment",Type.FLOAT8);
 
@@ -260,6 +262,7 @@ public class PlannerCatalogWorker extends Verticle {
       schema.addColumn("fqdnurl", Type.TEXT);
       schema.addColumn("lang", Type.TEXT);
       schema.addColumn("maincontent", Type.TEXT);
+      schema.addColumn("contentdate",Type.TEXT);
       schema.addColumn("oldsentiment", Type.TEXT);
       schema.addColumn("textcontent", Type.TEXT);
       schema.addColumn("type", Type.TEXT);

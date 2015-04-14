@@ -409,6 +409,7 @@ public class PluginManager {
     //    manager.addListener(listener, cacheName);
     RemoteCacheManager remoteCacheManager = createRemoteCacheManager();
     RemoteCache<Object, Object> remoteCache = remoteCacheManager.getCache(cacheName);
+
     //
     System.out.println("Using cache " + cacheName);
     //

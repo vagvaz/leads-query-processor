@@ -16,6 +16,7 @@
       <module>topk-plugin</module>
       <module>synopses-test-plugin</module>
       <module>adidas-processing-plugin</module>
+      <module>nutch-transform-plugin</module>
    </modules>
 
 

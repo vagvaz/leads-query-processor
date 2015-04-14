@@ -16,8 +16,8 @@ public class PrintUtilities {
 
     public static void printMap(Map<?, ?> map) {
         System.out.println("Map{\n");
-        for (Map.Entry<?, ?> e : map.entrySet()) {
-            System.out.println("\t " + e.getKey().toString() + "--->" + e.getValue() + "\n");
+        for (Object  e : map.keySet()) {
+            System.out.println("\t " + e.toString() + "--->" + map.get(e).toString() + "\n");
         }
         System.out.println("end of map }");
     }
@@ -57,13 +57,13 @@ public class PrintUtilities {
    }
 
     public static void printList(List<?> list) {
-        System.out.println("List{");
+        System.err.println("List{");
         Iterator<?> it = list.iterator();
         while (it.hasNext()) {
-            System.out.println("\t" + it.next().toString());
+            System.err.println("\t" + it.next().toString());
         }
 
-        System.out.println("end of list}");
+        System.err.println("end of list}");
     }
 
     public static void printIterable(Iterator<Object> testCache) {

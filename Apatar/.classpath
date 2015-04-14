@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" output="plugins/core/version/bin" path="plugins/core/version/src"/>
+	<classpathentry kind="src" output="plugins/core/sliding_window/bin" path="plugins/core/sliding_window/src"/>
 	<classpathentry kind="src" output="plugins/core/mapReduce/bin" path="plugins/core/mapReduce/src"/>
 	<classpathentry kind="src" output="plugins/core/groupByNew/bin" path="plugins/core/groupByNew/src"/>
 	<classpathentry kind="src" output="plugins/core/limit/bin" path="plugins/core/limit/src"/>

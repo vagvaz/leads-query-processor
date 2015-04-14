@@ -112,6 +112,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
       com.initialize(id, gr, null, leadsHandler, leadsHandler, vertx);
       bus.registerHandler(id + ".process", this);
       LQPConfiguration.initialize();
+      LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component", "nqe");
       persistence = InfinispanClusterSingleton.getInstance().getManager();
       JsonObject msg = new JsonObject();
       msg.putString("processor", id + ".process");

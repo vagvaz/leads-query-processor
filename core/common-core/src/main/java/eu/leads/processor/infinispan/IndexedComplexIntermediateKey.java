@@ -2,7 +2,7 @@ package eu.leads.processor.infinispan;
 
 import org.hibernate.search.annotations.*;
 
-import java.io.Serializable;
+import java.io.*;
 
 /**
  * Created by vagvaz on 3/7/15.
@@ -14,7 +14,7 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
 
    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
    private String node;
-   @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
+   @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES,name="key")
    private String key;
 
    public IndexedComplexIntermediateKey(String site, String node) {
@@ -27,13 +27,39 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
       this.node = node;
       this.key = key;
    }
+   public IndexedComplexIntermediateKey(IndexedComplexIntermediateKey other){
+      this(other.getSite(),other.getNode(),other.getKey());
+   }
 
-  public IndexedComplexIntermediateKey() {
+   public IndexedComplexIntermediateKey() {
 
-  }
+   }
+   private void readObject(ObjectInputStream in
+   ) throws ClassNotFoundException, IOException {
+      this.site = in.readUTF();
+      this.node = in.readUTF();
+      this.key = in.readUTF();
+   }
 
+   /**
+    * This is the default implementation of writeObject.
+    * Customise if necessary.
+    */
+   private void writeObject(ObjectOutputStream out ) throws IOException {
+      out.writeUTF(site);
+      out.writeUTF(node);
+      out.writeUTF(key);
+   }
 
-  public String getSite() {
+   public void unserialize(byte[] asbytes) throws IOException {
+      ByteArrayInputStream input = new ByteArrayInputStream(asbytes);
+      ObjectInputStream ios = new ObjectInputStream(input);
+      this.site = ios.readUTF();
+      this.node = ios.readUTF();
+      this.key = ios.readUTF();
+   }
+
+   public String getSite() {
       return site;
    }
 
@@ -59,7 +85,7 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
 
    @Override
    public boolean equals(Object o) {
-      if (this == o) return true;
+
       if (o == null || getClass() != o.getClass()) return false;
 
       IndexedComplexIntermediateKey that = (IndexedComplexIntermediateKey) o;
@@ -72,16 +98,16 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
 
    @Override
    public int hashCode() {
-      return key.hashCode();
+      int result = key.hashCode();
+      return result;
    }
 
    @Override
    public int compareTo(Object o) {
-      if (this == o) return 0;
       if (o == null || getClass() != o.getClass()) return -1;
 
       IndexedComplexIntermediateKey that = (IndexedComplexIntermediateKey) o;
-      int result = 0;
+      int result = -1;
       if (site != null){
          result = site.compareTo(that.site);
          if(result != 0)
@@ -99,7 +125,15 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
       }
       return -1;
    }
-   String getUniqueKey(){
+   public String getUniqueKey(){
       return site+node+key;
+   }
+
+   @Override public String toString() {
+      return "IndexedComplexIntermediateKey{" +
+                     "site='" + site + '\'' +
+                     ", node='" + node + '\'' +
+                     ", key='" + key + '\'' +
+                     '}';
    }
 }

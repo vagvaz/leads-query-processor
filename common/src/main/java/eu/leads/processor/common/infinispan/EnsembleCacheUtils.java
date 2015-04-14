@@ -1,42 +1,69 @@
 package eu.leads.processor.common.infinispan;
 
+import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.commons.api.BasicCache;
-
-import java.util.Map;
+import org.infinispan.context.Flag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by vagvaz on 3/7/15.
  */
 public class EnsembleCacheUtils {
 
-   public static void putToCache(Map cache, Object key, Object value){
+   static Logger log  = LoggerFactory.getLogger(EnsembleCacheUtils.class);
+   public static void putToCache(BasicCache cache, Object key, Object value){
       boolean isok = false;
       while(!isok) {
          try {
-            cache.put(key, value);
-            isok =true;
-         }catch(NullPointerException npe){
-           isok = true;
-           System.out.println("NPE: cache " + cache.toString() + " \nkey: " + key.toString()+" value: " +
-                                value.toString()+"\n-----");
-         }
-         catch (Exception e) {
+           if(cache != null) {
+              if(key == null || value == null){
+                 log.error("SERIOUS PROBLEM with key/value null key: " + (key==null) + " value " + (value==null) );
+                 if(key != null)
+                 {
+                    log.error("key " + key.toString());
+                 }
+                 if(value != null){
+                    log.error("value: " + value);
+                 }
+                 isok = true;
+                 continue;
+              }
+             cache.put(key,value);
+
+              log.error("Successful " + key);
+              isok = true;
+           }
+           else {
+             log.error("CACHE IS NULL IN PUT TO CACHE for " + key.toString() + " " + value.toString());
+             isok = true;
+           }
+         }catch (Exception e) {
             isok = false;
+            log.error("PUT TO CACHE " + e.getMessage() + " " + key);
+            log.error("key " + (key == null) + " value " + (value == null) + " cache " + (cache == null) + " log " + (log == null));
+
+            try {
+               Thread.sleep(5);
+            } catch (InterruptedException e1) {
+               e1.printStackTrace();
+            }
             System.err.println("PUT TO CACHE " + e.getMessage());
          }
       }
    }
 
   public static <KOut> void putIfAbsentToCache(BasicCache cache, KOut key, KOut value) {
-    boolean isok = false;
-    while(!isok) {
-      try {
-        cache.put(key, value);
-        isok =true;
-      } catch (Exception e) {
-        isok = false;
-        System.err.println("PUT TO CACHE " + e.getMessage());
-      }
-    }
+      putToCache(cache,key,value);
+//    boolean isok = false;
+//    while(!isok) {
+//      try {
+//        cache.put(key, value);
+//        isok =true;
+//      } catch (Exception e) {
+//        isok = false;
+//        System.err.println("PUT TO CACHE " + e.getMessage());
+//      }
+//    }
   }
 }

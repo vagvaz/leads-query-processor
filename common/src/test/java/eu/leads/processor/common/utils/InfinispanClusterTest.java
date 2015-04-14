@@ -13,6 +13,7 @@ import java.util.Map;
 public class InfinispanClusterTest extends TestCase {
     public static void main(String[] args) {
         LQPConfiguration.initialize();
+       LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component", "catalog-worker");
        InfinispanManager manager = InfinispanClusterSingleton.getInstance().getManager();
        Map<String,String> map = manager.getPersisentCache(StringConstants.QUERIESCACHE);
        Map<String,String> map2 = manager.getPersisentCache("default.webpages");
@@ -20,6 +21,7 @@ public class InfinispanClusterTest extends TestCase {
                map2.put("1","11");
                map.put("1","11");
                map.put("22","222");
+       LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component", "planner");
        InfinispanManager manager2 = CacheManagerFactory.createCacheManager();
        map2 = manager2.getPersisentCache("default.webpages");
        map = manager2.getPersisentCache(StringConstants.QUERIESCACHE);

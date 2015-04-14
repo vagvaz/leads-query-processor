@@ -40,6 +40,7 @@ public class LeadsMapperCallable<K, V, kOut, vOut> extends LeadsBaseCallable<K,V
   @Override
   public void initialize(){
 //    collector.initializeCache(inputCache.getCacheManager());
+    super.initialize();
     collector.setOnMap(true);
     collector.setManager(this.embeddedCacheManager);
     collector.setEmanager(emanager);

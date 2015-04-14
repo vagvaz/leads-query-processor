@@ -77,8 +77,8 @@ public static void main(String[] args) throws Exception {
     Mymodule.init_connection("127.0.0.1", 5998);
 //        String line = "select count(sentiment) as pipo,links,url as lala,pagerank as foobar,count(domainname) as papari   from webpages where lala = 'ddsaf' and foobar =9 group by links,lala, foobar having papari > 5 order by papari";
     // "select dept.deptname,dept.tmsp from dept join ( select score,phone,deptname,sumtest(score) as tmsp from score group by score,phone, deptname) s on dept.deptname = s.deptname and s.tmsp = dept.tmsp";
-    String line = "select w.url,w.sentiment from webpages as w join entities as e  on e.webpageurl=w.url where w.sentiment=e.sentimentscore and w.title =e.name and w.body = e.webpageurl";
-//   String line = "insert into entities values('a','dfs',728)";
+//    String line = "select w.url,w.sentiment from webpages as w join entities as e  on e.webpageurl=w.url where w.sentiment=e.sentimentscore and w.title =e.name and w.body = e.webpageurl";
+   String line = "insert into entities values('a',NULL,NULL)";
    Tuple t = new Tuple();
    t.setAttribute("default.e.webpageurl","mywebpage");
    t.setAttribute("default.e.sentimentscore",0.32342);

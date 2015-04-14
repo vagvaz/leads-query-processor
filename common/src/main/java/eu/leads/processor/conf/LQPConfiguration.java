@@ -207,7 +207,7 @@ public class LQPConfiguration {
      * @return Value for property 'microClusterName'.
      */
     public String getMicroClusterName() {
-        return configuration.getString("node.name");
+        return configuration.getString("node.cluster");
     }
 
     /**
