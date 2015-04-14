@@ -21,6 +21,9 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by vagvaz on 4/11/15.
@@ -36,7 +39,7 @@ public class NutchLocalListener {
    private String nutchOutputFileName = "nutchWebBackup";
    private String component;
    private  long globalCounter = 0;
-   private long tupleCounter = 0;
+//   private long tupleCounter = 0;
    private long nutchCounter = 0;
    private ObjectOutputStream tupleDataWriter;
    private ObjectOutputStream tupleKeysWriter;
@@ -48,15 +51,17 @@ public class NutchLocalListener {
    private FileOutputStream nutchData = null;
    private FileOutputStream nutchKeys = null;
    private HashMap<String,Tuple> webpagesTuple;
+   private HashMap<byte[], GenericData.Record> nutchTuples;
    private static Logger log = LoggerFactory.getLogger(NutchLocalListener.class);
-   private long nextRoll = 900;
-
+   private long nextRoll = 1000;
+   private ScheduledExecutorService scheduler;
    public NutchLocalListener(InfinispanManager manager, String outputCacheName,String outputPrefix,String component){
       this.manager = manager;
       this.outputCacheName = outputCacheName;
       this.component = component;
       this.prefix = outputPrefix;
-
+      webpagesTuple = new HashMap<>();
+      nutchTuples = new HashMap<>();
       outputCache = (Cache) this.manager.getPersisentCache(outputCacheName);
       List<String> mappings = LQPConfiguration.getInstance().getConfiguration().getList("nutch.mappings");
       Map<String,String> nutchToLQE = new HashMap<String,String>();
@@ -67,8 +72,36 @@ public class NutchLocalListener {
       }
       transformer = new NutchTransformer(nutchToLQE);
 //      rolloverFiles();
+       scheduler = Executors.newScheduledThreadPool(1);
+       scheduler.scheduleAtFixedRate(new Runnable() {
+          @Override
+          public void run() {
+             spillAndRollOver();
+          }
+       }, 1, 1, TimeUnit.MINUTES);
    }
 
+   public void spillAndRollOver(){
+      synchronized(this) {
+         System.err.println("SPitting");
+         for (Map.Entry<String, Tuple> tuple : webpagesTuple.entrySet()){
+            outputToFile(tuple.getKey(),tuple.getValue());
+         }
+
+         for(Map.Entry<byte[],GenericData.Record> rec : nutchTuples.entrySet()){
+            outputToFile(rec.getKey(),rec.getValue());
+         }
+         assert (webpagesTuple.size() == nutchTuples.size());
+         if(nutchTuples.size() > 0  || globalCounter == 0){
+            rolloverFiles();
+         }
+
+         nutchTuples.clear();
+         webpagesTuple.clear();
+
+
+      }
+   }
    public void outputToFile(String key, Tuple tuple){
       try {
          tupleKeysWriter.writeUTF(key + "\n");
@@ -102,11 +135,11 @@ public class NutchLocalListener {
       try {
          if(tupleOutputData == null || tupleOutputKeys == null || nutchData == null || nutchKeys == null) {
 
-            File file = getOrCreate(prefix + "/" + component+"-"+ webpageFileName + "-" + tupleCounter + ".data");
+            File file = getOrCreate(prefix + "/" + component+"-"+ webpageFileName + "-" + nutchCounter + ".data");
 
             tupleOutputData = new FileOutputStream(file);
             tupleDataWriter = new ObjectOutputStream(  (tupleOutputData));
-            file = getOrCreate(prefix + "/" + component + "-"+ webpageFileName + "-" + tupleCounter + ".keys");
+            file = getOrCreate(prefix + "/" + component + "-"+ webpageFileName + "-" + nutchCounter + ".keys");
             tupleOutputKeys = new FileOutputStream(file);
             tupleKeysWriter =new ObjectOutputStream((tupleOutputKeys));
             file = getOrCreate(prefix + "/" + component + "-"+ nutchOutputFileName + "-" + nutchCounter + ".keys");
@@ -118,13 +151,13 @@ public class NutchLocalListener {
 
          }
          else{
-            tupleCounter++;
+
             nutchCounter++;
-            File file = getOrCreate(prefix + "/" + component + "-"+ webpageFileName + "-" + tupleCounter + ".data");
+            File file = getOrCreate(prefix + "/" + component + "-"+ webpageFileName + "-" + nutchCounter + ".data");
             tupleDataWriter.close();
             tupleOutputData = new FileOutputStream(file);
             tupleDataWriter = new ObjectOutputStream( (tupleOutputData));
-            file = getOrCreate(prefix + "/" + component + "-"+ webpageFileName + "-" + tupleCounter + ".keys");
+            file = getOrCreate(prefix + "/" + component + "-"+ webpageFileName + "-" + nutchCounter + ".keys");
             tupleKeysWriter.close();
             tupleOutputKeys = new FileOutputStream(file);
             tupleKeysWriter =new ObjectOutputStream( (tupleOutputKeys));
@@ -192,13 +225,16 @@ public class NutchLocalListener {
 
 
          if(globalCounter % nextRoll == 0){
-            rolloverFiles();
+//            rolloverFiles();
+            spillAndRollOver();
          }
          globalCounter  = (globalCounter+1) % (Long.MAX_VALUE-1);
          //output to outputFile for our repr
-         outputToFile(outputCacheName+":"+object.getAttribute("url"),object);
+       webpagesTuple.put(outputCacheName+":"+object.getAttribute("url"),object);
+       nutchTuples.put((byte[])key, page);
+//         outputToFile(outputCacheName+":"+object.getAttribute("url"),object);
 
-         outputToFile((byte[])key, page);
+//         outputToFile((byte[])key, page);
 
 //      }
    }
