@@ -7,8 +7,8 @@
 		<prefix>path</prefix>
 	</hdfs>
 	<scheduler>chedulerip</scheduler>
-	<deploymentType>multicloud</deploymentType>
-	<adresses>obtain</adresses> <!-- localhost, 5.147.254.198-->
+	<deploymentType>singlecloud</deploymentType>
+	<adresses>localhost</adresses> <!--obtain, localhost, 5.147.254.198-->
 	<startUpDelay>20</startUpDelay> <!--delay between modules startup (seconds) -->
 	<processor>
 		<version>1.0-SNAPSHOT</version>
