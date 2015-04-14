@@ -55,6 +55,8 @@ public class NutchLocalListener {
    private static Logger log = LoggerFactory.getLogger(NutchLocalListener.class);
    private long nextRoll = 1000;
    private ScheduledExecutorService scheduler;
+   private boolean atleastonce = false;
+
    public NutchLocalListener(InfinispanManager manager, String outputCacheName,String outputPrefix,String component){
       this.manager = manager;
       this.outputCacheName = outputCacheName;
@@ -78,12 +80,12 @@ public class NutchLocalListener {
           public void run() {
              spillAndRollOver();
           }
-       }, 1, 1, TimeUnit.MINUTES);
+       }, 4, 4, TimeUnit.MINUTES);
    }
 
    public void spillAndRollOver(){
       synchronized(this) {
-         System.err.println("SPitting");
+
          for (Map.Entry<String, Tuple> tuple : webpagesTuple.entrySet()){
             outputToFile(tuple.getKey(),tuple.getValue());
          }
@@ -92,7 +94,9 @@ public class NutchLocalListener {
             outputToFile(rec.getKey(),rec.getValue());
          }
          assert (webpagesTuple.size() == nutchTuples.size());
-         if(nutchTuples.size() > 0  || globalCounter == 0){
+         if(nutchTuples.size() > 0  ||  !atleastonce){
+            atleastonce = true;
+            System.err.println("SPitting");
             rolloverFiles();
          }
 
@@ -221,7 +225,7 @@ public class NutchLocalListener {
 //         byte[] array = encoder.encode(object);
          //output to outputCache Tuple repr
          outputCache.put(outputCacheName + ":" + object.getAttribute("url"), object);
-         System.err.println("outputting to " + outputCacheName + "tuple " + object.toString());
+
 
 
          if(globalCounter % nextRoll == 0){
@@ -230,8 +234,11 @@ public class NutchLocalListener {
          }
          globalCounter  = (globalCounter+1) % (Long.MAX_VALUE-1);
          //output to outputFile for our repr
-       webpagesTuple.put(outputCacheName+":"+object.getAttribute("url"),object);
-       nutchTuples.put((byte[])key, page);
+       if(page.get("content") != null && object.getAttribute("body") != null) {
+          System.err.println("outputting to " + outputCacheName + "tuple " + object.toString());
+          webpagesTuple.put(outputCacheName + ":" + object.getAttribute("url"), object);
+          nutchTuples.put((byte[]) key, page);
+       }
 //         outputToFile(outputCacheName+":"+object.getAttribute("url"),object);
 
 //         outputToFile((byte[])key, page);
