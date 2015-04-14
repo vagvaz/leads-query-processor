@@ -180,7 +180,7 @@ public class NutchLocalListener {
 
 
       GenericData.Record page = (GenericData.Record) value;
-      System.err.println("LIstener  " +  new String((byte[]) key) + " " + value.getClass().toString());
+      //System.err.println("LIstener  " +  new String((byte[]) key) + " " + value.getClass().toString());
 
 //      if(page!=null) {
          Tuple object = transformer.transform(page);
