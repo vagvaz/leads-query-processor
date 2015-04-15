@@ -27,12 +27,21 @@ public class PZSStart {
 	    	  if(isPortAvailable(port)) {
 		    	  String command  = commandBase+endpoint;
 		    	  Process p = Runtime.getRuntime().exec(command, envp);
-		    	  if(p.isAlive())
+		    	  if(isProcessRunning(p))
 		    		  System.err.println("Python ZeroMQ Server STARTED at "+endpoint);
 	    	  }
 	    	  else
 	    		  System.err.println("Python ZeroMQ Server already RUNNING at "+endpoint);
 		  }
+	}
+	
+	private static boolean isProcessRunning(Process process) {
+	    try {
+	        process.exitValue();
+	        return false;
+	    } catch (Exception e) {
+	        return true;
+	    }
 	}
 	
 	private static boolean isPortAvailable(int port) {
