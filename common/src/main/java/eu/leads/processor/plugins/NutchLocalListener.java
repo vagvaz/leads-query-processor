@@ -224,7 +224,6 @@ public class NutchLocalListener {
 //         BasicBSONEncoder encoder = new BasicBSONEncoder();
 //         byte[] array = encoder.encode(object);
          //output to outputCache Tuple repr
-         outputCache.put(outputCacheName + ":" + object.getAttribute("url"), object);
 
 
 
@@ -238,6 +237,7 @@ public class NutchLocalListener {
           System.err.println("outputting to " + outputCacheName + "tuple " + object.toString());
           webpagesTuple.put(outputCacheName + ":" + object.getAttribute("url"), object);
           nutchTuples.put((byte[]) key, page);
+         outputCache.put(outputCacheName + ":" + object.getAttribute("url"), object);
        }
 //         outputToFile(outputCacheName+":"+object.getAttribute("url"),object);
 
