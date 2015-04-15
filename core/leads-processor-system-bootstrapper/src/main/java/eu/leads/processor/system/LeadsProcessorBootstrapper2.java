@@ -55,7 +55,7 @@ public class LeadsProcessorBootstrapper2 {
         componentsXml = new HashMap<>();
         componentsConf = new HashMap<>();
         componentsJson = new HashMap<>();
-        componentsInstances= new HashMap<>();
+        componentsInstances = new HashMap<>();
         screensIPmap = new HashMap<>();
 
         globalJson = new JsonObject();
@@ -79,7 +79,7 @@ public class LeadsProcessorBootstrapper2 {
         conf.addConfiguration(xmlConfiguration);
 
 
-        baseDir = getStringValue(conf, "baseDir", null, true); //FIX IT using pwd and configuration file path!
+        baseDir = getStringValue(conf, "baseDir", null, true); //FIX IT using pwd and configuration file path!?
         globalJson = checkandget(conf, "hdfs.user", globalJson, true);
         globalJson = checkandget(conf, "hdfs.prefix", globalJson, true);
         globalJson = checkandget(conf, "scheduler", globalJson, true);
@@ -96,15 +96,15 @@ public class LeadsProcessorBootstrapper2 {
             if (tmpAddrs != null)
                 for (String s : A) {
                     logger.info("key = " + s + " value = " + tmpAddrs.getObject(s).toString());
-                    JsonObject ooss=tmpAddrs.getObject(s);
+                    JsonObject ooss = tmpAddrs.getObject(s);
                     JsonObject openstacks = ooss.getObject("openstack");
 //                    for(int os=0;os<openstacks.size();os++){
 //                        JsonObject oos =openstacks.get(os);
-                    if(openstacks.getObject("leads-yarn-1")!=null){
+                    if (openstacks.getObject("leads-yarn-1") != null) {
                         JsonObject yarn1 = openstacks.getObject("leads-yarn-1");
                         JsonArray yarnpIps = yarn1.getArray("public_ips");
-                        logger.info("found  "+s+".openstack.leads-yarn-1");
-                        globalJson.putString("hdfsuri",   yarnpIps.get(0).toString()); //Fix it hardcode for the moment{
+                        logger.info("found  " + s + ".openstack.leads-yarn-1");
+                        globalJson.putString("hdfsuri", yarnpIps.get(0).toString()); //Fix it hardcode for the moment{
                     }
 //                    if(openstacks.get(0).getObject(s + ".openstack.")!=null){
 //
@@ -160,6 +160,8 @@ public class LeadsProcessorBootstrapper2 {
         JsonArray jallAddrs = new JsonArray();
         JsonArray jwebServiceAddrs = new JsonArray();
         JsonArray jcomponentsAddrs = new JsonArray();
+        JsonObject jwebServiceClusterAddrs = new JsonObject();
+        JsonObject jcomponetsClusterAddrs = new JsonObject();
 
         String deploymentType = getStringValue(conf, "deploymentType", "singlecloud", false);
         adresses = conf.getStringArray("adresses");
@@ -175,7 +177,7 @@ public class LeadsProcessorBootstrapper2 {
             for (String c : adresses)
                 jallAddrs.addString(c);
 
-            jwebServiceAddrs.add(jallAddrs.get(0));
+            jwebServiceAddrs.add(jallAddrs.get(0)); //TODO FIX is run for instances
 
             //predict where the components should be running
 
@@ -192,20 +194,32 @@ public class LeadsProcessorBootstrapper2 {
             for (String c : scheduled_components_run)
                 jcomponentsAddrs.addString(c);
 
-            webserviceJson = set_global_addresses(webserviceJson, jallAddrs, jwebServiceAddrs, jcomponentsAddrs);
-            log_sinkJson = set_global_addresses(log_sinkJson, jallAddrs, jwebServiceAddrs, jcomponentsAddrs);
+            //get env LEADS_CURRENT_CLUSTER and put the json arrays under it
+            String current_cluster = System.getenv("LEADS_CURRENT_CLUSTER");
+            if (current_cluster == null)
+                current_cluster = "LEADS_CURRENT_CLUSTER";
+
+            JsonObject JsonClouds = new JsonObject();
+            JsonClouds.putArray(current_cluster,jallAddrs);
+            globalJson.putObject("microclouds", JsonClouds);
+
+            jwebServiceClusterAddrs.putArray(current_cluster, jwebServiceAddrs);
+            jcomponetsClusterAddrs.putArray(current_cluster, jcomponentsAddrs);
+
+            webserviceJson = set_global_addresses(webserviceJson, jwebServiceClusterAddrs, jcomponetsClusterAddrs);
+            log_sinkJson = set_global_addresses(log_sinkJson, jwebServiceClusterAddrs, jcomponetsClusterAddrs);
 
             //Finally deploy modules !
             ip = 0;
-            System.out.println(" Deploying log-sink to Ip: " + adresses[ip]);
+            System.out.println(" Deploying log-sink to Ip: " + adresses[ip]); //TODO FIX is run for instances
             deployComponent("log-sink-module", log_sinkJson, adresses[ip]);
 
-            System.out.println(" Deploying webservice Ip: " + adresses[ip]);
+            System.out.println(" Deploying webservice Ip: " + adresses[ip]); //TODO FIX is run for instances
             deployComponent("processor-webservice", webserviceJson, adresses[ip]);
             //Deploy other modules
             for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
                 JsonObject modJson = componentsJson.get(e.getKey());
-                modJson = set_global_addresses(modJson, jallAddrs, jwebServiceAddrs, jcomponentsAddrs);
+                modJson = set_global_addresses(modJson, jwebServiceClusterAddrs, jcomponetsClusterAddrs);
                 for (int i = 0; i < componentsInstances.get(e.getKey()); i++) {
                     deployComponent(e.getKey(), modJson, adresses[ip]);
                     System.out.println("\nStarted : " + e.getKey() + " At: " + adresses[ip] + "Waiting for " + sleepTime + " seconds to start the next module.");
@@ -224,79 +238,88 @@ public class LeadsProcessorBootstrapper2 {
 
             //execute webservice in all clouds
 
-            HashSet<String> alladresses = new HashSet<>();
             //TODO
             //Verify that available nodes are accessible
 
             //predicted adresses of running  components
             //predict-prederermine webservice modules adresses //todo make also use of # of instances variable
+            JsonArray componentsInstancesNames = new JsonArray(); //An array that keeps the order of the components executed
+            for (Map.Entry<String, JsonObject> e : componentsJson.entrySet())
+                for (int i = 0; i < componentsInstances.get(e.getKey()); i++)
+                    componentsInstancesNames.addString(e.getKey());
 
+            JsonObject compAlladresses = new JsonObject();
+            JsonObject webserviceAlladresses = new JsonObject();
+
+            int instancesCnt = 0;
             for (Map.Entry<String, JsonArray> entry : allmcAddrs.entrySet()) {//TODO fix multicloud only with obtain
+                jwebServiceAddrs = new JsonArray();
                 JsonArray pAddrs = entry.getValue();
+                JsonArray clusterComponentsAddressed = new JsonArray();
+                JsonArray clusterWebServiceAddressed = new JsonArray();
                 if (pAddrs.size() == 0)
                     continue;
-                webservicesAddrs.add((String) pAddrs.get(0));
 
-                for (int s = 0; s < pAddrs.size(); s++) {
-                    alladresses.add((String) pAddrs.get(s));
-                    jallAddrs.addString((String) pAddrs.get(s));
+                for (int i = 0; i < pAddrs.size() && i < componentsInstances.get("webservice"); i++) {
+                    clusterWebServiceAddressed.addString((String) pAddrs.get(i));
+                    webservicesAddrs.add((String) pAddrs.get(i));
+                }
+                //for all available ips of current microcloud that are used save them to a set
+                for (int s = 0; s < pAddrs.size() && instancesCnt < componentsInstancesNames.size(); s++) {
+                    clusterComponentsAddressed.addString((String) pAddrs.get(s));
+                    logger.info("Curcomp" + componentsInstancesNames.get(instancesCnt) + " instances " + componentsInstances.get(componentsInstancesNames.get(instancesCnt)));
+
+
                     //Also write the cluster name in a text file into home dir ...
                     remoteExecute((String) pAddrs.get(s), "echo " + entry.getKey() + " > ~/micro_cloud.txt");
+                    instancesCnt++;
+                }
+                compAlladresses.putArray(entry.getKey(), clusterComponentsAddressed);
+                webserviceAlladresses.putArray(entry.getKey(), clusterWebServiceAddressed);
+                if (instancesCnt >= componentsInstancesNames.size()) {
+                    break;
                 }
             }
-
-            Set<String> scheduled_components_run = new HashSet<>();
-            adresses = alladresses.toArray(adresses); //Create an Array of all available adresses
-
-            //Add all possible compondend adresses to a set
-            ip = 0;
-            for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
-                for (int i = 0; i < componentsInstances.get(e.getKey()); i++) {
-                    scheduled_components_run.add(adresses[ip]);
-                    ip = (ip + 1) % adresses.length;
-                }
-            }
-            //extract the unique values from the set
-            for (String c : scheduled_components_run)
-                jcomponentsAddrs.addString(c);
-            for (String c :webservicesAddrs)
-                jwebServiceAddrs.addString(c);
             /////////////////
             //set also global variable adresses to
-            webserviceJson = set_global_addresses(webserviceJson, jallAddrs, jwebServiceAddrs, jcomponentsAddrs);
-            log_sinkJson = set_global_addresses(log_sinkJson, jallAddrs, jwebServiceAddrs, jcomponentsAddrs);
-
-            //deploy one log one webservice modules to each microcloud
+            webserviceJson = set_global_addresses(webserviceJson, webserviceAlladresses, compAlladresses);
+            log_sinkJson = set_global_addresses(log_sinkJson, webserviceAlladresses, compAlladresses);
+            instancesCnt = 0;
             for (Map.Entry<String, JsonArray> entry : allmcAddrs.entrySet()) {
                 JsonArray pAddrs = entry.getValue();
                 if (pAddrs.size() == 0)
                     continue;
 
-                System.out.println(" Deploying log-sink to: " + entry.getKey() + " Ip: " + pAddrs.get(0));
-                deployComponent("log-sink-module", log_sinkJson, pAddrs.get(0).toString());
+                //deploy at least one log one webservice modules to each microcloud
+                for (int i = 0; i < pAddrs.size() && i < componentsInstances.get("log-sink"); i++) {
+                    System.out.println(" Deploying log-sink to: " + entry.getKey() + " Ip: " + pAddrs.get(i));
+                    deployComponent("log-sink-module", log_sinkJson, pAddrs.get(i).toString());
+                }
+                for (int i = 0; i < pAddrs.size() && i < componentsInstances.get("webservice"); i++) {
 
-                System.out.println(" Deploying webservice to: " + entry.getKey() + " Ip: " + pAddrs.get(0));
-                deployComponent("processor-webservice", webserviceJson, pAddrs.get(0).toString());
+                    System.out.println(" Deploying webservice to: " + entry.getKey() + " Ip: " + pAddrs.get(i));
+                    deployComponent("processor-webservice", webserviceJson, pAddrs.get(i).toString());
+                }
                 //TODO Check if successfull deployment ...
-            }
-            //deploy all other components
-            ip = 0;
-            for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
-                JsonObject modJson = componentsJson.get(e.getKey());
-                modJson = set_global_addresses(modJson, jallAddrs, jwebServiceAddrs, jcomponentsAddrs);
-                for (int i = 0; i < componentsInstances.get(e.getKey()); i++) {
-                    deployComponent(e.getKey(), modJson, adresses[ip]);
-                    System.out.println("\nStarted : " + e.getKey() + " At: " + adresses[ip] + "Waiting for " + sleepTime + " seconds to start the next module.");
-                    ip = (ip + 1) % adresses.length;
+
+                //deploy all other components
+                for (int s = 0; s < pAddrs.size() && instancesCnt < componentsInstancesNames.size(); s++) {
+                    JsonObject modJson = componentsJson.get(componentsInstancesNames.get(instancesCnt));
+                    modJson = set_global_addresses(modJson, webserviceAlladresses, compAlladresses);
+                    deployComponent(componentsInstancesNames.get(instancesCnt).toString(), modJson, pAddrs.get(s).toString());
+                    System.out.println("\nStarted : " + componentsInstancesNames.get(instancesCnt) + " At: " + pAddrs.get(s).toString() + "Waiting for " + sleepTime + " seconds to start the next module.");
+                    instancesCnt++;
                 }
             }
         }
     }
 
-    private static JsonObject set_global_addresses(JsonObject modJson, JsonArray jallAddrs, JsonArray jwebServiceAddrs, JsonArray jcomponentsAddrs) {
-        modJson.putArray("webserviceAddrs", jwebServiceAddrs);
-        modJson.putArray("allAddrs", jallAddrs);
-        modJson.putArray("allComponentsAddrs", jcomponentsAddrs);
+    private static JsonObject set_global_addresses(JsonObject modJson, JsonObject jwebServiceAddrs, JsonObject jcomponentsAddrs) {
+        JsonObject global = modJson.getObject("global");
+        global.putObject("webserviceAddrs", jwebServiceAddrs);
+//        modJson.putArray("allAddrs", jallAddrs);
+        global.putObject("componentsAddrs", jcomponentsAddrs);
+        modJson.putObject("global", global);
         return modJson;
     }
 
@@ -476,7 +499,7 @@ public class LeadsProcessorBootstrapper2 {
             command += " -" + conf.getString("processor.vertxArg");
 
         runRemotely(modJson.getString("id"), ip, command);
-        for (int t = 0; t < sleepTime*2; t++) {
+        for (int t = 0; t < sleepTime * 2; t++) {
             System.out.print(".");
             try {
                 Thread.sleep(500);
