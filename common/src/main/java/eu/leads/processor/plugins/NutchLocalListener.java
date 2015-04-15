@@ -53,7 +53,7 @@ public class NutchLocalListener {
    private HashMap<String,Tuple> webpagesTuple;
    private HashMap<byte[], GenericData.Record> nutchTuples;
    private static Logger log = LoggerFactory.getLogger(NutchLocalListener.class);
-   private long nextRoll = 1000;
+   private long nextRoll = 50;
    private ScheduledExecutorService scheduler;
    private boolean atleastonce = false;
 
@@ -80,22 +80,27 @@ public class NutchLocalListener {
           public void run() {
              spillAndRollOver();
           }
-       }, 4, 4, TimeUnit.MINUTES);
+       }, 1, 1, TimeUnit.MINUTES);
    }
 
    public void spillAndRollOver(){
       synchronized(this) {
-
-         for (Map.Entry<String, Tuple> tuple : webpagesTuple.entrySet()){
-            outputToFile(tuple.getKey(),tuple.getValue());
-         }
-
-         for(Map.Entry<byte[],GenericData.Record> rec : nutchTuples.entrySet()){
-            outputToFile(rec.getKey(),rec.getValue());
-         }
          assert (webpagesTuple.size() == nutchTuples.size());
-         if(nutchTuples.size() > 0  ||  !atleastonce){
-            atleastonce = true;
+
+         if(nutchTuples.size() > 0 ){
+            if(!atleastonce) {
+               atleastonce = true;
+               rolloverFiles();
+            }
+            for (Map.Entry<String, Tuple> tuple : webpagesTuple.entrySet()){
+               outputToFile(tuple.getKey(),tuple.getValue());
+            }
+
+            for(Map.Entry<byte[],GenericData.Record> rec : nutchTuples.entrySet()){
+               outputToFile(rec.getKey(), rec.getValue());
+            }
+
+
             System.err.println("SPitting");
             rolloverFiles();
          }
@@ -227,17 +232,22 @@ public class NutchLocalListener {
 
 
 
-         if(globalCounter % nextRoll == 0){
-//            rolloverFiles();
-            spillAndRollOver();
-         }
-         globalCounter  = (globalCounter+1) % (Long.MAX_VALUE-1);
+
          //output to outputFile for our repr
-       if(page.get("content") != null && object.getAttribute("body") != null) {
-          System.err.println("outputting to " + outputCacheName + "tuple " + object.toString());
+       if(page.get("content") != null){
+          if(globalCounter % nextRoll == 0){
+//            rolloverFiles();
+             spillAndRollOver();
+          }
+          globalCounter  = (globalCounter+1) % (Long.MAX_VALUE-1);
+         if( object.getAttribute("body") == null) {
+            System.err.println("content not null but tuple body is null ");
+         }
+//          System.err.println("outputting to " + outputCacheName + "tuple " + object.toString());
           webpagesTuple.put(outputCacheName + ":" + object.getAttribute("url"), object);
           nutchTuples.put((byte[]) key, page);
          outputCache.put(outputCacheName + ":" + object.getAttribute("url"), object);
+          System.err.println("Stored " + globalCounter + " tuples till now");
        }
 //         outputToFile(outputCacheName+":"+object.getAttribute("url"),object);
 

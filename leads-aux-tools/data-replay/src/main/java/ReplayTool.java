@@ -87,7 +87,10 @@ public class ReplayTool {
 
                      if (load) {
                         Tuple t = nutchTransformer.transform(page);
-                        if(t.getAttribute("body") != null) {
+                        if(page.get("content")!= null) {
+                           if(t.getAttribute("body") == null){
+                              System.err.println("page content != null tuple body is null ");
+                        }
                            webpageCache.put(webpageCache.getName() + ":" + t.getAttribute("url"), t);
                            counter++;
                            if (counter % 1000 == 0) {
@@ -100,6 +103,7 @@ public class ReplayTool {
                   keyFile = new File(baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".keys");
                   dataFile = new File(baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".data");
                }
+
                System.out.println("read " + currentCounter + " files");
                currentCounter = 0;
                continue;
@@ -109,6 +113,7 @@ public class ReplayTool {
                currentCounter++;
             }
          }
+         System.out.println("Finally loaded " + counter + " tuples");
          break;
       }
    }
