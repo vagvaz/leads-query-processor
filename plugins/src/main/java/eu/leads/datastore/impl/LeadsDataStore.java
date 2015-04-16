@@ -2,12 +2,9 @@ package eu.leads.datastore.impl;
 
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,8 +34,7 @@ public class LeadsDataStore extends AbstractDataStore {
 	}
 
 	@Override
-	public SortedSet<URIVersion> getLeadsResourceMDFamily(String uri,
-																			String family, int lastVersions, String beforeTimestamp) {
+	public SortedSet<URIVersion> getLeadsResourceMDFamily(String uri, String family, int lastVersions, String beforeTimestamp) {
 		SortedSet<URIVersion> uriVersions = new TreeSet<URIVersion>();
 
 		boolean reverse = false;
@@ -98,7 +94,8 @@ public class LeadsDataStore extends AbstractDataStore {
 						Object value = jsonRow.get(name);
 						// To be extended to any type...
 						if(value instanceof java.lang.String){
-							Cell cell = new Cell(name, value, 0);
+							Object val = StringEscapeUtils.unescapeJava(value.toString());
+							Cell cell = new Cell(name, val, 0);
 							columnsMap.put(name, cell);
 						}
 						else {
@@ -142,7 +139,7 @@ public class LeadsDataStore extends AbstractDataStore {
 			if(LEADSUtils.isNumber(value))
 				valuesList.add(value);
 			else
-				valuesList.add("'"+value+"'");
+				valuesList.add("'"+StringEscapeUtils.escapeJava(value.toString())+"'");
 			fullColumnsList.remove(columnName);
 		}
 		for(String columnName : fullColumnsList) {
@@ -159,8 +156,9 @@ public class LeadsDataStore extends AbstractDataStore {
 		String queryP03 = "  (uri, ts, ";
 		//
 		String queryP04 = "";
-		for(i=0; i<columnsList.size()-1; i++)
+		for(i=0; i<columnsList.size()-1; i++) {
 			queryP04 += columnsList.get(i) + ", ";
+		}
 		queryP04 += columnsList.get(i) + ") ";
 		//
 		String queryP05 = "VALUES (";
@@ -215,6 +213,7 @@ public class LeadsDataStore extends AbstractDataStore {
 					
 					String type = jsonRow.getString(mapping.getProperty("leads_resourcepart-type"));
 					String value= jsonRow.getString(mapping.getProperty("leads_resourcepart-value"));
+					value = StringEscapeUtils.unescapeJava(value);
 					List<Object> values = returnMap.get(type);
 					if(values == null)
 	
@@ -249,18 +248,19 @@ public class LeadsDataStore extends AbstractDataStore {
 			String key = keyIdArray[0];
 			String id = keyIdArray[1];
 			Object value = partTypeValues.getValue();
+			String val = StringEscapeUtils.escapeJava(value.toString());
 			queryP05   += "(";
 			queryP05   += "'" + uri + "', ";
 			queryP05   += ts + ", ";
 			queryP05   += "'" + id + "', ";
 			queryP05   += "'" + key + "', ";
-			queryP05   += "%s";
+			queryP05   += "'" + val +  "'";
 			queryP05   += ");";
 			//queryP05 = new StringBuilder(queryP05).replace(queryP05.length()-2, queryP05.length(), "; ").toString();
 			//
 			String query = queryP01+queryP02+queryP03+queryP04+queryP05;
 
-			System.out.printf(query, value.toString());
+			System.out.println(query);
 
 			System.out.println();
 			QueryResults rs = LeadsQueryInterface.sendQuery(query);
