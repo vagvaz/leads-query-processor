@@ -11,14 +11,14 @@ import java.util.Map;
 public class Method_test_avro {
     public static void main(String[] args) throws IOException {
 // Create attribute names
-        String attributeName1 = "name1";
+        String attributeName1 = "angelos.patatas.name1";
         String attributeName2 = "name2";
         String attributeName3 = "name3";
         String attributeName4 = "name4";
-        String attributeName5 = "name5";
+        String attributeName5 = "angelos.patatas.name5";
         String attributeName6 = "name6";
         String attributeName7 = "longnum1";
-        String attributeName8 = "longnum2";
+        String attributeName8 = "angelos.patatas.longnum2";
         String attributeName9 = "doublenum1";
         String attributeName10 = "doublenum2";
 // Create attributes' values
@@ -33,6 +33,12 @@ public class Method_test_avro {
         Double value9 = 0.7535329047380597;
         Double value10 = 0.47334616297362775;
         Tuple tavro = new Tuple();
+
+        /*tavro.setProperName(attributeName1);
+
+        tavro.setProperName(attributeName2);
+
+        System.exit(0);*/
 // setAttribute
         long startTime = System.nanoTime();
         tavro.setAttribute(attributeName1, value1);

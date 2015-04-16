@@ -24,6 +24,7 @@ public abstract class DataTypeAvro {
                 .record("leadsrec").namespace("eu.leads.processor.core")
                 .fields()
                 .endRecord();
+        //schema = Schema.createRecord("arrayFoo","add","mytest",false);
         AvroRec = new GenericData.Record(schema);
     }
 
@@ -34,7 +35,7 @@ public abstract class DataTypeAvro {
     }
 
     public String asString() {
-        return AvroRec.toString();
+        return this.asJsonObject().toString();
     }
 
     public void copy(GenericRecord other) {
@@ -53,6 +54,6 @@ public abstract class DataTypeAvro {
 
     @Override
     public String toString() {
-        return AvroRec.toString();
+        return this.asJsonObject().toString();
     }
 }

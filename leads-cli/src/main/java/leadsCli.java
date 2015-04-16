@@ -180,6 +180,8 @@ public class leadsCli {
         for (String s : data.getResult()) {
           if (s== null || s.equals("") )
             continue;
+
+            System.out.println("String for Tuple is: "+s);
           resultSet.add(new Tuple(s));
         }
        printResults(resultSet);

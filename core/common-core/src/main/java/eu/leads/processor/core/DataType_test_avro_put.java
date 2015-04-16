@@ -42,7 +42,7 @@ public class DataType_test_avro_put {
         Double value9 = 0.7535329047380597;
         Double value10 = 0.47334616297362775;
         /*Create #N_tuples and isnert to an Arraylist*/
-        int N_tuples=1000;
+        int N_tuples=10;
         ArrayList<Tuple> arrlstavro = new ArrayList<>();
 
         for(int i=0; i<N_tuples; i++){
@@ -67,10 +67,6 @@ public class DataType_test_avro_put {
         }
         long stopTime = System.currentTimeMillis();
         System.out.println("Runtime avro: " + (stopTime-startTime) + " ms\n");
-// long size = FileUtils.sizeOfDirectory(new File("/tmp/leveldb"));
-// System.out.println("Folder Size: " + (size/(1024*1024)) + " MB");
-// /*delete directory /tmp/leveldb to run again*/
-// FileUtils.deleteDirectory(new File("/tmp/leveldb"));
         System.exit(0);
     }
 }

@@ -58,6 +58,12 @@ public class HDFSStorage implements LeadsStorage {
       hdfsConfiguration.set("fs.defaultFS", configuration.getProperty("hdfs.url"));
       hdfsConfiguration.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
       hdfsConfiguration.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
+
+      // added by angelos
+      hdfsConfiguration.set("hdfs.url", "hdfs://snf-618466.vm.okeanos.grnet.gr:8020");
+      hdfsConfiguration.set("prefix", "/user/vagvaz/");
+      // end
+
       fileSystem = FileSystem.get(hdfsConfiguration);
 
       if(!fileSystem.exists(basePath))
@@ -76,11 +82,21 @@ public class HDFSStorage implements LeadsStorage {
   @Override public byte[] read(String uri) {
     byte[] result = null;
     try {
-      SequenceFile.Reader reader = new SequenceFile.Reader(hdfsConfiguration);
+      // added by angelos
+      Path path = new Path(uri);
+      SequenceFile.Reader reader = new SequenceFile.Reader(hdfsConfiguration, SequenceFile.Reader.file(path));
+      // end
+
+//            SequenceFile.Reader reader = new SequenceFile.Reader(hdfsConfiguration);
       HDFSByteChunk chunk = new HDFSByteChunk();
+
+//            reader.getCurrentValue(chunk);
+
+      // added
       IntWritable key = new IntWritable();
       reader.next(key,chunk);
-      reader.getCurrentValue(chunk);
+      // end
+
       result = chunk.getData();
     } catch (IOException e) {
       e.printStackTrace();
@@ -124,7 +140,7 @@ public class HDFSStorage implements LeadsStorage {
   @Override public String[] parts(String uri) {
     String[] result = null;
     try {
-      FileStatus[] subPaths = fileSystem.listStatus(new Path(basePath + uri));
+      FileStatus[] subPaths = fileSystem.listStatus(new Path(basePath.toUri().toString()+uri));
       result = new String[subPaths.length];
       for (int index = 0; index < subPaths.length; index++) {
         result[index] = subPaths[index].getPath().toString();
@@ -160,6 +176,7 @@ public class HDFSStorage implements LeadsStorage {
       }
       FileOutputStream file = new FileOutputStream(destination);
       String[] pieces = parts(source);
+
       for(String piece : pieces){
         byte[] pieceBytes = read(piece);
         file.write(pieceBytes);
@@ -183,7 +200,7 @@ public class HDFSStorage implements LeadsStorage {
   }
 
   @Override public boolean write(String uri, InputStream stream) {
-   SequenceFile.Writer writer = getWriterFor(uri);
+    SequenceFile.Writer writer = getWriterFor(uri);
 
     try {
       int size = stream.available();
@@ -191,7 +208,7 @@ public class HDFSStorage implements LeadsStorage {
       int readBytes = stream.read(bytes);
       if(readBytes != size){
         log.error("Could not read all the bytes from the inputStream. Read " + readBytes + " instead of " +
-                    size);
+                size);
         return false;
       }
       HDFSByteChunk byteChunk = new HDFSByteChunk(bytes,uri);
@@ -207,8 +224,7 @@ public class HDFSStorage implements LeadsStorage {
   private SequenceFile.Writer getWriterFor(String uri) {
     SequenceFile.Writer.Option keyClass = SequenceFile.Writer.keyClass(IntWritable.class);
     SequenceFile.Writer.Option valueClass = SequenceFile.Writer.valueClass(HDFSByteChunk.class);
-    SequenceFile.Writer.Option fileName = SequenceFile.Writer.file(new Path(basePath.toUri().toString()
-                                                                              +"/"+uri));
+    SequenceFile.Writer.Option fileName = SequenceFile.Writer.file(new Path(basePath.toUri().toString()+"/"+uri));
     SequenceFile.Writer writer = null;
     try {
       writer = SequenceFile.createWriter(hdfsConfiguration, keyClass, valueClass, fileName);
@@ -237,7 +253,7 @@ public class HDFSStorage implements LeadsStorage {
         int readBytes = stream.read(bytes);
         if (readBytes != size) {
           log.error("Could not read all the bytes from the inputStream. Read " + readBytes + " instead of " +
-                      size);
+                  size);
           return false;
         }
         outputStream.write(bytes);
@@ -252,7 +268,27 @@ public class HDFSStorage implements LeadsStorage {
     return result;
   }
 
-  @Override public boolean writeData(String uri, byte[] data) {
+  @Override
+  public boolean writeData(String uri, byte[] data) {
+    /*
+    * Delete the parent folder if the parent folder exists
+    * */
+
+    File f = new File(uri);
+    if( f.getName().equals("0") ) {
+      f = f.getParentFile();
+      Path file = new Path(String.valueOf(f));
+      System.out.println("PATH: " + file);
+      try {
+        if (fileSystem.exists(file)) {
+          System.out.println("deleting...");
+          fileSystem.delete(file, true);
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+
     SequenceFile.Writer writer = getWriterFor(uri);
     HDFSByteChunk byteChunk = new HDFSByteChunk(data,uri);
     try {
@@ -287,6 +323,4 @@ public class HDFSStorage implements LeadsStorage {
     }
     return true;
   }
-
-
 }

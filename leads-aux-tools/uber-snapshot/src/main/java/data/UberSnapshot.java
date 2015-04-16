@@ -170,7 +170,7 @@ public class UberSnapshot {
          System.exit(-1);
       }
 
-      System.out.println("Loading entties remotely");
+      System.out.println("Loading entities remotely");
       if(args.length > 2 ){
          loadDataWithRemote(args);
       }else{
@@ -219,14 +219,12 @@ public class UberSnapshot {
          while (true && keyLine != null){
             if(keyLine != null && !keyLine.trim().equals("")){
                if(valueLine != null && !valueLine.trim().equals("")) {
-                  JsonObject ob = new JsonObject(valueLine);
                   Tuple tuple = new Tuple(valueLine.trim());
-//                  System.out.println("Tuple to store: " + tuple.getFieldNames());
-//                  for(String fname : tuple.getFieldNames()){
-//                     System.out.println(fname+"--"+tuple.getValue(fname));
-//                  }
+                  System.out.println("Tuple to store: " + tuple.getFieldNames());
+                  for(String fname : tuple.getFieldNames()){
+                     System.out.println(fname+"--"+tuple.getValue(fname));
+                  }
                   cache.put(keyLine.trim(), tuple);
-//                  cache.put(keyLine.trim(), valueLine.trim());
                }
             }
 
