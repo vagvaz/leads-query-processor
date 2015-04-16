@@ -5,6 +5,7 @@
 # Author: Daniel Lundin <dln(at)eintr(dot)org>
 #
 
+import os
 import sys
 import zmq
 from eu.leads.infext.python.CLAPI import helloworld_clinterface,\
