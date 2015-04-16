@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+
+	<technology>leads</technology>
+	<host>{TODO}</host>
+	<port>8080</port>
+	
+	<resources_path>{TODO}/leads-query-processor/nqe/system-plugins/adidas-processing-plugin/resources</resources_path>
+	<storagePropertiesDir>{TODO}/leads-query-processor/plugins/src/main/java/eu/leads/datastore</storagePropertiesDir>
+	
+	<pythonPath>{TODO}/leads-query-processor/nqe/system-plugins/adidas-processing-plugin/src/main/python</pythonPath>
+	<pythonCLIPackage>eu.leads.infext.python.CLAPI</pythonCLIPackage>
+	<pythonFileDirectory>/tmp/</pythonFileDirectory>
+	<pythonFileBasename>leadsjavapy-</pythonFileBasename>
+	<pzsEndpoints>tcp://127.0.0.1:5559</pzsEndpoints>
+	<pzsEndpoints>tcp://127.0.0.1:5560</pzsEndpoints>
+	
+</config>
