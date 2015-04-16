@@ -32,7 +32,7 @@ public class PluginTest {
 	     }
 	     final String content = content1;
 	     
-	     plugin.created("default.webpages:http://www.bbc.com/news/uk-31545744", 
+	     plugin.created("default.webpages:http://www.theguardian.com/sport/2015/apr/09/lewis-hamilton-new-mercedes-f1-contract", 
 				new Tuple() {{ setAttribute("body", content); }}.asJsonObject().toString(),
 				null);
 	}
