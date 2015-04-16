@@ -4,7 +4,7 @@ Created on Jan 9, 2014
 @author: nonlinear
 '''
 
-from eu.leads.infext.python.sellenium.dynamiccoderetriever import DynamicCodeRetriever
+#from eu.leads.infext.python.sellenium.dynamiccoderetriever import DynamicCodeRetriever
 import requests
 import io
 from lxml import html
