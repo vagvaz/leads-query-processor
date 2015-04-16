@@ -240,26 +240,26 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         //Send Request to Scheduler and receive Evaluations.
         Set<SQLPlan> result = new HashSet<>();
         for(SQLPlan plan : candidatePlans){
-            JsonObject p = plan.getPlanGraph().copy();
-            p = PlanUtils.handleRootOutputNodes(p);
-            p = PlanUtils.updateKeyspaceParameter(p);
-            p = PlanUtils.numberStages(p);
-            p = PlanUtils.annotatePlan(statisticsCache, p);
-            JsonObject annotatedPlan = null;
-            try {
-                JsonObject schedulerRep = PlanUtils.getSchedulerRep(p,currentCluster);
-                annotatedPlan = WP4Client.evaluatePlan(schedulerRep);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if(annotatedPlan == null){
-                SQLQuery query = new SQLQuery( new JsonObject(queriesCache.get(plan.getQueryId())));
-                failQuery(new Exception("Could not access the scheduler"),query);
-                return result;
-            }
-            JsonObject updatedPlan = PlanUtils.updateInformation(plan.getPlanGraph(),annotatedPlan.getObject("replied").getObject("stages"),globalInformation);
-            updatedPlan = PlanUtils.updateTargetEndpoints(updatedPlan);
-            plan.setPlanGraph(updatedPlan);
+//            JsonObject p = plan.getPlanGraph().copy();
+//            p = PlanUtils.handleRootOutputNodes(p);
+//            p = PlanUtils.updateKeyspaceParameter(p);
+//            p = PlanUtils.numberStages(p);
+//            p = PlanUtils.annotatePlan(statisticsCache, p);
+//            JsonObject annotatedPlan = null;
+//            try {
+//                JsonObject schedulerRep = PlanUtils.getSchedulerRep(p,currentCluster);
+//                annotatedPlan = WP4Client.evaluatePlan(schedulerRep);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            if(annotatedPlan == null){
+//                SQLQuery query = new SQLQuery( new JsonObject(queriesCache.get(plan.getQueryId())));
+//                failQuery(new Exception("Could not access the scheduler"),query);
+//                return result;
+//            }
+//            JsonObject updatedPlan = PlanUtils.updateInformation(plan.getPlanGraph(),annotatedPlan.getObject("replied").getObject("stages"),globalInformation);
+//            updatedPlan = PlanUtils.updateTargetEndpoints(updatedPlan);
+//            plan.setPlanGraph(updatedPlan);
             result.add(plan);
         }
         return result;
