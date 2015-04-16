@@ -29,6 +29,7 @@ public class HDFSStorageTest {
                     c.setProperty("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
                     c.setProperty("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
                     c.setProperty("prefix", "/user/vagvaz/");
+                    c.setProperty("postfix","0");
 
                     HDFSStorage hdfss = new HDFSStorage();
                     boolean init = hdfss.initialize(c);
@@ -58,6 +59,8 @@ public class HDFSStorageTest {
                                 buffer = new byte[size];
                             }
                             input.read(buffer);
+
+
                             if(!hdfss.writeData(hdfsPath + "/" + counter,buffer)) {
                                 System.out.println("Data could not be writed!");
                                 return null;

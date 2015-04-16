@@ -275,15 +275,11 @@ public class HDFSStorage implements LeadsStorage {
     * */
 
     File f = new File(uri);
-    if( f.getName().equals("0") ) {
+    if( f.getName().equals(storageConfiguration.getProperty("postfix")) ) {
       f = f.getParentFile();
       Path file = new Path(String.valueOf(f));
-      System.out.println("PATH: " + file);
       try {
-        if (fileSystem.exists(file)) {
-          System.out.println("deleting...");
-          fileSystem.delete(file, true);
-        }
+        if (fileSystem.exists(file)) {fileSystem.delete(file, true);}
       } catch (IOException e) {
         e.printStackTrace();
       }
