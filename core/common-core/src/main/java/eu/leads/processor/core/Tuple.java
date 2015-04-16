@@ -131,7 +131,6 @@ public class Tuple extends DataTypeAvro implements Serializable{
             Schema schema_new = Schema.createRecord("arrayFoo","add","mytest",false);
             List<Schema.Field> newFieldList = new ArrayList<>();
             for(Schema.Field field: schema.getFields()){
-                System.out.println("field name: "+field.name());
                 newFieldList.add(new Schema.Field(setProperName(field.name()),schema_new,field.doc(),field.defaultValue()));
             }
             newFieldList.add(new Schema.Field(setProperName(name),schema_new,"add",null));

@@ -220,10 +220,10 @@ public class UberSnapshot {
             if(keyLine != null && !keyLine.trim().equals("")){
                if(valueLine != null && !valueLine.trim().equals("")) {
                   Tuple tuple = new Tuple(valueLine.trim());
-                  System.out.println("Tuple to store: " + tuple.getFieldNames());
+                  /*System.out.println("Tuple to store: " + tuple.getFieldNames());
                   for(String fname : tuple.getFieldNames()){
                      System.out.println(fname+"--"+tuple.getValue(fname));
-                  }
+                  }*/
                   cache.put(keyLine.trim(), tuple);
                }
             }

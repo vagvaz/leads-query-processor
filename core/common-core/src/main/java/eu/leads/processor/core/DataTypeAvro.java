@@ -29,8 +29,10 @@ public abstract class DataTypeAvro {
     }
 
     public JsonObject asJsonObject() {
-        String avroString = AvroRec.toString();
-        JsonObject objectJSON = new JsonObject(avroString);
+        JsonObject objectJSON = new JsonObject();
+        for(Schema.Field field: AvroRec.getSchema().getFields()){
+            objectJSON.putValue(field.name(), AvroRec.get(field.name()));
+        }
         return objectJSON;
     }
 

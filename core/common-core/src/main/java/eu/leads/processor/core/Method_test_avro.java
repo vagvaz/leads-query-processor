@@ -168,8 +168,9 @@ public class Method_test_avro {
 // renameAttributes
         Map<String, List<String>> toRename = new HashMap<>();
         List<String> lst8 = new ArrayList<>();
-        lst8.add(attributeName8 + "X");//longnum2X
+        lst8.add(attributeName8+"X");//longnum2X
         lst8.add(attributeName8+"Y");//longnum2Y
+        lst8.add(attributeName8+"Z");//longnum2Y
         List<String> lst9 = new ArrayList<>();
         lst9.add(attributeName9 + "X");//doublenum1X
         lst9.add(attributeName9 + "Y");//doublenum1Y
@@ -179,7 +180,7 @@ public class Method_test_avro {
         toRename.put("longnumX", lst8);
         toRename.put(attributeName9,lst9);
         toRename.put(attributeName10,lst10);
-        startTime = System.nanoTime();
+        startTime = System.nanoTime(); System.out.println(tavro);
         tavro.renameAttributes(toRename);
         stopTime = System.nanoTime();
         System.out.println("############Runtime renameAttributes: " + (stopTime-startTime)/1000000 + " ns\n");
