@@ -18,7 +18,7 @@ public class PZSStart {
 	public static void start(Configuration config) throws IOException {
 	      List<String> endpoints = config.getList("pzsEndpoints");
 	      String pythonPath = "PYTHONPATH="+config.getString("pythonPath");
-	      String commandBase = "/usr/bin/python -m eu.leads.infext.python.CLAPI.pzs ";
+	      String commandBase = "/usr/bin/python2.7 -m eu.leads.infext.python.CLAPI.pzs ";
 	      String[] envp = {pythonPath};
 		  for(int i=0; i<endpoints.size(); i++) {
 	    	  String endpoint = endpoints.get(i);

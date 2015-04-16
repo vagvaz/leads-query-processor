@@ -7,8 +7,6 @@ Created on Jul 1, 2014
 from sklearn.cluster import KMeans
 from sklearn import preprocessing, metrics
 from sklearn.decomposition.pca import PCA
-import numpy
-import pylab
 
 
 class PagesDataset():
