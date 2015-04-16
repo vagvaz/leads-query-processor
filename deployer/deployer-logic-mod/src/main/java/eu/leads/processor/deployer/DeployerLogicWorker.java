@@ -71,11 +71,11 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
       pendingOperators = new HashMap<>();
       microclouds = new HashMap<>();
 
-      if(config.containsField("microclouds")) {
-         for (Map.Entry<String, Object> entry : config.getObject("microclouds").toMap().entrySet()) {
-            microclouds.put(entry.getKey(), (String) entry.getValue());
-         }
-      }
+//      if(config.containsField("microclouds")) {
+//         for (Map.Entry<String, Object> entry : config.getObject("microclouds").toMap().entrySet()) {
+//            microclouds.put(entry.getKey(), (String) entry.getValue());
+//         }
+//      }
    }
 
    @Override
@@ -105,19 +105,19 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                   executionPlan.setAction(action);
                   runningPlans.put(plan.getQueryId(), executionPlan);
                   String queryJson = queriesCache.get(plan.getQueryId());
-                  if(queryJson == null || queryJson.equals("")){
-                     failQuery(plan.getQueryId(),"Could not read query from queries");
+                  if (queryJson == null || queryJson.equals("")) {
+                     failQuery(plan.getQueryId(), "Could not read query from queries");
                   }
                   SQLQuery query = new SQLQuery(new JsonObject(queryJson));
                   query.getQueryStatus().setStatus(QueryState.RUNNING);
-                  queriesCache.put(query.getId(),query.asJsonObject().toString());
+                  queriesCache.put(query.getId(), query.asJsonObject().toString());
                   startExecution(executionPlan);
-
-               } else if (label.equals(DeployerConstants.DEPLOY_SINGLE_MR)){
-                  JsonObject operator = action.getData();
-                  remoteOperators.put(operator.getObject("MROperator").getString("id"), operator);
-                  deployRemoteOperator(action,operator,new PlanNode(operator.getObject("MROperator")));
                }
+//               } else if (label.equals(DeployerConstants.DEPLOY_SINGLE_MR)){
+//                  JsonObject operator = action.getData();
+//                  remoteOperators.put(operator.getObject("MROperator").getString("id"), operator);
+//                  deployRemoteOperator(action,operator,new PlanNode(operator.getObject("MROperator")));
+//               }
                else if (label.equals(DeployerConstants.DEPLOY_CUSTOM_PLAN)) {
 
                   String queryType = action.getData().getString("specialQueryType");
