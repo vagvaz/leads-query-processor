@@ -1,5 +1,7 @@
 package eu.leads.processor;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -47,28 +49,22 @@ public class AdidasProcessingPlugin implements PluginInterface {
 	  try {
 	      this.configuration = config;
 	      this.manager = manager;
-//	      
-	      System.out.println("%%%%% Initializing the plugin");
 	      
-//	      // KEEP config
+	      setLogging(configuration);
+	      
+	      System.out.println("%%%%% Initializing the plugin");
+	
+	      // KEEP config
 	      PropertiesSingleton.setConfig(config);
-//	      
-//	      // READ Configuration for Cassandra
+	      
+	      // READ Configuration for Cassandra
 	      DataStoreSingleton.configureDataStore(config);
-//	      
-//	      // READ Configuration for the plugin
+	      
+	      // READ Configuration for the plugin
 	      PropertiesSingleton.setResourcesDir(config.getString("resources_path"));
 
 	      if(pageProcessingPojo == null)
 	    	  pageProcessingPojo = new PageProcessingPojo();
-
-//	      try {
-//	      	 System.setOut(outputFile("/data/leads.out"));
-//	      	 System.setErr(outputFile("/data/leads.err"));
-//	      	 System.out.println("Let's start the party!");
-//	      } catch (java.io.FileNotFoundException e) {
-//	         e.printStackTrace();
-//	      }
       
 	      // START Python ZeroMQ Server!
 	      PZSStart.start(config);
@@ -79,9 +75,20 @@ public class AdidasProcessingPlugin implements PluginInterface {
     	  e.printStackTrace();
       }
    }
+   
+   private void setLogging(Configuration config) throws FileNotFoundException {
+	   String dir = config.getString("loggingDir");
+	   System.out.println("Logging to "+dir);
+	   System.setOut(outputFile(dir+"/leads-java.out"));
+	   System.setErr(outputFile(dir+"/leads-java.err"));
+	   System.out.println("Let's start the party!");
+	   System.err.println("Let's start the party!");
+   }
 
    protected java.io.PrintStream outputFile(String name) throws java.io.FileNotFoundException {
-       return new java.io.PrintStream(new java.io.BufferedOutputStream(new java.io.FileOutputStream(name)));
+	   File file = new File(name);
+	   file.getParentFile().mkdirs();
+       return new java.io.PrintStream(new java.io.BufferedOutputStream(new java.io.FileOutputStream(file)));
    }
 
    @Override

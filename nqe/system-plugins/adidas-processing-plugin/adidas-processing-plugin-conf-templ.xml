@@ -5,6 +5,7 @@
 	<host>{TODO}</host>
 	<port>8080</port>
 	
+	<loggingDir>{TODO}/leads-query-processor/nqe/system-plugins/adidas-processing-plugin/logs</loggingDir>
 	<resources_path>{TODO}/leads-query-processor/nqe/system-plugins/adidas-processing-plugin/resources</resources_path>
 	<storagePropertiesDir>{TODO}/leads-query-processor/plugins/src/main/java/eu/leads/datastore</storagePropertiesDir>
 	

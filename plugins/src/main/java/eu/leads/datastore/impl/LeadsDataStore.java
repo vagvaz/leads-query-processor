@@ -58,16 +58,10 @@ public class LeadsDataStore extends AbstractDataStore {
 
 		System.out.println(query);
 
-//		Iterable<Row> rs;
-//		try {
-//			rs = session.execute(query);
-//		} catch(Exception e) {
-//			rs = new TreeSet<Row>();
-//		}
 		QueryResults rs;
 		rs = LeadsQueryInterface.sendQuery(query);
 		
-		if(rs == null || rs.getResult().size() == 0) {
+		if((rs == null || rs.getResult().size() == 0) && beforeTimestamp != null) {
 
 			reverse = true;
 			//
@@ -91,19 +85,23 @@ public class LeadsDataStore extends AbstractDataStore {
 				try {
 					for(String col : columns) {
 						String name = col;
-						Object value = jsonRow.get(name);
-						// To be extended to any type...
-						if(value instanceof java.lang.String){
-							Object val = StringEscapeUtils.unescapeJava(value.toString());
-							Cell cell = new Cell(name, val, 0);
-							columnsMap.put(name, cell);
-						}
-						else {
-							Cell cell = new Cell(name, value, 0);
-							columnsMap.put(name, cell);
+						if(name.startsWith(family) && !name.endsWith("uri") && !name.endsWith("ts")) {
+							Object value = jsonRow.get(name);
+							// To be extended to any type...
+							if(!value.equals(JSONObject.NULL)) {
+								if(value instanceof java.lang.String){
+									Object val = StringEscapeUtils.unescapeJava(value.toString());
+									Cell cell = new Cell(name, val, 0);
+									columnsMap.put(name, cell);
+								}
+								else {
+									Cell cell = new Cell(name, value, 0);
+									columnsMap.put(name, cell);
+								}
+							}
 						}
 					}
-					Long ts = new Long(jsonRow.getLong("ts"));
+					Long ts = new Long(jsonRow.getLong(family+".ts"));
 					
 					URIVersion uriVersion = new URIVersion(ts.toString(), columnsMap);
 					uriVersions.add(uriVersion);
@@ -120,6 +118,7 @@ public class LeadsDataStore extends AbstractDataStore {
 			uriVersions = new TreeSet<>(uriVersionsList);
 		}
 
+		System.out.println(uriVersions);
 		return uriVersions;
 	}
 
@@ -134,13 +133,15 @@ public class LeadsDataStore extends AbstractDataStore {
 			String columnName = cell.getKey();
 			Object value = cell.getValue();
 			//
-			columnsList.add(columnName);
-			//
-			if(LEADSUtils.isNumber(value))
-				valuesList.add(value);
-			else
-				valuesList.add("'"+StringEscapeUtils.escapeJava(value.toString())+"'");
-			fullColumnsList.remove(columnName);
+			if(fullColumnsList.contains(columnName)) {
+				columnsList.add(columnName);
+				//
+				if(LEADSUtils.isNumber(value))
+					valuesList.add(value);
+				else
+					valuesList.add("'"+StringEscapeUtils.escapeJava(value.toString())+"'");
+				fullColumnsList.remove(columnName);
+			}
 		}
 		for(String columnName : fullColumnsList) {
 			columnsList.add(columnName);
@@ -157,9 +158,15 @@ public class LeadsDataStore extends AbstractDataStore {
 		//
 		String queryP04 = "";
 		for(i=0; i<columnsList.size()-1; i++) {
-			queryP04 += columnsList.get(i) + ", ";
+			String columnName = columnsList.get(i);
+			int columnNameBeg = columnName.lastIndexOf('.')+1;
+			columnName = columnName.substring(columnNameBeg);
+			queryP04 += columnName + ", ";
 		}
-		queryP04 += columnsList.get(i) + ") ";
+		String columnName = columnsList.get(i);
+		int columnNameBeg = columnName.lastIndexOf('.')+1;
+		columnName = columnName.substring(columnNameBeg);
+		queryP04 += columnName + ") ";
 		//
 		String queryP05 = "VALUES (";
 		//
@@ -216,7 +223,6 @@ public class LeadsDataStore extends AbstractDataStore {
 					value = StringEscapeUtils.unescapeJava(value);
 					List<Object> values = returnMap.get(type);
 					if(values == null)
-	
 						values = new ArrayList<Object>();
 					values.add(value);
 					returnMap.put(type, values);
@@ -238,8 +244,15 @@ public class LeadsDataStore extends AbstractDataStore {
 		//
 		String queryP03 = "  (uri, ts, partid, ";
 		//
-		String queryP04 = mapping.getProperty("leads_resourcepart-type") + ", ";
-		queryP04       += mapping.getProperty("leads_resourcepart-value") + ") ";
+		String rtCol = mapping.getProperty("leads_resourcepart-type");
+		int columnNameBeg = rtCol.lastIndexOf('.')+1;
+		rtCol = rtCol.substring(columnNameBeg);
+		String queryP04 = rtCol + ", ";
+		//
+		String rvCol = mapping.getProperty("leads_resourcepart-value");
+		columnNameBeg = rvCol.lastIndexOf('.')+1;
+		rvCol = rvCol.substring(columnNameBeg);
+		queryP04       += rvCol + ") ";
 		//
 		for(Entry<String, Object> partTypeValues : partsTypeValuesMap.entrySet()) {
 			String queryP05 = "VALUES ";
@@ -333,9 +346,16 @@ public class LeadsDataStore extends AbstractDataStore {
 		String queryP03 = "  (uri, ts, partid, keywords, ";
 		//
 		String queryP04 = "";
-		for(i=0; i<cells.size()-1; i++)
-			queryP04 += columnsList.get(i) + ", ";
-		queryP04 += columnsList.get(i) + ") ";
+		for(i=0; i<cells.size()-1; i++) {
+			String columnName = columnsList.get(i);
+			int columnNameBeg = columnName.lastIndexOf('.')+1;
+			columnName = columnName.substring(columnNameBeg);
+			queryP04 += columnName + ", ";
+		}
+		String columnName = columnsList.get(i);
+		int columnNameBeg = columnName.lastIndexOf('.')+1;
+		columnName = columnName.substring(columnNameBeg);
+		queryP04 += columnName + ") ";
 		//
 		String queryP05 = "VALUES (";
 		//

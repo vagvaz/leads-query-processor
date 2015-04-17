@@ -34,3 +34,31 @@ yes w | pip2.7 install --install-option="--prefix=" -U BeautifulSoup
 echo "#### Installing ZeroMQ... ####"
 sudo apt-get -y install libzmq3-dev
 yes w | pip2.7 install --install-option="--prefix=" -U pyzmq
+# JZMQ install
+echo "#### GETTING pkg-config... ####"
+sudo apt-get -y install pkg-config
+echo "####"
+echo "#### GETTING libtool... ####"
+sudo apt-get -y install libtool
+echo "####"
+echo "#### GETTING uuid-dev... ####"
+sudo apt-get -y install uuid-dev
+echo "####"
+echo "#### GETTING autoconf... ####"
+sudo apt-get -y install autoconf
+echo "####"
+echo "#### INSTALLING jzmq... ####"
+git clone https://github.com/zeromq/jzmq.git && cd jzmq
+./autogen.sh
+./configure
+make
+sudo make install
+echo "####"
+echo "#### REMOVING installation files... ####"
+cd ..
+sudo rm -R jzmq && sudo rm -R pkg-config-0.28 && sudo rm pkgconfig.tgz
+echo "####"
+echo "#### RUNNING ldconfig... ####"
+sudo ldconfig
+echo "#### DONE. ####"
+
