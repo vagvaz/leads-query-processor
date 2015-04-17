@@ -1,4 +1,4 @@
-package eu.leads.processor.core;
+package eu.leads.processor.core.avro;
 
 
 import org.apache.avro.Schema;
@@ -17,64 +17,51 @@ import java.util.*;
 /**
  * Created by angelos on 14/3/15.
  */
-public class Tuple_dots extends DataTypeAvro implements Serializable{
-    public Tuple_dots(String jsonString) {
+public class Tuple extends DataTypeAvro implements Serializable{
+    public Tuple(String jsonString) {
         super();
         JsonObject job = new JsonObject(jsonString);
         Set<String> jobstr = job.getFieldNames();
 
-        Iterator<String> it = jobstr.iterator();
-        String str = it.next();
-        String[] st;
-
-        st = str.split("\\.");
-        String namespace;
-        if(st.length>2){
-            namespace = st[0]+"."+st[1];
-        } else{
-            namespace = "defaultLeadsNamespace";
-        }
-
-        Schema schema_new = Schema.createRecord("LeadsName","LeadsDoc",namespace,false);
+        Schema schema_new = Schema.createRecord("arrayFoo","add","mytest",false);
         List<Schema.Field> newFieldList = new ArrayList<>();
 
         for(String jstr: jobstr){
-            String[] att = jstr.split("\\.");
-            if(att.length>2){
-                jstr = att[2];
-            }
-            newFieldList.add(new Schema.Field(jstr, Schema.create(Schema.Type.STRING), null, null));
+            newFieldList.add(new Schema.Field(setProperName(jstr), Schema.create(Schema.Type.STRING), "this is a test field", null));
         }
 
         schema_new.setFields(newFieldList);
         this.schema = schema_new;
         this.AvroRec = new GenericData.Record(this.schema);
 
-
         for(Schema.Field field: schema.getFields()){
-            if(st.length>2) {
-                this.AvroRec.put(field.name(), job.getField(namespace + "." + field.name()).toString());
-            } else{
-                this.AvroRec.put(field.name(), job.getField(field.name()).toString());
+            String snew="";
+            for(String s : jobstr){
+                if(setProperName(s).equals(field.name())){
+                    snew = s;
+                }
             }
+            this.AvroRec.put(setProperName(field.name()), job.getField(snew).toString());
         }
     }
 
-    public Tuple_dots() {
+    public Tuple() {
         super();
         this.AvroRec = new GenericData.Record(this.schema);
     }
-    public Tuple_dots(Tuple_dots tuple) {
+    public Tuple(Tuple tuple) {
         super();
         this.copy(tuple.AvroRec);
     }
-    public Tuple_dots(Tuple_dots tl, Tuple_dots tr, ArrayList<String> ignoreColumns) {
+    public Tuple(Tuple tl, Tuple tr, ArrayList<String> ignoreColumns) {
         super(tl.AvroRec);
         if(ignoreColumns != null) {
             tr.removeAtrributes(ignoreColumns);
         }
         tl.copy(tr.AvroRec);
     }
+
+
     private void writeObject(java.io.ObjectOutputStream out) throws IOException{
         // Serialize it.
         //get bytes
@@ -96,15 +83,16 @@ public class Tuple_dots extends DataTypeAvro implements Serializable{
         byte[] schemaBytes = new byte[schemaSize];
         in.readFully(schemaBytes);
         String schemaJson = new String(schemaBytes);
-        schema = new Schema.Parser().parse(schemaJson);
+        Schema schem_a = new Schema.Parser().parse(schemaJson);
+        schema = schem_a;
         // rebuild GenericData.Record
         DatumReader<Object> reader = new GenericDatumReader<>(schema);
         Decoder decoder = DecoderFactory.get().directBinaryDecoder(in, null);
         AvroRec = new GenericData.Record(schema);
         reader.read(AvroRec, decoder);
     }
-    private void readObjectNoData() throws ObjectStreamException{
-    }
+    private void readObjectNoData() throws ObjectStreamException{}
+
     public String asString() {
         return this.asJsonObject().toString();
 //        return AvroRec.toString();
@@ -115,150 +103,92 @@ public class Tuple_dots extends DataTypeAvro implements Serializable{
 //        return AvroRec.toString();
     }
     public void setAttribute(String attributeName, String value) {
-
-        String[] att = attributeName.split("\\.");
-        String namespace;
-        if(att.length>2){
-            attributeName = att[2];
-            namespace = att[0]+"."+att[1];
-        } else{
-            namespace = "defaultLeadsNamespace";
-        }
-
-        if(hasField(attributeName)) {
-            AvroRec.put(attributeName, value);
+        if(hasField(setProperName(attributeName))) {
+            AvroRec.put(setProperName(attributeName), value);
         }else {
-            Schema schema_new = Schema.createRecord("LeadsName","LeadsDoc",namespace,false);
+            Schema schema_new = Schema.createRecord("arrayFoo","add","mytest",false);
             List<Schema.Field> newFieldList = new ArrayList<>();
             for(Schema.Field field: schema.getFields()){
-                newFieldList.add(new Schema.Field(field.name(),schema_new,field.doc(),field.defaultValue()));
+                newFieldList.add(new Schema.Field(setProperName(field.name()),schema_new,field.doc(),field.defaultValue()));
             }
-            newFieldList.add(new Schema.Field(attributeName,schema_new,"LeadsDoc",null));
+            newFieldList.add(new Schema.Field(setProperName(attributeName),schema_new,"add",null));
             schema_new.setFields(newFieldList);
             GenericRecord AvroRec_old;
             AvroRec_old = AvroRec;
             this.schema = schema_new;
             AvroRec = new GenericData.Record(this.schema);
             for(Schema.Field field: schema.getFields()){
-                if(field.name().equals(attributeName)){
-                    AvroRec.put(field.name(), value);
+                if(setProperName(field.name()).equals(setProperName(attributeName))){
+                    AvroRec.put(setProperName(field.name()), value);
                 }else{
-                    AvroRec.put(field.name(), AvroRec_old.get(field.name()));
+                    AvroRec.put(setProperName(field.name()), AvroRec_old.get(setProperName(field.name())));
                 }
             }
         }
     }
     public void setAttribute(String name, Object tupleValue) {
-        String[] att = name.split("\\.");
-        String namespace;
-        if(att.length>2){
-            name = att[2];
-            namespace = att[0]+"."+att[1];
-        } else{
-            namespace = "defaultLeadsNamespace";
-        }
-
-        if(hasField(name)) {
-            AvroRec.put(name, tupleValue);
+        if(hasField(setProperName(name))) {
+            AvroRec.put(setProperName(name), tupleValue);
         }else {
-            Schema schema_new = Schema.createRecord("LeadsName", "LeadsDoc", namespace, false);
+            Schema schema_new = Schema.createRecord("arrayFoo","add","mytest",false);
             List<Schema.Field> newFieldList = new ArrayList<>();
             for(Schema.Field field: schema.getFields()){
-                newFieldList.add(new Schema.Field(field.name(),schema_new,field.doc(),field.defaultValue()));
+                newFieldList.add(new Schema.Field(setProperName(field.name()),schema_new,field.doc(),field.defaultValue()));
             }
-            newFieldList.add(new Schema.Field(name,schema_new,"add",null));
+            newFieldList.add(new Schema.Field(setProperName(name),schema_new,"add",null));
             schema_new.setFields(newFieldList);
             GenericRecord AvroRec_old;
             AvroRec_old = AvroRec;
             this.schema = schema_new;
             AvroRec = new GenericData.Record(this.schema);
             for(Schema.Field field: schema.getFields()){
-                if(field.name().equals(name)){
-                    AvroRec.put(field.name(), tupleValue);
+                if(setProperName(field.name()).equals(name)){
+                    AvroRec.put(setProperName(field.name()), tupleValue);
                 }else{
-                    AvroRec.put(field.name(), AvroRec_old.get(field.name()));
+                    AvroRec.put(setProperName(field.name()), AvroRec_old.get(setProperName(field.name())));
                 }
             }
         }
     }
     public void setNumberAttribute(String attributeName, Number value){
-        String[] att = attributeName.split("\\.");
-        String namespace;
-        if(att.length>2){
-            attributeName = att[2];
-            namespace = att[0]+"."+att[1];
-        } else{
-            namespace = "defaultLeadsNamespace";
-        }
-
-        if(hasField(attributeName)) {
-            AvroRec.put(attributeName, value);
+        if(hasField(setProperName(attributeName))) {
+            AvroRec.put(setProperName(attributeName), value);
         }else {
-            Schema schema_new = Schema.createRecord("LeadsName","LeadsDoc",namespace,false);
+            Schema schema_new = Schema.createRecord("arrayFoo","add","mytest",false);
             List<Schema.Field> newFieldList = new ArrayList<>();
             for(Schema.Field field: schema.getFields()){
-                newFieldList.add(new Schema.Field(field.name(),schema_new,field.doc(),field.defaultValue()));
+                newFieldList.add(new Schema.Field(setProperName(field.name()),schema_new,field.doc(),field.defaultValue()));
             }
-            newFieldList.add(new Schema.Field(attributeName,schema_new,"add",null));
+            newFieldList.add(new Schema.Field(setProperName(attributeName),schema_new,"add",null));
             schema_new.setFields(newFieldList);
             GenericRecord AvroRec_old;
             AvroRec_old = AvroRec;
             this.schema = schema_new;
             AvroRec = new GenericData.Record(this.schema);
             for(Schema.Field field: schema.getFields()){
-                if(field.name().equals(attributeName)){
-                    AvroRec.put(field.name(), value);
+                if(setProperName(field.name()).equals(setProperName(attributeName))){
+                    AvroRec.put(setProperName(field.name()), value);
                 }else{
-                    AvroRec.put(field.name(), AvroRec_old.get(field.name()));
+                    AvroRec.put(setProperName(field.name()), AvroRec_old.get(setProperName(field.name())));
                 }
             }
         }
     }
     public String getValue(String column) {
-        String[] att = column.split("\\.");
-        if(att.length>2){
-            column = att[2];
-        }
-        return AvroRec.get(column).toString();
+        return AvroRec.get(setProperName(column)).toString();
     }
     public String getAttribute(String column) {
-        String[] att = column.split("\\.");
-        if(att.length>2){
-            column = att[2];
-        }
-        return AvroRec.get(column).toString();
+        return AvroRec.get(setProperName(column)).toString();
     }
     public Number getNumberAttribute(String column){
-        return (Number) AvroRec.get(column);
+        return (Number) AvroRec.get(setProperName(column));
     }
     public void keepOnly(List<String> columns) {
-
-        List<String> cols = new ArrayList<>();
-        String[] st;
-        for(String colstr : columns){
-            st = colstr.split("\\.");
-            if(st.length>2){
-              cols.add(st[2]);
-            } else{
-                cols.add(colstr);
-            }
-        }
-
-        Iterator<String> attributeNameItr = columns.iterator();
-        String attributeName = attributeNameItr.next();
-        String[] att = attributeName.split("\\.");
-        String namespace;
-        if(att.length>2){
-            namespace = att[0]+"."+att[1];
-        } else{
-            namespace = "defaultLeadsNamespace";
-        }
-
-        Schema schema_new = Schema.createRecord("LeadsName","LeadsDoc",namespace,false);
+        Schema schema_new = Schema.createRecord("leadsrec","leadsdoc","eu.leads.processor.core",false);
         List<Schema.Field> newFieldList = new ArrayList<>();
         for(Schema.Field field: schema.getFields()){
-            if(cols.contains(field.name())){
-                newFieldList.add(new Schema.Field(field.name(),schema_new,field.doc(),field.defaultValue()));
+            if(columns.contains(setProperName(field.name()))){
+                newFieldList.add(new Schema.Field(setProperName(field.name()),schema_new,field.doc(),field.defaultValue()));
             }
         }
         schema_new.setFields(newFieldList);
@@ -266,26 +196,16 @@ public class Tuple_dots extends DataTypeAvro implements Serializable{
         AvroRec_old = AvroRec;
         this.schema = schema_new;
         AvroRec = new GenericData.Record(this.schema);
-
         for(Schema.Field field: schema.getFields()){
-            AvroRec.put(field.name(), AvroRec_old.get(field.name()));
+            AvroRec.put(setProperName(field.name()), AvroRec_old.get(setProperName(field.name())));
         }
     }
     public void removeAttribute(String name) {
-        String[] att = name.split("\\.");
-        String namespace;
-        if(att.length>2){
-            name = att[2];
-            namespace = att[0]+"."+att[1];
-        } else{
-            namespace = "defaultLeadsNamespace";
-        }
-
-        Schema schema_new = Schema.createRecord("LeadsName","LeadsDoc",namespace,false);
+        Schema schema_new = Schema.createRecord("arrayFoo","test","mytest",false);
         List<Schema.Field> newFieldList = new ArrayList<>();
         for(Schema.Field field: schema.getFields()){
-            if(!field.name().equals(name)){
-                newFieldList.add(new Schema.Field(field.name(),schema_new,field.doc(),field.defaultValue()));
+            if(!setProperName(field.name()).equals(name)){
+                newFieldList.add(new Schema.Field(setProperName(field.name()),schema_new,field.doc(),field.defaultValue()));
             }
         }
         schema_new.setFields(newFieldList);
@@ -294,37 +214,15 @@ public class Tuple_dots extends DataTypeAvro implements Serializable{
         this.schema = schema_new;
         AvroRec = new GenericData.Record(this.schema);
         for(Schema.Field field: schema.getFields()){
-            AvroRec.put(field.name(), AvroRec_old.get(field.name()));
+            AvroRec.put(setProperName(field.name()), AvroRec_old.get(setProperName(field.name())));
         }
     }
     public void removeAtrributes(List<String> columns) {
-
-        List<String> cols = new ArrayList<>();
-        String[] st;
-        for(String colstr : columns){
-            st = colstr.split("\\.");
-            if(st.length>2){
-                cols.add(st[2]);
-            } else{
-                cols.add(colstr);
-            }
-        }
-
-        Iterator<String> attributeNameItr = columns.iterator();
-        String attributeName = attributeNameItr.next();
-        String[] att = attributeName.split("\\.");
-        String namespace;
-        if(att.length>2){
-            namespace = att[0]+"."+att[1];
-        } else{
-            namespace = "defaultLeadsNamespace";
-        }
-
-        Schema schema_new = Schema.createRecord("LeadsName","LeadsDoc",namespace,false);
+        Schema schema_new = Schema.createRecord("leadsrec","leadsdoc","eu.leads.processor.core",false);
         List<Schema.Field> newFieldList = new ArrayList<>();
         for(Schema.Field field: schema.getFields()){
-            if(!cols.contains(field.name())){
-                newFieldList.add(new Schema.Field(field.name(),schema_new,field.doc(),field.defaultValue()));
+            if(!columns.contains(setProperName(field.name()))){
+                newFieldList.add(new Schema.Field(setProperName(field.name()),schema_new,field.doc(),field.defaultValue()));
             }
         }
         schema_new.setFields(newFieldList);
@@ -333,7 +231,7 @@ public class Tuple_dots extends DataTypeAvro implements Serializable{
         this.schema = schema_new;
         AvroRec = new GenericData.Record(this.schema);
         for(Schema.Field field: schema.getFields()){
-            AvroRec.put(field.name(), AvroRec_old.get(field.name()));
+            AvroRec.put(setProperName(field.name()), AvroRec_old.get(setProperName(field.name())));
         }
     }
     public List<String> getFieldNames() {
@@ -359,26 +257,15 @@ public class Tuple_dots extends DataTypeAvro implements Serializable{
         return false;
     }
     public void renameAttribute(String oldName, String newName) {
-
-        String[] attN = newName.split("\\.");
-        String[] attO = oldName.split("\\.");
-        if(attN.length>2){
-            newName = attN[2];
-        }
-
-        if(attO.length>2){
-            oldName = attO[2];
-        }
-
-        if(oldName == newName)
+        if(setProperName(oldName) == setProperName(newName))
             return;
-        Schema schema_new = Schema.createRecord("LeadsName","LeadsDoc","LeadsNamespace",false);
+        Schema schema_new = Schema.createRecord("arrayFoo", "test", "mytest", false);
         List<Schema.Field> newFieldList = new ArrayList<>();
         for(Schema.Field field: schema.getFields()){
-            if(!field.name().equals(oldName)){
-                newFieldList.add(new Schema.Field(field.name(),schema_new,field.doc(),field.defaultValue()));
+            if(!setProperName(field.name()).equals(setProperName(oldName))){
+                newFieldList.add(new Schema.Field(setProperName(field.name()),schema_new,field.doc(),field.defaultValue()));
             }else{
-                newFieldList.add(new Schema.Field(newName,schema_new,field.doc(),field.defaultValue()));
+                newFieldList.add(new Schema.Field(setProperName(newName),schema_new,field.doc(),field.defaultValue()));
             }
         }
         schema_new.setFields(newFieldList);
@@ -387,18 +274,14 @@ public class Tuple_dots extends DataTypeAvro implements Serializable{
         this.schema = schema_new;
         AvroRec = new GenericData.Record(this.schema);
         for(Schema.Field field: schema.getFields()){
-            if(field.name().equals(newName)){
-                AvroRec.put(field.name(), AvroRec_old.get(oldName));
+            if(setProperName(field.name()).equals(setProperName(newName))){
+                AvroRec.put(setProperName(field.name()), AvroRec_old.get(setProperName(oldName)));
             }else{
-                AvroRec.put(field.name(), AvroRec_old.get(field.name()));
+                AvroRec.put(setProperName(field.name()), AvroRec_old.get(setProperName(field.name())));
             }
         }
     }
     public Object getGenericAttribute(String attribute) {
-        String[] att = attribute.split("\\.");
-        if(att.length>2){
-            attribute = att[2];
-        }
         return AvroRec.get(attribute);
     }
     public void renameAttributes(Map<String, List<String>> toRename) {
@@ -415,5 +298,11 @@ public class Tuple_dots extends DataTypeAvro implements Serializable{
                 }
             }
         }
+    }
+
+    public String setProperName(String name){
+//        String newOutname = name.trim().split("\\.")[name.trim().split("\\.").length-1];
+//        return newOutname;
+        return name;
     }
 }

@@ -1,9 +1,9 @@
-package eu.leads.processor.core;
+package eu.leads.processor.core.json;
 
+import eu.leads.processor.common.infinispan.CacheManagerFactory;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.core.avro.Tuple;
 import org.infinispan.Cache;
 
 import java.io.IOException;
@@ -13,15 +13,18 @@ import java.util.concurrent.ExecutionException;
 /**
  * Created by angelos on 22/01/15.
  */
-public class DataType_test_avro_put {
+public class DataType_test_json_put {
+
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
-/*Create cache to store the tuples*/
+
+        /*Create cache to store the tuples*/
         LQPConfiguration.initialize();
         InfinispanManager man = InfinispanClusterSingleton.getInstance().getManager();
         Cache map = (Cache) man.getPersisentCache("queriesfoo");
-//         InfinispanManager man2 = CacheManagerFactory.createCacheManager();
-//         Cache map2 = (Cache) man2.getPersisentCache("queriesfoo");
-/*Create attribute names*/
+        InfinispanManager man2 = CacheManagerFactory.createCacheManager();
+        Cache map2 = (Cache) man2.getPersisentCache("queriesfoo");
+
+        /*Create attribute names*/
         String attributeName1 = "name1";
         String attributeName2 = "name2";
         String attributeName3 = "name3";
@@ -32,7 +35,8 @@ public class DataType_test_avro_put {
         String attributeName8 = "longnum2";
         String attributeName9 = "doublenum1";
         String attributeName10 = "doublenum2";
-/*Create attributes' values*/
+
+        /*Create attributes' values*/
         String value1 = "b9re9dmqls44ced";
         String value2 = "q2vklxkkexqxh1m";
         String value3 = "69eoihvawk6gco5";
@@ -43,32 +47,35 @@ public class DataType_test_avro_put {
         Long value8 = -5807565109641799382L;
         Double value9 = 0.7535329047380597;
         Double value10 = 0.47334616297362775;
+
         /*Create #N_tuples and isnert to an Arraylist*/
-        int N_tuples=10;
-        ArrayList<eu.leads.processor.core.avro.Tuple> arrlstavro = new ArrayList<>();
+        int N_tuples=1000;
+        ArrayList<Tuple> arrlstJson = new ArrayList<>();
 
         for(int i=0; i<N_tuples; i++){
-            eu.leads.processor.core.avro.Tuple tavro = new Tuple();
-            tavro.setAttribute(attributeName1, i+value1);
-            tavro.setAttribute(attributeName2, i+value2);
-            tavro.setAttribute(attributeName3, i+value3);
-            tavro.setAttribute(attributeName4, i+value4);
-            tavro.setAttribute(attributeName5, i+value5);
-            tavro.setAttribute(attributeName6, i + value6);
-            tavro.setNumberAttribute(attributeName7, i+value7);
-            tavro.setNumberAttribute(attributeName8, i+value8);
-            tavro.setNumberAttribute(attributeName9, i+value9);
-            tavro.setNumberAttribute(attributeName10, i + value10);
-            arrlstavro.add(tavro);
+            Tuple tJson = new Tuple();
+            tJson.setAttribute(attributeName1, i+value1);
+            tJson.setAttribute(attributeName2, i+value2);
+            tJson.setAttribute(attributeName3, i+value3);
+            tJson.setAttribute(attributeName4, i+value4);
+            tJson.setAttribute(attributeName5, i+value5);
+            tJson.setAttribute(attributeName6, i+value6);
+            tJson.setNumberAttribute(attributeName7, i+value7);
+            tJson.setNumberAttribute(attributeName8, i+value8);
+            tJson.setNumberAttribute(attributeName9, i+value9);
+            tJson.setNumberAttribute(attributeName10, i+value10);
+            arrlstJson.add(tJson);
+//            System.out.println(tJson.asString());
         }
-/*Iterate Arraylist, get tuple and insert tuple into the cache
-* also mesaure time and memory*/
+
+        /*Iterate Arraylist, get tuple and insert tuple into the cache
+        * also mesaure time and memory*/
         long startTime = System.currentTimeMillis();
-        for(int i=0; i<N_tuples; i++) {
-            map.put("infinispanKey" + i, arrlstavro.get(i));
-        }
+        for(int i=0; i<N_tuples; i++)
+            map.put("infinispanKey" + i, arrlstJson.get(i));
+
         long stopTime = System.currentTimeMillis();
-        System.out.println("Runtime avro: " + (stopTime-startTime) + " ms\n");
+        System.out.println("Runtime json: " + (stopTime-startTime) + " ms\n");
         System.exit(0);
     }
 }

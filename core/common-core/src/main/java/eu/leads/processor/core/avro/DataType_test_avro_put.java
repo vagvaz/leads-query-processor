@@ -1,9 +1,8 @@
-package eu.leads.processor.core;
+package eu.leads.processor.core.avro;
 
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.core.avro.Tuple;
 import org.infinispan.Cache;
 
 import java.io.IOException;
@@ -45,10 +44,10 @@ public class DataType_test_avro_put {
         Double value10 = 0.47334616297362775;
         /*Create #N_tuples and isnert to an Arraylist*/
         int N_tuples=10;
-        ArrayList<eu.leads.processor.core.avro.Tuple> arrlstavro = new ArrayList<>();
+        ArrayList<Tuple> arrlstavro = new ArrayList<>();
 
         for(int i=0; i<N_tuples; i++){
-            eu.leads.processor.core.avro.Tuple tavro = new Tuple();
+            Tuple tavro = new Tuple();
             tavro.setAttribute(attributeName1, i+value1);
             tavro.setAttribute(attributeName2, i+value2);
             tavro.setAttribute(attributeName3, i+value3);
