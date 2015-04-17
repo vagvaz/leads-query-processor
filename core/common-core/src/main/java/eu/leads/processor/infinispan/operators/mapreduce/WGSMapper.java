@@ -85,7 +85,7 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
       result.putString("url", t.getAttribute("url"));
       result.putString("pagerank", computePagerank(result.getString("url")));
       result.putString("sentiment", t.getGenericAttribute("sentiment").toString());
-      result.putString("micro-cluster",LQPConfiguration.getInstance().getMicroClusterName());
+      result.putString("microCluster",LQPConfiguration.getInstance().getMicroClusterName());
       ArrayList<Object> linksArray = (ArrayList<Object>) t.getGenericAttribute("links");
       JsonArray array = new JsonArray();
       for(Object o : linksArray){

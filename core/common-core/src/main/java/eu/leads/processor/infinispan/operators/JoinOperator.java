@@ -18,6 +18,7 @@ import org.vertx.java.core.json.JsonObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +51,8 @@ public class JoinOperator extends BasicOperator {
    }
 
 
-    @Override public void run() {
+//    @Override
+    public void run2() {
         long startTime = System.nanoTime();
         Cache innerCache = (Cache) manager.getPersisentCache(innerCacheName);
         Cache outerCache = (Cache) manager.getPersisentCache(outerCacheName);
@@ -155,4 +157,33 @@ public class JoinOperator extends BasicOperator {
     public void cleanup() {
            super.cleanup();
     }
+
+   @Override
+   public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
+      Set<String> targetMC = getTargetMC();
+      for(String mc : targetMC){
+         createCache(mc,getOutput());
+      }
+   }
+
+   @Override
+   public void setupMapCallable() {
+      inputCache = (Cache) manager.getPersisentCache(innerCacheName);
+      Cache outerCache = (Cache) manager.getPersisentCache(outerCacheName);
+
+      mapperCallable = new JoinCallableUpdated(conf.toString(),getOutput(),
+                                                      outerCache
+                                                              .getName(),
+                                                      isLeft);
+   }
+
+   @Override
+   public void setupReduceCallable() {
+
+   }
+
+   @Override
+   public boolean isSingleStage() {
+      return true;
+   }
 }

@@ -43,6 +43,9 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
     private  Session session;
     private WP4Client wp4Client;
     private JsonObject globalInformation;
+    private String schedHost;
+    private String schedPort;
+
     public ProcessSQLQueryActionHandler(Node com, LogProxy log, InfinispanManager persistence,
                                         String id, TaJoModule module,
                                         String schedHost,String schedPort,JsonObject globalInformation) {
@@ -54,7 +57,9 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
         statisticsCache = (Cache) persistence.getPersisentCache(StringConstants.STATISTICS_CACHE);
         session = new Session("defaultQueryId", "defaultUser",StringConstants.DEFAULT_DATABASE_NAME);
-        WP4Client.initialize(schedHost,schedPort);
+//        WP4Client.initialize(schedHost,schedPort);
+        this.schedHost  = schedHost;
+        this.schedPort = schedPort;
         currentCluster = LQPConfiguration.getInstance().getMicroClusterName();
         this.globalInformation = globalInformation;
     }
@@ -240,26 +245,28 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         //Send Request to Scheduler and receive Evaluations.
         Set<SQLPlan> result = new HashSet<>();
         for(SQLPlan plan : candidatePlans){
-//            JsonObject p = plan.getPlanGraph().copy();
-//            p = PlanUtils.handleRootOutputNodes(p);
-//            p = PlanUtils.updateKeyspaceParameter(p);
-//            p = PlanUtils.numberStages(p);
-//            p = PlanUtils.annotatePlan(statisticsCache, p);
-//            JsonObject annotatedPlan = null;
-//            try {
-//                JsonObject schedulerRep = PlanUtils.getSchedulerRep(p,currentCluster);
-//                annotatedPlan = WP4Client.evaluatePlan(schedulerRep);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            if(annotatedPlan == null){
-//                SQLQuery query = new SQLQuery( new JsonObject(queriesCache.get(plan.getQueryId())));
-//                failQuery(new Exception("Could not access the scheduler"),query);
-//                return result;
-//            }
-//            JsonObject updatedPlan = PlanUtils.updateInformation(plan.getPlanGraph(),annotatedPlan.getObject("replied").getObject("stages"),globalInformation);
-//            updatedPlan = PlanUtils.updateTargetEndpoints(updatedPlan);
-//            plan.setPlanGraph(updatedPlan);
+            JsonObject p = plan.getPlanGraph().copy();
+            p = PlanUtils.handleRootOutputNodes(p);
+            p = PlanUtils.updateKeyspaceParameter(p);
+            p = PlanUtils.numberStages(p);
+            p = PlanUtils.annotatePlan(statisticsCache, p);
+            JsonObject annotatedPlan = null;
+            try {
+                JsonObject schedulerRep = PlanUtils.getSchedulerRep(p,currentCluster);
+                System.err.println(schedulerRep.encodePrettily());
+                annotatedPlan = WP4Client.evaluatePlan(schedulerRep,schedHost,schedPort);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if(annotatedPlan == null){
+                SQLQuery query = new SQLQuery( new JsonObject(queriesCache.get(plan.getQueryId())));
+                failQuery(new Exception("Could not access the scheduler"),query);
+                return result;
+            }
+            JsonObject updatedPlan = PlanUtils.updateInformation(plan.getPlanGraph(),annotatedPlan.getObject("stages"),globalInformation);
+            updatedPlan = PlanUtils.updateTargetEndpoints(updatedPlan);
+            System.err.println(updatedPlan.encodePrettily());
+            plan.setPlanGraph(updatedPlan);
             result.add(plan);
         }
         return result;

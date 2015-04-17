@@ -4,6 +4,8 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.TupleComparator;
 import org.infinispan.Cache;
+import org.infinispan.commons.api.BasicCache;
+import org.infinispan.ensemble.EnsembleCacheManager;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.*;
@@ -15,7 +17,7 @@ public class SortMerger2 {
    //    private Map<String, String> input;
 //    private String output;
    private final String prefix;
-   private final Map<String, Tuple> outputCache;
+   private final BasicCache outputCache;
    private Vector<Integer> counters;
    private List<Tuple> values;
    private Vector<String> keys;
@@ -32,14 +34,14 @@ public class SortMerger2 {
    private long perCache = 1;
    private long counter = 0;
    private long rowcount = Long.MAX_VALUE;
-   public SortMerger2(List<String> inputCaches, String output, TupleComparator comp, InfinispanManager manager, JsonObject conf,long rc) {
+   public SortMerger2(List<String> inputCaches, String output, TupleComparator comp, InfinispanManager manager, EnsembleCacheManager emanager, JsonObject conf,long rc) {
 
       prefix = output+":";
 //        this.output = output;
 //        input = inputMap;
       rowcount  = rc;
       this.manager = manager;
-      outputCache = manager.getPersisentCache(output);
+      outputCache = emanager.getCache(output);
       counters = new Vector<Integer>(inputCaches.size());
       values = new Vector<Tuple>(inputCaches.size());
       caches = new Vector<Map<String, Tuple>>();

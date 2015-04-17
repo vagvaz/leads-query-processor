@@ -22,7 +22,7 @@ public class WP4Client {
       WP4Client.port = port;
    }
 
-   public static JsonObject evaluatePlan(JsonObject plan) throws IOException {
+   public static JsonObject evaluatePlan(JsonObject plan, String host , String port) throws IOException {
       //Send data to scheduler
       JsonObject result = null;
 

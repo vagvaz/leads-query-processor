@@ -23,7 +23,6 @@ public class Action extends DataType {
         data.putString("type", "action");
     }
 
-
     public String getId() {
         return data.getString("id");
     }
@@ -127,6 +126,9 @@ public class Action extends DataType {
         data.putObject("result", result);
     }
 
+    public void setGlobalConf(JsonObject global) { data.putObject("globalConfig",global);}
+    public JsonObject getGlobalConf() { return data.getObject("globalConfig");}
+
     @Override
     public int hashCode() {
         return getId().hashCode();
@@ -140,6 +142,14 @@ public class Action extends DataType {
         }
         return false;
 
+    }
+
+    public String getCurrentCluster() {
+        return data.getString("currentCluster");
+    }
+
+    public  void setCurrentCluster(String currentCluster){
+        data.putString("currentCluster",currentCluster);
     }
 }
 

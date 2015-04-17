@@ -166,6 +166,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
         logicConfig.putString("componentType", componentType);
         logicConfig.putString("workqueue", workQueueAddress);
         logicConfig.putString("componentId", getId());
+        logicConfig.putObject("global",conf.getObject("global"));
         if (config.containsField("logic")) {
             logicConfig.mergeIn(config.getObject("logic"));
         }
@@ -181,6 +182,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
         processorConfig.putString("parent", id + ".serviceMonitor");
         processorConfig.putString("componentType", getComponentType());
         processorConfig.putString("componentId", getId());
+        processorConfig.putObject("global",conf.getObject("global"));
         if (config.containsField("processor")) {
             processorConfig = processorConfig.mergeIn(config.getObject("processor"));
         }

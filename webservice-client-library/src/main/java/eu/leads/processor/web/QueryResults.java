@@ -1,6 +1,5 @@
 package eu.leads.processor.web;
 
-import eu.leads.processor.core.DataType;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonElement;
 import org.vertx.java.core.json.JsonObject;
@@ -12,7 +11,7 @@ import java.util.List;
 /**
  * Created by vagvaz on 3/7/14.
  */
-public class QueryResults  extends DataType {
+public class QueryResults  extends JsonObject {
 
     public QueryResults() {
      super();
@@ -34,36 +33,36 @@ public class QueryResults  extends DataType {
     }
 
     public QueryResults(JsonObject jsonObject) {
-        super(jsonObject);
+        super(jsonObject.toString());
     }
 
     public String getId() {
-        return data.getString("id");
+        return this.getString("id");
     }
 
     public void setId(String id) {
-        data.putString("id",id);
+        this.putString("id", id);
     }
 
     public long getMin() {
-        return data.getLong("min");
+        return this.getLong("min");
     }
 
     public void setMin(long min) {
-        data.putNumber("min",min);
+        this.putNumber("min", min);
     }
 
     public long getMax() {
-        return data.getLong("max");
+        return this.getLong("max");
     }
 
     public void setMax(long max) {
-        data.putNumber("max",max);
+        this.putNumber("max", max);
     }
 
     public List<String> getResult() {
         List<String> result = new ArrayList<String>();
-        JsonArray array = new JsonArray(data.getString("result"));
+        JsonArray array = new JsonArray(this.getString("result"));
 
         Iterator<Object> iterator = array.iterator();
         while(iterator.hasNext()){
@@ -79,27 +78,27 @@ public class QueryResults  extends DataType {
         for(String t : result){
             resultArray.add(t);
         }
-        data.putArray("result",resultArray);
+        this.putArray("result", resultArray);
     }
 
     public String getMessage() {
-        return data.getString("message");
+        return this.getString("message");
     }
 
     public void setMessage(String message) {
-        data.putString("message",message);
+        this.putString("message", message);
     }
 
     @Override
     public String toString() {
-       return  data.encodePrettily();
+       return  this.encodePrettily();
     }
 
     public long getSize() {
-      return  data.getLong("size");
+      return  this.getLong("size");
     }
 
     public void setSize(long size) {
-        data.putNumber("size",size);
+        this.putNumber("size",size);
     }
 }

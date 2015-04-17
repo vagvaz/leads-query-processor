@@ -30,7 +30,7 @@ public class GroupByOperator extends MapReduceOperator {
 
     public GroupByOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
 
-       super(com, persistence,log, action);
+       super(com, persistence, log, action);
 
        JsonArray columns = conf.getObject("body").getArray("groupingKeys");
        Iterator<Object> columnIterator = columns.iterator();
@@ -67,4 +67,20 @@ public class GroupByOperator extends MapReduceOperator {
     public void cleanup() {
       super.cleanup();
     }
+
+
+   @Override
+   public void setupMapCallable() {
+//      init(conf);
+      setMapper(new GroupByMapper(conf.toString()));
+      super.setupMapCallable();
+   }
+
+   @Override
+   public void setupReduceCallable() {
+      setReducer(new GroupByReducer(conf.toString()));
+      super.setupReduceCallable();
+   }
+
+
 }

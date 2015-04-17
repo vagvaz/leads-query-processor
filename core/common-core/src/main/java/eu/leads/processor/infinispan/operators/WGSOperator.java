@@ -70,38 +70,62 @@ public class WGSOperator extends MapReduceOperator {
    }
    @Override
    public void run() {
+//      int count = 0;
+//      String currentInput = getName() +".iter0";
+//      String currentOutput = "";
+//      String currentIntermediate = getName()+".itermediate0";
+//      inputCacheName = getName() +".iter0";
+//      inputCache = (Cache) manager.getPersisentCache(inputCacheName);
+//      JsonObject configBody = conf.getObject("body");
+//      inputCache.put(configBody.getString("url"),configBody.getString("url"));
+//      Cache realOutput = (Cache) manager.getPersisentCache(conf.getString("realOutput"));
+//      for ( count = 0; count < configBody.getInteger("depth"); count++) {
+//         currentInput = getName() +".iter"+count;
+//         currentOutput = getName() +".iter"+(count+1);
+//         currentIntermediate = getName()+".itermediate"+count;
+////         inputCache = (Cache)manager.getPersisentCache(currentInput);
+////         inputCache = (Cache)manager.getPersisentCache(getName()+".iter"+String.valueOf(count));
+//         System.out.println("realOutput " + conf.getString("realOutput") + " \nsize" + realOutput.size());
+//
+//         JsonObject jobConfig = new JsonObject();
+//         jobConfig.putNumber("iteration", count);
+//         jobConfig.putNumber("depth", configBody.getInteger("depth"));
+//         jobConfig.putArray("attributes", attributesArray);
+//         if(count < configBody.getInteger("depth")){
+//            jobConfig.putString("outputCache",currentOutput);
+//         }
+//         else
+//         {
+//            jobConfig.putString("outputCache","");
+//         }
+//         jobConfig.putString("realOutput",conf.getString("realOutput"));
+//         jobConfig.putString("webCache","default.webpages");
+//         setupMapReduceJob(currentInput,currentIntermediate,currentOutput);
+//         executeMapReducePhase(jobConfig);
+//      }
       int count = 0;
-      String currentInput = getName() +".iter0";
-      String currentOutput = "";
-      String currentIntermediate = getName()+".itermediate0";
-      inputCacheName = getName() +".iter0";
-      inputCache = (Cache) manager.getPersisentCache(inputCacheName);
-      JsonObject configBody = conf.getObject("body");
-      inputCache.put(configBody.getString("url"),configBody.getString("url"));
-      Cache realOutput = (Cache) manager.getPersisentCache(conf.getString("realOutput"));
-      for ( count = 0; count < configBody.getInteger("depth"); count++) {
-         currentInput = getName() +".iter"+count;
-         currentOutput = getName() +".iter"+(count+1);
-         currentIntermediate = getName()+".itermediate"+count;
-//         inputCache = (Cache)manager.getPersisentCache(currentInput);
-//         inputCache = (Cache)manager.getPersisentCache(getName()+".iter"+String.valueOf(count));
-         System.out.println("realOutput " + conf.getString("realOutput") + " \nsize" + realOutput.size());
-
-         JsonObject jobConfig = new JsonObject();
-         jobConfig.putNumber("iteration", count);
-         jobConfig.putNumber("depth", configBody.getInteger("depth"));
-         jobConfig.putArray("attributes", attributesArray);
-         if(count < configBody.getInteger("depth")){
-            jobConfig.putString("outputCache",currentOutput);
+      for ( count = 0; count < conf.getObject("body").getInteger("depth"); count++) {
+         findPendingMMCFromGlobal();
+         findPendingRMCFromGlobal();
+         createCaches(isRemote, executeOnlyMap, executeOnlyReduce);
+         if(executeOnlyMap) {
+            setupMapCallable();
+            executeMap();
          }
-         else
-         {
-            jobConfig.putString("outputCache","");
+         if(!failed) {
+            if (executeOnlyReduce) {
+               setupReduceCallable();
+               executeReduce();
+            }
+            if (!failed) {
+               cleanup();
+            } else {
+               failCleanup();
+            }
          }
-         jobConfig.putString("realOutput",conf.getString("realOutput"));
-         jobConfig.putString("webCache","default.webpages");
-         setupMapReduceJob(currentInput,currentIntermediate,currentOutput);
-         executeMapReducePhase(jobConfig);
+         else {
+            failCleanup();
+         }
       }
 
      cleanup();

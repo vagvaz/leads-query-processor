@@ -12,14 +12,12 @@ import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.distexec.DistributedTask;
 import org.infinispan.distexec.DistributedTaskBuilder;
+import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.remoting.transport.Address;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +35,8 @@ public class SortOperator extends BasicOperator {
    transient protected Boolean[] asceding;
    transient protected String[] types;
    transient  protected long rowcount = Long.MAX_VALUE;
-
+   String prefix;
+   List<String> addresses;
 
    public long getRowcount() {
       return rowcount;
@@ -48,7 +47,7 @@ public class SortOperator extends BasicOperator {
 
 
    public SortOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
-      super(com, persistence,log, action);
+      super(com, persistence, log, action);
       JsonArray sortKeys = conf.getObject("body").getArray("sortKeys");
       Iterator<Object> sortKeysIterator = sortKeys.iterator();
       sortColumns = new String[sortKeys.size()];
@@ -65,6 +64,15 @@ public class SortOperator extends BasicOperator {
       if(conf.containsField("limit")){
          rowcount = conf.getObject("limit").getObject("body").getLong("fetchFirstNum");
       }
+
+      if(isRemote){
+         action.getData().getString("prefix");
+      }
+      else{
+         prefix = UUID.randomUUID().toString();
+         action.getData().putString("prefix", prefix);
+      }
+      addresses = new ArrayList<>();
    }
 
    @Override
@@ -74,14 +82,14 @@ public class SortOperator extends BasicOperator {
        init_statistics(this.getClass().getCanonicalName());
     }
 
-   @Override
-   public void run() {
+//   @Override
+   public void ru2n() {
        long startTime = System.nanoTime();
       Cache inputCache = (Cache) this.manager.getPersisentCache(getInput());
       Cache beforeMerge = (Cache)this.manager.getPersisentCache(getOutput()+".merge");
       Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
-     String prefix = UUID.randomUUID().toString();
+//     String prefix = UUID.randomUUID().toString();
       SortCallableUpdated<String,Tuple> callable = new SortCallableUpdated(sortColumns,asceding,types,getOutput()+".merge",prefix);
 //      SortCallable callable = new SortCallable(sortColumns,asceding,types,getOutput()+".merge",UUID.randomUUID().toString());
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder( callable);
@@ -111,9 +119,7 @@ public class SortOperator extends BasicOperator {
          e.printStackTrace();
       }
 //      Merge outputs
-      TupleComparator comparator = new TupleComparator(sortColumns,asceding,types);
-      SortMerger2 merger = new SortMerger2(addresses, getOutput(),comparator,manager,conf,getRowcount());
-      merger.merge();
+
 //       Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
       for(String cacheName : addresses){
          manager.removePersistentCache(cacheName);
@@ -163,8 +169,70 @@ public class SortOperator extends BasicOperator {
 
     }
 
+   @Override
+   public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
+      if (isRemote) {
+         String coordinator = action.getData().getString("coordinator");
+         String prefix = action.getData().getString("prefix");
+         for (Address cacheNodes : inputCache.getAdvancedCache().getRpcManager().getMembers()) {
+            String tmpCacheName = prefix + "." + currentCluster + "." + cacheNodes.toString();
+            createCache(coordinator, tmpCacheName);
+         }
+//         manager.getPersisentCache();
+         createCache(coordinator,prefix+"."+manager.getMemberName().toString());
+      } else {
+         if (executeOnlyMap) {
+            if(pendingMMC.contains(currentCluster)) {
+               for (Address cacheNodes : inputCache.getAdvancedCache().getRpcManager().getMembers()) {
+                  String tmpCacheName = prefix + "." + currentCluster + "." + cacheNodes.toString();
+                  manager.getPersisentCache(tmpCacheName);
+               }
+               manager.getPersisentCache(prefix+"."+manager.getMemberName().toString());
+            }
 
-    public Boolean[] getAscending() {
+            Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
+            Set<String> targetMC = getTargetMC();
+            for (String mc : targetMC) {
+               createCache(mc, getOutput());
+            }
+         }
+
+
+      }
+   }
+
+   @Override
+   public void setupMapCallable() {
+//      String prefix = UUID.randomUUID().toString();
+      inputCache = (Cache) this.manager.getPersisentCache(getInput());
+      mapperCallable =  new SortCallableUpdated(sortColumns,asceding,types,getOutput()+".merge",prefix);
+   }
+
+   @Override
+   public void setupReduceCallable() {
+
+      Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
+      for(Object address : addressesCache.keySet()){
+         addresses.add(address.toString());
+      }
+   }
+
+   @Override
+   public void executeReduce(){
+      TupleComparator comparator = new TupleComparator(sortColumns,asceding,types);
+      String ensembleHost = computeEnsembleHost();
+      EnsembleCacheManager emanager = new EnsembleCacheManager(ensembleHost);
+      SortMerger2 merger = new SortMerger2(addresses, getOutput(),comparator,manager,emanager,conf,getRowcount());
+      merger.merge();
+   }
+
+   @Override
+   public boolean isSingleStage() {
+      return false;
+   }
+
+
+   public Boolean[] getAscending() {
         return this.asceding;
     }
 

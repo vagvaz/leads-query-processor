@@ -46,11 +46,21 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     this.output = output;
   }
 
-  public static RemoteCacheManager createRemoteCacheManager() {
-    ConfigurationBuilder builder = new ConfigurationBuilder();
-    builder.addServer().host(LQPConfiguration.getConf().getString("node.ip")).port(11222);
-    return new RemoteCacheManager(builder.build());
+
+  public String getEnsembleHost() {
+    return ensembleHost;
   }
+
+  public void setEnsembleHost(String ensembleHost) {
+    this.ensembleHost = ensembleHost;
+  }
+
+
+//  public static RemoteCacheManager createRemoteCacheManager() {
+//    ConfigurationBuilder builder = new ConfigurationBuilder();
+//    builder.addServer().host(LQPConfiguration.getConf().getString("node.ip")).port(11222);
+//    return new RemoteCacheManager(builder.build());
+//  }
   @Override public void setEnvironment(Cache<K, V> cache, Set<K> inputKeys) {
     embeddedCacheManager = cache.getCacheManager();
     imanager = new ClusterInfinispanManager(embeddedCacheManager);

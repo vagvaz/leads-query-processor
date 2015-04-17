@@ -194,8 +194,8 @@ public class WP4ClientTest {
                                  "  \n" +
                                  "}";
 
-      WP4Client.initialize(" http://127.0.0.1","5001");
-      JsonObject reply = WP4Client.evaluatePlan(new JsonObject(inputJSON));
+      WP4Client.initialize("http://127.0.0.1","5001");
+      JsonObject reply = WP4Client.evaluatePlan(new JsonObject(inputJSON),"http://127.0.0.1","5001");
       System.err.println("replied " + reply.encodePrettily());
    }
 }

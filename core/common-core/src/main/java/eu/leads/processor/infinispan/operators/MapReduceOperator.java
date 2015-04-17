@@ -15,6 +15,7 @@ import org.infinispan.distexec.DistributedTaskBuilder;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -70,11 +71,12 @@ public abstract class MapReduceOperator extends BasicOperator{
     indexSiteCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".indexed");
 //    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
     outputCache = (BasicCache) manager.getPersisentCache(outputCacheName);
+    reduceInputCache = (Cache) keysCache;
     collector = new LeadsCollector(0, intermediateCacheName);
   }
 
-  @Override
-  public void run() {
+//  @Override
+  public void run2() {
     long startTime = System.nanoTime();
     if(reducer == null)
       reducer = new LeadsReducer("");
@@ -156,5 +158,36 @@ public abstract class MapReduceOperator extends BasicOperator{
     indexSiteCache.stop();
     intermediateDataCache.stop();
     keysCache.stop();
+  }
+
+  @Override
+  public boolean isSingleStage() {
+    return false;
+  }
+  @Override
+  public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
+    Set<String> targetMC = getTargetMC();
+    for(String mc : targetMC){
+      createCache(mc,getOutput());
+      createCache(mc, intermediateCacheName);
+      //create Intermediate cache name for data on the same Sites as outputCache
+      createCache(mc,intermediateCacheName+".data");
+      //create Intermediate  keys cache name for data on the same Sites as outputCache;
+      createCache(mc,intermediateCacheName+".keys");
+      //createIndexCache for getting all the nodes that contain values with the same key! in a mc
+      createCache(mc,intermediateCacheName+".indexed");
+//    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
+
+    }
+  }
+  @Override
+  public void setupMapCallable(){
+    mapperCallable = new LeadsMapperCallable((Cache) inputCache,collector,mapper,
+                                   LQPConfiguration.getInstance().getMicroClusterName());
+  }
+  @Override
+  public void setupReduceCallable(){
+    reducerCallable =  new LeadsReducerCallable(outputCache.getName(), reducer,
+                                                                         intermediateCacheName);
   }
 }

@@ -36,7 +36,12 @@ public class PutObjectActionHandler implements ActionHandler {
          String key = action.getData().getString("key");
          JsonObject value = new JsonObject(action.getData().getString("object"));
          Cache<String, String> cache = (Cache<String, String>) persistence.getPersisentCache(cacheName);
-         cache.put(key, value.toString());
+         if(!key.equals("") && !value.equals("{}")) {
+            cache.put(key, value.toString());
+         }
+         else{
+            log.error("put object used for creating cache");
+         }
          actionResult.putString("status", "SUCCESS");
       } catch (Exception e) {
          actionResult.putString("status", "FAIL");

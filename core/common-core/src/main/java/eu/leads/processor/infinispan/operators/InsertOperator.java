@@ -50,6 +50,7 @@ public class InsertOperator extends BasicOperator {
    @Override
    public void init(JsonObject config) {
 //                            super.init(config);
+      ensembleHost = computeEnsembleHost();
       if(ensembleHost != null && !ensembleHost.equals("")) {
          emanager = new EnsembleCacheManager(ensembleHost);
 //      emanager = createRemoteCacheManager();
@@ -111,7 +112,7 @@ public class InsertOperator extends BasicOperator {
    }
 
    @Override
-   public void execute() {
+   public void run() {
 //      targetCache = (Cache) manager.getPersisentCache(tableName);
       ecache = emanager.getCache(tableName);
 //                VersionedCache versionedCache = new VersionedCacheTreeMapImpl(targetCache, new VersionScalarGenerator(),targetCache.getName());
@@ -136,6 +137,26 @@ public class InsertOperator extends BasicOperator {
    @Override
    public void cleanup() {
       super.cleanup();
+   }
+
+   @Override
+   public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
+
+   }
+
+   @Override
+   public void setupMapCallable() {
+
+   }
+
+   @Override
+   public void setupReduceCallable() {
+
+   }
+
+   @Override
+   public boolean isSingleStage() {
+      return true;
    }
 
 

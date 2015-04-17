@@ -17,7 +17,7 @@ public class WebServiceClientTest {
 
     public static void main(String[] args) throws IOException {
         host = "http://localhost";
-//        host = "http://5.147.254.198";
+        host = "http://5.147.254.199";
 //       host = "http://5.147.254.161";
         port = 8080;
         if (args.length == 2) {

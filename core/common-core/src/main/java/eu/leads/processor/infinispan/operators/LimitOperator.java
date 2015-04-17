@@ -2,13 +2,16 @@ package eu.leads.processor.infinispan.operators;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
+import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import org.infinispan.Cache;
+import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.CloseableIterable;
+import org.infinispan.ensemble.EnsembleCacheManager;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.Map;
@@ -29,10 +32,12 @@ import java.util.concurrent.ConcurrentMap;
 public class LimitOperator extends BasicOperator {
     boolean sorted = false;
     Cache inputMap=null;
-    ConcurrentMap data=null;
+    BasicCache data=null;
     public String prefix;
     public String inputPrefix;
     public long rowCount;
+    private EnsembleCacheManager emanager;
+
     public LimitOperator(Action action) {
       super(action);
    }
@@ -44,7 +49,9 @@ public class LimitOperator extends BasicOperator {
       sorted = conf.getBoolean("isSorted");
       prefix =   getOutput() + ":";
       inputMap = (Cache<String, String>) persistence.getPersisentCache(getInput());
-      data = persistence.getPersisentCache(getOutput());
+      emanager = new EnsembleCacheManager( computeEnsembleHost());
+      data = emanager.getCache(getOutput());
+//      data = persistence.getPersisentCache(getOutput());
      inputPrefix = inputMap.getName()+":";
    }
 
@@ -58,7 +65,7 @@ public class LimitOperator extends BasicOperator {
     }
 
     @Override
-    public void execute() {
+    public void run() {
         long startTime = System.nanoTime();
         int counter = 0;
         if (sorted) {
@@ -77,7 +84,7 @@ public class LimitOperator extends BasicOperator {
                 Tuple t = tupleValue;
                 handlePagerank(t);
 //                System.err.println(prefix+counter);
-                data.put(prefix + Integer.toString(counter), t);
+                EnsembleCacheUtils.putToCache(data, prefix + Integer.toString(counter), t);
 //                data.put(prefix + Integer.toString(counter), t.asString());
             }
         } else {
@@ -89,7 +96,7 @@ public class LimitOperator extends BasicOperator {
             String tupleId = entry.getKey().substring(entry.getKey().indexOf(":") + 1);
             Tuple t = entry.getValue();
             handlePagerank(t);
-            data.put(prefix + tupleId, t);
+            EnsembleCacheUtils.putToCache(data,prefix + tupleId, t);
             counter++;
           }
 
@@ -124,6 +131,26 @@ public class LimitOperator extends BasicOperator {
     public void cleanup() {
       super.cleanup();
     }
+
+   @Override
+   public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
+
+   }
+
+   @Override
+   public void setupMapCallable() {
+
+   }
+
+   @Override
+   public void setupReduceCallable() {
+
+   }
+
+   @Override
+   public boolean isSingleStage() {
+      return true;
+   }
 }/*ExecutionPlanNode {
     private Limit limit;
 

@@ -75,8 +75,9 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
        LQPConfiguration.initialize();
        LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component", "planner");
         persistence = InfinispanClusterSingleton.getInstance().getManager();
-       schedHost = config.getString("schedulerHost");
-       schedPort = config.getString("schedulerPort");
+       String schedulerUri = config.getObject("global").getString("scheduler");
+       schedHost = schedulerUri.substring(0,schedulerUri.lastIndexOf(":"));
+       schedPort = schedulerUri.substring(schedulerUri.lastIndexOf(":")+1);
 
         JsonObject msg = new JsonObject();
         msg.putString("processor", id + ".process");

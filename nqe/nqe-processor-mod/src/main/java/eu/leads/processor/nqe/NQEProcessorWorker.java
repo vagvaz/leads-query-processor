@@ -38,6 +38,8 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
    InfinispanManager persistence;
    Map<String,ActionHandler> handlers;
    Map<String,Action> activeActions;
+   String currentCluster;
+   JsonObject globalConfig;
    @Override
    public void start() {
       super.start();
@@ -104,6 +106,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
       };
       bus = vertx.eventBus();
       config = container.config();
+      globalConfig = config.getObject("global");
       id = config.getString("id");
       gr = config.getString("group");
       logic = config.getString("logic");
@@ -121,7 +124,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
       handlers.put(NQEConstants.DEPLOY_OPERATOR,new OperatorActionHandler(com,log,persistence,id));
       handlers.put(NQEConstants.DEPLOY_PLUGIN,new DeployPluginActionHandler(com,log,persistence,id));
       handlers.put(NQEConstants.UNDEPLOY_PLUGIN,new DeployPluginActionHandler(com,log,persistence,id));
-
+//      handlers.put(NQEConstants.DEPLOY_REMOTE_OPERATOR, new DeployRemoteOpActionHandler(com,log,persistence,id,globalConfig));
 
       bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {
          @Override
