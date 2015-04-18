@@ -1,7 +1,6 @@
 package eu.leads.processor.core.avro;
 
 import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.vertx.java.core.json.JsonObject;
@@ -21,11 +20,11 @@ public abstract class DataTypeAvro {
     }
 
     public DataTypeAvro() {
-        schema = SchemaBuilder
-                .record("leadsrec").namespace("eu.leads.processor.core")
-                .fields()
-                .endRecord();
-        //schema = Schema.createRecord("arrayFoo","add","mytest",false);
+//        schema = SchemaBuilder
+//                .record("leadsrec").namespace("eu.leads.processor.core")
+//                .fields()
+//                .endRecord();
+        schema = Schema.createRecord("arrayFoo","add","mytest",false);
         AvroRec = new GenericData.Record(schema);
     }
 

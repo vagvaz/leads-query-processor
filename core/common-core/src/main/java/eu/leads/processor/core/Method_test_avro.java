@@ -1,6 +1,5 @@
 package eu.leads.processor.core;
 
-import eu.leads.processor.core.avro.Tuple;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.IOException;
@@ -36,7 +35,7 @@ public class Method_test_avro {
         Long value8 = -5807565109641799382L;
         Double value9 = 0.7535329047380597;
         Double value10 = 0.47334616297362775;
-        eu.leads.processor.core.avro.Tuple tavro = new eu.leads.processor.core.avro.Tuple();
+        Tuple tavro = new Tuple();
 
         /*tavro.setProperName(attributeName1);
 
@@ -64,13 +63,13 @@ public class Method_test_avro {
         job.putString(attributeName1, value1);
         job.putString(attributeName2, value2);
         job.putString(attributeName3, value3);
-        eu.leads.processor.core.avro.Tuple tavroJ = new eu.leads.processor.core.avro.Tuple(job.toString());
+        Tuple tavroJ = new Tuple(job.toString());
         System.out.println("\n\n******************tavroJ"+tavroJ);
 
 // copy test
-        eu.leads.processor.core.avro.Tuple tavroNew = new eu.leads.processor.core.avro.Tuple();
+        Tuple tavroNew = new Tuple();
         tavroNew.copy(tavro.AvroRec);
-        eu.leads.processor.core.avro.Tuple tavroNew2 = new eu.leads.processor.core.avro.Tuple();
+        Tuple tavroNew2 = new Tuple();
         tavroNew2.copy(tavro.AvroRec);
         tavroNew.removeAttribute(attributeName2);
         tavroNew.removeAttribute(attributeName7);
@@ -86,7 +85,7 @@ public class Method_test_avro {
         ignoreColumns.add(attributeName1);
         ignoreColumns.add(attributeName4);
         ignoreColumns.add(attributeName10);
-        eu.leads.processor.core.avro.Tuple tavroNew3 = new Tuple(tavroNew2, tavroNew, ignoreColumns);
+        Tuple tavroNew3 = new Tuple(tavroNew2, tavroNew, ignoreColumns);
         System.out.println("\n\n-------------------Contructor test: "+tavroNew3);
         System.out.println("\n\n-------------------Contructor test: " + tavroNew2);
         //System.exit(0);

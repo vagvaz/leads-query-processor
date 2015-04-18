@@ -23,7 +23,7 @@ public class Tuple extends DataTypeAvro implements Serializable{
         JsonObject job = new JsonObject(jsonString);
         Set<String> jobstr = job.getFieldNames();
 
-        Schema schema_new = Schema.createRecord("arrayFoo","add","mytest",false);
+        Schema schema_new = Schema.createRecord("schemaName","schemaDoc","namespace",false);
         List<Schema.Field> newFieldList = new ArrayList<>();
 
         for(String jstr: jobstr){
@@ -60,7 +60,7 @@ public class Tuple extends DataTypeAvro implements Serializable{
         }
         tl.copy(tr.AvroRec);
     }
-
+    
     private void writeObject(java.io.ObjectOutputStream out) throws IOException{
         // Serialize it.
         //get bytes
@@ -105,12 +105,12 @@ public class Tuple extends DataTypeAvro implements Serializable{
         if(hasField(setProperName(attributeName))) {
             AvroRec.put(setProperName(attributeName), value);
         }else {
-            Schema schema_new = Schema.createRecord("arrayFoo","add","mytest",false);
+            Schema schema_new = Schema.createRecord("schemaName","schemaDoc","namespace",false);
             List<Schema.Field> newFieldList = new ArrayList<>();
             for(Schema.Field field: schema.getFields()){
                 newFieldList.add(new Schema.Field(setProperName(field.name()),schema_new,field.doc(),field.defaultValue()));
             }
-            newFieldList.add(new Schema.Field(setProperName(attributeName),schema_new,"add",null));
+            newFieldList.add(new Schema.Field(setProperName(attributeName),schema_new,"schemaDoc",null));
             schema_new.setFields(newFieldList);
             GenericRecord AvroRec_old;
             AvroRec_old = AvroRec;
@@ -129,12 +129,12 @@ public class Tuple extends DataTypeAvro implements Serializable{
         if(hasField(setProperName(name))) {
             AvroRec.put(setProperName(name), tupleValue);
         }else {
-            Schema schema_new = Schema.createRecord("arrayFoo","add","mytest",false);
+            Schema schema_new = Schema.createRecord("schemaName","schemaDoc","namespace",false);
             List<Schema.Field> newFieldList = new ArrayList<>();
             for(Schema.Field field: schema.getFields()){
                 newFieldList.add(new Schema.Field(setProperName(field.name()),schema_new,field.doc(),field.defaultValue()));
             }
-            newFieldList.add(new Schema.Field(setProperName(name),schema_new,"add",null));
+            newFieldList.add(new Schema.Field(setProperName(name),schema_new,"schemaDoc",null));
             schema_new.setFields(newFieldList);
             GenericRecord AvroRec_old;
             AvroRec_old = AvroRec;
@@ -153,12 +153,12 @@ public class Tuple extends DataTypeAvro implements Serializable{
         if(hasField(setProperName(attributeName))) {
             AvroRec.put(setProperName(attributeName), value);
         }else {
-            Schema schema_new = Schema.createRecord("arrayFoo","add","mytest",false);
+            Schema schema_new = Schema.createRecord("schemaName","schemaDoc","namespace",false);
             List<Schema.Field> newFieldList = new ArrayList<>();
             for(Schema.Field field: schema.getFields()){
                 newFieldList.add(new Schema.Field(setProperName(field.name()),schema_new,field.doc(),field.defaultValue()));
             }
-            newFieldList.add(new Schema.Field(setProperName(attributeName),schema_new,"add",null));
+            newFieldList.add(new Schema.Field(setProperName(attributeName),schema_new,"schemaDoc",null));
             schema_new.setFields(newFieldList);
             GenericRecord AvroRec_old;
             AvroRec_old = AvroRec;
@@ -183,7 +183,7 @@ public class Tuple extends DataTypeAvro implements Serializable{
         return (Number) AvroRec.get(setProperName(column));
     }
     public void keepOnly(List<String> columns) {
-        Schema schema_new = Schema.createRecord("leadsrec","leadsdoc","eu.leads.processor.core",false);
+        Schema schema_new = Schema.createRecord("schemaName","schemaDoc","namespace",false);
         List<Schema.Field> newFieldList = new ArrayList<>();
         for(Schema.Field field: schema.getFields()){
             if(columns.contains(setProperName(field.name()))){
@@ -200,7 +200,7 @@ public class Tuple extends DataTypeAvro implements Serializable{
         }
     }
     public void removeAttribute(String name) {
-        Schema schema_new = Schema.createRecord("arrayFoo","test","mytest",false);
+        Schema schema_new = Schema.createRecord("schemaName","schemaDoc","namespace",false);
         List<Schema.Field> newFieldList = new ArrayList<>();
         for(Schema.Field field: schema.getFields()){
             if(!setProperName(field.name()).equals(name)){
@@ -217,7 +217,7 @@ public class Tuple extends DataTypeAvro implements Serializable{
         }
     }
     public void removeAtrributes(List<String> columns) {
-        Schema schema_new = Schema.createRecord("leadsrec","leadsdoc","eu.leads.processor.core",false);
+        Schema schema_new = Schema.createRecord("schemaName","schemaDoc","namespace",false);
         List<Schema.Field> newFieldList = new ArrayList<>();
         for(Schema.Field field: schema.getFields()){
             if(!columns.contains(setProperName(field.name()))){
@@ -258,7 +258,7 @@ public class Tuple extends DataTypeAvro implements Serializable{
     public void renameAttribute(String oldName, String newName) {
         if(setProperName(oldName) == setProperName(newName))
             return;
-        Schema schema_new = Schema.createRecord("arrayFoo", "test", "mytest", false);
+        Schema schema_new = Schema.createRecord("schemaName","schemaDoc","namespace",false);
         List<Schema.Field> newFieldList = new ArrayList<>();
         for(Schema.Field field: schema.getFields()){
             if(!setProperName(field.name()).equals(setProperName(oldName))){
@@ -300,8 +300,8 @@ public class Tuple extends DataTypeAvro implements Serializable{
     }
 
     public String setProperName(String name){
-//        String newOutname = name.trim().split("\\.")[name.trim().split("\\.").length-1];
-//        return newOutname;
-        return name;
+        String newOutname = name.trim().split("\\.")[name.trim().split("\\.").length-1];
+        return newOutname;
+//        return name;
     }
 }
