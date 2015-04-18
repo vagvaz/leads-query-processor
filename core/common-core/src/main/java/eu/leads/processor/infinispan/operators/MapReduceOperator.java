@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  * Created by tr on 19/9/2014.
  */
 public abstract class MapReduceOperator extends BasicOperator{
-  protected transient BasicCache inputCache;
+//  protected transient BasicCache inputCache;
   protected transient BasicCache intermediateCache;
   protected transient BasicCache  outputCache;
   protected transient BasicCache  keysCache;
@@ -61,7 +61,7 @@ public abstract class MapReduceOperator extends BasicOperator{
   @Override
   public void init(JsonObject config) {
     conf.putString("output",getOutput());
-    inputCache = (BasicCache) manager.getPersisentCache(inputCacheName);
+    inputCache = (Cache) manager.getPersisentCache(inputCacheName);
     intermediateCache = (BasicCache) manager.getPersisentCache(intermediateCacheName);
     //create Intermediate cache name for data on the same Sites as outputCache
     intermediateDataCache = (BasicCache) manager.getPersisentCache(intermediateCacheName+".data");
@@ -154,10 +154,12 @@ public abstract class MapReduceOperator extends BasicOperator{
   @Override
   public void cleanup() {
     super.cleanup();
-    intermediateCache.stop();
-    indexSiteCache.stop();
-    intermediateDataCache.stop();
-    keysCache.stop();
+    if(executeOnlyReduce) {
+      intermediateCache.stop();
+      indexSiteCache.stop();
+      intermediateDataCache.stop();
+      keysCache.stop();
+    }
   }
 
   @Override
@@ -182,11 +184,37 @@ public abstract class MapReduceOperator extends BasicOperator{
   }
   @Override
   public void setupMapCallable(){
+//    conf.putString("output",getOutput());
+    inputCache = (Cache) manager.getPersisentCache(inputCacheName);
+//    intermediateCache = (BasicCache) manager.getPersisentCache(intermediateCacheName);
+    //create Intermediate cache name for data on the same Sites as outputCache
+//    intermediateDataCache = (BasicCache) manager.getPersisentCache(intermediateCacheName+".data");
+    //create Intermediate  keys cache name for data on the same Sites as outputCache;
+//    keysCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".keys");
+    //createIndexCache for getting all the nodes that contain values with the same key! in a mc
+//    indexSiteCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".indexed");
+    //    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
+//    outputCache = (BasicCache) manager.getPersisentCache(outputCacheName);
+//    reduceInputCache = (Cache) keysCache;
+    collector = new LeadsCollector(0, intermediateCacheName);
     mapperCallable = new LeadsMapperCallable((Cache) inputCache,collector,mapper,
                                    LQPConfiguration.getInstance().getMicroClusterName());
   }
   @Override
   public void setupReduceCallable(){
+    conf.putString("output",getOutput());
+    intermediateCache = (BasicCache) manager.getPersisentCache(intermediateCacheName);
+    //create Intermediate cache name for data on the same Sites as outputCache
+    intermediateDataCache = (BasicCache) manager.getPersisentCache(intermediateCacheName+".data");
+    //create Intermediate  keys cache name for data on the same Sites as outputCache;
+    keysCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".keys");
+    //createIndexCache for getting all the nodes that contain values with the same key! in a mc
+    indexSiteCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".indexed");
+    //    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
+        outputCache = (BasicCache) manager.getPersisentCache(outputCacheName);
+    //    reduceInputCache = (Cache) keysCache;
+    collector = new LeadsCollector(0, intermediateCacheName);
+    inputCache = (Cache) keysCache;
     reducerCallable =  new LeadsReducerCallable(outputCache.getName(), reducer,
                                                                          intermediateCacheName);
   }

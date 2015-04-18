@@ -143,6 +143,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
          if (body.containsField("type")) {
             if (body.getString("type").equals("action")) {
                Action action = new Action(body);
+              action.setGlobalConf(globalConfig);
                ActionHandler ac = handlers.get(action.getLabel());
                Action result = ac.process(action);
 //               result.setStatus(ActionStatus.COMPLETED.toString());

@@ -256,8 +256,9 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
                 System.err.println(schedulerRep.encodePrettily());
                 annotatedPlan = WP4Client.evaluatePlan(schedulerRep,schedHost,schedPort);
             } catch (IOException e) {
-                e.printStackTrace();
-            }
+                log.error("Exception  e " + e.getMessage());
+              SQLQuery query = new SQLQuery( new JsonObject(queriesCache.get(plan.getQueryId())));
+              failQuery(new Exception("Could not access the scheduler"),query);            }
             if(annotatedPlan == null){
                 SQLQuery query = new SQLQuery( new JsonObject(queriesCache.get(plan.getQueryId())));
                 failQuery(new Exception("Could not access the scheduler"),query);

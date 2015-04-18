@@ -18,7 +18,7 @@ import org.vertx.java.core.json.JsonObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -31,11 +31,13 @@ import java.util.concurrent.TimeUnit;
  * To change this template use File | Settings | File Templates.
  */
 
-public class JoinOperator extends BasicOperator {
+public class JoinOperator extends MapReduceOperator {
 
     private FilterOperatorTree tree;
     private String innerCacheName;
     private String outerCacheName;
+    private Cache inputCache2;
+    private Map<String,List<String>> tableCols;
     private LogProxy logProxy;
     private String qualString;
     private boolean isLeft;
@@ -48,6 +50,7 @@ public class JoinOperator extends BasicOperator {
             log.error("JOIN is not equal but " + qual.asObject().getString("type") );
         }
         tree = new FilterOperatorTree(qual);
+      tableCols = tree.getJoinColumns();
    }
 
 
@@ -158,32 +161,158 @@ public class JoinOperator extends BasicOperator {
            super.cleanup();
     }
 
-   @Override
-   public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
-      Set<String> targetMC = getTargetMC();
-      for(String mc : targetMC){
-         createCache(mc,getOutput());
-      }
-   }
+//   @Override
+//   public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
+//      Set<String> targetMC = getTargetMC();
+//      for(String mc : targetMC){
+//         createCache(mc,getOutput());
+//      }
+//   }
 
    @Override
    public void setupMapCallable() {
-      inputCache = (Cache) manager.getPersisentCache(innerCacheName);
-      Cache outerCache = (Cache) manager.getPersisentCache(outerCacheName);
+     inputCacheName = innerCacheName;
+     inputCache = (Cache) manager.getPersisentCache(innerCacheName);
+       inputCache2 = (Cache) manager.getPersisentCache(outerCacheName);
+      JsonObject ob = new JsonObject();
+     for(Map.Entry<String,List<String>> entry : tableCols.entrySet()){
+       JsonArray array = new JsonArray();
+       for(String col : entry.getValue()){
+         array.add(col);
+       }
+       ob.putArray(entry.getKey(),array);
+     }
+      conf.putObject("joinColumns",ob);
+      conf.putString("inputCache", inputCache.getName());
+      setMapper(new JoinMapper(conf.toString()));
+//      mapperCallable = new JoinCallableUpdated(conf.toString(),getOutput(),
+//                                                      ,
+//                                                      isLeft);
 
-      mapperCallable = new JoinCallableUpdated(conf.toString(),getOutput(),
-                                                      outerCache
-                                                              .getName(),
-                                                      isLeft);
    }
 
-   @Override
+  @Override public void localExecuteMap() {
+    if(mapperCallable != null) {
+      if (inputCache.size() == 0) {
+        replyForSuccessfulExecution(action);
+        return;
+      }
+      DistributedExecutorService des = new DefaultExecutorService(inputCache);
+
+      //      ScanCallable callable = new ScanCallable(conf.toString(),getOutput());
+
+      setMapperCallableEnsembleHost();
+      DistributedTaskBuilder builder = des.createDistributedTaskBuilder(mapperCallable);
+      builder.timeout(1, TimeUnit.HOURS);
+      DistributedTask task = builder.build();
+      List<Future<String>> res = des.submitEverywhere(task);
+      //      Future<String> res = des.submit(callable);
+      List<String> addresses = new ArrayList<String>();
+      try {
+        if (res != null) {
+          for (Future<?> result : res) {
+            System.out.println(result.get());
+            addresses.add((String) result.get());
+          }
+          System.out.println("map " + mapperCallable.getClass().toString() +
+                               " Execution is done");
+          log.info("map " + mapperCallable.getClass().toString() +
+                     " Execution is done");
+        } else {
+          System.out.println("map " + mapperCallable.getClass().toString() +
+                               " Execution not done");
+          log.info("map " + mapperCallable.getClass().toString() +
+                     " Execution not done");
+          failed = true;
+//          replyForFailExecution(action);
+        }
+      } catch (InterruptedException e) {
+        log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+                    e.getClass().toString());
+        log.error(e.getMessage());
+        System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+                             e.getClass().toString());
+        System.err.println(e.getMessage());
+        failed = true;
+//        replyForFailExecution(action);
+      } catch (ExecutionException e) {
+        log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+                    e.getClass().toString());
+        log.error(e.getMessage());
+        System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+                             e.getClass().toString());
+        System.err.println(e.getMessage());
+        failed = true;
+//        replyForFailExecution(action);
+      }
+    }
+//    replyForSuccessfulExecution(action);
+
+
+    conf.putString("inputCache", inputCache2.getName());
+    setMapper(new JoinMapper(conf.toString()));
+
+    if(mapperCallable != null) {
+      if (inputCache2.size() == 0) {
+        replyForSuccessfulExecution(action);
+        return;
+      }
+      DistributedExecutorService des = new DefaultExecutorService(inputCache2);
+
+      //      ScanCallable callable = new ScanCallable(conf.toString(),getOutput());
+
+      setMapperCallableEnsembleHost();
+      DistributedTaskBuilder builder = des.createDistributedTaskBuilder(mapperCallable);
+      builder.timeout(1, TimeUnit.HOURS);
+      DistributedTask task = builder.build();
+      List<Future<String>> res = des.submitEverywhere(task);
+      //      Future<String> res = des.submit(callable);
+      List<String> addresses = new ArrayList<String>();
+      try {
+        if (res != null) {
+          for (Future<?> result : res) {
+            System.out.println(result.get());
+            addresses.add((String) result.get());
+          }
+          System.out.println("map " + mapperCallable.getClass().toString() +
+                               " Execution is done");
+          log.info("map " + mapperCallable.getClass().toString() +
+                     " Execution is done");
+        } else {
+          System.out.println("map " + mapperCallable.getClass().toString() +
+                               " Execution not done");
+          log.info("map " + mapperCallable.getClass().toString() +
+                     " Execution not done");
+          failed = true;
+          replyForFailExecution(action);
+        }
+      } catch (InterruptedException e) {
+        log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+                    e.getClass().toString());
+        log.error(e.getMessage());
+        System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+                             e.getClass().toString());
+        System.err.println(e.getMessage());
+        failed = true;
+        replyForFailExecution(action);
+      } catch (ExecutionException e) {
+        log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+                    e.getClass().toString());
+        log.error(e.getMessage());
+        System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+                             e.getClass().toString());
+        System.err.println(e.getMessage());
+        failed = true;
+        replyForFailExecution(action);
+      }
+    }
+    replyForSuccessfulExecution(action);
+  }
+
+  @Override
    public void setupReduceCallable() {
-
+     setReducer(new JoinReducer(conf.toString()));
+     super.setupReduceCallable();
    }
 
-   @Override
-   public boolean isSingleStage() {
-      return true;
-   }
 }

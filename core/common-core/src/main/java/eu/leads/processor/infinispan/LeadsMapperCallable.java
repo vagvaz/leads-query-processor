@@ -45,7 +45,7 @@ public class LeadsMapperCallable<K, V, kOut, vOut> extends LeadsBaseCallable<K,V
     collector.setManager(this.embeddedCacheManager);
     collector.setEmanager(emanager);
     collector.setSite(site);
-    collector.initializeCache(imanager);
+    collector.initializeCache(inputCache.getName(),imanager);
   }
 
 //	public String call() throws Exception {

@@ -171,7 +171,10 @@ public class SortOperator extends BasicOperator {
 
    @Override
    public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
-      if (isRemote) {
+     //need to get the input Cache here because we need to get the nodes addresses in order to create the
+     // necessary caches for the merge
+     inputCache = (Cache) manager.getPersisentCache(getInput());
+     if (isRemote) {
          String coordinator = action.getData().getString("coordinator");
          String prefix = action.getData().getString("prefix");
          for (Address cacheNodes : inputCache.getAdvancedCache().getRpcManager().getMembers()) {
@@ -179,7 +182,7 @@ public class SortOperator extends BasicOperator {
             createCache(coordinator, tmpCacheName);
          }
 //         manager.getPersisentCache();
-         createCache(coordinator,prefix+"."+manager.getMemberName().toString());
+         createCache(coordinator,prefix+"."+currentCluster+"."+manager.getMemberName().toString());
       } else {
          if (executeOnlyMap) {
             if(pendingMMC.contains(currentCluster)) {
@@ -187,7 +190,7 @@ public class SortOperator extends BasicOperator {
                   String tmpCacheName = prefix + "." + currentCluster + "." + cacheNodes.toString();
                   manager.getPersisentCache(tmpCacheName);
                }
-               manager.getPersisentCache(prefix+"."+manager.getMemberName().toString());
+               manager.getPersisentCache(prefix+"."+currentCluster+"."+manager.getMemberName().toString());
             }
 
             Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
@@ -202,6 +205,20 @@ public class SortOperator extends BasicOperator {
    }
 
    @Override
+   public void setMapperCallableEnsembleHost(){
+     if(isRemote) {
+       String ensembleHost = globalConfig.getObject("componentsAddrs").getArray(action.getData().getString("coordinator")).get(0).toString()
+                               +":11222";
+       mapperCallable.setEnsembleHost(ensembleHost);
+     }
+     else{
+       String ensembleHost = globalConfig.getObject("componentsAddrs").getArray(currentCluster).get(0).toString()
+                               +":11222";
+       mapperCallable.setEnsembleHost(ensembleHost);
+     }
+   }
+
+   @Override
    public void setupMapCallable() {
 //      String prefix = UUID.randomUUID().toString();
       inputCache = (Cache) this.manager.getPersisentCache(getInput());
@@ -213,6 +230,7 @@ public class SortOperator extends BasicOperator {
 
       Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
       for(Object address : addressesCache.keySet()){
+        System.out.println("ICache " + address);
          addresses.add(address.toString());
       }
    }

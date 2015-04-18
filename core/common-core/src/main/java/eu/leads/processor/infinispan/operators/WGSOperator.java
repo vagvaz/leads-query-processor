@@ -56,7 +56,7 @@ public class WGSOperator extends MapReduceOperator {
    }
 
    public void setupMapReduceJob(String inputCacheName,String intermediateCacheName1, String outputCacheName){
-      inputCache = (BasicCache) manager.getPersisentCache(inputCacheName);
+      inputCache = (Cache) manager.getPersisentCache(inputCacheName);
       intermediateCache = (BasicCache) manager.getPersisentCache(intermediateCacheName1);
       //create Intermediate cache name for data on the same Sites as outputCache
       intermediateDataCache = (BasicCache) manager.getPersisentCache(intermediateCacheName1+".data");

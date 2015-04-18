@@ -79,6 +79,7 @@ public class SortMerger2 {
 //      String tmp = caches.get(cacheIndex).get(key  + counter.toString());
 //      if(tmp == null || tmp.equals(""))
 //         return null;
+     System.out.println("Try reading " + key  + counter.toString());
      Tuple tmp = caches.get(cacheIndex).get(key  + counter.toString());
       if(tmp == null || tmp.equals(""))
          return null;
