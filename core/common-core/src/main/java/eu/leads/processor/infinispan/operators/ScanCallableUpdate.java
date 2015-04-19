@@ -134,9 +134,9 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
       } else {
         tuple = prepareOutput(tuple);
         //            log.info("--------------------    put into output without tree ------------------------");
-        if (key != null && tuple != null){
-          outputToCache(key,tuple);
-      }
+        if (key != null && tuple != null) {
+          outputToCache(key, tuple);
+        }
     }
   }
 

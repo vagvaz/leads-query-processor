@@ -1,8 +1,6 @@
 package eu.leads.processor.common.infinispan;
 
-import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.commons.api.BasicCache;
-import org.infinispan.context.Flag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,9 +27,11 @@ public class EnsembleCacheUtils {
                  isok = true;
                  continue;
               }
-             cache.put(key,value);
 
-              log.error("Successful " + key);
+                cache.put(key, value);
+
+
+               log.error("Successful " + key);
               isok = true;
            }
            else {

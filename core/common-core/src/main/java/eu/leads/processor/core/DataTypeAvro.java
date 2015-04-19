@@ -1,6 +1,7 @@
 package eu.leads.processor.core;
 
 import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.vertx.java.core.json.JsonObject;
@@ -19,24 +20,19 @@ public abstract class DataTypeAvro {
     }
 
     public DataTypeAvro() {
-//        schema = SchemaBuilder
-//                .record("leadsrec").namespace("eu.leads.processor.core")
-//                .fields()
-//                .endRecord();
-        schema = Schema.createRecord("schemaName","schemaDoc","namespace",false);
-        List<Schema.Field> fields = new ArrayList<Schema.Field>();
-        fields.add(new Schema.Field("someFieldName",schema,"docs",null));
-        schema.setFields(fields);
-
+        schema = SchemaBuilder
+                .record("leadsrec").namespace("eu.leads.processor.core")
+                .fields()
+                .endRecord();
         AvroRec = new GenericData.Record(schema);
     }
 
     public JsonObject asJsonObject() {
-        JsonObject objectJSON = new JsonObject();
+        JsonObject jsonObject = new JsonObject();
         for(Schema.Field field: AvroRec.getSchema().getFields()){
-            objectJSON.putValue(field.name(), AvroRec.get(field.name()));
+            jsonObject.putString(field.name(), AvroRec.get(field.name()).toString());
         }
-        return objectJSON;
+        return jsonObject;
     }
 
     public String asString() {
@@ -44,7 +40,7 @@ public abstract class DataTypeAvro {
     }
 
     public void copy(GenericRecord other) {
-        Schema schema_new = Schema.createRecord("arrayFoo","add","mytest",false);
+        Schema schema_new = Schema.createRecord("schemaName","schemaDoc","namespace",false);
         List<Schema.Field> newFieldList = new ArrayList<>();
         for(Schema.Field field: other.getSchema().getFields()){
             newFieldList.add(new Schema.Field(field.name(),schema_new,field.doc(),field.defaultValue()));

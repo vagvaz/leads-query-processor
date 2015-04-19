@@ -15,15 +15,15 @@ public class Method_test_avro {
     public static void main(String[] args) throws IOException {
 // Create attribute names
         String attributeName1 = "angelos.patatas.name1";
-        String attributeName2 = "name2";
-        String attributeName3 = "name3";
-        String attributeName4 = "name4";
+        String attributeName2 = "angelos.patatas.name2";
+        String attributeName3 = "angelos.patatas.name3";
+        String attributeName4 = "angelos.patatas.name4";
         String attributeName5 = "angelos.patatas.name5";
-        String attributeName6 = "name6";
-        String attributeName7 = "longnum1";
+        String attributeName6 = "angelos.patatas.name6";
+        String attributeName7 = "angelos.patatas.longnum1";
         String attributeName8 = "angelos.patatas.longnum2";
-        String attributeName9 = "doublenum1";
-        String attributeName10 = "doublenum2";
+        String attributeName9 = "angelos.patatas.doublenum1";
+        String attributeName10 = "angelos.patatas.doublenum2";
 // Create attributes' values
         String value1 = "b9re9dmqls44ced";
         String value2 = "q2vklxkkexqxh1m";
@@ -37,11 +37,6 @@ public class Method_test_avro {
         Double value10 = 0.47334616297362775;
         Tuple tavro = new Tuple();
 
-        /*tavro.setProperName(attributeName1);
-
-        tavro.setProperName(attributeName2);
-
-        System.exit(0);*/
 // setAttribute
         long startTime = System.nanoTime();
         tavro.setAttribute(attributeName1, value1);
@@ -55,8 +50,15 @@ public class Method_test_avro {
         tavro.setNumberAttribute(attributeName8, value8);
         tavro.setNumberAttribute(attributeName9, value9);
         tavro.setNumberAttribute(attributeName10, value10);
-        System.out.println("############Runtime setAttribute: " + (stopTime-startTime)/1000000 + " ns\n");
+        System.out.println("############Runtime setAttribute: " + (stopTime - startTime) / 1000000 + " ns\n");
         System.out.println(tavro.toString());
+        System.out.println(tavro.schema.getNamespace().toString());
+        System.out.println(tavro.getValue("angelos.patatas.longnum1"));
+
+
+// Tuple(tuple)
+        Tuple tupleNew = new Tuple(tavro);
+        System.out.println(tupleNew);
 
 // json to avro
         JsonObject job = new JsonObject();
@@ -109,7 +111,7 @@ public class Method_test_avro {
         System.out.println("tuple avro: " + tavro + "\n");
 // removeAttributes
         List<String> remCol = new ArrayList<>();
-        remCol.add(attributeName5);
+        //remCol.add(attributeName5);
         remCol.add(attributeName6);
         remCol.add(attributeName7);
         startTime = System.nanoTime();
@@ -153,7 +155,6 @@ public class Method_test_avro {
         System.out.println("############Runtime hasField: " + (stopTime-startTime)/1000 + " μs\n");
         System.out.println(attributeName8);
         System.out.println(tavro.hasField(attributeName2));// false
-        System.out.println(attributeName1);
         System.out.println(tavro.hasField(attributeName8));// true
 // renameAttribute
         System.out.println("tuple avro: " + tavro + "\n");
@@ -168,12 +169,13 @@ public class Method_test_avro {
         stopTime = System.nanoTime();
         System.out.println("############Runtime getGenericAttribute: " + (stopTime - startTime) / 1000 + " μs\n");
         System.out.println(tavro.getGenericAttribute("doublenum2"));
+        System.out.println("tuple avro: " + tavro + "\n");
 // renameAttributes
         Map<String, List<String>> toRename = new HashMap<>();
         List<String> lst8 = new ArrayList<>();
         lst8.add(attributeName8+"X");//longnum2X
         lst8.add(attributeName8+"Y");//longnum2Y
-        lst8.add(attributeName8+"Z");//longnum2Y
+        lst8.add(attributeName8+"Z");//longnum2Z
         List<String> lst9 = new ArrayList<>();
         lst9.add(attributeName9 + "X");//doublenum1X
         lst9.add(attributeName9 + "Y");//doublenum1Y
@@ -183,12 +185,12 @@ public class Method_test_avro {
         toRename.put("longnumX", lst8);
         toRename.put(attributeName9,lst9);
         toRename.put(attributeName10,lst10);
-        startTime = System.nanoTime(); System.out.println(tavro);
+        startTime = System.nanoTime();
+        System.out.println("tuple avro before: " + tavro + "\n");
         tavro.renameAttributes(toRename);
+        System.out.println("tuple avro after: " + tavro + "\n");
         stopTime = System.nanoTime();
         System.out.println("############Runtime renameAttributes: " + (stopTime-startTime)/1000000 + " ns\n");
-        System.out.println(tavro);
-
         System.exit(0);
     }
 }

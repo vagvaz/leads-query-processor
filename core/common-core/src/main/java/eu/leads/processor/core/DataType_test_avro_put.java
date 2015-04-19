@@ -17,7 +17,7 @@ public class DataType_test_avro_put {
 /*Create cache to store the tuples*/
         LQPConfiguration.initialize();
         InfinispanManager man = InfinispanClusterSingleton.getInstance().getManager();
-        Cache map = (Cache) man.getPersisentCache("queriesfoo");
+        Cache cache = (Cache) man.getPersisentCache("queriesfoo");
 //         InfinispanManager man2 = CacheManagerFactory.createCacheManager();
 //         Cache map2 = (Cache) man2.getPersisentCache("queriesfoo");
 /*Create attribute names*/
@@ -47,24 +47,27 @@ public class DataType_test_avro_put {
         ArrayList<Tuple> arrlstavro = new ArrayList<>();
 
         for(int i=0; i<N_tuples; i++){
-            Tuple tavro = new Tuple();
-            tavro.setAttribute(attributeName1, i+value1);
-            tavro.setAttribute(attributeName2, i+value2);
-            tavro.setAttribute(attributeName3, i+value3);
-            tavro.setAttribute(attributeName4, i+value4);
-            tavro.setAttribute(attributeName5, i+value5);
-            tavro.setAttribute(attributeName6, i + value6);
-            tavro.setNumberAttribute(attributeName7, i+value7);
-            tavro.setNumberAttribute(attributeName8, i+value8);
-            tavro.setNumberAttribute(attributeName9, i+value9);
-            tavro.setNumberAttribute(attributeName10, i + value10);
-            arrlstavro.add(tavro);
+            Tuple tuple = new Tuple();
+            tuple.setAttribute(attributeName1, i+value1);
+            tuple.setAttribute(attributeName2, i+value2);
+            tuple.setAttribute(attributeName3, i+value3);
+            tuple.setAttribute(attributeName4, i+value4);
+            tuple.setAttribute(attributeName5, i+value5);
+            tuple.setAttribute(attributeName6, i + value6);
+            tuple.setNumberAttribute(attributeName7, i+value7);
+            tuple.setNumberAttribute(attributeName8, i+value8);
+            tuple.setNumberAttribute(attributeName9, i+value9);
+            tuple.setNumberAttribute(attributeName10, i + value10);
+            arrlstavro.add(tuple);
         }
 /*Iterate Arraylist, get tuple and insert tuple into the cache
 * also mesaure time and memory*/
         long startTime = System.currentTimeMillis();
         for(int i=0; i<N_tuples; i++) {
-            map.put("infinispanKey" + i, arrlstavro.get(i));
+            cache.put("infinispanKey" + i, arrlstavro.get(i));
+        }
+        for(int i=0; i<N_tuples; i++) {
+            System.out.println("Cache contain: " + cache.get("infinispanKey" + i));
         }
         long stopTime = System.currentTimeMillis();
         System.out.println("Runtime avro: " + (stopTime-startTime) + " ms\n");

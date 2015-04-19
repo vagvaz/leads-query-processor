@@ -225,6 +225,8 @@ public class UberSnapshot {
                      System.out.println(fname+"--"+tuple.getValue(fname));
                   }*/
                   cache.put(keyLine.trim(), tuple);
+
+                  //System.out.println("Cache contain: "+cache.get(keyLine.trim()));
                }
             }
 

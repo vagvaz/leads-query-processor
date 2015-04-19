@@ -53,17 +53,13 @@ public abstract  class LeadsSQLCallable<K,V> extends LeadsBaseCallable<K,V>{
       return tuple;
     }
 
-    JsonObject result = new JsonObject();
     //WARNING
-    //       System.err.println("out: " + tuple.asString());
-
     if(targetsMap.size() == 0)
-    {
-      //          System.err.println("s 0 ");
       return tuple;
-
-    }
     //END OF WANRING
+
+    System.out.println("++TUPLE: "+tuple);
+
     List<String> toRemoveFields = new ArrayList<String>();
     Map<String,List<String>> toRename = new HashMap<String,List<String>>();
     for (String field : tuple.getFieldNames()) {
@@ -84,7 +80,9 @@ public abstract  class LeadsSQLCallable<K,V> extends LeadsBaseCallable<K,V>{
       }
     }
     tuple.removeAtrributes(toRemoveFields);
+    System.out.println("remove--TUPLE: " + tuple);
     tuple.renameAttributes(toRename);
+    System.out.println("rename--TUPLE: " + tuple);
     return tuple;
   }
 }

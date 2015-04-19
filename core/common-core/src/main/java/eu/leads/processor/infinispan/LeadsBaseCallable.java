@@ -10,8 +10,6 @@ import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
-import org.infinispan.ensemble.EnsembleCacheManager;
-import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.vertx.java.core.json.JsonObject;
@@ -114,6 +112,6 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   }
 
   public void outputToCache(Object key, Object value){
-    EnsembleCacheUtils.putToCache(outputCache,key.toString(),value  );
+    EnsembleCacheUtils.putToCache(outputCache,key.toString(),value);
   }
 }

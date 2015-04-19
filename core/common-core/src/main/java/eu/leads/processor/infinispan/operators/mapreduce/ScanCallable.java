@@ -130,6 +130,9 @@ public class ScanCallable <K,V> implements
         Tuple tuple = value;
         namesToLowerCase(tuple);
         renameAllTupleAttributes(tuple);
+
+         log.info("TUPLEEEEEEEEEEEEEEEEEEEE: "+tuple);
+
         if (tree != null) {
             if(tree.accept(tuple)) {
                tuple = prepareOutput(tuple);
