@@ -225,7 +225,9 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
       DSPMNode currentPagerank = (DSPMNode) pageRankCache.get(url);
       if(currentPagerank == null || totalSum <= 0)
       {
-        t.setAttribute("default.webpages.pagerank",0f);
+//        t.setAttribute("default.webpages.pagerank",0f);
+       t.setAttribute("default.webpages.pagerank",Double.toString(  (10000/ url.length() )/10000 ));
+
         return;
       }
       //            t.setNumberAttribute("default.webpages.pagerank",0.032342);

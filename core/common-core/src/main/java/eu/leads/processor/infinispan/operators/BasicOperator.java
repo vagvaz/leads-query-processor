@@ -584,7 +584,8 @@ public abstract class BasicOperator extends Thread implements Operator{
         log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
                     e.getClass().toString());
         log.error(e.getMessage());
-        System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+        System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString()
+                             + "\n" +
                              e.getClass().toString());
         System.err.println(e.getMessage());
         failed = true;
@@ -594,7 +595,8 @@ public abstract class BasicOperator extends Thread implements Operator{
         log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
                     e.getClass().toString());
         log.error(e.getMessage());
-        System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+        System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString()
+                             + "\n" +
                              e.getClass().toString());
         System.err.println(e.getMessage());
         failed = true;
@@ -662,7 +664,8 @@ public abstract class BasicOperator extends Thread implements Operator{
         log.error("Exception in reduce Excuettion " + "reduce " + reducerCallable.getClass().toString() + "\n" +
                     e.getClass().toString());
         log.error(e.getMessage());
-        System.err.println("Exception in reduce Excuettion " + "reduce " + reducerCallable.getClass().toString() + "\n" +
+        System.err.println("Exception in reduce Excuettion " + "reduce " + reducerCallable.getClass()
+                                                                             .toString() + "\n" +
                              e.getClass().toString());
         System.err.println(e.getMessage());
         failed = true;
@@ -672,7 +675,8 @@ public abstract class BasicOperator extends Thread implements Operator{
         log.error("Exception in reduce Excuettion " + "reduce " + reducerCallable.getClass().toString() + "\n" +
                     e.getClass().toString());
         log.error(e.getMessage());
-        System.err.println("Exception in reduce Excuettion " + "map " + reducerCallable.getClass().toString() + "\n" +
+        System.err.println("Exception in reduce Excuettion " + "map " + reducerCallable.getClass().toString()
+                             + "\n" +
                              e.getClass().toString());
         System.err.println(e.getMessage());
         failed = true;
@@ -733,6 +737,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     }
   }
   public  String getURIForMC(String microCloud) {
+    log.error("Getting uriformc " + microCloud + " " + globalConfig.getObject("microclouds").toString());
     String uri = globalConfig.getObject("microclouds").getArray(microCloud).get(0);
 
 

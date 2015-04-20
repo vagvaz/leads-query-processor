@@ -33,7 +33,7 @@ public class WGSReducer extends LeadsReducer<String, String> {
       imanager = InfinispanClusterSingleton.getInstance().getManager();
       depth = conf.getInteger("depth");
       iteration = conf.getInteger("iteration");
-      outputCache = (Cache<String, String>) imanager.getPersisentCache(conf.getString("realOutput"));
+//      outputCache = (Cache<String, String>) imanager.getPersisentCache(conf.getString("realOutput"));
       log = LoggerFactory.getLogger(WGSReducer.class);
    }
    @Override
@@ -55,8 +55,8 @@ public class WGSReducer extends LeadsReducer<String, String> {
 
      result.putArray("result",resultArray);
 //      collector.emit(Integer.toString(iteration),result.toString());
-//         collector.emit(Integer.toString(iteration),result.toString());
-         outputCache.put(Integer.toString(iteration),result.toString());
+         collector.emit(Integer.toString(iteration),result.toString());
+//         outputCache.put(Integer.toString(iteration),result.toString());
 //      System.err.println(Integer.toString(iteration) + " ------------------------- cache mememres ------------------------ ");
 //       PrintUtilities.printList(outputCache.getAdvancedCache().getRpcManager().getMembers());
 //

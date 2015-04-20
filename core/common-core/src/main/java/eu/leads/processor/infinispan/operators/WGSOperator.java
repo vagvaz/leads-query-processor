@@ -149,6 +149,7 @@ public class WGSOperator extends MapReduceOperator {
           }
           if (!failed) {
 //            cleanup();
+            unsubscribeToMapActions("execution." + com.getId() + "." + action.getId());
           } else {
             failCleanup();
           }
@@ -226,6 +227,7 @@ public class WGSOperator extends MapReduceOperator {
   public void setupReduceCallable(){
     outputCacheName = conf.getString("realOutput");
     configBody.putNumber("iteration", iteration);
+    configBody.putString("realOutput",conf.getString("realOutput"));
     action.getData().getObject("operator").getObject("configuration").putObject("body", configBody);
     setReducer(new WGSReducer(configBody.toString()));
     super.setupReduceCallable();
@@ -242,7 +244,7 @@ public class WGSOperator extends MapReduceOperator {
           { // the real output should be created only once
             createCache(mc,realOutput);
           }
-          tmpIntermediateCacheName = tmpIntermediateCacheName+i;
+          tmpIntermediateCacheName = getName() + ".intermediate"+i;
           createCache(mc, tmpIntermediateCacheName+i);
           //create Intermediate cache name for data on the same Sites as outputCache
           createCache(mc,tmpIntermediateCacheName+".data");
@@ -253,10 +255,11 @@ public class WGSOperator extends MapReduceOperator {
         }
         String tmpInputName = getName()+ ".iter";
         for(String inputMC : getRunningMC()){
-          if(i < configBody.getInteger("depth")-1){
-            tmpInputName = tmpInputName+i;
+//          if(i < configBody.getInteger("depth")){
+            tmpInputName = getName()+ ".iter"+i;
             createCache(inputMC,tmpInputName);
-          }
+            createCache(inputMC,getName()+ ".iter"+(i+1));
+//          }
         }
 
       }

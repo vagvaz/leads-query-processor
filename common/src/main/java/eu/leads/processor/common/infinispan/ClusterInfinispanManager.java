@@ -125,8 +125,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
     holder.getDefaultConfigurationBuilder().transaction().transactionManagerLookup(new JBossStandaloneJTAManagerLookup());
     GlobalConfiguration gc = holder.getGlobalConfigurationBuilder().build();
     manager = new DefaultCacheManager(gc, initDefaultCacheConfigBuilder().build(gc), true);
-
-
+    manager.defineConfiguration("defaultCache",getCacheDefaultConfiguration("defaultCache"));
+    manager.getCache("defaultCache");
 
 //    manager = TestCacheManagerFactory.createClusteredCacheManager(holder.getGlobalConfigurationBuilder(),initDefaultCacheConfigBuilder());
 //    TestCacheManagerFactory.amendGlobalConfiguration(holder.getGlobalConfigurationBuilder(),transportFlags);
@@ -275,7 +275,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
                 .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath + "/")
                                 .fetchPersistentState(false)
-                .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false);
+                .shared(false).purgeOnStartup(true).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false);
 
       } else { //Use leveldb
         result = new ConfigurationBuilder();
@@ -292,7 +292,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
                          //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
                 .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
                 .fetchPersistentState(false)
-                .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
+                .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
                 .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
                 .build();
       }
@@ -363,6 +363,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
         //            }
         if(e instanceof  NullPointerException){
           e.printStackTrace();
+          server = new HotRodServer();
+          serverConfigurationBuilder = new HotRodServerConfigurationBuilder();
+          serverConfigurationBuilder.host(localhost).port(serverPort);
         }
         else{
           System.err.println("Not NullPointerExcepiton");
@@ -671,7 +674,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
                                 .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath + "/")
                                 .fetchPersistentState(false)
-                                .shared(false).purgeOnStartup(false).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
+                                .shared(false).purgeOnStartup(true).preload(false).compatibility().enable().expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
                                 .build();
 
       } else { //Use leveldb
@@ -688,7 +691,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
                                          //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
                                 .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
                                 .fetchPersistentState(false)
-                                .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
+                                .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
                                 .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
                                 .build();
       }

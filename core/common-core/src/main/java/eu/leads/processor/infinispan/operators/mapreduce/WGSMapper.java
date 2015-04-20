@@ -8,6 +8,9 @@ import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.infinispan.LeadsMapper;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
+import org.bson.BSONObject;
+import org.bson.BasicBSONDecoder;
+import org.bson.BasicBSONObject;
 import org.infinispan.Cache;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.CloseableIterable;
@@ -18,6 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -85,7 +91,26 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
     //         return;
     //      }
     System.err.println("Running map for " + key.toString());
-    Tuple webpage = (Tuple) webCache.get(prefix+key);
+    Object oo =  webCache.get(prefix+key);
+    Tuple webpage = null;
+    if( oo instanceof Tuple){
+       webpage = (Tuple)oo;
+    }
+    else{
+      System.err.println("\n\n\n\nSERIOUS ERROR WITH SERIALIZE GOT byte buffer ");
+      byte[] bytes = (byte[]) oo;
+      ByteArrayInputStream bs = new ByteArrayInputStream(bytes);
+      try {
+        ObjectInputStream ois = new ObjectInputStream(bs);
+        BasicBSONDecoder decoder = new BasicBSONDecoder();
+        BSONObject bsonObject =  decoder.readObject(ois);
+        webpage = new Tuple(bsonObject.toString());
+        System.err.println("\n\n\n\nSERIOUS ERROR WITH SERIALIZE GOT byte buffer unserialized " + webpage.toString());
+
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
     //      Tuple t = new Tuple(jsonString);
     if(webpage == null) {
       System.err.println("WAS NULLL " + key.toString());
@@ -133,7 +158,7 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
     if(currentPagerank == null || totalSum <= 0)
     {
 
-      return Double.toString(0.0f);
+      return Double.toString(  (10000/ url.length() )/10000 );
     }
     result = currentPagerank.getVisitCount()/totalSum;
     return Double.toString(result);

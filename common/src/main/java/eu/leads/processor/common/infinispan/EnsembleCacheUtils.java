@@ -1,8 +1,6 @@
 package eu.leads.processor.common.infinispan;
 
-import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.commons.api.BasicCache;
-import org.infinispan.context.Flag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +38,10 @@ public class EnsembleCacheUtils {
            }
          }catch (Exception e) {
             isok = false;
+
             log.error("PUT TO CACHE " + e.getMessage() + " " + key);
-            log.error("key " + (key == null) + " value " + (value == null) + " cache " + (cache == null) + " log " + (log == null));
+            log.error("key " + (key == null) + " value " + (value == null) + " cache " + (cache == null)
+                        + " log " + (log == null));
 
             try {
                Thread.sleep(5);
@@ -49,6 +49,11 @@ public class EnsembleCacheUtils {
                e1.printStackTrace();
             }
             System.err.println("PUT TO CACHE " + e.getMessage());
+            e.printStackTrace();
+           if(e.getMessage().startsWith("Cannot perform operations on ")){
+             e.printStackTrace();
+             System.exit(-1);
+           }
          }
       }
    }
