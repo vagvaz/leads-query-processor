@@ -40,14 +40,15 @@ public class ClusteredHadoopTest {
         System.out.println("PLUGIN ID: " + TransformPlugin.class.getCanonicalName());
         PluginPackage plugin = new PluginPackage(TransformPlugin.class.getCanonicalName(),
                                                     TransformPlugin.class.getCanonicalName(),
-               "/home/trs/Projects/LEADS/leads-query-processor/nqe/system-plugins/transform-plugin/transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar"// "/home/vagvaz/Projects/idea/transform-plugin/target/transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar",
-               ,"/home/trs/Projects/LEADS/leads-query-processor/nqe/system-plugins/transform-plugin/transform-plugin-conf.xml"); //"/home/vagvaz/Projects/idea/transform-plugin/transform-plugin-conf.xml" );
+               "/home/tr/Projects/LEADs/leads-query-processor/nqe/system-plugins/transform-plugin/target/transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar"// "/home/vagvaz/Projects/idea/transform-plugin/target/transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar",
+               ,"/home/tr/Projects/LEADs/leads-query-processor/nqe/system-plugins/transform-plugin/transform-plugin-conf.xml"); //"/home/vagvaz/Projects/idea/transform-plugin/transform-plugin-conf.xml" );
       Properties conf = new Properties();
         conf.setProperty("hdfs.url", "hdfs://snf-618466.vm.okeanos.grnet.gr:8020");
         conf.setProperty("fs.defaultFS", "hdfs://snf-618466.vm.okeanos.grnet.gr:8020");
         conf.setProperty("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
         conf.setProperty("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
         conf.setProperty("prefix", "/user/vagvaz/");
+        conf.setProperty("hdfs.user", "vagvaz");
         conf.setProperty("postfix","0");
 
         //conf.setProperty("prefix","/tmp/leads/");
