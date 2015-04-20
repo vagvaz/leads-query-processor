@@ -1,10 +1,13 @@
 package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.infinispan.LeadsCollector;
+import eu.leads.processor.infinispan.LeadsMapperCallable;
 import eu.leads.processor.math.FilterOperatorTree;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DefaultExecutorService;
@@ -40,6 +43,9 @@ public class JoinOperator extends MapReduceOperator {
     private Map<String,List<String>> tableCols;
     private LogProxy logProxy;
     private String qualString;
+    private String leftTableName;
+    private String rightTableName;
+
     private boolean isLeft;
     public JoinOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
       super(com, persistence,log, action);
@@ -51,10 +57,39 @@ public class JoinOperator extends MapReduceOperator {
         }
         tree = new FilterOperatorTree(qual);
       tableCols = tree.getJoinColumns();
+      findTableNames();
    }
 
+  private void findTableNames() {
+    //find left table name innerCache
+    JsonObject leftSchema = conf.getObject("body").getObject("leftSchema");
+    JsonObject fields = leftSchema.getObject("fieldsByQualifiedName");
+    for(String f : fields.getFieldNames()){
+      if(f.contains(".")){
+        String tableName = f.substring(0,f.lastIndexOf("."));
+        if(tableCols.containsKey(tableName)){
+          leftTableName = tableName;
+          break;
+        }
+      }
+    }
 
-//    @Override
+    JsonObject rightSchema = conf.getObject("body").getObject("rightSchema");
+    JsonObject rfields = rightSchema.getObject("fieldsByQualifiedName");
+    for(String f : rfields.getFieldNames()){
+      if(f.contains(".")){
+        String tableName = f.substring(0,f.lastIndexOf("."));
+        if(tableCols.containsKey(tableName)){
+          rightTableName = tableName;
+          break;
+        }
+      }
+    }
+
+  }
+
+
+  //    @Override
     public void run2() {
         long startTime = System.nanoTime();
         Cache innerCache = (Cache) manager.getPersisentCache(innerCacheName);
@@ -119,6 +154,7 @@ public class JoinOperator extends MapReduceOperator {
 //       }
        conf.putString("output",getOutput());
        init_statistics(this.getClass().getCanonicalName());
+      super.init(config);
     }
     private JsonObject resolveQual(JsonObject conf) {
         JsonObject qual = conf.getObject("body").getObject("joinQual");
@@ -173,7 +209,7 @@ public class JoinOperator extends MapReduceOperator {
    public void setupMapCallable() {
      inputCacheName = innerCacheName;
      inputCache = (Cache) manager.getPersisentCache(innerCacheName);
-       inputCache2 = (Cache) manager.getPersisentCache(outerCacheName);
+     inputCache2 = (Cache) manager.getPersisentCache(outerCacheName);
       JsonObject ob = new JsonObject();
      for(Map.Entry<String,List<String>> entry : tableCols.entrySet()){
        JsonArray array = new JsonArray();
@@ -183,8 +219,9 @@ public class JoinOperator extends MapReduceOperator {
        ob.putArray(entry.getKey(),array);
      }
       conf.putObject("joinColumns",ob);
-      conf.putString("inputCache", inputCache.getName());
+      conf.putString("inputCache", leftTableName);
       setMapper(new JoinMapper(conf.toString()));
+     super.setupMapCallable();
 //      mapperCallable = new JoinCallableUpdated(conf.toString(),getOutput(),
 //                                                      ,
 //                                                      isLeft);
@@ -248,15 +285,19 @@ public class JoinOperator extends MapReduceOperator {
     }
 //    replyForSuccessfulExecution(action);
 
+    System.out.println("####### RUNNING 2nd CALLABLE #########");
+    collector = new LeadsCollector(0, intermediateCacheName);
+    conf.putString("inputCache", rightTableName);
+    mapperCallable = new LeadsMapperCallable((Cache) inputCache2,collector,new JoinMapper(conf.toString()),
+                                              LQPConfiguration.getInstance().getMicroClusterName());
 
-    conf.putString("inputCache", inputCache2.getName());
-    setMapper(new JoinMapper(conf.toString()));
+
 
     if(mapperCallable != null) {
-      if (inputCache2.size() == 0) {
-        replyForSuccessfulExecution(action);
-        return;
-      }
+//      if (inputCache2.size() == 0) {
+//        replyForSuccessfulExecution(action);
+//        return;
+//      }
       DistributedExecutorService des = new DefaultExecutorService(inputCache2);
 
       //      ScanCallable callable = new ScanCallable(conf.toString(),getOutput());

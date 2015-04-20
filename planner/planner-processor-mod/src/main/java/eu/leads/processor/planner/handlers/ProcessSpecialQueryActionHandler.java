@@ -2,12 +2,15 @@ package eu.leads.processor.planner.handlers;
 
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.*;
+import eu.leads.processor.planner.PlanUtils;
+import eu.leads.processor.web.WP4Client;
 import leads.tajo.module.TaJoModule;
 import org.apache.hadoop.fs.Path;
 import org.apache.tajo.catalog.TableDesc;
@@ -18,6 +21,7 @@ import org.apache.tajo.util.KeyValueSet;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,15 +34,29 @@ public class ProcessSpecialQueryActionHandler implements ActionHandler {
     private final InfinispanManager persistence;
     private final String id;
     private final TaJoModule module;
-    private Cache<String,String> queriesCache;
-    public ProcessSpecialQueryActionHandler(Node com, LogProxy log, InfinispanManager persistence,
-                                               String id, TaJoModule module) {
+  private final Cache statisticsCache;
+  private Cache<String,String> queriesCache;
+    private String schedHost;
+    private String schedPort;
+  private String currentCluster;
+  private JsonObject globalInformation;
+
+
+  public ProcessSpecialQueryActionHandler(Node com, LogProxy log, InfinispanManager persistence,
+                                               String id, TaJoModule module,String schedHost,String
+                                                                                               schedPort,
+                                           JsonObject globalInformation) {
         this.com = com;
         this.log = log;
         this.persistence = persistence;
         this.id = id;
         this.module = module;
+      this.schedHost = schedHost;
+      this.schedPort = schedPort;
+    this.globalInformation = globalInformation;
+      statisticsCache = (Cache) persistence.getPersisentCache(StringConstants.STATISTICS_CACHE);
        queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
+      currentCluster = LQPConfiguration.getInstance().getMicroClusterName();
     }
 
     @Override
@@ -107,6 +125,41 @@ public class ProcessSpecialQueryActionHandler implements ActionHandler {
         //Transform each plan to scheduler like format.
         //Annotate each operator with k,q
         //Send Request to Scheduler and receive Evaluations.
-        return candidatePlans;
+      Set<SQLPlan> result = new HashSet<>();
+      for(SQLPlan plan : candidatePlans){
+        JsonObject p = plan.getPlanGraph().copy();
+//        p = PlanUtils.handleRootOutputNodes(p);
+        p = PlanUtils.updateKeyspaceParameter(p);
+        p = PlanUtils.numberStages(p);
+        p = PlanUtils.annotatePlan(statisticsCache, p);
+        JsonObject annotatedPlan = null;
+        try {
+          JsonObject schedulerRep = PlanUtils.getSchedulerRep(p,currentCluster);
+          System.err.println(schedulerRep.encodePrettily());
+          annotatedPlan = WP4Client.evaluatePlan(schedulerRep, schedHost, schedPort);
+        } catch (IOException e) {
+          log.error("Exception  e " + e.getMessage());
+          SQLQuery query = new SQLQuery( new JsonObject(queriesCache.get(plan.getQueryId())));
+          failQuery(new Exception("Could not access the scheduler"),query);            }
+        if(annotatedPlan == null){
+          SQLQuery query = new SQLQuery( new JsonObject(queriesCache.get(plan.getQueryId())));
+          failQuery(new Exception("Could not access the scheduler"),query);
+          return result;
+        }
+        JsonObject updatedPlan = PlanUtils.updateInformation(plan.getPlanGraph(),annotatedPlan.getObject("stages"),globalInformation);
+        updatedPlan = PlanUtils.updateTargetEndpoints(updatedPlan);
+        System.err.println(updatedPlan.encodePrettily());
+        plan.setPlanGraph(updatedPlan);
+        result.add(plan);
+      }
+      return result;
     }
+
+  private void failQuery(Exception e, SQLQuery sqlQuery) {
+    QueryStatus status = sqlQuery.getQueryStatus();
+    status.setErrorMessage(e.getMessage());
+    status.setStatus(QueryState.FAILED);
+    sqlQuery.setQueryStatus(status);
+    queriesCache.put(sqlQuery.getId(), sqlQuery.asJsonObject().toString());
+  }
 }

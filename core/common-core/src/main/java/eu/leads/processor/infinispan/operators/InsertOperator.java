@@ -12,7 +12,6 @@ import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.math.MathUtils;
-import org.infinispan.Cache;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.versioning.utils.version.Version;
@@ -53,12 +52,14 @@ public class InsertOperator extends BasicOperator {
       ensembleHost = computeEnsembleHost();
       if(ensembleHost != null && !ensembleHost.equals("")) {
          emanager = new EnsembleCacheManager(ensembleHost);
+        emanager.start();
 //      emanager = createRemoteCacheManager();
       }
       else {
          LQPConfiguration.initialize();
          emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
 //            emanager = createRemoteCacheManager();
+        emanager.start();
       }
       data = new Tuple();
       JsonArray columnNames = conf.getObject("body").getArray("columnNames");

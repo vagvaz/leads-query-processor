@@ -258,7 +258,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       com.sendTo(action.getData().getString("owner"),action.asJsonObject());
     else
       System.err.println("PROBLEM Uninitialized com");
-    updateStatistics(inputCache,null,outputCache);
+//    updateStatistics(inputCache,null,outputCache);
   }
 
   @Override
@@ -268,9 +268,12 @@ public abstract class BasicOperator extends Thread implements Operator{
       unsubscribeToMapActions("execution." + com.getId() + "." + action.getId());
     }
     action.setStatus(ActionStatus.FAILED.toString());
+
     pendingMMC.clear();
     pendingRMC.clear();
-    mmcMutex.notifyAll();
+
+//    mmcMutex.notifyAll();
+
 
     //      rmcMutex.notifyAll();
     if(com != null)
@@ -374,7 +377,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     if (isSingleStage())
       return;
     if(executeOnlyReduce) {
-      for (String mc : getMicroCloudsFromOpSched()) {
+      for (String mc : getMicroCloudsFromOpTarget()) {
         pendingRMC.add(mc);
       }
     }
@@ -404,7 +407,11 @@ public abstract class BasicOperator extends Thread implements Operator{
     else {
       failCleanup();
     }
-
+    try {
+      this.join();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
   }
   public void createCache(String microCloud, String cacheName ){
     String uri = getURIForMC(microCloud);
@@ -473,8 +480,8 @@ public abstract class BasicOperator extends Thread implements Operator{
     Action newAction = new Action(action);
     JsonObject dataAction = action.asJsonObject().copy();
     JsonObject sched = new JsonObject();
-    sched.putArray(mc,globalConfig.getObject("microclouds").getArray(mc));
-    dataAction.getObject("operator").putObject("scheduling",sched);
+    sched.putArray(mc, globalConfig.getObject("microclouds").getArray(mc));
+    dataAction.getObject("data").getObject("operator").putObject("scheduling",sched);
     newAction.setData(dataAction);
     newAction.getData().putString("remote","remote");
     if(b) {
@@ -488,7 +495,10 @@ public abstract class BasicOperator extends Thread implements Operator{
     newAction.getData().putString("coordinator",currentCluster);
     String uri = getURIForMC(mc);
     try {
+
+      System.out.println("Sending to " + uri + " new action " + newAction.asJsonObject().encodePrettily());
       ActionResult remoteResult = WebServiceClient.executeMapReduce(newAction.asJsonObject(), uri);
+      System.out.println("Reply  " + remoteResult.toString());
       if(remoteResult.getStatus().equals("FAIL")){
         log.error("Remote invocation for " + mc + " failed ");
         replyForFailExecution(newAction);
@@ -534,11 +544,13 @@ public abstract class BasicOperator extends Thread implements Operator{
   }
   @Override
   public void localExecuteMap(){
+
     if(mapperCallable != null) {
       if (inputCache.size() == 0) {
         replyForSuccessfulExecution(action);
         return;
       }
+      System.err.println("EXECUTE " + mapperCallable.getClass().toString() + " ON " + currentCluster);
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
 
       //      ScanCallable callable = new ScanCallable(conf.toString(),getOutput());
@@ -576,6 +588,7 @@ public abstract class BasicOperator extends Thread implements Operator{
                              e.getClass().toString());
         System.err.println(e.getMessage());
         failed = true;
+        e.printStackTrace();
         replyForFailExecution(action);
       } catch (ExecutionException e) {
         log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
@@ -585,6 +598,7 @@ public abstract class BasicOperator extends Thread implements Operator{
                              e.getClass().toString());
         System.err.println(e.getMessage());
         failed = true;
+        e.printStackTrace();
         replyForFailExecution(action);
       }
     }
@@ -653,6 +667,7 @@ public abstract class BasicOperator extends Thread implements Operator{
         System.err.println(e.getMessage());
         failed = true;
         replyForFailExecution(action);
+        e.printStackTrace();
       } catch (ExecutionException e) {
         log.error("Exception in reduce Excuettion " + "reduce " + reducerCallable.getClass().toString() + "\n" +
                     e.getClass().toString());
@@ -662,6 +677,7 @@ public abstract class BasicOperator extends Thread implements Operator{
         System.err.println(e.getMessage());
         failed = true;
         replyForFailExecution(action);
+        e.printStackTrace();
       }
     }
     replyForSuccessfulExecution(action);
@@ -751,13 +767,52 @@ public abstract class BasicOperator extends Thread implements Operator{
     return result;
   }
 
+  public  String getEnsembleHost(Set<String> runningMC) {
+    String result = "";
+    JsonObject targetEndpoints = action.getData().getObject("operator").getObject("targetEndpoints");
+    List<String> sites = new ArrayList<>();
+    for(String targetMC : runningMC){
+      //         JsonObject mc = targetEndpoints.getObject(targetMC);
+      sites.add(targetMC);
+      //
+    }
+    Collections.sort(sites);
+    for(String site : sites){
+      result += globalConfig.getObject("componentsAddrs").getArray(site).get(0).toString()+":11222|";
+    }
+    result = result.substring(0,result.length()-1);
+    return result;
+  }
+
+  public Set<String> getMicroCloudsFromOpTarget(){
+    Set<String> result = new HashSet<>();
+    JsonObject operator = action.getData().getObject("operator");
+    JsonObject scheduling = operator.getObject("targetEndpoints");
+    for (String mc : scheduling.getFieldNames()){
+      result.add(mc);
+    }
+
+    return result;
+  }
+
   public Set<String> getTargetMC(){
     Set<String> result= new HashSet<>();
-    JsonObject targetEndpoints = action.getData().getObject("operator").getObject ("targetEndpoints");
+    JsonObject targetEndpoints = action.getData().getObject("operator").getObject("targetEndpoints");
 
     for(String targetMC : targetEndpoints.getFieldNames()){
       //         JsonObject mc = targetEndpoints.getObject(targetMC);
       result.add(targetMC);
+      //
+    }
+    return result;
+  }
+  public Set<String> getRunningMC(){
+    Set<String> result= new HashSet<>();
+    JsonObject targetEndpoints = action.getData().getObject("operator").getObject ("scheduling");
+
+    for(String runningMC : targetEndpoints.getFieldNames()){
+      //         JsonObject mc = targetEndpoints.getObject(targetMC);
+      result.add(runningMC);
       //
     }
     return result;

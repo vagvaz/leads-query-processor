@@ -1,5 +1,6 @@
 package eu.leads.processor.infinispan.operators;
 
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.infinispan.LeadsMapper;
 import org.infinispan.distexec.mapreduce.Collector;
@@ -24,6 +25,7 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
   public void map(String key, Tuple value, Collector<String, Tuple> collector) {
     if (!isInitialized)
       initialize();
+
     StringBuilder builder = new StringBuilder();
     //        String tupleId = key.substring(key.indexOf(":"));
     Tuple t = new Tuple(value);
@@ -42,14 +44,18 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
 
   }
 
+
+
   @Override
   public void initialize() {
     isInitialized = true;
     //       System.err.println("-------------Initialize");
     super.initialize();
     JsonObject jCols = conf.getObject("joinColumns");
+    System.err.println(jCols.encodePrettily());
     Set<String> tables = new HashSet<>();
     tables.addAll(jCols.getFieldNames());
+    joinColumns = new HashMap<>();
     for (String table : tables) {
 
       joinColumns.put(table, new ArrayList<String>());
@@ -59,7 +65,11 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
         String current = (String) columnsIterator.next();
         joinColumns.get(table).add(current);
       }
+      System.err.println(table);
+      PrintUtilities.printList(joinColumns.get(table));
     }
+
     tableName = conf.getString("inputCache");
+    System.err.println("tablename " + tableName);
   }
 }

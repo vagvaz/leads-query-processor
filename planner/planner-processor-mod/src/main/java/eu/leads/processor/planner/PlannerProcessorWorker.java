@@ -87,7 +87,8 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
         handlers.put(QueryPlannerConstants.PROCESS_WORKFLOW_QUERY,
                         new ProcessWorkflowQueryActionHandler(com, log, persistence, id, module,schedHost,schedPort));
         handlers.put(QueryPlannerConstants.PROCESS_SPECIAL_QUERY,
-                        new ProcessSpecialQueryActionHandler(com, log, persistence, id, module));
+                        new ProcessSpecialQueryActionHandler(com, log, persistence, id, module,schedHost,
+                                                              schedPort,config.getObject("global")));
         log = new LogProxy(config.getString("log"), com);
         bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {
             @Override

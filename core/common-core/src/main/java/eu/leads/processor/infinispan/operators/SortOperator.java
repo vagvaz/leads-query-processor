@@ -240,6 +240,7 @@ public class SortOperator extends BasicOperator {
       TupleComparator comparator = new TupleComparator(sortColumns,asceding,types);
       String ensembleHost = computeEnsembleHost();
       EnsembleCacheManager emanager = new EnsembleCacheManager(ensembleHost);
+      emanager.start();
       SortMerger2 merger = new SortMerger2(addresses, getOutput(),comparator,manager,emanager,conf,getRowcount());
       merger.merge();
    }

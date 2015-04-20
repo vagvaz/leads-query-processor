@@ -24,7 +24,14 @@ public class PlanUtils {
     for (String nodeId : plan.getFieldNames()) {
       JsonObject node = plan.getObject(nodeId);
       if (node.getString("nodetype").equals(LeadsNodeType.ROOT.toString())) {
+        if(node.getObject("configuration").containsField("mapreduce")){
+          if(!node.getObject("configuration").getObject("mapreduce").containsField("after")){
+            node.putArray("keyspace",node.getArray("inputs"));
+          }
+          else{
 
+          }
+        }
       } else if (node.getString("nodetype").equals(LeadsNodeType.SCAN.toString())) {
 
       } else if (node.containsField("inputs")) {
@@ -190,28 +197,55 @@ public class PlanUtils {
   }
 
   private static JsonObject updateNodeWitInfo(JsonObject plan, JsonObject stage, JsonObject info) {
-    //Hard Coded hacks.
-    JsonObject node = plan.getObject(stage.getString("id"));
-    JsonArray array = stage.getArray("scheduling");
+    //Hard Coded hacks. //For SCAN,WGS
     JsonObject resulting = new JsonObject();
-    for (int i = 0; i < array.size(); i++) {
-      JsonObject object = array.get(i);
-      String name = object.getString("name");
-      JsonArray webServices = new JsonArray();
-      if (info.getObject("webserviceAddrs").containsField(name)) {
-        for (int j = 0; j < info.getObject("webserviceAddrs").getArray(name).size(); j++) {
-          String endpoint = info.getObject("webserviceAddrs").getArray(name).get(j);
-          if (endpoint.startsWith("http:")) {
-            webServices.add(endpoint);
-          } else {
-            webServices.add("http://" + endpoint + ":8080");
-          }
-        }
-      } else {
+    JsonObject node = plan.getObject(stage.getString("id"));
+    if(node.getString("nodetype").equals(LeadsNodeType.SCAN.toString()) ||
+         node.getString("nodetype").equals(LeadsNodeType.WGS_URL.toString())){
+      Set<String> allSites = new HashSet<>();
+      allSites.addAll(info.getObject("microclouds").getFieldNames());
+      for(String site : allSites){
 
-        webServices.add("http://localhost:8080");
+        String name = site;
+        JsonArray webServices = new JsonArray();
+        if (info.getObject("webserviceAddrs").containsField(name)) {
+          for (int j = 0; j < info.getObject("webserviceAddrs").getArray(name).size(); j++) {
+            String endpoint = info.getObject("webserviceAddrs").getArray(name).get(j);
+            if (endpoint.startsWith("http:")) {
+              webServices.add(endpoint);
+            } else {
+              webServices.add("http://" + endpoint + ":8080");
+            }
+          }
+        } else {
+
+          webServices.add("http://localhost:8080");
+        }
+        resulting.putArray(name, webServices);
       }
-      resulting.putArray(name, webServices);
+    }
+    else {
+      JsonArray array = stage.getArray("scheduling");
+
+      for (int i = 0; i < array.size(); i++) {
+        JsonObject object = array.get(i);
+        String name = object.getString("name");
+        JsonArray webServices = new JsonArray();
+        if (info.getObject("webserviceAddrs").containsField(name)) {
+          for (int j = 0; j < info.getObject("webserviceAddrs").getArray(name).size(); j++) {
+            String endpoint = info.getObject("webserviceAddrs").getArray(name).get(j);
+            if (endpoint.startsWith("http:")) {
+              webServices.add(endpoint);
+            } else {
+              webServices.add("http://" + endpoint + ":8080");
+            }
+          }
+        } else {
+
+          webServices.add("http://localhost:8080");
+        }
+        resulting.putArray(name, webServices);
+      }
     }
     node.putObject("scheduling", resulting);
     return plan;
@@ -229,16 +263,16 @@ public class PlanUtils {
           if (outputNode.containsField("output")) {
             outputNode = plan.getObject(outputNode.getString("output"));
           }
-            else{
-              outputNode = null;
-            }
+          else{
+            outputNode = null;
           }
         }
-        if (outputNode != null)
-          node.putObject("targetEndpoints", outputNode.getObject("scheduling"));
       }
-      return plan;
+      if (outputNode != null)
+        node.putObject("targetEndpoints", outputNode.getObject("scheduling"));
     }
+    return plan;
+  }
 
 
 

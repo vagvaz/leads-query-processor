@@ -142,7 +142,7 @@ public class WebServiceClient {
 
 
   public static ActionResult executeMapReduce(JsonObject newAction, String uri) throws IOException {
-    address = new URL(uri+"/prefix"+"internal/executemr");
+    address = new URL(uri+"/rest/internal/executemr");
     HttpURLConnection connection = (HttpURLConnection)address.openConnection();
     connection = setUp(connection,"POST",MediaType.APPLICATION_JSON,true,true);
     setBody(connection, newAction);
@@ -160,8 +160,8 @@ public class WebServiceClient {
     return result;
   }
 
-  public static ActionResult completeMapReduce(JsonObject mrAction,String host, String port) throws IOException {
-    address = new URL(host+":"+port+prefix+"internal/completedmr");
+  public static ActionResult completeMapReduce(JsonObject mrAction, String uri) throws IOException {
+    address = new URL(uri+"/"+prefix+"internal/completedmr");
     HttpURLConnection connection = (HttpURLConnection)address.openConnection();
     connection = setUp(connection,"POST",MediaType.APPLICATION_JSON,true,true);
     setBody(connection,mrAction);

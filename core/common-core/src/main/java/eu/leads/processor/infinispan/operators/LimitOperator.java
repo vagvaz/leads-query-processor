@@ -15,7 +15,6 @@ import org.infinispan.ensemble.EnsembleCacheManager;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 
 //import eu.leads.processor.plan.ExecutionPlanNode;
 //import eu.leads.processor.sql.PlanNode;
@@ -50,6 +49,7 @@ public class LimitOperator extends BasicOperator {
       prefix =   getOutput() + ":";
       inputMap = (Cache<String, String>) persistence.getPersisentCache(getInput());
       emanager = new EnsembleCacheManager( computeEnsembleHost());
+     emanager.start();
       data = emanager.getCache(getOutput());
 //      data = persistence.getPersisentCache(getOutput());
      inputPrefix = inputMap.getName()+":";

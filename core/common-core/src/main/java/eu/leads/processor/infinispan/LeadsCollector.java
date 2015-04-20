@@ -162,7 +162,8 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
       keysCache = (BasicCache) emanager.getCache(storeCache.getName() + ".keys");
       //createIndexCache for getting all the nodes that contain values with the same key! in a mc
       indexSiteCache = (BasicCache) emanager.getCache(storeCache.getName() + ".indexed");
-      counterCache = manager.getCache(cacheName+"."+manager.getAddress().toString() + ".counters");
+      counterCache = manager.getCache(storeCache.getName()+"."+inputCacheName+"."+manager.getAddress().toString()
+                                        + ".counters");
       baseIndexedKey = new IndexedComplexIntermediateKey(site, manager.getAddress().toString(),inputCacheName);
       baseIntermKey = new ComplexIntermediateKey(site, manager.getAddress().toString(),inputCacheName);
     }

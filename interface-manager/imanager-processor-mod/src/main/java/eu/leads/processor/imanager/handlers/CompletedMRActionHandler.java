@@ -5,7 +5,6 @@ import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
-import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 
 /**
@@ -32,12 +31,12 @@ public class CompletedMRActionHandler implements ActionHandler {
       String deployerId = "";
       try {
          JsonObject data = action.getData();
-         deployerId  = data.getString("coordinator");
+//         deployerId  = data.getString("coordinator");
          statusResult.putString("status","SUCCESS");
          statusResult.putString("message","");
          actionResult.putObject("status", statusResult);
-         actionResult.putString("deployerID", deployerId);
-         actionResult.putObject("result",data.getObject("completedOperator"));
+//         actionResult.putString("deployerID", deployerId);
+         actionResult.putObject("result",data);
 
          if (!(actionResult == null || actionResult.equals(""))) {
             //               com.sendTo(from, result.getObject("result"));

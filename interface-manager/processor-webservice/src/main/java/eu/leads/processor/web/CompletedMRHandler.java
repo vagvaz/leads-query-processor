@@ -41,7 +41,8 @@ public class CompletedMRHandler implements Handler<HttpServerRequest> {
    public void handle(HttpServerRequest request) {
       request.response().setStatusCode(200);
       request.response().putHeader(WebStrings.CONTENT_TYPE, WebStrings.APP_JSON);
-      log.info("Execute MR Handler");
+      log.info("COMPLETED MR Handler");
+      System.out.println(("COMPLETED MR Handler"));
       String reqId = UUID.randomUUID().toString();
       CompletedMRHandlerReplyHandler replyHandler = new CompletedMRHandlerReplyHandler(reqId, request);
       CompletedMRHandlerBodyHandler bodyHanlder = new CompletedMRHandlerBodyHandler(reqId, replyHandler);

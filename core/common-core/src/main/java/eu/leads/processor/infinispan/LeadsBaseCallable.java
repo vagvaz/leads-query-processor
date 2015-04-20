@@ -5,9 +5,6 @@ import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.Cache;
-import org.infinispan.client.hotrod.RemoteCache;
-import org.infinispan.client.hotrod.RemoteCacheManager;
-import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
 import org.infinispan.ensemble.EnsembleCacheManager;
@@ -69,12 +66,14 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     this.inputCache = cache;
     if(ensembleHost != null && !ensembleHost.equals("")) {
       emanager = new EnsembleCacheManager(ensembleHost);
+      emanager.start();
 //      emanager = createRemoteCacheManager();
       ecache = emanager.getCache(output);
     }
     else {
       LQPConfiguration.initialize();
       emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
+      emanager.start();
 //            emanager = createRemoteCacheManager();
     }
 
@@ -113,7 +112,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
   @Override public void finalize(){
     try {
-      emanager.stop();
+
+//      emanager.stop();
 //
 //      ecache.stop();
 //      outputCache.stop();

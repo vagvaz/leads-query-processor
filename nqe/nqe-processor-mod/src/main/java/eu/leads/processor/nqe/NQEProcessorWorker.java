@@ -9,13 +9,16 @@ import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.nqe.handlers.DeployRemoteOpActionHandler;
 import eu.leads.processor.nqe.handlers.OperatorActionHandler;
+import eu.leads.processor.web.WebServiceClient;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,6 +65,22 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
                        com.sendTo(action.getData().getString("monitor"),action.asJsonObject());
                        activeActions.remove(action.getId());
                      }
+                     else if (action.getLabel().equals(NQEConstants.DEPLOY_REMOTE_OPERATOR)){
+                       Action replyAction = new Action(action.getData());
+                       String coordinator = action.getData().getString("coordinator");
+                       replyAction.getData().putString("microcloud",currentCluster);
+                       replyAction.getData().putString("STATUS","SUCCESS");
+                       String webaddress = getURIFromGlobal(coordinator);
+                       try {
+                         WebServiceClient.completeMapReduce(replyAction.asJsonObject(),webaddress);
+                       } catch (IOException e) {
+                         e.printStackTrace();
+                       }
+                       System.err.println("Remote DEPLOY of " + action.getData().getObject("operator").getObject
+                                                                                                         ("configuration").toString() + " was successful");
+                       log.error("Remote DEPLOY of " + action.getData().getObject("operator").getObject
+                                                                                                ("configuration").toString() + " was successful");
+                     }
                      else{
                         log.error("COMPLETED Action " + action.toString() + "Received by NQEProcessor but cannot be handled" );
                      }
@@ -92,6 +111,20 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
                         com.sendTo(logic,action.asJsonObject());
                         activeActions.remove(action.getId());
                      }
+                     else if (action.getLabel().equals(NQEConstants.DEPLOY_REMOTE_OPERATOR)){
+                       Action replyAction = new Action(action.getData());
+                       String coordinator = action.getData().getString("coordinator");
+                       replyAction.getData().putString("microcloud",currentCluster);
+                       replyAction.getData().putString("STATUS","FAIL");
+                       String webaddress = getURIFromGlobal(coordinator);
+                       try {
+                         WebServiceClient.completeMapReduce(replyAction.asJsonObject(),webaddress);
+                       } catch (IOException e) {
+                         e.printStackTrace();
+                       }
+                       log.error("Remote DEPLOY of " + action.getData().getObject("operator").getObject
+                                                                                                ("configuration").toString() + " failed");
+                     }
                      else{
                         log.error("FAILED Action " + action.toString() + "Received by NQEProcessor but cannot be handled" );
                      }
@@ -116,6 +149,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
       bus.registerHandler(id + ".process", this);
       LQPConfiguration.initialize();
       LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component", "nqe");
+      currentCluster = LQPConfiguration.getInstance().getMicroClusterName();
       persistence = InfinispanClusterSingleton.getInstance().getManager();
       JsonObject msg = new JsonObject();
       msg.putString("processor", id + ".process");
@@ -124,8 +158,8 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
       handlers.put(NQEConstants.DEPLOY_OPERATOR,new OperatorActionHandler(com,log,persistence,id));
       handlers.put(NQEConstants.DEPLOY_PLUGIN,new DeployPluginActionHandler(com,log,persistence,id));
       handlers.put(NQEConstants.UNDEPLOY_PLUGIN,new DeployPluginActionHandler(com,log,persistence,id));
-//      handlers.put(NQEConstants.DEPLOY_REMOTE_OPERATOR, new DeployRemoteOpActionHandler(com,log,persistence,id,globalConfig));
-
+      handlers.put(NQEConstants.DEPLOY_REMOTE_OPERATOR, new DeployRemoteOpActionHandler(com,log,persistence,id,globalConfig));
+//
       bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {
          @Override
          public void handle(Message<JsonObject> event) {
@@ -136,7 +170,31 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
      log.info(id +" started ....");
    }
 
-   @Override
+  private String getURIFromGlobal(String coordinator) {
+    String uri = globalConfig.getObject("microclouds").getArray(coordinator).get(0);
+
+
+    if (!uri.startsWith("http:")) {
+      uri ="http://" + uri;
+    }
+    try {
+      String portString = uri.substring(uri.lastIndexOf(":")+1);
+      int port = Integer.parseInt(portString);
+    }catch (Exception e){
+      log.error("Parsing port execption " + e.getMessage());
+      System.err.println("Parsing port execption " + e.getMessage());
+      if(uri.endsWith(":")){
+        uri = uri +"8080";
+      }
+      else{
+        uri = uri+":8080";
+      }
+
+    }
+    return uri;
+  }
+
+  @Override
    public void handle(Message<JsonObject> message) {
       try {
          JsonObject body = message.body();

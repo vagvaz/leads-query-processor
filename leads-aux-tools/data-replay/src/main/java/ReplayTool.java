@@ -7,10 +7,8 @@ import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
-//import org.apache.nutch.storage.WebPage;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
-import org.infinispan.query.remote.client.avro.AvroMarshaller;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.avro.generic.GenericData.*;
+//import org.apache.nutch.storage.WebPage;
 
 /**
  * Created by vagvaz on 4/13/15.
@@ -40,6 +38,7 @@ public class ReplayTool {
       this.ensembleString = ensembleString;
       LQPConfiguration.initialize();
       emanager = new EnsembleCacheManager((ensembleString));
+     emanager.start();
       nutchCache = emanager.getCache("WebPage");
       webpageCache = emanager.getCache("default.webpages");
       List<String> mappings = LQPConfiguration.getInstance().getConfiguration().getList("nutch.mappings");
