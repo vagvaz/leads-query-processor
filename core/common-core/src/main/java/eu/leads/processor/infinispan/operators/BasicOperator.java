@@ -702,6 +702,7 @@ public abstract class BasicOperator extends Thread implements Operator{
   }
   @Override
   public void executeReduce(){
+    System.err.println("RUNNING REDUCE ON CLUSTER " + currentCluster);
     pendingMMC = new HashSet<>();
     mcResults = new HashMap<>();
     pendingMMC.addAll(pendingRMC);
