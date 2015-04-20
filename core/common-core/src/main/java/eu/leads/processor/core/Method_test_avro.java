@@ -52,8 +52,10 @@ public class Method_test_avro {
         tavro.setNumberAttribute(attributeName10, value10);
         System.out.println("############Runtime setAttribute: " + (stopTime - startTime) / 1000000 + " ns\n");
         System.out.println(tavro.toString());
-        System.out.println(tavro.schema.getNamespace().toString());
-        System.out.println(tavro.getValue("angelos.patatas.longnum1"));
+
+// get using total name (not working!)
+//        System.out.println(tavro.schema.getNamespace() +"."+ tavro.schema.getName()+"."+"longnum1");
+//        System.out.println(tavro.getValue(tavro.schema.getNamespace() +"."+ tavro.schema.getName()+"."+"longnum1"));
 
 
 // Tuple(tuple)

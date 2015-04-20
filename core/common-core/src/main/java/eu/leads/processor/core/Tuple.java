@@ -174,7 +174,7 @@ public class Tuple extends DataTypeAvro implements Serializable{
         }
     }
     public String getValue(String column) {
-        return AvroRec.get((column)).toString();
+        return AvroRec.get(setProperName(column)).toString();
     }
     public String getAttribute(String column) {
         return AvroRec.get(setProperName(column)).toString();
@@ -315,15 +315,17 @@ public class Tuple extends DataTypeAvro implements Serializable{
     }
 
     public String setProperName(String name){
-        int lastPeriod = name.lastIndexOf(".");
-        return name.substring(lastPeriod+1);
+//        int lastPeriod = name.lastIndexOf(".");
+//        return name.substring(lastPeriod+1);
+        return name;
     }
 
     public String setProperNameSpace(String name){
-        int lastPeriod = name.lastIndexOf(".");
-        if (lastPeriod>=0)
-            return name.substring(0,lastPeriod);
-        else
-            return "namespace";
+//        int lastPeriod = name.lastIndexOf(".");
+//        if (lastPeriod>=0)
+//            return name.substring(0,lastPeriod);
+//        else
+//            return "namespace";
+        return name;
     }
 }
