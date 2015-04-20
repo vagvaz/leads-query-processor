@@ -159,7 +159,7 @@ public class MathUtils {
         if(datum.getString("type").equalsIgnoreCase("TEXT")){
             result = getTextFrom(json.getObject("expr"));
         }else if(datum.getString("type").startsWith("INT")){
-            result = new Integer(datum.getObject("body").getNumber("val").intValue());
+            result = new Long(datum.getObject("body").getNumber("val").longValue());
         }else if(datum.getString("type").startsWith("FLOAT")){
             result = new Double(datum.getObject("body").getNumber("val").doubleValue());
         }else if(datum.getString("type").startsWith("DATE")){
