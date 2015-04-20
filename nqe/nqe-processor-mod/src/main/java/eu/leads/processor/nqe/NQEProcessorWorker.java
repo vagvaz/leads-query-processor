@@ -67,9 +67,12 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
                      }
                      else if (action.getLabel().equals(NQEConstants.DEPLOY_REMOTE_OPERATOR)){
                        Action replyAction = new Action(action.getData());
-                       String coordinator = action.getData().getString("coordinator");
-                       replyAction.getData().putString("microcloud",currentCluster);
+                       String coordinator = action.getData().getObject("data").getString("coordinator");
+                       replyAction.getData().putString("microcloud",currentCluster); //reduncdany to speed
+                       // up debuggin
+                       replyAction.getData().getObject("data").putString("microcloud",currentCluster);
                        replyAction.getData().putString("STATUS","SUCCESS");
+                       replyAction.getData().getObject("data").putString("STATUS","SUCCESS");
                        String webaddress = getURIFromGlobal(coordinator);
                        try {
                          WebServiceClient.completeMapReduce(replyAction.asJsonObject(),webaddress);
@@ -171,6 +174,9 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
    }
 
   private String getURIFromGlobal(String coordinator) {
+    System.err.println("IN NQE getting URI from global for " + coordinator + " while " + globalConfig
+                                                                                           .getObject
+                                                                                              ("microclouds`"));
     String uri = globalConfig.getObject("microclouds").getArray(coordinator).get(0);
 
 
