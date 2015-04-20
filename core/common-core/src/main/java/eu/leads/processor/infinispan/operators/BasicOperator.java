@@ -74,12 +74,16 @@ public abstract class BasicOperator extends Thread implements Operator{
     this.conf = action.getData().getObject("operator").getObject("configuration");
     isRemote = action.getData().containsField("remote");
     if(isRemote){
+
       executeOnlyMap = action.getData().containsField("map");
       executeOnlyReduce = action.getData().containsField("reduce");
+      System.err.println("IS REMOTE TRUE " + executeOnlyMap + " " + executeOnlyReduce);
+      log.error("IS REMOTE TRUE " + executeOnlyMap + " " + executeOnlyReduce);
     }
     else{
       executeOnlyMap = true;
       executeOnlyReduce =true;
+      log.error("IS REMOTE FALSE ");
     }
 
     this.globalConfig = action.getGlobalConf();
@@ -267,7 +271,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     {
       unsubscribeToMapActions("execution." + com.getId() + "." + action.getId());
     }
-    action.setStatus(ActionStatus.FAILED.toString());
+    action.setStatus(ActionStatus.COMPLETED.toString());
 
     pendingMMC.clear();
     pendingRMC.clear();
@@ -477,10 +481,28 @@ public abstract class BasicOperator extends Thread implements Operator{
   }
 
   private void sendRemoteRequest(String mc, boolean b) {
+    System.err.println("Send remote request to mc " + mc);
+    log.error("Send remote request to mc " + mc);
     Action newAction = new Action(action);
     JsonObject dataAction = action.asJsonObject().copy();
+    log.error("DATA ACTION = "+dataAction.toString());
     JsonObject sched = new JsonObject();
     sched.putArray(mc, globalConfig.getObject("microclouds").getArray(mc));
+    if(dataAction.containsField("data")){
+      System.err.println("contains data");
+      if(dataAction.getObject("data").containsField("operator")){
+        System.err.println("contains operator");
+        if(dataAction.getObject("data").getObject("operator").containsField("scheduling")){
+          System.err.println("contains schedu");
+        }
+      }
+
+    }
+    else{
+      for(String s : dataAction.getFieldNames()){
+        System.err.println(s);
+      }
+    }
     dataAction.getObject("data").getObject("operator").putObject("scheduling",sched);
     newAction.setData(dataAction);
     newAction.getData().putString("remote","remote");
