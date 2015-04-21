@@ -3,11 +3,13 @@ package eu.leads.processor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
 import eu.leads.PropertiesSingleton;
 import eu.leads.datastore.DataStoreSingleton;
+import eu.leads.infext.logging.redirect.StdLoggerRedirect;
 import eu.leads.infext.proc.realtime.env.pojo.PageProcessingPojo;
 import eu.leads.infext.python.PZSStart;
 import eu.leads.processor.common.infinispan.InfinispanManager;
@@ -76,20 +78,20 @@ public class AdidasProcessingPlugin implements PluginInterface {
       }
    }
    
-   private void setLogging(Configuration config) throws FileNotFoundException {
+   private void setLogging(Configuration config) throws Exception {
 	   String dir = config.getString("loggingDir");
 	   System.out.println("Logging to "+dir);
-	   System.setOut(outputFile(dir+"/leads-java.out"));
-	   System.setErr(outputFile(dir+"/leads-java.err"));
-	   System.out.println("Let's start the party!");
-	   System.err.println("Let's start the party!");
+	   StdLoggerRedirect.initLogging(dir);
+//	   System.setOut(outputFile(dir+"/leads-java-"+(new Date().getTime())+".out"));
+//	   System.setErr(outputFile(dir+"/leads-java-"+(new Date().getTime())+".err"));
+	   System.out.println("Initializing the plugin...");
    }
 
-   protected java.io.PrintStream outputFile(String name) throws java.io.FileNotFoundException {
-	   File file = new File(name);
-	   file.getParentFile().mkdirs();
-       return new java.io.PrintStream(new java.io.BufferedOutputStream(new java.io.FileOutputStream(file)));
-   }
+//   protected java.io.PrintStream outputFile(String name) throws java.io.FileNotFoundException {
+//	   File file = new File(name);
+//	   file.getParentFile().mkdirs();
+//       return new java.io.PrintStream(new java.io.BufferedOutputStream(new java.io.FileOutputStream(file)));
+//   }
 
    @Override
    public void cleanup() {

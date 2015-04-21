@@ -1,5 +1,6 @@
 package eu.leads.infext.logging.redirect;
 
+import java.io.File;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,11 +19,11 @@ public class StdLoggerRedirect {
 	private static PrintStream stdout;                                        
 	private static PrintStream stderr;
 	
-	private static boolean isExecuted = true;
+	private static boolean isExecuted = false;
 	
 	private static Handler fileHandler = null;
 	
-	public static void initLogging() throws Exception {
+	public static void initLogging(String dir) throws Exception {
 		
 		if(!isExecuted) {
 			System.err.println("Turning logging on, check logging files");
@@ -34,7 +35,9 @@ public class StdLoggerRedirect {
 			final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 			
 			// log file max size 10K, 3 rolling files, append-on-open
-			fileHandler = new FileHandler("%h/logs/leads-log", 1000000, 10, append);
+			File file = new File(dir);
+			file.mkdirs();
+			fileHandler = new FileHandler(dir+"/leads-log", 1000000, 10, append);
 			fileHandler.setFormatter(new Formatter() {
 			      public String format(LogRecord record) {
 			          return record.getLevel() + "\t" + dateFormat.format(new Date(record.getMillis())) + ":\t" + 

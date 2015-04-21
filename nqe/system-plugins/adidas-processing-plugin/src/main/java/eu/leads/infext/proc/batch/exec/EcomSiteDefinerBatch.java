@@ -238,7 +238,7 @@ public class EcomSiteDefinerBatch {
 		// 1. Get all the fully qualified domain names
 		List<String> fqdnList = dataStore.getFQDNList();
 
-		StdLoggerRedirect.initLogging();
+//		StdLoggerRedirect.initLogging();
 		
 		// 2. For every FQDN...
 		for(String fqdn : fqdnList) {

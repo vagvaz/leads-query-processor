@@ -36,7 +36,7 @@ public class SiteGeneralExecutor {
 		
 		String fqdn = args[0];
 		
-		StdLoggerRedirect.initLogging();
+//		StdLoggerRedirect.initLogging();
 		
 		/////////////////////////
 		/////////////////////////
