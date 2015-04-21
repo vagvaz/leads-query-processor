@@ -91,7 +91,7 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
        webpage = (Tuple)oo;
     }
     else{
-      System.err.println("\n\n\n\nSERIOUS ERROR WITH SERIALIZE GOT byte buffer " + oo.getClass().toString()  );
+//      System.err.println("\n\n\n\nSERIOUS ERROR WITH SERIALIZE GOT byte buffer " + oo.getClass().toString()  );
 //      Byte[] bytes = (Byte[]) oo;
       try {
 //        System.err.println("\n\n\n\nSERIOUS ERROR WITH SERIALIZE GOT byte buffer " + bytes.length);

@@ -540,11 +540,13 @@ public abstract class BasicOperator extends Thread implements Operator{
   }
 
   public void subscribeToMapActions(Set<String> pendingMMC) {
+    final boolean[] registered = {false};
     synchronized (rmcMutex) {
       com.subscribe("execution." + com.getId() + "." + action.getId(), handler, new Callable() {
         @Override
         public Object call() throws Exception {
           synchronized (rmcMutex) {
+            registered[0] = true;
             rmcMutex.notifyAll();
           }
           return null;
@@ -552,7 +554,8 @@ public abstract class BasicOperator extends Thread implements Operator{
         }
       });
       try {
-        rmcMutex.wait();
+        if(!registered[0])
+          rmcMutex.wait();
       } catch (InterruptedException e) {
         log.error("Subscription wait interreped " + e.getMessage());
         System.err.println("Subscription wait interreped " + e.getMessage());

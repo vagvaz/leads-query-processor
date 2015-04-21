@@ -67,7 +67,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
                      }
                      else if (action.getLabel().equals(NQEConstants.DEPLOY_REMOTE_OPERATOR)){
                        Action replyAction = new Action(action.getData());
-                       String coordinator = action.getData().getObject("data").getString("coordinator");
+                       String coordinator = action.asJsonObject().getString("coordinator");
                        replyAction.getData().putString("microcloud",currentCluster); //reduncdany to speed
                        // up debuggin
                        replyAction.getData().getObject("data").putString("microcloud",currentCluster);
