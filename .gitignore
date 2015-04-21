@@ -10,4 +10,4 @@ conf/
 target/
 .settings/
 *.pyc
-classifiers/
+resources/
