@@ -13,7 +13,7 @@ import java.util.List;
 public class PluginDeployer {
   public static void main(String[] args) {
     String propertiesFile = "";
-    if(args.length != 1) {
+    if(args.length == 1) {
       propertiesFile = args[0];
     }
     else{
