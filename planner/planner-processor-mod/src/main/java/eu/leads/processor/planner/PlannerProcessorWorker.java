@@ -82,7 +82,7 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
         msg.putString("processor", id + ".process");
         handlers = new HashMap<String, ActionHandler>();
         handlers.put(QueryPlannerConstants.PROCESS_SQL_QUERY,
-                        new ProcessSQLQueryActionHandler(com, log, persistence, id, module,schedHost,schedPort));
+                        new ProcessSQLQueryActionHandler(com, log, persistence, id, module,schedHost,schedPort,config.getObject("global")));
         handlers.put(QueryPlannerConstants.PROCESS_WORKFLOW_QUERY,
                         new ProcessWorkflowQueryActionHandler(com, log, persistence, id, module,schedHost,schedPort));
         handlers.put(QueryPlannerConstants.PROCESS_SPECIAL_QUERY,

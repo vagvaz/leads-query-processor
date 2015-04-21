@@ -1,10 +1,10 @@
 #!/bin/bash
 set -o nounset
-set -o errexit
+#set -o errexit
 set +x
 
 LEADS_QUERY_ENGINE_CONTAINER_NAME=query_engine
-export OS_AUTH_URL=https://identity-hamm5.cloudandheat.com:5000/v2.0
+export OS_AUTH_URL=https://identity-hamm6.cloudandheat.com:5000/v2.0
 
 if [ $# -eq 0 ];
   then
@@ -24,7 +24,21 @@ elif [ "$#" -eq 1 ]; then
 		swift --os-auth-url=${OS_AUTH_URL}  --os-username=${OS_USERNAME}  --os-password=${OS_PASSWORD}  --os-tenant-name=${OS_TENANT_NAME}  list ${LEADS_QUERY_ENGINE_CONTAINER_NAME};
 	elif [ $1 = "uploadallmods" ]; then
 			#statements
-			find * -name '*mod.zip' -type f | xargs -I {} -P 3  swift   --os-auth-url=${OS_AUTH_URL}  --os-username=${OS_USERNAME} --os-password=${OS_PASSWORD}  --os-tenant-name=${OS_TENANT_NAME}  upload --skip-identical --changed $LEADS_QUERY_ENGINE_CONTAINER_NAME {}
+			#echo `find * -name '*mod.zip' -type f `
+
+			zipfiles=`find * -name '*mod.zip' -type f `
+			find * -name '*mod.zip' -type f
+			echo '' 
+			for f in $zipfiles ; do
+			targetfile=`basename $f`
+			echo 'deleting ' $targetfile
+#			result=`swift   --os-auth-url=${OS_AUTH_URL}  --os-username=${OS_USERNAME} --os-password=${OS_PASSWORD}  --os-tenant-name=${OS_TENANT_NAME}  delete  ${LEADS_QUERY_ENGINE_CONTAINER_NAME}  `
+			echo 'uploading ' $f ' ' $targetfile 
+   				result=`swift   --os-auth-url=${OS_AUTH_URL}  --os-username=${OS_USERNAME} --os-password=${OS_PASSWORD}  --os-tenant-name=${OS_TENANT_NAME}  upload  ${LEADS_QUERY_ENGINE_CONTAINER_NAME} --skip-identical --changed $f --object-name $targetfile`
+			echo 'upload finish ' $f '  '  $result
+
+			done
+#| xargs -I {} -P 3  swift   --os-auth-url=${OS_AUTH_URL}  --os-username=${OS_USERNAME} --os-password=${OS_PASSWORD}  --os-tenant-name=${OS_TENANT_NAME}  upload  $LEADS_QUERY_ENGINE_CONTAINER_NAME {}
 	fi
 elif [ "$#" -eq 2 ]; then
 	

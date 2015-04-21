@@ -3,12 +3,14 @@ package eu.leads.processor.planner.handlers;
 import com.google.gson.Gson;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.*;
+import eu.leads.processor.planner.PlanUtils;
 import eu.leads.processor.web.WP4Client;
 import leads.tajo.module.TaJoModule;
 import org.apache.tajo.algebra.*;
@@ -22,6 +24,7 @@ import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,20 +36,27 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
     private final LogProxy log;
     private final InfinispanManager persistence;
     private final String id;
+    private String currentCluster;
     private final TaJoModule module;
     private Cache<String,String> queriesCache;
+    private Cache statisticsCache;
     private  Session session;
     private WP4Client wp4Client;
+    private JsonObject globalInformation;
     public ProcessSQLQueryActionHandler(Node com, LogProxy log, InfinispanManager persistence,
-                                           String id, TaJoModule module,String schedHost,String schedPort) {
+                                        String id, TaJoModule module,
+                                        String schedHost,String schedPort,JsonObject globalInformation) {
         this.com = com;
         this.log = log;
         this.persistence = persistence;
         this.id = id;
         this.module = module;
         queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
+        statisticsCache = (Cache) persistence.getPersisentCache(StringConstants.STATISTICS_CACHE);
         session = new Session("defaultQueryId", "defaultUser",StringConstants.DEFAULT_DATABASE_NAME);
         WP4Client.initialize(schedHost,schedPort);
+        currentCluster = LQPConfiguration.getInstance().getMicroClusterName();
+        this.globalInformation = globalInformation;
     }
 
     @Override
@@ -61,23 +71,23 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             expr = module.parseQuery(sqlQuery.getSQL());
 
 
-        if(expr.getType().equals(OpType.CreateTable)){
-            module.createTable((CreateTable)expr);
-            result.setResult(ignoreResult(sqlQuery));
-            completeQuery(sqlQuery);
-            return result;
-        }
+            if(expr.getType().equals(OpType.CreateTable)){
+                module.createTable((CreateTable)expr);
+                result.setResult(ignoreResult(sqlQuery));
+                completeQuery(sqlQuery);
+                return result;
+            }
 
-        else if(expr.getType().equals(OpType.DropTable)){
-            module.dropTable((DropTable)expr);
-            result.setResult(ignoreResult(sqlQuery));
-            completeQuery(sqlQuery);
-            return result;
-        }
+            else if(expr.getType().equals(OpType.DropTable)){
+                module.dropTable((DropTable)expr);
+                result.setResult(ignoreResult(sqlQuery));
+                completeQuery(sqlQuery);
+                return result;
+            }
         } catch (Exception e) {
-           failQuery(e, sqlQuery);
-           result.setResult(createFailResult(e, sqlQuery));
-           return result;
+            failQuery(e, sqlQuery);
+            result.setResult(createFailResult(e, sqlQuery));
+            return result;
         }
         //Optimize plan
 //        String planAsString = null;
@@ -100,9 +110,9 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         }
         if(plan == null){
             failQuery(new Exception("Could not Create Plan"),sqlQuery);
-             result.setResult(createFailResult(new Exception("Unable to create plan due to internal error"),sqlQuery));
+            result.setResult(createFailResult(new Exception("Unable to create plan due to internal error"),sqlQuery));
             return result;
-         }
+        }
         Set<SQLPlan> candidatePlans = new HashSet<SQLPlan>();
         candidatePlans.add(plan);
         Set<SQLPlan> evaluatedPlans = evaluatePlansFromScheduler(candidatePlans);
@@ -168,10 +178,10 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             if(opInsert.getTableName().startsWith(StringConstants.DEFAULT_DATABASE_NAME))
                 node.getConfiguration().getObject("body").putString("tableName",opInsert.getTableName());
             else
-                if(opInsert.getTableName().contains("."))
-                    node.getConfiguration().getObject("body").putString("tableName",opInsert.getTableName());
-                else
-                    node.getConfiguration().getObject("body").putString("tableName",StringConstants.DEFAULT_DATABASE_NAME+"."+opInsert.getTableName());
+            if(opInsert.getTableName().contains("."))
+                node.getConfiguration().getObject("body").putString("tableName",opInsert.getTableName());
+            else
+                node.getConfiguration().getObject("body").putString("tableName",StringConstants.DEFAULT_DATABASE_NAME+"."+opInsert.getTableName());
 
             node.getConfiguration().getObject("body").putArray("primaryColumns",resolvePrimaryColumns(opInsert.getTableName()));
             if(opInsert.hasTargetColumns()) {
@@ -196,7 +206,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         String table = tableName;
         Set<String> primaryColumns = null;
         if(table.startsWith(StringConstants.DEFAULT_DATABASE_NAME))
-             primaryColumns = TaJoModule.getPrimaryColumn(tableName);
+            primaryColumns = TaJoModule.getPrimaryColumn(tableName);
         else
             primaryColumns = TaJoModule.getPrimaryColumn(StringConstants.DEFAULT_DATABASE_NAME+"." + table);
         if(tableName.equals(StringConstants.DEFAULT_DATABASE_NAME+".webpages") || tableName.equals("webpages"))
@@ -230,10 +240,26 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         //Send Request to Scheduler and receive Evaluations.
         Set<SQLPlan> result = new HashSet<>();
         for(SQLPlan plan : candidatePlans){
-//            JsonObject schedulerRep = plan.getSchedulerRep();
-//            schedulerRep = annotatePlan(schedulerRep,persistence);
-//            JsonObject annotatedPlan = WP4Client.evaluatePlan(schedulerRep);
-//            plan.updateWithAnnotations(annotatedPlan);
+//            JsonObject p = plan.getPlanGraph().copy();
+//            p = PlanUtils.handleRootOutputNodes(p);
+//            p = PlanUtils.updateKeyspaceParameter(p);
+//            p = PlanUtils.numberStages(p);
+//            p = PlanUtils.annotatePlan(statisticsCache, p);
+//            JsonObject annotatedPlan = null;
+//            try {
+//                JsonObject schedulerRep = PlanUtils.getSchedulerRep(p,currentCluster);
+//                annotatedPlan = WP4Client.evaluatePlan(schedulerRep);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            if(annotatedPlan == null){
+//                SQLQuery query = new SQLQuery( new JsonObject(queriesCache.get(plan.getQueryId())));
+//                failQuery(new Exception("Could not access the scheduler"),query);
+//                return result;
+//            }
+//            JsonObject updatedPlan = PlanUtils.updateInformation(plan.getPlanGraph(),annotatedPlan.getObject("replied").getObject("stages"),globalInformation);
+//            updatedPlan = PlanUtils.updateTargetEndpoints(updatedPlan);
+//            plan.setPlanGraph(updatedPlan);
             result.add(plan);
         }
         return result;

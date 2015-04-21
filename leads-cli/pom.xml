@@ -260,12 +260,12 @@
                     </archive>
                 </configuration>
             </plugin>
-            <!-- The vert.x Maven plugin -->
-            <plugin>
-                <groupId>io.vertx</groupId>
-                <artifactId>vertx-maven-plugin</artifactId>
-                <version>${maven.vertx.plugin.version}</version>
-            </plugin>
+            <!--&lt;!&ndash; The vert.x Maven plugin &ndash;&gt;-->
+            <!--<plugin>-->
+                <!--<groupId>io.vertx</groupId>-->
+                <!--<artifactId>vertx-maven-plugin</artifactId>-->
+                <!--<version>${maven.vertx.plugin.version}</version>-->
+            <!--</plugin>-->
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>

@@ -49,9 +49,9 @@ public class HDFSByteChunk implements Writable {
 
   @Override public void readFields(DataInput in) throws IOException {
     fileName = in.readUTF();
-
     int size = in.readInt();
     data = new byte[size];
     in.readFully(data);
+
   }
 }

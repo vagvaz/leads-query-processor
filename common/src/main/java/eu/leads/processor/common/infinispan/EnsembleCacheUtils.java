@@ -31,7 +31,7 @@ public class EnsembleCacheUtils {
               }
              cache.put(key,value);
 
-              log.error("Successful " + key);
+//              log.error("Successful " + key);
               isok = true;
            }
            else {

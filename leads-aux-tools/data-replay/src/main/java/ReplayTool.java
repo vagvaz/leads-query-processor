@@ -7,7 +7,7 @@ import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
-import org.apache.nutch.storage.WebPage;
+//import org.apache.nutch.storage.WebPage;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.query.remote.client.avro.AvroMarshaller;
@@ -87,10 +87,15 @@ public class ReplayTool {
 
                      if (load) {
                         Tuple t = nutchTransformer.transform(page);
-                        webpageCache.put(webpageCache.getName() + ":" + t.getAttribute("url"), t);
-                        counter++;
-                        if(counter % 1000 == 0){
-                           System.err.println("loaded " + counter + " tuples");
+                        if(page.get("content")!= null) {
+                           if(t.getAttribute("body") == null){
+                              System.err.println("page content != null tuple body is null ");
+                        }
+                           webpageCache.put(webpageCache.getName() + ":" + t.getAttribute("url"), t);
+                           counter++;
+                           if (counter % 1000 == 0) {
+                              System.err.println("loaded " + counter + " tuples");
+                           }
                         }
                      }
                   }
@@ -98,6 +103,7 @@ public class ReplayTool {
                   keyFile = new File(baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".keys");
                   dataFile = new File(baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".data");
                }
+
                System.out.println("read " + currentCounter + " files");
                currentCounter = 0;
                continue;
@@ -107,6 +113,7 @@ public class ReplayTool {
                currentCounter++;
             }
          }
+         System.out.println("Finally loaded " + counter + " tuples");
          break;
       }
    }

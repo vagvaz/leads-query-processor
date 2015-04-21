@@ -50,7 +50,112 @@ public class WP4ClientTest {
                                  "      \"output\" : null,\n" +
                                  "      \"k\" : \"1\",\n" +
                                  "      \"q\" : \"1\",\n" +
-                                 "      \"stage\" : \"8\"      \n" +
+                                 "      \"stage\" : \"8\",\n" +
+                                 "       \"configuration\" : {\n" +
+                                 "        \"type\" : \"ROOT\",\n" +
+                                 "        \"body\" : {\n" +
+                                 "          \"child\" : {\n" +
+                                 "            \"type\" : \"LIMIT\",\n" +
+                                 "            \"body\" : {\n" +
+                                 "              \"fetchFirstNum\" : 5,\n" +
+                                 "             \"pid\" : 1,\n" +
+                                 "              \"type\" : \"LIMIT\",\n" +
+                                 "              \"inputSchema\" : {\n" +
+                                 "                \"fields\" : [ {\n" +
+                                 "                  \"name\" : \"default.s.score\",\n" +
+                                 "                  \"dataType\" : {\n" +
+                                 "                    \"type\" : \"INT4\"\n" +
+                                 "                  }\n" +
+                                 "                }, {\n" +
+                                 "                  \"name\" : \"default.s.deptname\",\n" +
+                                 "                  \"dataType\" : {\n" +
+                                 "                    \"type\" : \"TEXT\"\n" +
+                                 "                  }\n" +
+                                 "                } ],\n" +
+                                 "                \"fieldsByQualifiedName\" : {\n" +
+                                 "                  \"default.s.deptname\" : 1,\n" +
+                                 "                  \"default.s.score\" : 0\n" +
+                                 "                },\n" +
+                                 "                \"fieldsByName\" : {\n" +
+                                 "                  \"score\" : [ 0 ],\n" +
+                                 "                  \"deptname\" : [ 1 ]\n" +
+                                 "                }\n" +
+                                 "              },\n" +
+                                 "              \"outputSchema\" : {\n" +
+                                 "                \"fields\" : [ {\n" +
+                                 "                  \"name\" : \"default.s.score\",\n" +
+                                 "                  \"dataType\" : {\n" +
+                                 "                    \"type\" : \"INT4\"\n" +
+                                 "                  }\n" +
+                                 "                }, {\n" +
+                                 "                  \"name\" : \"default.s.deptname\",\n" +
+                                 "                  \"dataType\" : {\n" +
+                                 "                    \"type\" : \"TEXT\"\n" +
+                                 "                  }\n" +
+                                 "                } ],\n" +
+                                 "                \"fieldsByQualifiedName\" : {\n" +
+                                 "                  \"default.s.deptname\" : 1,\n" +
+                                 "                  \"default.s.score\" : 0\n" +
+                                 "                },\n" +
+                                 "                \"fieldsByName\" : {\n" +
+                                 "                  \"score\" : [ 0 ],\n" +
+                                 "                  \"deptname\" : [ 1 ]\n" +
+                                 "                }\n" +
+                                 "              },\n" +
+                                 "              \"cost\" : 0.0\n" +
+                                 "            }\n" +
+                                 "          },\n" +
+                                 "          \"pid\" : 3,\n" +
+                                 "          \"type\" : \"ROOT\",\n" +
+                                 "          \"inputSchema\" : {\n" +
+                                 "            \"fields\" : [ {\n" +
+                                 "              \"name\" : \"default.s.score\",\n" +
+                                 "              \"dataType\" : {\n" +
+                                 "                \"type\" : \"INT4\"\n" +
+                                 "              }\n" +
+                                 "            }, {\n" +
+                                 "              \"name\" : \"default.s.deptname\",\n" +
+                                 "              \"dataType\" : {\n" +
+                                 "                \"type\" : \"TEXT\"\n" +
+                                 "              }\n" +
+                                 "            } ],\n" +
+                                 "            \"fieldsByQualifiedName\" : {\n" +
+                                 "              \"default.s.deptname\" : 1,\n" +
+                                 "              \"default.s.score\" : 0\n" +
+                                 "            },\n" +
+                                 "            \"fieldsByName\" : {\n" +
+                                 "              \"score\" : [ 0 ],\n" +
+                                 "              \"deptname\" : [ 1 ]\n" +
+                                 "            }\n" +
+                                 "          },\n" +
+                                 "          \"outputSchema\" : {\n" +
+                                 "            \"fields\" : [ {\n" +
+                                 "              \"name\" : \"default.s.score\",\n" +
+                                 "              \"dataType\" : {\n" +
+                                 "                \"type\" : \"INT4\"\n" +
+                                 "              }\n" +
+                                 "            }, {\n" +
+                                 "              \"name\" : \"default.s.deptname\",\n" +
+                                 "              \"dataType\" : {\n" +
+                                 "                \"type\" : \"TEXT\"\n" +
+                                 "              }\n" +
+                                 "            } ],\n" +
+                                 "            \"fieldsByQualifiedName\" : {\n" +
+                                 "              \"default.s.deptname\" : 1,\n" +
+                                 "              \"default.s.score\" : 0\n" +
+                                 "            },\n" +
+                                 "            \"fieldsByName\" : {\n" +
+                                 "              \"score\" : [ 0 ],\n" +
+                                 "              \"deptname\" : [ 1 ]\n" +
+                                 "            }\n" +
+                                 "          },\n" +
+                                 "          \"cost\" : 0.0\n" +
+                                 "        }\n" +
+                                 "      },\n" +
+                                 "      \"nodetype\" : \"ROOT\",\n" +
+                                 "      \"id\" : \"queryId-custom.3\",\n" +
+                                 "      \"status\" : \"PENDING\",\n" +
+                                 "      \"site\" : \"\"\n" +
                                  "    },\n" +
                                  "    \"myoutput.orderBy.filter-having.project.groupby.filter-where.join.readRight\" : {\n" +
                                  "\n" +

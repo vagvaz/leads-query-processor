@@ -8,32 +8,21 @@
       <version>1.0-SNAPSHOT</version>
    </parent>
    <modelVersion>4.0.0</modelVersion>
+   <properties>
+      <infinispan.version>7.0.1-SNAPSHOT</infinispan.version>
+      <gora.version>0.5-SNAPSHOT</gora.version>
+      <avro.version>1.7.4</avro.version>
+      <nutch.version>2.2</nutch.version>
+   </properties>
 
-   <artifactId>data-replay</artifactId>
-   <dependencies>
-      <dependency>
-         <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-client-hotrod</artifactId>
-         <version>${infinispan.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-remote-query-client</artifactId>
-         <version>${infinispan.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>gr.tuc.softnet</groupId>
-         <artifactId>leads-query-processor-common</artifactId>
-         <version>1.0-SNAPSHOT</version>
-      </dependency>
-   </dependencies>
+
+   <artifactId>data-reader</artifactId>
    <build>
       <plugins>
-         <!-- The vert.x Maven plugin -->
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <version>${maven.compiler.plugin.version}</version>
+            <version>3.1</version>
             <configuration>
                <source>1.7</source>
                <target>1.7</target>
@@ -48,6 +37,34 @@
             </configuration>
          </plugin>
       </plugins>
-
    </build>
+
+
+   <dependencies>
+
+      <dependency>
+         <groupId>org.apache.gora</groupId>
+         <artifactId>gora-core</artifactId>
+         <version>${gora.version}</version>
+      </dependency>
+
+      <dependency>
+         <groupId>org.apache.gora</groupId>
+         <artifactId>gora-infinispan</artifactId>
+         <version>${gora.version}</version>
+      </dependency>
+
+      <dependency>
+         <groupId>org.apache.avro</groupId>
+         <artifactId>avro</artifactId>
+         <version>${avro.version}</version>
+      </dependency>
+
+      <dependency>
+         <groupId>org.apache.nutch</groupId>
+         <artifactId>nutch</artifactId>
+         <version>${nutch.version}</version>
+      </dependency>
+
+   </dependencies>
 </project>

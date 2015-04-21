@@ -2,7 +2,7 @@ package eu.leads.processor.plugins;
 
 import eu.leads.processor.core.Tuple;
 import org.apache.avro.generic.GenericData;
-import org.apache.nutch.storage.WebPage;
+//import org.apache.nutch.storage.WebPage;
 import org.bson.BasicBSONObject;
 
 import java.nio.ByteBuffer;
