@@ -15,7 +15,7 @@ public class DataSnapshot {
     DataRemoteReader reader = new DataRemoteReader(remoteCache);
     long counter = reader.storeToFile(prefix,basePath);
     System.out.println("We saved " + counter + " nutch webpages into " + prefix +"/" + basePath + "-"+
-                         "nutchWebBackup0.keys");
+                         "nutchWebBackup-0.keys");
     System.exit(0);
   }
 }

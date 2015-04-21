@@ -68,7 +68,7 @@ public class DataRemoteReader {
     Query query = store.newQuery();
 //    query.setLimit(1);
     query.setOffset(0);
-    query.setFields("content");
+//    query.setFields("content");
     Result<String,WebPage> result = query.execute();
     long counter = 0;
 
@@ -133,6 +133,9 @@ public class DataRemoteReader {
 //            record.put(f.pos(),f.defaultValue());
 //          }
 
+        }
+        if(record.get("content")!=null){
+          System.out.println("content not null");
         }
         outputToFile(record.get(0).toString().getBytes(),record,nutchKeysWriter,nutchDataWriter);
         counter++;

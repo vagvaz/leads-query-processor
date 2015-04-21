@@ -96,6 +96,7 @@ public class ReplayTool {
                               System.err.println("loaded " + counter + " tuples");
                            }
                         }
+
                      }
                   }
                   currentCounter++;
