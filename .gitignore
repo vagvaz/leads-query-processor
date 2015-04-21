@@ -3,11 +3,13 @@ conf/
 !/common/src/main/resources/conf
 *.iml
 .idea/
-.project/
-.classpath/
+.project
+.pydevproject
+.classpath
 *.log.*
 *.log
 target/
 .settings/
 *.pyc
 resources/
+logs/
