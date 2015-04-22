@@ -54,14 +54,14 @@ public class DataRemoteReader {
 
   }
 
-  public long storeToRemoteCache(String ensembleString,boolean distributed, long delay ){
+
+  public long storeToRemoteCache(String ensembleString,boolean distributed, long delay ) {
     EnsembleCacheManager manager = new EnsembleCacheManager(ensembleString);
     EnsembleCache cache = null;
-    if(distributed){
-      cache = manager.getCache("default.webpages",new ArrayList<Site>(manager.sites()),
-                                EnsembleCacheManager.Consistency.DIST);
-    }
-    else{
+    if (distributed) {
+      cache = manager.getCache("default.webpages", new ArrayList<Site>(manager.sites()),
+              EnsembleCacheManager.Consistency.DIST);
+    } else {
       cache = manager.getCache("default.webpages");
     }
 
@@ -89,6 +89,7 @@ public class DataRemoteReader {
           System.out.println("Loaded " + counter + " tuples");
         }
      }
+
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -96,7 +97,8 @@ public class DataRemoteReader {
   }
 
   public long storeToFile(String path, String baseName){
-    long  counter = 0;
+    int  counter = 0;
+    int small_count=0;
     FileOutputStream nutchData = null;
     FileOutputStream nutchKeys = null;
     ObjectOutputStream nutchKeysWriter = null;
@@ -116,33 +118,54 @@ public class DataRemoteReader {
     }
 
     store.createSchema();
-    Query query = store.newQuery();
-    query.setOffset(0);
-//    query.setLimit(1000);
-    Result<String,WebPage> result = query.execute();
+
+    long nullContentCounter = 0;
+    int batchRead=100;
     try {
-      while(result.next()){
-        WebPage page = result.get();
-        GenericData.Record record = new GenericData.Record(page.getSchema());
-        for(int i = 0; i < page.getFieldsCount();i++){
+      Result<String,WebPage> result ;
+//      query.setLimit(batchRead);
+      do {
+        small_count= 0;
+        Query query = store.newQuery();
+//        query.setFields("content");
+        query.setOffset(counter);
+        query.setLimit(batchRead);
+        result = query.execute();
+        while (result.next()) {
+          WebPage page = result.get();
+          GenericData.Record record = new GenericData.Record(page.getSchema());
+          for (int i = 0; i < page.getFieldsCount(); i++) {
 //          if(page.get(i)!= null)
-          {
-            record.put(i,page.get(i));
-          }
+            {
+              record.put(i, page.get(i));
+            }
 //          for(Schema.Field f : page.getUnmanagedFields()){
 //            record.put(f.pos(),f.defaultValue());
 //          }
 
+          }
+          if(page.getContent() == null)
+          {
+            nullContentCounter++;
+//            System.out.println("read page with null content "+ nullContentCounter + " " + page.getKey());
+          }
+
+
+          if (record.get("content") != null) {
+            System.out.println("content not null " + record.get("key"));
+            outputToFile(record.get(0).toString().getBytes(), record, nutchKeysWriter, nutchDataWriter);
+          }
+
+          small_count++;
+          if ((counter+small_count) % batchRead == 0)
+            System.out.println("Stored " + counter + " tuples into files");
+
         }
-        if(record.get("content")!=null){
-          System.out.println("content not null");
-        }
-        outputToFile(record.get(0).toString().getBytes(),record,nutchKeysWriter,nutchDataWriter);
-        counter++;
-        if(counter % 100 == 0){
-          System.out.println("Stored " + counter + " tuples into files" );
-        }
-      }
+        counter+=small_count;
+        System.out.println("read " + nullContentCounter + " with null content");
+      }while(small_count>=batchRead);
+      System.out.println("Totally Stored " + counter + " tuples into files");
+
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -157,7 +180,7 @@ public class DataRemoteReader {
   }
 
   public void outputToFile(byte[] key, GenericData.Record page, ObjectOutputStream nutchKeysWriter,
-                            ObjectOutputStream nutchDataWriter) {
+                           ObjectOutputStream nutchDataWriter) {
     try {
       nutchKeysWriter.writeInt(key.length);
       nutchKeysWriter.write(key);

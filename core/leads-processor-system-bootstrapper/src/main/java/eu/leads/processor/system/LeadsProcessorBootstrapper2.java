@@ -82,37 +82,39 @@ public class LeadsProcessorBootstrapper2 {
         baseDir = getStringValue(conf, "baseDir", null, true); //FIX IT using pwd and configuration file path!?
         globalJson = checkandget(conf, "hdfs.user", globalJson, true);
         globalJson = checkandget(conf, "hdfs.prefix", globalJson, true);
-        globalJson = checkandget(conf, "scheduler", globalJson, true);
         globalJson = checkandget(conf, "hdfs.uri", globalJson, true);
+        //
+
+        globalJson = checkandget(conf, "scheduler", globalJson, true);
+
 
         if (globalJson.getString("hdfs.uri").equals("obtain")) {
-//            JsonObject tmpAddrs = salt_get("leads_yarn.map", false);
-//            if (tmpAddrs != null)
-//                globalJson.putString("hdfsuri", tmpAddrs.getString("leads-yarn-1")); //Fix it hardcode for the moment
-            //try to read json file at baseDir/
-            JsonObject tmpAddrs = getJsonfile(baseDir + "hdfscloud.json", false);
-            Set<String> A = tmpAddrs.getFieldNames();
+            String hdfs_uri = System.getenv("LEADS_QUERY_ENGINE_HADOOP_FS");//LEADS_CURRENT_CLUSTER");
+            if (hdfs_uri == null) {
+                logger.warn("No HADOOP FS env variable ");
 
-            if (tmpAddrs != null)
-                for (String s : A) {
-                    logger.info("key = " + s + " value = " + tmpAddrs.getObject(s).toString());
-                    JsonObject ooss = tmpAddrs.getObject(s);
-                    JsonObject openstacks = ooss.getObject("openstack");
+                JsonObject tmpAddrs = getJsonfile(baseDir + "hdfscloud.json", false);
+                Set<String> A = tmpAddrs.getFieldNames();
+
+                if (tmpAddrs == null) {
+                    //Read the env
+                } else
+                    for (String s : A) {
+                        logger.info("key = " + s + " value = " + tmpAddrs.getObject(s).toString());
+                        JsonObject ooss = tmpAddrs.getObject(s);
+                        JsonObject openstacks = ooss.getObject("openstack");
 //                    for(int os=0;os<openstacks.size();os++){
 //                        JsonObject oos =openstacks.get(os);
-                    if (openstacks.getObject("leads-yarn-1") != null) {
-                        JsonObject yarn1 = openstacks.getObject("leads-yarn-1");
-                        JsonArray yarnpIps = yarn1.getArray("public_ips");
-                        logger.info("found  " + s + ".openstack.leads-yarn-1");
-                        globalJson.putString("hdfsuri", yarnpIps.get(0).toString()); //Fix it hardcode for the moment{
+                        if (openstacks.getObject("leads-yarn-1") != null) {
+                            JsonObject yarn1 = openstacks.getObject("leads-yarn-1");
+                            JsonArray yarnpIps = yarn1.getArray("public_ips");
+                            logger.info("found  " + s + ".openstack.leads-yarn-1");
+                            globalJson.putString("hdfs.uri", yarnpIps.get(0).toString()); //Fix it hardcode for the moment
+                        }
                     }
-//                    if(openstacks.get(0).getObject(s + ".openstack.")!=null){
-//
-//
-//                    }
-
-                }
-
+            }else{
+                globalJson.putString("hdfs.uri",hdfs_uri);
+            }
         }
 
 
@@ -195,7 +197,7 @@ public class LeadsProcessorBootstrapper2 {
                 jcomponentsAddrs.addString(c);
 
             //get env LEADS_CURRENT_CLUSTER and put the json arrays under it
-            String current_cluster = System.getenv("LEADS_CURRENT_CLUSTER");
+            String current_cluster = System.getenv("LEADS_QUERY_ENGINE_UCLOUD_NAME");//LEADS_CURRENT_CLUSTER");
             if (current_cluster == null)
                 current_cluster = "LEADS_CURRENT_CLUSTER";
 
@@ -233,7 +235,14 @@ public class LeadsProcessorBootstrapper2 {
 
             logger.info("Assuming that all the adresses shall be retrieved from the microclouds.json file.");
             //globalJson.putObject("microclouds", salt_get("leads_query-engine.map", true));
-            JsonObject JsonClouds = read_salt(getJsonfile(baseDir + "microclouds.json", false), true);
+
+            String JsonCloudsEnv = System.getenv("LEADS_QUERY_ENGINE_CLUSTER_TOPOLOGY");//LEADS_CURRENT_CLUSTER");
+            JsonObject JsonClouds;
+            if (JsonCloudsEnv == null)
+                JsonClouds =  read_salt(getJsonfile(baseDir + "microclouds.json", false), true);
+            else
+                JsonClouds =  read_salt(new JsonObject(JsonCloudsEnv),true);
+
             globalJson.putObject("microclouds", JsonClouds);
 
             //execute webservice in all clouds
@@ -253,7 +262,6 @@ public class LeadsProcessorBootstrapper2 {
 
             int instancesCnt = 0;
             for (Map.Entry<String, JsonArray> entry : allmcAddrs.entrySet()) {//TODO fix multicloud only with obtain
-                jwebServiceAddrs = new JsonArray();
                 JsonArray pAddrs = entry.getValue();
                 JsonArray clusterComponentsAddressed = new JsonArray();
                 JsonArray clusterWebServiceAddressed = new JsonArray();

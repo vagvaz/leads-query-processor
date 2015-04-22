@@ -55,7 +55,7 @@ public class WebServiceClient {
     address = new URL(host+":"+port);
     return true;
   }
-  private static boolean checkIfOnline() {
+  public static boolean checkIfOnline() {
     HttpURLConnection connection = null;
     try {
       address = new URL(host + ":" + port + prefix + "checkOnline");
