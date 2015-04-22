@@ -5,7 +5,7 @@ public class Replay {
 
     public static void main(String[] args) {
         if (args.length < 2) {
-            System.err.println("Help, Replay args: ip path_of_data_keys delayms_per_1000_put_tocache");
+            System.err.println("Help, Replay args: ip path_of_data_keys delayms_per_put_tocache");
             System.exit(0);
         }
         int delay = 1000;

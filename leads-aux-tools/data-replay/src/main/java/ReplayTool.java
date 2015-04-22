@@ -84,7 +84,7 @@ public class ReplayTool {
                      GenericData.Record page = new GenericData.Record(schema);
                      reader.read(page, decoder);
 //
-                   //  System.err.println("Read key: " + new String(key) + "\n" + "value " + page.toString());
+                     System.err.println("Read key: " + new String(key) + "\n" + "value " + page.toString());
 //
                      if (load) {
                         Tuple t = nutchTransformer.transform(page);
@@ -98,12 +98,13 @@ public class ReplayTool {
                                     System.err.println("tuple does not have body field ");
                                     nocontent_counter++;
                                  }else {
+                                    System.err.println("Put to cache");
                                     webpageCache.put(webpageCache.getName() + ":" + t.getAttribute("url"), t);
+                                    Thread.sleep(delay);
                                     counter++;
-                                    if (counter % 1000 == 0) {
+                                    if (counter % 1000 == 0)
                                        System.err.println("loaded " + counter + " tuples");
-                                       Thread.sleep(delay);
-                                    }
+
                                  }
                               } else {
                                  nocontent_counter++;
