@@ -95,8 +95,8 @@ public class ReplayTool {
                         }else {
                            if (t != null) {
                               if (page.get("content") != null) {
-                                 if (t.getAttribute("body") == null) {
-                                    System.err.println("tuple has null body ");
+                                 if (!t.hasField("body")/*t.getAttribute("body") == null*/) {
+                                    System.err.println("tuple does not have body field ");
                                     nocontent_counter++;
                                  }else {
                                    // System.err.println("Put to cache");
