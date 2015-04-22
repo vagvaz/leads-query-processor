@@ -34,7 +34,7 @@ public class LeadsDataStore extends AbstractDataStore {
 	}
 
 	@Override
-	public SortedSet<URIVersion> getLeadsResourceMDFamily(String uri, String family, int lastVersions, String beforeTimestamp) {
+	public SortedSet<URIVersion> getLeadsResourceMDFamily(String uri, String family, int lastVersions, String timestamp, boolean before) {
 		SortedSet<URIVersion> uriVersions = new TreeSet<URIVersion>();
 
 		boolean reverse = false;
@@ -46,30 +46,34 @@ public class LeadsDataStore extends AbstractDataStore {
 		String queryP03 = "uri = '" + uri + "'";
 		//
 		String queryP04 = "";
-		if(beforeTimestamp != null) {
-			queryP04 += " AND ts < " + beforeTimestamp;
+		if(timestamp != null) {
+			queryP04 += " AND ";
+			if(before) 	queryP04 += "ts < ";
+			else		queryP04 += "ts = ";
+			queryP04 += timestamp;
 		}
 		//
-		String queryP05 = " ORDER BY ts DESC";
+		if(before) {
+			queryP04 += " ORDER BY ts DESC";
+			queryP04 += " LIMIT " + lastVersions;
+		}
 		//
-		String queryP06 = " LIMIT " + lastVersions;
-		//
-		String query = queryP01+queryP02+queryP03+queryP04+queryP05+queryP06;
+		String query = queryP01+queryP02+queryP03+queryP04;
 
 		System.out.println(query);
 
 		QueryResults rs;
 		rs = LeadsQueryInterface.sendQuery(query);
 		
-		if((rs == null || rs.getResult().size() == 0) && beforeTimestamp != null) {
+		if((rs == null || rs.getResult().size() == 0) && timestamp != null && before == true) {
 
 			reverse = true;
 			//
 			queryP04 = "";
 			//
-			queryP05 = " ORDER BY ts ASC";
+			queryP04 += " ORDER BY ts ASC";
 			//
-			query = queryP01+queryP02+queryP03+queryP04+queryP05+queryP06;
+			query = queryP01+queryP02+queryP03+queryP04;
 
 			System.out.println(query);
 			

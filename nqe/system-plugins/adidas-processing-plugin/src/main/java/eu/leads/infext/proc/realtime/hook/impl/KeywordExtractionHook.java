@@ -26,9 +26,9 @@ public class KeywordExtractionHook extends AbstractHook {
 		
 		HashMap<String, HashMap<String, Object>> newMetadata = new HashMap<>();		
 
-		putLeadsMDIfNeeded(url, "new", "leads_core", 0, null, currentMetadata, newMetadata, null);
-		putLeadsMDIfNeeded(url, "new", "leads_resourceparts", 0, null, currentMetadata, newMetadata, null);
-		putLeadsMDIfNeeded(url, "new", "leads_keywords", 0, null, currentMetadata, newMetadata, editableFamilies);
+		putLeadsMDIfNeeded(url, "new", "leads_core", 0, timestamp, true, currentMetadata, newMetadata, null);
+		putLeadsMDIfNeeded(url, "new", "leads_resourceparts", 0, timestamp, true, currentMetadata, newMetadata, null);
+		putLeadsMDIfNeeded(url, "new", "leads_keywords", 0, timestamp, true, currentMetadata, newMetadata, editableFamilies);
 		
 		return newMetadata;
 	}

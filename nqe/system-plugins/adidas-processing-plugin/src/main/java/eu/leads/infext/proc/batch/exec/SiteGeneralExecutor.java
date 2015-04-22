@@ -43,7 +43,7 @@ public class SiteGeneralExecutor {
 		/////////////////////////
 		
 		// a. see if already defined
-		SortedSet<URIVersion> dirMdFamilyVersions = dataStore.getLeadsResourceMDFamily(fqdn, mapping.getProperty("leads_site"), 1, null);
+		SortedSet<URIVersion> dirMdFamilyVersions = dataStore.getLeadsResourceMDFamily(fqdn, mapping.getProperty("leads_site"), 1, null, true);
 		Map<String, Cell> dirMdFamily = null;
 		
 		boolean isKnown = false;

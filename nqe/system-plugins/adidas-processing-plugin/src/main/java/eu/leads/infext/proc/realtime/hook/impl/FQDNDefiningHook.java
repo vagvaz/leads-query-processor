@@ -16,7 +16,7 @@ public class FQDNDefiningHook extends AbstractHook {
 		
 		HashMap<String, HashMap<String, Object>> newMetadata = new HashMap<>();
 
-		putLeadsMDIfNeeded(url, "new", "leads_core", 0, null, currentMetadata, newMetadata, editableFamilies);
+		putLeadsMDIfNeeded(url, "new", "leads_core", 0, timestamp, true, currentMetadata, newMetadata, editableFamilies);
 		
 		return newMetadata;
 	}

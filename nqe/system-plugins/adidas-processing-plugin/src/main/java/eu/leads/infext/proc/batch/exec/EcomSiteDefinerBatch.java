@@ -31,7 +31,7 @@ public class EcomSiteDefinerBatch {
 		HashMap<String,Integer> pagesNoMap = new HashMap<>();
 		
 		// a. see if already evaluated as Ecom
-		SortedSet<URIVersion> dirMdFamilyVersions = dataStore.getLeadsResourceMDFamily(fqdn, mapping.getProperty("leads_urldirectory"), 1, null);
+		SortedSet<URIVersion> dirMdFamilyVersions = dataStore.getLeadsResourceMDFamily(fqdn, mapping.getProperty("leads_urldirectory"), 1, null, true);
 		
 		boolean isEcom = false;
 		boolean isKnown = false;
@@ -79,7 +79,7 @@ public class EcomSiteDefinerBatch {
 					String timestamp1 = null;
 					String timestamp2 = null;
 					
-					SortedSet<URIVersion> uriCrawlerMdFamilyVersions = dataStore.getLeadsResourceMDFamily(uri, mapping.getProperty("leads_crawler_data"), 1, null);
+					SortedSet<URIVersion> uriCrawlerMdFamilyVersions = dataStore.getLeadsResourceMDFamily(uri, mapping.getProperty("leads_crawler_data"), 1, null, true);
 					if(uriCrawlerMdFamilyVersions != null && !uriCrawlerMdFamilyVersions.isEmpty()) {
 						URIVersion uriCrawlerMdFamilyVersion = uriCrawlerMdFamilyVersions.first();
 						timestamp1 = uriCrawlerMdFamilyVersion.getTimestamp();
@@ -90,7 +90,7 @@ public class EcomSiteDefinerBatch {
 						}
 					}
 					
-					SortedSet<URIVersion> uriCoreMdFamilyVersions = dataStore.getLeadsResourceMDFamily(uri, mapping.getProperty("leads_core"), 1, null);
+					SortedSet<URIVersion> uriCoreMdFamilyVersions = dataStore.getLeadsResourceMDFamily(uri, mapping.getProperty("leads_core"), 1, null, true);
 					if(uriCoreMdFamilyVersions != null && !uriCoreMdFamilyVersions.isEmpty()) {
 						URIVersion uriCoreMdFamilyVersion = uriCoreMdFamilyVersions.first();
 						timestamp2 = uriCoreMdFamilyVersion.getTimestamp();

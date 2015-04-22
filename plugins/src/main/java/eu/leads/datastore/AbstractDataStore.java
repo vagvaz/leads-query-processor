@@ -34,7 +34,7 @@ public abstract class AbstractDataStore {
 	 * 
 	 * @return set of versions of URI family, starting with the freshest one (descending timestamp), if none - returns an empty set
 	 */
-	public abstract SortedSet<URIVersion> getLeadsResourceMDFamily(String uri, String family, int lastVersions, String beforeTimestamp);
+	public abstract SortedSet<URIVersion> getLeadsResourceMDFamily(String uri, String family, int lastVersions, String timestamp, boolean before);
 	
 	/**
 	 * Puts cell(s) of URI's family into the storage

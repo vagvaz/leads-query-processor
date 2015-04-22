@@ -46,11 +46,11 @@ public abstract class AbstractHook {
 	 * @return
 	 */
 	protected void putLeadsMDIfNeeded(String url, String versionName, String family, int versionOfInterest, 
-			String beforeTimestamp, HashMap<String, HashMap<String, Object>> currentMetadata,  
+			String timestamp, boolean exactlyTimestamp, HashMap<String, HashMap<String, Object>> currentMetadata,  
 			HashMap<String, HashMap<String, Object>> newMetadata, HashMap<String, MDFamily> editableFamilies) {
 		
 		String familyKey = versionName+":"+family;
-		int lastVersionsNeeded = 1 - versionOfInterest;
+		int lastVersionsNeeded = - versionOfInterest;
 		
 		HashMap<String, Object> newMetadataFamily = null;
 		
@@ -64,12 +64,17 @@ public abstract class AbstractHook {
 				editableFamilies.put(familyKey, mdFamily);
 			}
 			else {
+				SortedSet<URIVersion> uriVersionSet = DataStoreSingleton.getDataStore().getLeadsResourceMDFamily(url, mapping.getProperty(family), lastVersionsNeeded, timestamp, !exactlyTimestamp);
+
 				String ts = null;
-				
-				SortedSet<URIVersion> uriVersionSet = DataStoreSingleton.getDataStore().getLeadsResourceMDFamily(url, mapping.getProperty(family), lastVersionsNeeded, beforeTimestamp);
-				if(uriVersionSet.size() == lastVersionsNeeded) {
+				int versionIndex = -1;
+				if(exactlyTimestamp && uriVersionSet.size() == 1)
+					versionIndex = 0;
+				else if(!exactlyTimestamp && uriVersionSet.size() == lastVersionsNeeded)
+					versionIndex = -(1+versionOfInterest);
+				if(versionIndex >= 0) {
 					List<URIVersion> uriVersionList = new ArrayList<>(uriVersionSet);
-					URIVersion uriVersion = uriVersionList.get(-versionOfInterest);
+					URIVersion uriVersion = uriVersionList.get(versionIndex);
 					ts = uriVersion.getTimestamp();
 					for(Entry<String, Cell> e : uriVersion.getFamily().entrySet()) {
 						Cell cell = e.getValue();
@@ -80,6 +85,8 @@ public abstract class AbstractHook {
 					MDFamily mdFamily = new MDFamily(url,ts,family);
 					editableFamilies.put(familyKey, mdFamily);
 				}
+				System.out.println("Putting metadata for "+familyKey+"...");
+				System.out.println(newMetadataFamily);
 				newMetadata.put(familyKey, newMetadataFamily);
 			 }
 		}

@@ -34,15 +34,15 @@ public class PageCheckHook extends AbstractHook {
 		
 		HashMap<String, HashMap<String, Object>> newMetadata = new HashMap<>();
 		
-		putLeadsMDIfNeeded(url, "new", "leads_internal", 0, null, currentMetadata, newMetadata, editableFamilies);
-		putLeadsMDIfNeeded(url, "new", "leads_core", 0, null, currentMetadata, newMetadata, editableFamilies);
-		putLeadsMDIfNeeded(url, "previous", "leads_internal", -1, timestamp, currentMetadata, newMetadata, null);
+		putLeadsMDIfNeeded(url, "new", "leads_internal", 0, timestamp, true, currentMetadata, newMetadata, editableFamilies);
+		putLeadsMDIfNeeded(url, "new", "leads_core", 0, timestamp, true, currentMetadata, newMetadata, editableFamilies);
+		putLeadsMDIfNeeded(url, "previous", "leads_internal", -1, timestamp, false, currentMetadata, newMetadata, null);
 		
 		List<String> urlGeneralizations = LEADSUtils.getAllResourceGeneralizations(url);
 		int number = 0;
 		for(String genUrl : urlGeneralizations) {
-			putLeadsMDIfNeeded(genUrl, "general"+number, "leads_urldirectory", 0, timestamp, currentMetadata, newMetadata, null);
-			putLeadsMDIfNeeded(genUrl, "general"+number, "leads_urldirectory_ecom", 0, timestamp, currentMetadata, newMetadata, null);
+			putLeadsMDIfNeeded(genUrl, "general"+number, "leads_urldirectory", -1, timestamp, false, currentMetadata, newMetadata, null);
+			putLeadsMDIfNeeded(genUrl, "general"+number, "leads_urldirectory_ecom", -1, timestamp, false, currentMetadata, newMetadata, null);
 			number += 1;
 		}
 		

@@ -37,7 +37,7 @@ public class StdLoggerRedirect {
 			// log file max size 10K, 3 rolling files, append-on-open
 			File file = new File(dir);
 			file.mkdirs();
-			fileHandler = new FileHandler(dir+"/leads-log", 1000000, 10, append);
+			fileHandler = new FileHandler(dir+"/leads-adidas-log", 1000000, 10, append);
 			fileHandler.setFormatter(new Formatter() {
 			      public String format(LogRecord record) {
 			          return record.getLevel() + "\t" + dateFormat.format(new Date(record.getMillis())) + ":\t" + 
