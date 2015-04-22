@@ -13,9 +13,7 @@ import org.infinispan.ensemble.cache.EnsembleCache;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 //import org.apache.nutch.storage.WebPage;
 
@@ -56,7 +54,7 @@ public class ReplayTool {
       int currentCounter = 0;
       long counter = 0;
       long nocontent_counter=0;
-
+      Set<String> uniqueKeys = new HashSet<String>();
       while(true) {
          String[] prefixes = nutchDataPrefixes.split("\\|");
 
@@ -70,7 +68,7 @@ public class ReplayTool {
                   System.out.println("Exists_both... " +  nutchDataPrefix+ "-" + currentCounter + ".keys/data");
                   ObjectInputStream keyFileIS = new ObjectInputStream(new FileInputStream(keyFile));
                   ObjectInputStream dataFileIS = new ObjectInputStream(new FileInputStream(dataFile));
-                  if (keyFileIS.available() > 0) {
+                  while (keyFileIS.available() > 0) {
                      int keysize = keyFileIS.readInt();
                      byte[] key = new byte[keysize];
                      keyFileIS.readFully(key);
@@ -104,6 +102,7 @@ public class ReplayTool {
                                     webpageCache.put(webpageCache.getName() + ":" + t.getAttribute("url"), t);
                                     Thread.sleep(delay);
                                     counter++;
+                                   uniqueKeys.add(t.getAttribute("url"));
                                     if (counter % 1000 == 0)
                                        System.err.println("loaded " + counter + " tuples");
 
@@ -118,9 +117,10 @@ public class ReplayTool {
                         }
 
                      }
-                  }else{
-                     System.err.println("File"+ baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".keys"+ " No available bytes ");
                   }
+//                  else{
+//                     System.err.println("File"+ baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".keys"+ " No available bytes ");
+//                  }
                   currentCounter++;
                   keyFileIS.close();
                   dataFileIS.close();
@@ -139,7 +139,7 @@ public class ReplayTool {
                currentCounter++;
             }
          }
-         System.out.println("Finally loaded: " + counter + " tuples, no content count: " + nocontent_counter);
+         System.out.println("Finally loaded: " + counter + " tuples, no content count: " + nocontent_counter + " unique " + uniqueKeys.size());
          break;
       }
    }

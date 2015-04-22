@@ -129,7 +129,7 @@ public class DataRemoteReader {
         Query query = store.newQuery();
 //        query.setFields("content");
         query.setOffset(counter);
-        query.setLimit(batchRead);
+//        query.setLimit(batchRead);
         result = query.execute();
         while (result.next()) {
           WebPage page = result.get();
