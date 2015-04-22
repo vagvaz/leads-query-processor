@@ -55,6 +55,7 @@ public class ReplayTool {
       int currentCounter = 0;
       long counter = 0;
       long nocontent_counter=0;
+
       while(true) {
          String[] prefixes = nutchDataPrefixes.split("\\|");
 
@@ -94,16 +95,16 @@ public class ReplayTool {
                         }else {
                            if (t != null) {
                               if (page.get("content") != null) {
-                                 if (!t.hasField("body")/*t.getAttribute("body") == null*/) {
-                                    System.err.println("tuple does not have body field ");
+                                 if (t.getAttribute("body") == null) {
+                                    System.err.println("tuple has null body ");
                                     nocontent_counter++;
                                  }else {
                                     webpageCache.put(webpageCache.getName() + ":" + t.getAttribute("url"), t);
                                     counter++;
-                                    if (counter % 1000 == 0) {
+//                                    if (counter % 1000 == 0) {
                                        System.err.println("loaded " + counter + " tuples");
                                        Thread.sleep(delay);
-                                    }
+//                                    }
                                  }
                               } else {
                                  nocontent_counter++;
@@ -126,7 +127,8 @@ public class ReplayTool {
 
                }
 
-               System.out.println("read " + currentCounter + " files");
+               System.out.println("read " + currentCounter + " files and rejected " + nocontent_counter + ""
+                                    + " for having null body" );
                currentCounter = 0;
 
             } catch (Exception e) {
