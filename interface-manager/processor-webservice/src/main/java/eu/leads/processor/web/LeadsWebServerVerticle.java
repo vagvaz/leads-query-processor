@@ -5,8 +5,10 @@ import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.Node;
 import org.vertx.java.core.Handler;
+import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.http.RouteMatcher;
+import org.vertx.java.core.http.ServerWebSocket;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Verticle;
@@ -24,21 +26,19 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
     public void start() {
 
         LQPConfiguration.initialize(true);
-      id = "webservice-" + LQPConfiguration.getInstance().getHostname() + container.config()
-                                                                            .getNumber("port",
-                                                                                        8080)
-                                                                            .toString();
-
-      container.logger().info("Leads Processor REST service is starting..");
+        id = "webservice-" + LQPConfiguration.getInstance()
+                .getHostname() + container.config()
+                .getNumber("port", 8080)
+                .toString();
+        container.logger().info("Leads Processor REST service is starting..");
         com = new DefaultNode();
-
         log = container.logger();
         com.initialize(id, "webservice", null, this, null, getVertx());
         JsonObject config = container.config();
         RouteMatcher matcher = new RouteMatcher();
-
         //      startEmbeddedCacheManager(configFile);
         //      startLeadsWebModule("propertiesFile");
+        MonitorQueryResultsHandler monitorQueryHandler = new MonitorQueryResultsHandler(com,log);
         GetObjectHandler getObjectHandler = new GetObjectHandler(com, log);
         PutObjectHandler putObjectHandler = new PutObjectHandler(com, log);
         GetQueryStatusHandler getQueryStatusHandler = new GetQueryStatusHandler(com, log);
@@ -57,6 +57,7 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         Handler<HttpServerRequest> privacyPointQueryHandler = new PrivacyPointQueryHandler(com,log);
         Handler<HttpServerRequest> executeMRHandler = new ExecuteMRHandler(com,log);
         Handler<HttpServerRequest> completedMRHandler = new CompletedMRHandler(com,log);
+
         //object
         failHandler = new Handler<HttpServerRequest>() {
             @Override
@@ -69,49 +70,77 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
                 request.response().end(object.toString());
             }
         };
-
         matcher.noMatch(failHandler);
         matcher.post("/rest/object/get/", getObjectHandler);
         matcher.post("/rest/object/put/", putObjectHandler);
         matcher.post("/rest/data/upload/",uploadDataHandler);
         matcher.post("/rest/data/upload",uploadDataHandler);
-        matcher.post("/rest/data/submit/plugin",submitPluginHandler);
-        matcher.post("/rest/internal/executemr",executeMRHandler);
+        matcher.post("/rest/data/submit/plugin", submitPluginHandler);
+        matcher.post("/rest/internal/executemr", executeMRHandler);
         matcher.post("/rest/internal/completedmr",completedMRHandler);
-        //
-        //      //query   [a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+
+        //query   [a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+
         matcher.get("/rest/query/status/:id", getQueryStatusHandler);
-        //      //id:[a-zA-Z0-9]+@[a-zA-Z0-9]+}/{min:[0-9]+}/{max:[0-9]+}
+        // id:[a-zA-Z0-9]+@[a-zA-Z0-9]+}/{min:[0-9]+}/{max:[0-9]+}
         matcher.get("/rest/query/results/:id/min/:min/max/:max", getResultsHandler);
         matcher.post("/rest/query/submit", submitQueryHandler);
         matcher.post("/rest/workflow/submit", submitWorkflowHandler);
         matcher.post("/rest/data/submit", submitDataHandler);
         matcher.post("/rest/query/wgs/:type", submitSpecialCallHandler);
-        //
-
-//        matcher.post("/rest/deploy/plugin/:pluginname/:cachename", deployPluginHandler);
-//        matcher.post("/rest/deploy/plugin/:pluginname/:cachename", deployPluginHandler);
+        //        matcher.post("/rest/deploy/plugin/:pluginname/:cachename", deployPluginHandler);
+        //        matcher.post("/rest/deploy/plugin/:pluginname/:cachename", deployPluginHandler);
         matcher.post("/rest/undeploy/plugin/", undeployPluginHandler);
         matcher.post("/rest/deploy/plugin/", deployPluginHandler);
-
-
         matcher.get("/rest/checkOnline", new Handler<HttpServerRequest>() {
             @Override
             public void handle(HttpServerRequest httpServerRequest) {
                 httpServerRequest.response().setStatusCode(200);
                 httpServerRequest.response()
-                    .putHeader(WebStrings.CONTENT_TYPE, WebStrings.TEXT_HTML);
+                        .putHeader(WebStrings.CONTENT_TYPE, WebStrings.TEXT_HTML);
                 httpServerRequest.response()
-                    .end("<html><h1>Leads Query Processor REST Service</h1> <p>Yes I am online</p></html>");
+                        .end("<html><h1>Leads Query Processor REST Service</h1> <p>Yes I am online</p></html>");
 
             }
         });
-       matcher.post("/rest/upload/encData",uploadEncryptedData);
-       matcher.post("/rest/query/encrypted/ppq",privacyPointQueryHandler);
-        vertx.createHttpServer().requestHandler(matcher)
-            .listen((Integer) config.getNumber("port", 8080));
+        matcher.post("/rest/upload/encData", uploadEncryptedData);
+        matcher.post("/rest/query/encrypted/ppq",privacyPointQueryHandler);
+        matcher.post("/rest/websocket/getContinuousResults/:id", monitorQueryHandler);
 
-        container.logger().info("Webserver started");
+        System.out.println("Create Http Server...");
+        vertx.createHttpServer()
+                .requestHandler(matcher)
+                .websocketHandler(new Handler<ServerWebSocket>() {
+
+
+                    public void handle(final ServerWebSocket ws) {
+
+                        if (ws.path().equals("/myapp")) {
+
+                            ws.dataHandler(new Handler<Buffer>() {
+                                public void handle(Buffer data) {
+                                    System.out.println("remote add : " + ws.remoteAddress().toString());
+                                    System.out.println("Receiving " + data);
+                                    ws.writeTextFrame("Server speaking: I am sendind you the same data back to you: "+data);
+                                }
+                            });
+
+                            ws.closeHandler(new Handler<Void>() {
+                                @Override
+                                public void handle(final Void event) {
+                                    log.info("un-registering connection with id: " + ws.remoteAddress().toString());
+                                }
+                            });
+
+                        } else {
+                            ws.reject();
+                        }
+                    }
+
+
+                })
+                .listen((Integer) config.getNumber("port", 8080));
+
+
+        container.logger().info("Web Server listening at port 8080");
     }
 
     @Override

@@ -39,7 +39,7 @@ public class WebServiceClient {
   private static URL address;
   private static Vertx vertx;
   private static PlatformManager platformManager;
-  HttpClient httpClient;
+  private static HttpClient httpClient;
 
   public static boolean initialize(String url, int p) throws MalformedURLException {
     host = url;
@@ -206,6 +206,34 @@ public class WebServiceClient {
     result = aresult.getStatus().equals("SUCCESS");
     return result;
   }
+
+
+
+
+
+  // start
+  public static boolean monitorQueryResults(int queryId, String username, int websocketId) throws IOException {
+    boolean result = false;
+    // queryId,username,websocketId
+    JsonObject results = new JsonObject();
+    results.putNumber("queryId", queryId);
+    results.putString("username", username);
+    results.putNumber("websocketId", websocketId);
+    System.out.println("URL:"+host + ":" + port + prefix + "websocket/getContinuousResults/"+websocketId);
+    address = new URL(host + ":" + port + prefix + "websocket/getContinuousResults/"+websocketId);
+    HttpURLConnection connection = (HttpURLConnection) address.openConnection();
+    connection = setUp(connection, "POST", MediaType.APPLICATION_JSON, true, true);
+    setBody(connection, results);
+    String response = getResult(connection);
+    ActionResult aresult = mapper.readValue(response, ActionResult.class);
+    result = aresult.getStatus().equals("SUCCESS");
+    return result;
+  }
+  // end
+
+
+
+
 
   public static QueryStatus getQueryStatus(String id) throws IOException {
     QueryStatus result = new QueryStatus();
