@@ -115,15 +115,18 @@ public class DataRemoteReader {
     }
 
     store.createSchema();
-    Query query = store.newQuery();
 
+    long nullContentCounter = 0;
     int batchRead=100;
     try {
       Result<String,WebPage> result ;
-      query.setLimit(batchRead);
+//      query.setLimit(batchRead);
       do {
         small_count= 0;
+        Query query = store.newQuery();
+//        query.setFields("content");
         query.setOffset(counter);
+        query.setLimit(batchRead);
         result = query.execute();
         while (result.next()) {
           WebPage page = result.get();
@@ -138,17 +141,25 @@ public class DataRemoteReader {
 //          }
 
           }
-          if (record.get("content") != null)
-            System.out.println("content not null");
+          if(page.getContent() == null)
+          {
+            nullContentCounter++;
+//            System.out.println("read page with null content "+ nullContentCounter + " " + page.getKey());
+          }
 
-          outputToFile(record.get(0).toString().getBytes(), record, nutchKeysWriter, nutchDataWriter);
+
+          if (record.get("content") != null) {
+            System.out.println("content not null " + record.get("key"));
+            outputToFile(record.get(0).toString().getBytes(), record, nutchKeysWriter, nutchDataWriter);
+          }
+
           small_count++;
           if ((counter+small_count) % batchRead == 0)
             System.out.println("Stored " + counter + " tuples into files");
 
         }
         counter+=small_count;
-
+        System.out.println("read " + nullContentCounter + " with null content");
       }while(small_count>=batchRead);
       System.out.println("Totally Stored " + counter + " tuples into files");
 

@@ -55,6 +55,7 @@ public class ReplayTool {
       int currentCounter = 0;
       long counter = 0;
       long nocontent_counter=0;
+
       while(true) {
          String[] prefixes = nutchDataPrefixes.split("\\|");
 
@@ -84,7 +85,7 @@ public class ReplayTool {
                      GenericData.Record page = new GenericData.Record(schema);
                      reader.read(page, decoder);
 //
-                     System.err.println("Read key: " + new String(key) + "\n" + "value " + page.toString());
+ //                    System.err.println("Read key: " + new String(key) + "\n" + "value " + page.toString());
 //
                      if (load) {
                         Tuple t = nutchTransformer.transform(page);
@@ -94,11 +95,11 @@ public class ReplayTool {
                         }else {
                            if (t != null) {
                               if (page.get("content") != null) {
-                                 if (!t.hasField("body")/*t.getAttribute("body") == null*/) {
-                                    System.err.println("tuple does not have body field ");
+                                 if (t.getAttribute("body") == null) {
+                                    System.err.println("tuple has null body ");
                                     nocontent_counter++;
                                  }else {
-                                    System.err.println("Put to cache");
+                                   // System.err.println("Put to cache");
                                     webpageCache.put(webpageCache.getName() + ":" + t.getAttribute("url"), t);
                                     Thread.sleep(delay);
                                     counter++;
@@ -127,7 +128,8 @@ public class ReplayTool {
 
                }
 
-               System.out.println("read " + currentCounter + " files");
+               System.out.println("read " + currentCounter + " files and rejected " + nocontent_counter + ""
+                                    + " for having null body" );
                currentCounter = 0;
 
             } catch (Exception e) {
