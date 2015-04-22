@@ -39,6 +39,7 @@ public class ReplayTool {
       this.ensembleString = ensembleString;
       LQPConfiguration.initialize();
       emanager = new EnsembleCacheManager((ensembleString));
+     emanager.start();
       nutchCache = emanager.getCache("WebPage");
       webpageCache = emanager.getCache("default.webpages");
       List<String> mappings =    LQPConfiguration.getInstance().getConfiguration().getList("nutch.mappings");
@@ -69,7 +70,7 @@ public class ReplayTool {
                   System.out.println("Exists_both... " +  nutchDataPrefix+ "-" + currentCounter + ".keys/data");
                   ObjectInputStream keyFileIS = new ObjectInputStream(new FileInputStream(keyFile));
                   ObjectInputStream dataFileIS = new ObjectInputStream(new FileInputStream(dataFile));
-                  if (keyFileIS.available() > 0) {
+                  while (keyFileIS.available() > 0) {
                      int keysize = keyFileIS.readInt();
                      byte[] key = new byte[keysize];
                      keyFileIS.readFully(key);
@@ -115,10 +116,12 @@ public class ReplayTool {
                               nocontent_counter++;
                            }
                         }
+
                      }
-                  }else{
-                     System.err.println("File"+ baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".keys"+ " No available bytes ");
                   }
+//                  else{
+//                     System.err.println("File"+ baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".keys"+ " No available bytes ");
+//                  }
                   currentCounter++;
                   keyFileIS.close();
                   dataFileIS.close();

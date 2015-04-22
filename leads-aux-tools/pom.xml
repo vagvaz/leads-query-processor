@@ -19,6 +19,7 @@
        <module>load-csv</module>
       <module>wp4-scheduler-client</module>
       <module>data-replay</module>
+<!--       <module>data-reader</module> -->
       <module>plugin-deployer</module>
    </modules>
     <dependencies>

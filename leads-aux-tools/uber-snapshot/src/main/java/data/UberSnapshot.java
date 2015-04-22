@@ -1,7 +1,6 @@
 package data;
 
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
-import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
@@ -19,7 +18,8 @@ import java.util.Map;
 /**
  * Created by vagvaz on 10/29/14.
  */
-public class UberSnapshot {
+public class
+  UberSnapshot {
 
    static RemoteCacheManager manager;
    static InfinispanManager imanager;
@@ -31,8 +31,7 @@ public class UberSnapshot {
          System.exit(-1);
       }
       LQPConfiguration.initialize();
-      if(args.length == 2)
-         imanager = InfinispanClusterSingleton.getInstance().getManager();
+
       if(args[0].startsWith("l")){
          loadData(args);
       }
@@ -174,7 +173,13 @@ public class UberSnapshot {
       if(args.length > 2 ){
          loadDataWithRemote(args);
       }else{
-         loadDataEmbedded(args);
+        String[] newArgs = new String[4];
+        newArgs[0] = args[0];
+        newArgs[1] = args[1];
+        newArgs[2] = LQPConfiguration.getInstance().getConfiguration().getString("node.ip");
+        newArgs[3] = "11222";
+        loadDataWithRemote(newArgs);
+//         loadDataEmbedded(args);
       }
       System.out.println("loading fin");
 

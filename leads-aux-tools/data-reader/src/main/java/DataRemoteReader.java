@@ -54,6 +54,7 @@ public class DataRemoteReader {
 
   }
 
+
   public long storeToRemoteCache(String ensembleString,boolean distributed, long delay ) {
     EnsembleCacheManager manager = new EnsembleCacheManager(ensembleString);
     EnsembleCache cache = null;
@@ -68,26 +69,27 @@ public class DataRemoteReader {
 //    query.setLimit(1);
     query.setOffset(0);
 //    query.setFields("content");
-    Result<String, WebPage> result = query.execute();
+    Result<String,WebPage> result = query.execute();
     long counter = 0;
 
     try {
-      while (result.next()) {
+      while(result.next()){
         WebPage page = result.get();
         GenericData.Record record = new GenericData.Record(page.getSchema());
-        for (int i = 0; i < page.getFieldsCount(); i++) {
-          record.put(i, page.get(i));
+        for(int i = 0; i < page.getFieldsCount();i++){
+          record.put(i,page.get(i));
 
         }
         Tuple tuple = transformer.transform(record);
-        cache.put(cache.getName() + ":" + tuple.getAttribute("url"), tuple);
+        cache.put(cache.getName()+":"+tuple.getAttribute("url"),tuple);
         System.out.println("t " + tuple.getAttribute("url"));
         Thread.sleep(delay);
         counter++;
-        if (counter % 100 == 0) {
+        if(counter % 100 == 0){
           System.out.println("Loaded " + counter + " tuples");
         }
-      }
+     }
+
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -95,7 +97,8 @@ public class DataRemoteReader {
   }
 
   public long storeToFile(String path, String baseName){
-    int  counter = 0;int small_count=0;
+    int  counter = 0;
+    int small_count=0;
     FileOutputStream nutchData = null;
     FileOutputStream nutchKeys = null;
     ObjectOutputStream nutchKeysWriter = null;
@@ -126,7 +129,7 @@ public class DataRemoteReader {
         Query query = store.newQuery();
 //        query.setFields("content");
         query.setOffset(counter);
-        query.setLimit(batchRead);
+//        query.setLimit(batchRead);
         result = query.execute();
         while (result.next()) {
           WebPage page = result.get();
