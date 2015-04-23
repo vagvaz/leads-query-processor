@@ -1,6 +1,0 @@
-* Testing of tajo module
-check test database structure at ServerTest.java, TestsetUp()
-run first the catalog server 
-then run the tajo module
-enter sql
-results, output and optimizes.json
