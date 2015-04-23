@@ -33,7 +33,7 @@ public class StdLoggerRedirect {
 			logManager.reset();
 			
 			final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
-			
+		
 			// log file max size 10K, 3 rolling files, append-on-open
 			File file = new File(dir);
 			file.mkdirs();

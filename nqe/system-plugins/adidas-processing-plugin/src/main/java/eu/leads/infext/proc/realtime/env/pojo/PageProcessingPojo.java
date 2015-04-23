@@ -52,10 +52,10 @@ public class PageProcessingPojo extends AbstractExecutionPojo {
 			/* Process */
 			System.out.println("Processing...");
 			for(AbstractProcessing proc : processingQueue) {
-				long start = System.currentTimeMillis();
+				/* TIME */ long start = System.currentTimeMillis();
 				proc.process(uri, timestamp, metadata, editableFamilies);
-				double duration   = (System.currentTimeMillis()-start)/1000.0;
-				System.err.println("Execution time of "+proc.getHookName()+": "+duration+" s");
+				/* TIME */ double duration   = (System.currentTimeMillis()-start)/1000.0;
+				/* TIME */ System.err.println("+++ Execution time of "+proc.getHookName()+": "+duration+" s");
 			}
 			
 			/* Store */

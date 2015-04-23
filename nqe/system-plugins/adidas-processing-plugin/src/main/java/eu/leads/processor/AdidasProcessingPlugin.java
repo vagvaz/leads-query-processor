@@ -52,7 +52,7 @@ public class AdidasProcessingPlugin implements PluginInterface {
 	      this.configuration = config;
 	      this.manager = manager;
 	      
-	      setLogging(configuration);
+//	      setLogging(configuration);
 	      
 	      System.out.println("%%%%% Initializing the plugin");
 	
@@ -107,8 +107,14 @@ public class AdidasProcessingPlugin implements PluginInterface {
 
    @Override
    public void created(Object key, Object value, Cache<Object, Object> cache) {
-	   System.out.println("XXXcreated()");
+	  //
+	  /* TIME */ Long start = System.currentTimeMillis();
+	  //
       processTuple(key,value);
+	  //
+      /* TIME */ Long finish = System.currentTimeMillis();
+	  /* TIME */ System.err.println("+++ Plugin.created() time for "+key+": "+((finish-start)/1000.0)+" s");
+	  //      
    }
 
    /**
@@ -119,6 +125,7 @@ public class AdidasProcessingPlugin implements PluginInterface {
 //	   try {
 		   System.out.println("######## processTuple YEAH");
 		   System.out.println("CONTENT:\n"+value);
+
 		   String [] tableUri = key.toString().split(":", 2);
 		   String table = tableUri[0];
 		   String uri = LEADSUtils.standardUrlToNutchUrl(tableUri[1]);
@@ -133,7 +140,7 @@ public class AdidasProcessingPlugin implements PluginInterface {
 			// Here Do the heavy processing stuff
 			System.out.println("########:"+getClassName().toString() + " calls a processing POJO on a key " + key);
 			pageProcessingPojo.execute(uri, timestamp, table, cacheColumns);
-			
+
 /*			// ZEROMQ PYTHON CALL CHECK
  * 			PythonQueueCall pythonCall = new PythonQueueCall();
  *			pythonCall.call("eu.leads.infext.python.CLAPI.helloworld_clinterface","hello","world");

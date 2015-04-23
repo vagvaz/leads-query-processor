@@ -57,7 +57,7 @@ public class LeadsQueryInterface {
     		e.printStackTrace();
     	}
     	
-    	/* TIME */ System.err.println("LeadsQueryInterface.sendQuery() time: "+((System.currentTimeMillis()-start)/1000.0)+" s");
+    	/* TIME */ System.err.println("+++ LeadsQueryInterface.sendQuery() time: "+((System.currentTimeMillis()-start)/1000.0)+" s");
     	
         return res;
 
