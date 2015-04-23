@@ -18,7 +18,7 @@ public class PluginTest {
 	
 	public static void main(String[] args) throws ConfigurationException, UnsupportedEncodingException, IOException {
 		Configuration config = new XMLConfiguration(
-				"/leads/workm30/leads-query-processor/nqe/system-plugins/adidas-processing-plugin/adidas-processing-plugin-conf.xml");
+				"/home/ubuntu/.adidas/test/leads-query-processor/nqe/system-plugins/adidas-processing-plugin/adidas-processing-plugin-conf.xml");
 		
 		AdidasProcessingPlugin plugin = new AdidasProcessingPlugin();
 		plugin.initialize(config, null);

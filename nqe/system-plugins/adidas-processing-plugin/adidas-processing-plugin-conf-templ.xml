@@ -5,12 +5,12 @@
 	<host>http://5.147.254.199</host>
 	<port>8080</port>
 	
-	<loggingDir>$LEADS_HOME/.adidas/logs</loggingDir>
-	<resources_path>$LEADS_ADIDAS_RESOURCES</resources_path>
-	<storagePropertiesDir>$LEADS_ADIDAS_PROPERTIES</storagePropertiesDir>
+	<loggingDir>${env:LEADS_ADIDAS_LOGS}</loggingDir>
+	<resources_path>${env:LEADS_ADIDAS_RESOURCES}</resources_path>
+	<storagePropertiesDir>${env:LEADS_ADIDAS_PROPERTIES}</storagePropertiesDir>
 	
 <!-- 	<pythonPath>/home/nonlinear/.local/lib/python2.7/site-packages:/local/lib/python2.7/dist-packages:/home/nonlinear/workspace/leads-query-processor-plugins/plugin-examples/adidas-processing-plugin/src/main/python</pythonPath> -->
-	<pythonPath>$LEADS_ADIDAS_PYTHON</pythonPath>
+	<pythonPath>${env:LEADS_ADIDAS_PYTHON}</pythonPath>
 	<pythonCLIPackage>eu.leads.infext.python.CLAPI</pythonCLIPackage>
 	<pythonFileDirectory>/tmp/</pythonFileDirectory>
 	<pythonFileBasename>leadsjavapy-</pythonFileBasename>
