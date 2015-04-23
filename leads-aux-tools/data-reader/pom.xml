@@ -14,7 +14,33 @@
       <avro.version>1.7.4</avro.version>
       <nutch.version>2.2</nutch.version>
    </properties>
+   <repositories>
+      <repository>
+         <id>maven-restlet</id>
+         <name>Public online Restlet repository</name>
+         <url>http://maven.restlet.com</url>
+      </repository>
+      <repository>
+         <id>redhat-earlyaccess-repository-group</id>
+         <name>Red Hat early access repository</name>
+         <url>http://maven.repository.redhat.com/earlyaccess/all/</url>
+      </repository>
+      <repository>
+         <id>jboss-public-repository-group</id>
+         <name>JBoss Public Maven Repository Group</name>
+         <url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+         <layout>default</layout>
+         <releases>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+         </releases>
+         <snapshots>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+         </snapshots>
+      </repository>
 
+   </repositories>
 
    <artifactId>data-reader</artifactId>
    <build>
@@ -41,6 +67,12 @@
 
 
    <dependencies>
+      <dependency>
+         <groupId>net.sourceforge.nekohtml</groupId>
+         <artifactId>nekohtml</artifactId>
+         <version>1.9.12</version>
+      </dependency>
+
 
       <dependency>
          <groupId>org.apache.gora</groupId>

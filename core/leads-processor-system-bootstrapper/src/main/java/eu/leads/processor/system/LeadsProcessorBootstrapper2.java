@@ -72,7 +72,7 @@ public class LeadsProcessorBootstrapper2 {
         try {
             xmlConfiguration = new XMLConfiguration(filename);
         } catch (ConfigurationException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             System.err.println("Unable to load configuration, Please check the file: " + filename);
             System.exit(-1);
         }

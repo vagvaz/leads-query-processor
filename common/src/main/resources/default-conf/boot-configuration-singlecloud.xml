@@ -6,7 +6,7 @@
 		<user>leads</user>
 		<prefix>path</prefix>
 	</hdfs>
-	<scheduler>chedulerip</scheduler>
+	<scheduler>schedulerip</scheduler>
 	<deploymentType>singlecloud</deploymentType>
 	<adresses>localhost</adresses> <!--obtain, localhost, 5.147.254.198-->
 	<startUpDelay>20</startUpDelay> <!--delay between modules startup (seconds) -->

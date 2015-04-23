@@ -9,9 +9,8 @@ public class Replay {
             System.exit(0);
         }
         int delay = 1000;
-        if (args.length < 5)
+        if (args.length > 4)
             delay = Integer.parseInt(args[4]);
-
 
         System.out.println("Delay per put " + delay);
         ReplayTool tool = new ReplayTool(args[1]/*"/tmp/crawler-snapshot/"*/, args[3]/*"catalog-worker-default.webpages"*/, args[2]/*"catalog-worker-nutchWebBackup|planner-nutchWebBackup|imanager-nutchWebBackup|deployer-nutchWebBackup|nqe-nutchWebBackup"*/, args[0] + ":11222");
