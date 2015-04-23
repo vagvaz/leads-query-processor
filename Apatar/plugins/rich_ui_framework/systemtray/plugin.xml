@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="com.apatar.systemtray" version="0.0.1" class="com.apatar.systemtray.Tray">
+	<requires>
+		<import plugin-id="com.apatar.core"/>
+		<import plugin-id="com.apatar.thirdparty"/>
+		<import plugin-id="com.apatar.ui" />
+	</requires>
+
+	<runtime>
+	    <library id="core" path="bin/" type="code">
+	        <export prefix="*"/>
+	    </library>
+
+	    <library id="looks-2.0.1" path="lib/looks-2.0.1.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="jcalendar-1.3.2" path="lib/jcalendar-1.3.2.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+
+	</runtime>
+
+	<extension-point id="Node">
+	    <parameter-def id="class"/>
+   	</extension-point>
+</plugin>

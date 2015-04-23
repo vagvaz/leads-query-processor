@@ -1,0 +1,112 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="com.apatar.core" version="0.0.1" class="com.apatar.core.FunctionsPlugin">
+
+	<requires>
+		<import plugin-id="com.apatar.ui"/>
+		<import plugin-id="com.apatar.systemtray"/>
+		<import plugin-id="com.apatar.thirdparty"/>
+		<import plugin-id="com.apatar.functions"/>
+	</requires>
+
+	<runtime>
+	    <library id="core" path="bin/" type="code">
+	        <export prefix="*"/>
+	    </library>
+
+	    <library id="lib_oracle" path="lib/ojdbc14.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="lib_jdom" path="lib/jdom.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="lib_hsqldb" path="lib/hsqldb.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="lib_derby" path="lib/derby.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="lib_csvjdbc" path="lib/csvjdbc.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+
+	    <library id="xercesImpl" path="lib/xercesImpl.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="ostermillerutils" path="lib/ostermillerutils_1_06_01.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+
+	    <library id="jdic" path="lib/jdic.jar" type="code">
+		<export prefix="*"/>
+            </library>
+
+
+	    <library id="lib_jdic_stub" path="lib/jdic_stub.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+
+		<!-- This is web-services jars -->
+	    <library id="jaxrpc" path="lib/jaxrpc.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="axis" path="lib/axis.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="commons-discovery-0.2" path="lib/commons-discovery-0.2.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="activation" path="lib/activation.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="mail" path="lib/mail.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="saaj" path="lib/saaj.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="wsdl4j-1.5.1" path="lib/wsdl4j-1.5.1.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="ibmpkcs" path="lib/ibmpkcs.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="xmlrpc-2.0" path="lib/xmlrpc-2.0.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="jaxen-core" path="lib/jaxen-core.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="jaxen-jdom" path="lib/jaxen-jdom.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	    <library id="saxpath" path="lib/saxpath.jar" type="code">
+	        <export prefix="*"/>
+	    </library>
+	</runtime>
+
+    <extension-point id="functionFactory">
+	    <parameter-def id="classFunction" />
+    </extension-point>
+
+    <extension-point id="functionConstFactory">
+	    <parameter-def id="classFunction" />
+    </extension-point>
+
+    <extension-point id="otherFunctionFactory">
+        <parameter-def id="classNode" />
+	    <parameter-def id="classFunction" />
+    </extension-point>
+
+    <extension-point id="transformer">
+		<parameter-def id="class" />
+    </extension-point>
+
+	<extension-point id="Node">
+	    <parameter-def id="class"/>
+   	</extension-point>
+
+	<extension plugin-id="com.apatar.core" point-id="Node" id="ColumnNode">
+		<parameter id="class" value="com.apatar.core.ColumnNodeFactory"/>
+	</extension>
+</plugin>
