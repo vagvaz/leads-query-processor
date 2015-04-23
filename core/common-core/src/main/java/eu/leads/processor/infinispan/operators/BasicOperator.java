@@ -72,11 +72,11 @@ public abstract class BasicOperator extends Thread implements Operator{
     this.log = log;
     this.action = action;
     this.conf = action.getData().getObject("operator").getObject("configuration");
-    isRemote = action.getData().containsField("remote");
+    isRemote = action.asJsonObject().containsField("remote");
     if(isRemote){
 
-      executeOnlyMap = action.getData().containsField("map");
-      executeOnlyReduce = action.getData().containsField("reduce");
+      executeOnlyMap = action.asJsonObject().containsField("map");
+      executeOnlyReduce = action.asJsonObject().containsField("reduce");
       System.err.println("IS REMOTE TRUE " + executeOnlyMap + " " + executeOnlyReduce);
       log.error("IS REMOTE TRUE " + executeOnlyMap + " " + executeOnlyReduce);
     }
@@ -262,7 +262,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       com.sendTo(action.getData().getString("owner"),action.asJsonObject());
     else
       System.err.println("PROBLEM Uninitialized com");
-//    updateStatistics(inputCache,null,outputCache);
+    updateStatistics(inputCache,null,outputCache);
   }
 
   @Override
@@ -296,8 +296,15 @@ public abstract class BasicOperator extends Thread implements Operator{
       inputSize += input1.size();
     if(input2 != null)
       inputSize += input2.size();
-    if(outputSize != 0){
+    if(output != null){
       outputSize = outputCache.size();
+    }
+    else{
+      outputCache = (BasicCache) manager.getPersisentCache(getOutput());
+      outputSize = outputCache.size();
+    }
+    if(outputSize == 0){
+      outputSize =1;
     }
     System.out.println("In#: " + inputSize + " Out#:" + outputSize + " Execution time: " + (endTime - startTime) / 1000.0 + " s");
     updateStatisticsCache(inputSize, outputSize, (endTime - startTime));
@@ -371,6 +378,9 @@ public abstract class BasicOperator extends Thread implements Operator{
     if(executeOnlyMap) {
       for (String mc : getMicroCloudsFromOpSched()) {
         pendingMMC.add(mc);
+      }
+      if(pendingMMC.contains(currentCluster)){
+        pendingMMC.add(currentCluster);
       }
     }
   }
@@ -448,9 +458,14 @@ public abstract class BasicOperator extends Thread implements Operator{
   public void executeMap(){
 
     subscribeToMapActions(pendingMMC);
-    for(String mc : pendingMMC){
-      if(!mc.equals(currentCluster)){
-        sendRemoteRequest(mc,true);
+    if(!isRemote) {
+      for (String mc : pendingMMC) {
+        if (!mc.equals(currentCluster)) {
+          sendRemoteRequest(mc, true);
+        }
+        else{
+          sendRemoteRequest(mc,true);
+        }
       }
     }
 
@@ -541,11 +556,15 @@ public abstract class BasicOperator extends Thread implements Operator{
 
   public void subscribeToMapActions(Set<String> pendingMMC) {
     final boolean[] registered = {false};
+    //TODO VAGVAZ
+    if(isRemote)
+      return;
     synchronized (rmcMutex) {
       com.subscribe("execution." + com.getId() + "." + action.getId(), handler, new Callable() {
         @Override
         public Object call() throws Exception {
           synchronized (rmcMutex) {
+            Thread.sleep(5000);
             registered[0] = true;
             rmcMutex.notifyAll();
           }
@@ -569,6 +588,9 @@ public abstract class BasicOperator extends Thread implements Operator{
   }
   @Override
   public void localExecuteMap(){
+
+    if (!isRemote)
+      return;
 
     if(mapperCallable != null) {
       if (inputCache.size() == 0) {
@@ -658,6 +680,9 @@ public abstract class BasicOperator extends Thread implements Operator{
 
   @Override
   public void localExecuteReduce(){
+    if(!isRemote){
+      return;
+    }
     if(reducerCallable != null) {
       DistributedExecutorService des = new DefaultExecutorService(reduceInputCache);
      setReducerCallableEnsembleHost();
@@ -732,9 +757,11 @@ public abstract class BasicOperator extends Thread implements Operator{
     mcResults = new HashMap<>();
     pendingMMC.addAll(pendingRMC);
     //      subscribeToMapActions(pendingMMC);
-    for(String mc : pendingMMC){
-      if(!mc.equals(currentCluster)){
-        sendRemoteRequest(mc,false);
+    if(!isRemote) {
+      for (String mc : pendingMMC) {
+        if (!mc.equals(currentCluster)) {
+          sendRemoteRequest(mc, false);
+        }
       }
     }
 

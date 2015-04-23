@@ -70,17 +70,18 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
                        String coordinator = action.asJsonObject().getString("coordinator");
                        replyAction.getData().putString("microcloud",currentCluster); //reduncdany to speed
                        // up debuggin
-                       replyAction.getData().getObject("data").putString("microcloud",currentCluster);
+                       replyAction.getData().putString("microcloud",currentCluster);
                        replyAction.getData().putString("STATUS","SUCCESS");
-                       replyAction.getData().getObject("data").putString("STATUS","SUCCESS");
+                       replyAction.getData().putString("replyGroup",action.asJsonObject().getString("replyGroup"));
+
                        String webaddress = getURIFromGlobal(coordinator);
                        try {
                          WebServiceClient.completeMapReduce(replyAction.asJsonObject(),webaddress);
                        } catch (IOException e) {
                          e.printStackTrace();
                        }
-                       System.err.println("Remote DEPLOY of " + action.getData().getObject("operator").getObject
-                                                                                                         ("configuration").toString() + " was successful");
+//                       System.err.println("Remote DEPLOY of " + action.getData().getObject("operator").getObject
+//                                                                                                         ("configuration").toString() + " was successful");
                        log.error("Remote DEPLOY of " + action.getData().getObject("operator").getObject
                                                                                                 ("configuration").toString() + " was successful");
                      }

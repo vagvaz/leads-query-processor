@@ -14,9 +14,9 @@ public class TestDeploy {
     LQPConfiguration.initialize();
     Marshaller Tmarshaller = new TupleMarshaller();
     EnsembleCacheManager manager = new EnsembleCacheManager(LQPConfiguration.getInstance()
-                                                              .getConfiguration().getString("node.ip")+":11222",Tmarshaller);
+                                                              .getConfiguration().getString("node.ip")+":11222");//,Tmarshaller);
     EnsembleCache web  = manager.getCache("default.webpages");
-    EnsembleCache myCache = manager.getCache("mycache");
+    EnsembleCache myCache = manager.getCache("defaultCache");
     myargs[0] = "/home/vagvaz/test.properties";
     PluginDeployer.main(myargs);
     try {
