@@ -344,14 +344,14 @@ public class ClusterInfinispanManager implements InfinispanManager {
       server = new HotRodServer();
       HotRodServerConfigurationBuilder serverConfigurationBuilder =
               new HotRodServerConfigurationBuilder();
-      serverConfigurationBuilder.host(localhost).port(serverPort).defaultCacheName("defaultCache");
+      serverConfigurationBuilder.host(localhost).port(serverPort).defaultCacheName(manager.getCache().getName());
       //                 .keyValueFilterFactory("leads-processor-filter-factory",new LeadsProcessorKeyValueFilterFactory(manager))
       //                 .converterFactory("leads-processor-converter-factory",new LeadsProcessorConverterFactory());
 
       try {
 //       server = TestHelper.startHotRodServer(manager);
 
-        server.start(serverConfigurationBuilder.build(),targetManager);
+        server.start(serverConfigurationBuilder.build(),manager);
         server.addCacheEventConverterFactory("leads-processor-converter-factory", new LeadsProcessorConverterFactory());
         server.addCacheEventFilterFactory("leads-processor-filter-factory", new
                                                                                     LeadsProcessorKeyValueFilterFactory(manager));
