@@ -42,8 +42,16 @@ public class QueriesTest {
 //				 + "VALUES ('abd', 125, 'en', NULL, NULL, NULL, NULL, 2.0, NULL, 1.0);");
 		
 		QueryResults rs = LeadsQueryInterface.sendQuery(
-//				"INSERT INTO default.adidas_keywords (keywords) VALUES ('Formula One');"
-				"SELECT * FROM default.adidas_keywords"
+				"INSERT INTO default.adidas_keywords (keywords) VALUES "
+				+ "('adidas',"
+				+ " 'adidas boost',"
+				+ " 'nike',"
+				+ " 'nike free',"
+				+ " 'asics',"
+				+ " 'under armour',"
+				+ " 'football',"
+				+ " 'marathon');"
+//				"SELECT * FROM default.adidas_keywords"
 				);
 		System.out.println(rs.getResult());
 	}
