@@ -252,10 +252,10 @@ public abstract class BasicOperator extends Thread implements Operator{
 
   @Override
   public void cleanup() {
-    if(!isRemote)
-    {
+//    if(!isRemote)
+//    {
       unsubscribeToMapActions("execution." + com.getId() + "." + action.getId());
-    }
+//    }
     action.setStatus(ActionStatus.COMPLETED.toString());
 
     if(com != null)
@@ -421,11 +421,11 @@ public abstract class BasicOperator extends Thread implements Operator{
     else {
       failCleanup();
     }
-    try {
-      this.join();
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
+//    try {
+//      this.join();
+//    } catch (InterruptedException e) {
+//      e.printStackTrace();
+//    }
   }
   public void createCache(String microCloud, String cacheName ){
     String uri = getURIForMC(microCloud);
@@ -463,9 +463,6 @@ public abstract class BasicOperator extends Thread implements Operator{
         if (!mc.equals(currentCluster)) {
           sendRemoteRequest(mc, true);
         }
-        else{
-          sendRemoteRequest(mc,true);
-        }
       }
     }
 
@@ -479,7 +476,7 @@ public abstract class BasicOperator extends Thread implements Operator{
         System.out.println("Sleeping to executing " + mapperCallable.getClass().toString() + " pending clusters ");
         PrintUtilities.printList(Arrays.asList(pendingMMC));
         try {
-          mmcMutex.wait(240000);
+          mmcMutex.wait(120000);
         } catch (InterruptedException e) {
           log.error("Interrupted " + e.getMessage());
           break;
@@ -498,26 +495,27 @@ public abstract class BasicOperator extends Thread implements Operator{
   private void sendRemoteRequest(String mc, boolean b) {
     System.err.println("Send remote request to mc " + mc);
     log.error("Send remote request to mc " + mc);
-    Action newAction = new Action(action);
-    JsonObject dataAction = action.asJsonObject().copy();
+    Action copyAction = new Action(new JsonObject(action.toString()));
+    Action newAction = new Action(copyAction);
+    JsonObject dataAction = copyAction.asJsonObject().copy();
     log.error("DATA ACTION = "+dataAction.toString());
     JsonObject sched = new JsonObject();
     sched.putArray(mc, globalConfig.getObject("microclouds").getArray(mc));
-    if(dataAction.containsField("data")){
-      System.err.println("contains data");
-      if(dataAction.getObject("data").containsField("operator")){
-        System.err.println("contains operator");
-        if(dataAction.getObject("data").getObject("operator").containsField("scheduling")){
-          System.err.println("contains schedu");
-        }
-      }
+//    if(dataAction.containsField("data")){
+//      System.err.println("contains data");
+//      if(dataAction.getObject("data").containsField("operator")){
+//        System.err.println("contains operator");
+//        if(dataAction.getObject("data").getObject("operator").containsField("scheduling")){
+//          System.err.println("contains schedu");
+//        }
+//      }
 
-    }
-    else{
-      for(String s : dataAction.getFieldNames()){
-        System.err.println(s);
-      }
-    }
+//    }
+//    else{
+//      for(String s : dataAction.getFieldNames()){
+//        System.err.println(s);
+//      }
+//    }
     dataAction.getObject("data").getObject("operator").putObject("scheduling",sched);
     newAction.setData(dataAction);
     newAction.getData().putString("remote","remote");
@@ -588,9 +586,6 @@ public abstract class BasicOperator extends Thread implements Operator{
   }
   @Override
   public void localExecuteMap(){
-
-    if (!isRemote)
-      return;
 
     if(mapperCallable != null) {
       if (inputCache.size() == 0) {
@@ -680,9 +675,7 @@ public abstract class BasicOperator extends Thread implements Operator{
 
   @Override
   public void localExecuteReduce(){
-    if(!isRemote){
-      return;
-    }
+
     if(reducerCallable != null) {
       DistributedExecutorService des = new DefaultExecutorService(reduceInputCache);
      setReducerCallableEnsembleHost();
