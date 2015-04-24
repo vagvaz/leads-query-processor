@@ -26,15 +26,15 @@ public class PZSStart {
 	    	  int port = Integer.parseInt(ipPort[ipPort.length-1]);
 	    	  if(isPortAvailable(port)) {
 		    	  String command  = commandBase+endpoint;
-		    	  System.err.println("Starting command: '"+command+"' with environment: '"+envp+"'");
+		    	  System.out.println("Starting command: '"+command+"' with environment: '"+envp+"'");
 		    	  Process p = Runtime.getRuntime().exec(command, envp);
 		    	  try { Thread.sleep(1000); } 
 		    	  catch (InterruptedException e) { e.printStackTrace(); }
 		    	  if(isProcessRunning(p))
-		    		  System.err.println("Python ZeroMQ Server STARTED at "+endpoint);
+		    		  System.out.println("Python ZeroMQ Server STARTED at "+endpoint);
 	    	  }
 	    	  else
-	    		  System.err.println("Python ZeroMQ Server already RUNNING at "+endpoint);
+	    		  System.out.println("Python ZeroMQ Server already RUNNING at "+endpoint);
 		  }
 	}
 	

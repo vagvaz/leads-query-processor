@@ -163,7 +163,7 @@ public class PythonQueueCall {
         
         removeFiles(filenamesList);
 
-		/* TIME */ System.err.println("PythonQueueCall.call() time: "+((System.currentTimeMillis()-start)/1000.0)+" s");
+		/* TIME */ System.err.println("+++ PythonQueueCall.call() time: "+((System.currentTimeMillis()-start)/1000.0)+" s");
         
 		return retValue;		
 	}

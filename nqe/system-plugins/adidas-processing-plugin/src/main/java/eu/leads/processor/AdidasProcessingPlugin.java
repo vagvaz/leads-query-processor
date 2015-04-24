@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import eu.leads.PropertiesSingleton;
 import eu.leads.datastore.DataStoreSingleton;
@@ -52,9 +53,9 @@ public class AdidasProcessingPlugin implements PluginInterface {
 	      this.configuration = config;
 	      this.manager = manager;
 	      
-//	      setLogging(configuration);
+	      setLogging(configuration);
 	      
-	      System.out.println("%%%%% Initializing the plugin");
+	      System.out.println("%%%%% Initializing the plugin...");
 	
 	      // KEEP config
 	      PropertiesSingleton.setConfig(config);
@@ -84,7 +85,6 @@ public class AdidasProcessingPlugin implements PluginInterface {
 	   StdLoggerRedirect.initLogging(dir);
 //	   System.setOut(outputFile(dir+"/leads-java-"+(new Date().getTime())+".out"));
 //	   System.setErr(outputFile(dir+"/leads-java-"+(new Date().getTime())+".err"));
-	   System.out.println("Initializing the plugin...");
    }
 
 //   protected java.io.PrintStream outputFile(String name) throws java.io.FileNotFoundException {
@@ -110,49 +110,92 @@ public class AdidasProcessingPlugin implements PluginInterface {
 	  //
 	  /* TIME */ Long start = System.currentTimeMillis();
 	  //
-      processTuple(key,value);
+      boolean isProcessed = processTuple(key,value);
+      
+      if(isProcessed) {
 	  //
       /* TIME */ Long finish = System.currentTimeMillis();
 	  /* TIME */ System.err.println("+++ Plugin.created() time for "+key+": "+((finish-start)/1000.0)+" s");
-	  //      
+	  //   
+      }
    }
 
-   /**
- * @param key
- * @param value
- */
-   private void processTuple(Object key, Object value) {
-//	   try {
-		   System.out.println("######## processTuple YEAH");
-		   System.out.println("CONTENT:\n"+value);
-
-		   String [] tableUri = key.toString().split(":", 2);
-		   String table = tableUri[0];
-		   String uri = LEADSUtils.standardUrlToNutchUrl(tableUri[1]);
-			String webpageJson = (String)value;
-			Tuple webpage = new Tuple(webpageJson);
+    /**
+     * 
+     * @param key
+     * @param value
+     */
+    private boolean processTuple(Object key, Object value) {
+	   
+	    System.out.println("######## processTuple() method started");
+		
+		// Turn extract table:nutch_uri from key
+		String [] tableUri = key.toString().split(":", 2);
+		String table = tableUri[0];
+		String uri = tableUri[1];
+		uri = normalizeUri(uri);
+		
+		// Convert value into tuple
+		String webpageJson = (String)value;
+		Tuple webpage = new Tuple(webpageJson);
+		
+		// Extract content and timestamp from the tuple
+		String content    = webpage.getAttribute("body");
+		String timestamp  = webpage.getAttribute("published");
+		Object headersObj = webpage.getGenericAttribute("headers");
+		
+		if(content != null && timestamp != null && headersObj != null) {
+			if(isContentTypeHTML(headersObj)) {
+				HashMap<String,Object> cacheColumns = new HashMap<>();
+				cacheColumns.put("default.content.content", content);
 			
-			String content = webpage.getAttribute("body");
-			String timestamp = new Long(System.currentTimeMillis()).toString();
-			HashMap<String,Object> cacheColumns = new HashMap<>();
-			cacheColumns.put("default.content.content", content);
-			
-			// Here Do the heavy processing stuff
-			System.out.println("########:"+getClassName().toString() + " calls a processing POJO on a key " + key);
-			pageProcessingPojo.execute(uri, timestamp, table, cacheColumns);
+				System.out.println("table:     " + table);
+				System.out.println("uri:       " + uri);
+				System.out.println("content:   " + (content.length()>80 ? content.substring(0,80)+"..." : content) );
+				System.out.println("timestamp: " + timestamp);
+				
+				// Execute page processing
+				System.out.println("Starting with the page processing...");
+				System.err.println("Processing "+uri+" ...");
+				pageProcessingPojo.execute(uri, timestamp, table, cacheColumns);
+				return true;
+			}
+			else {
+				System.out.println("Content-Type is none of html types. Skipping.");
+			}
+		}
+		else {
+			System.out.println("Either content, timestamp or header is null. Skipping.");
+		}
+		return false;
+    }
 
-/*			// ZEROMQ PYTHON CALL CHECK
- * 			PythonQueueCall pythonCall = new PythonQueueCall();
- *			pythonCall.call("eu.leads.infext.python.CLAPI.helloworld_clinterface","hello","world");
- *          System.out.println("Python called, no exceptions.");
- */
-			
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-   }
+    private boolean isContentTypeHTML(Object headersObj) {
+    	Map<String, String> headers = (Map<String, String>) headersObj;
+		String contentType = headers.get("Content-Type");
+		
+		String lastModified = headers.get("Last-Modified");
+		if(lastModified!=null) System.out.println("Last-Modified:"+lastModified);
+				
+		if(contentType.toLowerCase().contains("html")) return true;
+		else return false;
+	}
 
-   @Override
+	/**
+     * For now, we simply treat URIs with various requests values as the same one.
+     * 
+     * @param uri
+     * @return
+     */
+    private String normalizeUri(String uri) {
+		int requestStart = uri.indexOf("?");
+		if(requestStart>0)
+			return uri.substring(0, requestStart);
+		else
+			return uri;
+	}
+
+@Override
    public void removed(Object key, Object value, Cache<Object, Object> cache) {
       // Do Nothing probably never called.
 

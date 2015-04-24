@@ -58,7 +58,7 @@ public abstract class AbstractHook {
 			newMetadataFamily = new HashMap<String, Object>();
 			
 			if(nonRetrievableFamilies.contains(family)) {
-				System.err.println("Not retrieving from family "+family);
+				System.out.println("Not retrieving from family "+family);
 				newMetadata.put(familyKey, newMetadataFamily);
 				MDFamily mdFamily = new MDFamily(url,null,family);
 				editableFamilies.put(familyKey, mdFamily);

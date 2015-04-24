@@ -60,8 +60,6 @@ public class LeadsDataStore extends AbstractDataStore {
 		//
 		String query = queryP01+queryP02+queryP03+queryP04;
 
-		System.out.println(query);
-
 		QueryResults rs;
 		rs = LeadsQueryInterface.sendQuery(query);
 		
@@ -212,8 +210,6 @@ public class LeadsDataStore extends AbstractDataStore {
 			queryP05 += " AND " + mapping.getProperty("leads_resourcepart-type") + " = '" + partType + "';";
 		//
 		String query = queryP01+queryP02+queryP03+queryP04+queryP05;
-		
-		System.out.println(query);
 
 		QueryResults rs = LeadsQueryInterface.sendQuery(query);
 		
@@ -372,7 +368,6 @@ public class LeadsDataStore extends AbstractDataStore {
 		//
 		String query = queryP01+queryP02+queryP03+queryP04+queryP05+queryP06+queryP07;
 
-		System.out.println(query);
 		QueryResults rs = LeadsQueryInterface.sendQuery(query);
 		if(rs == null || rs.getResult().size() == 0)
 			return false;

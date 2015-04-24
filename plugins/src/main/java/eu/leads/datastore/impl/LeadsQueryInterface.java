@@ -34,7 +34,7 @@ public class LeadsQueryInterface {
     	/* TIME */ long start = System.currentTimeMillis();
     	
     	try {
-    		System.err.println(sql);
+    		System.out.println(sql);
 	        QueryStatus currentStatus = WebServiceClient.submitQuery("adidas",sql);
 	        while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")) {
 	            sleep(200);
@@ -57,7 +57,9 @@ public class LeadsQueryInterface {
     		e.printStackTrace();
     	}
     	
-    	/* TIME */ System.err.println("+++ LeadsQueryInterface.sendQuery() time: "+((System.currentTimeMillis()-start)/1000.0)+" s");
+    	/* TIME */ System.err.println("+++ LeadsQueryInterface.sendQuery() time for '"
+    					+ (sql.length()>40 ? sql.substring(0,40) : sql) + "...':"
+    					+ ((System.currentTimeMillis()-start)/1000.0)+" s");
     	
         return res;
 
