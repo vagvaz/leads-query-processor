@@ -22,11 +22,6 @@
          <version>2.3.0</version>
          <exclusions>
             <exclusion>
-               <groupId>jboss</groupId>
-               <artifactId>jboss-*</artifactId>
-            </exclusion>
-
-            <exclusion>
                <groupId>log4j</groupId>
                <artifactId>log4j</artifactId>
             </exclusion>
@@ -51,10 +46,6 @@
          <artifactId>hadoop-common</artifactId>
          <version>${hadoop.version}</version>
           <exclusions>
-             <exclusion>
-                <groupId>jboss</groupId>
-                <artifactId>jboss-*</artifactId>
-             </exclusion>
             <exclusion>
                <groupId>log4j</groupId>
                <artifactId>log4j</artifactId>
@@ -79,10 +70,6 @@
          <artifactId>commons-configuration</artifactId>
          <version>1.7</version>
          <exclusions>
-            <exclusion>
-               <groupId>jboss</groupId>
-               <artifactId>jboss-*</artifactId>
-            </exclusion>
             <exclusion>
                <groupId>log4j</groupId>
                <artifactId>log4j</artifactId>
@@ -200,6 +187,12 @@
       </dependency>
 
       <dependency>
+         <groupId>junit</groupId>
+         <artifactId>junit</artifactId>
+         <version>4.11</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
          <groupId>com.google.guava</groupId>
          <artifactId>guava</artifactId>
          <exclusions>
@@ -248,30 +241,7 @@
          </exclusions>
       </dependency>
 
-      <!--<dependency>-->
-         <!--<groupId>org.apache.nutch</groupId>-->
-         <!--<artifactId>nutch</artifactId>-->
-         <!--<version>2.2</version>-->
-         <!--<exclusions>-->
-            <!--<exclusion>-->
-               <!--<groupId>log4j</groupId>-->
-               <!--<artifactId>log4j</artifactId>-->
-            <!--</exclusion>-->
-            <!--<exclusion>-->
-               <!--<groupId>org.apache.logging.log4j</groupId>-->
-               <!--<artifactId>log4j-core</artifactId>-->
-            <!--</exclusion>-->
-            <!--<exclusion>-->
-               <!--<groupId>org.slf4j</groupId>-->
-               <!--<artifactId>slf4j-log4j12</artifactId>-->
-            <!--</exclusion>-->
-            <!--<exclusion>-->
-               <!--<groupId>org.apache.tajo</groupId>-->
-               <!--<artifactId>tajo-jdbc</artifactId>-->
-            <!--</exclusion>-->
-         <!--</exclusions>-->
-      <!--</dependency>-->
-
+      <!--TODO CHANGE to ${infinsipan.version} when they publish it-->
 
       <dependency>
          <groupId>org.infinispan</groupId>
@@ -297,55 +267,9 @@
          </exclusions>
 
       </dependency>
-        <dependency>
-         <groupId>org.mongodb</groupId>
-         <artifactId>bson</artifactId>
-         <version>2.13.0</version>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-            </exclusion>
-         </exclusions>
-      </dependency>
-      <dependency>
-         <groupId>org.mongodb</groupId>
-         <artifactId>mongo-java-driver</artifactId>
-         <version>3.0.0-beta2</version>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-            </exclusion>
-         </exclusions>
-      </dependency>
       <dependency>
          <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-ensemble</artifactId>
+         <artifactId>infinispan-server-hotrod</artifactId>
          <version>${infinispan.version}</version>
          <exclusions>
             <exclusion>
@@ -365,10 +289,8 @@
                <artifactId>tajo-jdbc</artifactId>
             </exclusion>
          </exclusions>
+
       </dependency>
-
-
-
 
       <dependency>
          <groupId>org.infinispan</groupId>
@@ -393,6 +315,35 @@
             </exclusion>
          </exclusions>
 
+      </dependency>
+       <dependency>
+           <groupId>org.mongodb</groupId>
+           <artifactId>mongo-java-driver</artifactId>
+           <version>3.0.0-beta2</version>
+       </dependency>
+
+      <dependency>
+         <groupId>org.infinispan</groupId>
+         <artifactId>infinispan-ensemble</artifactId>
+         <version>${infinispan.version}</version>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+            </exclusion>
+         </exclusions>
       </dependency>
 
 
@@ -421,55 +372,6 @@
          </exclusions>
       </dependency>
 
-        <!--<dependency>-->
-         <!--<groupId>org.infinispan</groupId>-->
-         <!--<artifactId>infinispan-client-hotrod</artifactId>-->
-         <!--<version>${infinispan.version}</version>-->
-         <!--<type>test-jar</type>-->
-         <!--<exclusions>-->
-            <!--<exclusion>-->
-               <!--<groupId>log4j</groupId>-->
-               <!--<artifactId>log4j</artifactId>-->
-            <!--</exclusion>-->
-            <!--<exclusion>-->
-               <!--<groupId>org.apache.logging.log4j</groupId>-->
-               <!--<artifactId>log4j-core</artifactId>-->
-            <!--</exclusion>-->
-            <!--<exclusion>-->
-               <!--<groupId>org.slf4j</groupId>-->
-               <!--<artifactId>slf4j-log4j12</artifactId>-->
-            <!--</exclusion>-->
-            <!--<exclusion>-->
-               <!--<groupId>org.apache.tajo</groupId>-->
-               <!--<artifactId>tajo-jdbc</artifactId>-->
-            <!--</exclusion>-->
-         <!--</exclusions>-->
-      <!--</dependency>-->
-      <dependency>
-         <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-server-hotrod</artifactId>
-         <version>${infinispan.version}</version>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-            </exclusion>
-         </exclusions>
-
-      </dependency>
-
       <dependency>
          <groupId>org.infinispan</groupId>
          <artifactId>infinispan-server-hotrod</artifactId>
@@ -493,6 +395,36 @@
                <artifactId>tajo-jdbc</artifactId>
             </exclusion>
          </exclusions>
+      </dependency>
+
+      <dependency>
+         <groupId>org.infinispan</groupId>
+         <artifactId>infinispan-client-hotrod</artifactId>
+         <version>${infinispan.version}</version>
+         <type>test-jar</type>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+            </exclusion>
+         </exclusions>
+      </dependency>
+      <dependency>
+         <groupId>org.infinispan</groupId>
+         <artifactId>infinispan-server-hotrod</artifactId>
+         <version>${infinispan.version}</version>
       </dependency>
    </dependencies>
 

@@ -89,7 +89,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         executeOn((K)key, value);
       }
     }
-    finalize();
+    finalizeCallable();
     return embeddedCacheManager.getAddress().toString();
   }
 
@@ -101,7 +101,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       conf = new JsonObject(configString);
   }
 
-  @Override public void finalize(){
+  @Override public void finalizeCallable(){
     try {
       emanager.stop();
 //

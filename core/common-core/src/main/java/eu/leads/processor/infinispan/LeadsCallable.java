@@ -6,6 +6,6 @@ package eu.leads.processor.infinispan;
 public interface LeadsCallable<K,V> {
    void executeOn(K key , V value);
    void initialize();
-   void finalize();
+   void finalizeCallable();
 
 }
