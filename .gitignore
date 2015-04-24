@@ -11,5 +11,5 @@ conf/
 target/
 .settings/
 *.pyc
-resources/
+/nqe/system-plugins/adidas-processing-plugin/resources/
 logs/
