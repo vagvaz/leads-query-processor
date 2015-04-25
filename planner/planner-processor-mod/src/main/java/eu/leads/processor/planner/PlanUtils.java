@@ -294,4 +294,45 @@ public class PlanUtils {
     }
     return true;
   }
+
+  public static JsonObject emulateScheduler(JsonObject schedulerRep, JsonObject globalInformation) {
+    JsonObject result = new JsonObject();
+    Random random = new Random();
+    ArrayList<String> microclods = new ArrayList<>();
+    microclods.addAll(globalInformation.getObject("microclouds").getFieldNames());
+    String destination = schedulerRep.getString("destination");
+    Set<String> ops = new HashSet<>();
+    ops.addAll(schedulerRep.getObject("stages").getFieldNames());
+    JsonObject stages = schedulerRep.getObject("stages");
+    for(String op : ops){
+      JsonObject node = stages.getObject(op);
+      JsonArray scheduling = null;
+      if(node.getString("nodetype").equals(LeadsNodeType.OUTPUT_NODE.toString())){
+        scheduling = getSchedulingFor(destination,globalInformation);
+      }
+      else{
+        int index = random.nextInt(microclods.size());
+        scheduling = getSchedulingFor(microclods.get(index),globalInformation);
+      }
+      node.putArray("scheduling", scheduling);
+      result.putObject(op,node);
+    }
+
+    JsonObject realResult = new JsonObject();
+    realResult.putObject("stages",result);
+    return realResult;
+  }
+
+  private static JsonArray getSchedulingFor(String destination,JsonObject global) {
+    JsonArray result = new JsonArray();
+    JsonObject ob = new JsonObject();
+    ob.putString("name", destination);
+    ob.putNumber("t", 0.1);
+    ob.putNumber("v", 0.2);
+    JsonArray end  = new JsonArray();
+    end = global.getObject("webserviceAddrs").getArray(destination);
+    ob.putArray("endpoints",end);
+    result.add(ob);
+    return result;
+  }
 }

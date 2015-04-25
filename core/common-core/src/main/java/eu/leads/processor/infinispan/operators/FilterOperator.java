@@ -33,7 +33,6 @@ public class FilterOperator extends BasicOperator {
 
 
     private FilterOperatorTree tree;
-    private Cache inputCache;
 
 
     public FilterOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
@@ -97,10 +96,10 @@ public class FilterOperator extends BasicOperator {
 
    @Override
     public void init(JsonObject config) {
-        super.init(conf);
+//        super.init(conf);
         inputCache = (Cache) manager.getPersisentCache(getInput());
-        conf.putString("output",getOutput());
-        init_statistics(this.getClass().getCanonicalName());
+//        conf.putString("output",getOutput());
+//        init_statistics(this.getClass().getCanonicalName());
     }
 
     @Override

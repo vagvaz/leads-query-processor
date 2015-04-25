@@ -67,7 +67,7 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
         executeOn((K)key, value);
       }
     }
-    finalize();
+    finalizeCallable();
     return outputCache.getName();
   }
 
@@ -84,7 +84,7 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
 
   }
 
-  @Override public void finalize(){
+  @Override public void finalizeCallable(){
     Comparator<Tuple> comparator = new TupleComparator(sortColumns,asceding,types);
     Collections.sort(tuples, comparator);
     int counter = 0;
@@ -102,6 +102,6 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
 //                          +"."+imanager.getMemberName());
     EnsembleCacheUtils.putToCache(addressesCache,outputCache.getName(),outputCache.getName());
     tuples.clear();
-    super.finalize();
+    super.finalizeCallable();
   }
 }

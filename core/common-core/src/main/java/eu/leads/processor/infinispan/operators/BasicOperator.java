@@ -588,10 +588,10 @@ public abstract class BasicOperator extends Thread implements Operator{
   public void localExecuteMap(){
 
     if(mapperCallable != null) {
-      if (inputCache.size() == 0) {
-        replyForSuccessfulExecution(action);
-        return;
-      }
+//      if (inputCache.size() == 0) {
+//        replyForSuccessfulExecution(action);
+//        return;
+//      }
       System.err.println("EXECUTE " + mapperCallable.getClass().toString() + " ON " + currentCluster);
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
 

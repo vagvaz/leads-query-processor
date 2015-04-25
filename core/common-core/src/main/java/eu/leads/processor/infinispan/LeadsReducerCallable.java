@@ -72,7 +72,7 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut,Obj
 //    }
 
   @Override public void finalize() {
-    super.finalize();
-    reducer.finalize();
+    super.finalizeCallable();
+    reducer.finalizeTask();
   }
 }

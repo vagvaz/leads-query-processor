@@ -104,8 +104,8 @@ public  class LeadsReducer<K, V> implements Reducer<K, V>,Serializable {
    }
 
 
-   @Override
-   protected void finalize() {
+
+   protected void finalizeTask() {
 //      report.printReport(report.getReport());
 
 //      timer.cancel();

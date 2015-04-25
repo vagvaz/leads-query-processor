@@ -26,8 +26,6 @@ import java.util.concurrent.TimeUnit;
 
 @JsonAutoDetect
 public class ProjectOperator extends BasicOperator {
-   private Cache inputCache;
-
 
    public ProjectOperator(Node com, InfinispanManager persistence,LogProxy log, Action actionData) {
       super(com, persistence,log, actionData);
@@ -37,11 +35,13 @@ public class ProjectOperator extends BasicOperator {
    @Override
     public void init(JsonObject config) {
       super.init(conf);
-      conf.putString("output",getOutput());
-      LeadsMapper projectMapper = new ProjectMapper(conf.toString());
+      conf.putString("output", getOutput());
+     inputCache = (Cache) manager.getPersisentCache(getInput());
+
+     //      LeadsMapper projectMapper = new ProjectMapper(conf.toString());
 //      setMapper(projectMapper);
 //      setReducer(null);
-      init_statistics(this.getClass().getCanonicalName());
+//      init_statistics(this.getClass().getCanonicalName());
     }
 
     @Override
@@ -103,6 +103,7 @@ public class ProjectOperator extends BasicOperator {
    @Override
    public void setupMapCallable() {
       inputCache = (Cache) manager.getPersisentCache(getInput());
+     System.out.println("INPUT CACHE SIZE " + inputCache.size());
       mapperCallable =  new ProjectCallableUpdated<>(conf.toString(),getOutput());
    }
 

@@ -251,19 +251,20 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             p = PlanUtils.numberStages(p);
             p = PlanUtils.annotatePlan(statisticsCache, p);
             JsonObject annotatedPlan = null;
-            try {
+//            try {
                 JsonObject schedulerRep = PlanUtils.getSchedulerRep(p,currentCluster);
-                System.err.println(schedulerRep.encodePrettily());
-                annotatedPlan = WP4Client.evaluatePlan(schedulerRep,schedHost,schedPort);
-            } catch (IOException e) {
-                log.error("Exception  e " + e.getMessage());
-              SQLQuery query = new SQLQuery( new JsonObject(queriesCache.get(plan.getQueryId())));
-              failQuery(new Exception("Could not access the scheduler"),query);            }
-            if(annotatedPlan == null){
-                SQLQuery query = new SQLQuery( new JsonObject(queriesCache.get(plan.getQueryId())));
-                failQuery(new Exception("Could not access the scheduler"),query);
-                return result;
-            }
+                System.err.println("$$$$$$$$$$$$$$$$$$$$\n"+schedulerRep.encodePrettily());
+                annotatedPlan = PlanUtils.emulateScheduler(schedulerRep,globalInformation);
+//                annotatedPlan = WP4Client.evaluatePlan(schedulerRep,schedHost,schedPort);
+//            } catch (IOException e) {
+//                log.error("Exception  e " + e.getMessage());
+//              SQLQuery query = new SQLQuery( new JsonObject(queriesCache.get(plan.getQueryId())));
+//              failQuery(new Exception("Could not access the scheduler"),query);            }
+//            if(annotatedPlan == null){
+//                SQLQuery query = new SQLQuery( new JsonObject(queriesCache.get(plan.getQueryId())));
+//                failQuery(new Exception("Could not access the scheduler"),query);
+//                return result;
+//            }
             JsonObject updatedPlan = PlanUtils.updateInformation(plan.getPlanGraph(),annotatedPlan.getObject("stages"),globalInformation);
             updatedPlan = PlanUtils.updateTargetEndpoints(updatedPlan);
             System.err.println(updatedPlan.encodePrettily());
