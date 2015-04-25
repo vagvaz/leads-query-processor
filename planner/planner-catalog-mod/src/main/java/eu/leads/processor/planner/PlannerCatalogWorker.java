@@ -3,6 +3,8 @@ package eu.leads.processor.planner;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ServiceException;
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
+import eu.leads.processor.conf.ConfigurationUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import leads.tajo.catalog.LeadsCatalog;
 import org.apache.hadoop.fs.Path;
@@ -30,12 +32,18 @@ import java.util.Set;
 public class PlannerCatalogWorker extends Verticle {
   LeadsCatalog catalogServer = null;
   TajoConf conf = new TajoConf();
-
+  JsonObject globalConfig;
   @Override
   public void start() {
     super.start();
     LQPConfiguration.initialize();
-    LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component", "catalog-worker");
+    LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component",
+        "catalog-worker");
+    globalConfig = container.config().getObject("global");
+    globalConfig = container.config().getObject("global");
+    String publicIP = ConfigurationUtilities
+        .getPublicIPFromGlobal(LQPConfiguration.getInstance().getMicroClusterName(), globalConfig);
+    LQPConfiguration.getInstance().getConfiguration().setProperty(StringConstants.PUBLIC_IP,publicIP);
     //Read configuration
     JsonObject config = container.config();
     TajoConf conf = new TajoConf();

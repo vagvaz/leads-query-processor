@@ -1,7 +1,9 @@
 package eu.leads.processor.imanager;
 
+import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.ConfigurationUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
@@ -35,7 +37,7 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
    LogProxy log;
    InfinispanManager persistence;
    Map<String, ActionHandler> handlers;
-
+   JsonObject globalConfig;
    @Override
    public void start() {
       super.start();
@@ -53,6 +55,7 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
 
       bus = vertx.eventBus();
       config = container.config();
+
       id = config.getString("id");
       gr = config.getString("group");
       logic = config.getString("logic");
@@ -61,7 +64,11 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
       com.initialize(id, gr, null, leadsHandler, leadsHandler, vertx);
       bus.registerHandler(id + ".process", this);
       LQPConfiguration.initialize();
-      LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component","imanager");
+      LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component",
+          "imanager");
+      globalConfig = config.getObject("global");
+      String publicIP = ConfigurationUtilities.getPublicIPFromGlobal(LQPConfiguration.getInstance().getMicroClusterName(),globalConfig);
+      LQPConfiguration.getInstance().getConfiguration().setProperty(StringConstants.PUBLIC_IP,publicIP);
       persistence = InfinispanClusterSingleton.getInstance().getManager();
       log = new LogProxy(config.getString("log"), com);
       JsonObject msg = new JsonObject();

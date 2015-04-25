@@ -1,6 +1,7 @@
 package eu.leads.processor.conf;
 
 import org.apache.commons.configuration.Configuration;
+import org.vertx.java.core.json.JsonObject;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -176,5 +177,10 @@ public class ConfigurationUtilities {
             }
         }
         return result;
+    }
+
+    public static String getPublicIPFromGlobal(String microClusterName, JsonObject globalConfig) {
+        String result = globalConfig.getObject("componentsAddrs").getArray(microClusterName).get(0).toString();
+            return result;
     }
 }

@@ -35,4 +35,5 @@ public class StringConstants {
    public static final String STATISTICS_CACHE = "statisticsCache";
   public static final String TMPPREFIX = "leads/processor/tmp/";
   public static final java.lang.String OWNERSCACHE = "ownersCache";
+  public static final java.lang.String PUBLIC_IP = "node.public.ip";
 }
