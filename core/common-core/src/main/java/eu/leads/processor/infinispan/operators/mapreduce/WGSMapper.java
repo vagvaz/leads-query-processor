@@ -39,7 +39,6 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
     protected transient Cache pagerankCache;
     protected transient InfinispanManager imanager;
    protected transient Logger log ;
-  protected transient List<String> microclouds;
    @Override
   public  void initialize() {
 
@@ -68,10 +67,6 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
       }
       LQPConfiguration.initialize();
      log = LoggerFactory.getLogger(WGSMapper.class);
-     microclouds = new ArrayList<>();
-     microclouds.add("hamm5");
-     microclouds.add("hamm6");
-     microclouds.add("dresden2");
    }
 
    @Override
@@ -93,7 +88,12 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
       result.putString("pagerank", computePagerank(result.getString("url")));
       result.putString("sentiment", t.getGenericAttribute("sentiment").toString());
 //      result.putString("micro-cluster",LQPConfiguration.getInstance().getMicroClusterName());
-      int mcIndex = t.getAttribute("url").hashCode() % microclouds.size();
+      ArrayList<String> microclouds = new ArrayList<>();
+     microclouds.add("hamm5");
+     microclouds.add("hamm6");
+     microclouds.add("dresden2");
+
+      int mcIndex = Math.abs((t.getAttribute("url").hashCode())) % microclouds.size();
       result.putString("micro-cluster",microclouds.get(mcIndex));
       ArrayList<Object> linksArray = (ArrayList<Object>) t.getGenericAttribute("links");
       JsonArray array = new JsonArray();
