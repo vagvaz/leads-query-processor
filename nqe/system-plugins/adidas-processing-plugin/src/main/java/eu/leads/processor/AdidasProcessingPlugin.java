@@ -53,7 +53,7 @@ public class AdidasProcessingPlugin implements PluginInterface {
 	      this.configuration = config;
 	      this.manager = manager;
 	      
-	      setLogging(configuration);
+//	      setLogging(configuration);
 	      
 	      System.out.println("%%%%% Initializing the plugin...");
 	

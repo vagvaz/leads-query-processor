@@ -36,6 +36,8 @@ public class KeywordExtractionHook extends AbstractHook {
 	@Override
 	public HashMap<String, HashMap<String, Object>> process(
 			HashMap<String, HashMap<String, Object>> parameters) {
+		
+		System.out.println("KeywordExtractionHook.0");
 
 		HashMap<String, HashMap<String, Object>> result = new HashMap<>();
 		HashMap<String, Object> newKeywordsResult = new HashMap<>();
@@ -43,13 +45,13 @@ public class KeywordExtractionHook extends AbstractHook {
 		
 		List<String> keywordsList = KeywordsListSingleton.getInstance().getKeywordsList();
 		
-		/* TEMP */ keywordsList.add("Grand Prix"); 
-		
 		DocumentKeywordSearch keywordSearch = new DocumentKeywordSearch();
 		
 		HashMap<String, Object> newResourceParts = parameters.get("new:leads_resourceparts");
 		HashMap<String, Object> newCore = parameters.get("new:leads_core");
 		HashMap<String, Object> newMD = parameters.get("new");
+		
+		System.out.println("KeywordExtractionHook.1");
 		
 		for(Entry<String, Object> resPart : newResourceParts.entrySet()) {
 			String resTypeNIndex = resPart.getKey();
@@ -61,10 +63,14 @@ public class KeywordExtractionHook extends AbstractHook {
 				keywordSearch.addDocument(resType, resIndex, resValue.toString());
 		}
 		
+		System.out.println("KeywordExtractionHook.2");
+		
 		String lang = newCore.get(mapping.get(("leads_core-lang"))).toString();
 		
 		for(String keywords : keywordsList) {
 			String [] keywordsArray = keywords.split("\\s+");
+			
+			System.out.println("KeywordExtractionHook.3:"+keywords);
 			
 			// UrlTimestamp to be changed later! It's just about these are two strings. Parttype:Partid
 			HashMap<UrlTimestamp, Double> partsIds = keywordSearch.searchKeywords(keywordsArray);
@@ -86,6 +92,8 @@ public class KeywordExtractionHook extends AbstractHook {
 					relevanceScore = partsIds.get(partId);
 				}
 				
+				System.out.println("KeywordExtractionHook.4:"+keywords);
+				
 				String keyWord = key+":"+keywords;
 				
 				HashMap<String, Object> keywordMap = new HashMap<>();
@@ -100,6 +108,8 @@ public class KeywordExtractionHook extends AbstractHook {
 		
 		result.put("new:leads_keywords", newKeywordsResult);
 		result.putAll(newSpecificKeywordsResultsList);
+		
+		System.out.println("KeywordExtractionHook.5");
 		
 		return result;
 	}
