@@ -10,9 +10,7 @@ import org.apache.avro.io.DecoderFactory;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +60,7 @@ public class ReplayTool {
             for (String nutchDataPrefix : prefixes) {
                 System.out.println("Checking Prefix... " + nutchDataPrefix);
                 try {
-
+                    //PrintWriter pagesFile = new PrintWriter(baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".txt");
                     File keyFile = new File(baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".keys");
                     File dataFile = new File(baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".data");
                     while (keyFile.exists() && dataFile.exists()) {
@@ -98,10 +96,11 @@ public class ReplayTool {
                                                 nocontent_counter++;
                                             } else {
                                                 webpageCache.put(webpageCache.getName() + ":" + t.getAttribute("url"), t);
+                                                //pagesFile.println(t.getAttribute("url"));
                                                 Thread.sleep(delay);
-                                                if(delay>500)
-                                                    System.out.print(".");
                                                 counter++;
+                                                if(delay>500)
+                                                    System.out.println("Processed: " + counter);
                                                 if (counter % 1000 == 0)
                                                     System.err.println("loaded " + counter + " tuples");
                                             }
