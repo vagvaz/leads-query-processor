@@ -39,9 +39,11 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
     protected transient Cache pagerankCache;
     protected transient InfinispanManager imanager;
    protected transient Logger log ;
+  protected transient List<String> microclouds;
    @Override
   public  void initialize() {
-      imanager = InfinispanClusterSingleton.getInstance().getManager();
+
+     imanager = InfinispanClusterSingleton.getInstance().getManager();
       isInitialized = true;
       super.initialize();
         totalSum = -1.0;
@@ -49,6 +51,7 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
       depth = conf.getInteger("depth");
       webCache = (Cache) imanager.getPersisentCache(conf.getString("webCache"));
        pagerankCache = (Cache) imanager.getPersisentCache("pagerankCache");
+
       if(iteration < depth){
          outputCache = (Cache) imanager.getPersisentCache(conf.getString("outputCache"));
       }
@@ -65,6 +68,10 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
       }
       LQPConfiguration.initialize();
      log = LoggerFactory.getLogger(WGSMapper.class);
+     microclouds = new ArrayList<>();
+     microclouds.add("hamm5");
+     microclouds.add("hamm6");
+     microclouds.add("dresden2");
    }
 
    @Override
@@ -85,14 +92,16 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
       result.putString("url", t.getAttribute("url"));
       result.putString("pagerank", computePagerank(result.getString("url")));
       result.putString("sentiment", t.getGenericAttribute("sentiment").toString());
-      result.putString("micro-cluster",LQPConfiguration.getInstance().getMicroClusterName());
+//      result.putString("micro-cluster",LQPConfiguration.getInstance().getMicroClusterName());
+      int mcIndex = t.getAttribute("url").hashCode() % microclouds.size();
+      result.putString("micro-cluster",microclouds.get(mcIndex));
       ArrayList<Object> linksArray = (ArrayList<Object>) t.getGenericAttribute("links");
       JsonArray array = new JsonArray();
       for(Object o : linksArray){
          log.error("ADDING TO LINKS " + o.toString());
          array.add(o.toString());
       }
-      result.putValue("links",array);
+      result.putValue("links", array);
       collector.emit(String.valueOf(iteration),result.toString());
       if(outputCache != null){
          if (!result.getElement("links").isArray())
