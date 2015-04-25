@@ -555,8 +555,6 @@ public abstract class BasicOperator extends Thread implements Operator{
   public void subscribeToMapActions(Set<String> pendingMMC) {
     final boolean[] registered = {false};
     //TODO VAGVAZ
-    if(isRemote)
-      return;
     synchronized (rmcMutex) {
       com.subscribe("execution." + com.getId() + "." + action.getId(), handler, new Callable() {
         @Override
