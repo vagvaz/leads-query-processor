@@ -70,7 +70,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
                        String coordinator = action.asJsonObject().getString("coordinator");
                        replyAction.getData().putString("microcloud",currentCluster); //reduncdany to speed
                        // up debuggin
-                       replyAction.getData().putString("microcloud",currentCluster);
+//                       replyAction.getData().putString("microcloud",currentCluster);
                        replyAction.getData().putString("STATUS","SUCCESS");
                        replyAction.getData().putString("replyGroup",action.asJsonObject().getString("replyGroup"));
 
