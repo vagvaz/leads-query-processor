@@ -42,10 +42,16 @@ public class KeywordExtractionHook extends AbstractHook {
 		HashMap<String, HashMap<String, Object>> result = new HashMap<>();
 		HashMap<String, Object> newKeywordsResult = new HashMap<>();
 		HashMap<String,HashMap<String, Object>> newSpecificKeywordsResultsList = new HashMap<String,HashMap<String, Object>>();
+
+		System.out.println("KeywordExtractionHook.0.a");
 		
 		List<String> keywordsList = KeywordsListSingleton.getInstance().getKeywordsList();
+
+		System.out.println("KeywordExtractionHook.0.b");
 		
 		DocumentKeywordSearch keywordSearch = new DocumentKeywordSearch();
+
+		System.out.println("KeywordExtractionHook.0.c");
 		
 		HashMap<String, Object> newResourceParts = parameters.get("new:leads_resourceparts");
 		HashMap<String, Object> newCore = parameters.get("new:leads_core");
