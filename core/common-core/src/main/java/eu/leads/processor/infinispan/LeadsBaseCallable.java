@@ -104,11 +104,11 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   @Override public void finalizeCallable(){
     try {
 
-	if(ecache!=null) {
-    ecache.stop();
-  }
-	if(outputCache!=null && !ecache.getName().equals(outputCache.getName()))
-      	  outputCache.stop();
+//	if(ecache!=null) {
+//    ecache.stop();
+//  }
+//	if(outputCache!=null && !ecache.getName().equals(outputCache.getName()))
+//      	  outputCache.stop();
 	if(emanager!=null)
 	  emanager.stop();
     }catch(Exception e){
