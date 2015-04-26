@@ -4,10 +4,10 @@
 public class DataRemoteReaderTest {
   public static void main(String[] args) {
 
-    String conString = "192.168.1.104:11222";
-    String ensemble  = "192.168.1.104:11223";
+    String conString = "5.147.254.167:11222";
+    String ensemble  = "192.168.1.76:11223";
     boolean distributed = false;
-    String prefix = "/tmp/leads-crawler-snapshot/";
+    String prefix = "/tmp/leads-crawler-snapshot1/";
     String base = "catalog-worker";
     long delay =  10;
     String[] snapshotArgs = new String[3];
@@ -21,6 +21,6 @@ public class DataRemoteReaderTest {
     copyArgs[3] = "n";
 
     DataSnapshot.main(snapshotArgs);
-    DataCopy.main(copyArgs);
+//    DataCopy.main(copyArgs);
   }
 }

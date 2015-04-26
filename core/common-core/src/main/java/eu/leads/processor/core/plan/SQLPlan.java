@@ -42,7 +42,7 @@ public class SQLPlan extends DataType implements Plan {
     private void computeInternalStructures(LogicalRootNode rootNode, String queryId) {
         JsonObject planGraph = generatePlan(rootNode);
         setPlanGraph(planGraph);
-       System.out.println("PLAN$$\n"+ planGraph.encodePrettily() );
+//       System.out.println("PLAN$$\n"+ planGraph.encodePrettily() );
         JsonArray nodes = new JsonArray();
         for (String node : planGraph.getFieldNames()) {
             nodes.add(planGraph.getObject(node));

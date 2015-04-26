@@ -89,7 +89,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         executeOn((K)key, value);
       }
     }
-    finalize();
+    finalizeCallable();
     return embeddedCacheManager.getAddress().toString();
   }
 
@@ -101,15 +101,19 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       conf = new JsonObject(configString);
   }
 
-  @Override public void finalize(){
+  @Override public void finalizeCallable(){
     try {
-      emanager.stop();
-//
-//      ecache.stop();
-//      outputCache.stop();
+
+//	if(ecache!=null) {
+ //   ecache.stop();
+  //}
+//	if(outputCache!=null && !ecache.getName().equals(outputCache.getName()))
+  //    	  outputCache.stop();
+	if(emanager!=null)
+	  emanager.stop();
     }catch(Exception e){
-        System.err.println("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage() + " cause "
-                             + e.getCause().toString());
+        System.err.println("LEADS Base callable "+e.getClass().toString());
+      e.printStackTrace();
       }
   }
 

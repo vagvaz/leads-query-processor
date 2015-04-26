@@ -7,115 +7,137 @@ import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
-//import org.apache.nutch.storage.WebPage;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
-import org.infinispan.query.remote.client.avro.AvroMarshaller;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.apache.avro.generic.GenericData.*;
 
 /**
  * Created by vagvaz on 4/13/15.
  */
 public class ReplayTool {
-   private String baseDir;
-   private String webpagePrefixes;
-   private String nutchDataPrefixes;
-   private String ensembleString;
-   private EnsembleCacheManager emanager;
-   private EnsembleCache  nutchCache;
-   private EnsembleCache webpageCache;
-   private NutchTransformer nutchTransformer;
-   public ReplayTool(String baseDir, String webpagePrefixes, String nutchDataPrefixes, String ensembleString){
-      this.baseDir = baseDir;
-      this.webpagePrefixes = webpagePrefixes;
-      this.nutchDataPrefixes= nutchDataPrefixes;
-      this.ensembleString = ensembleString;
-      LQPConfiguration.initialize();
-      emanager = new EnsembleCacheManager((ensembleString));
-      nutchCache = emanager.getCache("WebPage");
-      webpageCache = emanager.getCache("default.webpages");
-      List<String> mappings = LQPConfiguration.getInstance().getConfiguration().getList("nutch.mappings");
-      Map<String,String> nutchToLQE = new HashMap<String,String>();
+    private String baseDir;
+    private int delay;
+    private String webpagePrefixes;
+    private String nutchDataPrefixes;
+    private String ensembleString;
+    private EnsembleCacheManager emanager;
+    private EnsembleCache nutchCache;
+    private EnsembleCache webpageCache;
+    private NutchTransformer nutchTransformer;
 
-      for(String mapping : mappings ){
-         String[] keyValue = mapping.split(":");
-         nutchToLQE.put(keyValue[0].trim(),keyValue[1].trim());
-      }
-      nutchTransformer = new NutchTransformer(nutchToLQE);
-   }
+    public ReplayTool(String baseDir, String webpagePrefixes, String nutchDataPrefixes, String ensembleString) {
+        this.baseDir = baseDir;
+        this.webpagePrefixes = webpagePrefixes;
+        this.nutchDataPrefixes = nutchDataPrefixes;
+        this.ensembleString = ensembleString;
+        LQPConfiguration.initialize();
+        emanager = new EnsembleCacheManager((ensembleString));
+        emanager.start();
+        nutchCache = emanager.getCache("WebPage");
+        webpageCache = emanager.getCache("default.webpages");
+        List<String> mappings = LQPConfiguration.getInstance().getConfiguration().getList("nutch.mappings");
+        Map<String, String> nutchToLQE = new HashMap<String, String>();
 
-   public void replayNutch(boolean load){
-      int currentCounter = 0;
-      long counter = 0;
-      while(true) {
-         String[] prefixes = nutchDataPrefixes.split("\\|");
+        for (String mapping : mappings) {
+            String[] keyValue = mapping.split(":");
+            nutchToLQE.put(keyValue[0].trim(), keyValue[1].trim());
+        }
+        nutchTransformer = new NutchTransformer(nutchToLQE);
+    }
 
-         for (String nutchDataPrefix : prefixes) {
+    public void replayNutch(boolean load) {
+        int currentCounter = 0;
+        long counter = 0;
+        long nocontent_counter = 0;
 
-            try {
+        while (true) {
+            String[] prefixes = nutchDataPrefixes.split("\\|");
 
-               File keyFile = new File(baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".keys");
-               File dataFile = new File(baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".data");
-               while (keyFile.exists()) {
-                  System.out.println("loading... " +  nutchDataPrefix+ "-" + currentCounter + ".keys");
-                  ObjectInputStream keyFileIS = new ObjectInputStream(new FileInputStream(keyFile));
-                  ObjectInputStream dataFileIS = new ObjectInputStream(new FileInputStream(dataFile));
-                  while (keyFileIS.available() > 0) {
-                     int keysize = keyFileIS.readInt();
-                     byte[] key = new byte[keysize];
-                     keyFileIS.readFully(key);
-                     int schemaSize = dataFileIS.readInt();
-                     byte[] schemaBytes = new byte[schemaSize];
-                     dataFileIS.readFully(schemaBytes);
-                     String schemaJson = new String(schemaBytes);
-                     Schema schema = new Schema.Parser().parse(schemaJson);
+            for (String nutchDataPrefix : prefixes) {
+                System.out.println("Checking Prefix... " + nutchDataPrefix);
+                try {
+                    //PrintWriter pagesFile = new PrintWriter(baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".txt");
+                    File keyFile = new File(baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".keys");
+                    File dataFile = new File(baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".data");
+                    while (keyFile.exists() && dataFile.exists()) {
+                        System.out.println("Exists_both... " + nutchDataPrefix + "-" + currentCounter + ".keys/data");
+                        ObjectInputStream keyFileIS = new ObjectInputStream(new FileInputStream(keyFile));
+                        ObjectInputStream dataFileIS = new ObjectInputStream(new FileInputStream(dataFile));
+                        while (keyFileIS.available() > 0) {
+                            int keysize = keyFileIS.readInt();
+                            byte[] key = new byte[keysize];
+                            keyFileIS.readFully(key);
+                            int schemaSize = dataFileIS.readInt();
+                            byte[] schemaBytes = new byte[schemaSize];
+                            dataFileIS.readFully(schemaBytes);
+                            String schemaJson = new String(schemaBytes);
+                            Schema schema = new Schema.Parser().parse(schemaJson);
+                            // rebuild GenericData.Record
+                            DatumReader<Object> reader = new GenericDatumReader<>(schema);
+                            Decoder decoder = DecoderFactory.get().directBinaryDecoder(dataFileIS, null);
+                            GenericData.Record page = new GenericData.Record(schema);
+                            reader.read(page, decoder);
+//                   System.err.println("Read key: " + new String(key) + "\n" + "value " + page.toString());
 
-                     // rebuild GenericData.Record
-                     DatumReader<Object> reader = new GenericDatumReader<>(schema);
-                     Decoder decoder = DecoderFactory.get().directBinaryDecoder(dataFileIS, null);
-                     GenericData.Record page = new GenericData.Record(schema);
-                     reader.read(page, decoder);
-                     //                  System.err.println("Read key: " + new String(key) + "\n" + "value " + page.toString());
-
-                     if (load) {
-                        Tuple t = nutchTransformer.transform(page);
-                        if(page.get("content")!= null) {
-                           if(t.getAttribute("body") == null){
-                              System.err.println("page content != null tuple body is null ");
+                            if (load) {
+                                Tuple t = nutchTransformer.transform(page);
+                                if (t == null) {
+                                    System.err.print("Tuple is null!!!!");
+                                    nocontent_counter++;
+                                } else {
+                                    if (t != null) {
+                                        if (page.get("content") != null) {
+                                            if (!t.hasField("body")/*t.getAttribute("body") == null*/) {
+                                                System.err.println("tuple does not have body field ");
+                                                nocontent_counter++;
+                                            } else {
+                                                webpageCache.put(webpageCache.getName() + ":" + t.getAttribute("url"), t);
+                                                //pagesFile.println(t.getAttribute("url"));
+                                                Thread.sleep(delay);
+                                                counter++;
+                                                if(delay>500)
+                                                    System.out.println("Processed: " + counter);
+                                                if (counter % 1000 == 0)
+                                                    System.err.println("loaded " + counter + " tuples");
+                                            }
+                                        } else {
+                                            nocontent_counter++;
+                                        }
+                                    } else {
+                                        System.err.println("tuple  is null ");
+                                        nocontent_counter++;
+                                    }
+                                }
+                            }
+                            //System.out.println("Still Available bytes " + keyFileIS.available());
                         }
-                           webpageCache.put(webpageCache.getName() + ":" + t.getAttribute("url"), t);
-                           counter++;
-                           if (counter % 1000 == 0) {
-                              System.err.println("loaded " + counter + " tuples");
-                           }
-                        }
-                     }
-                  }
-                  currentCounter++;
-                  keyFile = new File(baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".keys");
-                  dataFile = new File(baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".data");
-               }
+                        currentCounter++;
+                        keyFileIS.close();
+                        dataFileIS.close();
 
-               System.out.println("read " + currentCounter + " files");
-               currentCounter = 0;
-               continue;
+                        keyFile = new File(baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".keys");
+                        dataFile = new File(baseDir + "/" + nutchDataPrefix + "-" + currentCounter + ".data");
+                    }
 
-            } catch (Exception e) {
-               e.printStackTrace();
-               currentCounter++;
+                    System.out.println("read " + currentCounter + " files and rejected " + nocontent_counter + ""
+                            + " for having null body");
+                    currentCounter = 0;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    currentCounter++;
+                }
             }
-         }
-         System.out.println("Finally loaded " + counter + " tuples");
-         break;
-      }
-   }
+            System.out.println("Finally loaded: " + counter + " tuples, no content count: " + nocontent_counter);
+            break;
+        }
+    }
+
+    public void setDelay(int delay) {
+        this.delay = delay;
+    }
 
 }

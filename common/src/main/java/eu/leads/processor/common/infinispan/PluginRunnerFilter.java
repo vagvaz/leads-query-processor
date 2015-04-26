@@ -1,5 +1,6 @@
 package eu.leads.processor.common.infinispan;
 
+import com.sun.tools.hat.internal.model.StackTrace;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.plugins.PluginPackage;
 import eu.leads.processor.common.utils.FSUtilities;
@@ -86,6 +87,7 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
     isInitialized = false;
     UUIDname = UUID.randomUUID().toString();
     System.err.println(UUIDname+" DeSerialize " + configString);
+    initialize();
   }
 
   private void initialize() {
@@ -267,46 +269,56 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
 //    }
     String o1 = (String)key;
 //    Object value = newValue;
-    Object value = null;
-    switch (eventType.getType()) {
-      case CACHE_ENTRY_CREATED:
-        value = newValue;
-        break;
-      case CACHE_ENTRY_REMOVED:
-        value = oldValue;
-        break;
-      case CACHE_ENTRY_MODIFIED:
-        value = newValue;
-        break;
-      default:
-        break;
+    try {
+      Object value = null;
+      switch (eventType.getType()) {
+        case CACHE_ENTRY_CREATED:
+          value = newValue;
+          break;
+        case CACHE_ENTRY_REMOVED:
+          value = oldValue;
+          break;
+        case CACHE_ENTRY_MODIFIED:
+          value = newValue;
+          break;
+        default:
+          break;
+      }
+
+      if (value instanceof Tuple) {
+        value = value.toString();
+      }
+      switch (eventType.getType()) {
+        case CACHE_ENTRY_CREATED:
+          if (type.contains(CREATED))
+            plugin.created(key, value, targetCache);
+          break;
+        case CACHE_ENTRY_REMOVED:
+          if (type.contains(REMOVED)) {
+            if (oldValue == null) {
+              log.error("Accept old value is null");
+              return false;
+            }
+            //          value = (String) oldValue;
+            plugin.removed(key, value, targetCache);
+          }
+          break;
+        case CACHE_ENTRY_MODIFIED:
+          if (type.contains(MODIFIED))
+            plugin.modified(key, value, targetCache);
+          break;
+        default:
+          break;
+      }
+    }catch(Exception e ){
+      log.error("Exception when running for key " + key.toString());
+      log.error(e.getMessage() + "\ncause "  + e.getCause().toString());
+      for(StackTraceElement st : e.getStackTrace()){
+        log.error(st.toString());
+      }
+      log.error("END OF EXECPTION");
     }
 
-    if(value instanceof Tuple){
-      value = value.toString();
-    }
-    switch (eventType.getType()) {
-      case CACHE_ENTRY_CREATED:
-        if(type.contains(CREATED))
-          plugin.created(key, value, targetCache);
-        break;
-      case CACHE_ENTRY_REMOVED:
-        if(type.contains(REMOVED)) {
-          if(oldValue==null) {
-            log.error("Accept old value is null");
-            return false;
-          }
-//          value = (String) oldValue;
-          plugin.removed(key, value, targetCache);
-        }
-        break;
-      case CACHE_ENTRY_MODIFIED:
-        if(type.contains(MODIFIED))
-          plugin.modified(key, value, targetCache);
-        break;
-      default:
-        break;
-    }
     return false;
   }
 }

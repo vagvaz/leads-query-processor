@@ -91,8 +91,8 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
     //       timer.scheduleAtFixedRate(report, 0, 2000);
   }
 
-  @Override
-  protected void finalize() {
+//  @Override
+  protected void finalizeTask() {
     //        report.printReport(report.getReport());
     //////////////StdOutputWriter.getInstance().println("");
     //        report.cancel();

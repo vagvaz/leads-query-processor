@@ -30,7 +30,7 @@ public abstract class BasicOperator extends Thread implements Operator{
         this.action = action;
     }
     protected BasicOperator(Node com, InfinispanManager manager,LogProxy log,Action action){
-       super(com.getId()+"-operator-thread");
+       super(action.getId()+"-operator-thread");
        System.err.println(this.getClass().getCanonicalName());
 
        this.com = com;
