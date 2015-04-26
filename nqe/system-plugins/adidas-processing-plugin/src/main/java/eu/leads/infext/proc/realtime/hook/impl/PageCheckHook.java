@@ -29,20 +29,20 @@ import eu.leads.utils.LEADSUtils;
 public class PageCheckHook extends AbstractHook {
 
 	@Override
-	public HashMap<String, HashMap<String, String>> retrieveMetadata(String url, String timestamp, 
-			HashMap<String, HashMap<String, String>> currentMetadata, HashMap<String, MDFamily> editableFamilies) {
+	public HashMap<String, HashMap<String, Object>> retrieveMetadata(String url, String timestamp, 
+			HashMap<String, HashMap<String, Object>> currentMetadata, HashMap<String, MDFamily> editableFamilies) {
 		
-		HashMap<String, HashMap<String, String>> newMetadata = new HashMap<>();
+		HashMap<String, HashMap<String, Object>> newMetadata = new HashMap<>();
 		
-		putLeadsMDIfNeeded(url, "new", "leads_internal", 0, null, currentMetadata, newMetadata, editableFamilies);
-		putLeadsMDIfNeeded(url, "new", "leads_core", 0, null, currentMetadata, newMetadata, editableFamilies);
-		putLeadsMDIfNeeded(url, "previous", "leads_internal", -1, timestamp, currentMetadata, newMetadata, null);
+		putLeadsMDIfNeeded(url, "new", "leads_internal", 0, timestamp, true, currentMetadata, newMetadata, editableFamilies);
+		putLeadsMDIfNeeded(url, "new", "leads_core", 0, timestamp, true, currentMetadata, newMetadata, editableFamilies);
+		putLeadsMDIfNeeded(url, "previous", "leads_internal", -1, timestamp, false, currentMetadata, newMetadata, null);
 		
 		List<String> urlGeneralizations = LEADSUtils.getAllResourceGeneralizations(url);
 		int number = 0;
 		for(String genUrl : urlGeneralizations) {
-			putLeadsMDIfNeeded(genUrl, "general"+number, "leads_urldirectory", 0, timestamp, currentMetadata, newMetadata, null);
-			putLeadsMDIfNeeded(genUrl, "general"+number, "leads_urldirectory_ecom", 0, timestamp, currentMetadata, newMetadata, null);
+			putLeadsMDIfNeeded(genUrl, "general"+number, "leads_urldirectory", -1, timestamp, false, currentMetadata, newMetadata, null);
+			putLeadsMDIfNeeded(genUrl, "general"+number, "leads_urldirectory_ecom", -1, timestamp, false, currentMetadata, newMetadata, null);
 			number += 1;
 		}
 		
@@ -51,28 +51,32 @@ public class PageCheckHook extends AbstractHook {
 	
 
 	@Override
-	public HashMap<String, HashMap<String, String>> process(HashMap<String, HashMap<String, String>> parameters) {
+	public HashMap<String, HashMap<String, Object>> process(HashMap<String, HashMap<String, Object>> parameters) {
 		
-		HashMap<String, HashMap<String, String>> result = new HashMap<>();
-		HashMap<String, String> newInternal = new HashMap<>();
-		HashMap<String, String> newCore     = new HashMap<>();
+		HashMap<String, HashMap<String, Object>> result = new HashMap<>();
+		HashMap<String, Object> newInternal = new HashMap<>();
+		HashMap<String, Object> newCore     = new HashMap<>();
 		
-		HashMap<String,String> newParameters = parameters.get("new");
-		HashMap<String,String> newCoreParameters = parameters.get("new:leads_core");
-		HashMap<String,String> newCrawlParameters = parameters.get("new:leads_crawler_data");
+		HashMap<String, Object> newParameters = parameters.get("new");
+		HashMap<String, Object> newCoreParameters = parameters.get("new:leads_core");
+		HashMap<String, Object> newCrawlParameters = parameters.get("new:leads_crawler_data");
 		
-		HashMap<String,String> previousParameters = parameters.get("previous:leads_internal");
-		List<HashMap<String,String>> generalParametersList = LEADSUtils.getMetadataOfDirectories(parameters,"leads_urldirectory");
-		List<HashMap<String,String>> generalEcomParametersList = LEADSUtils.getMetadataOfDirectories(parameters,"leads_urldirectory_ecom");
+		HashMap<String, Object> previousParameters = parameters.get("previous:leads_internal");
+		List<HashMap<String, Object>> generalParametersList = LEADSUtils.getMetadataOfDirectories(parameters,"leads_urldirectory");
+		List<HashMap<String, Object>> generalEcomParametersList = LEADSUtils.getMetadataOfDirectories(parameters,"leads_urldirectory_ecom");
 		
-		String url     = newParameters.get("uri");
-		String lang    = newCoreParameters.get(mapping.getProperty("leads_core-lang"));
-		String content = newCrawlParameters.get(mapping.getProperty("leads_crawler_data-content"));
-		
+		String url     		= newParameters.get("uri").toString();
+		Object langObj 		= newCoreParameters.get(mapping.getProperty("leads_core-lang"));
+		String lang   		= (langObj == null ? null : langObj.toString());
+		Object contentObj 	= newCrawlParameters.get(mapping.getProperty("leads_crawler_data-content"));
+		String content		= (contentObj == null ? null : contentObj.toString());
+
 		String previousVersionType = null;
 		// Is that a new version of the previously-crawled page?
-		if(previousParameters != null && !previousParameters.isEmpty())
-			previousVersionType = previousParameters.get(mapping.getProperty("leads_internal-page_type"));
+		if(previousParameters != null && !previousParameters.isEmpty()) {
+			Object previousVersionTypeObj = previousParameters.get(mapping.getProperty("leads_internal-page_type"));
+			previousVersionType = (previousVersionTypeObj == null ? null : previousVersionTypeObj.toString());
+		}
 		
 		String extractionCandidatesJSONString = null;
 		String ecomTypeAssumption = null;
@@ -163,20 +167,20 @@ public class PageCheckHook extends AbstractHook {
 	}
 
 
-	private String ecomFindExtractionQuickPath(HashMap<String,String> previousParameters) {
+	private String ecomFindExtractionQuickPath(HashMap<String, Object> previousParameters) {
 		System.out.println("-> Quick extraction path");
-		String successfulSchemasJsonString = previousParameters.get(mapping.get("leads_internal-successful_extractions"));
-		return successfulSchemasJsonString;
+		Object successfulSchemasJsonObj = previousParameters.get(mapping.get("leads_internal-successful_extractions"));
+		return (successfulSchemasJsonObj == null ? null : successfulSchemasJsonObj.toString());
 	}
 	
 	
-	private String [] ecomFindExtractionLongPath(String content, String lang, List<HashMap<String,String>> generalParametersList, 
-			List<HashMap<String,String>> generalEcomParametersList, String previousVersionType) {
+	private String [] ecomFindExtractionLongPath(String content, String lang, List<HashMap<String, Object>> generalParametersList, 
+			List<HashMap<String, Object>> generalEcomParametersList, String previousVersionType) {
 		System.out.println("-> Long extraction path");
 		String extractionCandidatesJSONString = null;
 		
-		HashMap<String, String> fqdnParameters = null;
-		HashMap<String,String> fqdnEcomParameters = null;
+		HashMap<String, Object> fqdnParameters = null;
+		HashMap<String, Object> fqdnEcomParameters = null;
 		
 		EcommerceNewPageTypeEvaluation ecomPageEval = null;
 		
@@ -186,16 +190,16 @@ public class PageCheckHook extends AbstractHook {
 			fqdnEcomParameters = generalEcomParametersList.get(0);
 		
 		if(fqdnEcomParameters != null) {
-			String isBagButtonOnSite = fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-is_atb_button_in_dir"));
+			String isBagButtonOnSite = fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-is_atb_button_in_dir")).toString();
 			List<String> kMeansParams = new ArrayList<>();
-			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-product_cluster_center")));
-			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-category_cluster_center")));
-			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-product_cluster_50pc_dist")));
-			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-product_cluster_80pc_dist")));
-			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-category_cluster_50pc_dist")));
-			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-category_cluster_80pc_dist")));
-			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-scaler_mean")));
-			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-scaler_std")));
+			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-product_cluster_center")).toString());
+			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-category_cluster_center")).toString());
+			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-product_cluster_50pc_dist")).toString());
+			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-product_cluster_80pc_dist")).toString());
+			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-category_cluster_50pc_dist")).toString());
+			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-category_cluster_80pc_dist")).toString());
+			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-scaler_mean")).toString());
+			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-scaler_std")).toString());
 		
 			ecomPageEval = new EcommerceNewPageTypeEvaluation(content,lang, isBagButtonOnSite, kMeansParams);
 			
@@ -240,28 +244,30 @@ public class PageCheckHook extends AbstractHook {
 	}
 	
 	
-	private String getEcomNamePriceExtractionSchemasFromDir(HashMap<String, String> dirEcomParameters) {		
-		String nameExtractionTuples  = dirEcomParameters.get(mapping.getProperty("leads_urldirectory_ecom-name_extraction_tuples"));
-		String priceExtractionTuples = dirEcomParameters.get(mapping.getProperty("leads_urldirectory_ecom-price_extraction_tuples"));	
+	private String getEcomNamePriceExtractionSchemasFromDir(HashMap<String, Object> dirEcomParameters) {
+		Object nameExtractionTuplesObj	= dirEcomParameters.get(mapping.getProperty("leads_urldirectory_ecom-name_extraction_tuples"));
+		String nameExtractionTuples		= (nameExtractionTuplesObj == null ? null : nameExtractionTuplesObj.toString());
+		Object priceExtractionTuplesObj	= dirEcomParameters.get(mapping.getProperty("leads_urldirectory_ecom-price_extraction_tuples"));
+		String priceExtractionTuples	= (priceExtractionTuplesObj == null ? null : priceExtractionTuplesObj.toString());
 		String extractionCandidatesJSONString = LEADSUtils.prepareExtractionCandidatesJSONString(
 				new String[]{nameExtractionTuples,priceExtractionTuples}, new String[]{"ecom_product_name","ecom_product_price"});
 		return extractionCandidatesJSONString;
 	}
 	
-	private String getArticleSchemaFromDir(HashMap<String, String> dirEcomParameters) {	
+	private String getArticleSchemaFromDir(HashMap<String, Object> dirEcomParameters) {	
 		String extractionCandidatesJSONString = LEADSUtils.prepareExtractionCandidatesJSONString(
 				new String[]{"boilerpipe"}, new String[]{"article_content"});
 		return extractionCandidatesJSONString;
 	}
 	
 //	@Override
-//	public HashMap<String, HashMap<String, String>> retrieveMetadata(String url, String timestamp, HashMap<String, HashMap<String, String>> currentMetadata) {
+//	public HashMap<String, HashMap<String, Object>> retrieveMetadata(String url, String timestamp, HashMap<String, HashMap<String, Object>> currentMetadata) {
 //		
-//		HashMap<String, HashMap<String, String>> newMetadata = new HashMap<>();
+//		HashMap<String, HashMap<String, Object>> newMetadata = new HashMap<>();
 //		
 //		String familyKey = "previous:leads_internal";
 //		if(currentMetadata.get(familyKey) == null) {
-//			HashMap<String, String> previousInternalMetadata = new HashMap<String, String>();
+//			HashMap<String, Object> previousInternalMetadata = new HashMap<String, Object>();
 //			URIVersion uriVersion = DataStoreSingleton.getDataStore().getLeadsResourceMDFamily(url, mapping.getProperty("leads_internal"), 2, timestamp).last();
 //			for(Entry<String, Cell> e : uriVersion.getFamily().entrySet()) {
 //				Cell cell = e.getValue();
@@ -278,7 +284,7 @@ public class PageCheckHook extends AbstractHook {
 //			familyKey = "general"+number+":leads_urldirectory";
 //			
 //			if(currentMetadata.get(familyKey) == null) {
-//				HashMap<String, String> generalUrlMetadata = new HashMap<String, String>();
+//				HashMap<String, Object> generalUrlMetadata = new HashMap<String, Object>();
 //				SortedSet<URIVersion> generalizationUriVersionSet = DataStoreSingleton.getDataStore().getLeadsResourceMDFamily(genUrl, mapping.getProperty("leads_urldirectory"), 1, timestamp);
 //				if(generalizationUriVersionSet.size() > 0) {
 //					for(Entry<String, Cell> e : generalizationUriVersionSet.first().getFamily().entrySet()) {
@@ -292,7 +298,7 @@ public class PageCheckHook extends AbstractHook {
 //			familyKey = "general"+number+":leads_urldirectory_ecom";
 //			
 //			if(currentMetadata.get(familyKey) == null) {
-//				HashMap<String, String> generalUrlEcomMetadata = new HashMap<String, String>();
+//				HashMap<String, Object> generalUrlEcomMetadata = new HashMap<String, Object>();
 //				SortedSet<URIVersion> generalizationUriVersionEcomSet = DataStoreSingleton.getDataStore().getLeadsResourceMDFamily(genUrl, mapping.getProperty("leads_urldirectory_ecom"), 1, timestamp);
 //				if(generalizationUriVersionEcomSet.size() > 0) {
 //					for(Entry<String, Cell> e : generalizationUriVersionEcomSet.first().getFamily().entrySet()) {

@@ -125,8 +125,8 @@ public class JZC {
                 System.err.println(e.getMessage());
             }
         }
-        else
-        	returnList = null;
+//        else
+//        	returnList = null;
         request.destroy();
         ctx.destroy();
         

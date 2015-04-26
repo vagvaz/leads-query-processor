@@ -13,20 +13,20 @@ public class BasicSiteMetadataExtractionHook extends AbstractHook {
 	SiteIPGeolocalization siteGeolocalization = new SiteIPGeolocalization();
 
 	@Override
-	public HashMap<String, HashMap<String, String>> retrieveMetadata(
+	public HashMap<String, HashMap<String, Object>> retrieveMetadata(
 			String siteUri, String timestamp,
-			HashMap<String, HashMap<String, String>> currentMetadata,
+			HashMap<String, HashMap<String, Object>> currentMetadata,
 			HashMap<String, MDFamily> editableFamilies) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public HashMap<String, HashMap<String, String>> process(
-			HashMap<String, HashMap<String, String>> parameters) {
+	public HashMap<String, HashMap<String, Object>> process(
+			HashMap<String, HashMap<String, Object>> parameters) {
 		
-		HashMap<String, String> general0VersionParams = parameters.get("general0");
-		String baseUrl = general0VersionParams.get("url");
+		HashMap<String, Object> general0VersionParams = parameters.get("general0");
+		String baseUrl = general0VersionParams.get("url").toString();
 		
 		String domainName = LEADSUtils.nutchUrlToFullyQualifiedDomainName(baseUrl);
 		System.out.println(domainName);
@@ -39,8 +39,8 @@ public class BasicSiteMetadataExtractionHook extends AbstractHook {
 		 * CORE
 		 */
 		
-		HashMap<String, String> general0VersionResult = new HashMap<String, String>();
-		HashMap<String, HashMap<String, String>> result = new HashMap<String, HashMap<String, String>>();
+		HashMap<String, Object> general0VersionResult = new HashMap<String, Object>();
+		HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
 		
 		general0VersionResult.put("siteipcountry", sitecountry);
 		result.put("general0", general0VersionResult);

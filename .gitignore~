@@ -1,0 +1,12 @@
+conf/
+!/common/src/main/java/eu/leads/processor/conf
+*.iml
+.idea/
+.project/
+.classpath/
+*.log.*
+*.log
+target/
+.settings/
+*.pyc
+classifiers/

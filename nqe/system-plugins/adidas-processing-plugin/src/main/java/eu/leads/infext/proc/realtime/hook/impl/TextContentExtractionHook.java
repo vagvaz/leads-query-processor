@@ -16,34 +16,34 @@ public class TextContentExtractionHook extends AbstractHook {
 	JerichoTextContentExtraction textExtr = new JerichoTextContentExtraction();
 
 	@Override
-	public HashMap<String, HashMap<String, String>> retrieveMetadata(String url, String timestamp, 
-			HashMap<String, HashMap<String, String>> currentMetadata, HashMap<String, MDFamily> editableFamilies) {
+	public HashMap<String, HashMap<String, Object>> retrieveMetadata(String url, String timestamp, 
+			HashMap<String, HashMap<String, Object>> currentMetadata, HashMap<String, MDFamily> editableFamilies) {
 			
-		HashMap<String, HashMap<String, String>> newMetadata = new HashMap<>();
+		HashMap<String, HashMap<String, Object>> newMetadata = new HashMap<>();
 
-		putLeadsMDIfNeeded(url, "new", "leads_crawler_data", 0, null, currentMetadata, newMetadata, null);
-		putLeadsMDIfNeeded(url, "new", "leads_core", 0, null, currentMetadata, newMetadata, editableFamilies);
+		putLeadsMDIfNeeded(url, "new", "leads_crawler_data", 0, timestamp, true, currentMetadata, newMetadata, null);
+		putLeadsMDIfNeeded(url, "new", "leads_core", 0, timestamp, true, currentMetadata, newMetadata, editableFamilies);
 		
 		return newMetadata;
 	}
 	
 	
 	@Override
-	public HashMap<String, HashMap<String, String>> process(HashMap<String, HashMap<String, String>> parameters) {
+	public HashMap<String, HashMap<String, Object>> process(HashMap<String, HashMap<String, Object>> parameters) {
 		
-		HashMap<String, HashMap<String, String>> result = null;
+		HashMap<String, HashMap<String, Object>> result = null;
 		
-		HashMap<String, String> newMetadata = parameters.get("new:leads_crawler_data");
+		HashMap<String, Object> newMetadata = parameters.get("new:leads_crawler_data");
 		if(newMetadata!=null) {
-			String content = newMetadata.get(mapping.getProperty("leads_crawler_data-content"));
+			String content = newMetadata.get(mapping.getProperty("leads_crawler_data-content")).toString();
 
-			result = new HashMap<String, HashMap<String, String>>();
-			HashMap<String, String> newVersionResult = new HashMap<String, String>();
+			result = new HashMap<String, HashMap<String, Object>>();
+			HashMap<String, Object> newVersionResult = new HashMap<String, Object>();
 			
 			String textContent = textExtr.extractText(content);
 			
 			newVersionResult.put(mapping.getProperty("leads_core-textcontent"), textContent);
-			newVersionResult.put(mapping.getProperty("leads_core-sentiment"), "0.0");
+			newVersionResult.put(mapping.getProperty("leads_core-sentiment"), 0.0);
 			result.put("new:leads_core", newVersionResult);
 		}
 		

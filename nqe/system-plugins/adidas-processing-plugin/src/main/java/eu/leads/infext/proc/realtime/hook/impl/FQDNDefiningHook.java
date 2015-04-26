@@ -9,29 +9,29 @@ import eu.leads.utils.LEADSUtils;
 public class FQDNDefiningHook extends AbstractHook {
 
 	@Override
-	public HashMap<String, HashMap<String, String>> retrieveMetadata(
+	public HashMap<String, HashMap<String, Object>> retrieveMetadata(
 			String url, String timestamp,
-			HashMap<String, HashMap<String, String>> currentMetadata,
+			HashMap<String, HashMap<String, Object>> currentMetadata,
 			HashMap<String, MDFamily> editableFamilies) {
 		
-		HashMap<String, HashMap<String, String>> newMetadata = new HashMap<>();
+		HashMap<String, HashMap<String, Object>> newMetadata = new HashMap<>();
 
-		putLeadsMDIfNeeded(url, "new", "leads_core", 0, null, currentMetadata, newMetadata, editableFamilies);
+		putLeadsMDIfNeeded(url, "new", "leads_core", 0, timestamp, true, currentMetadata, newMetadata, editableFamilies);
 		
 		return newMetadata;
 	}
 
 	@Override
-	public HashMap<String, HashMap<String, String>> process(
-			HashMap<String, HashMap<String, String>> parameters) {
+	public HashMap<String, HashMap<String, Object>> process(
+			HashMap<String, HashMap<String, Object>> parameters) {
 		
-		HashMap<String, String> newVersionParams = parameters.get("new:leads_core");
+		HashMap<String, Object> newVersionParams = parameters.get("new:leads_core");
 
-		HashMap<String, String> newVersionResult = new HashMap<String, String>();
-		HashMap<String, HashMap<String, String>> result = new HashMap<String, HashMap<String, String>>();
+		HashMap<String, Object> newVersionResult = new HashMap<String, Object>();
+		HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
 		
-		HashMap<String, String> newPage = parameters.get("new");
-		String url = newPage.get("uri");
+		HashMap<String, Object> newPage = parameters.get("new");
+		String url = (String) newPage.get("uri");
 		
 		String fqdn = LEADSUtils.nutchUrlToFullyQualifiedDomainNameUrl(url);
 		

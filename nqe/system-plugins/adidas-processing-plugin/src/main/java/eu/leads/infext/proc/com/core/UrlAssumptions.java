@@ -24,7 +24,7 @@ public class UrlAssumptions {
 	 * @param urlFQDNParameters
 	 * @return
 	 */
-	public List<String> getFQDNAssumption(HashMap<String,String> urlFQDNParameters) {
+	public List<String> getFQDNAssumption(HashMap<String,Object> urlFQDNParameters) {
 //		List<String> assumptionsLists = new ArrayList<>();
 //		
 //		long currentTimestamp = LEADSUtils.getTimestamp();
@@ -55,7 +55,7 @@ public class UrlAssumptions {
 //		return assumptionsLists;
 		
 		List<String> assumptionsList = new ArrayList<>();
-		String assump = urlFQDNParameters.get(mapping.getProperty("leads_urldirectory-dir_assumption"));
+		String assump = urlFQDNParameters.get(mapping.getProperty("leads_urldirectory-dir_assumption")).toString();
 		if(assump != null)
 			assumptionsList.add(assump);
 		

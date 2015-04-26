@@ -14,6 +14,10 @@ public abstract class AbstractProcessing {
 		this.hook = hook;
 	}
 	
-	public abstract void process(String url, String timestamp, HashMap<String, HashMap<String,String>> metadata, HashMap<String, MDFamily> editableFamilies);
+	public abstract void process(String url, String timestamp, HashMap<String, HashMap<String,Object>> metadata, HashMap<String, MDFamily> editableFamilies);
+	
+	public String getHookName() {
+		return hook.getClass().getName();
+	}
 	
 }

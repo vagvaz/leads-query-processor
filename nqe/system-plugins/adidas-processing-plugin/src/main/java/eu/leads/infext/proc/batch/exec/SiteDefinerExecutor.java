@@ -53,7 +53,7 @@ public class SiteDefinerExecutor {
 		/////////////////////////
 		
 		// a. see if already defined
-		SortedSet<URIVersion> dirMdFamilyVersions = dataStore.getLeadsResourceMDFamily(fqdn, mapping.getProperty("leads_urldirectory"), 1, null);
+		SortedSet<URIVersion> dirMdFamilyVersions = dataStore.getLeadsResourceMDFamily(fqdn, mapping.getProperty("leads_urldirectory"), 1, null, true);
 		
 		boolean isEcom = false;
 		boolean isNewsOrBlog = true;

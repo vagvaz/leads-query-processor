@@ -37,10 +37,10 @@ public class LeadsMainContentExtraction {
 			
 			if(extractionGeneralName.equals("article_content")
 					&& extractionDefinitionString.equals("boilerpipe")) {
-				String article = boilerpipe.extractArticle(content);
+				final String article = boilerpipe.extractArticle(content);
 				if(NewsBlogArticleAnalysis.isArticle(article)) {
 					extractedValues.put(extractionGeneralName, 
-							new ArrayList<String>() {{ add(boilerpipe.extractArticle(content)); }});
+							new ArrayList<String>() {{ add(article); }});
 					extractionTypes[index] = extractionGeneralName;
 					extractionPaths[index] = "boilerpipe";
 				}
