@@ -107,7 +107,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 	if(ecache!=null) {
     ecache.stop();
   }
-	if(outputCache!=null && !ecache.getName().equals(ouputCache.getName()))
+	if(outputCache!=null && !ecache.getName().equals(outputCache.getName()))
       	  outputCache.stop();
 	if(emanager!=null)
 	  emanager.stop();
