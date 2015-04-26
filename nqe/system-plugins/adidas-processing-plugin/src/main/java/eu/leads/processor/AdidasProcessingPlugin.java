@@ -176,7 +176,8 @@ public class AdidasProcessingPlugin implements PluginInterface {
 		
 		String lastModified = headers.get("Last-Modified");
 		if(lastModified!=null) System.out.println("Last-Modified:"+lastModified);
-				
+		
+		if(contentType == null) return false;
 		if(contentType.toLowerCase().contains("html")) return true;
 		else return false;
 	}
