@@ -46,17 +46,26 @@ public class DocumentKeywordSearch {
 
     // 0. Specify the analyzer for tokenizing text.
     //    The same analyzer should be used for indexing and searching
-    private StandardAnalyzer analyzer = new StandardAnalyzer();
+    private StandardAnalyzer analyzer;
     // 1. create the index
-    private Directory index = new RAMDirectory();
-    private IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_4_10_1, analyzer);
+    private Directory index;
+    private IndexWriterConfig config;
     
-    private IndexWriter w = null;
+    private IndexWriter w;
     
     public DocumentKeywordSearch() {
 		try {
+			System.out.println("Lucene init...");
+			analyzer = new StandardAnalyzer();
+			System.out.println("Lucene init... analyzer = new StandardAnalyzer(); DONE");			
+			index = new RAMDirectory();
+			System.out.println("Lucene init... index = new RAMDirectory(); DONE");
+			config = new IndexWriterConfig(Version.LUCENE_4_10_1, analyzer);
+			System.out.println("Lucene init... config = new IndexWriterConfig(Version.LUCENE_4_10_1, analyzer); DONE");
 			w = new IndexWriter(index, config);
-		} catch (IOException e) {
+			System.out.println("Lucene init... w = new IndexWriter(index, config); DONE");
+		} catch (Exception e) {
+			System.out.println("Lucene init... EXCEPTION caught with a message: "+e.getMessage());
 			e.printStackTrace();
 		}
 	}
