@@ -26,13 +26,7 @@ public class KeywordsListSingleton {
 	}
 	
 	private void init() {
-		Session session = (Session) DataStoreSingleton.getDataStore().getFamilyStorageHandle(null);
-		
-		ResultSet rs = session.execute("SELECT * FROM adidas.keywords");
-		
-		for(Row row : rs) {
-			keywordsList.add(row.getString(0).toLowerCase());
-		}
+		keywordsList = DataStoreSingleton.getDataStore().getUsersKeywordsList();
 	}
 	
 	public List<String> getKeywordsList() {

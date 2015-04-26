@@ -87,6 +87,8 @@ public class PythonQueueCall {
 	
 	public List<Object> call(String moduleName, Object... args) {
 		
+		/* TIME */ long start = System.currentTimeMillis();
+		
 		List<Object> retValue = null;
 		
 		List<String> params = new ArrayList<>();
@@ -160,6 +162,8 @@ public class PythonQueueCall {
 	        System.out.println("Received reply:\n\n" + retValue);	
         
         removeFiles(filenamesList);
+
+		/* TIME */ System.err.println("+++ PythonQueueCall.call() time: "+((System.currentTimeMillis()-start)/1000.0)+" s");
         
 		return retValue;		
 	}

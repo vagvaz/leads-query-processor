@@ -1,5 +1,6 @@
 package eu.leads.infext.logging.redirect;
 
+import java.io.File;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -22,7 +23,7 @@ public class StdLoggerRedirect {
 	
 	private static Handler fileHandler = null;
 	
-	public static void initLogging() throws Exception {
+	public static void initLogging(String dir) throws Exception {
 		
 		if(!isExecuted) {
 			System.err.println("Turning logging on, check logging files");
@@ -32,17 +33,27 @@ public class StdLoggerRedirect {
 			logManager.reset();
 			
 			final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
-			
+		
 			// log file max size 10K, 3 rolling files, append-on-open
-			fileHandler = new FileHandler("%h/logs/leads-log", 1000000, 10, append);
-			fileHandler.setFormatter(new Formatter() {
+			Formatter formatter = new Formatter() {
 			      public String format(LogRecord record) {
 			          return record.getLevel() + "\t" + dateFormat.format(new Date(record.getMillis())) + ":\t" + 
-			        		  record.getSourceClassName() + "::" + record.getSourceMethodName() + ":\t" +
-			        		  record.getMessage() + "\n";
+			        		  /*record.getSourceClassName() + "::" + record.getSourceMethodName() + ":\t" +*/
+			        		 record.getMessage() + "\n";
 			        }
-			});
-			Logger.getLogger("").addHandler(fileHandler);
+			};			
+			
+			File file = new File(dir);
+			file.mkdirs();
+			
+			fileHandler = new FileHandler(dir+"/leads-adidas-out", 10000000, 100, append);
+			fileHandler.setFormatter(formatter);
+			Logger.getLogger("stdout").addHandler(fileHandler);
+			
+			fileHandler = new FileHandler(dir+"/leads-adidas-err", 10000000, 100, append);
+			fileHandler.setFormatter(formatter);
+			Logger.getLogger("stderr").addHandler(fileHandler);
+			
 	        // preserve old stdout/stderr streams in case they might be useful      
 	        stdout = System.out;                                        
 	        stderr = System.err;                                        

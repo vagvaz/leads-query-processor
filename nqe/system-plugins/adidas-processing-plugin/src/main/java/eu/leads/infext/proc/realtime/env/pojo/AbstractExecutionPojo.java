@@ -19,9 +19,9 @@ public abstract class AbstractExecutionPojo {
 	protected List<AbstractProcessing> processingQueue = new ArrayList<>();
 	
 	public AbstractExecutionPojo() throws Exception {
-		StdLoggerRedirect.initLogging();
+//		StdLoggerRedirect.initLogging();
 	}
 
-	public abstract void execute(String uri, String timestamp, String cacheName, HashMap<String, String> cacheColumns);
+	public abstract void execute(String uri, String timestamp, String cacheName, HashMap<String, Object> cacheColumns);
 	
 }

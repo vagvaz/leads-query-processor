@@ -34,7 +34,7 @@ public class NewsBlogArticleAnalysis {
 		pyCall.sendViaFile(0);
 		List<Object> retValues = pyCall.call(apName, content, url);
 		
-		if(retValues.size()>=3) {		
+		if(retValues.size()>=3) {
 			int year = (int) retValues.get(0);
 			int month = (int) retValues.get(1);
 			int day = (int) retValues.get(2);

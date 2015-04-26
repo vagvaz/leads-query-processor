@@ -13,35 +13,37 @@ public class ValuableContentExtractionHook extends AbstractHook {
 	private LeadsMainContentExtraction leadsMainContentExtraction = new LeadsMainContentExtraction();
 
 	@Override
-	public HashMap<String, HashMap<String, String>> retrieveMetadata(
+	public HashMap<String, HashMap<String, Object>> retrieveMetadata(
 			String url, String timestamp,
-			HashMap<String, HashMap<String, String>> currentMetadata,
+			HashMap<String, HashMap<String, Object>> currentMetadata,
 			HashMap<String, MDFamily> editableFamilies) {
 		
-		HashMap<String, HashMap<String, String>> newMetadata = new HashMap<>();
+		HashMap<String, HashMap<String, Object>> newMetadata = new HashMap<>();
 		
-		putLeadsMDIfNeeded(url, "new", "leads_internal", 0, null, currentMetadata, newMetadata, editableFamilies);
-		putLeadsMDIfNeeded(url, "new", "leads_resourceparts", 0, null, currentMetadata, newMetadata, editableFamilies);
+		putLeadsMDIfNeeded(url, "new", "leads_internal", 0, timestamp, true, currentMetadata, newMetadata, editableFamilies);
+		putLeadsMDIfNeeded(url, "new", "leads_resourceparts", 0, timestamp, true, currentMetadata, newMetadata, editableFamilies);
 		
 		return newMetadata;
 	}
 
 	@Override
-	public HashMap<String, HashMap<String, String>> process(
-			HashMap<String, HashMap<String, String>> parameters) {
+	public HashMap<String, HashMap<String, Object>> process(
+			HashMap<String, HashMap<String, Object>> parameters) {
 		
-		HashMap<String, HashMap<String, String>> result = new HashMap<>();
-		HashMap<String, String> newInternalResult = new HashMap<>();
-		HashMap<String, String> newResourcePartResult = new HashMap<>();
+		HashMap<String, HashMap<String, Object>> result = new HashMap<>();
+		HashMap<String, Object> newInternalResult = new HashMap<>();
+		HashMap<String, Object> newResourcePartResult = new HashMap<>();
 		
-		HashMap<String, String> newMD = parameters.get("new");
-		HashMap<String, String> newCrawled = parameters.get("new:leads_crawler_data");
-		HashMap<String, String> newInternal = parameters.get("new:leads_internal");
+		HashMap<String, Object> newMD = parameters.get("new");
+		HashMap<String, Object> newCrawled = parameters.get("new:leads_crawler_data");
+		HashMap<String, Object> newInternal = parameters.get("new:leads_internal");
 		
-		String content = newCrawled.get(mapping.get("leads_crawler_data-content"));
-		String candidatesExtractionJSON = newInternal.get(mapping.get("leads_internal-extraction_candidates"));
-		
-		if(candidatesExtractionJSON != null) {
+		String content = newCrawled.get(mapping.get("leads_crawler_data-content")).toString();
+		Object candidatesExtractionJSONObj	= newInternal.get(mapping.get("leads_internal-extraction_candidates"));
+
+		if(candidatesExtractionJSONObj != null) {
+			String candidatesExtractionJSON = candidatesExtractionJSONObj.toString();
+			
 			HashMap<String, List<String>> extractedValues = leadsMainContentExtraction.extract(content, candidatesExtractionJSON);
 			String successfulExtractionJSON = leadsMainContentExtraction.getLastSuccessfulExtractionJSON();
 			

@@ -5,6 +5,7 @@
 # Author: Daniel Lundin <dln(at)eintr(dot)org>
 #
 
+import os
 import sys
 import zmq
 from eu.leads.infext.python.CLAPI import helloworld_clinterface,\
@@ -46,7 +47,8 @@ def factory(str):
 def setup_custom_logger(name,fhsuffix):
     formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
 
-    handler = logging.FileHandler('/home/nonlinear/leads-pzs-'+fhsuffix+'.log')
+    mainpythondir = os.path.dirname(os.path.realpath(__file__))+"../../../../../"
+    handler = logging.FileHandler(mainpythondir+'leads-pzs-'+fhsuffix+'.log')
     handler.setFormatter(formatter)
 
     logger = logging.getLogger(name)

@@ -1,10 +1,27 @@
 package eu.leads.processor;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import eu.leads.PropertiesSingleton;
+import eu.leads.datastore.DataStoreSingleton;
+import eu.leads.infext.logging.redirect.StdLoggerRedirect;
 import eu.leads.infext.proc.realtime.env.pojo.PageProcessingPojo;
+import eu.leads.infext.python.PZSStart;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.PluginInterface;
+import eu.leads.utils.LEADSUtils;
+
 import org.apache.commons.configuration.Configuration;
 import org.infinispan.Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by vagvaz on 10/14/14.
@@ -32,60 +49,49 @@ public class AdidasProcessingPlugin implements PluginInterface {
 
    @Override
    public void initialize(Configuration config, InfinispanManager manager) {
-//	  try {
-//	      this.configuration = config;
-//	      this.manager = manager;
-//	      
-	      System.out.println("%%%%% Initializing the plugin");
+	  try {
+	      this.configuration = config;
+	      this.manager = manager;
 	      
-//	      // KEEP config
-//	      PropertiesSingleton.setConfig(config);
-//	      
-//	      // READ Configuration for Cassandra
-//	//      DataStoreSingleton.configureDataStore(config);
-//	      
-//	      // READ Configuration for the plugin
-//	      PropertiesSingleton.setResourcesDir(config.getString("resources_path"));
-//	      // TODO something more ??
-//	      
-//	//      try {
-//	      if(pageProcessingPojo == null)
-//	    	  pageProcessingPojo = new PageProcessingPojo();
-//	//	  } catch (Exception e) {
-//	//		  e.printStackTrace();
-//			  // TODO
-//	//	  }
-////	      try {
-////	      System.setOut(outputFile("/data/leads.out"));
-////	      System.setErr(outputFile("/data/leads.err"));
-//	      System.out.println("Let's start the party!");
-////	      } catch (java.io.FileNotFoundException e) {
-////	         e.printStackTrace();
-////	      }
-//	      
-//	      if(!isPZSStarted) {
-//		      // Start Python ZeroMQ Server processes!
-//		      List<String> endpoints = config.getList("pzsEndpoints");
-//		      String pythonPath = "PYTHONPATH="+config.getString("pythonPath");
-//		      String commandBase = "/usr/bin/python -m eu.leads.infext.python.CLAPI.pzs ";
-//		      String[] envp = {pythonPath};
-//			  for(int i=0; i<endpoints.size(); i++) {
-//		    	  String endpoint = endpoints.get(i);
-//		    	  String command  = commandBase+endpoint;
-//		    	  Runtime.getRuntime().exec(command, envp);
-//			  }
-//			  isPZSStarted = true;
-//	      }
-//      } 
-//      catch (Exception e) {
-//    	  System.out.println("Exception during initializing the plugin!");
-//    	  e.printStackTrace();
-//      }
+	      setLogging(configuration);
+	      
+	      System.out.println("%%%%% Initializing the plugin...");
+	
+	      // KEEP config
+	      PropertiesSingleton.setConfig(config);
+	      
+	      // READ Configuration for Cassandra
+	      DataStoreSingleton.configureDataStore(config);
+	      
+	      // READ Configuration for the plugin
+	      PropertiesSingleton.setResourcesDir(config.getString("resources_path"));
+
+	      if(pageProcessingPojo == null)
+	    	  pageProcessingPojo = new PageProcessingPojo();
+      
+	      // START Python ZeroMQ Server!
+	      PZSStart.start(config);
+	      
+      } 
+      catch (Exception e) {
+    	  System.out.println("Exception during initializing the plugin!");
+    	  e.printStackTrace();
+      }
+   }
+   
+   private void setLogging(Configuration config) throws Exception {
+	   String dir = config.getString("loggingDir");
+	   System.out.println("Logging to "+dir);
+	   StdLoggerRedirect.initLogging(dir);
+//	   System.setOut(outputFile(dir+"/leads-java-"+(new Date().getTime())+".out"));
+//	   System.setErr(outputFile(dir+"/leads-java-"+(new Date().getTime())+".err"));
    }
 
-   protected java.io.PrintStream outputFile(String name) throws java.io.FileNotFoundException {
-       return new java.io.PrintStream(new java.io.BufferedOutputStream(new java.io.FileOutputStream(name)));
-   }
+//   protected java.io.PrintStream outputFile(String name) throws java.io.FileNotFoundException {
+//	   File file = new File(name);
+//	   file.getParentFile().mkdirs();
+//       return new java.io.PrintStream(new java.io.BufferedOutputStream(new java.io.FileOutputStream(file)));
+//   }
 
    @Override
    public void cleanup() {
@@ -101,44 +107,95 @@ public class AdidasProcessingPlugin implements PluginInterface {
 
    @Override
    public void created(Object key, Object value, Cache<Object, Object> cache) {
-	   System.out.println("XXXcreated() " + key.toString());
-      processTuple(key,value);
+	  //
+	  /* TIME */ Long start = System.currentTimeMillis();
+	  //
+      boolean isProcessed = processTuple(key,value);
+      
+      if(isProcessed) {
+	  //
+      /* TIME */ Long finish = System.currentTimeMillis();
+	  /* TIME */ System.err.println("+++ Plugin.created() time for "+key+": "+((finish-start)/1000.0)+" s");
+	  //   
+      }
    }
 
-   /**
- * @param key
- * @param value
- */
-   private void processTuple(Object key, Object value) {
-//	   try {
-		   System.out.println("######## processTuple");
-        System.err.println("key; " + key.toString() + "\n" + value.toString());
-//		   String uri = (String) key;
-//			String webpageJson = (String)value;
-//			Tuple webpage = new Tuple(webpageJson);
-//				      
-//			String content = webpage.getAttribute("content");
-//			String timestamp = webpage.getNumberAttribute("timestamp").toString();
-//			HashMap<String,String> cacheColumns = new HashMap<>();
-//			cacheColumns.put("content", content);
-//			cacheColumns.put("fetchTime", timestamp);
-//				
-//			// Here Do the heavy processing stuff
-//			System.out.println("########:"+getClassName().toString() + " calls a processing POJO on a key " + key);
-//			pageProcessingPojo.execute(uri, timestamp, "webpages", cacheColumns);
+    /**
+     * 
+     * @param key
+     * @param value
+     */
+    private boolean processTuple(Object key, Object value) {
+	   
+	    System.out.println("######## processTuple() method started");
+		
+		// Turn extract table:nutch_uri from key
+		String [] tableUri = key.toString().split(":", 2);
+		String table = tableUri[0];
+		String uri = tableUri[1];
+		uri = normalizeUri(uri);
+		
+		// Convert value into tuple
+		String webpageJson = (String)value;
+		Tuple webpage = new Tuple(webpageJson);
+		
+		// Extract content and timestamp from the tuple
+		String content    = webpage.getAttribute("body");
+		String timestamp  = webpage.getAttribute("published");
+		Object headersObj = webpage.getGenericAttribute("headers");
+		
+		if(content != null && timestamp != null && headersObj != null) {
+			if(isContentTypeHTML(headersObj)) {
+				HashMap<String,Object> cacheColumns = new HashMap<>();
+				cacheColumns.put("default.content.content", content);
 			
-/*			// ZEROMQ PYTHON CALL CHECK
- * 			PythonQueueCall pythonCall = new PythonQueueCall();
- *			pythonCall.call("eu.leads.infext.python.CLAPI.helloworld_clinterface","hello","world");
- *          System.out.println("Python called, no exceptions.");
- */
-			
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-   }
+				System.out.println("table:     " + table);
+				System.out.println("uri:       " + uri);
+				System.out.println("content:   " + (content.length()>80 ? content.substring(0,80)+"..." : content) );
+				System.out.println("timestamp: " + timestamp);
+				
+				// Execute page processing
+				System.out.println("Starting with the page processing...");
+				System.err.println("Processing "+uri+" ...");
+				pageProcessingPojo.execute(uri, timestamp, table, cacheColumns);
+				return true;
+			}
+			else {
+				System.out.println("Content-Type is none of html types. Skipping.");
+			}
+		}
+		else {
+			System.out.println("Either content, timestamp or header is null. Skipping.");
+		}
+		return false;
+    }
 
-   @Override
+    private boolean isContentTypeHTML(Object headersObj) {
+    	Map<String, String> headers = (Map<String, String>) headersObj;
+		String contentType = headers.get("Content-Type");
+		
+		String lastModified = headers.get("Last-Modified");
+		if(lastModified!=null) System.out.println("Last-Modified:"+lastModified);
+				
+		if(contentType.toLowerCase().contains("html")) return true;
+		else return false;
+	}
+
+	/**
+     * For now, we simply treat URIs with various requests values as the same one.
+     * 
+     * @param uri
+     * @return
+     */
+    private String normalizeUri(String uri) {
+		int requestStart = uri.indexOf("?");
+		if(requestStart>0)
+			return uri.substring(0, requestStart);
+		else
+			return uri;
+	}
+
+@Override
    public void removed(Object key, Object value, Cache<Object, Object> cache) {
       // Do Nothing probably never called.
 
@@ -153,75 +210,5 @@ public class AdidasProcessingPlugin implements PluginInterface {
    public void setConfiguration(Configuration config) {
       this.configuration = config;
    }
-//	
-//	  private String id;
-//	  private Cache targetCache;
-//	  private List<String> attributes;
-//	  private Logger log = LoggerFactory.getLogger(AdidasProcessingPlugin.class);
-//
-//	  @Override
-//	  public String getId() {
-//	    return id;
-//	  }
-//
-//	  @Override
-//	  public void setId(String s) {
-//	    this.id = s;
-//	  }
-//
-//	  @Override
-//	  public String getClassName() {
-//	    return AdidasProcessingPlugin.class.getCanonicalName();
-//	  }
-//
-//	  @Override
-//	  public void initialize(Configuration configuration, InfinispanManager infinispanManager) {
-//	    String targetCacheName = configuration.getString("cache");
-//	    if ( targetCacheName != null || !targetCacheName.equals("") ) {
-//	      targetCache = (Cache) infinispanManager.getPersisentCache(targetCacheName);
-//	    } else {
-//	      System.out.println("TargetCache is not defined using default for not breaking");
-//	      targetCache = (Cache) infinispanManager.getPersisentCache("default");
-//	    }
-//	    attributes = configuration.getList("attributes");
-//	  }
-//
-//	  @Override
-//	  public void cleanup() {
-//
-//	  }
-//
-//	  @Override
-//	  public void modified(Object key, Object value, Cache<Object, Object> objectObjectCache) {
-//		  System.out.println("YXY");
-//	    Tuple t = new Tuple(value.toString());
-//	    processTuple(key.toString(), t);
-//	  }
-//
-//	  protected void processTuple(String key, Tuple tuple) {
-//	    tuple.keepOnly(attributes);
-//	    targetCache.put(key, tuple.asString());
-//	  }
-//
-//	  @Override
-//	  public void created(Object key, Object value, Cache<Object, Object> objectObjectCache) {
-//		  System.out.println("YXX");
-//	    Tuple t = new Tuple(value.toString());
-//	    processTuple(key.toString(), t);
-//	  }
-//
-//	  @Override
-//	  public void removed(Object o, Object o2, Cache<Object, Object> objectObjectCache) {
-//
-//	  }
-//
-//	  @Override
-//	  public Configuration getConfiguration() {
-//	    return null;
-//	  }
-//
-//	  @Override
-//	  public void setConfiguration(Configuration configuration) {
-//
-//	  }
+
 }

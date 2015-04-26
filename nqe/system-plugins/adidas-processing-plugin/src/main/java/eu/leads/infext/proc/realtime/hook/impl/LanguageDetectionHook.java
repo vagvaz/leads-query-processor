@@ -37,31 +37,31 @@ public class LanguageDetectionHook extends AbstractHook {
 	}
 	
 	@Override
-	public HashMap<String, HashMap<String, String>> retrieveMetadata(String url, String timestamp, 
-			HashMap<String, HashMap<String, String>> currentMetadata, HashMap<String, MDFamily> editableFamilies) {
+	public HashMap<String, HashMap<String, Object>> retrieveMetadata(String url, String timestamp, 
+			HashMap<String, HashMap<String, Object>> currentMetadata, HashMap<String, MDFamily> editableFamilies) {
 		
-		HashMap<String, HashMap<String, String>> newMetadata = new HashMap<>();
+		HashMap<String, HashMap<String, Object>> newMetadata = new HashMap<>();
 
-		putLeadsMDIfNeeded(url, "new", "leads_core", 0, null, currentMetadata, newMetadata, editableFamilies);
+		putLeadsMDIfNeeded(url, "new", "leads_core", 0, timestamp, true, currentMetadata, newMetadata, editableFamilies);
 		
 		return newMetadata;
 	}
 
 	@Override
-	public HashMap<String, HashMap<String, String>> process(
-			HashMap<String, HashMap<String, String>> parameters) {
+	public HashMap<String, HashMap<String, Object>> process(
+			HashMap<String, HashMap<String, Object>> parameters) {
 		
-		HashMap<String, String> newVersionParams = parameters.get("new:leads_core");
+		HashMap<String, Object> newVersionParams = parameters.get("new:leads_core");
 
-		HashMap<String, String> newVersionResult = new HashMap<String, String>();
-		HashMap<String, HashMap<String, String>> result = new HashMap<String, HashMap<String, String>>();
+		HashMap<String, Object> newVersionResult = new HashMap<String, Object>();
+		HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
 		
-		String pageContent = newVersionParams.get(mapping.getProperty("leads_core-maincontent"));
+		Object pageContent = newVersionParams.get(mapping.getProperty("leads_core-maincontent"));
 		if(pageContent == null)
 			pageContent = newVersionParams.get(mapping.getProperty("leads_core-textcontent")); // purely text content
 		
 		if(pageContent != null) {
-			String lang = langdetection.detectLanguage(pageContent);
+			String lang = langdetection.detectLanguage(pageContent.toString());
 			newVersionResult.put(mapping.getProperty("leads_core-lang"), lang);
 			
 			result.put("new:leads_core", newVersionResult);
@@ -71,7 +71,7 @@ public class LanguageDetectionHook extends AbstractHook {
 	}
 	
 //	@Override
-//	public HashMap<String, HashMap<String, String>> retrieveMetadata(String url, String timestamp, HashMap<String, HashMap<String, String>> currentMetadata) {
+//	public HashMap<String, HashMap<String, Object>> retrieveMetadata(String url, String timestamp, HashMap<String, HashMap<String, Object>> currentMetadata) {
 //		
 //		Map<String, Map<String, Object>> metadata = new HashMap<>();
 //		
