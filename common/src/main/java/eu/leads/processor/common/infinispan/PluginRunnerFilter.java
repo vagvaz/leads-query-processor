@@ -87,6 +87,7 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
     isInitialized = false;
     UUIDname = UUID.randomUUID().toString();
     System.err.println(UUIDname+" DeSerialize " + configString);
+    initialize();
   }
 
   private void initialize() {
