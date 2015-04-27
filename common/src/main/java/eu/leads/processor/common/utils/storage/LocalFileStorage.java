@@ -50,6 +50,11 @@ public class LocalFileStorage implements LeadsStorage {
     return LeadsStorageFactory.LOCAL;
   }
 
+  @Override
+  public boolean delete(String s) {
+    return false;
+  }
+
   @Override public boolean initializeReader(Properties configuration) {
     return true;
   }

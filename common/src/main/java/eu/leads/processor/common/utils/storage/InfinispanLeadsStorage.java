@@ -87,4 +87,9 @@ public class InfinispanLeadsStorage implements LeadsStorage {
   @Override public String getStorageType() {
     return null;
   }
+
+  @Override
+  public boolean delete(String s) {
+    return false;
+  }
 }

@@ -2,8 +2,12 @@ package eu.leads.processor.common.plugins;
 
 import com.google.common.base.Strings;
 import eu.leads.processor.common.utils.FSUtilities;
+import org.apache.hadoop.io.MD5Hash;
 import org.vertx.java.core.json.JsonObject;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -17,28 +21,58 @@ public class PluginPackage extends JsonObject implements Serializable {
   private String jarFilename;
   private String configFileName;
   private String user;
+  private MD5Hash key=null;
 
+  public boolean check_MD5(MD5Hash key){
+      if(key!=null)
+        return this.key.equals(key);
+      else
+          return false;
+  }
 
+  public void calculate_MD5(){
+      if(jarFilename!=null){
+          key = null;
+          try {
+              FileInputStream fileInputStream= new FileInputStream(jarFilename);
+              System.out.println("MD5 key : " + key);
+              key = MD5Hash.digest(fileInputStream);
+              fileInputStream.close(); //mark/reset not supported
+          } catch (IOException e) {
+              System.err.println("Error with " + jarFilename + " check tha the file exists and is readable." );
+              e.printStackTrace();
+          }
+
+      }
+  }
   public PluginPackage(String id, String className) {
     this.id = id;
     this.className = className;
   }
 
   public PluginPackage(String id, String className, String jarFileName) {
-    this.id = id;
-    this.className = className;
-    if (!Strings.isNullOrEmpty(jarFileName)) {
-      //            loadJarFromFile(jarFileName);
-      this.jarFilename = jarFileName;
-    }
-
+    this(id, className, jarFileName, null);
   }
+
 
   public PluginPackage(String id, String className, String jarFileName, String configFileName) {
     this.id = id;
     this.className = className;
     if (!Strings.isNullOrEmpty(jarFileName)) {
       //            loadJarFromFile(jarFileName);
+      FileInputStream fileInputStream= null;
+      try {
+        fileInputStream = new FileInputStream(jarFileName);
+        MD5Hash key = MD5Hash.digest(fileInputStream);
+        fileInputStream.close();
+      } catch (FileNotFoundException e) {
+        System.err.print("File jarFilename does not Exist");
+        //e.printStackTrace();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      fileInputStream.mark(0);
+
       this.jarFilename = jarFileName;
     }
     if (!Strings.isNullOrEmpty(configFileName)) {

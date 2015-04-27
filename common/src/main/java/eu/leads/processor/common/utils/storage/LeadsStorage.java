@@ -18,4 +18,6 @@ public interface LeadsStorage extends LeadsStorageWriter,LeadsStorageReader {
   Properties getConfiguration();
   void setConfiguration(Properties configuration);
   String getStorageType();
+
+  boolean delete(String s);
 }

@@ -28,6 +28,7 @@ public class HDFSStorage implements LeadsStorage {
     private Path basePath;
     private Properties storageConfiguration;
     UserGroupInformation ugi;
+
     @Override
     public boolean initialize(Properties configuration) {
         boolean result = false;
@@ -62,6 +63,28 @@ public class HDFSStorage implements LeadsStorage {
     }
 
     @Override
+    public boolean delete(String s) {
+        Path newFolderPath= new Path(s);
+        try {
+            if(fileSystem.exists(newFolderPath))
+               if(fileSystem.delete(newFolderPath, true)) {//Delete existing Directory
+                   log.info("Deleted existing folder " + s);
+                   System.out.println("Deleted existing folder " + s);
+                   return true;
+               }
+                else
+                log.error("Unable to delete folder: " + s);
+            else
+            log.info("Deleted existing folder "+ s);
+
+        } catch (IOException e) {
+            log.error("Unable to delete folder: " + s);
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
     public boolean initializeReader(Properties configuration) {
         try {
             hdfsConfiguration = new org.apache.hadoop.conf.Configuration(false);
@@ -69,12 +92,11 @@ public class HDFSStorage implements LeadsStorage {
             hdfsConfiguration.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
             hdfsConfiguration.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
 
-            // added by angelos
-            hdfsConfiguration.set("hdfs.url", "hdfs://snf-618466.vm.okeanos.grnet.gr:8020");
+
+            hdfsConfiguration.set("hdfs.url", configuration.getProperty("prefix"));//"hdfs://snf-618466.vm.okeanos.grnet.gr:8020");
             hdfsConfiguration.set("prefix", "/user/vagvaz/");
-            // end
 
-
+            hdfsConfiguration.set("prefix", configuration.getProperty("prefix"));
             //fileSystem = FileSystem.get(hdfsConfiguration);
             fileSystem = FileSystem.get(getDefaultUri(hdfsConfiguration), hdfsConfiguration, configuration.getProperty("hdfs.user"));
 
@@ -94,26 +116,21 @@ public class HDFSStorage implements LeadsStorage {
     @Override
     public byte[] read(final String uri) {
         try {
-             return ugi.doAs(new PrivilegedExceptionAction<byte[]>() {
+            return ugi.doAs(new PrivilegedExceptionAction<byte[]>() {
                 @Override
                 public byte[] run() throws IOException {
 
-
                     byte[] result;
-                    // added by angelos
                     Path path = new Path(uri);
                     SequenceFile.Reader reader = new SequenceFile.Reader(hdfsConfiguration, SequenceFile.Reader.file(path));
-                    // end
+
 
                     //            SequenceFile.Reader reader = new SequenceFile.Reader(hdfsConfiguration);
                     HDFSByteChunk chunk = new HDFSByteChunk();
-
                     //            reader.getCurrentValue(chunk);
 
-                    // added
                     IntWritable key = new IntWritable();
                     reader.next(key, chunk);
-                    // end
 
                     result = chunk.getData();
 
@@ -156,8 +173,14 @@ public class HDFSStorage implements LeadsStorage {
     public long size(String path) {
         Path file = new Path(path);
         try {
-            FileStatus fileStatus = fileSystem.getFileStatus(file);
-            return fileStatus.getLen();
+            if(path.endsWith("/"))//folder
+                return fileSystem.getContentSummary(file).getSpaceConsumed();
+            else
+            {
+                FileStatus fileStatus = fileSystem.getFileStatus(file);
+                return fileStatus.getLen();
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
             return -1;
@@ -191,10 +214,11 @@ public class HDFSStorage implements LeadsStorage {
     }
 
     @Override
-    public long download(String source, String destination) {
+    public long download(String hdfs_source, String localfile_destination) {
+        hdfs_source = "/"+hdfs_source;
         long readBytes = 0;
         try {
-            File destFile = new File(destination);
+            File destFile = new File(localfile_destination);
             if (destFile.exists()) {
                 destFile.delete();
             } else {
@@ -202,15 +226,25 @@ public class HDFSStorage implements LeadsStorage {
                 parent.mkdirs();
                 destFile.createNewFile();
             }
-            FileOutputStream file = new FileOutputStream(destination);
-            String[] pieces = parts(source);
-
+            FileOutputStream file = new FileOutputStream(localfile_destination);
+            String[] pieces = parts(hdfs_source);
+            log.info("File splited into " + pieces.length + "pieces ");
+            System.out.println("File is splited into " + pieces.length + " pieces ");
+            long filesize=0;
             for (String piece : pieces) {
                 byte[] pieceBytes = read(piece);
                 file.write(pieceBytes);
                 readBytes += pieceBytes.length;
+                log.info("Succesfully download " + readBytes + " bytes");
+                System.out.println("Succesfully download " + pieceBytes.length + " bytes");
             }
             file.close();
+            System.out.println("Download completed Total downloaded " + readBytes + " bytes into file " + localfile_destination );
+//            FileInputStream fileInputStream=new FileInputStream(localfile_destination);
+//            MD5Hash key = MD5Hash.digest(fileInputStream);
+//            fileInputStream.close();
+//            System.out.println("MD5 key : " + key);
+//            log.info("MD5 key : " + key);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
