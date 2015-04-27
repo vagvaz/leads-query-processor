@@ -144,6 +144,9 @@ public class PlannerCatalogWorker extends Verticle {
 
       System.out.println(catalog.getFunctions().size() + " functions loaded.");
 
+
+
+
     Schema webPagesSchema = new Schema();
     webPagesSchema.addColumn("url",Type.TEXT);
     webPagesSchema.addColumn("domainname",Type.TEXT);
@@ -178,7 +181,15 @@ public class PlannerCatalogWorker extends Verticle {
     TableDesc webpages = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"webpages"), webPagesSchema, meta, getTestDir("webpages").toUri());
     catalog.createTable(webpages);
 
-      String databaseName = "default";
+    Schema testwebPagesSchema = new Schema();
+    testwebPagesSchema.addColumn("url",Type.TEXT);
+    testwebPagesSchema.addColumn("domainname",Type.TEXT);
+    testwebPagesSchema.addColumn("responsecode",Type.INT4);
+    TableDesc TESTwebpages = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"testpages"), testwebPagesSchema, meta, getTestDir("testpages").toUri());
+    catalog.createTable(TESTwebpages);
+
+
+      String databaseName = StringConstants.DEFAULT_DATABASE_NAME;
       String tableName = "defaultname";
     //New schema
 

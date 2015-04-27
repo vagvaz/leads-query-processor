@@ -163,7 +163,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         ("/tmp/leadsprocessor-data/"+uniquePath+"/webpage/")
         .fetchPersistentState(true)
         .shared(false).purgeOnStartup(false).preload(false).expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-        false);
+            false);
     //    builder.transaction().transactionManagerLookup(new GenericTransactionManagerLookup()).dataContainer().valueEquivalence(AnyEquivalence.getInstance());
     Configuration configuration = builder.build();
     manager.defineConfiguration("WebPage", configuration);
@@ -179,6 +179,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache(StringConstants.QUERIESCACHE);
     
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".webpages");
+    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".testpages");
+
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".entities");
 
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".content");

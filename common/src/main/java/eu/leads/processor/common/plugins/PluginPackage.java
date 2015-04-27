@@ -21,11 +21,11 @@ public class PluginPackage extends JsonObject implements Serializable {
   private String jarFilename;
   private String configFileName;
   private String user;
-  private MD5Hash key=null;
+  private String key=null;
 
   public boolean check_MD5(MD5Hash key){
-      if(key!=null)
-        return this.key.equals(key);
+      if(key!=null && this.key!=null)
+        return this.key.equals(key.toString());
       else
           return false;
   }
@@ -35,8 +35,9 @@ public class PluginPackage extends JsonObject implements Serializable {
           key = null;
           try {
               FileInputStream fileInputStream= new FileInputStream(jarFilename);
-              System.out.println("MD5 key : " + key);
-              key = MD5Hash.digest(fileInputStream);
+
+              key = MD5Hash.digest(fileInputStream).toString();
+              System.out.println("initializing MD5 key : " + key);
               fileInputStream.close(); //mark/reset not supported
           } catch (IOException e) {
               System.err.println("Error with " + jarFilename + " check tha the file exists and is readable." );
@@ -60,20 +61,8 @@ public class PluginPackage extends JsonObject implements Serializable {
     this.className = className;
     if (!Strings.isNullOrEmpty(jarFileName)) {
       //            loadJarFromFile(jarFileName);
-      FileInputStream fileInputStream= null;
-      try {
-        fileInputStream = new FileInputStream(jarFileName);
-        MD5Hash key = MD5Hash.digest(fileInputStream);
-        fileInputStream.close();
-      } catch (FileNotFoundException e) {
-        System.err.print("File jarFilename does not Exist");
-        //e.printStackTrace();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-      fileInputStream.mark(0);
-
       this.jarFilename = jarFileName;
+      calculate_MD5();
     }
     if (!Strings.isNullOrEmpty(configFileName)) {
       loadConfigFromFile(configFileName);

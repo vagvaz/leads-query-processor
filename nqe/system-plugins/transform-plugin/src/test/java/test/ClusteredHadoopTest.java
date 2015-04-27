@@ -42,7 +42,7 @@ public class ClusteredHadoopTest {
                 "/home/trs/Projects/LEADS/leads-query-processor/nqe/system-plugins/transform-plugin/target/transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar"// "/home/vagvaz/Projects/idea/transform-plugin/target/transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar",
                 , "/home/trs/Projects/LEADS/leads-query-processor/nqe/system-plugins/transform-plugin/transform-plugin-conf.xml"); //"/home/vagvaz/Projects/idea/transform-plugin/transform-plugin-conf.xml" );
 
-        plugin.calculate_MD5();
+        //plugin.calculate_MD5();
         Properties conf = new Properties();
 
         conf.setProperty("hdfs.url", "hdfs://snf-618466.vm.okeanos.grnet.gr:8020");
@@ -64,18 +64,21 @@ public class ClusteredHadoopTest {
 //        if (!uploadJar("vagvaz", jarFileName, jarTarget)) {
 //            System.out.println("ERROR");
 //        }
+        System.out.println("upload Plugin");
         if (!PluginManager.uploadPlugin(plugin)) {
             System.out.println("ERROR");
         }
 
 
 
-        String jarTarget = "plugins/" + plugin.getId() + "/";
-        plugin.setJarFilename(jarTarget);
+
+        System.out.println("upload internal Plugin");
 
         if (!PluginManager.uploadInternalPlugin(plugin)) {
             System.err.println("ERR");
         }
+        String jarTarget = "plugins/" + plugin.getId() + "/";
+        plugin.setJarFilename(jarTarget);
 
         //distributed deployment  ( plugin id, cache to install, events)
         //PluginManager.deployPlugin();
@@ -83,9 +86,14 @@ public class ClusteredHadoopTest {
 //
 //                                      EventType.CREATEANDMODIFY,"defaultUser");
         plugin.setUser("vagvaz");
+        System.out.println(" addPluginToCache");
+
         PluginManager.addPluginToCache(plugin, 7, (Cache) clusters.get(0).getPersisentCache(StringConstants
                         .PLUGIN_ACTIVE_CACHE),
                 "default.webpages");
+
+        System.out.println(" deployPluginListener");
+
         try {
             PluginManager.deployPluginListener(plugin.getId(), "default.webpages", "vagvaz", clusters.get(0),
                     storage);
@@ -96,11 +104,11 @@ public class ClusteredHadoopTest {
     /*Start putting values to the cache */
 
         //Put some configuration properties for crawler
-        LQPConfiguration.getConf().setProperty("crawler.seed",
-                "http://www.bbc.co.uk"); //For some reason it is ignored news.yahoo.com is used by default
-        LQPConfiguration.getConf().setProperty("crawler.depth", 3);
-        //Set desired target cache
-        LQPConfiguration.getConf().setProperty(StringConstants.CRAWLER_DEFAULT_CACHE, "default.webpages");
+//        LQPConfiguration.getConf().setProperty("crawler.seed",
+//                "http://www.bbc.co.uk"); //For some reason it is ignored news.yahoo.com is used by default
+//        LQPConfiguration.getConf().setProperty("crawler.depth", 3);
+//        //Set desired target cache
+//        LQPConfiguration.getConf().setProperty(StringConstants.CRAWLER_DEFAULT_CACHE, "default.webpages");
         //start crawler
 //        PersistentCrawl.main(null);
 //        //Sleep for an amount of time to test if everything is working fine
@@ -113,25 +121,32 @@ public class ClusteredHadoopTest {
 
         //Iterate through local cache entries to ensure things went as planned
         Cache cache = (Cache) InfinispanClusterSingleton.getInstance().getManager()
-                .getPersisentCache("mycache");
+                .getPersisentCache("default.testpages");
+
+        Cache cache2= (Cache) InfinispanClusterSingleton.getInstance().getManager()
+                .getPersisentCache("default.webpages");
+
         PrintUtilities.printMap(cache);
-        System.out
-                .println("Local cache " + cache.entrySet().size() + " --- global --- " + cache.size());
-        //PersistentCrawl.stop();
-
-        System.out.print("STARTING NEW MANAGER");
-        clusters.add(CacheManagerFactory.createCacheManager());
-
-        for (InfinispanManager cluster : clusters) {
-            cluster.getPersisentCache("clustered");
-        }
+        System.out.println("Local cache " + cache.entrySet().size() + " --- global --- " + cache.size());
+//        //PersistentCrawl.stop();
+//
+//        System.out.print("STARTING NEW MANAGER");
+//        clusters.add(CacheManagerFactory.createCacheManager());
+//
+//        for (InfinispanManager cluster : clusters) {
+//            cluster.getPersisentCache("clustered");
+//        }
 
         // PersistentCrawl.main(null);
-
-
+        System.out.println(" put data into webpages");
+        int sleepingPeriod = 60;
+        int i=0;
+        while(i++<sleepingPeriod)
         try {
-            int sleepingPeriod = 180;
-            Thread.sleep(sleepingPeriod * 1000);
+            System.out.print(" " + i + " ");
+            Thread.sleep(1000);
+            System.out
+                    .println("Local cache " + cache.entrySet().size() + " --- global --- " + cache2.entrySet().size());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -141,7 +156,13 @@ public class ClusteredHadoopTest {
         /*Cleanup and close....*/
         //PersistentCrawl.stop();
         System.out
-                .println("Local cache " + cache.entrySet().size() + " --- global --- " + cache.size());
+                .println("Local cache " + cache.entrySet().size() + " --- global --- " + cache2.entrySet().size());
+        try {
+            System.out.println(" " + i + " ");
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         InfinispanClusterSingleton.getInstance().getManager().stopManager();
         System.exit(0);
     }
