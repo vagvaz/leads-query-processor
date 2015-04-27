@@ -122,7 +122,14 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
     result.putString("url", t.getAttribute("url"));
     result.putString("pagerank", computePagerank(result.getString("url")));
     result.putString("sentiment", t.getGenericAttribute("sentiment").toString());
-    result.putString("microCluster",LQPConfiguration.getInstance().getMicroClusterName());
+//    result.putString("microCluster",LQPConfiguration.getInstance().getMicroClusterName());
+    ArrayList<String> microclouds = new ArrayList<>();
+    microclouds.add("hamm5");
+    microclouds.add("hamm6");
+    microclouds.add("dresden2");
+
+    int mcIndex = Math.abs((t.getAttribute("url").hashCode())) % microclouds.size();
+    result.putString("micro-cluster",microclouds.get(mcIndex));
     ArrayList<Object> linksArray = (ArrayList<Object>) t.getGenericAttribute("links");
     JsonArray array = new JsonArray();
     for(Object o : linksArray){

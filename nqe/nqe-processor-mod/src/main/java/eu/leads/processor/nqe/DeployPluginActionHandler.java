@@ -53,14 +53,14 @@ public class DeployPluginActionHandler implements ActionHandler {
 //     ownersPlugins = (BasicCache) persistence.getPersisentCache(StringConstants.OWNERSCACHE);
 //     activePlugins = (BasicCache) persistence.getPersisentCache(StringConstants.PLUGIN_ACTIVE_CACHE);
 //     pluginRepository = (BasicCache) persistence.getPersisentCache(StringConstants.PLUGIN_CACHE);
-     ownersPlugins = emanager.getCache(StringConstants.OWNERSCACHE);
-     activePlugins = emanager.getCache(StringConstants.PLUGIN_ACTIVE_CACHE);
-     pluginRepository = emanager.getCache(StringConstants.PLUGIN_CACHE);
      Properties conf = new Properties();
      conf.setProperty("prefix","/tmp/leads/");
      storage = LeadsStorageFactory.getInitializedStorage(LeadsStorageFactory.LOCAL,conf);
      String ensembleHost = ConfigurationUtilities.getEnsembleString(globalConfig);
     emanager = new EnsembleCacheManager(ensembleHost);
+     ownersPlugins = emanager.getCache(StringConstants.OWNERSCACHE);
+     activePlugins = emanager.getCache(StringConstants.PLUGIN_ACTIVE_CACHE);
+     pluginRepository = emanager.getCache(StringConstants.PLUGIN_CACHE);
    }
 
    @Override
