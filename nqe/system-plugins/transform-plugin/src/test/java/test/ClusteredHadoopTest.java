@@ -13,9 +13,7 @@ import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.plugins.transform.TransformPlugin;
 import org.infinispan.Cache;
 
-import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Properties;
 
 /**
@@ -23,11 +21,12 @@ import java.util.Properties;
  */
 public class ClusteredHadoopTest {
     static LeadsStorage storage = null;
+
     public static void main(String[] args) {
         LQPConfiguration.initialize();
         ArrayList<InfinispanManager> clusters = new ArrayList<InfinispanManager>();
         clusters.add(InfinispanClusterSingleton.getInstance()
-                         .getManager());  //must add because it is used from the rest of the system
+                .getManager());  //must add because it is used from the rest of the system
         //clusters.add(CacheManagerFactory.createCacheManager());
 
         //Crucial for joining infinispan cluster
@@ -39,57 +38,66 @@ public class ClusteredHadoopTest {
         /*PluginPackage plugin = new PluginPackage();*/
         System.out.println("PLUGIN ID: " + TransformPlugin.class.getCanonicalName());
         PluginPackage plugin = new PluginPackage(TransformPlugin.class.getCanonicalName(),
-                                                    TransformPlugin.class.getCanonicalName(),
-               "/home/tr/Projects/LEADs/leads-query-processor/nqe/system-plugins/transform-plugin/target/transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar"// "/home/vagvaz/Projects/idea/transform-plugin/target/transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar",
-               ,"/home/tr/Projects/LEADs/leads-query-processor/nqe/system-plugins/transform-plugin/transform-plugin-conf.xml"); //"/home/vagvaz/Projects/idea/transform-plugin/transform-plugin-conf.xml" );
-      Properties conf = new Properties();
+                TransformPlugin.class.getCanonicalName(),
+                "/home/trs/Projects/LEADS/leads-query-processor/nqe/system-plugins/transform-plugin/target/transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar"// "/home/vagvaz/Projects/idea/transform-plugin/target/transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar",
+                , "/home/trs/Projects/LEADS/leads-query-processor/nqe/system-plugins/transform-plugin/transform-plugin-conf.xml"); //"/home/vagvaz/Projects/idea/transform-plugin/transform-plugin-conf.xml" );
+
+        plugin.calculate_MD5();
+        Properties conf = new Properties();
+
         conf.setProperty("hdfs.url", "hdfs://snf-618466.vm.okeanos.grnet.gr:8020");
         conf.setProperty("fs.defaultFS", "hdfs://snf-618466.vm.okeanos.grnet.gr:8020");
         conf.setProperty("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
         conf.setProperty("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
         conf.setProperty("prefix", "/user/vagvaz/");
         conf.setProperty("hdfs.user", "vagvaz");
-        conf.setProperty("postfix","0");
+        conf.setProperty("postfix", "0");
 
         //conf.setProperty("prefix","/tmp/leads/");
-      PluginManager.initialize(LeadsStorageFactory.HDFS, conf);
+        PluginManager.initialize(LeadsStorageFactory.HDFS, conf);
 
-      storage = LeadsStorageFactory.getInitializedStorage(LeadsStorageFactory.HDFS,conf);
+        storage = LeadsStorageFactory.getInitializedStorage(LeadsStorageFactory.HDFS, conf);
         //upload plugin
 //        PluginManager.uploadPlugin(plugin);
-      String jarFileName = plugin.getJarFilename();
-      String jarTarget = "plugins/"+plugin.getId()+"/";
-      if(!uploadJar("vagvaz",jarFileName,jarTarget)){
-        System.out.println("ERROR");
-      }
-      plugin.setJarFilename(jarTarget);
 
-      if(!PluginManager.uploadInternalPlugin(plugin))
-      {
-        System.err.println("ERR");
-      }
+
+//        if (!uploadJar("vagvaz", jarFileName, jarTarget)) {
+//            System.out.println("ERROR");
+//        }
+        if (!PluginManager.uploadPlugin(plugin)) {
+            System.out.println("ERROR");
+        }
+
+
+
+        String jarTarget = "plugins/" + plugin.getId() + "/";
+        plugin.setJarFilename(jarTarget);
+
+        if (!PluginManager.uploadInternalPlugin(plugin)) {
+            System.err.println("ERR");
+        }
 
         //distributed deployment  ( plugin id, cache to install, events)
         //PluginManager.deployPlugin();
 //        PluginManager.deployPluginListener(TransformPlugin.class.getCanonicalName(), "default.webpages",
 //
 //                                      EventType.CREATEANDMODIFY,"defaultUser");
-    plugin.setUser("vagvaz");
-    PluginManager.addPluginToCache(plugin,7, (Cache) clusters.get(0).getPersisentCache(StringConstants
-                                                                                .PLUGIN_ACTIVE_CACHE),
-                                    "default.webpages");
-    try {
-      PluginManager.deployPluginListener(plugin.getId(), "default.webpages", "vagvaz", clusters.get(0),
-                                          storage);
-    }catch (Exception e){
-      e.printStackTrace();
-      System.exit(-1);
-    }
+        plugin.setUser("vagvaz");
+        PluginManager.addPluginToCache(plugin, 7, (Cache) clusters.get(0).getPersisentCache(StringConstants
+                        .PLUGIN_ACTIVE_CACHE),
+                "default.webpages");
+        try {
+            PluginManager.deployPluginListener(plugin.getId(), "default.webpages", "vagvaz", clusters.get(0),
+                    storage);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
     /*Start putting values to the cache */
 
         //Put some configuration properties for crawler
         LQPConfiguration.getConf().setProperty("crawler.seed",
-                                                  "http://www.bbc.co.uk"); //For some reason it is ignored news.yahoo.com is used by default
+                "http://www.bbc.co.uk"); //For some reason it is ignored news.yahoo.com is used by default
         LQPConfiguration.getConf().setProperty("crawler.depth", 3);
         //Set desired target cache
         LQPConfiguration.getConf().setProperty(StringConstants.CRAWLER_DEFAULT_CACHE, "default.webpages");
@@ -105,10 +113,10 @@ public class ClusteredHadoopTest {
 
         //Iterate through local cache entries to ensure things went as planned
         Cache cache = (Cache) InfinispanClusterSingleton.getInstance().getManager()
-                                  .getPersisentCache("mycache");
+                .getPersisentCache("mycache");
         PrintUtilities.printMap(cache);
-         System.out
-            .println("Local cache " + cache.entrySet().size() + " --- global --- " + cache.size());
+        System.out
+                .println("Local cache " + cache.entrySet().size() + " --- global --- " + cache.size());
         //PersistentCrawl.stop();
 
         System.out.print("STARTING NEW MANAGER");
@@ -118,7 +126,7 @@ public class ClusteredHadoopTest {
             cluster.getPersisentCache("clustered");
         }
 
-       // PersistentCrawl.main(null);
+        // PersistentCrawl.main(null);
 
 
         try {
@@ -130,43 +138,42 @@ public class ClusteredHadoopTest {
         System.out.print("Print with NEW MANAGER");
 
         PrintUtilities.printMap(cache);
-	    /*Cleanup and close....*/
+        /*Cleanup and close....*/
         //PersistentCrawl.stop();
         System.out
-            .println("Local cache " + cache.entrySet().size() + " --- global --- " + cache.size());
+                .println("Local cache " + cache.entrySet().size() + " --- global --- " + cache.size());
         InfinispanClusterSingleton.getInstance().getManager().stopManager();
         System.exit(0);
     }
 
-  public static boolean uploadJar(String username,String jarPath,String prefix){
-    try {
-      BufferedInputStream input = new BufferedInputStream(new FileInputStream(jarPath));
-      ByteArrayOutputStream array = new ByteArrayOutputStream();
-      byte[] buffer = new byte[20*1024*1024];
-      byte[] toWrite = null;
-      int size = input.available();
-      int counter = -1;
-      while( size > 0){
-        counter++;
-
-        int readSize = input.read(buffer);
-        toWrite = Arrays.copyOfRange(buffer, 0, readSize);
-        if(!uploadData(username,toWrite,prefix+"/"+counter)) {
-          return false;
-        }
-        size = input.available();
-      }
-      return true;
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return  false;
-  }
-
-  public static boolean uploadData(String username, byte[] data, String target){
-    storage.writeData(target,data);
-    return true;
-  }
+//    public static boolean uploadJar(String username, String jarPath, String prefix) {
+//        try {
+//            BufferedInputStream input = new BufferedInputStream(new FileInputStream(jarPath));
+//            byte[] buffer = new byte[10 * 1024 * 1024];
+//            byte[] toWrite = null;
+//            int size = input.available();
+//            int counter = -1;
+//            while (size > 0) {
+//                counter++;
+//
+//                int readSize = input.read(buffer);
+//                toWrite = Arrays.copyOfRange(buffer, 0, readSize);
+//                if (!uploadData(username, toWrite, prefix + "/" + counter)) {
+//                    return false;
+//                }
+//                size = input.available();
+//            }
+//            return true;
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return false;
+//    }
+//
+//    public static boolean uploadData(String username, byte[] data, String target) {
+//        return storage.writeData(target, data);
+//        //return true;
+//    }
 }

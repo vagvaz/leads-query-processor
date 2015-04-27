@@ -17,9 +17,11 @@ import java.util.Properties;
 public class HDFSStorageTest {
 
     public static void main(String [] args){
-
+        final String user="vagvaz";
+        final String jarPath = "/tmp/test.jar";
+        final String jarnewPath = "/tmp/test2.jar";
         try {
-            UserGroupInformation ugi = UserGroupInformation.createRemoteUser("vagvaz");
+            UserGroupInformation ugi = UserGroupInformation.createRemoteUser(user);
             ugi.doAs(new PrivilegedExceptionAction<Void>() {
 
                 public Void run() throws Exception {
@@ -29,6 +31,8 @@ public class HDFSStorageTest {
                     c.setProperty("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
                     c.setProperty("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
                     c.setProperty("prefix", "/user/vagvaz/");
+                    c.setProperty("hdfs.user",user);
+
                     c.setProperty("postfix","0");
 
                     HDFSStorage hdfss = new HDFSStorage();
@@ -42,7 +46,7 @@ public class HDFSStorageTest {
                     /*
                     upload my.jar and break into pieces
                      */
-                    String jarPath = "/tmp/my.jar";
+
                     String hdfsPath = "jars1/my.jar";
                     try {
                         BufferedInputStream input = new BufferedInputStream(new FileInputStream(jarPath));
@@ -88,7 +92,7 @@ public class HDFSStorageTest {
 
                     if(hdfss.exists(hdfsPath)) {
                         System.out.println("...Downloading");
-                        hdfss.download("/" + hdfsPath, "/tmp/Downloads");
+                        hdfss.download("/" + hdfsPath, jarnewPath);
                     } else{
                         System.out.println("Error occured!");
                     }
@@ -96,11 +100,11 @@ public class HDFSStorageTest {
                     /*
                     * Checksum MD5*/
 
-                    FileInputStream fileInputStream=new FileInputStream("/tmp/Downloads");
+                    FileInputStream fileInputStream=new FileInputStream(jarnewPath);
                     MD5Hash key = MD5Hash.digest(fileInputStream);
                     System.out.println("MD5 key : "+key);
 
-                    FileInputStream fileInputStream2=new FileInputStream("/tmp/my.jar");
+                    FileInputStream fileInputStream2=new FileInputStream(jarPath);
                     MD5Hash key2 = MD5Hash.digest(fileInputStream2);
                     System.out.println("MD5 key : "+key2);
 
