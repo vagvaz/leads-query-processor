@@ -187,7 +187,7 @@ public class ConfigurationUtilities {
         String result = "";
         List<String> sites = new ArrayList<>();
 
-        for(String targetMC : globalConfig.getObject("global").getObject("microclouds").getFieldNames()){
+        for(String targetMC : globalConfig.getObject("microclouds").getFieldNames()){
             //         JsonObject mc = targetEndpoints.getObject(targetMC);
             sites.add(targetMC);
             //
