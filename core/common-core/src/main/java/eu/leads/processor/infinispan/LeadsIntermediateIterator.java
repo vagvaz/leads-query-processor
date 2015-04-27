@@ -130,7 +130,7 @@ public class LeadsIntermediateIterator<V> implements Iterator<V> {
     log.error(baseIntermKey.toString());
     V returnValue = (V) intermediateDataCache.get(new ComplexIntermediateKey(baseIntermKey));
     if(returnValue == null){
-      System.err.println("\n\n\nERROR NULL GET FROM intermediate data cache " + intermediateDataCache.size());
+      System.err.println("\n\n\nERROR NULL GET FROM intermediate data cache " + baseIntermKey.toString() + "\n cache size = " + intermediateDataCache.size());
       throw new NoSuchElementException("LeadsIntermediateIterator read from cache returned NULL");
     }
     baseIntermKey.next();

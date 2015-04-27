@@ -146,6 +146,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
       bus = vertx.eventBus();
       config = container.config();
       globalConfig = config.getObject("global");
+
       id = config.getString("id");
       gr = config.getString("group");
       logic = config.getString("logic");
@@ -161,13 +162,14 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
      LQPConfiguration.getInstance().getConfiguration().setProperty(StringConstants.PUBLIC_IP,publicIP);
       currentCluster = LQPConfiguration.getInstance().getMicroClusterName();
       persistence = InfinispanClusterSingleton.getInstance().getManager();
-      JsonObject msg = new JsonObject();
+     JsonObject msg = new JsonObject();
       msg.putString("processor", id + ".process");
        log = new LogProxy(config.getString("log"),com);
        handlers = new HashMap<String,ActionHandler>();
+     ActionHandler pluginHandler = new DeployPluginActionHandler(com, log, persistence, id, globalConfig);
       handlers.put(NQEConstants.DEPLOY_OPERATOR,new OperatorActionHandler(com,log,persistence,id));
-      handlers.put(NQEConstants.DEPLOY_PLUGIN,new DeployPluginActionHandler(com,log,persistence,id));
-      handlers.put(NQEConstants.UNDEPLOY_PLUGIN,new DeployPluginActionHandler(com,log,persistence,id));
+      handlers.put(NQEConstants.DEPLOY_PLUGIN,pluginHandler );
+      handlers.put(NQEConstants.UNDEPLOY_PLUGIN,pluginHandler);
       handlers.put(NQEConstants.DEPLOY_REMOTE_OPERATOR, new DeployRemoteOpActionHandler(com,log,persistence,id,globalConfig));
 //
       bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {

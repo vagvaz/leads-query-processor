@@ -7,6 +7,7 @@ import eu.leads.processor.common.plugins.PluginManager;
 import eu.leads.processor.common.plugins.PluginPackage;
 import eu.leads.processor.common.utils.storage.LeadsStorage;
 import eu.leads.processor.common.utils.storage.LeadsStorageFactory;
+import eu.leads.processor.conf.ConfigurationUtilities;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
@@ -17,7 +18,9 @@ import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang.SerializationUtils;
 import org.infinispan.Cache;
 import org.infinispan.commons.api.BasicCache;
+import org.infinispan.ensemble.EnsembleCacheManager;
 import org.vertx.java.core.json.JsonObject;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,18 +41,26 @@ public class DeployPluginActionHandler implements ActionHandler {
   private BasicCache activePlugins;
   private BasicCache pluginRepository;
   private LeadsStorage storage;
+  private JsonObject globalConfig;
+  private EnsembleCacheManager emanager;
 
-   public DeployPluginActionHandler(Node com, LogProxy log, InfinispanManager persistence, String id) {
+   public DeployPluginActionHandler(Node com, LogProxy log, InfinispanManager persistence,
+       String id, JsonObject globalConfig) {
      this.com = com;
      this.log = log;
      this.persistence = persistence;
      this.id = id;
-     ownersPlugins = (BasicCache) persistence.getPersisentCache(StringConstants.OWNERSCACHE);
-     activePlugins = (BasicCache) persistence.getPersisentCache(StringConstants.PLUGIN_ACTIVE_CACHE);
-     pluginRepository = (BasicCache) persistence.getPersisentCache(StringConstants.PLUGIN_CACHE);
+//     ownersPlugins = (BasicCache) persistence.getPersisentCache(StringConstants.OWNERSCACHE);
+//     activePlugins = (BasicCache) persistence.getPersisentCache(StringConstants.PLUGIN_ACTIVE_CACHE);
+//     pluginRepository = (BasicCache) persistence.getPersisentCache(StringConstants.PLUGIN_CACHE);
+     ownersPlugins = emanager.getCache(StringConstants.OWNERSCACHE);
+     activePlugins = emanager.getCache(StringConstants.PLUGIN_ACTIVE_CACHE);
+     pluginRepository = emanager.getCache(StringConstants.PLUGIN_CACHE);
      Properties conf = new Properties();
      conf.setProperty("prefix","/tmp/leads/");
      storage = LeadsStorageFactory.getInitializedStorage(LeadsStorageFactory.LOCAL,conf);
+     String ensembleHost = ConfigurationUtilities.getEnsembleString(globalConfig);
+    emanager = new EnsembleCacheManager(ensembleHost);
    }
 
    @Override
@@ -87,9 +98,13 @@ public class DeployPluginActionHandler implements ActionHandler {
 
        plugin.setUser(user);
        activePlugins.put(targetCache+":"+plugin.getId()+plugin.getUser(),plugin);
+//       PluginHandlerListener listener = PluginManager.deployPluginListenerWithEvents(pluginId,targetCache,
+//                                                                                      user,events,
+//                                                                            persistence,storage);
        PluginHandlerListener listener = PluginManager.deployPluginListenerWithEvents(pluginId,targetCache,
-                                                                                      user,events,
-                                                                            persistence,storage);
+           user,events,
+           emanager,storage);
+
        reply.putString("status","SUCCESS");
        reply.putString("message","");
        action.setResult(reply);

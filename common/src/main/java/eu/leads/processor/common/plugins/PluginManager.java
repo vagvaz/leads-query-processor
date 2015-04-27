@@ -19,6 +19,8 @@ import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
+import org.infinispan.ensemble.EnsembleCacheManager;
+import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.remoting.transport.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -426,7 +428,72 @@ public class PluginManager {
     return runner;
   }
 
+  public static PluginHandlerListener deployPluginListenerWithEvents(String pluginId, String cacheName,String
+      user,
+      EventType[] events,
+      EnsembleCacheManager manager, LeadsStorage storage) {
+    Properties conf = new Properties();
+    conf.put("target", cacheName);
+    conf.put("config", StringConstants.PLUGIN_ACTIVE_CACHE);
+    conf.put("user", user);
+    ArrayList<String> alist = new ArrayList<String>();
+    alist.add(pluginId);
+    conf.put("pluginName", alist);
+    JsonObject configuration = new JsonObject();
+    configuration.putString("targetCache", cacheName);
+    configuration.putString("activePluginCache", StringConstants.PLUGIN_ACTIVE_CACHE);
+    configuration.putString("pluginName", pluginId);
+    configuration.putArray("types", new JsonArray());
+    configuration.putString("id", UUID.randomUUID().toString());
+    configuration.putString("user", user);
+    for(EventType e : events){
+      configuration.getArray("types").add(e.toString());
+    }
+    configuration.putString("storageType", storage.getStorageType());
+    ByteArrayOutputStream storageConfigurationStream = new ByteArrayOutputStream();
+    try {
+      storage.getConfiguration().store(storageConfigurationStream, "");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    configuration.putBinary("storageConfiguration", storageConfigurationStream.toByteArray());
+    //        configuration.getArray("types").add(EventType.MODIFIED);
+    //    SimplePluginRunner listener = new SimplePluginRunner("TestSimplePluginDeployer", conf);
+    PluginHandlerListener runner = new PluginHandlerListener();
+    try {
+      EnsembleCache remoteTargetCache = manager.getCache(cacheName);
+      log.info("Using cache " + remoteTargetCache.getName() + " to deploy pluign");
+      if (remoteTargetCache == null){
+        System.err.println("Cache " + cacheName + " not found!");
+        log.error("Target Cache was not found " + cacheName + " not deploying plugin");
+        return null;
+      }
+      remoteTargetCache.addClientListener(runner,new Object[] {configuration.toString()}, new Object[0]);
+        //    manager.addListener(listener, cacheName);
+//        RemoteCacheManager remoteCacheManager = createRemoteCacheManager();
+//      RemoteCache<Object, Object> remoteCache = remoteCacheManager.getCache(cacheName);
 
+      //
+//      System.out.println("Using cache " + cacheName);
+      //
+//      if (remoteCache == null) {
+//        System.err.println("Cache " + cacheName + " not found!");
+//        log.error("Target Cache was not found " + cacheName + " not deploying plugin");
+//        return null;
+//        System.exit(1);
+//      }
+      //        if (remoteCache == null) {
+      //            System.err.println("Cache " + cacheName + " not found!");
+      //            return;
+      //        }
+      //
+//      remoteCache.addClientListener(runner, new Object[] {configuration.toString()}, new Object[0]);
+    }catch (Exception e){
+      log.error("Trying to add listener to ensemble cache problem");
+      e.printStackTrace();
+    }
+    return runner;
+  }
 
 
   private static void deployPluginListener(String pluginId, String cacheName,String user,
@@ -507,8 +574,8 @@ public class PluginManager {
 
     int eventmask = computeEventMask(events);
     addPluginToCache(plugin, eventmask, configCache,configCache.getName());
-    deployPluginListener(plugin.getId(), cacheName,user,
-                          InfinispanClusterSingleton.getInstance().getManager());
+    deployPluginListener(plugin.getId(), cacheName, user,
+        InfinispanClusterSingleton.getInstance().getManager());
 
     return true;
   }
@@ -580,4 +647,5 @@ public class PluginManager {
     return true;
 
   }
+
 }
