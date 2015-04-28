@@ -46,11 +46,11 @@ public class StdLoggerRedirect {
 			File file = new File(dir);
 			file.mkdirs();
 			
-			fileHandler = new FileHandler(dir+"/leads-adidas-out", 10000000, 100, append);
+			fileHandler = new FileHandler(dir+"/leads-lucene-out", 10000000, 100, append);
 			fileHandler.setFormatter(formatter);
 			Logger.getLogger("stdout").addHandler(fileHandler);
 			
-			fileHandler = new FileHandler(dir+"/leads-adidas-err", 10000000, 100, append);
+			fileHandler = new FileHandler(dir+"/leads-lucene-err", 10000000, 100, append);
 			fileHandler.setFormatter(formatter);
 			Logger.getLogger("stderr").addHandler(fileHandler);
 			

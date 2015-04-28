@@ -42,7 +42,7 @@ public class ClusteredTest {
         /*PluginPackage plugin = new PluginPackage();*/
      PluginPackage plugin = new PluginPackage(AdidasProcessingPlugin.class.getCanonicalName(), AdidasProcessingPlugin.class.getCanonicalName(),
                                                      "/tmp/adidas-processing-plugin/target/adidas-processing-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar",
-                                                     "/tmp/adidas-processing-plugin//adidas-processing-plugin-conf.xml");
+                                                     "/tmp/adidas-processing-plugin/adidas-processing-plugin-conf.xml");
 
 
      //upload plugin

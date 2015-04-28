@@ -30,6 +30,7 @@ public class PluginTest {
 		
 	    String content1 = "";
 //	    String uri = "http://runblogger.com/minimalist-running";
+//	    String uri = "http://runblogger.com/2011/06/vibram-fivefingers-komodosport-review.html?replytocom=215625693";
 	    String uri = "http://runblogger.com/2011/06/vibram-fivefingers-komodosport-review.html?replytocom=215625693";
 	    String nutchUri = LEADSUtils.standardUrlToNutchUrl(uri);
 	    

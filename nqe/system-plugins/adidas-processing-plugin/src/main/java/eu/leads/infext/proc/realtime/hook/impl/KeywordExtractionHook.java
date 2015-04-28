@@ -6,11 +6,13 @@ import java.util.Map.Entry;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.lucene.analysis.core.KeywordTokenizerFactory;
 
 import eu.leads.datastore.datastruct.MDFamily;
 import eu.leads.datastore.datastruct.UrlTimestamp;
-import eu.leads.infext.proc.com.indexing.DocumentKeywordSearch;
-import eu.leads.infext.proc.com.indexing.KeywordsListSingleton;
+import eu.leads.infext.proc.com.indexing.LeadsLuceneIndexingCall;
+//import eu.leads.infext.proc.com.indexing.DocumentKeywordSearch;
+//import eu.leads.infext.proc.com.indexing.KeywordsListSingleton;
 import eu.leads.infext.proc.com.keyword.RelevanceScore;
 import eu.leads.infext.proc.com.keyword.SentimentScore;
 import eu.leads.infext.proc.realtime.hook.AbstractHook;
@@ -45,46 +47,47 @@ public class KeywordExtractionHook extends AbstractHook {
 		HashMap<String, HashMap<String, Object>> result = new HashMap<>();
 		HashMap<String, Object> newKeywordsResult = new HashMap<>();
 		HashMap<String,HashMap<String, Object>> newSpecificKeywordsResultsList = new HashMap<String,HashMap<String, Object>>();
-
-		System.out.println("KeywordExtractionHook.0.a");
 		
-		List<String> keywordsList = KeywordsListSingleton.getInstance().getKeywordsList();
-
-		System.out.println("KeywordExtractionHook.0.b");
-		
-		DocumentKeywordSearch keywordSearch = new DocumentKeywordSearch();
-
-		System.out.println("KeywordExtractionHook.0.c");
+//		List<String> keywordsList = KeywordsListSingleton.getInstance().getKeywordsList();
+//		DocumentKeywordSearch keywordSearch = new DocumentKeywordSearch();
 		
 		HashMap<String, Object> newResourceParts = parameters.get("new:leads_resourceparts");
 		HashMap<String, Object> newCore = parameters.get("new:leads_core");
 		HashMap<String, Object> newMD = parameters.get("new");
+
+		String lang = newCore.get(mapping.get(("leads_core-lang"))).toString();
 		
-		System.out.println("KeywordExtractionHook.1");
+		LeadsLuceneIndexingCall luceneCall = new LeadsLuceneIndexingCall();
 		
 		for(Entry<String, Object> resPart : newResourceParts.entrySet()) {
 			String resTypeNIndex = resPart.getKey();
 			String resType  = resTypeNIndex.substring(0, resTypeNIndex.length()-4); // cut ':xxx'
 			String resIndex = resTypeNIndex.substring(resTypeNIndex.length()-3);
 			Object resValue = resPart.getValue();
+			String content  = resValue.toString();
 			
+			UrlTimestamp partId = new UrlTimestamp(resType, resTypeNIndex); /* TYLKO BO TRZEBA */
+			String key = resTypeNIndex;
+
+			HashMap<String, Double> keywordsMap = new HashMap<>();
 			if(resValue != null)
-				keywordSearch.addDocument(resType, resIndex, resValue.toString());
-		}
-		
-		System.out.println("KeywordExtractionHook.2");
-		
-		String lang = newCore.get(mapping.get(("leads_core-lang"))).toString();
-		
-		for(String keywords : keywordsList) {
-			String [] keywordsArray = keywords.split("\\s+");
-			
-			// UrlTimestamp to be changed later! It's just about these are two strings. Parttype:Partid
-			HashMap<UrlTimestamp, Double> partsIds = keywordSearch.searchKeywords(keywordsArray);
-			
-			for(UrlTimestamp partId : partsIds.keySet()) {
-				String key = partId.url+":"+partId.timestamp;
-				String content = newResourceParts.get(key).toString();
+//				keywordSearch.addDocument(resType, resIndex, resValue.toString());
+				keywordsMap = luceneCall.call(content);
+//		}
+//		
+//		
+//		for(String keywords : keywordsList) {
+			for(Entry<String, Double> x : keywordsMap.entrySet()) {
+//			String [] keywordsArray = keywords.split("\\s+");
+//			
+//			// UrlTimestamp to be changed later! It's just about these are two strings. Parttype:Partid
+////			HashMap<UrlTimestamp, Double> partsIds = keywordSearch.searchKeywords(keywordsArray);
+//			
+//			for(UrlTimestamp partId : partsIds.keySet()) {
+//				String key = partId.url+":"+partId.timestamp;
+//				String content = newResourceParts.get(key).toString();
+				String keywords = x.getKey();
+				Double relevance = x.getValue();
 				
 				Double sentimentScore = Double.NaN;
 				Double relevanceScore = Double.NaN;
@@ -96,10 +99,9 @@ public class KeywordExtractionHook extends AbstractHook {
 					if(sentiment != null)
 						sentimentScore = sentiment.getValue();
 					// count relevance
-					relevanceScore = partsIds.get(partId);
+					//relevanceScore = partsIds.get(partId);
+					relevanceScore = relevance;
 				}
-				
-				System.out.println("KeywordExtractionHook.4:"+keywords);
 				
 				String keyWord = key+":"+keywords;
 				
@@ -115,8 +117,6 @@ public class KeywordExtractionHook extends AbstractHook {
 		
 		result.put("new:leads_keywords", newKeywordsResult);
 		result.putAll(newSpecificKeywordsResultsList);
-		
-		System.out.println("KeywordExtractionHook.5");
 		
 		return result;
 	}

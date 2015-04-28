@@ -13,6 +13,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -92,11 +93,12 @@ public class LeadsLuceneIndexingCall {
 	}
 	
 	
-	public List<Object> call(String content) {
+	public HashMap<String,Double> call(String content) {
 		
 		/* TIME */ long start = System.currentTimeMillis();
 		
-		List<Object> retValue = null;
+		List<Object> response = null;
+		HashMap<String,Double> returnMap = new HashMap<>();
 		
 		List<String> params = new ArrayList<>();
 		
@@ -110,15 +112,19 @@ public class LeadsLuceneIndexingCall {
 			filenamesList.add(fileName);
 		}
         
-        retValue = send(params);
-        if(retValue != null)
-	        System.out.println("Received reply:\n\n" + retValue);	
+        response = send(params);
+        if(response != null)
+	        System.out.println("Received reply:\n\n" + response);
+        
+        for(int i=0; i<response.size();i+=2) {
+        	returnMap.put((String)response.get(i), Double.parseDouble((String)response.get(i+1)));
+        }
         
         removeFiles(filenamesList);
 
-		/* TIME */ System.err.println("+++ PythonQueueCall.call() time: "+((System.currentTimeMillis()-start)/1000.0)+" s");
+		/* TIME */ System.err.println("+++ LeadsLuceneIndexingCall.call() time: "+((System.currentTimeMillis()-start)/1000.0)+" s");
         
-		return retValue;		
+		return returnMap;		
 	}
 
 	
@@ -127,9 +133,9 @@ public class LeadsLuceneIndexingCall {
 		
         ZMQ.Context context = ZMQ.context(1);
         ZMQ.Socket socket = context.socket(ZMQ.REQ);
-        socket.setSendTimeOut(500);
-        socket.setReceiveTimeOut(500);
-        socket.connect ("tcp://127.0.0.1:5569");
+        socket.setSendTimeOut(3000);
+        socket.setReceiveTimeOut(3000);
+        socket.connect (PropertiesSingleton.getConfig().getString("lliEndpoints"));
         
         byte[] reply = null;
     	ZMsg req = new ZMsg();
