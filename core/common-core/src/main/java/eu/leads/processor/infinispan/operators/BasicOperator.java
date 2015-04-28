@@ -54,10 +54,10 @@ public abstract class BasicOperator extends Thread implements Operator{
   protected  boolean executeOnlyReduce = false;
   long startTime;
   protected boolean failed = false;
-  private volatile Object mmcMutex = new Object();
+  protected volatile Object mmcMutex = new Object();
   private volatile Object rmcMutex = new Object();
   protected LeadsMessageHandler handler = new CompleteExecutionHandler(com,this);
-  private Map<String, String> mcResults;
+  protected Map<String, String> mcResults;
 
   protected BasicOperator(Action action) {
     conf = action.getData();
@@ -297,7 +297,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     if(input2 != null)
       inputSize += input2.size();
     if(output != null){
-      outputSize = outputCache.size();
+      outputSize = output.size();
     }
     else{
       outputCache = (BasicCache) manager.getPersisentCache(getOutput());
@@ -492,7 +492,7 @@ public abstract class BasicOperator extends Thread implements Operator{
 
   }
 
-  private void sendRemoteRequest(String mc, boolean b) {
+  public void sendRemoteRequest(String mc, boolean b) {
     System.err.println("Send remote request to mc " + mc);
     log.error("Send remote request to mc " + mc);
     Action copyAction = new Action(new JsonObject(action.toString()));

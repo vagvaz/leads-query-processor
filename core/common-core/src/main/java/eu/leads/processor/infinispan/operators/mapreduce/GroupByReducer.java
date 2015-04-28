@@ -199,7 +199,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
             log.error(e.getClass() + " " + e.getMessage());
             log.error(iterator.toString());
             log.error(t.toString());
-
+            break;
          }
       }
 
@@ -228,6 +228,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
             log.error(e.getClass() + " " + e.getMessage());
             log.error(iterator.toString());
             log.error(t.toString());
+            return;
 
          }
          //prepare output

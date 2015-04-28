@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
@@ -14,6 +15,7 @@ import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.vertx.java.core.json.JsonObject;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
@@ -65,48 +67,99 @@ public class LimitOperator extends BasicOperator {
 
     }
 
+  @Override
+  public void executeMap(){
+
+    subscribeToMapActions(pendingMMC);
+    if(!isRemote) {
+      for (String mc : pendingMMC) {
+        if (!mc.equals(currentCluster)) {
+          sendRemoteRequest(mc, true);
+        }
+      }
+    }
+
+    if(pendingMMC.contains(currentCluster)){
+      int counter = 0;
+      if (sorted) {
+        //            int sz = inputMap.size();
+        //          CloseableIterable<Map.Entry<String, String>> iterable =
+        //            inputMap.getAdvancedCache().filterEntries(new AcceptAllFilter());
+        //          for (Map.Entry<String, String> entry : iterable) {
+        //              System.err.println("e: " + entry.getKey().toString() + " ---> " + entry.getValue().toString());
+        //            }
+        for (counter = 0; counter < rowCount ; counter++) {
+          //                String tupleValue = (String) inputMap.get(inputPrefix + counter);
+          Tuple tupleValue = (Tuple) inputCache.get(inputPrefix + counter);
+          if(tupleValue == null)
+            break;
+          //                System.err.println("Read " + inputPrefix + counter + " --> " +tupleValue);
+          Tuple t = tupleValue;
+          handlePagerank(t);
+          //                System.err.println(prefix+counter);
+          EnsembleCacheUtils.putToCache(data, prefix + Integer.toString(counter), t);
+          //                data.put(prefix + Integer.toString(counter), t.asString());
+        }
+      } else {
+        CloseableIterable<Map.Entry<String, Tuple>> iterable =
+            inputCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
+        for (Map.Entry<String, Tuple> entry : iterable) {
+          if (counter >= rowCount)
+            break;
+          String tupleId = entry.getKey().substring(entry.getKey().indexOf(":") + 1);
+          Tuple t = entry.getValue();
+          handlePagerank(t);
+          EnsembleCacheUtils.putToCache(data,prefix + tupleId, t);
+          counter++;
+        }
+
+      }
+      replyForSuccessfulExecution(action);
+    }
+
+    synchronized (mmcMutex){
+      while(pendingMMC.size() > 0)
+      {
+        System.out.println("Sleeping to executing " + this.getClass().toString() + " pending clusters ");
+        PrintUtilities.printList(Arrays.asList(pendingMMC));
+        try {
+          mmcMutex.wait(120000);
+        } catch (InterruptedException e) {
+          log.error("Interrupted " + e.getMessage());
+          break;
+        }
+      }
+    }
+    for(Map.Entry<String,String> entry : mcResults.entrySet()){
+      System.out.println("Execution on " + entry.getKey() + " was " + entry.getValue());
+      log.error("Execution on " + entry.getKey() + " was " + entry.getValue());
+      if(entry.getValue().equals("FAIL"))
+        failed =true;
+    }
+
+  }
     @Override
     public void run() {
-      createCaches(isRemote,executeOnlyMap,executeOnlyReduce);
-        long startTime = System.nanoTime();
-        int counter = 0;
-        if (sorted) {
-//            int sz = inputMap.size();
-//          CloseableIterable<Map.Entry<String, String>> iterable =
-//            inputMap.getAdvancedCache().filterEntries(new AcceptAllFilter());
-//          for (Map.Entry<String, String> entry : iterable) {
-//              System.err.println("e: " + entry.getKey().toString() + " ---> " + entry.getValue().toString());
-//            }
-            for (counter = 0; counter < rowCount ; counter++) {
-//                String tupleValue = (String) inputMap.get(inputPrefix + counter);
-                Tuple tupleValue = (Tuple) inputCache.get(inputPrefix + counter);
-                if(tupleValue == null)
-                   break;
-//                System.err.println("Read " + inputPrefix + counter + " --> " +tupleValue);
-                Tuple t = tupleValue;
-                handlePagerank(t);
-//                System.err.println(prefix+counter);
-                EnsembleCacheUtils.putToCache(data, prefix + Integer.toString(counter), t);
-//                data.put(prefix + Integer.toString(counter), t.asString());
-            }
-        } else {
-          CloseableIterable<Map.Entry<String, Tuple>> iterable =
-            inputCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
-          for (Map.Entry<String, Tuple> entry : iterable) {
-            if (counter >= rowCount)
-              break;
-            String tupleId = entry.getKey().substring(entry.getKey().indexOf(":") + 1);
-            Tuple t = entry.getValue();
-            handlePagerank(t);
-            EnsembleCacheUtils.putToCache(data,prefix + tupleId, t);
-            counter++;
-          }
+//      createCaches(isRemote,executeOnlyMap,executeOnlyReduce);
+      long startTime = System.nanoTime();
+      findPendingMMCFromGlobal();
+      findPendingRMCFromGlobal();
+      createCaches(isRemote, executeOnlyMap, executeOnlyReduce);
+      if(executeOnlyMap) {
+//        setupMapCallable();
+        executeMap();
+      }
+      if(!failed) {
 
-        }
-       cleanup();
+      }
+      else {
+        failCleanup();
+      }
+
         //Store Values for statistics
 //        updateStatistics(inputMap.size(), data.size(), System.nanoTime() - startTime);
         updateStatistics(inputCache,null,data);
+      cleanup();
     }
 
     private void handlePagerank(Tuple t) {
@@ -129,10 +182,6 @@ public class LimitOperator extends BasicOperator {
         }
     }
 
-    @Override
-    public void cleanup() {
-      super.cleanup();
-    }
 
    @Override
    public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
