@@ -159,6 +159,7 @@ public class LimitOperator extends BasicOperator {
         //Store Values for statistics
 //        updateStatistics(inputMap.size(), data.size(), System.nanoTime() - startTime);
         updateStatistics(inputCache,null,data);
+      cleanup();
     }
 
     private void handlePagerank(Tuple t) {
@@ -181,10 +182,6 @@ public class LimitOperator extends BasicOperator {
         }
     }
 
-    @Override
-    public void cleanup() {
-      super.cleanup();
-    }
 
    @Override
    public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
