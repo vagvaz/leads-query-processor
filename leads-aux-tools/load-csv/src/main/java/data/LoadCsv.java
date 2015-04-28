@@ -13,6 +13,8 @@ import org.infinispan.Cache;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
+import org.infinispan.ensemble.EnsembleCacheManager;
+import org.infinispan.ensemble.cache.EnsembleCache;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.*;
@@ -34,18 +36,24 @@ public class LoadCsv {
     transient protected static Random r;
 
     static int delay = 0;
-    static RemoteCacheManager manager = null;
+    static RemoteCacheManager remoteCacheManager = null;
     static InfinispanManager imanager = null;
+    static EnsembleCacheManager emanager;
 
     static ConcurrentMap embeddedCache = null;
     static RemoteCache remoteCache = null;
-
+    static EnsembleCache ensembleCache = null;
+    static boolean ensemple_multi = false;
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         r = new Random(0);
 
         if (args.length == 0) {
             System.out.print(" Syntax:\tconvertadd filename {inputcollumn conversion}+ \n where convertion type: sentiment, pagerank");
-            System.err.println("or  \t\tload $prog load dir/ $prog load dir host port (delay per put)");
+            System.err.println("or  \t\t$prog loadIspn dir (delay per put)\n ");
+            System.err.println("or  \t\t$prog loadRemote dir host port (delay per put)\n ");
+            System.err.println("or  \t\t$prog loadEnsemble dir host:port(|host:port)+ (delay per put)\n ");
+            System.err.println("or  \t\t$prog loadEnsembleMulti dir host:port(|host:port)+ (delay per put)\n ");
+
             System.exit(-1);
         }
         if (args[0].startsWith("convert")) {
@@ -53,10 +61,35 @@ public class LoadCsv {
             System.exit(0);
         }
         LQPConfiguration.initialize();
-        if (args.length == 2)
-            imanager = InfinispanClusterSingleton.getInstance().getManager();
+
         if (args[0].startsWith("l")) {
-            loadData(args);
+            if(args[0].equals("loadIspn")) {
+                imanager = InfinispanClusterSingleton.getInstance().getManager();
+
+            }else if(args[0].equals("loadRemote")) {
+                if (args.length != 2 && args.length < 4) {
+                    System.err.println("wrong number of arguments for load $prog load dir/ $prog load dir host port (delay per put)");
+                    System.exit(-1);
+                }
+                remoteCacheManager = createRemoteCacheManager(args[2], args[3]);
+            }  else if(args[0].startsWith("loadEnsemble")){
+                if ( args.length < 3) {
+                    System.err.println("or  \t\t$prog loadEnsemble(Multi) dir host:port(|host:port)+ (delay per put)\n ");
+                    System.exit(-1);
+                }
+
+                if(args[0].equals("loadEnsembleMulti"))
+                     ensemple_multi=true;
+                if (args.length == 4) {
+                    delay = Integer.parseInt(args[3]);
+                    System.out.println("Forced delay per put : " + delay + " ms");
+                }
+                String ensembleString = args[2];
+                emanager = new EnsembleCacheManager((ensembleString));
+                emanager.start();
+            }
+
+            loadData(args[1]);
         }
     }
 
@@ -254,20 +287,10 @@ public class LoadCsv {
     }
 
 
-    private static void loadData(String[] args) throws IOException, ClassNotFoundException {
-        if (args.length != 2 && args.length < 4) {
-            System.err.println("wrong number of arguments for load $prog load dir/ $prog load dir host port (delay per put)");
-            System.exit(-1);
-        }
+    private static void loadData(String path) throws IOException, ClassNotFoundException {
 
-        if (args.length == 5) {
-            delay = Integer.parseInt(args[4]);
-            System.out.println("Forced delay per put : " + delay + " ms");
-        }
-        if (args.length > 2)
-            manager = createRemoteCacheManager(args[2], args[3]);
         Long startTime = System.currentTimeMillis();
-        Path dir = Paths.get(args[1]);
+        Path dir = Paths.get(path);
         List<File> files = new ArrayList<>();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*.{csv}")) {
             for (Path entry : stream) {
@@ -480,6 +503,8 @@ public class LoadCsv {
             remoteCache.put(remoteCache.getName() + ":" + key, tuple);
         else if (embeddedCache != null)
             embeddedCache.put(((Cache) embeddedCache).getName() + ":" + key, tuple);
+        else if (ensembleCache!=null)
+            ensembleCache.put( ensembleCache.getName() + ":" + key, tuple);
         try {
             Thread.sleep(delay);
         } catch (InterruptedException e) {
@@ -491,20 +516,25 @@ public class LoadCsv {
     private static boolean initialize_cache(String tableName) {
 
         System.out.println(" Tablename: " + tableName + " Trying to create cache: " + StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
-        if (manager != null)
+        if (remoteCacheManager != null)
             try {
-                remoteCache = manager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
+                remoteCache = remoteCacheManager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
             } catch (Exception e) {
                 System.err.println("Error " + e.getMessage() + " Terminating file loading.");
                 return false;
             }
         else if (imanager != null)
             embeddedCache = imanager.getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
+        else if (ensembleCache != null)
+            ensembleCache = emanager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName,new ArrayList<>(emanager.sites()),
+                        EnsembleCacheManager.Consistency.DIST);
         else {
             System.err.println("Not recognised type, stop importing");
             return false;
         }
-        if (embeddedCache == null && remoteCache == null) {
+
+
+        if (embeddedCache == null && remoteCache == null && ensembleCache ==null) {
             System.err.print("Unable to Crete Cache, exiting");
             System.exit(0);
         }
