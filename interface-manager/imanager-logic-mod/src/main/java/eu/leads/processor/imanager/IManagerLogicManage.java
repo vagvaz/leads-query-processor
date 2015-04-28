@@ -34,6 +34,7 @@ public class IManagerLogicManage extends ManageVerticle {
         workerConfig.putString("persistence", config.getString("persistence"));
         workerConfig.putString("id", id);
         workerConfig.putString("workqueue", config.getString("workqueue"));
+        workerConfig.putObject("global",config.getObject("global"));
         com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id, serviceType));
 
     }
