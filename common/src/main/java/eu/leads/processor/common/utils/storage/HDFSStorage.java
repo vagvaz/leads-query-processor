@@ -93,8 +93,8 @@ public class HDFSStorage implements LeadsStorage {
             hdfsConfiguration.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
 
 
-            hdfsConfiguration.set("hdfs.url", configuration.getProperty("prefix"));//"hdfs://snf-618466.vm.okeanos.grnet.gr:8020");
-            hdfsConfiguration.set("prefix", "/user/vagvaz/");
+            hdfsConfiguration.set("hdfs.url", configuration.getProperty("hdfs.url"));//"hdfs://snf-618466.vm.okeanos.grnet.gr:8020");
+            //hdfsConfiguration.set("prefix", "/user/vagvaz/");
 
             hdfsConfiguration.set("prefix", configuration.getProperty("prefix"));
             //fileSystem = FileSystem.get(hdfsConfiguration);
@@ -194,7 +194,9 @@ public class HDFSStorage implements LeadsStorage {
             FileStatus[] subPaths = fileSystem.listStatus(new Path(basePath.toUri().toString() + uri));
             result = new String[subPaths.length];
             for (int index = 0; index < subPaths.length; index++) {
-                result[index] = subPaths[index].getPath().toString();
+                //System.out.println("path :" + subPaths[index].getPath().toString());
+                result[index] = basePath.toUri().toString() + uri+"/"+index;//subPaths[index].getPath().toString();
+                //System.out.println("path :" + result[index]);
             }
         } catch (IOException e) {
             e.printStackTrace();

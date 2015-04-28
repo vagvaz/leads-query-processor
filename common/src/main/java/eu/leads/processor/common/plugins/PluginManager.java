@@ -130,7 +130,11 @@ public class PluginManager {
       fileInputStream.close();
       System.out.println("MD5 key : " + key);
       if (!plugin.check_MD5(key)) {
+        System.out.println("Wrong file ");
+
         log.info("Plugin downloaded corrupted?Or not initialized plugin package, MD5 check error");
+      }else{
+        System.out.println("Correct file ");
       }
     } catch (FileNotFoundException e) {
       e.printStackTrace();
