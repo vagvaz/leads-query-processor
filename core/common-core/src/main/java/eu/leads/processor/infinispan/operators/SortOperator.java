@@ -175,7 +175,7 @@ public class SortOperator extends BasicOperator {
      // necessary caches for the merge
      inputCache = (Cache) manager.getPersisentCache(getInput());
      if (isRemote) {
-         String coordinator = action.getData().getString("coordinator");
+         String coordinator = action.asJsonObject().getString("coordinator");
          String prefix = action.getData().getString("prefix");
          for (Address cacheNodes : inputCache.getAdvancedCache().getRpcManager().getMembers()) {
             String tmpCacheName = prefix + "." + currentCluster + "." + cacheNodes.toString();
