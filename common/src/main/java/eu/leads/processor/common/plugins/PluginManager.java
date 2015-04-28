@@ -126,7 +126,6 @@ public class PluginManager {
     String pluginTmpJar=check_exist_download(pluginFn,plugin,false);
     if(pluginTmpJar==null){
       System.out.println("Wrong file ");
-
       log.info("Plugin downloaded corrupted?Or not initialized plugin package, MD5 check error");
     }else{
       System.out.println("Correct file ");
@@ -147,6 +146,7 @@ public class PluginManager {
   }
   private static String check_exist_download(String pluginFn,  PluginPackage plugin, boolean forcedownload) {
     String pluginTmpJar=null;
+    System.out.println("Plugin md5: " + plugin.getKey() );
     if(forcedownload)
       pluginTmpJar = downloadPlugin(pluginFn);
     else

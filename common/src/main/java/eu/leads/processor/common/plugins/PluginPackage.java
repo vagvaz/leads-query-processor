@@ -21,6 +21,15 @@ public class PluginPackage extends JsonObject implements Serializable {
   private String jarFilename;
   private String configFileName;
   private String user;
+
+  public void setKey(String key) {
+    this.key = key;
+  }
+
+  public String getKey() {
+    return key;
+  }
+
   private String key=null;
 
   public boolean check_MD5(MD5Hash key){

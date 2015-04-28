@@ -54,6 +54,7 @@ public class RegisterPluginActionHandler implements ActionHandler {
       PluginPackage newPlugin = new PluginPackage(pluginId,pluginClass);
       newPlugin.setJarFilename(jarPath);
       newPlugin.setConfig(configbytes);
+      newPlugin.setKey(pluginInfo.getString("key"));
 
       if (PluginManager.uploadInternalPlugin(newPlugin)) {
         result.setStatus(ActionStatus.COMPLETED.toString());

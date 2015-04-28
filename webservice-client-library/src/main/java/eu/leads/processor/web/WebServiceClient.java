@@ -423,6 +423,7 @@ public class WebServiceClient {
     object.putString("pluginclass", pluginPackage.getClassName());
     object.putBinary("config",pluginPackage.getConfig());
     object.putString("jar","plugins/"+pluginPackage.getId());
+    object.putString("key",pluginPackage.getKey());
     setBody(connection, object);
     String response = getResult(connection);
     result = mapper.readValue(response, ActionResult.class);
