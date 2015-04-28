@@ -498,7 +498,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     Action copyAction = new Action(new JsonObject(action.toString()));
     Action newAction = new Action(copyAction);
     JsonObject dataAction = copyAction.asJsonObject().copy();
-    log.error("DATA ACTION = "+dataAction.toString());
+//    log.error("DATA ACTION = "+dataAction.toString());
     JsonObject sched = new JsonObject();
     sched.putArray(mc, globalConfig.getObject("microclouds").getArray(mc));
 //    if(dataAction.containsField("data")){
@@ -590,24 +590,38 @@ public abstract class BasicOperator extends Thread implements Operator{
 //        replyForSuccessfulExecution(action);
 //        return;
 //      }
-      System.err.println("EXECUTE " + mapperCallable.getClass().toString() + " ON " + currentCluster);
-      DistributedExecutorService des = new DefaultExecutorService(inputCache);
-
-      //      ScanCallable callable = new ScanCallable(conf.toString(),getOutput());
-
       setMapperCallableEnsembleHost();
+      System.err.println(
+          "EXECUTE " + mapperCallable.getClass().toString() + " ON " + currentCluster);
+      DistributedExecutorService des = new DefaultExecutorService(inputCache);
+      System.err.println("building dist task");
+      log.error("building dist task");
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder(mapperCallable);
       builder.timeout(1, TimeUnit.HOURS);
       DistributedTask task = builder.build();
+      System.err.println("submitting to local cluster task");
+      log.error("submitting to local cluster task");
       List<Future<String>> res = des.submitEverywhere(task);
       //      Future<String> res = des.submit(callable);
       List<String> addresses = new ArrayList<String>();
       try {
         if (res != null) {
-          for (Future<?> result : res) {
-            System.out.println(result.get());
-            addresses.add((String) result.get());
+          while(res.size() > 0 ){
+            Iterator<Future<String>> resultIterator = res.iterator();
+
+            while(resultIterator.hasNext()){
+              Future<String> future = resultIterator.next();
+              System.err.println("Checking whether " + future.toString() + " is Done " + future.isDone() );
+              if(future.isDone()){
+                System.err.println(mapperCallable.getClass().toString() + " completed on " + future.get());
+                resultIterator.remove();
+              }
+            }
           }
+//          for (Future<?> result : res) {
+//            System.out.println(result.get());
+//            addresses.add((String) result.get());
+//          }
           System.out.println("map " + mapperCallable.getClass().toString() +
                                " Execution is done");
           log.info("map " + mapperCallable.getClass().toString() +

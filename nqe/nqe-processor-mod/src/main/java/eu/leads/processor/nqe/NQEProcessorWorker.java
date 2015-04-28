@@ -84,8 +84,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
                        }
 //                       System.err.println("Remote DEPLOY of " + action.getData().getObject("operator").getObject
 //                                                                                                         ("configuration").toString() + " was successful");
-                       log.error("Remote DEPLOY of " + action.getData().getObject("operator").getObject
-                                                                                                ("configuration").toString() + " was successful");
+                       log.error("Remote DEPLOY of " + action.getId() + " was successful");
                      }
                      else{
                         log.error("COMPLETED Action " + action.toString() + "Received by NQEProcessor but cannot be handled" );
@@ -128,8 +127,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
                        } catch (IOException e) {
                          e.printStackTrace();
                        }
-                       log.error("Remote DEPLOY of " + action.getData().getObject("operator").getObject
-                                                                                                ("configuration").toString() + " failed");
+                       log.error("Remote DEPLOY of " + action.getId() + " failed");
                      }
                      else{
                         log.error("FAILED Action " + action.toString() + "Received by NQEProcessor but cannot be handled" );

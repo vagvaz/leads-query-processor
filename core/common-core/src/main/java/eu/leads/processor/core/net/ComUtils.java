@@ -6,8 +6,8 @@ package eu.leads.processor.core.net;
 public class ComUtils {
 
 
-    public static  int DEFAULT_RETRIES = 10;
-    public static  long DEFAULT_TIMEOUT = 40000;
+    public static  int DEFAULT_RETRIES = 3;
+    public static  long DEFAULT_TIMEOUT = 20000;
     public static final java.lang.String P2P = "P2P";
     public static final java.lang.String GROUP = "GROUP";
     public static final java.lang.String ALLGROUP = "ALLGROUP";
