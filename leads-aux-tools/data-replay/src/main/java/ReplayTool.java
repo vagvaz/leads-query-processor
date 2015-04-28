@@ -30,7 +30,7 @@ public class ReplayTool {
    private EnsembleCache  nutchCache;
    private EnsembleCache webpageCache;
    private NutchTransformer nutchTransformer;
-   public ReplayTool(String baseDir, String webpagePrefixes, String nutchDataPrefixes, String ensembleString){
+   public ReplayTool(String baseDir, String webpagePrefixes, String nutchDataPrefixes, String ensembleString, boolean multicloud){
       this.baseDir = baseDir;
       this.webpagePrefixes = webpagePrefixes;
       this.nutchDataPrefixes= nutchDataPrefixes;
@@ -39,7 +39,13 @@ public class ReplayTool {
       emanager = new EnsembleCacheManager((ensembleString));
      emanager.start();
       nutchCache = emanager.getCache("WebPage");
-      webpageCache = emanager.getCache("default.webpages");
+      if(multicloud)
+         webpageCache = emanager.getCache("default.webpages",new ArrayList<>(emanager.sites()), EnsembleCacheManager.Consistency.DIST);
+      else
+         webpageCache = emanager.getCache("default.webpages");
+
+
+
       List<String> mappings =    LQPConfiguration.getInstance().getConfiguration().getList("nutch.mappings");
       Map<String,String> nutchToLQE = new HashMap<String,String>();
 
