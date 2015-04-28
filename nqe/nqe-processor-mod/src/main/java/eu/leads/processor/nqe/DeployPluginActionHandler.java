@@ -53,9 +53,31 @@ public class DeployPluginActionHandler implements ActionHandler {
 //     ownersPlugins = (BasicCache) persistence.getPersisentCache(StringConstants.OWNERSCACHE);
 //     activePlugins = (BasicCache) persistence.getPersisentCache(StringConstants.PLUGIN_ACTIVE_CACHE);
 //     pluginRepository = (BasicCache) persistence.getPersisentCache(StringConstants.PLUGIN_CACHE);
-     Properties conf = new Properties();
-     conf.setProperty("prefix","/tmp/leads/");
-     storage = LeadsStorageFactory.getInitializedStorage(LeadsStorageFactory.LOCAL,conf);
+     Properties storageConf = new Properties();
+     storageConf.setProperty("prefix","/tmp/leads/");
+     if(globalConfig!=null){
+       if(globalConfig.containsField("hdfs.uri") && globalConfig.containsField("hdfs.prefix") && globalConfig.containsField("hdfs.user"))
+       {
+         storageConf.setProperty("hdfs.url", globalConfig.getString("hdfs.uri"));
+         storageConf.setProperty("fs.defaultFS", globalConfig.getString("hdfs.uri"));
+         storageConf.setProperty("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+         storageConf.setProperty("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
+         storageConf.setProperty("prefix", globalConfig.getString("hdfs.prefix"));
+         storageConf.setProperty("hdfs.user", globalConfig.getString("hdfs.user"));
+         storageConf.setProperty("postfix", "0");
+         System.out.println("USING HDFS yeah!");
+         log.info("using hdfs: " + globalConfig.getString("hdfs.user")+ " @ "+ globalConfig.getString("hdfs.uri") + globalConfig.getString("hdfs.prefix") );
+         storage = LeadsStorageFactory.getInitializedStorage(LeadsStorageFactory.HDFS,storageConf);
+       }else {
+         log.info("No defined all hdfs parameters using local storage ");
+         storage = LeadsStorageFactory.getInitializedStorage(LeadsStorageFactory.LOCAL, storageConf);
+       }
+     }else
+       storage = LeadsStorageFactory.getInitializedStorage(LeadsStorageFactory.LOCAL,storageConf);
+
+
+
+
      String ensembleHost = ConfigurationUtilities.getEnsembleString(globalConfig);
     emanager = new EnsembleCacheManager(ensembleHost);
      ownersPlugins = emanager.getCache(StringConstants.OWNERSCACHE);

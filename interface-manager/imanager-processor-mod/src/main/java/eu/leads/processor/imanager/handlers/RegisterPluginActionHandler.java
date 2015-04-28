@@ -10,6 +10,7 @@ import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
+import org.apache.avro.data.Json;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 
@@ -26,7 +27,7 @@ public class RegisterPluginActionHandler implements ActionHandler {
   private Cache<String,String> queriesCache;
 
   public RegisterPluginActionHandler(Node com, LogProxy log, InfinispanManager persistence,
-                                      String id) {
+                                      String id, JsonObject global) {
     this.com = com;
     this.log = log;
     this.persistence = persistence;
@@ -34,7 +35,25 @@ public class RegisterPluginActionHandler implements ActionHandler {
     queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
     Properties storageConf = new Properties();
     storageConf.setProperty("prefix", "/tmp/leads/");
-    PluginManager.initialize(LeadsStorageFactory.LOCAL,storageConf);
+    if(global!=null){
+
+      if(global.containsField("hdfs.uri") && global.containsField("hdfs.prefix") && global.containsField("hdfs.user"))
+      {
+        storageConf.setProperty("hdfs.url", global.getString("hdfs.uri"));
+        storageConf.setProperty("fs.defaultFS", global.getString("hdfs.uri"));
+        storageConf.setProperty("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+        storageConf.setProperty("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
+        storageConf.setProperty("prefix", global.getString("hdfs.prefix"));
+        storageConf.setProperty("hdfs.user", global.getString("hdfs.user"));
+        storageConf.setProperty("postfix", "0");
+        System.out.println("USING HDFS yeah!");
+        log.info("using hdfs: " + global.getString("hdfs.user")+ " @ "+ global.getString("hdfs.uri") + global.getString("hdfs.prefix") );
+
+        PluginManager.initialize(LeadsStorageFactory.HDFS,storageConf);
+      }else
+        PluginManager.initialize(LeadsStorageFactory.LOCAL,storageConf);
+    }else
+      PluginManager.initialize(LeadsStorageFactory.LOCAL,storageConf);
   }
   @Override
   public Action process(Action action) {

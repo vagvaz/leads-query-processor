@@ -90,9 +90,9 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
       handlers.put(IManagerConstants.CREATE_NEW_SPECIAL_QUERY,
                           new CreateSpecialQueryActionHandler(com, log, persistence, id));
       handlers.put(IManagerConstants.REGISTER_PLUGIN,
-                          new RegisterPluginActionHandler(com, log, persistence, id));
+                          new RegisterPluginActionHandler(com, log, persistence, id, globalConfig));
       handlers.put(IManagerConstants.DEPLOY_PLUGIN,
-                          new DeployPluginActionHandler(com, log, persistence, id));
+                          new DeployPluginActionHandler(com, log, persistence, id, globalConfig));
       handlers.put(IManagerConstants.UNDEPLOY_PLUGIN,
                           new UndeployPluginActionHandler(com, log, persistence, id));
       handlers.put(IManagerConstants.PUT_ENC_OBJECT, new PutEncActionHandler(com,log,persistence,id));

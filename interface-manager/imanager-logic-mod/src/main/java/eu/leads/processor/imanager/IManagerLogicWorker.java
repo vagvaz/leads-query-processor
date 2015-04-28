@@ -56,7 +56,30 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
     mapper = new ObjectMapper();
     Properties storageConf = new Properties();
     storageConf.setProperty("prefix", "/tmp/leads/");
-    storage = LeadsStorageFactory.getInitializedStorage(LeadsStorageFactory.LOCAL,storageConf);
+
+
+    if(config.containsField("global")){
+      JsonObject global = config.getObject("global");
+      if(global.containsField("hdfs.uri") && global.containsField("hdfs.prefix") && global.containsField("hdfs.user"))
+      {
+        storageConf.setProperty("hdfs.url", global.getString("hdfs.uri"));
+        storageConf.setProperty("fs.defaultFS", global.getString("hdfs.uri"));
+        storageConf.setProperty("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+        storageConf.setProperty("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
+        storageConf.setProperty("prefix", global.getString("hdfs.prefix"));
+        storageConf.setProperty("hdfs.user", global.getString("hdfs.user"));
+        storageConf.setProperty("postfix", "0");
+        System.out.println("USING HDFS yeah!");
+        log.info("using hdfs: " + global.getString("hdfs.user")+ " @ "+ global.getString("hdfs.uri") + global.getString("hdfs.prefix") );
+
+        storage = LeadsStorageFactory.getInitializedStorage(LeadsStorageFactory.HDFS,storageConf);
+      }else
+      {
+        log.info("No defined all hdfs parameters using local storage ");
+        storage = LeadsStorageFactory.getInitializedStorage(LeadsStorageFactory.LOCAL, storageConf);
+      }
+    }else
+      storage = LeadsStorageFactory.getInitializedStorage(LeadsStorageFactory.LOCAL,storageConf);
   }
 
   @Override
