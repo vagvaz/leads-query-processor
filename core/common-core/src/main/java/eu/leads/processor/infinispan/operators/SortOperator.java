@@ -207,7 +207,7 @@ public class SortOperator extends BasicOperator {
    @Override
    public void setMapperCallableEnsembleHost(){
      if(isRemote) {
-       String ensembleHost = globalConfig.getObject("componentsAddrs").getArray(action.getData().getString("coordinator")).get(0).toString()
+       String ensembleHost = globalConfig.getObject("componentsAddrs").getArray(action.asJsonObject().getString("coordinator")).get(0).toString()
                                +":11222";
        mapperCallable.setEnsembleHost(ensembleHost);
      }
