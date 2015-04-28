@@ -49,6 +49,7 @@ public class SentimentAnalysisPlugin implements PluginInterface {
         targetCache = (Cache) manager.getPersisentCache(configuration.getString("cache"));
         module = new SentimentAnalysisModule("classifiers/english.all.3class.distsim.crf.ser.gz");
         debug = configuration.getBoolean("debug");
+        System.err.println("Plugin initialized writing to : "+ targetCache);
     }
 
     @Override

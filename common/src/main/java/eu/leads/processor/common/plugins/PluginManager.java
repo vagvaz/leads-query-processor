@@ -121,26 +121,17 @@ public class PluginManager {
       log.error("Tried to upload plugin " + plugin.getId() + " without a valid jar file " + plugin.getJarFilename());
       return false;
     }
-    //Donwload plugin to local file system in order to check initialization
-    String pluginTmpJar = downloadPlugin(pluginFn);
-    FileInputStream fileInputStream = null;
-    try {
-      fileInputStream = new FileInputStream(pluginTmpJar);
-      MD5Hash key = MD5Hash.digest(fileInputStream);
-      fileInputStream.close();
-      System.out.println("MD5 key : " + key);
-      if (!plugin.check_MD5(key)) {
-        System.out.println("Wrong file ");
 
-        log.info("Plugin downloaded corrupted?Or not initialized plugin package, MD5 check error");
-      }else{
-        System.out.println("Correct file ");
-      }
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
+    //Donwload plugin to local file system in order to check initialization
+    String pluginTmpJar=check_exist_download(pluginFn,plugin,false);
+    if(pluginTmpJar==null){
+      System.out.println("Wrong file ");
+
+      log.info("Plugin downloaded corrupted?Or not initialized plugin package, MD5 check error");
+    }else{
+      System.out.println("Correct file ");
     }
+
 
     if (!checkPluginNameFromFile(plugin.getClassName(), pluginTmpJar)) {
       log.error("Plugin " + plugin.getId() + " failed validation test. Class.getClassByName("
@@ -153,6 +144,53 @@ public class PluginManager {
     }
 
     return true;
+  }
+  private static String check_exist_download(String pluginFn,  PluginPackage plugin, boolean forcedownload) {
+    String pluginTmpJar=null;
+    if(forcedownload)
+      pluginTmpJar = downloadPlugin(pluginFn);
+    else
+      pluginTmpJar = PluginManager.pluginPrefix + pluginFn + ".jar";
+    File f = new File(pluginTmpJar);
+
+    if (f.exists() && !f.isDirectory()) {
+      //check md5sum
+      if (checkMD5(pluginTmpJar, plugin)) {
+        return pluginTmpJar;
+      } else {
+        pluginTmpJar = downloadPlugin(pluginFn);
+        if (checkMD5(pluginTmpJar, plugin))
+          return pluginTmpJar;
+        else
+          return null;
+      }
+    } else {
+        pluginTmpJar = downloadPlugin(pluginFn);
+        if (checkMD5(pluginTmpJar, plugin))
+          return pluginTmpJar;
+        else
+          return null;
+    }
+  }
+
+    private static boolean checkMD5(String jarFilname,PluginPackage plugin){
+    FileInputStream fileInputStream = null;
+      try {
+        fileInputStream = new FileInputStream(jarFilname);
+        MD5Hash key = MD5Hash.digest(fileInputStream);
+        fileInputStream.close();
+        System.out.println("checkMD5  key : " + key);
+        if (!plugin.check_MD5(key))
+          return false;
+        else
+          return true;
+
+      } catch (FileNotFoundException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    return false;
   }
 
   private static String downloadPlugin(String jarFilename) {
