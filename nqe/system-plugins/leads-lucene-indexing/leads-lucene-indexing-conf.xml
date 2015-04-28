@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+
+	<technology>leads</technology>
+	<host>http://5.147.254.199</host>
+	<port>8080</port>
+	
+	<loggingDir>${env:LEADS_ADIDAS_LOGS}</loggingDir>
+	<resources_path>${env:LEADS_ADIDAS_RESOURCES}</resources_path>
+	<storagePropertiesDir>${env:LEADS_ADIDAS_PROPERTIES}</storagePropertiesDir>
+	
+</config>
