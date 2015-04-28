@@ -237,14 +237,14 @@ public class WGSOperator extends MapReduceOperator {
 
     if(iteration == 0){
       Set<String> targetMC = getTargetMC();
-      String tmpIntermediateCacheName =  getName() + ".intermediate";
+      String tmpIntermediateCacheName =  getOutput() + ".intermediate";
       for(int i = 0; i < configBody.getInteger("depth");i++){
         for(String mc : targetMC){
           if(i==0)
           { // the real output should be created only once
             createCache(mc,realOutput);
           }
-          tmpIntermediateCacheName = getName() + ".intermediate"+i;
+          tmpIntermediateCacheName = getOutput() + ".intermediate"+i;
           createCache(mc, tmpIntermediateCacheName+i);
           //create Intermediate cache name for data on the same Sites as outputCache
           createCache(mc,tmpIntermediateCacheName+".data");
@@ -253,12 +253,12 @@ public class WGSOperator extends MapReduceOperator {
           //createIndexCache for getting all the nodes that contain values with the same key! in a mc
           createCache(mc,tmpIntermediateCacheName+".indexed");
         }
-        String tmpInputName = getName()+ ".iter";
+        String tmpInputName = getOutput()+ ".iter";
         for(String inputMC : getRunningMC()){
 //          if(i < configBody.getInteger("depth")){
-            tmpInputName = getName()+ ".iter"+i;
+            tmpInputName = getOutput()+ ".iter"+i;
             createCache(inputMC,tmpInputName);
-            createCache(inputMC,getName()+ ".iter"+(i+1));
+            createCache(inputMC,getOutput()+ ".iter"+(i+1));
 //          }
         }
 
@@ -268,7 +268,7 @@ public class WGSOperator extends MapReduceOperator {
   //   @Override
   public void run2() {
     int count = 0;
-    inputCacheName = getName() +".iter0";
+    inputCacheName = getOutput() +".iter0";
     inputCache = (Cache) manager.getPersisentCache(inputCacheName);
     JsonObject configBody = conf.getObject("body");
     inputCache.put(configBody.getString("url"),configBody.getString("url"));

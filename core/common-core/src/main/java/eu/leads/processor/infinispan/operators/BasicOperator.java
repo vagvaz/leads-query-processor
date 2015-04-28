@@ -612,10 +612,10 @@ public abstract class BasicOperator extends Thread implements Operator{
             while(resultIterator.hasNext()){
               Future<String> future = resultIterator.next();
               System.err.println("Checking whether " + future.toString() + " is Done " + future.isDone() );
-              if(future.isDone()){
-                System.err.println(mapperCallable.getClass().toString() + " completed on " + future.get());
-                resultIterator.remove();
-              }
+//              if(future.isDone()){
+              System.err.println(mapperCallable.getClass().toString() + " completed on " + future.get());
+              resultIterator.remove();
+//              }
             }
           }
 //          for (Future<?> result : res) {
