@@ -78,7 +78,8 @@ public class ClusteredTest {
 //      e.printStackTrace();
 //    }
      InfinispanManager menago = InfinispanClusterSingleton.getInstance().getManager();
-     ConcurrentMap<Object,Object> map = menago.getPersisentCache("default.webpages");
+     ConcurrentMap<Object,Object> map = 
+    		 menago.getPersisentCache("default.webpages");
      
      System.out.println("Putting values to cache...");
      

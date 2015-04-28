@@ -28,7 +28,6 @@ public class JZC {
 
     private JSONArray tryRequest (ZContext ctx, String endpoint, ZMsg request)
     {
-        //System.out.printf("I: trying echo service at %s…\n",new Object[]{endpoint});
         Socket client = ctx.createSocket(ZMQ.REQ);
         client.connect(endpoint);
 
@@ -37,6 +36,7 @@ public class JZC {
         msg.send(client);
         PollItem[] items = { new PollItem(client, ZMQ.Poller.POLLIN) };
         ZMQ.poll(items, REQUEST_TIMEOUT);
+
         ZMsg reply = null;
         if (items[0].isReadable()) {
             reply = ZMsg.recvMsg(client);

@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.XMLConfiguration;
+
 import eu.leads.datastore.datastruct.MDFamily;
 import eu.leads.datastore.datastruct.UrlTimestamp;
 import eu.leads.infext.proc.com.indexing.DocumentKeywordSearch;
@@ -75,8 +78,6 @@ public class KeywordExtractionHook extends AbstractHook {
 		
 		for(String keywords : keywordsList) {
 			String [] keywordsArray = keywords.split("\\s+");
-			
-			System.out.println("KeywordExtractionHook.3:"+keywords);
 			
 			// UrlTimestamp to be changed later! It's just about these are two strings. Parttype:Partid
 			HashMap<UrlTimestamp, Double> partsIds = keywordSearch.searchKeywords(keywordsArray);

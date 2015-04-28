@@ -48,7 +48,9 @@ def setup_custom_logger(name,fhsuffix):
     formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
 
     mainpythondir = os.path.dirname(os.path.realpath(__file__))+"../../../../../"
-    handler = logging.FileHandler(mainpythondir+'leads-pzs-'+fhsuffix+'.log')
+    loggingdir = os.environ.get('LEADS_ADIDAS_LOGS') or mainpythondir
+
+    handler = logging.FileHandler(loggingdir+'leads-pzs-'+fhsuffix+'.log')
     handler.setFormatter(formatter)
 
     logger = logging.getLogger(name)
