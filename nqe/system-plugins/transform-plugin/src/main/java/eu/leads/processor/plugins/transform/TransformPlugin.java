@@ -59,7 +59,7 @@ public class TransformPlugin implements PluginInterface {
 
     protected void processTuple(String key, Tuple tuple) {
         tuple.keepOnly(attributes);
-        targetCache.put(key, tuple.asString());
+        targetCache.put(key, tuple);
     }
 
     @Override
