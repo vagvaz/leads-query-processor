@@ -1,6 +1,7 @@
 package eu.leads.processor.common.infinispan;
 
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.plugins.PluginManager;
 import eu.leads.processor.common.plugins.PluginPackage;
 import eu.leads.processor.common.utils.FSUtilities;
 import eu.leads.processor.common.utils.storage.LeadsStorage;
@@ -48,7 +49,7 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
   transient private String pluginsCacheName;
   transient private String pluginName;
   transient private List<EventType> type;
-  transient private boolean isInitialized ;
+  transient private boolean isInitialized =false ;
   transient private LeadsStorage storageLayer;// = null;
   transient private String user;
   public PluginRunnerFilter(EmbeddedCacheManager manager,String confString){
@@ -67,7 +68,6 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
 
     System.err.println(UUIDname + " Construct " + confString);
     storageLayer=null;
-    initialize();
   }
 
   private void writeObject(ObjectOutputStream o)
@@ -75,7 +75,7 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
     o.defaultWriteObject(); //is enough for no transient objects but anyway
     o.writeUTF(UUIDname);
     o.writeUTF(configString);
-    System.err.println(UUIDname+" Serialize " + configString);
+    System.err.println(UUIDname + " Serialize " + configString);
   }
 
   private void readObject(ObjectInputStream i)
@@ -86,10 +86,15 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
     isInitialized = false;
     UUIDname = UUID.randomUUID().toString();
     System.err.println(UUIDname+" DeSerialize " + configString);
-//    initialize();
+    initialize();
   }
 
   private void initialize() {
+    if(isInitialized)
+    {
+      System.err.println("Already initialized !!!! not again  " + UUIDname);
+      return;
+    }
     System.err.println("Initilize " + UUIDname);
     log = LoggerFactory.getLogger(PluginRunnerFilter.class);
     log = LoggerFactory.getLogger(UUIDname + " PluginRunner." + pluginName + ":" +  pluginsCacheName);
@@ -159,14 +164,21 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
     PluginPackage pluginPackage = (PluginPackage) cache.get(targetCacheName+":"+plugName+user);
     log.error("INITPLUG:" + (pluginPackage == null));
     String tmpdir = System.getProperties().getProperty("java.io.tmpdir")+"/"+StringConstants
-                                                                          .TMPPREFIX+"/runningPlugins/"+ UUID
-                                                                                                     .randomUUID()
-                                                                                    .toString()+"/";
+              .TMPPREFIX+"/runningPlugins/"+ UUIDname+"/";//+ UUID.randomUUID().toString()+"/";
+
+
     log.error("using tmpdir " + tmpdir);
     String  jarFileName = tmpdir+pluginPackage.getClassName()+".jar";
     log.error("Download... " + "plugins/" + plugName + " -> " + jarFileName);
-    storageLayer.download("plugins/"+plugName,jarFileName);
+    System.out.println("Download... " + "plugins/" + plugName + " -> " + jarFileName);
+    check_exist_download(jarFileName,plugName,pluginPackage,false);
+    //PluginManager.checkMD5(jarFileName,pluginPackage);
+    log.error("Downloaded " + "plugins/" + plugName + " -> " + jarFileName);
+    System.out.println("Downloaded " + "plugins/" + plugName + " -> " + jarFileName);
+    //storageLayer.download("plugins/" + plugName, jarFileName);
     ClassLoader classLoader = null;
+
+
     File file = new File(jarFileName);
     try {
       classLoader =
@@ -239,7 +251,43 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
       log.error("Could not find the name for " + plugName);
     }
   }
+  private String check_exist_download(String jarFileName, String plugName,  PluginPackage plugin, boolean forcedownload) {
 
+    System.out.println("Plugin md5: " + plugin.getKey() );
+    if(forcedownload)
+      storageLayer.download("plugins/" + plugName, jarFileName);
+
+    File f = new File(jarFileName);
+
+    if (f.exists() && !f.isDirectory()) {
+      //check md5sum
+      System.out.println("File already exists " );
+      if (PluginManager.checkMD5(jarFileName, plugin)) {
+        System.out.println("MD5 correct no redownloading " );
+        return jarFileName;
+      } else {
+        System.out.println(" MD5 checksum error redownload plugin, pluginPackage key: " + plugin.getKey());
+        storageLayer.download("plugins/" + plugName, jarFileName);
+        if (PluginManager.checkMD5(jarFileName, plugin)) {
+          System.out.println("MD5 correct  " );
+          return jarFileName;
+        }else{
+          System.err.println("MD5 incorrect  " );
+          return null;
+        }
+      }
+    } else {
+      System.out.println("File does not exists " );
+      storageLayer.download("plugins/" + plugName, jarFileName);
+      if (PluginManager.checkMD5(jarFileName, plugin)) {
+        System.out.println("File downloaded  " );
+        return jarFileName;
+      }else {
+        System.err.println("MD5 incorrect  " );
+        return null;
+      }
+    }
+  }
 
   @Override
   public boolean accept(Object key, Object oldValue, Metadata oldMetadata, Object newValue,

@@ -173,7 +173,7 @@ public class PluginManager {
     }
   }
 
-    private static boolean checkMD5(String jarFilname,PluginPackage plugin){
+    public static boolean checkMD5(String jarFilname, PluginPackage plugin){
     FileInputStream fileInputStream = null;
       try {
         fileInputStream = new FileInputStream(jarFilname);
