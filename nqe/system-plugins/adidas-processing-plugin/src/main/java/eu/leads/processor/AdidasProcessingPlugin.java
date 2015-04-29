@@ -59,9 +59,11 @@ public class AdidasProcessingPlugin implements PluginInterface {
 	
 	      // KEEP config
 	      PropertiesSingleton.setConfig(config);
+		  System.out.println("...config set");
 	      
 	      // READ Configuration for Cassandra
 	      DataStoreSingleton.configureDataStore(config);
+		  System.out.println("...datastore configured");
 	      
 	      // READ Configuration for the plugin
 	      PropertiesSingleton.setResourcesDir(config.getString("resources_path"));

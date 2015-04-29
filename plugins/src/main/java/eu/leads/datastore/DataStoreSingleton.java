@@ -40,13 +40,16 @@ public class DataStoreSingleton {
 				dataStore = new CassandraCQLDataStore(mapping,port,hosts);
 			}
 			else if(technology.toLowerCase().equals("leads")) {
+				System.out.println("Configuring data store...");
 				mappingFile = "mapping/leadsstore.properties";
 				initProperties();
 				initMapping();
 				initParameters();
+				System.out.println("...initiated properties");
 				int port = conf.getInt("port");
 				String [] hosts = conf.getStringArray("host");
-				dataStore = new LeadsDataStore(mapping,port,hosts);				
+				dataStore = new LeadsDataStore(mapping,port,hosts);	
+				System.out.println("...initiated datastore");			
 			}
 		}
 	}
