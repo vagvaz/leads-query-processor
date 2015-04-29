@@ -38,7 +38,13 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
       while(iter.hasNext()){
 //         String jsonTuple = iter.next();
 //         Tuple t = new Tuple(jsonTuple);
-        Tuple t = iter.next();
+        Tuple t = null;
+        Object c = iter.next();
+        if(c instanceof Tuple )
+          t = (Tuple)c;
+        else{
+          continue;
+        }
          String table = t.getAttribute("__table");
          t.removeAttribute("__table");
          List<Tuple> tuples = relations.get(table);
