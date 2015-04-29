@@ -319,6 +319,10 @@
                <artifactId>tajo-jdbc</artifactId>
 
             </exclusion>
+            <exclusion>
+               <groupId>jboss</groupId>
+               <artifactId>jboss-*</artifactId>
+            </exclusion>
          </exclusions>
       </dependency>
       <dependency>
@@ -342,6 +346,10 @@
                <groupId>org.apache.tajo</groupId>
                <artifactId>tajo-jdbc</artifactId>
 
+            </exclusion>
+            <exclusion>
+               <groupId>jboss</groupId>
+               <artifactId>jboss-*</artifactId>
             </exclusion>
          </exclusions>
       </dependency>
@@ -368,6 +376,10 @@
                 <artifactId>tajo-jdbc</artifactId>
 
              </exclusion>
+             <exclusion>
+                <groupId>jboss</groupId>
+                <artifactId>jboss-*</artifactId>
+             </exclusion>
           </exclusions>
       </dependency>
       <dependency>
@@ -391,6 +403,10 @@
                <groupId>org.apache.tajo</groupId>
                <artifactId>tajo-jdbc</artifactId>
 
+            </exclusion>
+            <exclusion>
+               <groupId>jboss</groupId>
+               <artifactId>jboss-*</artifactId>
             </exclusion>
          </exclusions>
       </dependency>
