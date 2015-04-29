@@ -198,7 +198,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
             log.error("EXCEPTION WHILE updating agg value");
             log.error(e.getClass() + " " + e.getMessage());
             log.error(iterator.toString());
-            log.error(t.toString());
+//            log.error(t.toString());
             break;
          }
       }
