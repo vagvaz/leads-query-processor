@@ -199,10 +199,19 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
       else{
         currentCount = currentCount+1;
       }
-      counterCache.put(key.toString(),currentCount);
+      counterCache.put(key.toString(), currentCount);
       baseIntermKey.setKey(key.toString());
       baseIntermKey.setCounter(currentCount);
-      EnsembleCacheUtils.putToCache(intermediateDataCache,new ComplexIntermediateKey(baseIntermKey),value);
+      ComplexIntermediateKey newKey = new ComplexIntermediateKey(baseIntermKey.getSite(),baseIntermKey.getNode(),key.toString(),baseIntermKey.getCache(),currentCount);
+      EnsembleCacheUtils.putToCache(intermediateDataCache,newKey,value);
+      Object o = intermediateDataCache.get(newKey);
+      if(o == null){
+        System.err.println("\n\n\n\n\nINTERMEDIATE KEY " + newKey.toString() + " was not saved exiting" );
+        System.exit(-1);
+      }
+      else{
+        log.error("intermediate key " + newKey.toString() + " saved ");
+      }
     }
     else{
       EnsembleCacheUtils.putToCache(storeCache, key, value);
