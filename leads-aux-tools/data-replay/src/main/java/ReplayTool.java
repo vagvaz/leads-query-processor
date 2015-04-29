@@ -104,10 +104,13 @@ public class ReplayTool {
                                     System.err.println("tuple does not have body field ");
                                     nocontent_counter++;
                                  }else {
-                                   // System.err.println("Put to cache");
+                                    System.err.print(" Put to cache");
                                     webpageCache.put(webpageCache.getName() + ":" + t.getAttribute("url"), t);
                                     Thread.sleep(delay);
                                     counter++;
+                                    if(delay>10){
+                                       System.err.print(" Inserted "+ counter);
+                                    }
                                    uniqueKeys.add(t.getAttribute("url"));
                                     if (counter % 1000 == 0)
                                        System.err.println("loaded " + counter + " tuples");
