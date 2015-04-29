@@ -271,9 +271,11 @@ public class WebServiceClient {
 
   public static boolean uploadJar(String username,String jarPath,String prefix){
     try {
+      int chunkSize = 5*1024*1024;
+      System.out.println("UploadJar chunks size: "+ chunkSize);
       BufferedInputStream input = new BufferedInputStream(new FileInputStream(jarPath));
       ByteArrayOutputStream array = new ByteArrayOutputStream();
-      byte[] buffer = new byte[2*1024*1024];
+      byte[] buffer = new byte[chunkSize];
       byte[] toWrite = null;
       int size = input.available();
       int counter = -1;
