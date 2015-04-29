@@ -763,7 +763,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       cacheConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
           .clustering()
           .cacheMode(CacheMode.DIST_SYNC)
-          .hash().numOwners(2)
+          .hash().numOwners(1)
           .indexing().index(Index.LOCAL).transaction().transactionMode(TransactionMode
               .NON_TRANSACTIONAL)
           .persistence()
@@ -791,7 +791,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       cacheConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
           .clustering()
           .cacheMode(CacheMode.DIST_SYNC)
-          .hash().numOwners(2)
+          .hash().numOwners(1)
           .indexing().setProperty("auto-config", "true") .setProperty("default.directory_provider", "ram").index(Index.ALL).transaction().transactionMode(TransactionMode
               .NON_TRANSACTIONAL)
           .persistence()
