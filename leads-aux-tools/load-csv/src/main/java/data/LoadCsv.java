@@ -525,7 +525,7 @@ public class LoadCsv {
             }
         else if (imanager != null)
             embeddedCache = imanager.getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
-        else if (ensembleCache != null)
+        else if (emanager != null)
             ensembleCache = emanager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName,new ArrayList<>(emanager.sites()),
                         EnsembleCacheManager.Consistency.DIST);
         else {
