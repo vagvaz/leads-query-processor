@@ -23,20 +23,35 @@ public class
 
    static RemoteCacheManager manager;
    static InfinispanManager imanager;
+   static int delay=0;
    public static void main(String[] args) throws IOException, ClassNotFoundException {
-      if(args.length != 2  && args.length != 4)
-      {
-         System.err.println("Wrong number of arguments");
-         System.err.println("program [store/load] directory host port (only in load)");
-         System.exit(-1);
-      }
-      LQPConfiguration.initialize();
 
       if(args[0].startsWith("l")){
+         if(args.length<4){
+            System.err.println("program load directory host port (put_dealy)");
+               System.exit(-1);
+         }
+         if(args.length==5) {
+            delay = Integer.parseInt(args[4]);
+            System.out.println("Delay per put to cache "+ delay);
+         }
+
+         LQPConfiguration.initialize();
          loadData(args);
+         System.exit(0);
       }
-      else{
+      else if(args[0].startsWith("s")){
+         LQPConfiguration.initialize();
+
          storeData(args);
+         System.exit(0);
+      }
+
+      {
+         System.err.println("Wrong number of arguments");
+         System.err.println("program store directory");
+         System.err.println("program load directory host port (put_dealy)");
+         System.exit(-1);
       }
    }
 
@@ -164,10 +179,7 @@ public class
    }
 
    private static void loadData(String[] args) throws IOException, ClassNotFoundException {
-      if(args.length != 2 && args.length != 4 ){
-         System.err.println("wrong number of arguments for store $prog load dir/ $prog load dir host port");
-         System.exit(-1);
-      }
+
 
       System.out.println("Loading entties remotely");
       if(args.length > 2 ){
@@ -226,7 +238,9 @@ public class
                if(valueLine != null && !valueLine.trim().equals("")) {
                   JsonObject ob = new JsonObject(valueLine);
                  Tuple tuple = new Tuple(valueLine.trim());
+
                   cache.put(keyLine.trim(), tuple);
+                  Thread.sleep(delay);
 //                  cache.put(keyLine.trim(), valueLine.trim());
                }
             }
@@ -239,6 +253,8 @@ public class
          keyReader.close();
          valueReader.close();
          System.out.println("Read " + counter + "tuples");
+      } catch (InterruptedException e) {
+         e.printStackTrace();
       }
    }
    private static void loadDataEmbedded(String[] args) throws IOException, ClassNotFoundException {
