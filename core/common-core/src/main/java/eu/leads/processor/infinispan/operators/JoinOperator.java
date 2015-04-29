@@ -229,59 +229,25 @@ public class JoinOperator extends MapReduceOperator {
    }
 
   @Override public void localExecuteMap() {
+
+    List<Future<String>> res = new ArrayList<>();
+    List<String> addresses = new ArrayList<String>();
+
     if(mapperCallable != null) {
       if (inputCache.size() == 0) {
         replyForSuccessfulExecution(action);
         return;
       }
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
-
       //      ScanCallable callable = new ScanCallable(conf.toString(),getOutput());
 
       setMapperCallableEnsembleHost();
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder(mapperCallable);
       builder.timeout(1, TimeUnit.HOURS);
       DistributedTask task = builder.build();
-      List<Future<String>> res = des.submitEverywhere(task);
+      res = des.submitEverywhere(task);
       //      Future<String> res = des.submit(callable);
-      List<String> addresses = new ArrayList<String>();
-      try {
-        if (res != null) {
-          for (Future<?> result : res) {
-            System.out.println(result.get());
-            addresses.add((String) result.get());
-          }
-          System.out.println("map " + mapperCallable.getClass().toString() +
-                               " Execution is done");
-          log.info("map " + mapperCallable.getClass().toString() +
-                     " Execution is done");
-        } else {
-          System.out.println("map " + mapperCallable.getClass().toString() +
-                               " Execution not done");
-          log.info("map " + mapperCallable.getClass().toString() +
-                     " Execution not done");
-          failed = true;
-//          replyForFailExecution(action);
-        }
-      } catch (InterruptedException e) {
-        log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
-                    e.getClass().toString());
-        log.error(e.getMessage());
-        System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
-                             e.getClass().toString());
-        System.err.println(e.getMessage());
-        failed = true;
-//        replyForFailExecution(action);
-      } catch (ExecutionException e) {
-        log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
-                    e.getClass().toString());
-        log.error(e.getMessage());
-        System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
-                             e.getClass().toString());
-        System.err.println(e.getMessage());
-        failed = true;
-//        replyForFailExecution(action);
-      }
+
     }
 //    replyForSuccessfulExecution(action);
 
@@ -306,12 +272,56 @@ public class JoinOperator extends MapReduceOperator {
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder(mapperCallable);
       builder.timeout(1, TimeUnit.HOURS);
       DistributedTask task = builder.build();
-      List<Future<String>> res = des.submitEverywhere(task);
+      List<Future<String>> res2 = des.submitEverywhere(task);
       //      Future<String> res = des.submit(callable);
-      List<String> addresses = new ArrayList<String>();
+      /**
+       * READ RESULT FROM MAP 1
+       */
       try {
         if (res != null) {
           for (Future<?> result : res) {
+            System.out.println(result.get());
+            addresses.add((String) result.get());
+          }
+          System.out.println("map " + mapperCallable.getClass().toString() +
+              " Execution is done");
+          log.info("map " + mapperCallable.getClass().toString() +
+              " Execution is done");
+        } else {
+          System.out.println("map " + mapperCallable.getClass().toString() +
+              " Execution not done");
+          log.info("map " + mapperCallable.getClass().toString() +
+              " Execution not done");
+          failed = true;
+          //          replyForFailExecution(action);
+        }
+      } catch (InterruptedException e) {
+        log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+            e.getClass().toString());
+        log.error(e.getMessage());
+        System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+            e.getClass().toString());
+        System.err.println(e.getMessage());
+        failed = true;
+        //        replyForFailExecution(action);
+      } catch (ExecutionException e) {
+        log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+            e.getClass().toString());
+        log.error(e.getMessage());
+        System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+            e.getClass().toString());
+        System.err.println(e.getMessage());
+        failed = true;
+        //        replyForFailExecution(action);
+      }
+
+
+
+
+      addresses = new ArrayList<String>();
+      try {
+        if (res2 != null) {
+          for (Future<?> result : res2) {
             System.out.println(result.get());
             addresses.add((String) result.get());
           }
