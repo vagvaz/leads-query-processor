@@ -87,6 +87,8 @@ public class LoadCsv {
                 String ensembleString = args[2];
                 emanager = new EnsembleCacheManager((ensembleString));
                 emanager.start();
+            }else{
+                System.exit(0);
             }
 
             loadData(args[1]);
@@ -526,8 +528,11 @@ public class LoadCsv {
         else if (imanager != null)
             embeddedCache = imanager.getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
         else if (emanager != null)
-            ensembleCache = emanager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName,new ArrayList<>(emanager.sites()),
+            if(ensemple_multi)
+                ensembleCache = emanager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName,new ArrayList<>(emanager.sites()),
                         EnsembleCacheManager.Consistency.DIST);
+            else
+                ensembleCache = emanager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
         else {
             System.err.println("Not recognised type, stop importing");
             return false;
