@@ -83,8 +83,8 @@ public class SentimentAnalysisPlugin implements PluginInterface {
                 break;
         }
         long endTime = System.currentTimeMillis();
-        System.out.println("Tuple processed and inserted in " + (StartTime - endTime)+" ms");
-        log.info("Tuple processed and inserted in " + (StartTime - endTime)+" ms");
+        System.out.println("Tuple processed and inserted in " + (endTime - StartTime)+" ms");
+        log.info("Tuple processed and inserted in " + (endTime - StartTime)+" ms");
     }
 
     @Override

@@ -281,7 +281,7 @@ public class WebServiceClient {
       byte[] toWrite = null;
       int size = input.available();
       int initialSize = size;
-      int partsNum = size/chunkSize;
+      int partsNum = size/chunkSize +1;
       System.out.println("Must upload "+ size + " bytes, in "+ partsNum +" parts.");
       int counter = -1;
       float currentSpeed=0;
@@ -301,7 +301,7 @@ public class WebServiceClient {
         size = input.available();
         long ET=(int)(size/(chunkSize/timeDiff));
 
-        System.out.println("Uploaded chunk #" + counter +  "/" + partsNum +", speed:  "+currentSpeed +" kb/s, " + size + " bytes to go estimated finish in:  " + ConvertSecondToHHMMString(ET) );
+        System.out.println("Uploaded chunk #" + counter+1 +  "/" + partsNum +", speed:  "+currentSpeed +" kb/s, " + size + " bytes to go estimated finish in:  " + ConvertSecondToHHMMString(ET) );
       }
       currentSpeed = (initialSize/1000)/(totalUploadTime/1000);
       System.out.println("Upload Completed in: " +ConvertSecondToHHMMString(totalUploadTime)+ " Avg Speed: "+ currentSpeed + " kb/s, ");

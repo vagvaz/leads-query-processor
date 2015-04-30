@@ -244,7 +244,7 @@ public class
                   } catch (org.infinispan.util.concurrent.TimeoutException | org.infinispan.client.hotrod.exceptions.HotRodClientException e) {
                      e.printStackTrace();
                      delay*=1.2;
-                     System.out.println("Increasing delay x1.2, new delay+ " + delay);
+                     System.out.println("Increasing delay x1.2, new delay " + delay + "ms");
 
                   }
                   Thread.sleep(delay);
