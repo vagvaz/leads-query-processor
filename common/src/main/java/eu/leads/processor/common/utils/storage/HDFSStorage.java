@@ -232,16 +232,28 @@ public class HDFSStorage implements LeadsStorage {
             String[] pieces = parts(hdfs_source);
             log.info("File splited into " + pieces.length + "pieces ");
             System.out.println("File is splited into " + pieces.length + " pieces ");
+            long StartTime = System.currentTimeMillis();
+            float currentSpeed;
+            long totalUploadTime=0;
             long filesize=0;
+            int count=1;
             for (String piece : pieces) {
                 byte[] pieceBytes = read(piece);
                 file.write(pieceBytes);
                 readBytes += pieceBytes.length;
-                log.info("Succesfully download " + readBytes + " bytes");
-                System.out.println("Succesfully download " + pieceBytes.length + " bytes");
+
+                long endTime = System.currentTimeMillis();
+                long timeDiff = endTime-StartTime +1;
+                StartTime=endTime;
+                currentSpeed=(pieceBytes.length/1000f)/((timeDiff+1f)/1000f);
+                totalUploadTime+=timeDiff;
+
+                log.info("Succesfully download  piece #" + count + "/" + pieces.length +" " + readBytes + " bytes speed: " + currentSpeed + " kb/s");
+                System.out.println("Succesfully download  piece #" + count + "/" + pieces.length + " " + readBytes + " bytes speed: " + currentSpeed + " kb/s");
+                count++;
             }
             file.close();
-            System.out.println("Download completed Total downloaded " + readBytes + " bytes into file " + localfile_destination );
+            System.out.println("Download completed Total downloaded " + readBytes + " bytes into file " + localfile_destination + " time " + totalUploadTime/1000f+ " s" );
 //            FileInputStream fileInputStream=new FileInputStream(localfile_destination);
 //            MD5Hash key = MD5Hash.digest(fileInputStream);
 //            fileInputStream.close();
