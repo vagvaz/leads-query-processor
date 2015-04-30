@@ -110,6 +110,7 @@ public class DeployPluginActionHandler implements ActionHandler {
        //CHeck plugin if exists
 
        PluginPackage plugin = (PluginPackage) pluginRepository.get(pluginId);
+       //plugin.setConfig(config.toString().getBytes());
        if(plugin == null){
          result.setStatus(ActionStatus.FAILED.toString());
          reply.putString("status","FAIL");
@@ -120,12 +121,12 @@ public class DeployPluginActionHandler implements ActionHandler {
 
        plugin.setUser(user);
        activePlugins.put(targetCache+":"+plugin.getId()+plugin.getUser(),plugin);
-//       PluginHandlerListener listener = PluginManager.deployPluginListenerWithEvents(pluginId,targetCache,
-//                                                                                      user,events,
-//                                                                            persistence,storage);
        PluginHandlerListener listener = PluginManager.deployPluginListenerWithEvents(pluginId,targetCache,
-           user,events,
-           emanager,storage);
+                                                                                      user,events,
+                                                                            persistence,storage);
+//       PluginHandlerListener listener = PluginManager.deployPluginListenerWithEvents(pluginId,targetCache,
+//           user,events,
+//           emanager,storage);
 
        reply.putString("status","SUCCESS");
        reply.putString("message","");
