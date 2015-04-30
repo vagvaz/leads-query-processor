@@ -25,6 +25,7 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.security.InvalidAlgorithmParameterException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -269,26 +270,39 @@ public class WebServiceClient {
     return result;
   }
 
-  public static boolean uploadJar(String username,String jarPath,String prefix){
+  public static boolean uploadJar(String username,String jarPath,String prefix, int chunkSize){
     try {
-      int chunkSize = 5*1024*1024;
+      long StartTime = System.currentTimeMillis();
+      long totalUploadTime = 0;
       System.out.println("UploadJar chunks size: "+ chunkSize);
       BufferedInputStream input = new BufferedInputStream(new FileInputStream(jarPath));
       ByteArrayOutputStream array = new ByteArrayOutputStream();
       byte[] buffer = new byte[chunkSize];
       byte[] toWrite = null;
       int size = input.available();
+      int initialSize = size;
+      int partsNum = size/chunkSize;
+      System.out.println("Must upload "+ size + " bytes, in "+ partsNum +" parts.");
       int counter = -1;
+      float currentSpeed=0;
       while( size > 0){
         counter++;
 
         int readSize = input.read(buffer);
-        toWrite = Arrays.copyOfRange(buffer,0,readSize);
+        toWrite = Arrays.copyOfRange(buffer, 0, readSize);
         if(!uploadData(username,toWrite,prefix+"/"+counter)) {
           return false;
         }
+        long timeDiff = System.currentTimeMillis()-StartTime;
+        currentSpeed=(chunkSize/1000)/(timeDiff/1000);
+        totalUploadTime+=timeDiff;
         size = input.available();
+        long ET=(int)(size/currentSpeed);
+
+        System.out.println("Uploaded chunk #" + counter +  "/" + partsNum +", speed:  "+currentSpeed +" kb/s, " + size + " bytes to go estimated finish in:  " + ConvertSecondToHHMMString(ET*1000L) );
       }
+      currentSpeed = (initialSize/1000)/(totalUploadTime/1000);
+      System.out.println("Upload Completed in: " +ConvertSecondToHHMMString(totalUploadTime)+ " Avg Speed: "+ currentSpeed + " kb/s, ");
       return true;
     } catch (FileNotFoundException e) {
       e.printStackTrace();
@@ -297,7 +311,16 @@ public class WebServiceClient {
     }
     return  false;
   }
+  private static String ConvertSecondToHHMMString(long millisecondtTime)
+  {
+    TimeZone tz = TimeZone.getTimeZone("UTC");
+    SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
+    df.setTimeZone(tz);
+    String time = df.format(new Date(millisecondtTime));
 
+    return time;
+
+}
   public static boolean uploadData(String username, byte[] data, String target){
     boolean result = false;
     try {
@@ -401,8 +424,13 @@ public class WebServiceClient {
     result = mapper.readValue(response, ActionResult.class);
     return result;
   }
-
   public static ActionResult submitPlugin(String username, PluginPackage pluginPackage) throws IOException {
+
+      int chunkSize = 3 * 1024 * 1024;
+      return submitPlugin( username,  pluginPackage,  chunkSize);
+  }
+
+  public static ActionResult submitPlugin(String username, PluginPackage pluginPackage, int chunkSize) throws IOException {
     ActionResult result = new ActionResult();
 
 //    pluginPackage.putString("user",username);
@@ -410,7 +438,7 @@ public class WebServiceClient {
 //    byte[] data = SerializationUtils.serialize(pluginPackage);
     String jarFileName = pluginPackage.getJarFilename();
     String jarTarget = "plugins/"+pluginPackage.getId()+"/";
-    if(!uploadJar(username,jarFileName,jarTarget)){
+    if(!uploadJar(username,jarFileName,jarTarget, chunkSize)){
       result.setMessage("Failed to Upload Jar");
       result.setStatus("FAILED");
       return result;

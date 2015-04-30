@@ -238,8 +238,15 @@ public class
                if(valueLine != null && !valueLine.trim().equals("")) {
                   JsonObject ob = new JsonObject(valueLine);
                  Tuple tuple = new Tuple(valueLine.trim());
+                  try {
+                     cache.put(keyLine.trim(), tuple);
 
-                  cache.put(keyLine.trim(), tuple);
+                  } catch (org.infinispan.util.concurrent.TimeoutException | org.infinispan.client.hotrod.exceptions.HotRodClientException e) {
+                     e.printStackTrace();
+                     delay*=1.2;
+                     System.out.println("Increasing delay x1.2, new delay+ " + delay);
+
+                  }
                   Thread.sleep(delay);
 //                  cache.put(keyLine.trim(), valueLine.trim());
                }
