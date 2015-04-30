@@ -56,6 +56,7 @@ public class AdidasProcessingPlugin implements PluginInterface {
 	      setLogging(configuration);
 	      
 	      System.out.println("%%%%% Initializing the plugin...");
+	      System.out.flush();
 	
 	      // KEEP config
 	      PropertiesSingleton.setConfig(config);

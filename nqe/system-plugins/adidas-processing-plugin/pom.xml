@@ -31,7 +31,7 @@
           <groupId>gr.tuc.softnet</groupId>
           <artifactId>leads-query-processor-common</artifactId>
           <version>${processor.version}</version>
-          <scope>provided</scope>
+<!--           <scope>provided</scope> -->
           <exclusions>
              <exclusion>
                 <groupId>log4j</groupId>
@@ -131,7 +131,7 @@
           <groupId>gr.tuc.softnet</groupId>
           <artifactId>leads-query-processor-plugins</artifactId>
           <version>1.0-SNAPSHOT</version>
-		  <scope>provided</scope>
+<!-- 		  <scope>provided</scope> -->
 	   <exclusions>
 		   <exclusion>
 			   <groupId>log4j</groupId>
@@ -199,7 +199,7 @@
 			<groupId>gr.tuc.softnet</groupId>
 			<artifactId>sentiment-module</artifactId>
 			<version>1.0-SNAPSHOT</version>
-			<scope>provided</scope>
+<!-- 			<scope>provided</scope> -->
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
