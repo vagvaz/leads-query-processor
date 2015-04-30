@@ -281,7 +281,7 @@ public class WebServiceClient {
       byte[] toWrite = null;
       int size = input.available();
       int initialSize = size;
-      int partsNum = size/chunkSize;
+      int partsNum = size/chunkSize +1;
       System.out.println("Must upload "+ size + " bytes, in "+ partsNum +" parts.");
       int counter = -1;
       float currentSpeed=0;
@@ -293,20 +293,18 @@ public class WebServiceClient {
         if(!uploadData(username,toWrite,prefix+"/"+counter)) {
           return false;
         }
-        long timeDiff = System.currentTimeMillis()-StartTime;
-        if(timeDiff != 0) {
-          currentSpeed = (chunkSize / 1000) / (timeDiff / 1000);
-        }
+
+        long endTime = System.currentTimeMillis();
+        long timeDiff = endTime-StartTime +1;
+        StartTime=endTime;
+        currentSpeed=(chunkSize/1000f)/((timeDiff+1f)/1000f);
         totalUploadTime+=timeDiff;
         size = input.available();
-        long ET = 0;
-        if(currentSpeed!=0) {
-           ET = (int) (size / currentSpeed);
-        }
+        long ET=(int)(size/(chunkSize/(timeDiff+1)));
 
-        System.out.println("Uploaded chunk #" + counter +  "/" + partsNum +", speed:  "+currentSpeed +" kb/s, " + size + " bytes to go estimated finish in:  " + ConvertSecondToHHMMString(ET*1000L) );
+        System.out.println("Uploaded chunk #" + (counter+1) +  "/" + partsNum +", speed:  "+currentSpeed +" kb/s, " + size + " bytes to go estimated finish in:  " + ConvertSecondToHHMMString(ET) );
       }
-      currentSpeed = (initialSize/1000)/(totalUploadTime/1000);
+      currentSpeed = (initialSize/1000f)/(totalUploadTime/1000f);
       System.out.println("Upload Completed in: " +ConvertSecondToHHMMString(totalUploadTime)+ " Avg Speed: "+ currentSpeed + " kb/s, ");
       return true;
     } catch (FileNotFoundException e) {
