@@ -293,11 +293,13 @@ public class WebServiceClient {
         if(!uploadData(username,toWrite,prefix+"/"+counter)) {
           return false;
         }
-        long timeDiff = System.currentTimeMillis()-StartTime;
+        long endTime = System.currentTimeMillis();
+        long timeDiff = endTime-StartTime;
+        StartTime=endTime;
         currentSpeed=(chunkSize/1000)/(timeDiff/1000);
         totalUploadTime+=timeDiff;
         size = input.available();
-        long ET=(int)(size/currentSpeed);
+        long ET=(int)(size/(chunkSize/timeDiff));
 
         System.out.println("Uploaded chunk #" + counter +  "/" + partsNum +", speed:  "+currentSpeed +" kb/s, " + size + " bytes to go estimated finish in:  " + ConvertSecondToHHMMString(ET*1000L) );
       }
