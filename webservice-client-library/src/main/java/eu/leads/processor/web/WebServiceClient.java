@@ -294,16 +294,16 @@ public class WebServiceClient {
           return false;
         }
         long endTime = System.currentTimeMillis();
-        long timeDiff = endTime-StartTime;
+        long timeDiff = endTime-StartTime +1;
         StartTime=endTime;
-        currentSpeed=(chunkSize/1000)/(timeDiff/1000);
+        currentSpeed=(chunkSize/1000f)/((timeDiff+1f)/1000f);
         totalUploadTime+=timeDiff;
         size = input.available();
-        long ET=(int)(size/(chunkSize/timeDiff));
+        long ET=(int)(size/(chunkSize/(timeDiff+1)));
 
-        System.out.println("Uploaded chunk #" + counter+1 +  "/" + partsNum +", speed:  "+currentSpeed +" kb/s, " + size + " bytes to go estimated finish in:  " + ConvertSecondToHHMMString(ET) );
+        System.out.println("Uploaded chunk #" + (counter+1) +  "/" + partsNum +", speed:  "+currentSpeed +" kb/s, " + size + " bytes to go estimated finish in:  " + ConvertSecondToHHMMString(ET) );
       }
-      currentSpeed = (initialSize/1000)/(totalUploadTime/1000);
+      currentSpeed = (initialSize/1000f)/(totalUploadTime/1000f);
       System.out.println("Upload Completed in: " +ConvertSecondToHHMMString(totalUploadTime)+ " Avg Speed: "+ currentSpeed + " kb/s, ");
       return true;
     } catch (FileNotFoundException e) {
