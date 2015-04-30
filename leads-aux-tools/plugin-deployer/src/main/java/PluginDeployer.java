@@ -65,25 +65,24 @@ public class PluginDeployer {
             WebServiceClient.submitPlugin(user, plugin, chunkSize);
           else
             WebServiceClient.submitPlugin(user, plugin);
-
-        EventType[] e = new EventType[events.size()];
-        int c = 0;
-        for (String event : events) {
-          if (event.startsWith("create")) {
-            e[c] = EventType.CREATED;
-
-          } else if (event.startsWith("modify")) {
-            e[c] = EventType.MODIFIED;
-          } else if (event.startsWith("remove")) {
-            e[c] = EventType.REMOVED;
-          }
-          c++;
-        }
-        if (e.length == 0) {
-          e = EventType.ALL;
-        }
-        WebServiceClient.deployPlugin(user, pluginId, null, cache, e);
       }
+      EventType[] e = new EventType[events.size()];
+      int c = 0;
+      for (String event : events) {
+        if (event.startsWith("create")) {
+          e[c] = EventType.CREATED;
+
+        } else if (event.startsWith("modify")) {
+          e[c] = EventType.MODIFIED;
+        } else if (event.startsWith("remove")) {
+          e[c] = EventType.REMOVED;
+        }
+        c++;
+      }
+      if (e.length == 0) {
+        e = EventType.ALL;
+      }
+      WebServiceClient.deployPlugin(user, pluginId, null, cache, e);
     } catch (MalformedURLException e) {
       e.printStackTrace();
     } catch (IOException e) {
