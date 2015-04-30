@@ -63,7 +63,7 @@ public class SentimentAnalysisPlugin implements PluginInterface {
     }
 
     private void processTuple(String key, Tuple value) {
-
+        long StartTime = System.currentTimeMillis();
         String url = value.getAttribute("url");
         String body = value.getAttribute("body");
         Set<Entity> entities = module.getEntities(body);
@@ -82,6 +82,9 @@ public class SentimentAnalysisPlugin implements PluginInterface {
             if(counter == 0)
                 break;
         }
+        long endTime = System.currentTimeMillis();
+        System.out.println("Tuple processed and inserted in " + (StartTime - endTime)+" ms");
+        log.info("Tuple processed and inserted in " + (StartTime - endTime)+" ms");
     }
 
     @Override
