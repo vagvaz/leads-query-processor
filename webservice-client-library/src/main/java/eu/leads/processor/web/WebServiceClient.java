@@ -294,10 +294,15 @@ public class WebServiceClient {
           return false;
         }
         long timeDiff = System.currentTimeMillis()-StartTime;
-        currentSpeed=(chunkSize/1000)/(timeDiff/1000);
+        if(timeDiff != 0) {
+          currentSpeed = (chunkSize / 1000) / (timeDiff / 1000);
+        }
         totalUploadTime+=timeDiff;
         size = input.available();
-        long ET=(int)(size/currentSpeed);
+        long ET = 0;
+        if(currentSpeed!=0) {
+           ET = (int) (size / currentSpeed);
+        }
 
         System.out.println("Uploaded chunk #" + counter +  "/" + partsNum +", speed:  "+currentSpeed +" kb/s, " + size + " bytes to go estimated finish in:  " + ConvertSecondToHHMMString(ET*1000L) );
       }
@@ -329,7 +334,7 @@ public class WebServiceClient {
     HttpURLConnection connection = (HttpURLConnection) address.openConnection();
     connection = setUp(connection, "POST", MediaType.APPLICATION_JSON, true, true);
     //        setBody(connection,mapper.writeValueAsString(action));
-      action.putBinary("data",data);
+      action.putBinary("data", data);
       action.putString("path",target);
       action.putString("user",username);
     setBody(connection, action);
@@ -413,7 +418,7 @@ public class WebServiceClient {
     JsonObject req = new JsonObject();
     req.putString("pluginid",pluginId);
     req.putString("cachename",cacheName);
-    req.putString("user",username);
+    req.putString("user", username);
 
     address = new URL(host + ":" + port + prefix + "undeploy/plugin/");
     HttpURLConnection connection = (HttpURLConnection) address.openConnection();
