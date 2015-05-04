@@ -43,6 +43,7 @@ public class LoadCsv {
     static ConcurrentMap embeddedCache = null;
     static RemoteCache remoteCache = null;
     static EnsembleCache ensembleCache = null;
+    static ArrayList<EnsembleCache>  ecaches = new ArrayList<>();
     static boolean ensemple_multi = false;
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         r = new Random(0);
@@ -85,7 +86,9 @@ public class LoadCsv {
                     System.out.println("Forced delay per put : " + delay + " ms");
                 }
                 String ensembleString = args[2];
+                System.out.println("Using ensemble sring " + ensembleString);
                 emanager = new EnsembleCacheManager((ensembleString));
+                System.out.println("Emanager has " + emanager.sites().size() + " sites");
                 emanager.start();
             }else{
                 System.exit(0);
@@ -528,11 +531,11 @@ public class LoadCsv {
         else if (imanager != null)
             embeddedCache = imanager.getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
         else if (emanager != null)
-            if(ensemple_multi)
+//            if(ensemple_multi)
                 ensembleCache = emanager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName,new ArrayList<>(emanager.sites()),
                         EnsembleCacheManager.Consistency.DIST);
-            else
-                ensembleCache = emanager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
+//            else
+//                ensembleCache = emanager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
         else {
             System.err.println("Not recognised type, stop importing");
             return false;

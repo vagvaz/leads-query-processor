@@ -7,6 +7,7 @@ import eu.leads.processor.core.TupleComparator;
 import eu.leads.processor.infinispan.LeadsBaseCallable;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.context.Flag;
+import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 
 import java.util.ArrayList;
@@ -47,8 +48,10 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
     address = inputCache.getCacheManager().getAddress().toString();
 //    outputCache = (Cache) imanager.getPersisentCache(prefix+"."+address);
     outputCache = emanager.getCache(prefix+"."+LQPConfiguration.getInstance().getMicroClusterName()
-                                                 +"."+imanager.getMemberName());
-    addressesCache = emanager.getCache(addressesCacheName);
+                                                 +"."+imanager.getMemberName(),new ArrayList<>(emanager.sites()),
+        EnsembleCacheManager.Consistency.DIST);
+    addressesCache = emanager.getCache(addressesCacheName,new ArrayList<>(emanager.sites()),
+        EnsembleCacheManager.Consistency.DIST);
     tuples = new ArrayList<>(100);
   }
 

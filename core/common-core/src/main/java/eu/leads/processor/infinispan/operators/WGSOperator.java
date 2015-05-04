@@ -116,9 +116,9 @@ public class WGSOperator extends MapReduceOperator {
     //      }
     if(!isRemote) {
       int count = 0;
-      currentInput = getName() + ".iter0";
-      currentOutput = getName() + ".iter1";
-      currentIntermediate = getName() + ".intermediate0";
+      currentInput = getOutput() + ".iter0";
+      currentOutput = getOutput() + ".iter1";
+      currentIntermediate = getOutput() + ".intermediate0";
 
       //           inputCacheName = getName() +".iter0";
       //           inputCache = (Cache) manager.getPersisentCache(inputCacheName);
@@ -135,9 +135,9 @@ public class WGSOperator extends MapReduceOperator {
         iteration = count;
 
         createCaches(isRemote, executeOnlyMap, executeOnlyReduce);
-        currentInput = getName() + ".iter" + count;
-        currentOutput = getName() + ".iter" + (count + 1);
-        currentIntermediate = getName() + ".intermediate" + count;
+        currentInput = getOutput() + ".iter" + count;
+        currentOutput = getOutput() + ".iter" + (count + 1);
+        currentIntermediate = getOutput() + ".intermediate" + count;
         if (executeOnlyMap) {
           setupMapCallable();
           executeMap();
@@ -164,9 +164,9 @@ public class WGSOperator extends MapReduceOperator {
       iteration = conf.getObject("body").getInteger("iteration");
 
 //      createCaches(isRemote, executeOnlyMap, executeOnlyReduce);
-      currentInput = getName() + ".iter" + iteration;
-      currentOutput = getName() + ".iter" + (iteration + 1);
-      currentIntermediate = getName() + ".intermediate" + iteration;
+      currentInput = getOutput() + ".iter" + iteration;
+      currentOutput = getOutput() + ".iter" + (iteration + 1);
+      currentIntermediate = getOutput() + ".intermediate" + iteration;
       if (executeOnlyMap) {
         setupMapCallable();
         executeMap();

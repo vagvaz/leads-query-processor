@@ -80,9 +80,12 @@ public class DeployPluginActionHandler implements ActionHandler {
 
      String ensembleHost = ConfigurationUtilities.getEnsembleString(globalConfig);
     emanager = new EnsembleCacheManager(ensembleHost);
-     ownersPlugins = emanager.getCache(StringConstants.OWNERSCACHE);
-     activePlugins = emanager.getCache(StringConstants.PLUGIN_ACTIVE_CACHE);
-     pluginRepository = emanager.getCache(StringConstants.PLUGIN_CACHE);
+     ownersPlugins = emanager.getCache(StringConstants.OWNERSCACHE,new ArrayList<>(emanager.sites()),
+         EnsembleCacheManager.Consistency.DIST);
+     activePlugins = emanager.getCache(StringConstants.PLUGIN_ACTIVE_CACHE,new ArrayList<>(emanager.sites()),
+         EnsembleCacheManager.Consistency.DIST);
+     pluginRepository = emanager.getCache(StringConstants.PLUGIN_CACHE,new ArrayList<>(emanager.sites()),
+         EnsembleCacheManager.Consistency.DIST);
    }
 
    @Override

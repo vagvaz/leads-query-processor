@@ -20,6 +20,7 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -115,7 +116,8 @@ public class InsertOperator extends BasicOperator {
    @Override
    public void run() {
 //      targetCache = (Cache) manager.getPersisentCache(tableName);
-      ecache = emanager.getCache(tableName);
+      ecache = emanager.getCache(tableName,new ArrayList<>(emanager.sites()),
+          EnsembleCacheManager.Consistency.DIST);
 //                VersionedCache versionedCache = new VersionedCacheTreeMapImpl(targetCache, new VersionScalarGenerator(),targetCache.getName());
       if(version == null){
          version = new VersionScalar(System.currentTimeMillis());

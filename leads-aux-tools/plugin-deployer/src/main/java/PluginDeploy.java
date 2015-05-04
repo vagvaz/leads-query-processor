@@ -5,6 +5,8 @@ import org.infinispan.commons.marshall.Marshaller;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
 
+import java.util.ArrayList;
+
 /**
  * Created by vagvaz on 4/21/15.
  */
@@ -16,8 +18,10 @@ public class PluginDeploy {
     EnsembleCacheManager manager = new EnsembleCacheManager(LQPConfiguration.getInstance()
             .getConfiguration().getString("node.ip")+":11222",Tmarshaller);
 
-    EnsembleCache web  = manager.getCache("default.webpages");
-    EnsembleCache myCache = manager.getCache("mycache");
+    EnsembleCache web  = manager.getCache("default.webpages",new ArrayList<>(manager.sites()),
+        EnsembleCacheManager.Consistency.DIST);
+    EnsembleCache myCache = manager.getCache("mycache",new ArrayList<>(manager.sites()),
+        EnsembleCacheManager.Consistency.DIST);
 
     PluginDeployer.main(args);
     try {

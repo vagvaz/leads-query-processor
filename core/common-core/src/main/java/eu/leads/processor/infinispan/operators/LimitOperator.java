@@ -15,6 +15,7 @@ import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.vertx.java.core.json.JsonObject;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -53,7 +54,8 @@ public class LimitOperator extends BasicOperator {
       inputCache = (Cache) persistence.getPersisentCache(getInput());
       emanager = new EnsembleCacheManager( computeEnsembleHost());
      emanager.start();
-      data = emanager.getCache(getOutput());
+      data = emanager.getCache(getOutput(),new ArrayList<>(emanager.sites()),
+          EnsembleCacheManager.Consistency.DIST);
 //      data = persistence.getPersisentCache(getOutput());
      inputPrefix = inputCache.getName()+":";
    }

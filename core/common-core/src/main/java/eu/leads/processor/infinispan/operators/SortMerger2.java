@@ -41,7 +41,8 @@ public class SortMerger2 {
 //        input = inputMap;
       rowcount  = rc;
       this.manager = manager;
-      outputCache = emanager.getCache(output);
+      outputCache = emanager.getCache(output,new ArrayList<>(emanager.sites()),
+          EnsembleCacheManager.Consistency.DIST);
       counters = new Vector<Integer>(inputCaches.size());
       values = new Vector<Tuple>(inputCaches.size());
       caches = new Vector<Map<String, Tuple>>();

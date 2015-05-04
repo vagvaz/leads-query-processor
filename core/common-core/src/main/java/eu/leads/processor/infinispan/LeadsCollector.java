@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -55,7 +56,8 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
     emitCount = new AtomicInteger();
     this.imanager = manager;
     this.cacheName = cacheName;
-    storeCache = (BasicCache) emanager.getCache(cacheName);
+    storeCache = (BasicCache) emanager.getCache(cacheName,new ArrayList<>(emanager.sites()),
+        EnsembleCacheManager.Consistency.DIST);
 //    storeCache = (BasicCache) this.imanager.getPersisentCache(cacheName);
   }
   public Cache getCounterCache() {
@@ -155,13 +157,17 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
     this.imanager = imanager;
     log = LoggerFactory.getLogger(LeadsCollector.class);
 //    storeCache = (Cache) imanager.getPersisentCache(cacheName);
-    storeCache = emanager.getCache(cacheName);
+    storeCache = emanager.getCache(cacheName,new ArrayList<>(emanager.sites()),
+        EnsembleCacheManager.Consistency.DIST);
     if(onMap) {
-      intermediateDataCache = (BasicCache) emanager.getCache(storeCache.getName() + ".data");
+      intermediateDataCache = (BasicCache) emanager.getCache(storeCache.getName() + ".data",new ArrayList<>(emanager.sites()),
+          EnsembleCacheManager.Consistency.DIST);
       //create Intermediate  keys cache name for data on the same Sites as outputCache;
-      keysCache = (BasicCache) emanager.getCache(storeCache.getName() + ".keys");
+      keysCache = (BasicCache) emanager.getCache(storeCache.getName() + ".keys",new ArrayList<>(emanager.sites()),
+          EnsembleCacheManager.Consistency.DIST);
       //createIndexCache for getting all the nodes that contain values with the same key! in a mc
-      indexSiteCache = (BasicCache) emanager.getCache(storeCache.getName() + ".indexed");
+      indexSiteCache = (BasicCache) emanager.getCache(storeCache.getName() + ".indexed",new ArrayList<>(emanager.sites()),
+          EnsembleCacheManager.Consistency.DIST);
       counterCache = manager.getCache(storeCache.getName()+"."+inputCacheName+"."+manager.getAddress().toString()
                                         + ".counters");
       baseIndexedKey = new IndexedComplexIntermediateKey(site, manager.getAddress().toString(),inputCacheName);

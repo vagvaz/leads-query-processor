@@ -38,11 +38,13 @@ public class ReplayTool {
       LQPConfiguration.initialize();
       emanager = new EnsembleCacheManager((ensembleString));
      emanager.start();
-      nutchCache = emanager.getCache("WebPage");
+      nutchCache = emanager.getCache("WebPage",new ArrayList<>(emanager.sites()),
+          EnsembleCacheManager.Consistency.DIST);
       if(multicloud)
          webpageCache = emanager.getCache("default.webpages",new ArrayList<>(emanager.sites()), EnsembleCacheManager.Consistency.DIST);
       else
-         webpageCache = emanager.getCache("default.webpages");
+         webpageCache = emanager.getCache("default.webpages",new ArrayList<>(emanager.sites()),
+             EnsembleCacheManager.Consistency.DIST);
 
 
 

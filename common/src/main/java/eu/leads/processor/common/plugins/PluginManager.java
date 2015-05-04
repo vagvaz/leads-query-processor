@@ -527,7 +527,8 @@ public class PluginManager {
     //    SimplePluginRunner listener = new SimplePluginRunner("TestSimplePluginDeployer", conf);
     PluginHandlerListener runner = new PluginHandlerListener();
     try {
-      EnsembleCache remoteTargetCache = manager.getCache(cacheName);
+      EnsembleCache remoteTargetCache = manager.getCache(cacheName, new ArrayList<>(manager.sites()),
+          EnsembleCacheManager.Consistency.DIST);
       log.info("Using cache " + remoteTargetCache.getName() + " to deploy pluign");
       if (remoteTargetCache == null) {
         System.err.println("Cache " + cacheName + " not found!");

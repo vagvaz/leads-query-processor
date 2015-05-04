@@ -155,7 +155,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
 
         workQueueConfig = new JsonObject();
         workQueueConfig.putString("address", workQueueAddress);
-        workQueueConfig.putNumber("process_timeout", 5 * 60 * 1000);
+        workQueueConfig.putNumber("process_timeout", 35 * 60 * 1000);
 
         logicConfig = new JsonObject();
         logicConfig.putString("id", logicAddress);

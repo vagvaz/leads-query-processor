@@ -14,6 +14,7 @@ import org.infinispan.manager.EmbeddedCacheManager;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Set;
 
 /**
@@ -68,7 +69,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       emanager = new EnsembleCacheManager(ensembleHost);
       emanager.start();
 //      emanager = createRemoteCacheManager();
-      ecache = emanager.getCache(output);
+//      ecache = emanager.getCache(output,new ArrayList<>(emanager.sites()),
+//          EnsembleCacheManager.Consistency.DIST);
     }
     else {
       LQPConfiguration.initialize();
@@ -77,8 +79,11 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //            emanager = createRemoteCacheManager();
     }
 
-      ecache = emanager.getCache(output);
-      outputCache =  emanager.getCache(output);
+      ecache = emanager.getCache(output,new ArrayList<>(emanager.sites()),
+          EnsembleCacheManager.Consistency.DIST);
+      outputCache = ecache;
+//outputCache =  emanager.getCache(output,new ArrayList<>(emanager.sites()),
+//          EnsembleCacheManager.Consistency.DIST);
 
     initialize();
   }
