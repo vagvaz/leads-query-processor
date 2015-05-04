@@ -106,17 +106,29 @@ public class ReplayTool {
                                     System.err.println("tuple does not have body field ");
                                     nocontent_counter++;
                                  }else {
-                                    System.err.print(" Put to cache");
-                                    webpageCache.put(webpageCache.getName() + ":" + t.getAttribute("url"), t);
-                                    Thread.sleep(delay);
+                                    //System.err.print(" Put to cache");
+                                    try {
+                                       try {
+                                         webpageCache.put(webpageCache.getName() + ":" + t.getAttribute("url"), t);
+                                       } catch (org.infinispan.util.concurrent.TimeoutException | org.infinispan.client.hotrod.exceptions.HotRodClientException e) {
+                                         // e.printStackTrace();
+                                          delay*=1.2;
+                                          System.out.println("Increasing delay x1.2, new delay " + delay + "ms");
+                                       }
+
+                                          Thread.sleep(delay);
+                                       }  catch (Exception e) {
+                                       System.out.println("another Exception Yeah");
+                                       e.printStackTrace();
+
+                                    }
                                     counter++;
                                     if(delay>10){
                                        System.err.print(" Inserted "+ counter);
                                     }
-                                   uniqueKeys.add(t.getAttribute("url"));
+                                    uniqueKeys.add(t.getAttribute("url"));
                                     if (counter % 1000 == 0)
                                        System.err.println("loaded " + counter + " tuples");
-
                                  }
                               } else {
                                  nocontent_counter++;
@@ -146,6 +158,7 @@ public class ReplayTool {
                currentCounter = 0;
 
             } catch (Exception e) {
+               System.out.println("another Exception Yeah");
                e.printStackTrace();
                currentCounter++;
             }

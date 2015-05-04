@@ -212,8 +212,8 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
       EnsembleCacheUtils.putToCache(intermediateDataCache,newKey,value);
       Object o = intermediateDataCache.get(newKey);
       if(o == null){
-        System.err.println("\n\n\n\n\nINTERMEDIATE KEY " + newKey.toString() + " was not saved exiting" );
-        System.exit(-1);
+        System.err.println("\n\n\n\n\n#@#@INTERMEDIATE KEY " + newKey.toString() + " was not saved exiting" );
+//        System.exit(-1);
       }
       else{
         log.error("intermediate key " + newKey.toString() + " saved ");

@@ -10,7 +10,7 @@ public class Replay {
             System.exit(0);
         }
         int delay = 1000;
-        if (args.length <= 5)
+        if (args.length >= 5)
             delay = Integer.parseInt(args[4]);
         System.out.println("Delay per put " + delay);
         boolean multi=false;
