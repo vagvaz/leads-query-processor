@@ -162,6 +162,7 @@ public class leadsCli {
             resultArrived = System.currentTimeMillis();
             print_results(res);
             resultPrinted  = System.currentTimeMillis();
+            System.out.println("Found " + res.getResult().size() + " results.");
             System.out.println("Result acquisition (execution + delivery) time: " +  (resultArrived - start) + " ms.");
             System.out.println("Display time: " +  (resultPrinted-resultArrived) + " ms.");
         }
