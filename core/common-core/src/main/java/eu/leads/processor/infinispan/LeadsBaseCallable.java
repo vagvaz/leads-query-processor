@@ -69,9 +69,11 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //  }
   @Override public void setEnvironment(Cache<K, V> cache, Set<K> inputKeys) {
     profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
-    if(profCallable!=null)
-      profCallable.end();
-    profCallable = new ProfileEvent("setEnvironment Callable " + this.getClass().toString(),profilerLog);
+    if(profCallable!=null) {
+      profCallable.end("setEnv");
+      profCallable.start("setEnvironment Callable ");
+    }else
+      profCallable = new ProfileEvent("setEnvironment Callable " + this.getClass().toString(),profilerLog);
     embeddedCacheManager = cache.getCacheManager();
     imanager = new ClusterInfinispanManager(embeddedCacheManager);
 //    outputCache = (Cache) imanager.getPersisentCache(output);
@@ -108,11 +110,12 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //          EnsembleCacheManager.Consistency.DIST);
 
     initialize();
-    profCallable.end();
+    profCallable.end("end_setEnv");
   }
 
 
   @Override public String call() throws Exception {
+    profCallable.end("call");
     if(!isInitialized){
       initialize();
     }
@@ -122,12 +125,13 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     profCallable.end();
     profCallable.start("Call inputCacheSize " + inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet().size());
     ProfileEvent profExecute = new ProfileEvent("Execute " + this.getClass().toString(),profilerLog);
+    int count=0;
     for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
       if (!cdl.localNodeIsPrimaryOwner(key))
         continue;
       V value = inputCache.get(key);
       if (value != null) {
-        profExecute.start(key.toString());
+        profExecute.start("ExOn" + (++count));
         executeOn((K) key, value);
         profExecute.end();
       }
@@ -155,7 +159,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         System.err.println("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage() + " cause "
                              + e.getCause().toString());
       }
-    profCallable.end();
+    profCallable.end("finalize");
   }
 
   public void outputToCache(Object key, Object value){

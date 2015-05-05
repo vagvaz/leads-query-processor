@@ -251,6 +251,7 @@ public abstract class BasicOperator extends Thread implements Operator{
 
   @Override
   public void execute() {
+    profOperator.end("execute");
     startTime = System.currentTimeMillis();
     System.out.println("Execution Start! ");
     profOperator.start("Execute()");
@@ -260,7 +261,7 @@ public abstract class BasicOperator extends Thread implements Operator{
   @Override
   public void cleanup() {
     profOperator.end();
-    profOperator.start("CleanUp");
+    profOperator.start("Op CleanUp");
 //    if(!isRemote)
 //    {
       unsubscribeToMapActions("execution." + com.getId() + "." + action.getId());
@@ -294,7 +295,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       com.sendTo(action.getData().getString("owner"),action.asJsonObject());
     else
       System.err.println("PROBLEM Uninitialized com");
-    profOperator.end();
+    profOperator.end("failclean");
   }
 
   public void updateStatistics(BasicCache input1,BasicCache input2, BasicCache output)
