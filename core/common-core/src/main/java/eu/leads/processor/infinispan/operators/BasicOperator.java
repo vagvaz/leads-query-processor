@@ -3,6 +3,7 @@ package eu.leads.processor.infinispan.operators;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.utils.PrintUtilities;
+import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
@@ -19,6 +20,8 @@ import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.distexec.DistributedTask;
 import org.infinispan.distexec.DistributedTaskBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.IOException;
@@ -58,10 +61,12 @@ public abstract class BasicOperator extends Thread implements Operator{
   private volatile Object rmcMutex = new Object();
   protected LeadsMessageHandler handler = new CompleteExecutionHandler(com,this);
   protected Map<String, String> mcResults;
-
+  protected Logger profilerLog  = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
+  protected ProfileEvent profOperator;
   protected BasicOperator(Action action) {
     conf = action.getData();
     this.action = action;
+    profOperator = new ProfileEvent("Operator- " + this.getClass().toString(),profilerLog);
   }
   protected BasicOperator(Node com, InfinispanManager manager,LogProxy log,Action action){
     super(com.getId() + "-operator-thread");
@@ -91,6 +96,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     this.statisticsCache = (Cache) manager.getPersisentCache(StringConstants.STATISTICS_CACHE);
     this.init_statistics(this.getClass().getCanonicalName());
     startTime = System.currentTimeMillis();
+    profOperator = new ProfileEvent("Operator " + this.getClass().toString(),profilerLog);
   }
 
   public JsonObject getConf() {
@@ -247,11 +253,14 @@ public abstract class BasicOperator extends Thread implements Operator{
   public void execute() {
     startTime = System.currentTimeMillis();
     System.out.println("Execution Start! ");
+    profOperator.start("Execute()");
     start();
   }
 
   @Override
   public void cleanup() {
+    profOperator.end();
+    profOperator.start("CleanUp");
 //    if(!isRemote)
 //    {
       unsubscribeToMapActions("execution." + com.getId() + "." + action.getId());
@@ -262,7 +271,8 @@ public abstract class BasicOperator extends Thread implements Operator{
       com.sendTo(action.getData().getString("owner"),action.asJsonObject());
     else
       System.err.println("PROBLEM Uninitialized com");
-    updateStatistics(inputCache,null,outputCache);
+    profOperator.end();
+    updateStatistics(inputCache, null, outputCache);
   }
 
   @Override
@@ -284,6 +294,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       com.sendTo(action.getData().getString("owner"),action.asJsonObject());
     else
       System.err.println("PROBLEM Uninitialized com");
+    profOperator.end();
   }
 
   public void updateStatistics(BasicCache input1,BasicCache input2, BasicCache output)

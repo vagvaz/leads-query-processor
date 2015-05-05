@@ -1,5 +1,6 @@
 package eu.leads.processor.common.infinispan;
 
+import eu.leads.processor.common.utils.ProfileEvent;
 import org.infinispan.commons.api.BasicCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,9 +9,11 @@ import org.slf4j.LoggerFactory;
  * Created by vagvaz on 3/7/15.
  */
 public class EnsembleCacheUtils {
-
+  static Logger profilerLog  = LoggerFactory.getLogger("###PROF###" +  EnsembleCacheUtils.class);
+  static ProfileEvent profExecute = new ProfileEvent("Execute " + EnsembleCacheUtils.class,profilerLog);
    static Logger log  = LoggerFactory.getLogger(EnsembleCacheUtils.class);
    public static void putToCache(BasicCache cache, Object key, Object value){
+     profExecute.start("putToCache");
       boolean isok = false;
       while(!isok) {
          try {
@@ -56,6 +59,7 @@ public class EnsembleCacheUtils {
            }
          }
       }
+     profExecute.end();
    }
 
   public static <KOut> void putIfAbsentToCache(BasicCache cache, KOut key, KOut value) {

@@ -3,6 +3,7 @@ package eu.leads.processor.infinispan;
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.Cache;
 import org.infinispan.context.Flag;
@@ -11,6 +12,8 @@ import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 import org.infinispan.manager.EmbeddedCacheManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.Serializable;
@@ -39,9 +42,14 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   transient protected EnsembleCacheManager emanager;
   transient protected EnsembleCache ecache;
 
+  Logger profilerLog;
+  ProfileEvent profCallable;
   public LeadsBaseCallable(String configString, String output){
     this.configString = configString;
     this.output = output;
+    profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
+    profCallable = new ProfileEvent("Callable Construct" + this.getClass().toString(),profilerLog);
+
   }
 
 
@@ -60,12 +68,19 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //    return new RemoteCacheManager(builder.build());
 //  }
   @Override public void setEnvironment(Cache<K, V> cache, Set<K> inputKeys) {
+    profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
+    if(profCallable!=null)
+      profCallable.end();
+    profCallable = new ProfileEvent("setEnvironment Callable " + this.getClass().toString(),profilerLog);
     embeddedCacheManager = cache.getCacheManager();
     imanager = new ClusterInfinispanManager(embeddedCacheManager);
 //    outputCache = (Cache) imanager.getPersisentCache(output);
     keys = inputKeys;
     this.inputCache = cache;
+    ProfileEvent tmpprofCallable = new ProfileEvent("setEnvironment manager " + this.getClass().toString(),profilerLog);
+
     if(ensembleHost != null && !ensembleHost.equals("")) {
+      tmpprofCallable.start("Start EnsemlbeCacheManager");
       emanager = new EnsembleCacheManager(ensembleHost);
       emanager.start();
 //      emanager = createRemoteCacheManager();
@@ -73,19 +88,27 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //          EnsembleCacheManager.Consistency.DIST);
     }
     else {
+      tmpprofCallable.start("Start LQPConfiguration");
+
       LQPConfiguration.initialize();
+      tmpprofCallable.end();
+      tmpprofCallable.start("Start EnsemlbeCacheManager");
+
       emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
       emanager.start();
 //            emanager = createRemoteCacheManager();
     }
-
+    tmpprofCallable.end();
+    tmpprofCallable.start("Get cache ");
       ecache = emanager.getCache(output,new ArrayList<>(emanager.sites()),
           EnsembleCacheManager.Consistency.DIST);
+    tmpprofCallable.end();
       outputCache = ecache;
 //outputCache =  emanager.getCache(output,new ArrayList<>(emanager.sites()),
 //          EnsembleCacheManager.Consistency.DIST);
 
     initialize();
+    profCallable.end();
   }
 
 
@@ -93,14 +116,20 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     if(!isInitialized){
       initialize();
     }
+    profCallable.start("Call getComponent ()");
     final ClusteringDependentLogic cdl = inputCache.getAdvancedCache().getComponentRegistry().getComponent
-                                                                                       (ClusteringDependentLogic.class);
+                                                                                    (ClusteringDependentLogic.class);
+    profCallable.end();
+    profCallable.start("Call inputCacheSize " + inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet().size());
+    ProfileEvent profExecute = new ProfileEvent("Execute " + this.getClass().toString(),profilerLog);
     for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
       if (!cdl.localNodeIsPrimaryOwner(key))
         continue;
       V value = inputCache.get(key);
       if (value != null) {
-        executeOn((K)key, value);
+        profExecute.start(key.toString());
+        executeOn((K) key, value);
+        profExecute.end();
       }
     }
     finalizeCallable();
@@ -126,6 +155,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         System.err.println("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage() + " cause "
                              + e.getCause().toString());
       }
+    profCallable.end();
   }
 
   public void outputToCache(Object key, Object value){
