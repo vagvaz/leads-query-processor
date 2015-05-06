@@ -20,6 +20,7 @@ import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.distexec.DistributedTask;
 import org.infinispan.distexec.DistributedTaskBuilder;
+import org.infinispan.remoting.transport.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
@@ -627,7 +628,8 @@ public abstract class BasicOperator extends Thread implements Operator{
 //      }
       setMapperCallableEnsembleHost();
       System.err.println(
-          "EXECUTE " + mapperCallable.getClass().toString() + " ON " + currentCluster);
+              "EXECUTE " + mapperCallable.getClass().toString() + " ON " + currentCluster);
+      ProfileEvent distTask = new ProfileEvent("setup map taks " + mapperCallable.getClass().toString(),profilerLog);
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
       System.err.println("building dist task");
       log.error("building dist task");
@@ -637,7 +639,14 @@ public abstract class BasicOperator extends Thread implements Operator{
       System.err.println("submitting to local cluster task");
       log.error("submitting to local cluster task");
 
-      List<Future<String>> res = des.submitEverywhere(task);
+      List<Future<String>> res = new ArrayList<>();
+      List<Address> taskNodes =  inputCache.getAdvancedCache().getRpcManager().getMembers();
+      taskNodes.add(inputCache.getCacheManager().getAddress());
+      for(Address node : taskNodes){
+        Future<String> ft = des.submit(node,task);
+        res.add(ft);
+      }
+      distTask.end();
       //      Future<String> res = des.submit(callable);
       List<String> addresses = new ArrayList<String>();
       try {
@@ -647,7 +656,7 @@ public abstract class BasicOperator extends Thread implements Operator{
 
             while(resultIterator.hasNext()){
               Future<String> future = resultIterator.next();
-              System.err.println("Checking whether " + future.toString() + " is Done " + future.isDone() );
+//              System.err.println("Checking whether " + future.toString() + " is Done " + future.isDone() );
 //              if(future.isDone()){
               System.err.println(mapperCallable.getClass().toString() + " completed on " + future.get());
               resultIterator.remove();
