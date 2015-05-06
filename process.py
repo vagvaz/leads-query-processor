@@ -7,6 +7,7 @@ searchTerms.append('findPendingRMCFromGlobal');
 searchTerms.append('createCaches');
 searchTerms.append('setupMapCallable');
 searchTerms.append('executeMap');
+searchTerms.append('setEnv');
 
 searchTerms.append('setupReduceCallable');
 searchTerms.append('executeReduce');
@@ -19,7 +20,9 @@ searchTerms.append('Call getComponent');
 searchTerms.append('GetTuple');
 searchTerms.append('Start EnsemlbeCacheManager');
 searchTerms.append('Get cache');
-searchTerms.append('prepareOutput');
+searchTerms.append("new Tuple");
+searchTerms.append("namesToLowerCase");
+searchTerms.append("Scan_Put");
 searchTerms.append('prepareOutput');
 searchTerms.append('renameAllTupleAttributes');
 searchTerms.append('ExOn');
