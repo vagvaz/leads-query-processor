@@ -23,10 +23,10 @@ public class ProfileEvent implements Serializable {
     start = System.nanoTime();
   }
   public void end(){
-    profileLogger.info("#PROF"+id+" " + profileName + "\t"+ ((System.nanoTime()-start)/1000.0f) + " ms");
+    profileLogger.info("#PROF"+id+" " + profileName + "\t"+ ((System.nanoTime()-start)/1000000.0f) + " ms");
   }
 
   public void end(String endString){
-    profileLogger.info("#PROF"+id+" " + profileName + " -> "+endString+ " " +((System.nanoTime()-start)/1000.0f) + " ms");
+    profileLogger.info("#PROF"+id+" " + profileName + " -> "+endString+ " " +((System.nanoTime()-start)/1000000.0f) + " ms");
   }
 }
