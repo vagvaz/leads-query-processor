@@ -260,7 +260,7 @@ public abstract class BasicOperator extends Thread implements Operator{
 
   @Override
   public void cleanup() {
-    profOperator.end();
+    profOperator.end("cleanup");
     profOperator.start("Op CleanUp");
 //    if(!isRemote)
 //    {
@@ -412,26 +412,48 @@ public abstract class BasicOperator extends Thread implements Operator{
 
   @Override
   public void run(){
+    ProfileEvent runProf = new ProfileEvent("findPendingMMCFromGlobal() " + this.getClass().toString(),profilerLog);
     findPendingMMCFromGlobal();
+    runProf.end();
+    runProf.start("findPendingRMCFromGlobal()");
     findPendingRMCFromGlobal();
+    runProf.end();
+    runProf.start("createCaches()");
     createCaches(isRemote, executeOnlyMap, executeOnlyReduce);
+    runProf.end();
+
+
     if(executeOnlyMap) {
+      runProf.start("setupMapCallable()");
       setupMapCallable();
+      runProf.end();
+      runProf.start("executeMap()");
       executeMap();
+      runProf.end();
     }
     if(!failed) {
       if (executeOnlyReduce) {
+        runProf.start("setupReduceCallable()");
         setupReduceCallable();
+        runProf.end();
+        runProf.start("executeReduce()");
         executeReduce();
+        runProf.end();
       }
       if (!failed) {
+        runProf.start("run_cleanup()");
         cleanup();
+        runProf.end();
       } else {
+        runProf.start("fail_cleanup()");
         failCleanup();
+        runProf.end();
       }
     }
     else {
+      runProf.start("fail_cleanup()");
       failCleanup();
+      runProf.end();
     }
 //    try {
 //      this.join();
@@ -440,6 +462,7 @@ public abstract class BasicOperator extends Thread implements Operator{
 //    }
   }
   public void createCache(String microCloud, String cacheName ){
+
     String uri = getURIForMC(microCloud);
     try {
       WebServiceClient.initialize(uri);
@@ -613,6 +636,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       DistributedTask task = builder.build();
       System.err.println("submitting to local cluster task");
       log.error("submitting to local cluster task");
+
       List<Future<String>> res = des.submitEverywhere(task);
       //      Future<String> res = des.submit(callable);
       List<String> addresses = new ArrayList<String>();

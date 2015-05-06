@@ -1,6 +1,7 @@
 package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
+import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.math.FilterOperatorTree;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
@@ -98,6 +99,10 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
   }
 
   @Override public void executeOn(K key, V ivalue) {
+    Logger profilerLog = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
+
+    ProfileEvent profExecute = new ProfileEvent("Execute " + this.getClass().toString(),profilerLog);
+
     //         System.err.println(manager.getCacheManager().getAddress().toString() + " "+ entry.getKey() + "       " + entry.getValue());
     Tuple toRunValue = null;
     if(onVersionedCache){
@@ -143,23 +148,37 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
       //          String value = (String) entry.getValue();
       //          String value = (String)inputCache.get(key);
 //      Tuple tuple = new Tuple(toRunValue);
+      profExecute.start("new Tuple");
       Tuple tuple = new Tuple(toRunValue);
+      profExecute.end();
+
+      profExecute.start("namesToLowerCase");
       namesToLowerCase(tuple);
+      profExecute.end();
+      profExecute.start("renameAllTupleAttributes");
       renameAllTupleAttributes(tuple);
+      profExecute.end();
       if (tree != null) {
         if (tree.accept(tuple)) {
           tuple = prepareOutput(tuple);
           //               log.info("--------------------    put into output with filter ------------------------");
-          if (key != null && tuple != null)
+          if (key != null && tuple != null) {
+            profExecute.start("Scan_Put");
             outputCache.put(key.toString(), tuple);
+            profExecute.end();
+          }
         }
       } else {
+        profExecute.start("prepareOutput");
         tuple = prepareOutput(tuple);
+        profExecute.end();
         //            log.info("--------------------    put into output without tree ------------------------");
         if (key != null && tuple != null){
+          profExecute.start("Scan_outputToCache");
           outputToCache(key,tuple);
+          profExecute.end();
+        }
       }
-    }
   }
 
 

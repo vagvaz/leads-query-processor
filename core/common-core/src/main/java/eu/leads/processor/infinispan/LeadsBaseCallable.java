@@ -129,7 +129,9 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
       if (!cdl.localNodeIsPrimaryOwner(key))
         continue;
+      profExecute.start("GetTuple" + (count+1));
       V value = inputCache.get(key);
+      profExecute.end();
       if (value != null) {
         profExecute.start("ExOn" + (++count));
         executeOn((K) key, value);

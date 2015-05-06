@@ -20,13 +20,13 @@ public class ProfileEvent implements Serializable {
   }
   public void start(String logName){
     profileName= logName;
-    start = System.currentTimeMillis();
+    start = System.nanoTime();
   }
   public void end(){
-    profileLogger.info("#PROF"+id+" " + profileName + "\t"+ (System.currentTimeMillis()-start) + " ms");
+    profileLogger.info("#PROF"+id+" " + profileName + "\t"+ ((System.nanoTime()-start)/1000.0f) + " ms");
   }
 
   public void end(String endString){
-    profileLogger.info("#PROF"+id+" " + profileName + " -> "+endString+ " " +(System.currentTimeMillis()-start) + " ms");
+    profileLogger.info("#PROF"+id+" " + profileName + " -> "+endString+ " " +((System.nanoTime()-start)/1000.0f) + " ms");
   }
 }
