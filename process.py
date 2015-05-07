@@ -1,28 +1,40 @@
 import re
-hand = open('selectWithData.txt') #grep #PROF leadsprocessor.log 
+hand = open('../withData.txt') #grep #PROF leadsprocessor.log 
 
 searchTerms = []
-searchTerms.append('findPendingMMCFromGlobal');
-searchTerms.append('findPendingRMCFromGlobal');
-searchTerms.append('createCaches');
-searchTerms.append('setupMapCallable');
-searchTerms.append('executeMap');
+searchTerms.append('findPendingMMCFromGlobal()');
+searchTerms.append('findPendingRMCFromGlobal()');
+searchTerms.append('createCaches()');
+searchTerms.append('setupMapCallable()');
+searchTerms.append('executeMap()');
 
-searchTerms.append('setupReduceCallable');
-searchTerms.append('executeReduce');
+searchTerms.append('setupReduceCallable()');
+searchTerms.append('executeReduce()');
 searchTerms.append('run_cleanup');
 searchTerms.append('fail_cleanup');
-searchTerms.append('fail_cleanup');
-searchTerms.append('Scan_outputToCache');
 
 searchTerms.append('Call getComponent');
+searchTerms.append('finalize');
 searchTerms.append('GetTuple');
+searchTerms.append('putToCache');
+searchTerms.append('ExOn');
+searchTerms.append('Scan_outputToCache');
+searchTerms.append('new Tuple');
+searchTerms.append('namesToLowerCase');
 searchTerms.append('Start EnsemlbeCacheManager');
 searchTerms.append('Get cache');
-searchTerms.append('prepareOutput');
+
 searchTerms.append('prepareOutput');
 searchTerms.append('renameAllTupleAttributes');
-searchTerms.append('ExOn');
+searchTerms.append('ScanCallableUpdate -> setEnv');
+searchTerms.append('Start EnsemlbeCacheManager');
+searchTerms.append('end_setEnv');
+
+searchTerms.append('Op CleanUp');
+searchTerms.append('Execute()');
+
+
+
 
 files=[];
 count=[];
@@ -45,6 +57,7 @@ for line in hand:
 			#print ms
 			files[i].write(ms+'\n')
 			count[i]=count[i]+1
+			continue
 
 
 for i in range(len(searchTerms)):
