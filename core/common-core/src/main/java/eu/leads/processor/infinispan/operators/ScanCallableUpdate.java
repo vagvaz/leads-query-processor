@@ -160,8 +160,9 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
       profExecute.end();
       if (tree != null) {
         profExecute.start("tree.accept");
-        if (tree.accept(tuple)) {
-          profExecute.end();
+        boolean accept = tree.accept(tuple);
+        profExecute.end();
+        if (accept) {
           profExecute.start("prepareOutput");
           tuple = prepareOutput(tuple);
           profExecute.end();
@@ -172,9 +173,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
             profExecute.end();
           }
         }
-
       } else {
-        profExecute.end();
         profExecute.start("prepareOutput");
         tuple = prepareOutput(tuple);
         profExecute.end();
