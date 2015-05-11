@@ -1,11 +1,12 @@
 import re
-hand = open('../withData.txt') #grep #PROF leadsprocessor.log 
+hand = open('single_result.txt') #grep #PROF leadsprocessor.log 
 
 searchTerms = []
 searchTerms.append('findPendingMMCFromGlobal()');
 searchTerms.append('findPendingRMCFromGlobal()');
 searchTerms.append('createCaches()');
 searchTerms.append('setupMapCallable()');
+searchTerms.append('ActualExecMap');
 searchTerms.append('executeMap()');
 
 searchTerms.append('setupReduceCallable()');
@@ -18,11 +19,15 @@ searchTerms.append('finalize');
 searchTerms.append('GetTuple');
 searchTerms.append('putToCache');
 searchTerms.append('ExOn');
+searchTerms.append('tree.accept');
+searchTerms.append('Scan_Put');
 searchTerms.append('Scan_outputToCache');
 searchTerms.append('new Tuple');
 searchTerms.append('namesToLowerCase');
 searchTerms.append('Start EnsemlbeCacheManager');
 searchTerms.append('Get cache');
+
+
 
 searchTerms.append('prepareOutput');
 searchTerms.append('renameAllTupleAttributes');
@@ -53,7 +58,13 @@ for line in hand:
 		if re.search(searchTerms[i], line) :
 			#line_ = line.split(" ")
 			lasts = line.split('\t') 
-			ms = lasts[-1].split(' ')[0]
+			#print lasts
+			if(len(lasts)>1):
+				ms = lasts[-1].split(' ')[0]
+			else:
+				llaast = lasts[-1].split(' ')
+				ms = llaast[-2]
+			
 			#print ms
 			files[i].write(ms+'\n')
 			count[i]=count[i]+1

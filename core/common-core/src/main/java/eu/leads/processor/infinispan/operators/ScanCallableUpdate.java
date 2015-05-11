@@ -159,8 +159,12 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
       renameAllTupleAttributes(tuple);
       profExecute.end();
       if (tree != null) {
+        profExecute.start("tree.accept");
         if (tree.accept(tuple)) {
+          profExecute.end();
+          profExecute.start("prepareOutput");
           tuple = prepareOutput(tuple);
+          profExecute.end();
           //               log.info("--------------------    put into output with filter ------------------------");
           if (key != null && tuple != null) {
             profExecute.start("Scan_Put");
@@ -168,7 +172,9 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
             profExecute.end();
           }
         }
+
       } else {
+        profExecute.end();
         profExecute.start("prepareOutput");
         tuple = prepareOutput(tuple);
         profExecute.end();

@@ -42,14 +42,13 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   transient protected EnsembleCacheManager emanager;
   transient protected EnsembleCache ecache;
 
-  Logger profilerLog;
+  transient Logger profilerLog;
   ProfileEvent profCallable;
   public LeadsBaseCallable(String configString, String output){
     this.configString = configString;
     this.output = output;
     profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
     profCallable = new ProfileEvent("Callable Construct" + this.getClass().toString(),profilerLog);
-
   }
 
 
@@ -69,6 +68,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //  }
   @Override public void setEnvironment(Cache<K, V> cache, Set<K> inputKeys) {
     profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
+    profCallable.setProfileLogger(profilerLog);
     if(profCallable!=null) {
       profCallable.end("setEnv");
       profCallable.start("setEnvironment Callable ");

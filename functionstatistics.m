@@ -1,10 +1,12 @@
+close all;
+clear all;
 folder_name = uigetdir
 
 csvs = dir([folder_name '/*.csv']);
 %printmat(M, 'My Matrix', 'ROW1 ROW2 ROW3 ROW4 ROW5', 'FOO BAR BAZ BUZZ FUZZ' )
 stats=[];
 
-vars = ['records max min  mean std sum'];
+vars = ['records max min  mean std median sum'];
 terms = {};
  
 
@@ -21,13 +23,14 @@ fprintf(fileID,'term,records,max,min,mean,std,sum\n');
 
 for i=1:length(csvs)
    try
-       csvs(i).name = csvs(i).name;
+       name = csvs(i).name;
+       disp(name);
        data=csvread([folder_name '/' csvs(i).name]);
        %disp([ ' records ' length(data) ' max: ' num2str(max(data)) ' min: ' num2str(min(data)) ' mean: ' num2str(mean(data)) ' std: ' num2str(std(data)) ' Term ' csvs(i).name ]) 
-       stats(end+1,:) = [length(data) max(data) min(data) mean(data) std(data) sum(data)];
+       stats(end+1,:) = [length(data) max(data) min(data) mean(data) std(data) median(data) sum(data)];
        terms{end+1} = strrep(strrep(csvs(i).name,'.csv',''),' ','_'); 
        
-       fprintf(fileID,'%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n',terms{end},stats(end,1),stats(end,2),stats(end,3),stats(end,4),stats(end,5),stats(end,6));
+       fprintf(fileID,'%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n',terms{end},stats(end,1),stats(end,2),stats(end,3),stats(end,4),stats(end,5),stats(end,6),stats(end,7));
        figure;
        hist(data,50)
        title([csvs(i).name ' ' num2str(length(data)) ' records'])
