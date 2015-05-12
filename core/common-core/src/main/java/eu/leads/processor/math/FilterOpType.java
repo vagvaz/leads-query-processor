@@ -1,5 +1,8 @@
 package eu.leads.processor.math;
 
+import org.apache.tajo.plan.expr.CastEval;
+import org.apache.tajo.plan.expr.SignedEval;
+
 /**
  * Created by vagvaz on 9/24/14.
  */
@@ -46,8 +49,8 @@ public enum FilterOpType {
    IN,
 
    // Value or Reference
-//   SIGNED(SignedEval.class),
-//   CAST(CastEval.class),
+   SIGNED,
+   CAST,
    ROW_CONSTANT,
    FIELD,
    CONST;

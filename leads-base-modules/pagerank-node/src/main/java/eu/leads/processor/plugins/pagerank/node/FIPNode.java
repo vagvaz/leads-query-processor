@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.TreeMap;
 
 public class FIPNode extends Node implements Serializable{
-
+    static final long serialVersionUID = -1828291873628101L;
     protected int fipVisits;
 	protected THashMap<Object,TreeMap<Integer, Object>> fip_map;//<RWid, Object>, where Object: sortedMap with entries <curr_pos_at_RWid, nextNode>
 

@@ -1,5 +1,6 @@
 package eu.leads.processor.core;
 
+import com.sun.jersey.core.util.Base64;
 import org.bson.BSONObject;
 import org.bson.BasicBSONDecoder;
 import org.bson.BasicBSONEncoder;
@@ -28,8 +29,9 @@ public class TupleMarshaller implements Marshaller {
 
                 Tuple t = (Tuple)obj;
                 BasicBSONEncoder encoder = new BasicBSONEncoder();
-                byte[] array = encoder.encode(t.asBsonObject());
-                oos.write(array);
+                byte[] array1 = encoder.encode(t.asBsonObject());
+//                byte[] array = Base64.encode(array1);
+                oos.writeObject(array1);
         }
         else{
             oos.writeObject(obj);
@@ -39,18 +41,33 @@ public class TupleMarshaller implements Marshaller {
 
     @Override
     public Object objectFromByteBuffer(byte[] buf) throws IOException, ClassNotFoundException {
+        Object oo = null;
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(buf);
+
             ObjectInputStream ois = new ObjectInputStream(bais);
-            BasicBSONDecoder decoder = new BasicBSONDecoder();
-            BSONObject data = decoder.readObject(buf);
-            Tuple result = new Tuple(data.toString());
-            return result;
-        } catch (Exception e) {
-            e.printStackTrace();
+            oo = ois.readObject();
+            if (oo instanceof byte[]) {
+                byte[] array = (byte[]) oo;
+                //            String tmpBytes =  (String) oo;
+                //            byte[] array = Base64.decode(tmpBytes);
+                BasicBSONDecoder decoder = new BasicBSONDecoder();
+                BSONObject data = decoder.readObject(array);
+                Tuple result = new Tuple(data.toString());
+                return result;
+            }
+            else {
+                return oo;
+            }
+            }catch(Exception e){
+                e.printStackTrace();
+                System.out.println("Returning.... for " + oo.toString());
+                return oo;
+
+            }
         }
-        throw new IOException("cannot unmarshall");
-    }
+//        throw new IOException("cannot unmarshall");
+//    }
 
     @Override
     public Object objectFromByteBuffer(byte[] buf, int offset, int length) throws IOException, ClassNotFoundException {

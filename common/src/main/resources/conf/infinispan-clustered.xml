@@ -30,9 +30,9 @@
           <indexing index="NONE">
               <property name="default.directory_provider">ram</property>
           </indexing>
-            <eviction max-entries="1000" strategy="LIRS" />
+            <!--<eviction max-entries="1000" strategy="LIRS" />-->
             <transaction mode="NONE"/>
-            <expiration lifespan="-1" max-idle="-1" interval="-1"/>
+            <expiration lifespan="-1" max-idle="-1" interval="-1" />
            <state-transfer enabled="true" await-initial-transfer="true"/>
       </distributed-cache>
       <distributed-cache name="WebPage" mode="SYNC" segments="20" owners="1" remote-timeout="10000" start="EAGER">
@@ -46,7 +46,7 @@
             <property name="hibernate.search.default.indexwriter.ram_buffer_size">256</property>
          </indexing>
          <transaction mode="NONE"/>
-         <eviction strategy="LRU" max-entries="10000"/>
+         <!--<eviction strategy="LRU" max-entries="10000"/>-->
          <persistence>
             <file-store fetch-state="true"
                         shared ="true"
@@ -66,7 +66,7 @@
             <!--<property name="hibernate.search.default.indexwriter.ram_buffer_size">256</property>-->
          </indexing>
          <transaction mode="NONE"/>
-         <eviction strategy="LRU" max-entries="10000"/>
+         <!--<eviction strategy="LRU" max-entries="10000"/>-->
          <!--<persistence>-->
          <!--<file-store fetch-state="true"-->
          <!--read-only="false"-->

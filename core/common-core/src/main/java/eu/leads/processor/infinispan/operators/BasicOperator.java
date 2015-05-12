@@ -503,7 +503,9 @@ public abstract class BasicOperator extends Thread implements Operator{
     }
 
     if(pendingMMC.contains(currentCluster)){
+      ProfileEvent lem = new ProfileEvent("ActualExecMap",profilerLog);
       localExecuteMap();
+      lem.end();
     }
 
     synchronized (mmcMutex){

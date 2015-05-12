@@ -3,8 +3,10 @@ package eu.leads.processor.common.infinispan;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.core.TupleMarshaller;
 import eu.leads.processor.plugins.NutchLocalListener;
 import org.infinispan.Cache;
+import org.infinispan.commons.marshall.Marshaller;
 import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
@@ -14,6 +16,7 @@ import org.infinispan.configuration.parsing.ConfigurationBuilderHolder;
 import org.infinispan.configuration.parsing.ParserRegistry;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
+import org.infinispan.eviction.EvictionStrategy;
 import org.infinispan.lifecycle.ComponentStatus;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
@@ -711,7 +714,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
             .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath + "/")
             .fetchPersistentState(false)
-            .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
+            .shared(false).purgeOnStartup(true).preload(false).compatibility().enable().marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
             .build();
 
@@ -729,7 +732,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
                 //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
             .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
             .fetchPersistentState(false)
-            .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
+            .shared(false).purgeOnStartup(true).preload(false).compatibility().enable().marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
             .build();
       }
@@ -738,8 +741,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
           .clustering()
           .cacheMode(CacheMode.DIST_SYNC)
           .hash().numOwners(1)
-          .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility()//.enable()
-          .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
+          .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility().enable().marshaller(new TupleMarshaller())
+          .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().strategy(EvictionStrategy.NONE)
           .build();
     }
   }
@@ -769,7 +772,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
           .persistence()
               //                            .addStore(LevelDBStoreConfigurationBuilder.class
               //                            .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
-          .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath+"/").shared(false).preload(false).compatibility().enable()
+          .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath+"/").shared(false).preload(false).compatibility().enable().marshaller(new TupleMarshaller())
           .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
           .build();
     }

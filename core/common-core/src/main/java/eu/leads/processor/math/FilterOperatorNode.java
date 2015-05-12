@@ -18,7 +18,7 @@ public class FilterOperatorNode {
    JsonObject value;
    public FilterOperatorNode(JsonElement node){
        type = FilterOpType.valueOf(node.asObject().getString("type"));
-       if(type.equals(FilterOpType.FIELD) || type.equals(FilterOpType.CONST))
+       if(type.equals(FilterOpType.FIELD) || type.equals(FilterOpType.CONST) || type.equals(FilterOpType.SIGNED) || type.equals(FilterOpType.CAST))
        {
           value = node.asObject();
           left = null;

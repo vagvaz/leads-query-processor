@@ -169,12 +169,14 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
       while (iterator.hasNext()) {
          try {
             tuplecounter++;
-
-            t = new Tuple(iterator.next());
-            if (t == null) {
+            Tuple itTuple = iterator.next();
+            if (itTuple == null) {
                System.err.println("Iterator got next and it was null..." + iterator.toString());
                log.error("Iterator got next and it was null..." + iterator.toString());
+               continue;
             }
+            t = new Tuple(itTuple);
+
 
             Iterator<String> funcTypeIterator = functionType.iterator();
             //           Iterator<Object> aggValuesIterator = aggregateValues.iterator();
@@ -227,7 +229,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
             log.error("EXCEPTION ON FINAL setting agg value");
             log.error(e.getClass() + " " + e.getMessage());
             log.error(iterator.toString());
-            log.error(t.toString());
+//            log.error(t.toString());
             return;
 
          }

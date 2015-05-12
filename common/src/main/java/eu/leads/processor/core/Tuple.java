@@ -1,17 +1,21 @@
 package eu.leads.processor.core;
 
 import com.mongodb.util.JSON;
+import com.sun.jersey.core.util.Base64;
 import org.bson.BSONObject;
 import org.bson.BasicBSONDecoder;
 import org.bson.BasicBSONEncoder;
 import org.bson.BasicBSONObject;
+import org.infinispan.commons.marshall.AdvancedExternalizer;
+import org.infinispan.commons.marshall.Externalizer;
+import org.infinispan.commons.marshall.SerializeWith;
+import org.infinispan.commons.util.Util;
 
-import java.io.IOException;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 
-public class Tuple extends DataType_bson implements Serializable{
+@SerializeWith(Tuple.TupleExternalizer.class)
+public class Tuple extends DataType_bson implements Serializable,Externalizable{
 
 //    static BasicBSONEncoder encoder = new BasicBSONEncoder();
 //    static BasicBSONDecoder decoder = new BasicBSONDecoder();
@@ -41,6 +45,10 @@ public class Tuple extends DataType_bson implements Serializable{
    public Tuple(Tuple tuple) {
       data = new BasicBSONObject(tuple.asBsonObject().toMap());
    }
+
+    public Tuple(BSONObject object) {
+        data = object;
+    }
 //
 //  public Tuple(Tuple tmp) {
 //
@@ -67,9 +75,20 @@ public class Tuple extends DataType_bson implements Serializable{
     }
 
     private void readObjectNoData() throws ObjectStreamException {
-
+        data = new BasicBSONObject();
     }
 
+    public void writeExternal(ObjectOutput out) throws IOException{
+        BasicBSONEncoder encoder = new BasicBSONEncoder();
+        byte[] array = encoder.encode(data);
+        out.writeObject(array);
+    }
+
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException{
+        BasicBSONDecoder decoder = new BasicBSONDecoder();
+        byte[] array = (byte[]) in.readObject();
+        data = decoder.readObject(array);
+    }
     public String asString() {
         return data.toString();
     }
@@ -167,6 +186,40 @@ public class Tuple extends DataType_bson implements Serializable{
                     }
                 }
             }
+        }
+    }
+
+    public static class TupleExternalizer implements AdvancedExternalizer<Tuple> {
+        @Override
+        public void writeObject(ObjectOutput output, Tuple object) throws IOException {
+            BasicBSONEncoder encoder = new BasicBSONEncoder();
+            byte[] array = encoder.encode(object.asBsonObject());
+//            byte[] array1 = Base64.encode(array);
+            output.writeObject(array);
+        }
+
+        @Override
+        public Tuple readObject(ObjectInput input) throws IOException, ClassNotFoundException {
+            BasicBSONDecoder decoder = new BasicBSONDecoder();
+            byte[] array = (byte[]) input.readObject();
+//            String tmp = (String) input.readObject();
+//            byte[] array = Base64.decode(tmp.getBytes());
+
+            BSONObject object = decoder.readObject(array);
+            Tuple tuple = new Tuple(object);
+            return tuple;
+        }
+
+        @Override
+        public Set<Class<? extends Tuple>> getTypeClasses() {
+            Set<Class<? extends Tuple>> result = new HashSet<>();
+            result.add(Tuple.class);
+            return result;
+        }
+
+        @Override
+        public Integer getId() {
+            return 27011988;
         }
     }
 }

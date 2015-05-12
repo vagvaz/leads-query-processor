@@ -5,6 +5,7 @@ import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.core.TupleMarshaller;
 import org.infinispan.Cache;
 import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
@@ -83,7 +84,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
     if(ensembleHost != null && !ensembleHost.equals("")) {
       tmpprofCallable.start("Start EnsemlbeCacheManager");
-      emanager = new EnsembleCacheManager(ensembleHost);
+      emanager = new EnsembleCacheManager(ensembleHost,new TupleMarshaller());
       emanager.start();
 //      emanager = createRemoteCacheManager();
 //      ecache = emanager.getCache(output,new ArrayList<>(emanager.sites()),

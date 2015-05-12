@@ -4,15 +4,19 @@ import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
+import eu.leads.processor.core.TupleMarshaller;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
 import org.infinispan.Cache;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.commons.util.CloseableIterable;
+import org.infinispan.ensemble.EnsembleCacheManager;
+import org.infinispan.ensemble.cache.EnsembleCache;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -21,7 +25,7 @@ import java.util.Map;
 public class
   UberSnapshot {
 
-   static RemoteCacheManager manager;
+   static EnsembleCacheManager manager;
    static InfinispanManager imanager;
    static int delay=0;
    public static void main(String[] args) throws IOException, ClassNotFoundException {
@@ -443,8 +447,8 @@ public class
 
       LQPConfiguration.initialize();
 //      InfinispanManager manager = InfinispanClusterSingleton.getInstance().getManager();
-      RemoteCacheManager manager = createRemoteCacheManager(host,port);
-      RemoteCache cache =  manager.getCache(cacheName,true);
+      EnsembleCacheManager manager = createRemoteCacheManager(host,port);
+      EnsembleCache cache =  manager.getCache(cacheName,new ArrayList<>(manager.sites()), EnsembleCacheManager.Consistency.DIST);
       BufferedReader keyReader = new BufferedReader(new InputStreamReader(new FileInputStream(dir+"/"+cacheName+".keys")));
 //        BufferedReader sizeReader = new BufferedReader(new InputStreamReader(new FileInputStream(dir+"/"+cacheName+".sizes")));
       BufferedReader valueReader = new BufferedReader(new InputStreamReader(new FileInputStream(dir+"/"+cacheName+".values")));
@@ -484,9 +488,9 @@ public class
    }
 
 
-   private static RemoteCacheManager createRemoteCacheManager(String host, String port) {
+   private static EnsembleCacheManager createRemoteCacheManager(String host, String port) {
       ConfigurationBuilder builder = new ConfigurationBuilder();
       builder.addServer().host(host).port(Integer.parseInt(port));
-      return new RemoteCacheManager(builder.build());
+      return new EnsembleCacheManager(host+":"+port,new TupleMarshaller());
    }
 }
