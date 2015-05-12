@@ -12,7 +12,12 @@ public class ProfileEvent implements Serializable {
   long start;
   String id;
   String profileName;
-  Logger profileLogger=null;
+
+  public void setProfileLogger(Logger profileLogger) {
+    this.profileLogger = profileLogger;
+  }
+
+  transient Logger profileLogger=null;
   public ProfileEvent(String logName, Logger logger) {
     profileLogger= logger;
     id = UUID.randomUUID().toString().substring(0,5);

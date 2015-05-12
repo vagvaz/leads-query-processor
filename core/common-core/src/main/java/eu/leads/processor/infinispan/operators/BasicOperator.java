@@ -598,7 +598,7 @@ public abstract class BasicOperator extends Thread implements Operator{
         @Override
         public Object call() throws Exception {
           synchronized (rmcMutex) {
-            Thread.sleep(5000);
+           // Thread.sleep(5000);
             registered[0] = true;
             rmcMutex.notifyAll();
           }
