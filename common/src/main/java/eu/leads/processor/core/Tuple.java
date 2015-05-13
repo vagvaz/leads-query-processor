@@ -14,7 +14,7 @@ import org.infinispan.commons.util.Util;
 import java.io.*;
 import java.util.*;
 
-@SerializeWith(Tuple.TupleExternalizer.class)
+//@SerializeWith(Tuple.TupleExternalizer.class)
 public class Tuple extends DataType_bson implements Serializable,Externalizable{
 
 //    static BasicBSONEncoder encoder = new BasicBSONEncoder();
@@ -58,15 +58,16 @@ public class Tuple extends DataType_bson implements Serializable,Externalizable{
         // Serialize it
         BasicBSONEncoder encoder = new BasicBSONEncoder();
         byte[] array = encoder.encode(data);
-        out.write(array);
+        out.writeObject(array);
 //      out.writeInt(data.toString().length());
 //      out.writeBytes(data.toString());
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException{
         // Deserialize it
+        byte[] array = (byte[]) in.readObject();
         BasicBSONDecoder decoder = new BasicBSONDecoder();
-        data = decoder.readObject(in);
+        data = decoder.readObject(array);
 //         int size = in.readInt();
 //         byte[] bb =  new byte[size];
 //         in.readFully(bb);

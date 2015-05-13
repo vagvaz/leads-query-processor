@@ -84,7 +84,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
     if(ensembleHost != null && !ensembleHost.equals("")) {
       tmpprofCallable.start("Start EnsemlbeCacheManager");
-      emanager = new EnsembleCacheManager(ensembleHost,new TupleMarshaller());
+      emanager = new EnsembleCacheManager(ensembleHost);
       emanager.start();
 //      emanager = createRemoteCacheManager();
 //      ecache = emanager.getCache(output,new ArrayList<>(emanager.sites()),

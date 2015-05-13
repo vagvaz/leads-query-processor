@@ -452,7 +452,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       manager.getCache(name);
       //            createCache(name,manager.getDefaultCacheConfiguration());
     else {
-      createCache(name, manager.getDefaultCacheConfiguration());
+      createCache(name, null);
     }
     return manager.getCache(name);
   }
@@ -654,11 +654,11 @@ public class ClusterInfinispanManager implements InfinispanManager {
   }
 
   private void createCache(String cacheName, Configuration cacheConfiguration) {
-    if (!cacheConfiguration.clustering().cacheMode().isClustered()) {
-      log.warn("Configuration given for " + cacheName
-          + " is not clustered so using default cluster configuration");
-      //            cacheConfiguration = new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_ASYNC).async().l1().lifespan(100000L).hash().numOwners(3).build();
-    }
+//    if (!cacheConfiguration.clustering().cacheMode().isClustered()) {
+//      log.warn("Configuration given for " + cacheName
+//          + " is not clustered so using default cluster configuration");
+//      //            cacheConfiguration = new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_ASYNC).async().l1().lifespan(100000L).hash().numOwners(3).build();
+//    }
     //      if(manager.cacheExists(cacheName))
     //         return;
     if(cacheName.equals("clustered")){
@@ -701,7 +701,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
   private void initDefaultCacheConfig() {
     if (LQPConfiguration.getConf().getBoolean("leads.processor.infinispan.persistence", true)) { //perssistence
       if (!LQPConfiguration.getConf().getBoolean("leads.processor.infinispan.useLevelDB", false)) {
-        defaultConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
+        defaultConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
             .clustering()
             .cacheMode(CacheMode.DIST_SYNC)
             .hash().numOwners(1)
@@ -713,13 +713,13 @@ public class ClusterInfinispanManager implements InfinispanManager {
                 //               .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
 
             .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath + "/")
-            .fetchPersistentState(false)
-            .shared(false).purgeOnStartup(true).preload(false).compatibility().enable().marshaller(new TupleMarshaller())
+            .fetchPersistentState(true)
+            .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
             .build();
 
       } else { //Use leveldb
-        defaultConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
+        defaultConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
             .clustering()
             .cacheMode(CacheMode.DIST_SYNC)
             .hash().numOwners(1)
@@ -731,17 +731,17 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .expiredLocation("/tmp/leadsprocessor-data/expired-" + uniquePath + "/")
                 //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
             .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
-            .fetchPersistentState(false)
-            .shared(false).purgeOnStartup(true).preload(false).compatibility().enable().marshaller(new TupleMarshaller())
+            .fetchPersistentState(true)
+            .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
             .build();
       }
     } else { //do not use persistence
-      defaultConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
+      defaultConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
           .clustering()
           .cacheMode(CacheMode.DIST_SYNC)
           .hash().numOwners(1)
-          .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility().enable().marshaller(new TupleMarshaller())
+          .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility().enable()//.marshaller(new TupleMarshaller())
           .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().strategy(EvictionStrategy.NONE)
           .build();
     }
@@ -763,7 +763,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     if(cacheName.equals("clustered") && cacheName.equals("default")){
 
 
-      cacheConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
+      cacheConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
           .clustering()
           .cacheMode(CacheMode.DIST_SYNC)
           .hash().numOwners(1)
@@ -772,7 +772,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
           .persistence()
               //                            .addStore(LevelDBStoreConfigurationBuilder.class
               //                            .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
-          .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath+"/").shared(false).preload(false).compatibility().enable().marshaller(new TupleMarshaller())
+          .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath+"/").fetchPersistentState(true).purgeOnStartup(false).shared(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
           .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
           .build();
     }
@@ -791,7 +791,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     if(cacheName.equals("clustered") && cacheName.equals("default")){
 
 
-      cacheConfig = new ConfigurationBuilder().read(manager.getDefaultCacheConfiguration())
+      cacheConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
           .clustering()
           .cacheMode(CacheMode.DIST_SYNC)
           .hash().numOwners(1)

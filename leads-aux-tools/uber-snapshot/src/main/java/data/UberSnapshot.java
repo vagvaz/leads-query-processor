@@ -491,6 +491,6 @@ public class
    private static EnsembleCacheManager createRemoteCacheManager(String host, String port) {
       ConfigurationBuilder builder = new ConfigurationBuilder();
       builder.addServer().host(host).port(Integer.parseInt(port));
-      return new EnsembleCacheManager(host+":"+port,new TupleMarshaller());
+      return new EnsembleCacheManager(host+":"+port );
    }
 }

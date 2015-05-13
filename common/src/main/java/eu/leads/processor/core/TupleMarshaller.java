@@ -42,11 +42,21 @@ public class TupleMarshaller implements Marshaller {
     @Override
     public Object objectFromByteBuffer(byte[] buf) throws IOException, ClassNotFoundException {
         Object oo = null;
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(buf);
+        try{
+            byte[] b = Arrays.copyOfRange(buf,3,buf.length);
+            ByteArrayInputStream bais = new ByteArrayInputStream(b);
 
             ObjectInputStream ois = new ObjectInputStream(bais);
             oo = ois.readObject();
+        }
+        catch (Exception e){
+            if(e instanceof StreamCorruptedException){
+                String probKey = new String(buf);
+                return probKey;
+            }
+        }
+        try {
+
             if (oo instanceof byte[]) {
                 byte[] array = (byte[]) oo;
                 //            String tmpBytes =  (String) oo;

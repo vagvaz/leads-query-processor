@@ -643,8 +643,8 @@ public abstract class BasicOperator extends Thread implements Operator{
 
       List<Future<String>> res = new ArrayList<>();
       List<Address> taskNodes =  inputCache.getAdvancedCache().getRpcManager().getMembers();
-      taskNodes.add(inputCache.getCacheManager().getAddress());
-      for(Address node : taskNodes){
+//      taskNodes.add(inputCache.getCacheManager().getAddress());
+      for(Address node : taskNodes){k
         Future<String> ft = des.submit(node,task);
         res.add(ft);
       }
