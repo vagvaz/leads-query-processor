@@ -644,7 +644,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       List<Future<String>> res = new ArrayList<>();
       List<Address> taskNodes =  inputCache.getAdvancedCache().getRpcManager().getMembers();
 //      taskNodes.add(inputCache.getCacheManager().getAddress());
-      for(Address node : taskNodes){k
+      for(Address node : taskNodes){
         Future<String> ft = des.submit(node,task);
         res.add(ft);
       }
