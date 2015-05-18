@@ -1,7 +1,9 @@
 package leads.tajo.module;
 
+import org.apache.tajo.algebra.CreateIndex;
 import org.apache.tajo.algebra.Expr;
 import org.apache.tajo.algebra.JsonHelper;
+import org.apache.tajo.algebra.OpType;
 import org.apache.tajo.engine.parser.SQLSyntaxError;
 import org.apache.tajo.session.Session;
 
@@ -51,11 +53,21 @@ public class TajoModuleTest {
                         }
                         System.out.println("END");
 
-						if (res_expr != null)
+						if (res_expr != null )
 							System.out.println("Expr: "+res_expr.toJson() +" end");
 						else
 							System.out.println("No Expr");
-						String res = TaJoModule.Optimize(session,res_expr );//.Optimize(session, line);//res_expr.toJson();//;
+                        String res=null;
+                        if(res_expr.getType().equals(OpType.CreateIndex)) {
+                            res = res_expr.toJson();
+                            CreateIndex newExpr= JsonHelper.fromJson(res, CreateIndex.class);//
+//                            JsonArray columnNames = conf.getObject("CreateIndex").getArray("SortSpecs");
+//                            JsonArray values = conf.getObject("body").getArray("exprs");
+//                            JsonArray primaryArray = conf.getObject("Projection").getArray("TableName");
+
+                        }
+                        else
+						    res = TaJoModule.Optimize(session,res_expr );//.Optimize(session, line);//res_expr.toJson();//;
 
 						if (res != null){
 							 
