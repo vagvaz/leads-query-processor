@@ -102,17 +102,19 @@ public class SQLOperatorFactory {
    }
 
    private static Operator getSingleOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
-        Operator result  = null;
-                 String opType = action.getData().getObject("operator").getObject("configuration")
-                                                     .getObject("body").getString("operationType");
-                 if(opType.equals(OpType.Insert.toString())){
-                   result = new InsertOperator(com,persistence,log,action);
-              }
-               else{
-                         log.error("Trying to create Unimplemented operator " + opType);
+       Operator result  = null;
+       String opType = action.getData().getObject("operator").getObject("configuration")
+               .getObject("body").getString("operationType");
+       if(opType.equals(OpType.Insert.toString())){
+           result = new InsertOperator(com,persistence,log,action);
+       }
+       else if(opType.equals(OpType.CreateIndex.toString())){
+           result = new InsertOperator(com,persistence,log,action);
+       }
+       else{
+           log.error("Trying to create Unimplemented operator " + opType);
+       }
+       return result;
 
-                     }
-                 return result;
-
-    }
+   }
 }
