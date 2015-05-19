@@ -81,7 +81,11 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     keys = inputKeys;
     this.inputCache = cache;
     ProfileEvent tmpprofCallable = new ProfileEvent("setEnvironment manager " + this.getClass().toString(),profilerLog);
+    tmpprofCallable.start("Start LQPConfiguration");
 
+    LQPConfiguration.initialize();
+    tmpprofCallable.end();
+    EnsembleCacheUtils.initialize();
     if(ensembleHost != null && !ensembleHost.equals("")) {
       tmpprofCallable.start("Start EnsemlbeCacheManager");
       emanager = new EnsembleCacheManager(ensembleHost);
@@ -91,12 +95,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //          EnsembleCacheManager.Consistency.DIST);
     }
     else {
-      tmpprofCallable.start("Start LQPConfiguration");
-
-      LQPConfiguration.initialize();
-      tmpprofCallable.end();
       tmpprofCallable.start("Start EnsemlbeCacheManager");
-
       emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
       emanager.start();
 //            emanager = createRemoteCacheManager();
@@ -153,7 +152,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
   @Override public void finalizeCallable(){
     try {
-
+      EnsembleCacheUtils.waitForAllPuts();
       emanager.stop();
 //
 //      ecache.stop();

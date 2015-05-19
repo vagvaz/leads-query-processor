@@ -179,7 +179,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache(StringConstants.OWNERSCACHE);
     getPersisentCache(StringConstants.PLUGIN_ACTIVE_CACHE);
     getPersisentCache(StringConstants.PLUGIN_CACHE);
-    getPersisentCache(StringConstants.QUERIESCACHE);
+    getPersisentCache(StringConstants.QUERIESCACHE);  
     
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".webpages");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".testpages");
@@ -293,9 +293,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
         result.read(c).clustering()
             .cacheMode(CacheMode.DIST_SYNC)
             .hash().numOwners(1)
-            .indexing().index(Index.NONE).transaction().transactionMode
-            (TransactionMode
-                .NON_TRANSACTIONAL)
+            .indexing().index(Index.NONE).transaction().transactionMode(
+            TransactionMode.NON_TRANSACTIONAL)
             .persistence().passivation(true)
             //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
             //                                                                      .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
@@ -303,7 +302,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath + "/")
             .fetchPersistentState(false)
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
-            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false);
+            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
+            false).eviction().maxEntries(30000).strategy(EvictionStrategy.LIRS);
 
       } else { //Use leveldb
         result = new ConfigurationBuilder();
@@ -311,7 +311,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .clustering()
             .cacheMode(CacheMode.DIST_SYNC)
             .hash().numOwners(1)
-            .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
+            .indexing().index(Index.NONE).transaction().transactionMode(
+            TransactionMode.NON_TRANSACTIONAL)
             .persistence().passivation(true)
             .addStore(LevelDBStoreConfigurationBuilder.class)
             .location("/tmp/leadsprocessor-data/leveldb/" + uniquePath + "-data/")
@@ -321,7 +322,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
             .fetchPersistentState(false)
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
-            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
+            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
+            false).eviction().maxEntries(30000).strategy(EvictionStrategy.LIRS)
             .build();
       }
     } else { //do not use persistence
@@ -330,8 +332,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
           .clustering()
           .cacheMode(CacheMode.DIST_SYNC)
           .hash().numOwners(1)
-          .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility().enable()
-          .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
+          .indexing().index(Index.NONE).transaction().transactionMode(
+          TransactionMode.NON_TRANSACTIONAL).compatibility().enable()
+          .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
+          false).eviction().maxEntries(30000).strategy(EvictionStrategy.LIRS)
           .build();
     }
 
@@ -705,9 +709,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .clustering()
             .cacheMode(CacheMode.DIST_SYNC)
             .hash().numOwners(1)
-            .indexing().index(Index.NONE).transaction().transactionMode
-                (TransactionMode
-                    .NON_TRANSACTIONAL)
+            .indexing().index(Index.NONE).transaction().transactionMode(
+                TransactionMode.NON_TRANSACTIONAL)
             .persistence().passivation(true)
                 //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
                 //               .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
@@ -715,7 +718,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath + "/")
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
-            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
+            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
+                false).eviction().maxEntries(30000).strategy(EvictionStrategy.LIRS)
             .build();
 
       } else { //Use leveldb
@@ -733,7 +737,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
-            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
+            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(30000).strategy(EvictionStrategy.LIRS)
             .build();
       }
     } else { //do not use persistence
@@ -742,7 +746,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
           .cacheMode(CacheMode.DIST_SYNC)
           .hash().numOwners(1)
           .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility().enable()//.marshaller(new TupleMarshaller())
-          .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().strategy(EvictionStrategy.NONE)
+          .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(30000).strategy(EvictionStrategy.LIRS)
           .build();
     }
   }
