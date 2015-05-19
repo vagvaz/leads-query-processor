@@ -59,7 +59,7 @@ public class EnsembleCacheUtils {
                 }
             }
         }
-        while
+//        while
         profExecute.end();
     }
     public static void putToCache(BasicCache cache, Object key, Object value) {
@@ -74,8 +74,8 @@ public class EnsembleCacheUtils {
     }
 
     private static void clearCompleted() {
-        ClearCompletedRunnable ccr = new ClearCompletedRunnable(concurrentQuue,mutex,threads);
-        Thread thread = new Thread(ccr);
+//        ClearCompletedRunnable ccr = new ClearCompletedRunnable(concurrentQuue,mutex,threads);
+//        Thread thread = new Thread(ccr);
 
     }
 
