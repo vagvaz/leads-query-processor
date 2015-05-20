@@ -186,11 +186,19 @@ public class TaJoModule {
             newTableSchema.addColumn(c.getColumnName(), TajoDataTypes.Type.valueOf(c.getTypeName()));
         }
         TableMeta newTableMeta = CatalogUtil.newTableMeta(CatalogProtos.StoreType.SEQUENCEFILE);
-        Path tablePath = getTablePath(ctCommand.getTableName());
+
+        String DatabaseName = StringConstants.DEFAULT_DATABASE_NAME;
+        String TableName =ctCommand.getTableName();
+        String [] TableNameArray = TableName.split("\\.");
+        if(TableNameArray.length>1) {
+            DatabaseName =TableNameArray[0];
+            TableName  = TableNameArray[1];
+        }
+        Path tablePath = getTablePath(DatabaseName+"."+TableName);
         TableDesc desc =// new TableDesc(CatalogUtil
                // .buildFQName(StringConstants.DEFAULT_DATABASE_NAME,ctCommand.getTableName()),newTableSchema,newTableMeta,tablePath);
-        CatalogUtil.newTableDesc(CatalogUtil
-                .buildFQName(StringConstants.DEFAULT_DATABASE_NAME,ctCommand.getTableName()), newTableSchema, newTableMeta, tablePath);
+                CatalogUtil.newTableDesc(CatalogUtil
+                .buildFQName(DatabaseName,TableName), newTableSchema, newTableMeta, tablePath);
         return catalog.createTable(desc);
     }
 
