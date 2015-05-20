@@ -88,6 +88,19 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
                 result.setResult(ignoreResult(sqlQuery));
                 completeQuery(sqlQuery);
                 return result;
+            }else if (expr.getType().equals(OpType.CreateIndex)) {
+                String res = expr.toJson();
+                CreateIndex newExpr = JsonHelper.fromJson(res, CreateIndex.class);//
+                JsonObject actionResult = new JsonObject();
+                actionResult.putString("status", "ok");
+                actionResult.putObject("query",  new JsonObject(res));
+                result.setStatus(ActionStatus.COMPLETED.toString());
+                result.setResult(actionResult);
+                return result;
+                //                            JsonArray columnNames = conf.getObject("CreateIndex").getArray("SortSpecs");
+                //                            JsonArray values = conf.getObject("body").getArray("exprs");
+                //                            JsonArray primaryArray = conf.getObject("Projection").getArray("TableName");
+
             }
         } catch (Exception e) {
             failQuery(e, sqlQuery);

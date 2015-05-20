@@ -109,7 +109,7 @@ public class SQLOperatorFactory {
            result = new InsertOperator(com,persistence,log,action);
        }
        else if(opType.equals(OpType.CreateIndex.toString())){
-           result = new InsertOperator(com,persistence,log,action);
+           result = new CreateIndexOperator(com,persistence,log,action);
        }
        else{
            log.error("Trying to create Unimplemented operator " + opType);
