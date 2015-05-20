@@ -134,7 +134,7 @@ public class LeadsIntermediateIterator<V> implements Iterator<V> {
       throw new NoSuchElementException("LeadsIntermediateIterator the iterator does not have next");
     }
     //    System.err.println("in next ");
-    log.error(baseIntermKey.toString());
+//    log.error(baseIntermKey.toString());
     V returnValue = (V) intermediateDataCache.get(new ComplexIntermediateKey(baseIntermKey));
     if(returnValue == null){
       System.err.println("\n\n\nERROR NULL GET FROM intermediate data cache " + baseIntermKey.toString() + "\n cache size = " + intermediateDataCache.size());
