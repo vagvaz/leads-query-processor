@@ -68,6 +68,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
   private static String uniquePath;
   private String currentComponent;
   private String externalIP =null;
+  private int maxEntries;
   //  private static final EquivalentConcurrentHashMapV8<String, TestResources> testResources = new EquivalentConcurrentHashMapV8<>(AnyEquivalence.getInstance(), AnyEquivalence.getInstance());
 
   /**
@@ -99,6 +100,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
   public void startManager(String configurationFile)  {
 
     currentComponent = LQPConfiguration.getInstance().getConfiguration().getString("node.current.component");
+    maxEntries = LQPConfiguration.getInstance().getConfiguration().getInt("node.infinispan.maxentries",3000);
     externalIP = LQPConfiguration.getInstance().getConfiguration().getString(StringConstants.PUBLIC_IP);
     if(currentComponent == null)
       currentComponent = "testingComponents-"+UUID.randomUUID();
@@ -303,7 +305,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(false)
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-            false).eviction().maxEntries(30000).strategy(EvictionStrategy.LIRS);
+            false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS);
 
       } else { //Use leveldb
         result = new ConfigurationBuilder();
@@ -323,7 +325,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(false)
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-            false).eviction().maxEntries(30000).strategy(EvictionStrategy.LIRS)
+            false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
             .build();
       }
     } else { //do not use persistence
@@ -335,7 +337,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
           .indexing().index(Index.NONE).transaction().transactionMode(
           TransactionMode.NON_TRANSACTIONAL).compatibility().enable()
           .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-          false).eviction().maxEntries(30000).strategy(EvictionStrategy.LIRS)
+          false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
           .build();
     }
 
@@ -719,7 +721,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-                false).eviction().maxEntries(30000).strategy(EvictionStrategy.LIRS)
+                false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
             .build();
 
       } else { //Use leveldb
@@ -737,7 +739,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
-            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(30000).strategy(EvictionStrategy.LIRS)
+            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
             .build();
       }
     } else { //do not use persistence
@@ -746,7 +748,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
           .cacheMode(CacheMode.DIST_SYNC)
           .hash().numOwners(1)
           .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility().enable()//.marshaller(new TupleMarshaller())
-          .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(30000).strategy(EvictionStrategy.LIRS)
+          .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
           .build();
     }
   }

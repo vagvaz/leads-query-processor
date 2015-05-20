@@ -24,8 +24,10 @@ public class EnsembleCacheUtils {
     static Set<Thread> threads;
     static volatile Object mutex = new Object();
     static Boolean initialized = false;
-    static int batchSize = 500;
+    static int batchSize = 20;
     static long counter = 0;
+    private static ClearCompletedRunnable ccr;
+
     public static void initialize(){
         synchronized (mutex) {
          if(initialized) {
@@ -36,7 +38,9 @@ public class EnsembleCacheUtils {
             log.info("Using asynchronous put " + useAsync);
             concurrentQuue = new ConcurrentLinkedQueue<>();
             threads = new HashSet<>();
+//            ccr = new ClearCompletedRunnable(concurrentQuue,mutex,threads);
             initialized = true;
+            batchSize = LQPConfiguration.getInstance().getConfiguration().getInt("node.ensemble.batchsize",10);
         }
     }
 
@@ -47,19 +51,30 @@ public class EnsembleCacheUtils {
             while(iterator.hasNext()){
                 NotifyingFuture current = iterator.next();
                 try {
-                    if (current.isDone()) {
-                        iterator.remove();
-                    }
-                    else{
+//                    if (current.isDone()) {
+//                        iterator.remove();
+//                    }
+//                    else{
                         current.get();
-                    }
+                        iterator.remove();
                 }catch(Exception e){
                     log.error("EnsembleCacheUtils waitForAllPuts Exception " + e.getClass().toString());
                     log.error(e.getStackTrace().toString());
+                    e.printStackTrace();
                 }
             }
         }
-//        while
+       Iterator<Thread> threadIterator = threads.iterator();
+        while(threadIterator.hasNext()){
+            Thread t = threadIterator.next();
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                log.error("EnsembleCacheUtils waitForAllPuts Wait clean threads " + e.getClass().toString());
+                log.error(e.getStackTrace().toString());
+                e.printStackTrace();
+            }
+        }
         profExecute.end();
     }
     public static void putToCache(BasicCache cache, Object key, Object value) {
@@ -74,9 +89,13 @@ public class EnsembleCacheUtils {
     }
 
     private static void clearCompleted() {
-//        ClearCompletedRunnable ccr = new ClearCompletedRunnable(concurrentQuue,mutex,threads);
-//        Thread thread = new Thread(ccr);
-
+        if(ccr == null)
+        {
+            ccr = new ClearCompletedRunnable(concurrentQuue,mutex,threads);
+        }
+//        threads.add(ccr);
+//        ccr.start();
+          ccr.run();
     }
 
     private static void putToCacheSync(BasicCache cache, Object key, Object value) {
