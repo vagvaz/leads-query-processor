@@ -457,9 +457,9 @@ public class LoadCsv {
                     for (pos = 0; pos < StringData.length; pos++) {
                         numofChars+=StringData[pos].length();
                         if (columnType.get(pos) == String.class)
-                            if (columns.get(pos).equals("textcontent") || tableName == "page_core")
-                                data.putString(columns.get(pos), "");
-                            else
+//                            if (columns.get(pos).equals("textcontent") || tableName == "page_core")
+//                                data.putString(columns.get(pos), "");
+//                            else
                                 data.putString(columns.get(pos), StringData[pos]);
                         else try {
                             if (columnType.get(pos) == Long.class)
