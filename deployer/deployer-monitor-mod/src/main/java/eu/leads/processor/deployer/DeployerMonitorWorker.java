@@ -129,8 +129,7 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
                         if (claimedAction == null) {
                             Integer currentLevel = actionToLevelMap.get(action.getId());
                             log.error("Received OPERATOR OWNER but action " + action.toString()
-                                          + " was not in unclaimed level but in level "
-                                          + currentLevel.toString());
+                                          + " was not in unclaimed level but in level " + currentLevel);
                         }
                         monitoredActions.get(1).put(action.getId(), action);
                         actionToLevelMap.put(action.getId(), 1);
