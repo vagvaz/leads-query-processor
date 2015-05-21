@@ -111,7 +111,16 @@ public class Tuple extends DataType_bson implements Serializable,Externalizable{
     }
 
     public String getAttribute(String column) {
-        return data.get(column).toString();
+        Object result = null;
+        try{
+            result = data.get(column);
+            if(result == null){
+                System.err.println("Could not find attribute " + column);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return result.toString();
     }
 
     public Number getNumberAttribute(String column){
