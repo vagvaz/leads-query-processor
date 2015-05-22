@@ -39,7 +39,7 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
     outkey.substring(0, outkey.length() - 1);
     //           collector.emit(outkey, t.asString());
     t.setAttribute("__table", tableName);
-    t.setAttribute("__tupleKey",key.substring(key.indexOf(":")+1));
+    t.setAttribute("__tupleKey",key);
     collector.emit(outkey, t);
 
   }

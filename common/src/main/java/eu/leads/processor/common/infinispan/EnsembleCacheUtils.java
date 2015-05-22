@@ -212,6 +212,12 @@ public class EnsembleCacheUtils {
                         }
                     } else {
                         Map<Object, Object> cacheMap = mapsToPut.get(cache.getName());
+                        if(cacheMap == null){
+                            synchronized (mutex){
+                                cacheMap = new ConcurrentHashMap<>();
+                                mapsToPut.put(cache.getName(),cacheMap);
+                            }
+                        }
                         cacheMap.put(key, value);
                     }
 
