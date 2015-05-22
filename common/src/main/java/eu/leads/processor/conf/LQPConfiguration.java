@@ -13,19 +13,24 @@ import java.util.Map;
  * Created by vagvaz on 5/25/14.
  */
 public class LQPConfiguration {
+    private static volatile Object mutex = new Object();
     private static final LQPConfiguration instance = new LQPConfiguration();
     private static Logger log = LoggerFactory.getLogger(LQPConfiguration.class);
     private String baseDir;
     private CompositeConfiguration configuration;
     private Map<String, Configuration> configurations;
-
+    private static boolean initialized = false;
 
     /**
      * Do not instantiate LQPConfiguration.
      */
     private LQPConfiguration() {
-        configuration = new CompositeConfiguration();
-        configurations = new HashMap<String, Configuration>();
+        mutex = new Object();
+        synchronized (mutex) {
+            configuration = new CompositeConfiguration();
+            configurations = new HashMap<String, Configuration>();
+            initialized = false;
+        }
     }
 
     /**
@@ -56,20 +61,24 @@ public class LQPConfiguration {
     }
 
     public static void initialize(String base_dir, boolean lite) {
-        ConfigurationUtilities.addToClassPath(base_dir);
+        synchronized (mutex) {
+            if(initialized)
+                return;
+            initialized = true;
+            ConfigurationUtilities.addToClassPath(base_dir);
 
-        if (!base_dir.endsWith("/"))
-            base_dir += "/";
-        instance.setBaseDir(base_dir);
-        //Get All important initialValues
-        generateDefaultValues();
-        resolveDyanmicParameters();
-        loadSystemPropertiesFile();
+            if (!base_dir.endsWith("/"))
+                base_dir += "/";
+            instance.setBaseDir(base_dir);
+            //Get All important initialValues
+            generateDefaultValues();
+            resolveDyanmicParameters();
+            loadSystemPropertiesFile();
 
-        if (!lite) {
-            updateConfigurationFiles();
+            if (!lite) {
+                updateConfigurationFiles();
+            }
         }
-
     }
 
     private static void generateDefaultValues() {

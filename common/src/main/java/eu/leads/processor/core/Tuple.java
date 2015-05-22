@@ -115,7 +115,8 @@ public class Tuple extends DataType_bson implements Serializable,Externalizable{
         try{
             result = data.get(column);
             if(result == null){
-                System.err.println("Could not find attribute " + column);
+                System.err.println("Could not find attribute " + column + " " + data.keySet().toString());
+                return null;
             }
         }catch(Exception e){
             e.printStackTrace();

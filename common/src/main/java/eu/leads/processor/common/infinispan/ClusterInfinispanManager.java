@@ -302,7 +302,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             //                                                                      .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
 
             .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath + "/")
-            .fetchPersistentState(false)
+            .fetchPersistentState(true)
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
             false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS);
@@ -322,7 +322,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "-expired/")
                 //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
             .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
-            .fetchPersistentState(false)
+            .fetchPersistentState(true)
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
             false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)

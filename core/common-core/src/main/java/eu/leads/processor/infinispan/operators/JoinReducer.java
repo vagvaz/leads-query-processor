@@ -40,11 +40,11 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
             //         Tuple t = new Tuple(jsonTuple);
             Tuple t = null;
             Object c = iter.next();
-            if(c instanceof Tuple )
+//            if(c instanceof Tuple )
                 t = (Tuple)c;
-            else{
-                continue;
-            }
+//            else{
+//                continue;
+//            }
             String table = t.getAttribute("__table");
             t.removeAttribute("__table");
             List<Tuple> tuples = relations.get(table);
@@ -64,13 +64,14 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
 
         for(int i = 0; i < arrays.get(0).size(); i++){
             Tuple outerTuple = arrays.get(0).get(i);
+//            System.err.println("outer " + outerTuple.toString());
             String outerKey = outerTuple.getAttribute("__tupleKey");
             for(int j = 0; j <  arrays.get(1).size(); j++){
                 Tuple innerTuple = arrays.get(1).get(j);
-                outerTuple.removeAttribute("__tupleKey");
+//                outerTuple.removeAttribute("__tupleKey");
                 String outerKey2 = innerTuple.getAttribute("__tupleKey");
                 Tuple resultTuple = new Tuple(innerTuple, outerTuple,null);
-                resultTuple.removeAttribute("__tupleKey");
+//                resultTuple.removeAttribute("__tupleKey");
                 String combinedKey = prefix + outerKey + "-" + outerKey2;
                 resultTuple = prepareOutput(resultTuple);
                 resultTuple = prepareOutput(resultTuple);
