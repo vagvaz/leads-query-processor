@@ -193,14 +193,14 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
         baseIndexedKey.setKey(key.toString());
         EnsembleCacheUtils.putIfAbsentToCache(keysCache, key, key);
         EnsembleCacheUtils.putToCache(indexSiteCache,baseIndexedKey.getUniqueKey(), new IndexedComplexIntermediateKey(baseIndexedKey));
-        Object o = indexSiteCache.get(baseIndexedKey.getUniqueKey());
-        if(o == null)
-        {
-          log.error("Could not add to indexedCache indexedKey " + baseIndexedKey.toString());
-        }
-        else{
-          log.error("successfully added to indexed cache " + baseIndexedKey.getUniqueKey() + "\n" + o.toString());
-        }
+//        Object o = indexSiteCache.get(baseIndexedKey.getUniqueKey());
+//        if(o == null)
+//        {
+//          log.error("Could not add to indexedCache indexedKey " + baseIndexedKey.toString());
+//        }
+//        else{
+//          log.error("successfully added to indexed cache " + baseIndexedKey.getUniqueKey() + "\n" + o.toString());
+//        }
       }
       else{
         currentCount = currentCount+1;
@@ -210,14 +210,14 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
       baseIntermKey.setCounter(currentCount);
       ComplexIntermediateKey newKey = new ComplexIntermediateKey(baseIntermKey.getSite(),baseIntermKey.getNode(),key.toString(),baseIntermKey.getCache(),currentCount);
       EnsembleCacheUtils.putToCache(intermediateDataCache,newKey,value);
-      Object o = intermediateDataCache.get(newKey);
-      if(o == null){
-        System.err.println("\n\n\n\n\n#@#@INTERMEDIATE KEY " + newKey.toString() + " was not saved exiting" );
-//        System.exit(-1);
-      }
-      else{
-        log.error("intermediate key " + newKey.toString() + " saved ");
-      }
+//      Object o = intermediateDataCache.get(newKey);
+//      if(o == null){
+//        System.err.println("\n\n\n\n\n#@#@INTERMEDIATE KEY " + newKey.toString() + " was not saved exiting" );
+////        System.exit(-1);
+//      }
+//      else{
+//        log.error("intermediate key " + newKey.toString() + " saved ");
+//      }
     }
     else{
       EnsembleCacheUtils.putToCache(storeCache, key, value);

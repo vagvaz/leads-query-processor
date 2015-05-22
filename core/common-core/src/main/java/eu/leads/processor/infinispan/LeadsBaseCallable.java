@@ -7,6 +7,7 @@ import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.TupleMarshaller;
 import org.infinispan.Cache;
+import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
 import org.infinispan.ensemble.EnsembleCacheManager;
@@ -19,6 +20,7 @@ import org.vertx.java.core.json.JsonObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -81,7 +83,11 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     keys = inputKeys;
     this.inputCache = cache;
     ProfileEvent tmpprofCallable = new ProfileEvent("setEnvironment manager " + this.getClass().toString(),profilerLog);
+    tmpprofCallable.start("Start LQPConfiguration");
 
+    LQPConfiguration.initialize();
+    tmpprofCallable.end();
+    EnsembleCacheUtils.initialize();
     if(ensembleHost != null && !ensembleHost.equals("")) {
       tmpprofCallable.start("Start EnsemlbeCacheManager");
       emanager = new EnsembleCacheManager(ensembleHost);
@@ -91,12 +97,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //          EnsembleCacheManager.Consistency.DIST);
     }
     else {
-      tmpprofCallable.start("Start LQPConfiguration");
-
-      LQPConfiguration.initialize();
-      tmpprofCallable.end();
       tmpprofCallable.start("Start EnsemlbeCacheManager");
-
       emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
       emanager.start();
 //            emanager = createRemoteCacheManager();
@@ -124,21 +125,33 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     final ClusteringDependentLogic cdl = inputCache.getAdvancedCache().getComponentRegistry().getComponent
                                                                                     (ClusteringDependentLogic.class);
     profCallable.end();
-    profCallable.start("Call inputCacheSize " + inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet().size());
+    profCallable.start("Iterate Over Local Data");
     ProfileEvent profExecute = new ProfileEvent("Execute " + this.getClass().toString(),profilerLog);
     int count=0;
-    for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
-      if (!cdl.localNodeIsPrimaryOwner(key))
-        continue;
-      profExecute.start("GetTuple" + (count+1));
-      V value = inputCache.get(key);
-      profExecute.end();
-      if (value != null) {
-        profExecute.start("ExOn" + (++count));
-        executeOn((K) key, value);
+//    for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
+//      if (!cdl.localNodeIsPrimaryOwner(key))
+//        continue;
+    CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(new LocalDataFilter<K,V>(cdl));
+    try {
+      for (Object object : iterable) {
+        Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
+        profExecute.start("GetTuple" + (count + 1));
+        //      V value = inputCache.get(key);
+        K key = (K) entry.getKey();
+        V value = (V) entry.getValue();
         profExecute.end();
+        if (value != null) {
+          profExecute.start("ExOn" + (++count));
+          executeOn((K) key, value);
+          profExecute.end();
+        }
       }
     }
+    catch(Exception e){
+        iterable.close();
+      profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
+      profilerLog.error(e.getStackTrace().toString());
+      }
     finalizeCallable();
     return embeddedCacheManager.getAddress().toString();
   }
@@ -153,7 +166,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
   @Override public void finalizeCallable(){
     try {
-
+      EnsembleCacheUtils.waitForAllPuts();
       emanager.stop();
 //
 //      ecache.stop();

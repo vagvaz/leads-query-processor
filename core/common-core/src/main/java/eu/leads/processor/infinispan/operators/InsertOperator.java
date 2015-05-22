@@ -50,6 +50,7 @@ public class InsertOperator extends BasicOperator {
    @Override
    public void init(JsonObject config) {
 //                            super.init(config);
+      EnsembleCacheUtils.initialize();
       ensembleHost = computeEnsembleHost();
       if(ensembleHost != null && !ensembleHost.equals("")) {
          emanager = new EnsembleCacheManager(ensembleHost);
@@ -119,6 +120,7 @@ public class InsertOperator extends BasicOperator {
       ecache = emanager.getCache(tableName,new ArrayList<>(emanager.sites()),
           EnsembleCacheManager.Consistency.DIST);
 //                VersionedCache versionedCache = new VersionedCacheTreeMapImpl(targetCache, new VersionScalarGenerator(),targetCache.getName());
+
       if(version == null){
          version = new VersionScalar(System.currentTimeMillis());
       }
@@ -134,6 +136,7 @@ public class InsertOperator extends BasicOperator {
       if(ecache.get(key) == null){
          log.error("Insert Failed " + ecache.size());
       }
+      EnsembleCacheUtils.waitForAllPuts();
       cleanup();
    }
 

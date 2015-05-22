@@ -685,11 +685,12 @@ public abstract class BasicOperator extends Thread implements Operator{
         log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
                     e.getClass().toString());
         log.error(e.getMessage());
-        System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString()
-                             + "\n" +
-                             e.getClass().toString());
+        System.err.println(
+            "Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+                e.getClass().toString());
         System.err.println(e.getMessage());
         failed = true;
+        log.error(e.getStackTrace().toString());
         e.printStackTrace();
         replyForFailExecution(action);
       } catch (ExecutionException e) {
@@ -700,6 +701,7 @@ public abstract class BasicOperator extends Thread implements Operator{
                              + "\n" +
                              e.getClass().toString());
         System.err.println(e.getMessage());
+        log.error(e.getStackTrace().toString());
         failed = true;
         e.printStackTrace();
         replyForFailExecution(action);

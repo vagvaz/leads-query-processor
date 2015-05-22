@@ -24,6 +24,7 @@ import java.util.Set;
 //import eu.leads.processor.sql.PlanNode;
 //import net.sf.jsqlparser.statement.select.Limit;
 
+
 /**
  * Created with IntelliJ IDEA.
  * User: vagvaz
@@ -31,137 +32,135 @@ import java.util.Set;
  * Time: 1:00 AM
  * To change this template use File | Settings | File Templates.
  */
-@JsonAutoDetect
-public class LimitOperator extends BasicOperator {
+@JsonAutoDetect public class LimitOperator extends BasicOperator {
     boolean sorted = false;
-//    Cache inputMap=null;
-    BasicCache data=null;
+    //    Cache inputMap=null;
+    BasicCache data = null;
     public String prefix;
     public String inputPrefix;
     public long rowCount;
     private EnsembleCacheManager emanager;
 
     public LimitOperator(Action action) {
-      super(action);
-   }
+        super(action);
+    }
 
-   public LimitOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
+    public LimitOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
 
-      super(com, persistence,log, action);
-      rowCount = conf.getObject("body").getLong("fetchFirstNum");
-      sorted = conf.getBoolean("isSorted");
-      prefix =   getOutput() + ":";
-      inputCache = (Cache) persistence.getPersisentCache(getInput());
-      emanager = new EnsembleCacheManager( computeEnsembleHost());
-     emanager.start();
-      data = emanager.getCache(getOutput(),new ArrayList<>(emanager.sites()),
-          EnsembleCacheManager.Consistency.DIST);
-//      data = persistence.getPersisentCache(getOutput());
-     inputPrefix = inputCache.getName()+":";
-   }
+        super(com, persistence, log, action);
+        rowCount = conf.getObject("body").getLong("fetchFirstNum");
+        sorted = conf.getBoolean("isSorted");
+        prefix = getOutput() + ":";
+        inputCache = (Cache) persistence.getPersisentCache(getInput());
+        emanager = new EnsembleCacheManager(computeEnsembleHost());
+        emanager.start();
+        data = emanager.getCache(getOutput(), new ArrayList<>(emanager.sites()),
+            EnsembleCacheManager.Consistency.DIST);
+        //      data = persistence.getPersisentCache(getOutput());
+        inputPrefix = inputCache.getName() + ":";
+    }
 
-   @Override
-    public void init(JsonObject config) {
-       super.init(conf);
+    @Override public void init(JsonObject config) {
+        super.init(conf);
         ///How to initialize what ?
-       rowCount = conf.getObject("body").getLong("fetchFirstNum");
-       init_statistics(this.getClass().getCanonicalName());
+        rowCount = conf.getObject("body").getLong("fetchFirstNum");
+        init_statistics(this.getClass().getCanonicalName());
+        EnsembleCacheUtils.initialize();
 
     }
 
-  @Override
-  public void executeMap(){
+    @Override public void executeMap() {
 
-    subscribeToMapActions(pendingMMC);
-    if(!isRemote) {
-      for (String mc : pendingMMC) {
-        if (!mc.equals(currentCluster)) {
-          sendRemoteRequest(mc, true);
-        }
-      }
-    }
-
-    if(pendingMMC.contains(currentCluster)){
-      int counter = 0;
-      if (sorted) {
-        //            int sz = inputMap.size();
-        //          CloseableIterable<Map.Entry<String, String>> iterable =
-        //            inputMap.getAdvancedCache().filterEntries(new AcceptAllFilter());
-        //          for (Map.Entry<String, String> entry : iterable) {
-        //              System.err.println("e: " + entry.getKey().toString() + " ---> " + entry.getValue().toString());
-        //            }
-        for (counter = 0; counter < rowCount ; counter++) {
-          //                String tupleValue = (String) inputMap.get(inputPrefix + counter);
-          Tuple tupleValue = (Tuple) inputCache.get(inputPrefix + counter);
-          if(tupleValue == null)
-            break;
-          //                System.err.println("Read " + inputPrefix + counter + " --> " +tupleValue);
-          Tuple t = tupleValue;
-          handlePagerank(t);
-          //                System.err.println(prefix+counter);
-          EnsembleCacheUtils.putToCache(data, prefix + Integer.toString(counter), t);
-          //                data.put(prefix + Integer.toString(counter), t.asString());
-        }
-      } else {
-        CloseableIterable<Map.Entry<String, Tuple>> iterable =
-            inputCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
-        for (Map.Entry<String, Tuple> entry : iterable) {
-          if (counter >= rowCount)
-            break;
-          String tupleId = entry.getKey().substring(entry.getKey().indexOf(":") + 1);
-          Tuple t = entry.getValue();
-          handlePagerank(t);
-          EnsembleCacheUtils.putToCache(data,prefix + tupleId, t);
-          counter++;
+        subscribeToMapActions(pendingMMC);
+        if (!isRemote) {
+            for (String mc : pendingMMC) {
+                if (!mc.equals(currentCluster)) {
+                    sendRemoteRequest(mc, true);
+                }
+            }
         }
 
-      }
-      replyForSuccessfulExecution(action);
-    }
+        if (pendingMMC.contains(currentCluster)) {
+            int counter = 0;
+            if (sorted) {
+                //            int sz = inputMap.size();
+                //          CloseableIterable<Map.Entry<String, String>> iterable =
+                //            inputMap.getAdvancedCache().filterEntries(new AcceptAllFilter());
+                //          for (Map.Entry<String, String> entry : iterable) {
+                //              System.err.println("e: " + entry.getKey().toString() + " ---> " + entry.getValue().toString());
+                //            }
+                for (counter = 0; counter < rowCount; counter++) {
+                    //                String tupleValue = (String) inputMap.get(inputPrefix + counter);
+                    Tuple tupleValue = (Tuple) inputCache.get(inputPrefix + counter);
+                    if (tupleValue == null)
+                        break;
+                    //                System.err.println("Read " + inputPrefix + counter + " --> " +tupleValue);
+                    Tuple t = tupleValue;
+                    handlePagerank(t);
+                    //                System.err.println(prefix+counter);
+                    EnsembleCacheUtils.putToCache(data, prefix + Integer.toString(counter), t);
+                    //                data.put(prefix + Integer.toString(counter), t.asString());
+                }
+            } else {
+                CloseableIterable<Map.Entry<String, Tuple>> iterable =
+                    inputCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
+                for (Map.Entry<String, Tuple> entry : iterable) {
+                    if (counter >= rowCount)
+                        break;
+                    String tupleId = entry.getKey().substring(entry.getKey().indexOf(":") + 1);
+                    Tuple t = entry.getValue();
+                    handlePagerank(t);
+                    EnsembleCacheUtils.putToCache(data, prefix + tupleId, t);
+                    counter++;
+                }
 
-    synchronized (mmcMutex){
-      while(pendingMMC.size() > 0)
-      {
-        System.out.println("Sleeping to executing " + this.getClass().toString() + " pending clusters ");
-        PrintUtilities.printList(Arrays.asList(pendingMMC));
-        try {
-          mmcMutex.wait(120000);
-        } catch (InterruptedException e) {
-          log.error("Interrupted " + e.getMessage());
-          break;
+            }
+            EnsembleCacheUtils.waitForAllPuts();
+            replyForSuccessfulExecution(action);
         }
-      }
-    }
-    for(Map.Entry<String,String> entry : mcResults.entrySet()){
-      System.out.println("Execution on " + entry.getKey() + " was " + entry.getValue());
-      log.error("Execution on " + entry.getKey() + " was " + entry.getValue());
-      if(entry.getValue().equals("FAIL"))
-        failed =true;
+
+        synchronized (mmcMutex) {
+            while (pendingMMC.size() > 0) {
+                System.out.println(
+                    "Sleeping to executing " + this.getClass().toString() + " pending clusters ");
+                PrintUtilities.printList(Arrays.asList(pendingMMC));
+                try {
+                    mmcMutex.wait(120000);
+                } catch (InterruptedException e) {
+                    log.error("Interrupted " + e.getMessage());
+                    break;
+                }
+            }
+        }
+        for (Map.Entry<String, String> entry : mcResults.entrySet()) {
+            System.out.println("Execution on " + entry.getKey() + " was " + entry.getValue());
+            log.error("Execution on " + entry.getKey() + " was " + entry.getValue());
+            if (entry.getValue().equals("FAIL"))
+                failed = true;
+        }
+
     }
 
-  }
-    @Override
-    public void run() {
-//      createCaches(isRemote,executeOnlyMap,executeOnlyReduce);
-      long startTime = System.nanoTime();
-      findPendingMMCFromGlobal();
-      findPendingRMCFromGlobal();
-      createCaches(isRemote, executeOnlyMap, executeOnlyReduce);
-      if(executeOnlyMap) {
-//        setupMapCallable();
-        executeMap();
-      }
-      if(!failed) {
+    @Override public void run() {
+        //      createCaches(isRemote,executeOnlyMap,executeOnlyReduce);
+        long startTime = System.nanoTime();
+        findPendingMMCFromGlobal();
+        findPendingRMCFromGlobal();
+        createCaches(isRemote, executeOnlyMap, executeOnlyReduce);
+        if (executeOnlyMap) {
+            //        setupMapCallable();
+            executeMap();
+        }
+        if (!failed) {
 
-      }
-      else {
-        failCleanup();
-      }
+        } else {
+            failCleanup();
+        }
 
         //Store Values for statistics
-//        updateStatistics(inputMap.size(), data.size(), System.nanoTime() - startTime);
-        updateStatistics(inputCache,null,data);
-      cleanup();
+        //        updateStatistics(inputMap.size(), data.size(), System.nanoTime() - startTime);
+        updateStatistics(inputCache, null, data);
+        cleanup();
     }
 
     private void handlePagerank(Tuple t) {
@@ -169,44 +168,41 @@ public class LimitOperator extends BasicOperator {
             if (!t.hasField("url"))
                 return;
             String pagerankStr = t.getAttribute("pagerank");
-//            Double d = Double.parseDouble(pagerankStr);
-//            if (d < 0.0) {
+            //            Double d = Double.parseDouble(pagerankStr);
+            //            if (d < 0.0) {
 
-//                try {
-////                    d = LeadsPrGraph.getPageDistr(t.getAttribute("url"));
-//                    d = (double) LeadsPrGraph.getPageVisitCount(t.getAttribute("url"));
-//                    System.out.println("vs cnt " + LeadsPrGraph.getTotalVisitCount());
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                t.setAttribute("pagerank", d.toString());
-//            }
+            //                try {
+            ////                    d = LeadsPrGraph.getPageDistr(t.getAttribute("url"));
+            //                    d = (double) LeadsPrGraph.getPageVisitCount(t.getAttribute("url"));
+            //                    System.out.println("vs cnt " + LeadsPrGraph.getTotalVisitCount());
+            //                } catch (IOException e) {
+            //                    e.printStackTrace();
+            //                }
+            //                t.setAttribute("pagerank", d.toString());
+            //            }
         }
     }
 
 
-   @Override
-   public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
-     Set<String> targetMC = getTargetMC();
-     for(String mc : targetMC){
-       createCache(mc,getOutput());
-     }
-   }
+    @Override
+    public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
+        Set<String> targetMC = getTargetMC();
+        for (String mc : targetMC) {
+            createCache(mc, getOutput());
+        }
+    }
 
-   @Override
-   public void setupMapCallable() {
+    @Override public void setupMapCallable() {
 
-   }
+    }
 
-   @Override
-   public void setupReduceCallable() {
+    @Override public void setupReduceCallable() {
 
-   }
+    }
 
-   @Override
-   public boolean isSingleStage() {
-      return true;
-   }
+    @Override public boolean isSingleStage() {
+        return true;
+    }
 }/*ExecutionPlanNode {
     private Limit limit;
 

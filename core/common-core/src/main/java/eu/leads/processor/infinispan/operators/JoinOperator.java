@@ -299,18 +299,24 @@ public class JoinOperator extends MapReduceOperator {
         log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
             e.getClass().toString());
         log.error(e.getMessage());
-        System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
-            e.getClass().toString());
+        System.err.println(
+            "Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+                e.getClass().toString());
         System.err.println(e.getMessage());
+          log.error(e.getStackTrace().toString());
+          e.printStackTrace();
         failed = true;
         //        replyForFailExecution(action);
       } catch (ExecutionException e) {
         log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
             e.getClass().toString());
         log.error(e.getMessage());
-        System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
-            e.getClass().toString());
+        System.err.println(
+            "Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+                e.getClass().toString());
         System.err.println(e.getMessage());
+          log.error(e.getStackTrace().toString());
+          e.printStackTrace();
         failed = true;
         //        replyForFailExecution(action);
       }
@@ -341,18 +347,25 @@ public class JoinOperator extends MapReduceOperator {
         log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
                     e.getClass().toString());
         log.error(e.getMessage());
-        System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
-                             e.getClass().toString());
+        System.err.println(
+            "Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+                e.getClass().toString());
         System.err.println(e.getMessage());
+          e.printStackTrace();
+          log.error(e.getStackTrace().toString());
         failed = true;
         replyForFailExecution(action);
       } catch (ExecutionException e) {
         log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
                     e.getClass().toString());
         log.error(e.getMessage());
-        System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
-                             e.getClass().toString());
+          System.err.println(
+              "Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n"
+                  +
+                  e.getClass().toString());
         System.err.println(e.getMessage());
+          e.printStackTrace();
+          log.error(e.getStackTrace().toString());
         failed = true;
         replyForFailExecution(action);
       }

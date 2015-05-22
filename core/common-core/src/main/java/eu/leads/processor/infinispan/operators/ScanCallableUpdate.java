@@ -169,7 +169,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
           //               log.info("--------------------    put into output with filter ------------------------");
           if (key != null && tuple != null) {
             profExecute.start("Scan_Put");
-            outputCache.put(key.toString(), tuple);
+            outputToCache(key.toString(), tuple);
             profExecute.end();
           }
         }
