@@ -135,7 +135,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     try {
       for (Object object : iterable) {
         Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
-        profExecute.start("GetTuple" + (count + 1));
+
         //      V value = inputCache.get(key);
         K key = (K) entry.getKey();
         V value = (V) entry.getValue();
@@ -152,6 +152,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
       profilerLog.error(e.getStackTrace().toString());
       }
+    profCallable.end();
     finalizeCallable();
     return embeddedCacheManager.getAddress().toString();
   }

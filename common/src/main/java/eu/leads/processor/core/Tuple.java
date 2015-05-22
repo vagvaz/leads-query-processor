@@ -30,7 +30,7 @@ public class Tuple extends DataType_bson implements Serializable,Externalizable{
     }
 
     public Tuple(Tuple tl, Tuple tr, ArrayList<String> ignoreColumns) {
-        super(tl.data);
+        super(tl.toString());
 
         if(ignoreColumns != null) {
             for (String field : ignoreColumns) {
@@ -39,7 +39,7 @@ public class Tuple extends DataType_bson implements Serializable,Externalizable{
             }
             tr.removeAtrributes(ignoreColumns);
         }
-        data.putAll(tr.data);
+        data.putAll(tr.data.toMap());
     }
 
    public Tuple(Tuple tuple) {
