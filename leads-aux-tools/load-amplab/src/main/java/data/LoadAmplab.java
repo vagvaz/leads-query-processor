@@ -93,7 +93,7 @@ public class LoadAmplab {
             }else{
                 System.exit(0);
             }
-            loadData(args[1],args[5]);
+            loadData(args[1],args[5], args[6]);
         }
     }
 
@@ -290,7 +290,7 @@ public class LoadAmplab {
     }
 
 
-    private static void loadData(String path, String arg5) throws IOException, ClassNotFoundException {
+    private static void loadData(String path, String arg5, String arg6) throws IOException, ClassNotFoundException {
         Long startTime = System.currentTimeMillis();
         Path dir = Paths.get(path);
         List<File> files = new ArrayList<>();
@@ -304,7 +304,7 @@ public class LoadAmplab {
         for (File csvfile : files) {
             System.out.print("Loading file: " + csvfile.getName());
             Long filestartTime = System.currentTimeMillis();
-            loadDataFromFile(csvfile,arg5);
+            loadDataFromFile(csvfile,arg5,arg6);
             System.out.println("Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - filestartTime, "HH:mm:ss,SSS"));
         }
         System.out.println("Loading finished.");
@@ -312,7 +312,7 @@ public class LoadAmplab {
         System.exit(0);
     }
 
-    private static void loadDataFromFile(File csvfile, String arg5) {
+    private static void loadDataFromFile(File csvfile, String arg5, String arg6) {
         String filename[] = csvfile.getAbsolutePath().split(".csv");
         String fulltableName[] = (csvfile.getName().split(".csv")[0]).split("-");
         String tableName = fulltableName[fulltableName.length - 1];
@@ -416,52 +416,70 @@ public class LoadAmplab {
                 int lines = 0;
                 String key="";
                 System.out.println("Importing data ... ");
+                long sizeE = 0;
+                long x = 1500000L;
 
                 for(int entry=0;entry<Integer.valueOf(arg5);entry++){
                     JsonObject data = new JsonObject();
 
                     for (pos = 0; pos < columns.size(); pos++) {
-                        if (columnType.get(pos) == String.class)
-                            if (columns.get(pos).equals("textcontent") || tableName == "page_core")
-                                data.putString(columns.get(pos), "");
-                            else{
-                                data.putString(columns.get(pos), randString());
-                            }
-                        else try {
-                            if (columnType.get(pos) == Long.class){
-                                data.putNumber(columns.get(pos), randLong());
-                            }
-                            else if (columnType.get(pos) == Integer.class){
-                                data.putNumber(columns.get(pos), randInt(0, 100));
-                            }
-                            else if (columnType.get(pos) == Float.class){
-                                data.putNumber(columns.get(pos), nextFloat(-5, 5));
+                        String fullCollumnName =  "default."+tableName+"." + columns.get(pos);
+                        try {
+                            if (columnType.get(pos) == String.class){
+                                if (columns.get(pos).equals("textcontent") && tableName == "page_core")
+                                    data.putString(fullCollumnName, randBigString(Integer.valueOf(arg6)));
+                                else
+                                    data.putString(fullCollumnName, randSmallString());
+                            } else if (columnType.get(pos) == Long.class){
+                                x++;
+                                data.putNumber(fullCollumnName, x);
+                                //data.putNumber(columns.get(pos), randLong());
+                            } else if (columnType.get(pos) == Integer.class){
+                                data.putNumber(fullCollumnName, randInt(-10000, 10000));
+                            } else if (columnType.get(pos) == Float.class){
+                                data.putNumber(fullCollumnName, nextFloat(-5, 5));
                             } else {
                                 System.err.println("Not recognised type, stop importing");
                                 return;
                             }
                         } catch (NumberFormatException e) {
                             System.err.println("Line: " + lines + "Parsing error");
-                            data.putNumber(columns.get(pos), nextFloat(-3, 3));
+                            data.putNumber(fullCollumnName, nextFloat(-3, 3));
                         }
                     }
 
                     for (int i = 1; i < primaryKeys.length; i++) {
                         key = ":" + data.getValue(primaryKeys[i]);
                     }
+
                     put(key, data.toString());
 
+                    try {
+                        sizeE+=serialize(data).length;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+//                    sizeE+=data.toString().getBytes().length;
+
                     numofEntries++;
+
                     if (delay > 50) {
                         System.out.println("Cache put: " + numofEntries);
                     }
                     if (numofEntries % 1000 == 0) {
-                        System.out.println("Imported: " + numofEntries);
+                        System.out.println("Imported: " + numofEntries+" -- size: "+sizeE);
                     }
                 }
 
                 System.out.println("Totally Imported: " + numofEntries);
             }
+    }
+
+    public static byte[] serialize(JsonObject obj) throws IOException {
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        ObjectOutputStream o = new ObjectOutputStream(b);
+        o.writeObject(obj.toString());
+        return b.toByteArray();
     }
 
     public static int randInt(int min, int max) {
@@ -478,11 +496,23 @@ public class LoadAmplab {
         return number;
     }
 
-    public static String randString() {
+    public static String randSmallString() {
         char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
         StringBuilder sb = new StringBuilder();
         Random random = new Random();
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 50; i++) {
+            char c = chars[random.nextInt(chars.length)];
+            sb.append(c);
+        }
+        String randomString = sb.toString();
+        return randomString;
+    }
+
+    public static String randBigString(int arg6) {
+        char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < arg6; i++) {
             char c = chars[random.nextInt(chars.length)];
             sb.append(c);
         }
