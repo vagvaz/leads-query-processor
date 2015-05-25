@@ -418,6 +418,7 @@ public class LoadAmplab {
                 System.out.println("Importing data ... ");
                 long sizeE = 0;
                 long x = 1500000L;
+                long y = 1500000L;
 
                 for(int entry=0;entry<Integer.valueOf(arg5);entry++){
                     JsonObject data = new JsonObject();
@@ -426,8 +427,12 @@ public class LoadAmplab {
                         String fullCollumnName =  "default."+tableName+"." + columns.get(pos);
                         try {
                             if (columnType.get(pos) == String.class){
-                                if (columns.get(pos).equals("textcontent") && tableName == "page_core")
+                                if (columns.get(pos).equals("textcontent") && tableName.equals("page_core"))
                                     data.putString(fullCollumnName, randBigString(Integer.valueOf(arg6)));
+				else if (columns.get(pos).equals("uri") ) {
+                                    y++;
+                                    data.putString(fullCollumnName, "adidas" + "" +y);
+                                }
                                 else
                                     data.putString(fullCollumnName, randSmallString());
                             } else if (columnType.get(pos) == Long.class){
