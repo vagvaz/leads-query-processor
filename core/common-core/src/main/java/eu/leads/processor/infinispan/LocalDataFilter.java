@@ -22,10 +22,10 @@ public class LocalDataFilter<K,V> implements KeyValueFilter<K, V> {
 
     @Override public boolean accept(K key, V value, Metadata metadata) {
         boolean result = false;
-        event.start("dataFilter " + key.toString());
+//        event.start("dataFilter " + key.toString());
         if(cdl.localNodeIsPrimaryOwner(key))
             result=true;
-        event.end();
+//        event.end();
         return result;
 
     }

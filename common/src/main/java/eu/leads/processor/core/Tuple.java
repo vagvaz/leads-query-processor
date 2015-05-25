@@ -27,6 +27,7 @@ public class Tuple extends DataType_bson implements Serializable,Externalizable{
     public Tuple(String value) {
         this.data = new BasicBSONObject();
         this.data = (BSONObject) JSON.parse(value);
+
     }
 
     public Tuple(Tuple tl, Tuple tr, ArrayList<String> ignoreColumns) {
@@ -112,10 +113,15 @@ public class Tuple extends DataType_bson implements Serializable,Externalizable{
 
     public String getAttribute(String column) {
         Object result = null;
+        result = data.get(column);
         try{
-            result = data.get(column);
             if(result == null){
-                System.err.println("Could not find attribute " + column + " " + data.keySet().toString());
+                if(!data.containsField(column)) {
+                    System.err.println("Could not find attribute " + column + " " + data.keySet().toString());
+                }
+                else{
+                    System.err.println("Attribute " + column + " is null ");
+                }
                 return null;
             }
         }catch(Exception e){

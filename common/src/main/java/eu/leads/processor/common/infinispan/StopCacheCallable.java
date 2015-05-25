@@ -30,6 +30,8 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
       {
          System.out.println("Removing " + cacheName + " from " +cache.getCacheManager().getAddress().toString());
            cache.getAdvancedCache().getDataContainer().clear();
+//           cache.getAdvancedCache().withFlags(Flag.)
+
            if(cache.getStatus().stopAllowed()) {
               System.out.println("Clear " + cacheName + " from " + cache.getCacheManager().getAddress().toString());
               cache.getAdvancedCache().stop();

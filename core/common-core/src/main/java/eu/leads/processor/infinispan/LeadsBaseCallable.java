@@ -3,6 +3,7 @@ package eu.leads.processor.infinispan;
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.TupleMarshaller;
@@ -139,18 +140,18 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         //      V value = inputCache.get(key);
         K key = (K) entry.getKey();
         V value = (V) entry.getValue();
-        profExecute.end();
+//        profExecute.end();
         if (value != null) {
-          profExecute.start("ExOn" + (++count));
+//          profExecute.start("ExOn" + (++count));
           executeOn((K) key, value);
-          profExecute.end();
+//          profExecute.end();
         }
       }
     }
     catch(Exception e){
         iterable.close();
       profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
-      profilerLog.error(e.getStackTrace().toString());
+      PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
       }
     profCallable.end();
     finalizeCallable();
