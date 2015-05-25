@@ -175,7 +175,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
                log.error("Iterator got next and it was null..." + iterator.toString());
                continue;
             }
-            t = new Tuple(itTuple);
+            t =(itTuple);
 
 
             Iterator<String> funcTypeIterator = functionType.iterator();

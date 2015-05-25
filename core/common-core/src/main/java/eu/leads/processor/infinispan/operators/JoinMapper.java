@@ -28,7 +28,7 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
 
     StringBuilder builder = new StringBuilder();
     //        String tupleId = key.substring(key.indexOf(":"));
-    Tuple t = new Tuple(value);
+    Tuple t = value;//new Tuple(value);
     //        Tuple t = new Tuple(value);
     //progress();
     for (String c : joinColumns.get(tableName)) {

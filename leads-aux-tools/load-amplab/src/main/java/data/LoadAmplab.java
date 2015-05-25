@@ -423,27 +423,28 @@ public class LoadAmplab {
                     JsonObject data = new JsonObject();
 
                     for (pos = 0; pos < columns.size(); pos++) {
+                        String fullCollumnName =  "default."+tableName+"." + columns.get(pos);
                         try {
                             if (columnType.get(pos) == String.class){
                                 if (columns.get(pos).equals("textcontent") && tableName == "page_core")
-                                    data.putString(columns.get(pos), randBigString(Integer.valueOf(arg6)));
+                                    data.putString(fullCollumnName, randBigString(Integer.valueOf(arg6)));
                                 else
-                                    data.putString(columns.get(pos), randSmallString());
+                                    data.putString(fullCollumnName, randSmallString());
                             } else if (columnType.get(pos) == Long.class){
                                 x++;
-                                data.putNumber(columns.get(pos), x);
+                                data.putNumber(fullCollumnName, x);
                                 //data.putNumber(columns.get(pos), randLong());
                             } else if (columnType.get(pos) == Integer.class){
-                                data.putNumber(columns.get(pos), randInt(-10000, 10000));
+                                data.putNumber(fullCollumnName, randInt(-10000, 10000));
                             } else if (columnType.get(pos) == Float.class){
-                                data.putNumber(columns.get(pos), nextFloat(-5, 5));
+                                data.putNumber(fullCollumnName, nextFloat(-5, 5));
                             } else {
                                 System.err.println("Not recognised type, stop importing");
                                 return;
                             }
                         } catch (NumberFormatException e) {
                             System.err.println("Line: " + lines + "Parsing error");
-                            data.putNumber(columns.get(pos), nextFloat(-3, 3));
+                            data.putNumber(fullCollumnName, nextFloat(-3, 3));
                         }
                     }
 

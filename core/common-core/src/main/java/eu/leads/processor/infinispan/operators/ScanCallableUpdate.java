@@ -148,15 +148,15 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
       //          String value = (String) entry.getValue();
       //          String value = (String)inputCache.get(key);
 //      Tuple tuple = new Tuple(toRunValue);
-      profExecute.start("new Tuple");
-      Tuple tuple = new Tuple(toRunValue);
-      profExecute.end();
+      //profExecute.start("new Tuple");
+      Tuple tuple = toRunValue;//new Tuple(toRunValue);
+      //profExecute.end();
 
-      profExecute.start("namesToLowerCase");
-      namesToLowerCase(tuple);
-      profExecute.end();
-      profExecute.start("renameAllTupleAttributes");
-      renameAllTupleAttributes(tuple);
+      //profExecute.start("namesToLowerCase");
+      //namesToLowerCase(tuple);
+      //profExecute.end();
+     // profExecute.start("renameAllTupleAttributes");
+      //renameAllTupleAttributes(tuple);
       profExecute.end();
       if (tree != null) {
         profExecute.start("tree.accept");

@@ -48,7 +48,8 @@ public abstract  class LeadsSQLCallable<K,V> extends LeadsBaseCallable<K,V>{
   }
 
 
-  protected Tuple prepareOutput(Tuple tuple) {
+  protected Tuple prepareOutput(Tuple tupleIn) {
+    Tuple tuple = new Tuple(tupleIn);
     if (outputSchema.toString().equals(inputSchema.toString())) {
       return tuple;
     }
