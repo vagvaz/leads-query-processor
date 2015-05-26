@@ -43,17 +43,17 @@ public class ProjectMapper extends LeadsMapper<String, Tuple, String, Tuple> imp
 
     @Override
     public void map(String key, Tuple value, Collector<String, Tuple> collector) {
-        if (!isInitialized)
-            initialize();
-
-        progress();
-        String tupleId = key.substring(key.indexOf(':') + 1);
-        Tuple projected = value;
-//        Tuple projected = new Tuple(value);
-        handlePagerank(projected);
-        projected = prepareOutput(projected);
-//        output.put(prefix + tupleId, projected.asString());
-        output.put(prefix + tupleId, projected);
+//        if (!isInitialized)
+//            initialize();
+//
+//        progress();
+//        String tupleId = key.substring(key.indexOf(':') + 1);
+//        Tuple projected = value;
+////        Tuple projected = new Tuple(value);
+//        handlePagerank(projected);
+//        projected = prepareOutput(projected);
+////        output.put(prefix + tupleId, projected.asString());
+//        output.put(prefix + tupleId, projected);
     }
 
    protected Tuple prepareOutput(Tuple tuple) {

@@ -148,40 +148,52 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
       //          String value = (String) entry.getValue();
       //          String value = (String)inputCache.get(key);
 //      Tuple tuple = new Tuple(toRunValue);
-      profExecute.start("new Tuple");
-      Tuple tuple = new Tuple(toRunValue);
-      profExecute.end();
+//<<<<<<< HEAD
+//      profExecute.start("new Tuple");
+////      Tuple tuple = toRunValue;//new Tuple(toRunValue);
+//      Tuple tuple = new Tuple(toRunValue);
+//      profExecute.end();
+//
+//      profExecute.start("namesToLowerCase");
+//      namesToLowerCase(tuple);
+//      profExecute.end();
+//      profExecute.start("renameAllTupleAttributes");
+//      renameAllTupleAttributes(tuple);
+//=======
+      //profExecute.start("new Tuple");
+      Tuple tuple = toRunValue;//new Tuple(toRunValue);
+      //profExecute.end();
 
-      profExecute.start("namesToLowerCase");
-      namesToLowerCase(tuple);
-      profExecute.end();
-      profExecute.start("renameAllTupleAttributes");
-      renameAllTupleAttributes(tuple);
+      //profExecute.start("namesToLowerCase");
+      //namesToLowerCase(tuple);
+      //profExecute.end();
+     // profExecute.start("renameAllTupleAttributes");
+      //renameAllTupleAttributes(tuple);
       profExecute.end();
       if (tree != null) {
-        profExecute.start("tree.accept");
+//        profExecute.start("tree.accept");
         boolean accept = tree.accept(tuple);
-        profExecute.end();
+//        profExecute.end();
         if (accept) {
-          profExecute.start("prepareOutput");
+//          profExecute.start("prepareOutput");
           tuple = prepareOutput(tuple);
-          profExecute.end();
+//          profExecute.end();
           //               log.info("--------------------    put into output with filter ------------------------");
           if (key != null && tuple != null) {
-            profExecute.start("Scan_Put");
+//            profExecute.start("Scan_Put");
             outputToCache(key.toString(), tuple);
-            profExecute.end();
+//            profExecute.end();
           }
         }
       } else {
-        profExecute.start("prepareOutput");
+//        profExecute.start("prepareOutput");
         tuple = prepareOutput(tuple);
-        profExecute.end();
+//        profExecute.end();
         //            log.info("--------------------    put into output without tree ------------------------");
         if (key != null && tuple != null){
-          profExecute.start("Scan_outputToCache");
+//          profExecute.start("Scan_outputToCache");
           outputToCache(key,tuple);
-          profExecute.end();
+//          profExecute.end();
         }
       }
   }

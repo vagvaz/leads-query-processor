@@ -1,5 +1,6 @@
 package eu.leads.processor.common.utils;
 
+import org.slf4j.Logger;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.FileNotFoundException;
@@ -73,5 +74,11 @@ public class PrintUtilities {
             System.out.println("\t" + it.next().toString());
         }
         System.out.println("end of iterable");
+    }
+
+    public static void logStackTrace(Logger profilerLog, StackTraceElement[] stackTrace) {
+        for(StackTraceElement s : stackTrace){
+            profilerLog.error(s.toString());
+        }
     }
 }
