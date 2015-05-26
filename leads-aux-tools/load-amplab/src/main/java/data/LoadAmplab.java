@@ -412,66 +412,72 @@ public class LoadAmplab {
         }
 
         if (initialize_cache(tableName)){
-                int numofEntries = 0;
-                int lines = 0;
-                String key="";
-                System.out.println("Importing data ... ");
-                long sizeE = 0;
-                long x = 1500000L;
+            int numofEntries = 0;
+            int lines = 0;
+            String key="";
+            System.out.println("Importing data ... ");
+            long sizeE = 0;
+            long x = 1500000L;
+            long y = 1500000L;
 
-                for(int entry=0;entry<Integer.valueOf(arg5);entry++){
-                    JsonObject data = new JsonObject();
+            for(int entry=0;entry<Integer.valueOf(arg5);entry++){
+                JsonObject data = new JsonObject();
 
-                    for (pos = 0; pos < columns.size(); pos++) {
-                        try {
-                            if (columnType.get(pos) == String.class){
-                                if (columns.get(pos).equals("textcontent") && tableName == "page_core")
-                                    data.putString(columns.get(pos), randBigString(Integer.valueOf(arg6)));
-                                else
-                                    data.putString(columns.get(pos), randSmallString());
-                            } else if (columnType.get(pos) == Long.class){
-                                x++;
-                                data.putNumber(columns.get(pos), x);
-                                //data.putNumber(columns.get(pos), randLong());
-                            } else if (columnType.get(pos) == Integer.class){
-                                data.putNumber(columns.get(pos), randInt(-10000, 10000));
-                            } else if (columnType.get(pos) == Float.class){
-                                data.putNumber(columns.get(pos), nextFloat(-5, 5));
-                            } else {
-                                System.err.println("Not recognised type, stop importing");
-                                return;
-                            }
-                        } catch (NumberFormatException e) {
-                            System.err.println("Line: " + lines + "Parsing error");
-                            data.putNumber(columns.get(pos), nextFloat(-3, 3));
-                        }
-                    }
-
-                    for (int i = 1; i < primaryKeys.length; i++) {
-                        key = ":" + data.getValue(primaryKeys[i]);
-                    }
-
-                    put(key, data.toString());
-
+                for (pos = 0; pos < columns.size(); pos++) {
+                    String fullCollumnName =  "default."+tableName+"." + columns.get(pos);
                     try {
-                        sizeE+=serialize(data).length;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-//                    sizeE+=data.toString().getBytes().length;
-
-                    numofEntries++;
-
-                    if (delay > 50) {
-                        System.out.println("Cache put: " + numofEntries);
-                    }
-                    if (numofEntries % 1000 == 0) {
-                        System.out.println("Imported: " + numofEntries+" -- size: "+sizeE);
+                        if (columnType.get(pos) == String.class){
+                            if (columns.get(pos).equals("textcontent") && tableName.equals("page_core"))
+                                data.putString(fullCollumnName, randBigString(Integer.valueOf(arg6)));
+                            else if (columns.get(pos).equals("uri") ) {
+                                y++;
+                                data.putString(fullCollumnName, "adidas" + "" +y);
+                            }
+                            else
+                                data.putString(fullCollumnName, randSmallString());
+                        } else if (columnType.get(pos) == Long.class){
+                            x++;
+                            data.putNumber(fullCollumnName, x);
+                            //data.putNumber(columns.get(pos), randLong());
+                        } else if (columnType.get(pos) == Integer.class){
+                            data.putNumber(fullCollumnName, randInt(-10000, 10000));
+                        } else if (columnType.get(pos) == Float.class){
+                            data.putNumber(fullCollumnName, nextFloat(-5, 5));
+                        } else {
+                            System.err.println("Not recognised type, stop importing");
+                            return;
+                        }
+                    } catch (NumberFormatException e) {
+                        System.err.println("Line: " + lines + "Parsing error");
+                        data.putNumber(fullCollumnName, nextFloat(-3, 3));
                     }
                 }
 
-                System.out.println("Totally Imported: " + numofEntries);
+                for (int i = 1; i < primaryKeys.length; i++) {
+                    key = ":" + data.getValue("default."+tableName+"." +primaryKeys[i]);
+                }
+
+                put(key, data.toString());
+
+                try {
+                    sizeE+=serialize(data).length;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+//                    sizeE+=data.toString().getBytes().length;
+
+                numofEntries++;
+
+                if (delay > 50) {
+                    System.out.println("Cache put: " + numofEntries);
+                }
+                if (numofEntries % 1000 == 0) {
+                    System.out.println("Imported: " + numofEntries+" -- size: "+sizeE);
+                }
             }
+
+            System.out.println("Totally Imported: " + numofEntries);
+        }
     }
 
     public static byte[] serialize(JsonObject obj) throws IOException {
