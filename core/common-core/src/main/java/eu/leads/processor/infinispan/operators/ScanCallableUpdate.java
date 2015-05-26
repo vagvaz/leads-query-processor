@@ -1,5 +1,6 @@
 package eu.leads.processor.infinispan.operators;
 
+import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.Tuple;
@@ -41,8 +42,10 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
   protected Logger log = LoggerFactory.getLogger(ScanCallableUpdate.class.toString());
     private VersionScalar minVersion=null;
     private VersionScalar maxVersion=null;
-
-    public ScanCallableUpdate(String configString, String output) {
+  transient protected boolean renameTableInTree;
+  transient  private String toRename;
+  transient  private String tableName;
+  public ScanCallableUpdate(String configString, String output) {
     super(configString, output);
   }
   public ScanCallableUpdate(String configString, String output,boolean onVersionedCache) {
@@ -80,6 +83,17 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
     if(conf.getObject("body").containsField("qual"))
     {
       tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
+
+      toRename = getRenamingTableFromSchema(inputSchema);
+      tableName = conf.getObject("body").getObject("tableDesc").getString("tableName");
+      tableName = tableName.replace(StringConstants.DEFAULT_DATABASE_NAME+".","");
+      if(tableName.equals(toRename)){
+        renameTableInTree = false;
+      }
+      else{
+        renameTableInTree = true;
+      }
+
     }
     else{
       tree =null;
@@ -101,7 +115,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
   @Override public void executeOn(K key, V ivalue) {
     Logger profilerLog = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
 
-    ProfileEvent profExecute = new ProfileEvent("Execute " + this.getClass().toString(),profilerLog);
+//    ProfileEvent profExecute = new ProfileEvent("Execute " + this.getClass().toString(),profilerLog);
 
     //         System.err.println(manager.getCacheManager().getAddress().toString() + " "+ entry.getKey() + "       " + entry.getValue());
     Tuple toRunValue = null;
@@ -169,18 +183,15 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
       //profExecute.end();
      // profExecute.start("renameAllTupleAttributes");
       //renameAllTupleAttributes(tuple);
-      profExecute.end();
+//      profExecute.end();
       if (tree != null) {
-
+        if(renameTableInTree){
+          tree.renameTableDatum(tableName,toRename);
+        }
 //        profExecute.start("tree.accept");
         boolean accept = tree.accept(tuple);
 //        profExecute.end();
         if (accept) {
-          if(needsREnaming()){
-            String tableName = getTableNameFromTuple(tuple);
-            String toRename = getRenamingTableFromSchema(inputSchema);
-            tree.renameTableDatum(tableName,toRename);
-          }
 //          profExecute.start("prepareOutput");
 
           tuple = prepareOutput(tuple);
@@ -214,9 +225,9 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
 
       String fieldname =((JsonObject)(inputSchema.getArray("fields").iterator().next())).getString("name");
       //fieldname database.table.collumncolumnName = tmp.getString("name");
-      String[] names;
-      if ((names = fieldname.split(".")).length == 2)
-        return names[1];
+      String result = fieldname.substring(fieldname.indexOf(".")+1,fieldname.lastIndexOf("."));
+      if(result != null && !result.equals(""))
+        return result;
     }
     return null;
   }
@@ -227,9 +238,9 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
 
       String fieldname = tuple.getFieldNames().iterator().next();
       //fieldname database.table.collumn
-      String[] names;
-      if ((names = fieldname.split("i")).length == 2)
-        return names[1];
+      String result = fieldname.substring(fieldname.indexOf(".")+1,fieldname.lastIndexOf("."));
+      if(result != null && !result.equals(""))
+        return result;
     }
 
     return  null;

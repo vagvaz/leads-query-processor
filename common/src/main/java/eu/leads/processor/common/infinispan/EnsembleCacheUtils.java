@@ -54,6 +54,7 @@ public class EnsembleCacheUtils {
 
     public static void waitForAllPuts() {
 //        profExecute.start("waitForAllPuts");
+        clearCompleted();
         while (!concurrentQuue.isEmpty()) {
             Iterator<NotifyingFuture<Void>> iterator = concurrentQuue.iterator();
             while (iterator.hasNext()) {

@@ -168,7 +168,7 @@ public class Tuple extends DataType_bson implements Serializable,Externalizable{
     }
 
     public void renameAttribute(String oldName, String newName) {
-        if(oldName == newName)
+        if(oldName.equals(newName))
             return;
         Object value = data.get(oldName);
         data.removeField(oldName);
