@@ -1,5 +1,6 @@
 package eu.leads.processor.infinispan.operators;
 
+import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.infinispan.LeadsBaseCallable;
 import org.vertx.java.core.json.JsonArray;
@@ -46,13 +47,31 @@ public abstract  class LeadsSQLCallable<K,V> extends LeadsBaseCallable<K,V>{
       }
     }
   }
-
+  protected void renameAllTupleAttributes(Tuple tuple) {
+    JsonArray fields = inputSchema.getArray("fields");
+    Iterator<Object> iterator = fields.iterator();
+    String columnName = null;
+    String fieldName = tuple.getFieldNames().iterator().next();
+    String tableName = fieldName.substring(fieldName.indexOf(".")+1,fieldName.lastIndexOf("."));
+    while (iterator.hasNext()) {
+      JsonObject tmp = (JsonObject) iterator.next();
+      columnName = tmp.getString("name");
+      if(columnName.contains("."+tableName+".")){
+        return;
+      }
+      int lastPeriod = columnName.lastIndexOf(".");
+      String attributeName = columnName.substring(lastPeriod + 1);
+      tuple.renameAttribute(StringConstants.DEFAULT_DATABASE_NAME+"."+tableName+"."+ attributeName, columnName);
+    }
+  }
 
   protected Tuple prepareOutput(Tuple tupleIn) {
     Tuple tuple = new Tuple(tupleIn);
+    renameAllTupleAttributes(tuple);
     if (outputSchema.toString().equals(inputSchema.toString())) {
       return tuple;
     }
+
 
     JsonObject result = new JsonObject();
     //WARNING
