@@ -171,10 +171,16 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
       //renameAllTupleAttributes(tuple);
       profExecute.end();
       if (tree != null) {
+
 //        profExecute.start("tree.accept");
         boolean accept = tree.accept(tuple);
 //        profExecute.end();
         if (accept) {
+          if(needsREnaming()){
+            String tableName = getTableNameFromTuple(tuple);
+            String toRename = getRenamingTableFromSchema(inputSchema);
+            tree.renameTableDatum(tableName,toRename);
+          }
 //          profExecute.start("prepareOutput");
 
           tuple = prepareOutput(tuple);
@@ -199,6 +205,35 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
       }
   }
 
+  private boolean needsREnaming() {
+    return !outputSchema.toString().equals(inputSchema.toString());
+  }
+
+  private String getRenamingTableFromSchema(JsonObject inputSchema) {
+    if(inputSchema!=null) {
+
+      String fieldname =((JsonObject)(inputSchema.getArray("fields").iterator().next())).getString("name");
+      //fieldname database.table.collumncolumnName = tmp.getString("name");
+      String[] names;
+      if ((names = fieldname.split(".")).length == 2)
+        return names[1];
+    }
+    return null;
+  }
+
+  //TODO write checks
+  private String getTableNameFromTuple(Tuple tuple) {
+    if(tuple!=null) {
+
+      String fieldname = tuple.getFieldNames().iterator().next();
+      //fieldname database.table.collumn
+      String[] names;
+      if ((names = fieldname.split("i")).length == 2)
+        return names[1];
+    }
+
+    return  null;
+  }
 
 
   /**
