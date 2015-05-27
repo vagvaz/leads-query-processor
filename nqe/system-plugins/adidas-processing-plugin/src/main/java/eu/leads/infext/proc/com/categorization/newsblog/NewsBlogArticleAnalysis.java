@@ -15,6 +15,7 @@ import org.apache.commons.configuration.XMLConfiguration;
 
 import eu.leads.PropertiesSingleton;
 import eu.leads.infext.python.PythonQueueCall;
+import eu.leads.infext.python.PythonQueueCall;
 
 public class NewsBlogArticleAnalysis {
 	

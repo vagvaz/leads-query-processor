@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -32,6 +33,8 @@ import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
+import org.apache.lucene.queryparser.xml.builders.SpanNearBuilder;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FuzzyQuery;
@@ -60,10 +63,10 @@ public class DocumentKeywordSearchExt {
 
     // 0. Specify the analyzer for tokenizing text.
     //    The same analyzer should be used for indexing and searching
-    private StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_4_9);
+    private StandardAnalyzer analyzer = new StandardAnalyzer();
     // 1. create the index
     private Directory index = new RAMDirectory();
-    private IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_4_9, analyzer);
+    private IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_4_10_1, analyzer);
     
     private IndexWriter w = null;
     
@@ -75,7 +78,7 @@ public class DocumentKeywordSearchExt {
 		}
 	}
 	
-    /*
+    /**
      * Returns documents when the keywords are found together with relevance score
      */
 	public HashMap<UrlTimestamp,Double> searchKeywords(String [] keywords, 
@@ -92,25 +95,20 @@ public class DocumentKeywordSearchExt {
 		// Construct the terms since they will be used more than once
 		SpanQuery[] clauses = new SpanQuery[keywords.length];
 		for(int i=0; i<keywords.length; i++) {
-			Term term = new Term("article", keywords[i]);
+			Term term = new Term("text", keywords[i]);
 			//
 			clauses[i] = new SpanMultiTermQueryWrapper<FuzzyQuery>(new FuzzyQuery(term,nonMatchingChars));
-			query.add(new TermQuery(term), Occur.SHOULD);
+			query.add(new FuzzyQuery(term,nonMatchingChars), Occur.SHOULD);
 		}
-		
 		SpanNearQuery spanQuery = new SpanNearQuery(clauses, distanceBetweenWords, inOrder);
 		spanQuery.setBoost(5f);
 		query.add(spanQuery, Occur.SHOULD);
 		
 		query.setMinimumNumberShouldMatch(keywords.length-nonMatchingWords);
+		System.out.println(query.toString());
 		
-		int hitsPerPage = 10;
-		IndexReader reader;
 		try {
-			if(w.isLocked(index)) w.close();
-			reader = DirectoryReader.open(index);
-			IndexSearcher searcher = new IndexSearcher(reader);
-			TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage, true);
+			collector = TopScoreDocCollector.create(hitsPerPage, true);
 			searcher.search(query, collector);
 			ScoreDoc[] hits = collector.topDocs().scoreDocs;
 			
@@ -128,14 +126,39 @@ public class DocumentKeywordSearchExt {
 		return docsWithKeywords;
 	}
 	
-	public boolean addDocument(Map<String,String> contentParts) {
+	public boolean addDocument(String url, Map<String,String> contentParts) {
 		try {
-		    addDoc(w, contentParts);
+			for(Entry<String, String> part : contentParts.entrySet()) {
+				Map<String,String> partMeta = new HashMap<>();
+				partMeta.put("url", url);
+				partMeta.put("part", part.getKey());
+				partMeta.put("text", part.getValue());
+				addDoc(w, partMeta);
+			}
 		    return true;
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
 		}
+	}
+	
+
+	private int hitsPerPage = 10;
+	private IndexReader reader;
+	private IndexSearcher searcher;
+	private TopScoreDocCollector collector;
+	
+	public boolean commitDocSet() {
+			try {
+				if(w.isLocked(index)) w.close();
+				reader = DirectoryReader.open(index);
+				searcher = new IndexSearcher(reader);
+				return true;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return false;
+			}
 	}
 	
 	private int getWordLength(String text) {
@@ -144,7 +167,7 @@ public class DocumentKeywordSearchExt {
 		return words;
 	}
 	
-	private void addDoc(IndexWriter w, Map<String,String> parts) throws IOException {
+	private void addDoc(IndexWriter w, Map<String,String> docProps) throws IOException {
 	    Document doc = new Document();
 	    FieldType type = new FieldType();
 	    type.setIndexed(true);
@@ -152,7 +175,7 @@ public class DocumentKeywordSearchExt {
 	    type.setStoreTermVectors(true);
 	    type.setStoreTermVectorOffsets(true);
 	    type.setStoreTermVectorPositions(true);
-	    for(Map.Entry<String, String> part : parts.entrySet())
+	    for(Map.Entry<String, String> part : docProps.entrySet())
 	    	doc.add(new Field(part.getKey(), part.getValue(), type));
 	    w.addDocument(doc);
 	}
@@ -162,12 +185,25 @@ public class DocumentKeywordSearchExt {
 		DocumentKeywordSearchExt dks = new DocumentKeywordSearchExt();
 		
 		Map<String, String> contentParts = new HashMap<>();
-		contentParts.put("title",   "New adidas Boost is great!");
-		contentParts.put("article", "Finally, today a long awaited premiere of a new adidas qrewgv adipure varvr aefaed product: adios muchacho wqeCWE ESd wefEd Boost 2.");
-		dks.addDocument(contentParts);
+		contentParts.put("title",   "New adidas Boosty is great!");
+		contentParts.put("article", "Finally, today a long awaited premiere of a new qrewgv adipur varvr aefaed product: adios muchacho wqeCWE ESd wefEd Boost 2.");
+		String url = "http://www.sport.eu/";
+		dks.addDocument(url,contentParts);
+		dks.commitDocSet();
 		
-		dks.searchKeywords(new String [] {"adidas","adipure","adios","boost","2"}, 
-				0, 0, 0, true);
+		long start = System.currentTimeMillis();
+		System.out.println( dks.searchKeywords(new String [] {"fuck"}, 
+				0, 0, 0, true) );
+		long start1 = System.currentTimeMillis();
+		System.out.println( dks.searchKeywords(new String [] {"boost","great"}, 
+				0, 1, 0, true) );
+		long checkpoint = System.currentTimeMillis();
+		System.out.println( dks.searchKeywords(new String [] {"adidas","adipure","adios","boost","2"}, 
+				1, 1, 5, false) );
+		long finish = System.currentTimeMillis();
+		System.out.println(start1-start);
+		System.out.println(checkpoint-start1);
+		System.out.println(finish-checkpoint);		
 	}
 	
 }

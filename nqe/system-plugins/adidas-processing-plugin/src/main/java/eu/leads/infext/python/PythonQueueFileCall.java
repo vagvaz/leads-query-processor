@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,19 +26,18 @@ import org.zeromq.ZMQ.Socket;
 
 import scala.Array;
 import eu.leads.PropertiesSingleton;
-import eu.leads.infext.python.JZC2;
 
-public class PythonQueueCall {
+public class PythonQueueFileCall {
 
 	Configuration config = PropertiesSingleton.getConfig();
-	private JZC2 jzc;
+	private JZC jzc;
 	
 	private SecureRandom random;
 
 
-	public PythonQueueCall() {
+	public PythonQueueFileCall() {
 		random = new SecureRandom();
-        jzc = new JZC2(config.getList("pzsEndpoints"));
+        jzc = new JZC(config.getList("pzsEndpoints"));
 	}
 	
 	
@@ -93,9 +91,10 @@ public class PythonQueueCall {
 		
 		List<Object> retValue = null;
 		
-		List<Object> params = new ArrayList<>();
+		List<String> params = new ArrayList<>();
 		
-		List<Object> paramsList = new ArrayList<>();
+		List<String> paramsList = new ArrayList<>();
+		List<String> filenamesList = new ArrayList<>();
 		
 		for (int i=0; i<args.length; i++) {
 			Object arg = args[i];
@@ -116,9 +115,12 @@ public class PythonQueueCall {
 				if (param == null)
 					param = "None";
 				if (argsViaFile.contains(i) || isHtml(param) || param.contains("\n")) {
-					//byte[] byteParam = param.getBytes(Charset.forName("UTF-8"));
-					//paramsList.add(byteParam);
-					paramsList.add(param);
+					// create a temp file with the content
+					String fileName = paramInFile(param);
+					if(fileName != null) {
+						paramsList.add("file:"+fileName);
+						filenamesList.add(fileName);
+					}
 				}
 				else if(cutSpaces.contains(i)) {
 					param = param.replaceAll("\\s","");
@@ -130,6 +132,15 @@ public class PythonQueueCall {
 			}
 			
 		}
+		
+		if(paramsList.size() > 20) {
+			String fileName = paramInFile(paramsList.toArray(new String[paramsList.size()]));
+			if(fileName != null) {
+				paramsList.clear();
+				paramsList.add("paramsfile:"+fileName);
+				filenamesList.add(fileName);
+			}
+		}
 		String path;
 		if(moduleName.contains(".")) // full package name
 			path = moduleName;
@@ -138,6 +149,10 @@ public class PythonQueueCall {
 		params.add(path);
 		params.addAll(paramsList);
 		
+		int REQUEST_RETRIES = 3;
+		int REQUEST_TIMEOUT = 2500;
+		String SERVER_ENDPOINT = config.getString("pythonQueueAddress");
+		
 		String paramsString = StringUtils.join(params.toArray(),' ');
 		
 		System.out.println(paramsString);
@@ -145,6 +160,8 @@ public class PythonQueueCall {
         retValue = jzc.send(params);
         if(retValue != null)
 	        System.out.println("Received reply:\n\n" + retValue);	
+        
+        removeFiles(filenamesList);
 
 		/* TIME */ System.err.println("+++ PythonQueueCall.call() time: "+((System.currentTimeMillis()-start)/1000.0)+" s");
         

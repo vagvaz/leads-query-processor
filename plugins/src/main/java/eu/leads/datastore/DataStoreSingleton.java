@@ -22,7 +22,7 @@ public class DataStoreSingleton {
 	static String storagePropertiesDir = "/temp";
 	
 	static AbstractDataStore dataStore = null;
-	static Properties prop = new Properties();
+//	static Properties prop = new Properties();
 	static Properties mapping = new Properties();
 	static Properties parameters = new Properties();
 	
@@ -32,7 +32,7 @@ public class DataStoreSingleton {
 			String technology = conf.getString("technology");
 			if(technology.toLowerCase().equals("cassandra")) {
 				mappingFile = "mapping/casscql.properties";
-				initProperties();
+//				initProperties();
 				initMapping();
 				initParameters();
 				int port = conf.getInt("port");
@@ -42,7 +42,7 @@ public class DataStoreSingleton {
 			else if(technology.toLowerCase().equals("leads")) {
 				System.out.println("Configuring data store...");
 				mappingFile = "mapping/leadsstore.properties";
-				initProperties();
+//				initProperties();
 				initMapping();
 				initParameters();
 				System.out.println("...initiated properties");
@@ -100,19 +100,19 @@ public class DataStoreSingleton {
 		}
 	}
 
-	private static void initProperties() {
-		InputStream input = null;
-	 
-		try {
-			String filePath = storagePropertiesDir+"/"+storagePropsFile;
-			input = new FileInputStream(filePath);
-			//input =  DataStoreSingleton.class.getClassLoader().getResourceAsStream(storagePropsFile);
-			// load a properties file
-			prop.load(input);
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-	}
+//	private static void initProperties() {
+//		InputStream input = null;
+//	 
+//		try {
+//			String filePath = storagePropertiesDir+"/"+storagePropsFile;
+//			input = new FileInputStream(filePath);
+//			//input =  DataStoreSingleton.class.getClassLoader().getResourceAsStream(storagePropsFile);
+//			// load a properties file
+//			prop.load(input);
+//		} catch (IOException ex) {
+//			ex.printStackTrace();
+//		}
+//	}
 	
 	
 }

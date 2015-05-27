@@ -457,5 +457,43 @@ public class LeadsDataStore extends AbstractDataStore {
 		
 		return keywords;
 	}
+
+	@Override
+	public Map<Long, Map<String, Object>> getUsersKeywordsListExt() {
+		Map<Long, Map<String, Object>> keywordsTuples = new HashMap<>();
+		
+//		QueryResults rs = LeadsQueryInterface.sendQuery("SELECT * FROM default.adidas_keywords");
+//		
+//		if(rs != null) {
+//			for(String row : rs.getResult()) {
+//				JSONObject jsonRow 	= new JSONObject(row);
+//				Long key = jsonRow.getLong(mapping.getProperty("default.adidas_keywords.id"));
+//				Map<String, Object> value = new HashMap<String, Object>();
+//				for(Object o : jsonRow.keySet()) {
+//					String column = (String)o;
+//					value.put(column, jsonRow.get(column));
+//				}
+//			}
+//		}
+		
+		keywordsTuples.put(0L, new HashMap<String,Object>() {{
+			put("default.adidas_keywords.id",0L);
+			put("default.adidas_keywords.keywords","adidas adiPure adios Boost 2");
+			put("default.adidas_keywords.nonMatchingWords",0);
+			put("default.adidas_keywords.nonMatchingChars",1);
+			put("default.adidas_keywords.distanceBetweenWords",0);
+			put("default.adidas_keywords.inOrder",true);
+		}});
+		keywordsTuples.put(0L, new HashMap<String,Object>() {{
+			put("default.adidas_keywords.id",1L);
+			put("default.adidas_keywords.keywords","who");
+			put("default.adidas_keywords.nonMatchingWords",0);
+			put("default.adidas_keywords.nonMatchingChars",1);
+			put("default.adidas_keywords.distanceBetweenWords",0);
+			put("default.adidas_keywords.inOrder",true);
+		}});
+		
+		return keywordsTuples;
+	}
 	
 }

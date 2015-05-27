@@ -88,7 +88,7 @@ if __name__ == '__main__':
         try:
             ap = factory(msg[0])
             # pt.2 all of the params
-            paramstr = str([text for text in msg[1:]])
+            paramstr = str([(text if isinstance(text, basestring) else text.decode("utf-8")) for text in msg[1:]])
             logger.debug("input params: %s" % paramstr)
             params = translateInputParameters(msg)
         except:

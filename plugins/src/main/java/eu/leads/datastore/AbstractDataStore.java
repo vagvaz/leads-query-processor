@@ -115,6 +115,12 @@ public abstract class AbstractDataStore {
 	public abstract List<String> getUsersKeywordsList();
 	
 	/**
+	 * 	
+	 * @return
+	 */
+	public abstract Map<Long,Map<String, Object>> getUsersKeywordsListExt();
+	
+	/**
 	 * Returns an object representing family storage handle, in case some method runs some custom retrieval/storage functionality
 	 * 
 	 * @return
