@@ -8,14 +8,22 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import ch.lambdaj.function.matcher.LambdaJMatcher;
+
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
+import com.sun.tools.corba.se.idl.constExpr.GreaterThan;
 
 import eu.leads.datastore.AbstractDataStore;
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.URIVersion;
 import eu.leads.processor.web.QueryResults;
 import eu.leads.utils.LEADSUtils;
+
+import static ch.lambdaj.Lambda.*;
+import static org.hamcrest.Matchers.*;
+import static java.util.Arrays.*;
+
 
 public class LeadsDataStore extends AbstractDataStore {
 
@@ -37,7 +45,7 @@ public class LeadsDataStore extends AbstractDataStore {
 	public SortedSet<URIVersion> getLeadsResourceMDFamily(String uri, String family, int lastVersions, String timestamp, boolean before) {
 		SortedSet<URIVersion> uriVersions = new TreeSet<URIVersion>();
 
-		boolean reverse = false;
+//		boolean reverse = false;
 
 		String queryP01 = "SELECT * FROM " + family;
 		//
@@ -46,37 +54,37 @@ public class LeadsDataStore extends AbstractDataStore {
 		String queryP03 = "uri = '" + uri + "'";
 		//
 		String queryP04 = "";
-		if(timestamp != null) {
-			queryP04 += " AND ";
-			if(before) 	queryP04 += "ts < ";
-			else		queryP04 += "ts = ";
-			queryP04 += timestamp;
-		}
+//		if(timestamp != null) {
+//			queryP04 += " AND ";
+//			if(before) 	queryP04 += "ts < ";
+//			else		queryP04 += "ts = ";
+//			queryP04 += timestamp;
+//		}
 		//
-		if(before) {
-			queryP04 += " ORDER BY ts DESC";
-			queryP04 += " LIMIT " + lastVersions;
-		}
+//		if(before) {
+//			queryP04 += " ORDER BY ts DESC";
+//			queryP04 += " LIMIT " + lastVersions;
+//		}
 		//
 		String query = queryP01+queryP02+queryP03+queryP04;
 
 		QueryResults rs;
 		rs = LeadsQueryInterface.sendQuery(query);
 		
-		if((rs == null || rs.getResult().size() == 0) && timestamp != null && before == true) {
-
-			reverse = true;
-			//
-			queryP04 = "";
-			//
-			queryP04 += " ORDER BY ts ASC";
-			//
-			query = queryP01+queryP02+queryP03+queryP04;
-
-			System.out.println(query);
-			
-			rs = LeadsQueryInterface.sendQuery(query);		
-		}
+//		if((rs == null || rs.getResult().size() == 0) && timestamp != null && before == true) {
+//
+//			reverse = true;
+//			//
+//			queryP04 = "";
+//			//
+//			queryP04 += " ORDER BY ts ASC";
+//			//
+//			query = queryP01+queryP02+queryP03+queryP04;
+//
+//			System.out.println(query);
+//			
+//			rs = LeadsQueryInterface.sendQuery(query);		
+//		}
 		
 		if(rs != null) {
 			for(String row : rs.getResult()) {
@@ -114,11 +122,40 @@ public class LeadsDataStore extends AbstractDataStore {
 			}
 		}
 
-		if(reverse) {
-			List<URIVersion> uriVersionsList = new ArrayList<>(uriVersions);
-			Collections.reverse(uriVersionsList);
+//		if(reverse) {
+//			List<URIVersion> uriVersionsList = new ArrayList<>(uriVersions);
+//			Collections.reverse(uriVersionsList);
+//			uriVersions = new TreeSet<>(uriVersionsList);
+//		}
+		
+		// New code replacing WHERE ts, ORDER BY and LIMIT
+		List<URIVersion> uriVersionsList = new ArrayList<>(uriVersions);
+		Collections.sort(uriVersionsList);
+		if(timestamp != null) {
+			uriVersions = new TreeSet<>();
+			if(before) {
+				Long timestampL = Long.parseLong(timestamp);
+				int counter = 0;
+				for(URIVersion uriVersion : uriVersionsList)
+					if(uriVersion.getTimestampL() < timestampL) {
+						uriVersions.add(uriVersion);
+						counter++;
+						if(counter == lastVersions)
+							break;
+					}
+			}
+			else {
+				for(URIVersion uriVersion : uriVersionsList)
+					if(uriVersion.getTimestamp().equals(timestamp)) {
+						uriVersions.add(uriVersion);
+						break;
+					}
+			}
+		}
+		else {
 			uriVersions = new TreeSet<>(uriVersionsList);
 		}
+		
 
 		System.out.println(uriVersions);
 		return uriVersions;

@@ -39,9 +39,11 @@ public abstract class AbstractHook {
 	 * @param url
 	 * @param versionName
 	 * @param family
-	 * @param versionOfInterest: 0 for the newest one, -1,-2,... for previous ones
-	 * @param beforeTimestamp
+	 * @param versionOfInterest - 0 for the newest one, -1,-2,... for previous ones
+	 * @param timestamp
+	 * @param exactlyTimestamp
 	 * @param currentMetadata
+	 * @param newMetadata
 	 * @param editableFamilies - if null, the family will be "read-only"
 	 * @return
 	 */
@@ -57,7 +59,14 @@ public abstract class AbstractHook {
 		if(currentMetadata.get(familyKey) == null) {
 			newMetadataFamily = new HashMap<String, Object>();
 			
-			if(nonRetrievableFamilies.contains(family)) {
+			boolean skipRetrieve = false;
+			
+			if(versionOfInterest==0) // May lead to overwrite. Introduced only to limit queries for LEADS M36.
+				skipRetrieve = true;
+			if(nonRetrievableFamilies.contains(family))
+				skipRetrieve = true;
+			
+			if(skipRetrieve) {
 				System.out.println("Not retrieving from family "+family);
 				newMetadata.put(familyKey, newMetadataFamily);
 				MDFamily mdFamily = new MDFamily(url,null,family);

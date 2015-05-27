@@ -32,10 +32,6 @@ public class LanguageDetectionHook extends AbstractHook {
 	private String tableName = "maintable";
 	private JavaLanguageDetection langdetection = JavaLanguageDetection.getInstance();
 	
-	public LanguageDetectionHook() {
-		
-	}
-	
 	@Override
 	public HashMap<String, HashMap<String, Object>> retrieveMetadata(String url, String timestamp, 
 			HashMap<String, HashMap<String, Object>> currentMetadata, HashMap<String, MDFamily> editableFamilies) {
