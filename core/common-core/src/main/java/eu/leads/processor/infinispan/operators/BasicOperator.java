@@ -641,13 +641,13 @@ public abstract class BasicOperator extends Thread implements Operator{
       System.err.println("submitting to local cluster task");
       log.error("submitting to local cluster task");
 
-      List<Future<String>> res = new ArrayList<>();
+      List<Future<String>> res = des.submitEverywhere(task);//new ArrayList<>();
       List<Address> taskNodes =  inputCache.getAdvancedCache().getRpcManager().getMembers();
 //      taskNodes.add(inputCache.getCacheManager().getAddress());
-      for(Address node : taskNodes){
-        Future<String> ft = des.submit(node,task);
-        res.add(ft);
-      }
+//      for(Address node : taskNodes){
+//        Future<String> ft = des.submit(node,task);
+//        res.add(ft);
+//      }
       distTask.end();
       //      Future<String> res = des.submit(callable);
       List<String> addresses = new ArrayList<String>();
