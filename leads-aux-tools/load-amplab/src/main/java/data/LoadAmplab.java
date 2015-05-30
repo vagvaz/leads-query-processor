@@ -409,7 +409,7 @@ public class LoadAmplab {
             }
         }
 
-        //if (initialize_cache(tableName)){
+        if (initialize_cache(tableName)){
             int numofEntries = 0;
             int lines = 0;
             String key="";
@@ -466,7 +466,7 @@ public class LoadAmplab {
                     key = ":" + data.getValue("default."+tableName+"." +primaryKeys[i]);
                 }
 
-                System.out.println("putting... "+data.toString());
+                System.out.println("putting... uri:" +data.getField("uri").toString()+" -- ts:"+data.getField("ts").toString());
                 put(key, data.toString());
 
                 try {
@@ -486,7 +486,7 @@ public class LoadAmplab {
             }
 
             System.out.println("Totally Imported: " + numofEntries);
-        //}
+        }
     }
 
     public static byte[] serialize(JsonObject obj) throws IOException {
