@@ -466,7 +466,7 @@ public class LoadAmplab {
                     key = ":" + data.getValue("default."+tableName+"." +primaryKeys[i]);
                 }
 
-                System.out.println("putting... uri:" +data.getField("uri").toString()+" -- ts:"+data.getField("ts").toString());
+                System.out.println("putting... uri:" +data.getField("default."+tableName+".uri").toString()+" -- ts:"+data.getField("default."+tableName+".ts").toString());
                 put(key, data.toString());
 
                 try {
