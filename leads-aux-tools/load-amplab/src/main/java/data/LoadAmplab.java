@@ -415,10 +415,10 @@ public class LoadAmplab {
             String key="";
             System.out.println("Importing data ... ");
             long sizeE = 0;
-            long x_k = 1500000L;
-            long y_k = 1500000L;
-            long x_c = 1500000L;
-            long y_c = 1500000L;
+            long k_ts = 15000000L;
+            long k_uri = 15000000L;
+            long p_ts = 1500000L;
+            long p_uri = 1500000L;
 
             for(int entry=0;entry<Integer.valueOf(arg5);entry++){
                 JsonObject data = new JsonObject();
@@ -430,23 +430,23 @@ public class LoadAmplab {
                             if (columns.get(pos).equals("textcontent") && tableName.equals("page_core"))
                                 data.putString(fullCollumnName, randBigString(Integer.valueOf(arg6)));
                             else if (columns.get(pos).equals("uri") && tableName.equals("page_core")){
-                                data.putString(fullCollumnName, "adidas" + "" +y_c);
-                                y_c++;
+                                data.putString(fullCollumnName, "adidas" + "" +p_uri);
+                                p_uri++;
                             }
                             else if (columns.get(pos).equals("uri") && tableName.equals("keywords")){
-                                data.putString(fullCollumnName, "adidas" + "" +y_k);
-                                y_k++;
+                                data.putString(fullCollumnName, "adidas" + "" +k_uri);
+                                k_uri++;
                             }
                             else
                                 data.putString(fullCollumnName, randSmallString());
                         } else if (columnType.get(pos) == Long.class){
                             if (columns.get(pos).equals("ts") && tableName.equals("page_core")){
-                                data.putNumber(fullCollumnName, x_c);
-                                x_c++;
+                                data.putNumber(fullCollumnName, p_ts);
+                                p_ts++;
                             }
                             else if (columns.get(pos).equals("ts") && tableName.equals("keywords")){
-                                data.putNumber(fullCollumnName, x_k);
-                                x_k++;
+                                data.putNumber(fullCollumnName, k_ts);
+                                k_ts++;
                             }
                         } else if (columnType.get(pos) == Integer.class){
                             data.putNumber(fullCollumnName, randInt(-10000, 10000));
