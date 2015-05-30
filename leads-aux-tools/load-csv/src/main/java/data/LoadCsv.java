@@ -425,7 +425,7 @@ public class LoadCsv {
             }
         }
 
-        if (initialize_cache(tableName))
+        //if (initialize_cache(tableName))
             try {
 
                 CSVReader reader = new CSVReader(new FileReader(csvfile), ',');
@@ -474,7 +474,6 @@ public class LoadCsv {
                             }
                         } catch (NumberFormatException e) {
                             System.err.println("Line: " + lines + "Parsing error: " + StringData[pos]);
-                            //e.printStackTrace();
                             data.putNumber(fullCollumnName, nextFloat(-3, 3));
                         }
 
@@ -487,9 +486,6 @@ public class LoadCsv {
                     }
                     if (numofEntries % 1000 == 0) {
                         System.out.println("Imported: " + numofEntries);
-                        //cache.endBatch(true);
-//                   if(numofEntries%3000==0)
-                        //         return;
                     }
                 }
                 System.out.println("Totally Imported: " + numofEntries);
@@ -499,7 +495,6 @@ public class LoadCsv {
                 e.printStackTrace();
 
             }
-
 
     }
 
@@ -520,7 +515,6 @@ public class LoadCsv {
     }
 
     private static boolean initialize_cache(String tableName) {
-
         System.out.println(" Tablename: " + tableName + " Trying to create cache: " + StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
         if (remoteCacheManager != null)
             try {
@@ -532,11 +526,8 @@ public class LoadCsv {
         else if (imanager != null)
             embeddedCache = imanager.getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
         else if (emanager != null)
-//            if(ensemple_multi)
                 ensembleCache = emanager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName,new ArrayList<>(emanager.sites()),
                         EnsembleCacheManager.Consistency.DIST);
-//            else
-//                ensembleCache = emanager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
         else {
             System.err.println("Not recognised type, stop importing");
             return false;

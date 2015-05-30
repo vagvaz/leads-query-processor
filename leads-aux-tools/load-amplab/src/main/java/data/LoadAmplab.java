@@ -103,8 +103,6 @@ public class LoadAmplab {
         String initfilename = args[1];
         System.out.print("Trying to convert file: " + initfilename);
         String filename[] = initfilename.split(".csv");
-        //System.out.println("Filename" + csvfile.getAbsolutePath()+" "+filename[0]);
-
         String fulltableName[] = (initfilename.split(".csv")[0]).split("-");
         String tableName = fulltableName[fulltableName.length - 1];
         String keysFilename = filename[0] + ".keys";
@@ -411,14 +409,16 @@ public class LoadAmplab {
             }
         }
 
-        if (initialize_cache(tableName)){
+        //if (initialize_cache(tableName)){
             int numofEntries = 0;
             int lines = 0;
             String key="";
             System.out.println("Importing data ... ");
             long sizeE = 0;
-            long x = 1500000L;
-            long y = 1500000L;
+            long x_k = 1500000L;
+            long y_k = 1500000L;
+            long x_c = 1500000L;
+            long y_c = 1500000L;
 
             for(int entry=0;entry<Integer.valueOf(arg5);entry++){
                 JsonObject data = new JsonObject();
@@ -429,16 +429,25 @@ public class LoadAmplab {
                         if (columnType.get(pos) == String.class){
                             if (columns.get(pos).equals("textcontent") && tableName.equals("page_core"))
                                 data.putString(fullCollumnName, randBigString(Integer.valueOf(arg6)));
-                            else if (columns.get(pos).equals("uri") ) {
-                                y++;
-                                data.putString(fullCollumnName, "adidas" + "" +y);
+                            else if (columns.get(pos).equals("uri") && tableName.equals("page_core")){
+                                data.putString(fullCollumnName, "adidas" + "" +y_c);
+                                y_c++;
+                            }
+                            else if (columns.get(pos).equals("uri") && tableName.equals("keywords")){
+                                data.putString(fullCollumnName, "adidas" + "" +y_k);
+                                y_k++;
                             }
                             else
                                 data.putString(fullCollumnName, randSmallString());
                         } else if (columnType.get(pos) == Long.class){
-                            x++;
-                            data.putNumber(fullCollumnName, x);
-                            //data.putNumber(columns.get(pos), randLong());
+                            if (columns.get(pos).equals("ts") && tableName.equals("page_core")){
+                                data.putNumber(fullCollumnName, x_c);
+                                x_c++;
+                            }
+                            else if (columns.get(pos).equals("ts") && tableName.equals("keywords")){
+                                data.putNumber(fullCollumnName, x_k);
+                                x_k++;
+                            }
                         } else if (columnType.get(pos) == Integer.class){
                             data.putNumber(fullCollumnName, randInt(-10000, 10000));
                         } else if (columnType.get(pos) == Float.class){
@@ -457,6 +466,7 @@ public class LoadAmplab {
                     key = ":" + data.getValue("default."+tableName+"." +primaryKeys[i]);
                 }
 
+                System.out.println("putting... "+data.toString());
                 put(key, data.toString());
 
                 try {
@@ -464,7 +474,6 @@ public class LoadAmplab {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-//                    sizeE+=data.toString().getBytes().length;
 
                 numofEntries++;
 
@@ -477,7 +486,7 @@ public class LoadAmplab {
             }
 
             System.out.println("Totally Imported: " + numofEntries);
-        }
+        //}
     }
 
     public static byte[] serialize(JsonObject obj) throws IOException {
@@ -554,11 +563,8 @@ public class LoadAmplab {
         else if (imanager != null)
             embeddedCache = imanager.getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
         else if (emanager != null)
-//            if(ensemple_multi)
             ensembleCache = emanager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName,new ArrayList<>(emanager.sites()),
                     EnsembleCacheManager.Consistency.DIST);
-//            else
-//                ensembleCache = emanager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
         else {
             System.err.println("Not recognised type, stop importing");
             return false;
