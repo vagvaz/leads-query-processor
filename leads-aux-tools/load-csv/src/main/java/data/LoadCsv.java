@@ -434,6 +434,7 @@ public class LoadCsv {
                 int lines = 0;
                 String[] StringData;
                 System.out.println("Importing data ... ");
+                long sizeE = 0;
                 // cache.startBatch();
                 while ((StringData = reader.readNext()) != null) {
                     lines++;
@@ -451,9 +452,9 @@ public class LoadCsv {
                     for (pos = 0; pos < StringData.length; pos++) {
                         String fullCollumnName =  "default."+tableName+"." + columns.get(pos);
                         if (columnType.get(pos) == String.class)
-                            if (columns.get(pos).equals("textcontent") || tableName == "page_core")
+                            /*if (columns.get(pos).equals("textcontent") || tableName == "page_core")
                                 data.putString(fullCollumnName, "");
-                            else
+                            else*/
                                 data.putString(fullCollumnName, StringData[pos]);
                         else try {
                             if (columnType.get(pos) == Long.class)
@@ -481,16 +482,31 @@ public class LoadCsv {
                     }
                     put(key, data.toString());
 
+                    try {
+                        sizeE+=serialize(data).length;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                     numofEntries++;
+
                     if (delay > 50) {
                         System.out.println("Cache put: " + numofEntries);
                     }
                     if (numofEntries % 1000 == 0) {
-                        System.out.println("Imported: " + numofEntries);
+                        System.out.println("Imported: " + numofEntries+" -- size: "+sizeE);
+                    }
+
+//                    numofEntries++;
+//                    if (delay > 50) {
+//                        System.out.println("Cache put: " + numofEntries);
+//                    }
+//                    if (numofEntries % 1000 == 0) {
+//                        System.out.println("Imported: " + numofEntries);
                         //cache.endBatch(true);
 //                   if(numofEntries%3000==0)
                         //         return;
-                    }
+//                    }
                 }
                 System.out.println("Totally Imported: " + numofEntries);
             } catch (FileNotFoundException e) {
@@ -501,6 +517,13 @@ public class LoadCsv {
             }
 
 
+    }
+
+    public static byte[] serialize(JsonObject obj) throws IOException {
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        ObjectOutputStream o = new ObjectOutputStream(b);
+        o.writeObject(obj.toString());
+        return b.toByteArray();
     }
 
     private static void put(String key, String value) {
