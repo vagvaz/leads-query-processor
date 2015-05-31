@@ -25,13 +25,13 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 
-import static data.LoadAmplab.plugs.PAGERANK;
-import static data.LoadAmplab.plugs.SENTIMENT;
+import static data.LoadSynthetic.plugs.PAGERANK;
+import static data.LoadSynthetic.plugs.SENTIMENT;
 
 /**
- * Created by angelos on 05/13/15.
+ * Created by vagvaz on 10/29/14.
  */
-public class LoadAmplab {
+public class LoadSynthetic {
     enum plugs {SENTIMENT, PAGERANK};
     transient protected static Random r;
 
@@ -93,7 +93,8 @@ public class LoadAmplab {
             }else{
                 System.exit(0);
             }
-            loadData(args[1],args[5], args[6]);
+
+            loadData(args[1]);
         }
     }
 
@@ -103,6 +104,8 @@ public class LoadAmplab {
         String initfilename = args[1];
         System.out.print("Trying to convert file: " + initfilename);
         String filename[] = initfilename.split(".csv");
+        //System.out.println("Filename" + csvfile.getAbsolutePath()+" "+filename[0]);
+
         String fulltableName[] = (initfilename.split(".csv")[0]).split("-");
         String tableName = fulltableName[fulltableName.length - 1];
         String keysFilename = filename[0] + ".keys";
@@ -136,11 +139,8 @@ public class LoadAmplab {
                 max_column = incolumn;
             if (args[i].startsWith("sentiment")) {
                 plugins.put(SENTIMENT, incolumn - 1);
-                //output.put(SENTIMENT,outcolumn-1);
-                //sentimentAnalysisModule = new SentimentAnalysisModule("../classifiers/english.all.3class.distsim.crf.ser.gz");
             } else if (args[i].startsWith("pagerank")) {
                 plugins.put(PAGERANK, incolumn - 1);
-                //output.put(PAGERANK,outcolumn-1);
             } else {
                 System.err.print("Unknown plugin!!!" + args[i]);
             }
@@ -228,14 +228,7 @@ public class LoadAmplab {
                         }
 
                         if (PAGERANK == e.getKey()) {
-                            //Thread.sleep(500);
-                            //pagerank = Web2.pagerank(transformUri(StringData[e.getValue()]));
-                            //if(pagerank<0)
                             pagerank = r.nextInt(8);
-                            //else
-                            //Thread.sleep(300);
-
-                            //System.out.println(" pagerank: " + pagerank);
                             newValue = String.valueOf(pagerank);
                         } else if (e.getKey() == SENTIMENT) {
                             try {
@@ -246,9 +239,8 @@ public class LoadAmplab {
                                     content = content.substring(0, maximumSentimentStringLength);
                                 }
                                 /*newStringData[counter++]*/
-                                newValue = String.valueOf(nextFloat(-5, 5)); // String.valueOf(sentimentAnalysisModule.getOverallSentiment(content).getValue());
+                                newValue = String.valueOf(nextFloat(-5, 5));
                             } catch (StackOverflowError er) {
-//                                newStringData[counter++] = "0";
                                 newValue = "0";
                                 CSVWriter errorwriter = new CSVWriter(new FileWriter(errinitfilename, true));
                                 String[] err = new String[1];
@@ -267,6 +259,7 @@ public class LoadAmplab {
 
                     if (convertedrows % 100 == 0) {
                         System.out.print("Converted " + convertedrows + " Mean process time: " + DurationFormatUtils.formatDuration((long) ((System.currentTimeMillis() - filestartTime) / (float) (convertedrows - alreadyconvertedrows + 1)), "HH:mm:ss,SSS"));
+
                         System.out.print("\n");
                         System.out.flush();
                         writer.flush();
@@ -282,13 +275,12 @@ public class LoadAmplab {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
         }
     }
 
 
-    private static void loadData(String path, String arg5, String arg6) throws IOException, ClassNotFoundException {
+    private static void loadData(String path) throws IOException, ClassNotFoundException {
+
         Long startTime = System.currentTimeMillis();
         Path dir = Paths.get(path);
         List<File> files = new ArrayList<>();
@@ -297,12 +289,15 @@ public class LoadAmplab {
                 files.add(entry.toFile());
             }
         } catch (IOException x) {
-            throw new RuntimeException(String.format("error reading folder %s: %s", dir, x.getMessage()), x);
+            throw new RuntimeException(String.format("error reading folder %s: %s",
+                    dir,
+                    x.getMessage()),
+                    x);
         }
         for (File csvfile : files) {
             System.out.print("Loading file: " + csvfile.getName());
             Long filestartTime = System.currentTimeMillis();
-            loadDataFromFile(csvfile,arg5,arg6);
+            loadDataFromFile(csvfile);
             System.out.println("Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - filestartTime, "HH:mm:ss,SSS"));
         }
         System.out.println("Loading finished.");
@@ -310,7 +305,7 @@ public class LoadAmplab {
         System.exit(0);
     }
 
-    private static void loadDataFromFile(File csvfile, String arg5, String arg6) {
+    private static void loadDataFromFile(File csvfile) {
         String filename[] = csvfile.getAbsolutePath().split(".csv");
         String fulltableName[] = (csvfile.getName().split(".csv")[0]).split("-");
         String tableName = fulltableName[fulltableName.length - 1];
@@ -331,8 +326,8 @@ public class LoadAmplab {
             System.err.println(" No keys file, skipping " + filename[0] + ".csv");
             return;
         }
-
         //Read the keys
+
         ArrayList<Class> columnType = new ArrayList<>();
         ArrayList<String> columns = new ArrayList<>();
         //HashSet<String > primaryKeys = new HashSet<String>();
@@ -409,129 +404,77 @@ public class LoadAmplab {
             }
         }
 
-        if (initialize_cache(tableName)){
-            int numofEntries = 0;
-            int lines = 0;
-            String key="";
-            System.out.println("Importing data ... ");
-            long sizeE = 0;
-            long k_ts = 1500000L;
-            long k_uri = 1500000L;
-            long p_ts = 1500000L;
-            long p_uri = 1500000L;
+        if (initialize_cache(tableName))
+            try {
 
-            for(int entry=0;entry<Integer.valueOf(arg5);entry++){
-                JsonObject data = new JsonObject();
+                CSVReader reader = new CSVReader(new FileReader(csvfile), ',');
+                String valueLine = "";
+                int numofEntries = 0;
+                int lines = 0;
+                String[] StringData;
+                System.out.println("Importing data ... ");
+                while ((StringData = reader.readNext()) != null) {
+                    lines++;
+                    if (StringData.length != columns.size()) {
 
-                for (pos = 0; pos < columns.size(); pos++) {
-                    String fullCollumnName =  "default."+tableName+"." + columns.get(pos);
-                    try {
-                        if (columnType.get(pos) == String.class){
-                            if (columns.get(pos).equals("textcontent") && tableName.equals("page_core"))
-                                data.putString(fullCollumnName, randBigString(Integer.valueOf(arg6)));
-                            else if (columns.get(pos).equals("uri") && tableName.equals("page_core")){
-                                data.putString(fullCollumnName, "adidas" + "" +p_uri);
-                                p_uri++;
+                        System.err.println("Line: " + lines + " Columns size: " + columns.size() + ", data column:" + StringData.length + " size mismatch, continue importing");
+                        continue;
+                    }
+                    JsonObject data = new JsonObject();
+                    String key = StringData[primaryKeysPos[0]];
+                    for (int i = 1; i < primaryKeysPos.length; i++) {
+                        key += ":" + StringData[primaryKeysPos[i]];
+                    }
+
+                    for (pos = 0; pos < StringData.length; pos++) {
+                        String fullCollumnName =  "default."+tableName+"." + columns.get(pos);
+                        if (columnType.get(pos) == String.class)
+//                            if (columns.get(pos).equals("textcontent") || tableName == "page_core")
+//                                data.putString(fullCollumnName, "");
+//                            else
+                                data.putString(fullCollumnName, StringData[pos]);
+                        else try {
+                            if (columnType.get(pos) == Long.class)
+                                data.putNumber(fullCollumnName, Long.parseLong(StringData[pos]));
+                            else if (columnType.get(pos) == Integer.class)
+                                data.putNumber(fullCollumnName, Integer.parseInt(StringData[pos]));
+                            else if (columnType.get(pos) == Float.class) {
+                                float num = Float.parseFloat(StringData[pos]);
+
+                                if (Float.isNaN(num)) {
+                                    num = nextFloat(-5, 5);
+                                    System.err.println("Found " + StringData[pos] + " .. ->  " + num);
+                                }
+                                data.putNumber(fullCollumnName, num);
+                            } else {
+                                System.err.println("Not recognised type, stop importing");
+                                return;
                             }
-                            else if (columns.get(pos).equals("uri") && tableName.equals("keywords")){
-                                data.putString(fullCollumnName, "adidas" + "" +k_uri);
-                                k_uri++;
-                            }
-                            else
-                                data.putString(fullCollumnName, randSmallString());
-                        } else if (columnType.get(pos) == Long.class){
-                            if (columns.get(pos).equals("ts") && tableName.equals("page_core")){
-                                data.putNumber(fullCollumnName, p_ts);
-                                p_ts++;
-                            }
-                            else if (columns.get(pos).equals("ts") && tableName.equals("keywords")){
-                                data.putNumber(fullCollumnName, k_ts);
-                                k_ts++;
-                            }
-                        } else if (columnType.get(pos) == Integer.class){
-                            data.putNumber(fullCollumnName, randInt(-10000, 10000));
-                        } else if (columnType.get(pos) == Float.class){
-                            data.putNumber(fullCollumnName, nextFloat(-5, 5));
-                        } else {
-                            System.err.println("Not recognised type, stop importing");
-                            return;
+                        } catch (NumberFormatException e) {
+                            System.err.println("Line: " + lines + "Parsing error: " + StringData[pos]);
+                            data.putNumber(fullCollumnName, nextFloat(-3, 3));
                         }
-                    } catch (NumberFormatException e) {
-                        System.err.println("Line: " + lines + "Parsing error");
-                        data.putNumber(fullCollumnName, nextFloat(-3, 3));
+
+                    }
+                    put(key, data.toString());
+
+                    numofEntries++;
+                    if (delay > 50) {
+                        System.out.println("Cache put: " + numofEntries);
+                    }
+                    if (numofEntries % 1000 == 0) {
+                        System.out.println("Imported: " + numofEntries);
                     }
                 }
+                System.out.println("Totally Imported: " + numofEntries);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
 
-                for (int i = 1; i < primaryKeys.length; i++) {
-                    key = ":" + data.getValue("default."+tableName+"." +primaryKeys[i]);
-                }
-
-                System.out.println("putting... uri:" +data.getField("default."+tableName+".uri").toString()+" -- ts:"+data.getField("default."+tableName+".ts").toString());
-                put(key, data.toString());
-
-                try {
-                    sizeE+=serialize(data).length;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                numofEntries++;
-
-                if (delay > 50) {
-                    System.out.println("Cache put: " + numofEntries);
-                }
-                if (numofEntries % 1000 == 0) {
-                    System.out.println("Imported: " + numofEntries+" -- size: "+sizeE);
-                }
             }
 
-            System.out.println("Totally Imported: " + numofEntries);
-        }
-    }
 
-    public static byte[] serialize(JsonObject obj) throws IOException {
-        ByteArrayOutputStream b = new ByteArrayOutputStream();
-        ObjectOutputStream o = new ObjectOutputStream(b);
-        o.writeObject(obj.toString());
-        return b.toByteArray();
-    }
-
-    public static int randInt(int min, int max) {
-        Random rand = new Random();
-        int randomNum = rand.nextInt((max - min) + 1) + min;
-        return randomNum;
-    }
-
-    public static Long randLong() {
-        long x = 1234567L;
-        long y = 23456789L;
-        Random r = new Random();
-        long number = x+((long)(r.nextDouble()*(y-x)));
-        return number;
-    }
-
-    public static String randSmallString() {
-        char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-        StringBuilder sb = new StringBuilder();
-        Random random = new Random();
-        for (int i = 0; i < 50; i++) {
-            char c = chars[random.nextInt(chars.length)];
-            sb.append(c);
-        }
-        String randomString = sb.toString();
-        return randomString;
-    }
-
-    public static String randBigString(int arg6) {
-        char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-        StringBuilder sb = new StringBuilder();
-        Random random = new Random();
-        for (int i = 0; i < arg6; i++) {
-            char c = chars[random.nextInt(chars.length)];
-            sb.append(c);
-        }
-        String randomString = sb.toString();
-        return randomString;
     }
 
     private static void put(String key, String value) {
@@ -585,46 +528,8 @@ public class LoadAmplab {
         return new RemoteCacheManager(builder.build());
     }
 
-    private static String transformUri(String nutchUrlBase) {
-
-        String domainName = "";
-        String url = "";
-
-        String[] parts = nutchUrlBase.split(":");
-        String nutchDomainName = parts[0];
-
-        String[] words = nutchDomainName.split("\\.");
-
-        for (int i = words.length - 1; i >= 0; i--) {
-            domainName += words[i] + ".";
-        }
-        domainName = domainName.substring(0, domainName.length() - 1);
-
-        if (parts.length == 2) {
-            //System.out.print("Parts[1]:" + parts[1]);
-            String[] parts2 = parts[1].split("/");
-            if (parts2[0].startsWith("http")) ;
-            url = parts2[0] + "://" + domainName;
-            for (int i = 1; i < parts2.length; i++) {
-                url += "/" + parts2[i];
-            }
-        }
-        //System.out.print("Corrected url: " +  url);
-        return url;
-
-    }
-
     public static float nextFloat(float min, float max) {
         return min + r.nextFloat() * (max - min);
     }
-
-//    protected String getRandomDomain() {
-//        int l = 10;
-//        String result = "";
-//        for (int i = 0; i < l; i++) {
-//            result += loc[r.nextInt(loc.length)];
-//        }
-//        return "www." + result + ".com";
-//    }
 
 }
