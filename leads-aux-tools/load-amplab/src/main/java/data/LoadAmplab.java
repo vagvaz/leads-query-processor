@@ -29,7 +29,7 @@ import static data.LoadAmplab.plugs.PAGERANK;
 import static data.LoadAmplab.plugs.SENTIMENT;
 
 /**
- * Created by angelos on 05/13/15.
+ * Created by vagvaz on 05/13/15.
  */
 public class LoadAmplab {
     enum plugs {SENTIMENT, PAGERANK};
