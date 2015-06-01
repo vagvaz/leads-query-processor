@@ -1,8 +1,11 @@
 package eu.leads.processor.infinispan.operators;
 
+import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.infinispan.LeadsReducer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.*;
@@ -14,9 +17,14 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
     //   transient JsonObject conf;
     //   String configString;
     private transient String prefix;
+    transient Logger profilerLog;
+    protected ProfileEvent profCallable;
+
     public JoinReducer(String s) {
         super(s);
         configString = s;
+        profilerLog  = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
+        profCallable = new ProfileEvent("LeadsIntermediateIterator Construct" + this.getClass().toString(),profilerLog);
     }
 
     @Override
@@ -35,16 +43,24 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
         if(!isInitialized)
             initialize();
         Map<String,List<Tuple>> relations = new HashMap<>();
+
+
         while(iter.hasNext()){
             //         String jsonTuple = iter.next();
             //         Tuple t = new Tuple(jsonTuple);
             Tuple t = null;
+
+            profCallable.start("reduce iter.next");
             Object c = iter.next();
+            profCallable.end();
+
 //            if(c instanceof Tuple )
                 t = (Tuple)c;
 //            else{
 //                continue;
 //            }
+
+            profCallable.start("reduce tuples.add");
             String table = t.getAttribute("__table");
             t.removeAttribute("__table");
             List<Tuple> tuples = relations.get(table);
@@ -54,8 +70,11 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
             }
             assert(t.hasField("__tupleKey"));
             tuples.add(t);
+            profCallable.end();
         }
 
+
+        profCallable.start("reduce join");
         if(relations.size() < 2)
             return;
         ArrayList<List<Tuple>> arrays = new ArrayList<>(2);
@@ -88,6 +107,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
                 collector.emit(prefix+combinedKey,resultTuple);
             }
         }
+        profCallable.end();
         return ;
     }
 }

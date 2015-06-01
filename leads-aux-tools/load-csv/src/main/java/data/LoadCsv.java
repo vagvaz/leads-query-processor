@@ -452,7 +452,7 @@ public class LoadCsv {
                     for (pos = 0; pos < StringData.length; pos++) {
                         String fullCollumnName =  "default."+tableName+"." + columns.get(pos);
                         if (columnType.get(pos) == String.class)
-                            /*if (columns.get(pos).equals("textcontent") || tableName == "page_core")
+                            /*if (columns.get(pos).equals("textcontent") || ta  bleName == "page_core")
                                 data.putString(fullCollumnName, "");
                             else*/
                                 data.putString(fullCollumnName, StringData[pos]);
