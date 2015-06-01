@@ -29,7 +29,7 @@ import static data.LoadAmplab.plugs.PAGERANK;
 import static data.LoadAmplab.plugs.SENTIMENT;
 
 /**
- * Created by angelos on 05/13/15.
+ * Created by vagvaz on 05/13/15.
  */
 public class LoadAmplab {
     enum plugs {SENTIMENT, PAGERANK};
@@ -103,8 +103,6 @@ public class LoadAmplab {
         String initfilename = args[1];
         System.out.print("Trying to convert file: " + initfilename);
         String filename[] = initfilename.split(".csv");
-        //System.out.println("Filename" + csvfile.getAbsolutePath()+" "+filename[0]);
-
         String fulltableName[] = (initfilename.split(".csv")[0]).split("-");
         String tableName = fulltableName[fulltableName.length - 1];
         String keysFilename = filename[0] + ".keys";
@@ -412,72 +410,83 @@ public class LoadAmplab {
         }
 
         if (initialize_cache(tableName)){
-                int numofEntries = 0;
-                int lines = 0;
-                String key="";
-                System.out.println("Importing data ... ");
-                long sizeE = 0;
-                long x = 1500000L;
-                long y = 1500000L;
+            int numofEntries = 0;
+            int lines = 0;
+            String key="";
+            System.out.println("Importing data ... ");
+            long sizeE = 0;
+            long k_ts = 1500000L;
+            long k_uri = 1500000L;
+            long p_ts = 1500000L;
+            long p_uri = 1500000L;
 
-                for(int entry=0;entry<Integer.valueOf(arg5);entry++){
-                    JsonObject data = new JsonObject();
+            for(int entry=0;entry<Integer.valueOf(arg5);entry++){
+                JsonObject data = new JsonObject();
 
-                    for (pos = 0; pos < columns.size(); pos++) {
-                        String fullCollumnName =  "default."+tableName+"." + columns.get(pos);
-                        try {
-                            if (columnType.get(pos) == String.class){
-                                if (columns.get(pos).equals("textcontent") && tableName.equals("page_core"))
-                                    data.putString(fullCollumnName, randBigString(Integer.valueOf(arg6)));
-				else if (columns.get(pos).equals("uri") ) {
-                                    y++;
-                                    data.putString(fullCollumnName, "adidas" + "" +y);
-                                }
-                                else
-                                    data.putString(fullCollumnName, randSmallString());
-                            } else if (columnType.get(pos) == Long.class){
-                                x++;
-                                data.putNumber(fullCollumnName, x);
-                                //data.putNumber(columns.get(pos), randLong());
-                            } else if (columnType.get(pos) == Integer.class){
-                                data.putNumber(fullCollumnName, randInt(-10000, 10000));
-                            } else if (columnType.get(pos) == Float.class){
-                                data.putNumber(fullCollumnName, nextFloat(-5, 5));
-                            } else {
-                                System.err.println("Not recognised type, stop importing");
-                                return;
-                            }
-                        } catch (NumberFormatException e) {
-                            System.err.println("Line: " + lines + "Parsing error");
-                            data.putNumber(fullCollumnName, nextFloat(-3, 3));
-                        }
-                    }
-
-                    for (int i = 1; i < primaryKeys.length; i++) {
-                        key = ":" + data.getValue(primaryKeys[i]);
-                    }
-
-                    put(key, data.toString());
-
+                for (pos = 0; pos < columns.size(); pos++) {
+                    String fullCollumnName =  "default."+tableName+"." + columns.get(pos);
                     try {
-                        sizeE+=serialize(data).length;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-//                    sizeE+=data.toString().getBytes().length;
-
-                    numofEntries++;
-
-                    if (delay > 50) {
-                        System.out.println("Cache put: " + numofEntries);
-                    }
-                    if (numofEntries % 1000 == 0) {
-                        System.out.println("Imported: " + numofEntries+" -- size: "+sizeE);
+                        if (columnType.get(pos) == String.class){
+                            if (columns.get(pos).equals("textcontent") && tableName.equals("page_core"))
+                                data.putString(fullCollumnName, randBigString(Integer.valueOf(arg6)));
+                            else if (columns.get(pos).equals("uri") && tableName.equals("page_core")){
+                                data.putString(fullCollumnName, "adidas" + "" +p_uri);
+                                p_uri++;
+                            }
+                            else if (columns.get(pos).equals("uri") && tableName.equals("keywords")){
+                                data.putString(fullCollumnName, "adidas" + "" +k_uri);
+                                k_uri++;
+                            }
+                            else
+                                data.putString(fullCollumnName, randSmallString());
+                        } else if (columnType.get(pos) == Long.class){
+                            if (columns.get(pos).equals("ts") && tableName.equals("page_core")){
+                                data.putNumber(fullCollumnName, p_ts);
+                                p_ts++;
+                            }
+                            else if (columns.get(pos).equals("ts") && tableName.equals("keywords")){
+                                data.putNumber(fullCollumnName, k_ts);
+                                k_ts++;
+                            }
+                        } else if (columnType.get(pos) == Integer.class){
+                            data.putNumber(fullCollumnName, randInt(-10000, 10000));
+                        } else if (columnType.get(pos) == Float.class){
+                            data.putNumber(fullCollumnName, nextFloat(-5, 5));
+                        } else {
+                            System.err.println("Not recognised type, stop importing");
+                            return;
+                        }
+                    } catch (NumberFormatException e) {
+                        System.err.println("Line: " + lines + "Parsing error");
+                        data.putNumber(fullCollumnName, nextFloat(-3, 3));
                     }
                 }
 
-                System.out.println("Totally Imported: " + numofEntries);
+                for (int i = 1; i < primaryKeys.length; i++) {
+                    key = ":" + data.getValue("default."+tableName+"." +primaryKeys[i]);
+                }
+
+                System.out.println("putting... uri:" +data.getField("default."+tableName+".uri").toString()+" -- ts:"+data.getField("default."+tableName+".ts").toString());
+                put(key, data.toString());
+
+                try {
+                    sizeE+=serialize(data).length;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                numofEntries++;
+
+                if (delay > 50) {
+                    System.out.println("Cache put: " + numofEntries);
+                }
+                if (numofEntries % 1000 == 0) {
+                    System.out.println("Imported: " + numofEntries+" -- size: "+sizeE);
+                }
             }
+
+            System.out.println("Totally Imported: " + numofEntries);
+        }
     }
 
     public static byte[] serialize(JsonObject obj) throws IOException {
@@ -554,11 +563,8 @@ public class LoadAmplab {
         else if (imanager != null)
             embeddedCache = imanager.getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
         else if (emanager != null)
-//            if(ensemple_multi)
             ensembleCache = emanager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName,new ArrayList<>(emanager.sites()),
                     EnsembleCacheManager.Consistency.DIST);
-//            else
-//                ensembleCache = emanager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
         else {
             System.err.println("Not recognised type, stop importing");
             return false;
