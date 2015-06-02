@@ -24,43 +24,60 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
         super(s);
         configString = s;
         profilerLog  = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
-        profCallable = new ProfileEvent("LeadsIntermediateIterator Construct" + this.getClass().toString(),profilerLog);
+        profCallable = new ProfileEvent("JoinReducer Construct" + this.getClass().toString(),profilerLog);
     }
 
     @Override
     public void initialize() {
+        profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
+        profCallable.setProfileLogger(profilerLog);
+        if(profCallable!=null) {
+            profCallable.end("reduce init ");
+        } else {
+            profCallable = new ProfileEvent("reduce init " + this.getClass().toString(), profilerLog);
+        }
+        profCallable.start("reduce init ");
         super.initialize();
         isInitialized = true;
         conf = new JsonObject(configString);
         prefix = outputCacheName+":";
         //      prefix = outputCacheName+":";
         //      outputCache = (Cache) InfinispanClusterSingleton.getInstance().getManager().getPersisentCache(conf.getString("output"));
-
+        profCallable.end("reduce init");
     }
 
     @Override
     public void reduce(String reducedKey, Iterator<Tuple> iter,LeadsCollector collector) {
+
+        profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
+        profCallable.setProfileLogger(profilerLog);
+        if(profCallable!=null) {
+            profCallable.end("reduce reduce ");
+        } else {
+            profCallable = new ProfileEvent("reduce reduce " + this.getClass().toString(), profilerLog);
+        }
+
         if(!isInitialized)
             initialize();
         Map<String,List<Tuple>> relations = new HashMap<>();
 
-
+        profCallable.start("reduce hasNext ");
         while(iter.hasNext()){
             //         String jsonTuple = iter.next();
             //         Tuple t = new Tuple(jsonTuple);
             Tuple t = null;
 
-            profCallable.start("reduce iter.next");
+            ProfileEvent tmpprofCallable = new ProfileEvent("setEnvironment manager " + this.getClass().toString(),profilerLog);
+            tmpprofCallable.start("reduce next");
             Object c = iter.next();
-            profCallable.end();
-
+            tmpprofCallable.end("reduce next");
 //            if(c instanceof Tuple )
-                t = (Tuple)c;
+            t = (Tuple)c;
 //            else{
 //                continue;
 //            }
 
-            profCallable.start("reduce tuples.add");
+
             String table = t.getAttribute("__table");
             t.removeAttribute("__table");
             List<Tuple> tuples = relations.get(table);
@@ -69,12 +86,22 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
                 relations.put(table,tuples);
             }
             assert(t.hasField("__tupleKey"));
+
+            tmpprofCallable.start("reduce add");
             tuples.add(t);
-            profCallable.end();
+            tmpprofCallable.start("reduce add");
+        }
+        profCallable.end("reduce iter.hasNext ");
+
+        profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
+        profCallable.setProfileLogger(profilerLog);
+        if(profCallable!=null) {
+            profCallable.end("reduce reduce ");
+        } else {
+            profCallable = new ProfileEvent("reduce reduce " + this.getClass().toString(), profilerLog);
         }
 
-
-        profCallable.start("reduce join");
+        profCallable.start("reduce proc ");
         if(relations.size() < 2)
             return;
         ArrayList<List<Tuple>> arrays = new ArrayList<>(2);
@@ -107,7 +134,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
                 collector.emit(prefix+combinedKey,resultTuple);
             }
         }
-        profCallable.end();
+        profCallable.end("reduce proc ");
         return ;
     }
 }
