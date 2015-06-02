@@ -29,21 +29,21 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
 
     @Override
     public void initialize() {
-        profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
-        profCallable.setProfileLogger(profilerLog);
-        if(profCallable!=null) {
-            profCallable.end("reduce init ");
-        } else {
-            profCallable = new ProfileEvent("reduce init " + this.getClass().toString(), profilerLog);
-        }
-        profCallable.start("reduce init ");
+//        profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
+//        profCallable.setProfileLogger(profilerLog);
+//        if(profCallable!=null) {
+//            profCallable.end("reduce init ");
+//        } else {
+//            profCallable = new ProfileEvent("reduce init " + this.getClass().toString(), profilerLog);
+//        }
+//        profCallable.start("reduce init ");
         super.initialize();
         isInitialized = true;
         conf = new JsonObject(configString);
         prefix = outputCacheName+":";
         //      prefix = outputCacheName+":";
         //      outputCache = (Cache) InfinispanClusterSingleton.getInstance().getManager().getPersisentCache(conf.getString("output"));
-        profCallable.end("reduce init");
+//        profCallable.end("reduce init");
     }
 
     @Override
