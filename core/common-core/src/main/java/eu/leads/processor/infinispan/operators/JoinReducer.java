@@ -67,7 +67,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
             //         Tuple t = new Tuple(jsonTuple);
             Tuple t = null;
 
-            ProfileEvent tmpprofCallable = new ProfileEvent("setEnvironment manager " + this.getClass().toString(),profilerLog);
+            ProfileEvent tmpprofCallable = new ProfileEvent("JoinReducer Manager " + this.getClass().toString(),profilerLog);
             tmpprofCallable.start("reduce next");
             Object c = iter.next();
             tmpprofCallable.end("reduce next");
@@ -89,7 +89,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
 
             tmpprofCallable.start("reduce add");
             tuples.add(t);
-            tmpprofCallable.start("reduce add");
+            tmpprofCallable.end("reduce add");
         }
         profCallable.end("reduce iter.hasNext ");
 
