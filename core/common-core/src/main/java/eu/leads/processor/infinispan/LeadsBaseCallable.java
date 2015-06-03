@@ -6,7 +6,6 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.core.TupleMarshaller;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.context.Flag;
@@ -129,7 +128,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
                                                                                     (ClusteringDependentLogic.class);
     profCallable.end();
     profCallable.start("Iterate Over Local Data");
-//    ProfileEvent profExecute = new ProfileEvent("Execute " + this.getClass().toString(),profilerLog);
+    ProfileEvent profExecute = new ProfileEvent("Execute " + this.getClass().toString(),profilerLog);
     int count=0;
 //    for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
 //      if (!cdl.localNodeIsPrimaryOwner(key))
@@ -142,11 +141,11 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         //      V value = inputCache.get(key);
         K key = (K) entry.getKey();
         V value = (V) entry.getValue();
-//        profExecute.end();
+        profExecute.end();
         if (value != null) {
-//          profExecute.start("ExOn" + (++count));
+          profExecute.start("ExOn" + (++count));
           executeOn((K) key, value);
-//          profExecute.end();
+          profExecute.end();
         }
       }
     }
