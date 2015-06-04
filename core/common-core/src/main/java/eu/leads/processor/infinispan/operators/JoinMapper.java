@@ -22,13 +22,13 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
   }
 
   @Override
-  public void map(String key, Tuple value, Collector<String, Tuple> collector) {
+  public void map(String key, Tuple t, Collector<String, Tuple> collector) {
     if (!isInitialized)
       initialize();
 
     StringBuilder builder = new StringBuilder();
     //        String tupleId = key.substring(key.indexOf(":"));
-    Tuple t = new Tuple(value);
+    //Tuple t = new Tuple(value);
     //        Tuple t = new Tuple(value);
     //progress();
     for (String c : joinColumns.get(tableName)) {

@@ -1,14 +1,9 @@
 package eu.leads.processor.infinispan;
 
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.core.TupleMarshaller;
 import org.infinispan.Cache;
-import org.infinispan.client.hotrod.RemoteCache;
-import org.infinispan.client.hotrod.Search;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.CloseableIterable;
-import org.infinispan.query.SearchManager;
-import org.infinispan.query.dsl.QueryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +23,8 @@ public class LeadsIntermediateIterator<V> implements Iterator<V> {
   private Iterator<IndexedComplexIntermediateKey> chunkIterator;
   private List<IndexedComplexIntermediateKey> list;
   private static Logger log = null;
+
+
 
   public LeadsIntermediateIterator(String key, String prefix, InfinispanManager imanager){
     log = LoggerFactory.getLogger(LeadsIntermediateIterator.class);

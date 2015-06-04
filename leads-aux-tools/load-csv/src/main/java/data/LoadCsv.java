@@ -440,6 +440,7 @@ public class LoadCsv {
                 int lines = 0;
                 String[] StringData;
                 System.out.println("Importing data ... ");
+                long sizeE = 0;
                 // cache.startBatch();
                 while ((StringData = reader.readNext()) != null) {
                     lines++;
@@ -456,16 +457,18 @@ public class LoadCsv {
 
                     for (pos = 0; pos < StringData.length; pos++) {
                         numofChars+=StringData[pos].length();
+
+                        String fullCollumnName =  "default."+tableName+"." + columns.get(pos);
                         if (columnType.get(pos) == String.class)
-//                            if (columns.get(pos).equals("textcontent") || tableName == "page_core")
-//                                data.putString(columns.get(pos), "");
-//                            else
-                                data.putString(columns.get(pos), StringData[pos]);
+                            /*if (columns.get(pos).equals("textcontent") || ta  bleName == "page_core")
+                                data.putString(fullCollumnName, "");
+                            else*/
+                                data.putString(fullCollumnName, StringData[pos]);
                         else try {
                             if (columnType.get(pos) == Long.class)
-                                data.putNumber(columns.get(pos), Long.parseLong(StringData[pos]));
+                                data.putNumber(fullCollumnName, Long.parseLong(StringData[pos]));
                             else if (columnType.get(pos) == Integer.class)
-                                data.putNumber(columns.get(pos), Integer.parseInt(StringData[pos]));
+                                data.putNumber(fullCollumnName, Integer.parseInt(StringData[pos]));
                             else if (columnType.get(pos) == Float.class) {
                                 float num = Float.parseFloat(StringData[pos]);
 
@@ -473,7 +476,7 @@ public class LoadCsv {
                                     num = nextFloat(-5, 5);
                                     System.err.println("Found " + StringData[pos] + " .. ->  " + num);
                                 }
-                                data.putNumber(columns.get(pos), num);
+                                data.putNumber(fullCollumnName, num);
                             } else {
                                 System.err.println("Not recognised type, stop importing");
                                 return;
@@ -481,19 +484,27 @@ public class LoadCsv {
                         } catch (NumberFormatException e) {
                             System.err.println("Line: " + lines + "Parsing error: " + StringData[pos]);
                             //e.printStackTrace();
-                            data.putNumber(columns.get(pos), nextFloat(-3, 3));
+                            data.putNumber(fullCollumnName, nextFloat(-3, 3));
                         }
 
                     }
 
                     put(key, data.toString());
                     numofBytes += key.getBytes().length+data.toString().getBytes().length;
+
+                    try {
+                        sizeE+=serialize(data).length;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                     numofEntries++;
                     if (delay > 50) {
                         System.out.println("Cache put: " + numofEntries);
                     }
                     if (numofEntries % 1000 == 0) {
                         System.out.println("Imported: " + numofEntries + ", Charbytes: " + numofChars + ", bytes: " + numofBytes + ", average: " + numofBytes/numofEntries);
+                        System.out.println("Imported: " + numofEntries+" -- size: "+sizeE);
                         //cache.endBatch(true);
 //                   if(numofEntries%3000==0)
                         //         return;
@@ -510,6 +521,13 @@ public class LoadCsv {
             }
 
 
+    }
+
+    public static byte[] serialize(JsonObject obj) throws IOException {
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        ObjectOutputStream o = new ObjectOutputStream(b);
+        o.writeObject(obj.toString());
+        return b.toByteArray();
     }
 
     private static void put(String key, String value) {

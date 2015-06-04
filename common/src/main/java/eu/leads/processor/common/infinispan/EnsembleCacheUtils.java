@@ -53,7 +53,8 @@ public class EnsembleCacheUtils {
     }
 
     public static void waitForAllPuts() {
-        profExecute.start("waitForAllPuts");
+//        profExecute.start("waitForAllPuts");
+        clearCompleted();
         while (!concurrentQuue.isEmpty()) {
             Iterator<NotifyingFuture<Void>> iterator = concurrentQuue.iterator();
             while (iterator.hasNext()) {
@@ -85,7 +86,7 @@ public class EnsembleCacheUtils {
                 e.printStackTrace();
             }
         }
-        profExecute.end();
+//        profExecute.end();
     }
 
     public static void putToCache(BasicCache cache, Object key, Object value) {
@@ -134,7 +135,7 @@ public class EnsembleCacheUtils {
     }
 
     private static void putToCacheSync(BasicCache cache, Object key, Object value) {
-        profExecute.start("putToCache Sync");
+//        profExecute.start("putToCache Sync");
         boolean isok = false;
         while (!isok) {
             try {
@@ -176,12 +177,12 @@ public class EnsembleCacheUtils {
                 }
             }
         }
-        profExecute.end();
+//        profExecute.end();
     }
 
     private static void putToCacheAsync(BasicCache cache, Object key, Object value) {
         counter = (counter + 1) % Long.MAX_VALUE;
-        profExecute.start("putToCache Async");
+//        profExecute.start("putToCache Async");
         boolean isok = false;
         while (!isok) {
             try {
@@ -243,7 +244,7 @@ public class EnsembleCacheUtils {
                 }
             }
         }
-        profExecute.end();
+//        profExecute.end();
     }
 
     public static <KOut> void putIfAbsentToCache(BasicCache cache, KOut key, KOut value) {

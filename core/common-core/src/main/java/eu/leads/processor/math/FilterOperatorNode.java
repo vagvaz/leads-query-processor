@@ -261,10 +261,12 @@ public class FilterOperatorNode {
       if(!t.hasField(value.getObject("body").getObject("column").getString("name")))
          return null;
       JsonObject result = new JsonObject();
-      result.putString("type",value.getObject("body").getObject("column").getObject("dataType").getString("type"));
-      result.putObject("body",new JsonObject());
+      result.putString("type",
+          value.getObject("body").getObject("column").getObject("dataType").getString("type"));
+      result.putObject("body", new JsonObject());
       result.getObject("body").putString("type", result.getString("type"));
-      result.getObject("body").putValue("val",t.getGenericAttribute(value.getObject("body").getObject("column").getString("name")));
+      result.getObject("body").putValue("val",
+          t.getGenericAttribute(value.getObject("body").getObject("column").getString("name")));
       return result;
    }
 
@@ -273,8 +275,8 @@ public class FilterOperatorNode {
 //      FilterOperatorNode left;
 //      FilterOperatorNode right;
 //      JsonObject value;
-      result.putString("type",type.toString());
-      result.putObject("value",value);
+      result.putString("type", type.toString());
+      result.putObject("value", value);
       if(left != null){
          JsonObject leftOb = new JsonObject();
          leftOb = left.toJson(leftOb);
@@ -318,10 +320,30 @@ public class FilterOperatorNode {
             }
             columns.add(columnName);
             result.put(table,columns);
+            break;
          default:
             break;
       }
       return result;
 
+   }
+
+   public void renameTableReference(String tableName, String toRename) {
+      if(left != null)
+         left.renameTableReference(tableName, toRename);
+      if(right != null)
+         right.renameTableReference(tableName, toRename);
+      switch (type) {
+         case FIELD:
+            String columnName = value.getObject("body").getObject("column").getString("name");
+            if(columnName.contains("."+toRename+"."))
+            {
+               columnName = columnName.replace("."+toRename+".","."+tableName+".");
+               value.getObject("body").getObject("column").putString("name",columnName);
+            }
+            break;
+         default:
+            break;
+      }
    }
 }

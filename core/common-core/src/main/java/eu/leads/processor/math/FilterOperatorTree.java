@@ -65,6 +65,10 @@ public class FilterOperatorTree {
       result = root.getAllFieldsByTable(result);
       return result;
    }
+
+   public void renameTableDatum(String tableName, String toRename) {
+      root.renameTableReference(tableName,toRename);
+   }
 //    public MathOperatorTree(MathOperatorTreeNode root) {
 //        this.root = root;
 //    }

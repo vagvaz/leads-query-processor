@@ -111,47 +111,47 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
   //        return report.getReport();
   //    }
 
-  protected Tuple prepareOutput(Tuple tuple) {
-    if (outputSchema.toString().equals(inputSchema.toString())) {
-      return tuple;
-    }
-
-    JsonObject result = new JsonObject();
-    //WARNING
-    //       System.err.println("out: " + tuple.asString());
-
-    if(targetsMap.size() == 0)
-    {
-      //          System.err.println("s 0 ");
-      return tuple;
-
-    }
-    //       System.err.println("normal");
-
-    //END OF WANRING
-    List<String> toRemoveFields = new ArrayList<String>();
-    Map<String,List<String>> toRename = new HashMap<String,List<String>>();
-    for (String field : tuple.getFieldNames()) {
-      List<JsonObject> ob = targetsMap.get(field);
-      if (ob == null)
-        toRemoveFields.add(field);
-      else {
-        for(JsonObject obb : ob)
-        {
-          List<String> ren  = toRename.get(field);
-          if(ren == null){
-            ren = new ArrayList<>();
-          }
-          //               toRename.put(field, ob.getObject("column").getString("name"));
-          ren.add(obb.getObject("column").getString("name"));
-          toRename.put(field,ren);
-        }
-      }
-    }
-    tuple.removeAtrributes(toRemoveFields);
-    tuple.renameAttributes(toRename);
-    return tuple;
-  }
+//  protected Tuple prepareOutput(Tuple tuple) {
+//    if (outputSchema.toString().equals(inputSchema.toString())) {
+//      return tuple;
+//    }
+//
+//    JsonObject result = new JsonObject();
+//    //WARNING
+//    //       System.err.println("out: " + tuple.asString());
+//
+//    if(targetsMap.size() == 0)
+//    {
+//      //          System.err.println("s 0 ");
+//      return tuple;
+//
+//    }
+//    //       System.err.println("normal");
+//
+//    //END OF WANRING
+//    List<String> toRemoveFields = new ArrayList<String>();
+//    Map<String,List<String>> toRename = new HashMap<String,List<String>>();
+//    for (String field : tuple.getFieldNames()) {
+//      List<JsonObject> ob = targetsMap.get(field);
+//      if (ob == null)
+//        toRemoveFields.add(field);
+//      else {
+//        for(JsonObject obb : ob)
+//        {
+//          List<String> ren  = toRename.get(field);
+//          if(ren == null){
+//            ren = new ArrayList<>();
+//          }
+//          //               toRename.put(field, ob.getObject("column").getString("name"));
+//          ren.add(obb.getObject("column").getString("name"));
+//          toRename.put(field,ren);
+//        }
+//      }
+//    }
+//    tuple.removeAtrributes(toRemoveFields);
+//    tuple.renameAttributes(toRename);
+//    return tuple;
+//  }
   protected  void handlePagerank(Tuple t) {
 
     if (t.hasField("default.webpages.pagerank")) {

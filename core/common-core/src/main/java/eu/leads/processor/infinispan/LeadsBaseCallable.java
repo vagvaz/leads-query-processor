@@ -3,9 +3,9 @@ package eu.leads.processor.infinispan;
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.core.TupleMarshaller;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.context.Flag;
@@ -46,7 +46,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   transient protected EnsembleCache ecache;
 
   transient Logger profilerLog;
-  ProfileEvent profCallable;
+  protected ProfileEvent profCallable;
   public LeadsBaseCallable(String configString, String output){
     this.configString = configString;
     this.output = output;
@@ -91,7 +91,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     if(ensembleHost != null && !ensembleHost.equals("")) {
       tmpprofCallable.start("Start EnsemlbeCacheManager");
       emanager = new EnsembleCacheManager(ensembleHost);
-      emanager.start();
+//      emanager.start();
 //      emanager = createRemoteCacheManager();
 //      ecache = emanager.getCache(output,new ArrayList<>(emanager.sites()),
 //          EnsembleCacheManager.Consistency.DIST);
@@ -99,12 +99,14 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     else {
       tmpprofCallable.start("Start EnsemlbeCacheManager");
       emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
-      emanager.start();
+//      emanager.start();
 //            emanager = createRemoteCacheManager();
     }
+    emanager.start();
+
     tmpprofCallable.end();
     tmpprofCallable.start("Get cache ");
-      ecache = emanager.getCache(output,new ArrayList<>(emanager.sites()),
+    ecache = emanager.getCache(output,new ArrayList<>(emanager.sites()),
           EnsembleCacheManager.Consistency.DIST);
     tmpprofCallable.end();
       outputCache = ecache;
@@ -135,7 +137,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     try {
       for (Object object : iterable) {
         Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
-        profExecute.start("GetTuple" + (count + 1));
+
         //      V value = inputCache.get(key);
         K key = (K) entry.getKey();
         V value = (V) entry.getValue();
@@ -150,8 +152,9 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     catch(Exception e){
         iterable.close();
       profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
-      profilerLog.error(e.getStackTrace().toString());
+      PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
       }
+    profCallable.end();
     finalizeCallable();
     return embeddedCacheManager.getAddress().toString();
   }
@@ -167,13 +170,13 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   @Override public void finalizeCallable(){
     try {
       EnsembleCacheUtils.waitForAllPuts();
-      emanager.stop();
+//      emanager.stop();
 //
 //      ecache.stop();
 //      outputCache.stop();
     }catch(Exception e){
-        System.err.println("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage() + " cause "
-                             + e.getCause().toString());
+        System.err.println("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage() + " cause ");
+       PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
       }
     profCallable.end("finalize");
   }

@@ -1,5 +1,6 @@
 package eu.leads.processor.infinispan.operators;
 
+import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.Tuple;
@@ -41,8 +42,10 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
   protected Logger log = LoggerFactory.getLogger(ScanCallableUpdate.class.toString());
     private VersionScalar minVersion=null;
     private VersionScalar maxVersion=null;
-
-    public ScanCallableUpdate(String configString, String output) {
+  transient protected boolean renameTableInTree;
+  transient  private String toRename;
+  transient  private String tableName;
+  public ScanCallableUpdate(String configString, String output) {
     super(configString, output);
   }
   public ScanCallableUpdate(String configString, String output,boolean onVersionedCache) {
@@ -80,6 +83,17 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
     if(conf.getObject("body").containsField("qual"))
     {
       tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
+
+      toRename = getRenamingTableFromSchema(inputSchema);
+      tableName = conf.getObject("body").getObject("tableDesc").getString("tableName");
+      tableName = tableName.replace(StringConstants.DEFAULT_DATABASE_NAME+".","");
+      if(tableName.equals(toRename)){
+        renameTableInTree = false;
+      }
+      else{
+        renameTableInTree = true;
+      }
+
     }
     else{
       tree =null;
@@ -101,7 +115,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
   @Override public void executeOn(K key, V ivalue) {
     Logger profilerLog = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
 
-    ProfileEvent profExecute = new ProfileEvent("Execute " + this.getClass().toString(),profilerLog);
+//    ProfileEvent profExecute = new ProfileEvent("Execute " + this.getClass().toString(),profilerLog);
 
     //         System.err.println(manager.getCacheManager().getAddress().toString() + " "+ entry.getKey() + "       " + entry.getValue());
     Tuple toRunValue = null;
@@ -148,44 +162,89 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
       //          String value = (String) entry.getValue();
       //          String value = (String)inputCache.get(key);
 //      Tuple tuple = new Tuple(toRunValue);
-      profExecute.start("new Tuple");
-      Tuple tuple = new Tuple(toRunValue);
-      profExecute.end();
+//<<<<<<< HEAD
+//      profExecute.start("new Tuple");
+////      Tuple tuple = toRunValue;//new Tuple(toRunValue);
+//      Tuple tuple = new Tuple(toRunValue);
+//      profExecute.end();
+//
+//      profExecute.start("namesToLowerCase");
+//      namesToLowerCase(tuple);
+//      profExecute.end();
+//      profExecute.start("renameAllTupleAttributes");
+//      renameAllTupleAttributes(tuple);
+//=======
+      //profExecute.start("new Tuple");
+      Tuple tuple = toRunValue;//new Tuple(toRunValue);
+      //profExecute.end();
 
-      profExecute.start("namesToLowerCase");
-      namesToLowerCase(tuple);
-      profExecute.end();
-      profExecute.start("renameAllTupleAttributes");
-      renameAllTupleAttributes(tuple);
-      profExecute.end();
+      //profExecute.start("namesToLowerCase");
+      //namesToLowerCase(tuple);
+      //profExecute.end();
+     // profExecute.start("renameAllTupleAttributes");
+      //renameAllTupleAttributes(tuple);
+//      profExecute.end();
       if (tree != null) {
-        profExecute.start("tree.accept");
+        if(renameTableInTree){
+          tree.renameTableDatum(tableName,toRename);
+        }
+//        profExecute.start("tree.accept");
         boolean accept = tree.accept(tuple);
-        profExecute.end();
+//        profExecute.end();
         if (accept) {
-          profExecute.start("prepareOutput");
+//          profExecute.start("prepareOutput");
+
           tuple = prepareOutput(tuple);
-          profExecute.end();
+//          profExecute.end();
           //               log.info("--------------------    put into output with filter ------------------------");
           if (key != null && tuple != null) {
-            profExecute.start("Scan_Put");
+//            profExecute.start("Scan_Put");
             outputToCache(key.toString(), tuple);
-            profExecute.end();
+//            profExecute.end();
           }
         }
       } else {
-        profExecute.start("prepareOutput");
+//        profExecute.start("prepareOutput");
         tuple = prepareOutput(tuple);
-        profExecute.end();
+//        profExecute.end();
         //            log.info("--------------------    put into output without tree ------------------------");
         if (key != null && tuple != null){
-          profExecute.start("Scan_outputToCache");
+//          profExecute.start("Scan_outputToCache");
           outputToCache(key,tuple);
-          profExecute.end();
+//          profExecute.end();
         }
       }
   }
 
+  private boolean needsREnaming() {
+    return !outputSchema.toString().equals(inputSchema.toString());
+  }
+
+  private String getRenamingTableFromSchema(JsonObject inputSchema) {
+    if(inputSchema!=null) {
+
+      String fieldname =((JsonObject)(inputSchema.getArray("fields").iterator().next())).getString("name");
+      //fieldname database.table.collumncolumnName = tmp.getString("name");
+      String result = fieldname.substring(fieldname.indexOf(".")+1,fieldname.lastIndexOf("."));
+      if(result != null && !result.equals(""))
+        return result;
+    }
+    return null;
+  }
+
+  //TODO write checks
+  private String getTableNameFromTuple(Tuple tuple) {
+    if(tuple!=null) {
+
+      String fieldname = tuple.getFieldNames().iterator().next();
+      //fieldname database.table.collumn
+      String result = fieldname.substring(fieldname.indexOf(".")+1,fieldname.lastIndexOf("."));
+      if(result != null && !result.equals(""))
+        return result;
+    }
+
+    return  null;
+  }
 
 
   /**
@@ -225,20 +284,20 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
     }
   }
 
-  private void renameAllTupleAttributes(Tuple tuple) {
-    JsonArray fields = inputSchema.getArray("fields");
-    Iterator<Object> iterator = fields.iterator();
-    String columnName = null;
-    while(iterator.hasNext()){
-      JsonObject tmp = (JsonObject) iterator.next();
-      columnName = tmp.getString("name");
-      int lastPeriod = columnName.lastIndexOf(".");
-      String attributeName = columnName.substring(lastPeriod+1);
-      tuple.renameAttribute(attributeName,columnName);
-    }
+//  private void renameAllTupleAttributes(Tuple tuple) {
+//    JsonArray fields = inputSchema.getArray("fields");
+//    Iterator<Object> iterator = fields.iterator();
+//    String columnName = null;
+//    while(iterator.hasNext()){
+//      JsonObject tmp = (JsonObject) iterator.next();
+//      columnName = tmp.getString("name");
+//      int lastPeriod = columnName.lastIndexOf(".");
+//      String attributeName = columnName.substring(lastPeriod+1);
+//      tuple.renameAttribute(attributeName,columnName);
+//    }
 
-    handlePagerank(columnName.substring(0,columnName.lastIndexOf(".")),tuple);
-  }
+//    handlePagerank(columnName.substring(0,columnName.lastIndexOf(".")),tuple);
+//  }
 
   protected void handlePagerank(String substring, Tuple t) {
     if(conf.getObject("body").getObject("tableDesc").getString("tableName").equals("default.webpages")){

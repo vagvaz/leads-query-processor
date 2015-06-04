@@ -226,8 +226,8 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
     // if (isOverflown() && mcc.hasCombiner()) {
     // combine(mcc, this);
     // }
-    Set<Object> keys = new HashSet<>();
-    keys.add(key);
+//    Set<Object> keys = new HashSet<>();
+//    keys.add(key);
   }
 
 
