@@ -26,11 +26,13 @@ public class DataStoreSingleton {
 	static Properties mapping = new Properties();
 	static Properties parameters = new Properties();
 	
+	public static String storeTechnology = null;
+	
 	public static void configureDataStore(Configuration conf) {
 		if(dataStore == null) {
 			storagePropertiesDir = conf.getString("storagePropertiesDir");
-			String technology = conf.getString("technology");
-			if(technology.toLowerCase().equals("cassandra")) {
+			storeTechnology = conf.getString("technology").toLowerCase();
+			if(storeTechnology.toLowerCase().equals("cassandra")) {
 				mappingFile = "mapping/casscql.properties";
 //				initProperties();
 				initMapping();
@@ -39,7 +41,7 @@ public class DataStoreSingleton {
 				String [] hosts = conf.getStringArray("host");
 				dataStore = new CassandraCQLDataStore(mapping,port,hosts);
 			}
-			else if(technology.toLowerCase().equals("leads")) {
+			else if(storeTechnology.toLowerCase().equals("leads")) {
 				System.out.println("Configuring data store...");
 				mappingFile = "mapping/leadsstore.properties";
 //				initProperties();
@@ -98,6 +100,10 @@ public class DataStoreSingleton {
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	public static String getStoreTechnology() {
+		return storeTechnology;
 	}
 
 //	private static void initProperties() {

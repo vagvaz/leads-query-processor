@@ -3,14 +3,18 @@ package eu.leads.processor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import eu.leads.PropertiesSingleton;
 import eu.leads.datastore.DataStoreSingleton;
 import eu.leads.infext.logging.redirect.StdLoggerRedirect;
+import eu.leads.infext.proc.com.indexing.KeywordsListSingletonExt;
+import eu.leads.infext.proc.com.indexing.LeadsDocumentConceptSearchCall;
 import eu.leads.infext.proc.realtime.env.pojo.PageProcessingPojo;
 import eu.leads.infext.python.PZSStart;
 import eu.leads.processor.common.infinispan.InfinispanManager;
@@ -69,9 +73,13 @@ public class AdidasProcessingPlugin implements PluginInterface {
 	      // READ Configuration for the plugin
 	      PropertiesSingleton.setResourcesDir(config.getString("resources_path"));
 
+	      // INIT page content processor
 	      if(pageProcessingPojo == null)
 	    	  pageProcessingPojo = new PageProcessingPojo();
-      
+	      
+	      // ADD Keywords to Lucene
+	      addKeywordsToIndexer();
+	      
 	      // START Python ZeroMQ Server!
 	      PZSStart.start(config);
 	      
@@ -82,7 +90,36 @@ public class AdidasProcessingPlugin implements PluginInterface {
       }
    }
    
-   private void setLogging(Configuration config) throws Exception {
+   private void addKeywordsToIndexer() {
+		List<List<Object>> keywordsDef = new ArrayList<>();
+		
+		Properties mapping = DataStoreSingleton.getMapping();
+		
+		List<Map<String, Object>> keywordsList = KeywordsListSingletonExt.getInstance().getKeywordsList();
+		for(Map<String, Object> keywordMap : keywordsList) {
+			List<Object> keywordInfo = new ArrayList<>();
+			
+			Long id 					= (Long) keywordMap.get(mapping.getProperty("leads_input_keywords-id"));
+			String keywordsString 		= (String) keywordMap.get(mapping.getProperty("leads_input_keywords-keywords"));	
+			int nonMatchingWords 		= (int) keywordMap.get(mapping.getProperty("leads_input_keywords-non_matching_words"));
+			int nonMatchingChars 		= (int) keywordMap.get(mapping.getProperty("leads_input_keywords-non_matching_chars"));
+			int distanceBetweenWords 	= (int) keywordMap.get(mapping.getProperty("leads_input_keywords-distance_between_words"));
+			boolean inOrder 		 	= (boolean) keywordMap.get(mapping.getProperty("leads_input_keywords-in_order"));
+
+			keywordInfo.add(id);
+			keywordInfo.add(keywordsString);
+			keywordInfo.add(nonMatchingWords);
+			keywordInfo.add(nonMatchingChars);
+			keywordInfo.add(distanceBetweenWords);
+			keywordInfo.add(inOrder);
+			
+			keywordsDef.add(keywordInfo);			
+		}
+		
+		LeadsDocumentConceptSearchCall.addKeywords(keywordsDef);
+   }
+
+private void setLogging(Configuration config) throws Exception {
 	   String dir = config.getString("loggingDir");
 	   System.out.println("Logging to "+dir);
 	   StdLoggerRedirect.initLogging(dir);

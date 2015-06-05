@@ -69,7 +69,7 @@ public class LeadsDataStore extends AbstractDataStore {
 		String query = queryP01+queryP02+queryP03+queryP04;
 
 		QueryResults rs;
-		rs = LeadsQueryInterface.sendQuery(query);
+		rs = LeadsQueryInterface.execute(query);
 		
 //		if((rs == null || rs.getResult().size() == 0) && timestamp != null && before == true) {
 //
@@ -221,7 +221,7 @@ public class LeadsDataStore extends AbstractDataStore {
 		
 		query = String.format(query,valuesList.toArray());
 		
-		QueryResults rs = LeadsQueryInterface.sendQuery(query);
+		QueryResults rs = LeadsQueryInterface.execute(query);
 		if(rs == null || rs.getResult().size() == 0)
 			return false;		
 	
@@ -248,7 +248,7 @@ public class LeadsDataStore extends AbstractDataStore {
 		//
 		String query = queryP01+queryP02+queryP03+queryP04+queryP05;
 
-		QueryResults rs = LeadsQueryInterface.sendQuery(query);
+		QueryResults rs = LeadsQueryInterface.execute(query);
 		
 		if(rs != null) {
 			for(String row : rs.getResult()) {
@@ -313,7 +313,7 @@ public class LeadsDataStore extends AbstractDataStore {
 			System.out.println(query);
 
 			System.out.println();
-			QueryResults rs = LeadsQueryInterface.sendQuery(query);
+			QueryResults rs = LeadsQueryInterface.execute(query);
 			if(rs == null || rs.getResult().size() == 0)
 				return false;
 		}
@@ -335,7 +335,7 @@ public class LeadsDataStore extends AbstractDataStore {
 					+ " WHERE keywords = '" + element + "'";
 			System.out.println(query);
 			
-			QueryResults rs = LeadsQueryInterface.sendQuery(query);
+			QueryResults rs = LeadsQueryInterface.execute(query);
 			
 			if(rs != null) {
 				for(String row : rs.getResult()) {
@@ -405,7 +405,7 @@ public class LeadsDataStore extends AbstractDataStore {
 		//
 		String query = queryP01+queryP02+queryP03+queryP04+queryP05+queryP06+queryP07;
 
-		QueryResults rs = LeadsQueryInterface.sendQuery(query);
+		QueryResults rs = LeadsQueryInterface.execute(query);
 		if(rs == null || rs.getResult().size() == 0)
 			return false;
 
@@ -426,7 +426,7 @@ public class LeadsDataStore extends AbstractDataStore {
 
 		System.out.println(query);
 
-		QueryResults rs = LeadsQueryInterface.sendQuery(query);
+		QueryResults rs = LeadsQueryInterface.execute(query);
 		try{
 			if(rs != null) {
 				for(String row : rs.getResult()) {
@@ -453,7 +453,7 @@ public class LeadsDataStore extends AbstractDataStore {
 
 	@Override
 	public Object getFamilyStorageHandle(String familyName) {
-		throw new UnsupportedOperationException("Use eu.leads.processor.web.WebServiceClient singleton for this storage");
+		return new LeadsQueryInterface();
 	}
 	
 	/*
@@ -481,7 +481,7 @@ public class LeadsDataStore extends AbstractDataStore {
 	public List<String> getUsersKeywordsList() {
 		List<String> keywords = new ArrayList<String>();
 		
-		QueryResults rs = LeadsQueryInterface.sendQuery("SELECT * FROM default.adidas_keywords");
+		QueryResults rs = LeadsQueryInterface.execute("SELECT * FROM default.adidas_keywords");
 		
 		if(rs != null) {
 			for(String row : rs.getResult()) {

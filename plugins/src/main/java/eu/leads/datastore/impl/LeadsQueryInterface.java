@@ -36,7 +36,7 @@ public class LeadsQueryInterface {
 		}
 	}
 
-    public static QueryResults sendQuery(String sql) {
+    public static QueryResults execute(String sql) {
     	QueryResults res = null;
     	
     	/* TIME */ long start = System.currentTimeMillis();

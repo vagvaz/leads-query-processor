@@ -319,6 +319,20 @@ public class LEADSUtils {
 		java.util.regex.Matcher m = r.matcher(uuidCand);
 		return m.matches();
 	}
+	
+	public static Long stringToLongOrNull(String str) {
+		try {return Long.parseLong(str);}
+		catch (NumberFormatException e) {
+			return null;
+		}
+	}
+	
+	public static Double stringToDoubleOrNull(String str) {
+		try {return Double.parseDouble(str);}
+		catch (NumberFormatException e) {
+			return null;
+		}
+	}
 
 	public static boolean isNumber(Object value) {
 		if(value instanceof java.lang.Integer)

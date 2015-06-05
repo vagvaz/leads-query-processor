@@ -6,7 +6,5 @@
 	<port>8080</port>
 	
 	<loggingDir>${env:LEADS_ADIDAS_LOGS}</loggingDir>
-	<resources_path>${env:LEADS_ADIDAS_RESOURCES}</resources_path>
-	<storagePropertiesDir>${env:LEADS_ADIDAS_PROPERTIES}</storagePropertiesDir>
 	
 </config>

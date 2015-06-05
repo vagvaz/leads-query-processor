@@ -41,7 +41,7 @@ public class QueriesTest {
 //				// + "VALUES ('abcd', 124, 'en', 'abc', '1.0', 'abc', 'abc', 1.0, 'type', 1.0);");
 //				 + "VALUES ('abd', 125, 'en', NULL, NULL, NULL, NULL, 2.0, NULL, 1.0);");
 		
-		QueryResults rs = LeadsQueryInterface.sendQuery(
+		QueryResults rs = LeadsQueryInterface.execute(
 				"INSERT INTO default.adidas_keywords (keywords) VALUES "
 				+ "('adidas',"
 				+ " 'adidas boost',"

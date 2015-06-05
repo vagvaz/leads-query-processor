@@ -4,7 +4,11 @@ import java.util.Iterator;
 
 import org.infinispan.distexec.mapreduce.Reducer;
 
-public class DefaultReducer implements Reducer<Object, Object> {
+import eu.leads.processor.infinispan.LeadsReducer;
+
+public class DefaultReducer extends LeadsReducer<Object, Object> {
+	
+	private static final long serialVersionUID = 835066292446759205L;
 
 	@Override
 	public Object reduce(Object arg0, Iterator<Object> iterator) {

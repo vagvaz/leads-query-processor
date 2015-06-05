@@ -53,7 +53,8 @@ public class EcomSiteDefinerMR extends AbstractPartialSiteDefiner {
 			int countedPagesNo = dirPagesNo;
 			int ecomPagesNo = 0;
 			
-	        MapReduceTask<Object, Object, Object, Object> task = new MapReduceTask<Object, Object, Object, Object>((Cache<Object, Object>) dataStore.getFamilyStorageHandle(null));
+			// TODO Vaggelis
+	        MapReduceTask<Object, Object, Object, Object> task = new MapReduceTask<Object, Object, Object, Object>((Cache<Object, Object>) new Object());
 	        task.onKeys(dirUris.toArray());
 			
 	        Mapper<Object, Object, Object, Object> ecomSiteDefinerMapper = new EcomSiteDefinerMapper();

@@ -6,96 +6,151 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.XMLConfiguration;
+import org.zeromq.ZFrame;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
 
-import eu.leads.PropertiesSingleton;
-import eu.leads.datastore.DataStoreSingleton;
-import eu.leads.datastore.datastruct.UrlTimestamp;
 import eu.leads.infext.logging.redirect.StdLoggerRedirect;
-import eu.leads.infext.proc.com.indexing.DocumentKeywordSearch;
-import eu.leads.infext.proc.com.indexing.KeywordsListSingleton;
+import eu.leads.infext.proc.com.indexing.LuLeadIndexer;
+import eu.leads.infext.proc.com.indexing.model.KeywordMatchInfo;
 
 public class LeadsIndexingServer {
 
-	public static void main(String[] args) throws ConfigurationException {
+	public static void main(String[] args) {
         if (args.length < 2) {
-            System.out.printf("I: syntax: flserver1 <conffile> <endpoint>\n");
+            System.out.printf("I: syntax: flserver1 <loggingdir> <endpoint>\n");
             System.exit(0);
         }
         
-		Configuration config = new XMLConfiguration(
-//				"/home/ubuntu/.adidas/test/leads-query-processor/nqe/system-plugins/adidas-processing-plugin/adidas-processing-plugin-conf.xml");
-				args[0]+"leads-lucene-indexing-conf.xml");
-        
-        // TODO LOGGING
- 	    String dir = config.getString("loggingDir");
+ 	    String dir = args[0];
+ 	    if(dir.startsWith("$")) dir = System.getenv(dir);
  	    System.out.println("Logging to "+dir);
  	    try { StdLoggerRedirect.initLogging(dir);
 		} catch (Exception e1) { e1.printStackTrace(); }
         
-		// KEEP config
-        PropertiesSingleton.setConfig(config);
-        // READ Configuration for datastore
-        DataStoreSingleton.configureDataStore(config);
-        
-        DocumentKeywordSearch dks = new DocumentKeywordSearch();
-		
-        List<String> kList = KeywordsListSingleton.getInstance().getKeywordsList();
+        LuLeadIndexer dks = LuLeadIndexer.getInstance();
 
         while (true) {
 	        ZMQ.Context context = ZMQ.context(1);
 	        // Socket to talk to clients
 	        ZMQ.Socket socket = context.socket(ZMQ.REP);
+	        System.err.println("P01");
 	        socket.bind (args[1]);
+	        
         	try {
         		while (!Thread.currentThread ().isInterrupted ()) {
 	            	ZMsg msg = null;
 	            	try {msg = ZMsg.recvMsg(socket);}
 	            	catch(org.zeromq.ZMQException e) {
-	            		e.printStackTrace();
-	                    socket.close();socket = context.socket(ZMQ.REP);
+	        	        System.err.println("P02x");
+	            		System.err.println("Exception during ZMsg.recvMsg(): " + e.getMessage());
+	                    socket.close();
+	                    Thread.sleep(200);
+	                    socket = context.socket(ZMQ.REP);
 	                    socket.bind (args[1]);
 	            		continue;
 	            	}
 	            	
-	            	String fileName = msg.popString();
-	                System.out.println("Received "+fileName);
-	
-		            String part 	= "";
-		            String partId 	= "";
-		            String content 	= null;
-	                if(fileName.startsWith("file:")) {
-	                	fileName = fileName.split(":")[1];
-	                	System.out.println("Filename "+fileName);
-	                	content = readFile(fileName);
-	                }
-	                
-	                if(content != null) {
-			            dks.addDocument(part, partId, content);
-		
-		                ZMsg reply = new ZMsg();
-		
-			      		for(String keywords : kList) {
-				  			String [] keywordsArray = keywords.split("\\s+");
-				            HashMap<UrlTimestamp, Double> foundKeywords = dks.searchKeywords(keywordsArray);
-				            Double relevanceFound = foundKeywords.get(new UrlTimestamp("", ""));
-				            if(relevanceFound!=null) {
-					            reply.add(keywords);
-					            reply.add(relevanceFound.toString());
-				            }
-			      		}                
-		                reply.send(socket);
-		                
-		                dks.refresh();
-	                }
+	    	        System.err.println("P02");
+            		System.out.println(">>> Received message <<<");
+	            	String messageType = null;
+	            	try {messageType = msg.popString();}
+	            	catch(Exception e) {
+	        	        System.err.println("P03x");
+	            		System.err.println("Exception during msg.popString(): " + e.getMessage());
+	            		continue;
+	            	}
+
+	    	        System.err.println("P03");
+					ZMsg reply = new ZMsg();
+	            	
+					// DOCUMENT //
+	            	if(messageType.equals("doc")) {
+						String url = msg.pop().toString();
+				        System.err.println("P04d");
+						
+	            		Map<String, String> contentParts = new HashMap<>();
+	            		boolean moreParts = true;
+	            		while(moreParts) {
+	            			ZFrame zKey = msg.pop();
+	            			String value = null;
+	            			if(zKey != null) {
+	            				String key = zKey.toString();
+	            				ZFrame zValue = msg.pop();
+	            				if(zValue != null) {
+		            				byte [] bValue = zValue.getData();
+		            				value = new String(bValue);
+		            				if(value != null)
+		            					contentParts.put(key, value);
+	            				}
+	            			}
+	            			if(value==null)
+	            				moreParts = false;
+	            		}
+	            		
+	            		if(contentParts.size() > 0) {
+	            			// part -> keywords numbers
+	            			Map<String, List<KeywordMatchInfo>> kMap = dks.searchDocument(url, contentParts);
+							
+				      		for(Entry<String, List<KeywordMatchInfo>> partKeywords : kMap.entrySet()) {
+				      			String part         		    = partKeywords.getKey();
+				      			List<KeywordMatchInfo> keywords = partKeywords.getValue();
+						        reply.add(part);
+						        for(KeywordMatchInfo keywordNo : keywords) {
+						        	reply.add(keywordNo.id.toString());
+						        	reply.add(keywordNo.matched);
+						        	reply.add(keywordNo.score.toString());
+						        }
+				      		}	
+	            		}
+	            	}
+	            	// KEYWORDS //
+	            	else if(messageType.equals("key")) {
+	        	        System.err.println("P04k");
+	            		
+	            		boolean moreParts = true;
+	            		String poppedString = null;
+	            		while(moreParts) {
+	            			// id
+	            			poppedString = msg.popString();
+	            			if(poppedString == null) break;
+	            			long id = Long.parseLong(poppedString);
+	            			// keywords
+	            			poppedString = msg.popString();
+	            			if(poppedString == null) break;
+	            			String [] keywords = poppedString.toLowerCase().split("\\s+");
+	            			// nonMatchingWords
+	            			poppedString = msg.popString();
+	            			if(poppedString == null) break;
+	            			int nonMatchingWords = Integer.parseInt(poppedString);
+	            			// nonMatchingChars
+	            			poppedString = msg.popString();
+	            			if(poppedString == null) break;
+	            			int nonMatchingChars = Integer.parseInt(poppedString);
+	            			// distanceBetweenWords
+	            			poppedString = msg.popString();
+	            			if(poppedString == null) break;
+		            		int distanceBetweenWords = Integer.parseInt(poppedString);
+		            		// inOrder
+	            			poppedString = msg.popString();
+	            			if(poppedString == null) break;
+							boolean inOrder = Boolean.parseBoolean(poppedString);
+							
+							Boolean succeeded = dks.addKeywords(id, keywords, nonMatchingWords, nonMatchingChars, distanceBetweenWords, inOrder);
+							
+							reply.add(succeeded.toString());
+	            		}
+	            	}
+
+            		System.out.println(">>> Sending reply: "+reply+"\n<<<");
+	                reply.send(socket);
+        	        System.err.println("P05");
+	            	
         		}
 	        } catch(Exception e) {
 	            StringWriter sw = new StringWriter();

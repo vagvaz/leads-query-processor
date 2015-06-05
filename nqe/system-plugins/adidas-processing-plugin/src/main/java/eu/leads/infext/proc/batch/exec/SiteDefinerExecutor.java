@@ -40,7 +40,6 @@ public class SiteDefinerExecutor {
 	
 	private static AbstractDataStore dataStore = DataStoreSingleton.getDataStore();;
 	private static Properties mapping =  DataStoreSingleton.getMapping();
-	private static Properties parameters = DataStoreSingleton.getParameters();
     
 	public static void main(String[] args) throws Exception {
 		
@@ -106,7 +105,5 @@ public class SiteDefinerExecutor {
 		/////////////////////////
    	
 	}
-	
-	
 	
 }
