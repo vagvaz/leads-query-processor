@@ -62,34 +62,48 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
         Map<String,List<Tuple>> relations = new HashMap<>();
 
         profCallable.start("reduce hasNext ");
-        while(iter.hasNext()){
+        while(true){
             //         String jsonTuple = iter.next();
             //         Tuple t = new Tuple(jsonTuple);
-            Tuple t = null;
+            try {
+                Tuple t = null;
 
-            ProfileEvent tmpprofCallable = new ProfileEvent("JoinReducer Manager " + this.getClass().toString(),profilerLog);
-            tmpprofCallable.start("reduce next");
-            Object c = iter.next();
-            tmpprofCallable.end("reduce next");
-//            if(c instanceof Tuple )
-            t = (Tuple)c;
-//            else{
-//                continue;
-//            }
+                ProfileEvent tmpprofCallable = new ProfileEvent("JoinReducer Manager " + this.getClass().toString(),
+                    profilerLog);
+                tmpprofCallable.start("reduce next");
+                Object c = iter.next();
+                tmpprofCallable.end("reduce next");
+                //            if(c instanceof Tuple )
+                t = (Tuple) c;
+                //            else{
+                //                continue;
+                //            }
 
 
-            String table = t.getAttribute("__table");
-            t.removeAttribute("__table");
-            List<Tuple> tuples = relations.get(table);
-            if(tuples == null){
-                tuples = new ArrayList<>();
-                relations.put(table,tuples);
+                String table = t.getAttribute("__table");
+                t.removeAttribute("__table");
+                List<Tuple> tuples = relations.get(table);
+                if (tuples == null) {
+                    tuples = new ArrayList<>();
+                    relations.put(table, tuples);
+                }
+                assert (t.hasField("__tupleKey"));
+
+                tmpprofCallable.start("reduce add");
+                tuples.add(t);
+                tmpprofCallable.end("reduce add");
+            }catch (Exception e){
+                if(e instanceof NoSuchElementException){
+                    profilerLog.info("End of LeadsIntermediateIterator");
+                    break;
+                }
+                else{
+
+                    profilerLog.error("EXCEPTION WHILE updating agg value");
+                    profilerLog.error(e.getClass() + " " + e.getMessage());
+                    profilerLog.error(iter.toString());
+                }
             }
-            assert(t.hasField("__tupleKey"));
-
-            tmpprofCallable.start("reduce add");
-            tuples.add(t);
-            tmpprofCallable.end("reduce add");
         }
         profCallable.end("reduce iter.hasNext ");
 
