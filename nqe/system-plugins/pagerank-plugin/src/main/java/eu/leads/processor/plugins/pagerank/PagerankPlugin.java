@@ -1,7 +1,6 @@
 package eu.leads.processor.plugins.pagerank;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.leads.crawler.model.Page;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.plugins.PluginInterface;
 import eu.leads.processor.plugins.pagerank.graph.DSPM;
@@ -9,9 +8,9 @@ import org.apache.commons.configuration.Configuration;
 import org.infinispan.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vertx.java.core.json.JsonObject;
 
-import java.io.IOException;
-import java.net.URL;
+import java.util.Iterator;
 import java.util.List;
 
 public class PagerankPlugin implements PluginInterface {
@@ -44,7 +43,7 @@ public class PagerankPlugin implements PluginInterface {
         attributes = configuration.getList("attributes");
 
         myDSPM = new DSPM(Integer.parseInt(configuration.getString("R"))-1, configuration,
-                infinispanManager, Integer.parseInt(configuration.getString("rseed")));
+            infinispanManager, Integer.parseInt(configuration.getString("rseed")));
 
         //testing(configuration);
     }
@@ -100,19 +99,18 @@ public class PagerankPlugin implements PluginInterface {
 
     private void processCrawled(Object key, Object value) {
 
-        Page p = null;
-        try {p = my_mapper.readValue(value.toString(), Page.class);}
-        catch (IOException e) {e.printStackTrace();}
-
+        JsonObject p = null;
+        p = (JsonObject) value;
         //remove self-loops (meaningless concerning PageRank)
         String skey = key.toString();
-        if(p.getLinks()!=null) {
-           for (URL u : p.getLinks()) {
-              if (!(skey.equals(u.toString()))) {
-                 myDSPM.processEdge(skey, u.toString());
-              }
-           }
+        Iterator<Object> iterator = p.getArray("links").iterator();
+        while(iterator.hasNext()) {
+            String u = (String) iterator.next();
+            //           for (URL u : p.getLinks()) {
+            if (!(skey.equals(u.toString()))) {
+                myDSPM.processEdge(skey, u.toString());
+            }
         }
     }
-
 }
+
