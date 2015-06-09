@@ -61,7 +61,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
             initialize();
         Map<String,List<Tuple>> relations = new HashMap<>();
 
-        profCallable.start("reduce hasNext ");
+        profCallable.start("reduce proc ");
         while(true){
             //         String jsonTuple = iter.next();
             //         Tuple t = new Tuple(jsonTuple);
@@ -105,7 +105,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
                 }
             }
         }
-        profCallable.end("reduce iter.hasNext ");
+        profCallable.end("reduce proc ");
 
         profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
         profCallable.setProfileLogger(profilerLog);
@@ -115,7 +115,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
             profCallable = new ProfileEvent("reduce reduce " + this.getClass().toString(), profilerLog);
         }
 
-        profCallable.start("reduce proc ");
+        profCallable.start("reduce rest ");
         if(relations.size() < 2)
             return;
         ArrayList<List<Tuple>> arrays = new ArrayList<>(2);
@@ -148,7 +148,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
                 collector.emit(prefix+combinedKey,resultTuple);
             }
         }
-        profCallable.end("reduce proc ");
+        profCallable.end("reduce rest ");
         return ;
     }
 }
