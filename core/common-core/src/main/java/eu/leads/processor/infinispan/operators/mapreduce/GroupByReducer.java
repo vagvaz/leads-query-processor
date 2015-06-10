@@ -166,7 +166,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
 //        progress();
       //Iterate overall values
       int tuplecounter =0;
-      while (iterator.hasNext()) {
+      while (true) {
          try {
             tuplecounter++;
             Tuple itTuple = iterator.next();
@@ -197,6 +197,10 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
             }
 
          } catch (Exception e) {
+            if(e instanceof NoSuchElementException){
+               log.info("End of leadsIntermidateIterator " + e.getMessage());
+               break;
+            }
             log.error("EXCEPTION WHILE updating agg value");
             log.error(e.getClass() + " " + e.getMessage());
             log.error(iterator.toString());

@@ -188,4 +188,8 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
   public String getCache() {
     return cache;
   }
+
+  public void setCache(String cache) {
+    this.cache = cache;
+  }
 }

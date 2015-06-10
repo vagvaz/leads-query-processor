@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -24,7 +25,7 @@ import java.util.Set;
 /**
  * Created by vagvaz on 2/20/15.
  */
-public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> {
+public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Serializable {
 
   transient protected VersionedCache versionedCache;
 

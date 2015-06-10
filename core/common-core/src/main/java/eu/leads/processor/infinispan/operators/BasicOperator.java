@@ -710,7 +710,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     replyForSuccessfulExecution(action);
   }
 
-  public void setMapperCallableEnsembleHost(){
+  public void   setMapperCallableEnsembleHost(){
     mapperCallable.setEnsembleHost(computeEnsembleHost());
   }
   public void setReducerCallableEnsembleHost(){
@@ -731,6 +731,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       result += globalConfig.getObject("componentsAddrs").getArray(site).get(0).toString()+":11222|";
     }
     result = result.substring(0,result.length()-1);
+    log.error("EnsembleHost: " + result);
     return result;
   }
 

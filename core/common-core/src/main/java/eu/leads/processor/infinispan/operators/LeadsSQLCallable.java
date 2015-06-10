@@ -6,6 +6,7 @@ import eu.leads.processor.infinispan.LeadsBaseCallable;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -15,7 +16,8 @@ import java.util.HashMap;
 /**
  * Created by vagvaz on 2/18/15.
  */
-public abstract  class LeadsSQLCallable<K,V> extends LeadsBaseCallable<K,V>{
+public abstract  class LeadsSQLCallable<K,V> extends LeadsBaseCallable<K,V> implements
+    Serializable {
   transient protected JsonObject inputSchema;
   transient protected JsonObject outputSchema;
   transient protected Map<String,String> outputMap;

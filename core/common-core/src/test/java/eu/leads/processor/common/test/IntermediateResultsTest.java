@@ -11,6 +11,8 @@ import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.commons.api.BasicCache;
 
+import java.util.NoSuchElementException;
+
 /**
  * Created by vagvaz on 3/27/15.
  */
@@ -19,11 +21,12 @@ public class IntermediateResultsTest {
   static BasicCache indexedCache;
   static BasicCache dataCache;
   static BasicCache keysCache;
-  static String[] nodes= {"node0","node1","node2","node3","node00"};//,"node11","node22","node33"};
+  static String[] nodes= {"node0","node1"};//,"node2","node3","node00"};//,"node11","node22","node33"};
   static String[] microClouds = {"mc0"};//,"mc1"};//,"mc2","mc01","mc11","mc21"};
   static String[] keys;
-  static int numOfkeys = 1;
-  static int valuesPerKey = 70;
+  static String cacheName = "acache";
+  static int numOfkeys = 2;
+  static int valuesPerKey = 2;
   static RemoteCacheManager rmanager;
   public static void main(String[] args) {
     LQPConfiguration.initialize();
@@ -53,10 +56,18 @@ public class IntermediateResultsTest {
     for(String k : keys){
       int keyCounter = 0;
       LeadsIntermediateIterator iterator = new LeadsIntermediateIterator(k,"prefix",InfinispanClusterSingleton.getInstance().getManager());
-      while(iterator.hasNext()){
-        System.out.println(keyCounter + ": "+ iterator.next().toString());
-        keyCounter++;
-        counter++;
+      while(true){
+        try {
+          System.out.println(keyCounter + ": " + iterator.next().toString());
+          keyCounter++;
+          counter++;
+        }catch(Exception e ){
+          if ( e instanceof NoSuchElementException){
+            System.err.println("End of Iteration");
+            break;
+          }
+          e.printStackTrace();
+        }
       }
       System.err.println("key " + k + " " + keyCounter);
     }
@@ -78,10 +89,12 @@ public class IntermediateResultsTest {
             indexedKey.setKey(key);
             indexedKey.setNode(node);
             indexedKey.setSite(site);
+            indexedKey.setCache(cacheName);
             ikey.setCounter(counter);
             ikey.setKey(key);
             ikey.setSite(site);
             ikey.setNode(node);
+            ikey.setCache(cacheName);
             indexedCache.put(indexedKey.getUniqueKey(), new IndexedComplexIntermediateKey(indexedKey));
             dataCache.put(new ComplexIntermediateKey(ikey), new ComplexIntermediateKey(ikey));
             keysCache.put(key, key);

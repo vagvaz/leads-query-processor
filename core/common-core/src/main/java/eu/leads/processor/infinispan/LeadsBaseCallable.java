@@ -90,6 +90,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     EnsembleCacheUtils.initialize();
     if(ensembleHost != null && !ensembleHost.equals("")) {
       tmpprofCallable.start("Start EnsemlbeCacheManager");
+      profilerLog.error("EnsembleHost EXIST " + ensembleHost);
       emanager = new EnsembleCacheManager(ensembleHost);
 //      emanager.start();
 //      emanager = createRemoteCacheManager();
@@ -97,6 +98,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //          EnsembleCacheManager.Consistency.DIST);
     }
     else {
+      profilerLog.error("EnsembleHost NULL");
       tmpprofCallable.start("Start EnsemlbeCacheManager");
       emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
 //      emanager.start();
@@ -128,12 +130,13 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
                                                                                     (ClusteringDependentLogic.class);
     profCallable.end();
     profCallable.start("Iterate Over Local Data");
-    ProfileEvent profExecute = new ProfileEvent("Execute " + this.getClass().toString(),profilerLog);
+    ProfileEvent profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(),profilerLog);
     int count=0;
 //    for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
 //      if (!cdl.localNodeIsPrimaryOwner(key))
 //        continue;
     CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(new LocalDataFilter<K,V>(cdl));
+    profExecute.end();
     try {
       for (Object object : iterable) {
         Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
@@ -141,7 +144,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         //      V value = inputCache.get(key);
         K key = (K) entry.getKey();
         V value = (V) entry.getValue();
-        profExecute.end();
+
         if (value != null) {
           profExecute.start("ExOn" + (++count));
           executeOn((K) key, value);
