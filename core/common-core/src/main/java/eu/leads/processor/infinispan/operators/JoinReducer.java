@@ -79,16 +79,20 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
                 //                continue;
                 //            }
 
-
+                tmpprofCallable.start("JoinReducerGetTable");
                 String table = t.getAttribute("__table");
+                tmpprofCallable.end();
+                tmpprofCallable.start("JoinReducerRemoveAttributeTable");
                 t.removeAttribute("__table");
+                tmpprofCallable.end();
+                tmpprofCallable.start("JoinReducerGetRelationArray");
                 List<Tuple> tuples = relations.get(table);
                 if (tuples == null) {
                     tuples = new ArrayList<>();
                     relations.put(table, tuples);
                 }
-                assert (t.hasField("__tupleKey"));
-
+//                assert (t.hasField("__tupleKey"));
+                tmpprofCallable.end();
                 tmpprofCallable.start("reduce add");
                 tuples.add(t);
                 tmpprofCallable.end("reduce add");
@@ -107,8 +111,8 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
         }
         profCallable.end("reduce proc ");
 
-        profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
-        profCallable.setProfileLogger(profilerLog);
+//        profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
+//        profCallable.setProfileLogger(profilerLog);
         if(profCallable!=null) {
             profCallable.end("reduce reduce ");
         } else {
@@ -117,35 +121,48 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
 
         profCallable.start("reduce rest ");
         if(relations.size() < 2)
+        {
+            profCallable.end();
             return;
+        }
         ArrayList<List<Tuple>> arrays = new ArrayList<>(2);
         for(List<Tuple> a : relations.values()){
             arrays.add(a);
         }
-
+        ProfileEvent tmpProfileEvent = new ProfileEvent("tmp profile event",profilerLog);
         for(int i = 0; i < arrays.get(0).size(); i++){
+            tmpProfileEvent.start("JoinReducerReadOuterTuple");
             Tuple outerTuple = arrays.get(0).get(i);
-            assert(outerTuple.hasField("__tupleKey"));
+//            assert(outerTuple.hasField("__tupleKey"));
 //            System.err.println("outer " + outerTuple.toString());
             String outerKey = outerTuple.getAttribute("__tupleKey");
             if(outerKey == null){
-                System.out.println("outerTuple " + outerTuple.toString());
+                profilerLog.error("outerTuple " + outerTuple.toString());
             }
+            tmpProfileEvent.end();
             for(int j = 0; j <  arrays.get(1).size(); j++){
+                tmpProfileEvent.start("JoinReducerReadInnerTuple");
                 Tuple innerTuple = arrays.get(1).get(j);
 //                outerTuple.removeAttribute("__tupleKey");
                 String outerKey2 = innerTuple.getAttribute("__tupleKey");
                 if(outerKey2 == null){
-                    System.out.println("innerTuple " + innerTuple.toString());
+                    profilerLog.error("innerTuple " + innerTuple.toString());
                 }
-                assert(innerTuple.hasField("__tupleKey"));
+                tmpProfileEvent.end();
+                tmpProfileEvent.start("JoinReducerJoinTuples");
+//                assert(innerTuple.hasField("__tupleKey"));
                 Tuple resultTuple = new Tuple(innerTuple, outerTuple,null);
 //                resultTuple.removeAttribute("__tupleKey");
                 String combinedKey = outerKey + "-" + outerKey2;
+                tmpProfileEvent.end();
+                tmpProfileEvent.start("JoinReducerPrepareOutput");
                 resultTuple = prepareOutput(resultTuple);
+                tmpProfileEvent.end();
 //                resultTuple = prepareOutput(resultTuple);
                 //            outputCache.put(combinedKey, resultTuple.asJsonObject().toString());
+                tmpProfileEvent.start("JoinReducerEmitResult");
                 collector.emit(prefix+combinedKey,resultTuple);
+                tmpProfileEvent.end();
             }
         }
         profCallable.end("reduce rest ");
