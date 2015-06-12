@@ -31,11 +31,11 @@ public class LeadsIntermediateIterator<V> implements Iterator<V> {
     log = LoggerFactory.getLogger(LeadsIntermediateIterator.class);
     this.imanager = imanager;
     intermediateDataCache =   (Cache) imanager.getPersisentCache(prefix + ".data");
-    intermediateDataCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL);
+//    intermediateDataCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL);
 
     //createIndexCache for getting all the nodes that contain values with the same key! in a mc
     indexSiteCache = (Cache) imanager.getPersisentCache(prefix + ".indexed");
-    indexSiteCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL);
+//    indexSiteCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL);
     baseIntermKey = new ComplexIntermediateKey();
     baseIntermKey.setCounter(currentCounter);
     baseIntermKey.setKey(key);
