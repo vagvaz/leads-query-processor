@@ -4,6 +4,7 @@ import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.concurrent.NotifyingFuture;
+import org.infinispan.util.concurrent.ConcurrentHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,7 @@ public class EnsembleCacheUtils {
     static Queue<NotifyingFuture<Void>> concurrentQuue;
     static Map<String, BasicCache> currentCaches;
     static Map<String, Map<Object, Object>> mapsToPut;
-    static Set<Thread> threads;
+    static Queue<Thread> threads;
     static volatile Object mutex = new Object();
     static Boolean initialized = false;
     static int batchSize = 20;
@@ -42,7 +43,7 @@ public class EnsembleCacheUtils {
                 .getBoolean("node.infinispan.putasync", true);
             log.info("Using asynchronous put " + useAsync);
             concurrentQuue = new ConcurrentLinkedQueue<>();
-            threads = new HashSet<>();
+            threads = new ConcurrentLinkedQueue<>();
             //            ccr = new ClearCompletedRunnable(concurrentQuue,mutex,threads);
             initialized = true;
             batchSize = LQPConfiguration.getInstance().getConfiguration()
@@ -56,27 +57,27 @@ public class EnsembleCacheUtils {
 //        profExecute.start("waitForAllPuts");
         clearCompleted();
         while (!concurrentQuue.isEmpty()) {
-            Iterator<NotifyingFuture<Void>> iterator = concurrentQuue.iterator();
-            while (iterator.hasNext()) {
-                NotifyingFuture current = iterator.next();
+//            Iterator<NotifyingFuture<Void>> iterator = concurrentQuue.iterator();
+//            while (iterator.hasNext()) {
+                NotifyingFuture current = concurrentQuue.poll();
                 try {
                     //                    if (current.isDone()) {
                     //                        iterator.remove();
                     //                    }
                     //                    else{
                     current.get();
-                    iterator.remove();
+//                    iterator.remove();
                 } catch (Exception e) {
                     log.error(
                         "EnsembleCacheUtils waitForAllPuts Exception " + e.getClass().toString());
                     log.error(e.getStackTrace().toString());
                     e.printStackTrace();
                 }
-            }
+//            }
         }
-        Iterator<Thread> threadIterator = threads.iterator();
-        while (threadIterator.hasNext()) {
-            Thread t = threadIterator.next();
+//        Iterator<Thread> threadIterator = threads.iterator();
+        while (!threads.isEmpty()) {
+            Thread t = threads.poll();
             try {
                 t.join();
             } catch (InterruptedException e) {

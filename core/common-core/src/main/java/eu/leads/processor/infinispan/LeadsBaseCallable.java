@@ -172,6 +172,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
   @Override public void finalizeCallable(){
     try {
+      profCallable.start("finalize");
       EnsembleCacheUtils.waitForAllPuts();
 //      emanager.stop();
 //
@@ -179,6 +180,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //      outputCache.stop();
     }catch(Exception e){
         System.err.println("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage() + " cause ");
+      profilerLog.error(("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage() + " cause "));
        PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
       }
     profCallable.end("finalize");
