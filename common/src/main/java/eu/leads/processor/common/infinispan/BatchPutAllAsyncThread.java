@@ -31,8 +31,7 @@ public class BatchPutAllAsyncThread extends Thread{
             futures.add(cache.putAllAsync(entry.getValue()));
         }
 
-        caches.clear();
-        objects.clear();
+
         for(NotifyingFuture future : futures){
             try {
                 future.get();
@@ -42,5 +41,7 @@ public class BatchPutAllAsyncThread extends Thread{
                 e.printStackTrace();
             }
         }
+        caches.clear();
+        objects.clear();
     }
 }

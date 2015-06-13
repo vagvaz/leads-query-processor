@@ -19,7 +19,8 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
     private transient String prefix;
     transient Logger profilerLog;
     protected ProfileEvent profCallable;
-
+    transient Map<String,List<Tuple>> relations;
+    transient ArrayList<List<Tuple>> arrays;
     public JoinReducer(String s) {
         super(s);
         configString = s;
@@ -41,6 +42,8 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
         isInitialized = true;
         conf = new JsonObject(configString);
         prefix = outputCacheName+":";
+         relations = new HashMap<>();
+        arrays = new ArrayList<>(2);
         //      prefix = outputCacheName+":";
         //      outputCache = (Cache) InfinispanClusterSingleton.getInstance().getManager().getPersisentCache(conf.getString("output"));
 //        profCallable.end("reduce init");
@@ -59,22 +62,32 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
 
         if(!isInitialized)
             initialize();
-        Map<String,List<Tuple>> relations = new HashMap<>();
+
+        ProfileEvent tmpprofCallable = new ProfileEvent("JoinReducer Manager " + this.getClass().toString(),
+            profilerLog);
+
 
         profCallable.start("reduce proc ");
+        tmpprofCallable.start("JoinReducerClearPreviousTuples");
+        for(Map.Entry<String,List<Tuple>> entry : relations.entrySet()){
+            entry.getValue().clear();
+        }
+        tmpprofCallable.end();
+
+        tmpprofCallable.start("JoinReducerManualCallingProfLog");
+        profilerLog.error("Sample log");
+        tmpprofCallable.end();
         while(true){
             //         String jsonTuple = iter.next();
             //         Tuple t = new Tuple(jsonTuple);
             try {
                 Tuple t = null;
 
-                ProfileEvent tmpprofCallable = new ProfileEvent("JoinReducer Manager " + this.getClass().toString(),
-                    profilerLog);
+
                 tmpprofCallable.start("reduce next");
-                Object c = iter.next();
+                t = (Tuple) iter.next();
                 tmpprofCallable.end("reduce next");
                 //            if(c instanceof Tuple )
-                t = (Tuple) c;
                 //            else{
                 //                continue;
                 //            }
@@ -97,8 +110,10 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
                 tuples.add(t);
                 tmpprofCallable.end("reduce add");
             }catch (Exception e){
+                tmpprofCallable.start("JoinReducerException");
                 if(e instanceof NoSuchElementException){
                     profilerLog.info("End of LeadsIntermediateIterator");
+                    tmpprofCallable.end("JoinReducerException IterationEnd");
                     break;
                 }
                 else{
@@ -106,6 +121,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
                     profilerLog.error("EXCEPTION WHILE updating agg value");
                     profilerLog.error(e.getClass() + " " + e.getMessage());
                     profilerLog.error(iter.toString());
+                    tmpprofCallable.end("JoinReducerException ExceptionEnd");
                 }
             }
         }
@@ -122,48 +138,55 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
         profCallable.start("reduce rest ");
         if(relations.size() < 2)
         {
-            profCallable.end();
+            profCallable.end("reduce rest ");
             return;
         }
-        ArrayList<List<Tuple>> arrays = new ArrayList<>(2);
+//         arrays = new ArrayList<>(2);
+        tmpprofCallable.start("JoinReducerToArrays");
+        arrays.clear();
         for(List<Tuple> a : relations.values()){
             arrays.add(a);
         }
+        tmpprofCallable.end();
         ProfileEvent tmpProfileEvent = new ProfileEvent("tmp profile event",profilerLog);
-        for(int i = 0; i < arrays.get(0).size(); i++){
-            tmpProfileEvent.start("JoinReducerReadOuterTuple");
-            Tuple outerTuple = arrays.get(0).get(i);
-//            assert(outerTuple.hasField("__tupleKey"));
-//            System.err.println("outer " + outerTuple.toString());
-            String outerKey = outerTuple.getAttribute("__tupleKey");
-            if(outerKey == null){
-                profilerLog.error("outerTuple " + outerTuple.toString());
-            }
-            tmpProfileEvent.end();
-            for(int j = 0; j <  arrays.get(1).size(); j++){
-                tmpProfileEvent.start("JoinReducerReadInnerTuple");
-                Tuple innerTuple = arrays.get(1).get(j);
-//                outerTuple.removeAttribute("__tupleKey");
-                String outerKey2 = innerTuple.getAttribute("__tupleKey");
-                if(outerKey2 == null){
-                    profilerLog.error("innerTuple " + innerTuple.toString());
+        try {
+            for (int i = 0; i < arrays.get(0).size(); i++) {
+                tmpProfileEvent.start("JoinReducerReadOuterTuple");
+                Tuple outerTuple = arrays.get(0).get(i);
+                //            assert(outerTuple.hasField("__tupleKey"));
+                //            System.err.println("outer " + outerTuple.toString());
+                String outerKey = outerTuple.getAttribute("__tupleKey");
+                if (outerKey == null) {
+                    profilerLog.error("outerTuple " + outerTuple.toString());
                 }
                 tmpProfileEvent.end();
-                tmpProfileEvent.start("JoinReducerJoinTuples");
-//                assert(innerTuple.hasField("__tupleKey"));
-                Tuple resultTuple = new Tuple(innerTuple, outerTuple,null);
-//                resultTuple.removeAttribute("__tupleKey");
-                String combinedKey = outerKey + "-" + outerKey2;
-                tmpProfileEvent.end();
-                tmpProfileEvent.start("JoinReducerPrepareOutput");
-                resultTuple = prepareOutput(resultTuple);
-                tmpProfileEvent.end();
-//                resultTuple = prepareOutput(resultTuple);
-                //            outputCache.put(combinedKey, resultTuple.asJsonObject().toString());
-                tmpProfileEvent.start("JoinReducerEmitResult");
-                collector.emit(prefix+combinedKey,resultTuple);
-                tmpProfileEvent.end();
+                for (int j = 0; j < arrays.get(1).size(); j++) {
+                    tmpProfileEvent.start("JoinReducerReadInnerTuple");
+                    Tuple innerTuple = arrays.get(1).get(j);
+                    //                outerTuple.removeAttribute("__tupleKey");
+                    String outerKey2 = innerTuple.getAttribute("__tupleKey");
+                    if (outerKey2 == null) {
+                        profilerLog.error("innerTuple " + innerTuple.toString());
+                    }
+                    tmpProfileEvent.end();
+                    tmpProfileEvent.start("JoinReducerJoinTuples");
+                    //                assert(innerTuple.hasField("__tupleKey"));
+                    Tuple resultTuple = new Tuple(innerTuple, outerTuple, null);
+                    //                resultTuple.removeAttribute("__tupleKey");
+                    String combinedKey = outerKey + "-" + outerKey2;
+                    tmpProfileEvent.end();
+                    tmpProfileEvent.start("JoinReducerPrepareOutput");
+                    resultTuple = prepareOutput(resultTuple);
+                    tmpProfileEvent.end();
+                    //                resultTuple = prepareOutput(resultTuple);
+                    //            outputCache.put(combinedKey, resultTuple.asJsonObject().toString());
+                    tmpProfileEvent.start("JoinReducerEmitResult");
+                    collector.emit(prefix + combinedKey, resultTuple);
+                    tmpProfileEvent.end();
+                }
             }
+        }catch(Exception e){
+            profCallable.end("JoinReducerRest Exception");
         }
         profCallable.end("reduce rest ");
         return ;

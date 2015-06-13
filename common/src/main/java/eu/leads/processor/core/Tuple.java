@@ -31,8 +31,9 @@ public class Tuple extends DataType_bson implements Serializable,Externalizable{
     }
 
     public Tuple(Tuple tl, Tuple tr, ArrayList<String> ignoreColumns) {
-        super(tl.toString());
-
+//        super(tl.toString());
+        super();
+        super.copy(tl.asBsonObject());
         if(ignoreColumns != null) {
             for (String field : ignoreColumns) {
                 if (data.containsField(field))
@@ -40,7 +41,7 @@ public class Tuple extends DataType_bson implements Serializable,Externalizable{
             }
             tr.removeAtrributes(ignoreColumns);
         }
-        data.putAll(tr.data.toMap());
+        data.putAll(tr.asBsonObject());
     }
 
    public Tuple(Tuple tuple) {
