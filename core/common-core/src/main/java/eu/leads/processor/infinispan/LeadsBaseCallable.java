@@ -28,7 +28,7 @@ import java.util.Set;
  */
 public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
-  DistributedCallable<K, V, String>, Serializable {
+        DistributedCallable<K, V, String>, Serializable {
   protected String configString;
   protected String output;
   transient protected JsonObject conf;
@@ -39,7 +39,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   transient protected  Cache<K,V> inputCache;
   transient protected EnsembleCache outputCache;
   protected String ensembleHost;
-//  transient protected RemoteCache outputCache;
+  //  transient protected RemoteCache outputCache;
 //  transient protected RemoteCache ecache;
 //  transient protected RemoteCacheManager emanager;
   transient protected EnsembleCacheManager emanager;
@@ -64,7 +64,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   }
 
 
-//  public static RemoteCacheManager createRemoteCacheManager() {
+  //  public static RemoteCacheManager createRemoteCacheManager() {
 //    ConfigurationBuilder builder = new ConfigurationBuilder();
 //    builder.addServer().host(LQPConfiguration.getConf().getString("node.ip")).port(11222);
 //    return new RemoteCacheManager(builder.build());
@@ -109,9 +109,9 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     tmpprofCallable.end();
     tmpprofCallable.start("Get cache ");
     ecache = emanager.getCache(output,new ArrayList<>(emanager.sites()),
-          EnsembleCacheManager.Consistency.DIST);
+            EnsembleCacheManager.Consistency.DIST);
     tmpprofCallable.end();
-      outputCache = ecache;
+    outputCache = ecache;
 //outputCache =  emanager.getCache(output,new ArrayList<>(emanager.sites()),
 //          EnsembleCacheManager.Consistency.DIST);
 
@@ -127,7 +127,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     }
     profCallable.start("Call getComponent ()");
     final ClusteringDependentLogic cdl = inputCache.getAdvancedCache().getComponentRegistry().getComponent
-                                                                                    (ClusteringDependentLogic.class);
+            (ClusteringDependentLogic.class);
     profCallable.end();
     profCallable.start("Iterate Over Local Data");
     ProfileEvent profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(),profilerLog);
@@ -153,10 +153,10 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       }
     }
     catch(Exception e){
-        iterable.close();
+      iterable.close();
       profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
       PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
-      }
+    }
     profCallable.end();
     finalizeCallable();
     return embeddedCacheManager.getAddress().toString();
@@ -172,15 +172,17 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
   @Override public void finalizeCallable(){
     try {
+      profCallable.start("finalize");
       EnsembleCacheUtils.waitForAllPuts();
 //      emanager.stop();
 //
 //      ecache.stop();
 //      outputCache.stop();
     }catch(Exception e){
-        System.err.println("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage() + " cause ");
-       PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
-      }
+      System.err.println("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage() + " cause ");
+      profilerLog.error(("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage() + " cause "));
+      PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
+    }
     profCallable.end("finalize");
   }
 
