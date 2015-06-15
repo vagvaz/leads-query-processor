@@ -250,49 +250,7 @@ public class JoinOperator extends MapReduceOperator {
 
     }
 //    replyForSuccessfulExecution(action);
-      try {
-          if (res != null) {
-              for (Future<?> result : res) {
-                  System.out.println(result.get());
-                  addresses.add((String) result.get());
-              }
-              System.out.println("map " + mapperCallable.getClass().toString() +
-                  " Execution is done");
-              log.info("map " + mapperCallable.getClass().toString() +
-                  " Execution is done");
-          } else {
-              System.out.println("map " + mapperCallable.getClass().toString() +
-                  " Execution not done");
-              log.info("map " + mapperCallable.getClass().toString() +
-                  " Execution not done");
-              failed = true;
-              //          replyForFailExecution(action);
-          }
-      } catch (InterruptedException e) {
-          log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
-              e.getClass().toString());
-          log.error(e.getMessage());
-          System.err.println(
-              "Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
-                  e.getClass().toString());
-          System.err.println(e.getMessage());
-          log.error(e.getStackTrace().toString());
-          e.printStackTrace();
-          failed = true;
-          //        replyForFailExecution(action);
-      } catch (ExecutionException e) {
-          log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
-              e.getClass().toString());
-          log.error(e.getMessage());
-          System.err.println(
-              "Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
-                  e.getClass().toString());
-          System.err.println(e.getMessage());
-          log.error(e.getStackTrace().toString());
-          e.printStackTrace();
-          failed = true;
-          //        replyForFailExecution(action);
-      }
+
     System.out.println("####### RUNNING 2nd CALLABLE #########");
     collector = new LeadsCollector(0, intermediateCacheName);
     conf.putString("inputCache", rightTableName);
@@ -319,6 +277,51 @@ public class JoinOperator extends MapReduceOperator {
       /**
        * READ RESULT FROM MAP 1
        */
+        try {
+            if (res != null) {
+                for (Future<?> result : res) {
+                    System.out.println(result.get());
+                    addresses.add((String) result.get());
+                }
+                System.out.println("map " + mapperCallable.getClass().toString() +
+                    " Execution is done");
+                log.info("map " + mapperCallable.getClass().toString() +
+                    " Execution is done");
+            } else {
+                System.out.println("map " + mapperCallable.getClass().toString() +
+                    " Execution not done");
+                log.info("map " + mapperCallable.getClass().toString() +
+                    " Execution not done");
+                failed = true;
+                //          replyForFailExecution(action);
+            }
+        } catch (InterruptedException e) {
+            log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+                e.getClass().toString());
+            log.error(e.getMessage());
+            System.err.println(
+                "Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+                    e.getClass().toString());
+            System.err.println(e.getMessage());
+            log.error(e.getStackTrace().toString());
+            e.printStackTrace();
+            failed = true;
+            //        replyForFailExecution(action);
+        } catch (ExecutionException e) {
+            log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+                e.getClass().toString());
+            log.error(e.getMessage());
+            System.err.println(
+                "Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+                    e.getClass().toString());
+            System.err.println(e.getMessage());
+            log.error(e.getStackTrace().toString());
+            e.printStackTrace();
+            failed = true;
+            //        replyForFailExecution(action);
+        }
+
+
 
       addresses = new ArrayList<String>();
       try {
