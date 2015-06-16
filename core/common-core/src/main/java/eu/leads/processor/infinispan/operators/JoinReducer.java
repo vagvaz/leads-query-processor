@@ -17,11 +17,14 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
     //   transient JsonObject conf;
     //   String configString;
     private transient String prefix;
-    transient Logger profilerLog;
+    private transient Logger profilerLog;
     protected ProfileEvent profCallable;
-    transient ProfileEvent reduceEvent;
-    transient Map<String,List<Tuple>> relations;
-    transient ArrayList<List<Tuple>> arrays;
+    private transient ProfileEvent reduceEvent;
+    private transient Map<String,List<Tuple>> relations;
+    private transient ArrayList<List<Tuple>> arrays;
+    private transient ProfileEvent tmpprofCallable;
+    private transient ProfileEvent tmpProfileEvent;
+
     public JoinReducer(String s) {
         super(s);
         configString = s;
@@ -43,6 +46,9 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
         profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
         profCallable = new ProfileEvent("JoinReducer profCallable",profilerLog);
         reduceEvent = new ProfileEvent("JoinReducer ReduceExecute",profilerLog);
+        tmpprofCallable = new ProfileEvent("JoinReducer Manager " + this.getClass().toString(),
+            profilerLog);
+        tmpProfileEvent = new ProfileEvent("tmp profile event",profilerLog);
         isInitialized = true;
         conf = new JsonObject(configString);
         prefix = outputCacheName+":";
@@ -68,8 +74,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
         if(!isInitialized)
             initialize();
         reduceEvent.start("JoinReducerReduceExecute");
-        ProfileEvent tmpprofCallable = new ProfileEvent("JoinReducer Manager " + this.getClass().toString(),
-            profilerLog);
+
 
 
         profCallable.start("JoinReducerReduceProcessing");
@@ -99,19 +104,19 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
 
                 tmpprofCallable.start("JoinReducerGetTable");
                 String table = t.getAttribute("__table");
-                tmpprofCallable.end();
-                tmpprofCallable.start("JoinReducerRemoveAttributeTable");
+//                tmpprofCallable.end();
+//                tmpprofCallable.start("JoinReducerRemoveAttributeTable");
                 t.removeAttribute("__table");
-                tmpprofCallable.end();
-                tmpprofCallable.start("JoinReducerGetRelationArray");
+//                tmpprofCallable.end();
+//                tmpprofCallable.start("JoinReducerGetRelationArray");
                 List<Tuple> tuples = relations.get(table);
                 if (tuples == null) {
-                    tuples = new ArrayList<>();
+                    tuples = new ArrayList<>(2);
                     relations.put(table, tuples);
                 }
 //                assert (t.hasField("__tupleKey"));
-                tmpprofCallable.end();
-                tmpprofCallable.start("reduce add");
+//                tmpprofCallable.end();
+//                tmpprofCallable.start("reduce add");
                 tuples.add(t);
                 tmpprofCallable.end("reduce add");
             }catch (Exception e){
@@ -154,7 +159,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
             arrays.add(a);
         }
         tmpprofCallable.end();
-        ProfileEvent tmpProfileEvent = new ProfileEvent("tmp profile event",profilerLog);
+
         try {
             for (int i = 0; i < arrays.get(0).size(); i++) {
                 tmpProfileEvent.start("JoinReducerReadOuterTuple");
@@ -165,23 +170,23 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
                 if (outerKey == null) {
                     profilerLog.error("outerTuple " + outerTuple.toString());
                 }
-                tmpProfileEvent.end();
+//                tmpProfileEvent.end();
                 for (int j = 0; j < arrays.get(1).size(); j++) {
-                    tmpProfileEvent.start("JoinReducerReadInnerTuple");
+//                    tmpProfileEvent.start("JoinReducerReadInnerTuple");
                     Tuple innerTuple = arrays.get(1).get(j);
                     //                outerTuple.removeAttribute("__tupleKey");
                     String outerKey2 = innerTuple.getAttribute("__tupleKey");
                     if (outerKey2 == null) {
                         profilerLog.error("innerTuple " + innerTuple.toString());
                     }
-                    tmpProfileEvent.end();
-                    tmpProfileEvent.start("JoinReducerJoinTuples");
+//                    tmpProfileEvent.end();
+//                    tmpProfileEvent.start("JoinReducerJoinTuples");
                     //                assert(innerTuple.hasField("__tupleKey"));
                     Tuple resultTuple = new Tuple(innerTuple, outerTuple, null);
                     //                resultTuple.removeAttribute("__tupleKey");
                     String combinedKey = outerKey + "-" + outerKey2;
                     tmpProfileEvent.end();
-                    tmpProfileEvent.start("JoinReducerPrepareOutput");
+//                    tmpProfileEvent.start("JoinReducerPrepareOutput");
                     resultTuple = prepareOutput(resultTuple);
                     tmpProfileEvent.end();
                     //                resultTuple = prepareOutput(resultTuple);
