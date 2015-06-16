@@ -140,7 +140,7 @@ public class LoadAmplab2 {
 
     }
 
-    private static void loadDataFromFile(File csvfile, String arg5, String arg6) {
+    private static void loadDataFromFile(File csvfile, String arg5, String arg6) throws IOException {
         String tableName = csvfile.getParentFile().getName();
         String keysFilename = csvfile.getAbsoluteFile().getParent() + "/" + tableName + ".keys";
         Path path = Paths.get(keysFilename);
@@ -243,23 +243,33 @@ public class LoadAmplab2 {
             System.out.println("Importing data ... ");
             long sizeE = 0;
 
-            for(int entry=0;entry<Integer.valueOf(arg5);entry++){
+            String keyLine = "";
+
+            try {
+                keyReader = new BufferedReader(new InputStreamReader(new FileInputStream(csvfile)));
+            } catch (FileNotFoundException e) {
+                System.out.println("Unable to read keys file, skipping "+ tableName);
+                e.printStackTrace();
+                return;
+            }
+
+            while ((keyLine = keyReader.readLine()) != null){
                 JsonObject data = new JsonObject();
 
                 // read line and values separated by commas
-
+                String[] dataline = keyLine.split(",");
 
                 for (pos = 0; pos < columns.size(); pos++) {
                     String fullCollumnName =  "default."+tableName+"." + columns.get(pos);
                     try {
                         if (columnType.get(pos) == String.class)
-                            data.putString(fullCollumnName, randBigString(Integer.valueOf(arg6)));
+                            data.putString(fullCollumnName, dataline[pos]);
                         else if (columnType.get(pos) == Long.class)
-                            data.putNumber(fullCollumnName, randLong());
+                            data.putNumber(fullCollumnName, Long.parseLong(dataline[pos]));
                         else if (columnType.get(pos) == Integer.class)
-                            data.putNumber(fullCollumnName, randInt(-10000, 10000));
+                            data.putNumber(fullCollumnName,  Integer.parseInt(dataline[pos]));
                         else if (columnType.get(pos) == Float.class)
-                            data.putNumber(fullCollumnName, nextFloat(-5, 5));
+                            data.putNumber(fullCollumnName,  Float.parseFloat(dataline[pos]));
                         else{
                             System.err.println("Not recognised type, stop importing");
                             return;
@@ -270,8 +280,9 @@ public class LoadAmplab2 {
                     }
                 }
 
-                for (int i = 1; i < primaryKeys.length; i++) {
-                    key = ":" + data.getValue("default."+tableName+"." +primaryKeys[i]);
+                key = dataline[primaryKeysPos[0]];
+                for (int i = 1; i < primaryKeysPos.length; i++) {
+                    key += ":" + dataline[primaryKeysPos[i]];
                 }
 
                 try {
