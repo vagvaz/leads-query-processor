@@ -281,6 +281,7 @@ public class LoadAmplab2 {
                     }
                 }
 
+                // create key
                 key = dataline[primaryKeysPos[0]];
                 for (int i = 1; i < primaryKeysPos.length; i++) {
                     key += ":" + dataline[primaryKeysPos[i]];
