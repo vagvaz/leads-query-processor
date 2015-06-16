@@ -57,7 +57,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
     @Override
     public void reduce(String reducedKey, Iterator<Tuple> iter,LeadsCollector collector) {
 
-
+        Tuple t = null;
 //        profCallable.setProfileLogger(profilerLog);
 //        if(profCallable!=null) {
 //            profCallable.end("reduce reduce ");
@@ -67,12 +67,12 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
 
         if(!isInitialized)
             initialize();
-        reduceEvent.start("JoinReducer ReduceExecute");
+        reduceEvent.start("JoinReducerReduceExecute");
         ProfileEvent tmpprofCallable = new ProfileEvent("JoinReducer Manager " + this.getClass().toString(),
             profilerLog);
 
 
-        profCallable.start("reduce proc ");
+        profCallable.start("JoinReducerReduceProcessing");
         tmpprofCallable.start("JoinReducerClearPreviousTuples");
         for(Map.Entry<String,List<Tuple>> entry : relations.entrySet()){
             entry.getValue().clear();
@@ -86,7 +86,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
             //         String jsonTuple = iter.next();
             //         Tuple t = new Tuple(jsonTuple);
             try {
-                Tuple t = null;
+
 
 
                 tmpprofCallable.start("reduce next");
@@ -118,7 +118,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
                 tmpprofCallable.start("JoinReducerException");
                 if(e instanceof NoSuchElementException){
                     profilerLog.info("End of LeadsIntermediateIterator");
-                    tmpprofCallable.end("JoinReducerException IterationEnd");
+                    tmpprofCallable.end("JoinReducerExceptionIterationEnd");
                     break;
                 }
                 else{
@@ -126,24 +126,24 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
                     profilerLog.error("EXCEPTION WHILE updating agg value");
                     profilerLog.error(e.getClass() + " " + e.getMessage());
                     profilerLog.error(iter.toString());
-                    tmpprofCallable.end("JoinReducerException ExceptionEnd");
+                    tmpprofCallable.end("JoinReducerExceptionExceptionEnd");
                 }
             }
         }
-        profCallable.end("reduce proc ");
+        profCallable.end();
 
 //        profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
 //        profCallable.setProfileLogger(profilerLog);
-        if(profCallable!=null) {
-            profCallable.end("reduce reduce ");
-        } else {
-            profCallable = new ProfileEvent("reduce reduce " + this.getClass().toString(), profilerLog);
-        }
+//        if(profCallable!=null) {
+//            profCallable.end("reduce reduce ");
+//        } else {
+//            profCallable = new ProfileEvent("reduce reduce " + this.getClass().toString(), profilerLog);
+//        }
 
-        profCallable.start("reduce rest ");
+        profCallable.start("JoinReducerReduceRestProc ");
         if(relations.size() < 2)
         {
-            profCallable.end("reduce rest ");
+            profCallable.end("JoinReducerReduceRestProc ");
             reduceEvent.end();
             return;
         }
@@ -192,9 +192,9 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
                 }
             }
         }catch(Exception e){
-            profCallable.end("JoinReducerRest Exception");
+//            profCallable.end("JoinReducerRest Exception");
         }
-        profCallable.end("reduce rest ");
+        profCallable.end();
         reduceEvent.end();
         return ;
     }

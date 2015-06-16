@@ -31,7 +31,7 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
 
     if (!isInitialized)
       initialize();
-    mapEvent.start("JoinMap MapExecute");
+    mapEvent.start("JoinMapMapExecute");
     StringBuilder builder = new StringBuilder();
     //        String tupleId = key.substring(key.indexOf(":"));
     //Tuple t = new Tuple(value);
