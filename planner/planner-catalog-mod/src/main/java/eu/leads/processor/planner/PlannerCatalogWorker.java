@@ -343,28 +343,28 @@ public class PlannerCatalogWorker extends Verticle {
     //##############################
 
       schema = new Schema();
-      schema.addColumn("pageURL", Type.TEXT);
-      schema.addColumn("pageRank", Type.INT8);
-      schema.addColumn("avgDuration", Type.INT8);
+      schema.addColumn("pageurl", Type.TEXT);
+      schema.addColumn("pagerank", Type.INT8);
+      schema.addColumn("avgduration", Type.INT8);
       //PRIMARY KEY (pageURL)
        tableName = "rankings";
-      (schema.getColumn("pageURL")).setPrimaryKey(true);
+      (schema.getColumn("pageurl")).setPrimaryKey(true);
       catalog.createTable(new TableDesc(
               CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
 
     schema = new Schema();
-    schema.addColumn("sourceIP", Type.TEXT);
-    schema.addColumn("destURL", Type.TEXT);
-    schema.addColumn("visitDate", Type.TEXT);
-    schema.addColumn("adRevenue", Type.FLOAT4);
-    schema.addColumn("userAgent", Type.TEXT);
-    schema.addColumn("countryCode", Type.TEXT);
-    schema.addColumn("languageCode", Type.TEXT);
+    schema.addColumn("sourceip", Type.TEXT);
+    schema.addColumn("desturl", Type.TEXT);
+    schema.addColumn("visitdate", Type.TEXT);
+    schema.addColumn("adrevenue", Type.FLOAT4);
+    schema.addColumn("useragent", Type.TEXT);
+    schema.addColumn("countrycode", Type.TEXT);
+    schema.addColumn("languagecode", Type.TEXT);
     schema.addColumn("searchWord", Type.TEXT);
     schema.addColumn("duration", Type.INT8);
     //PRIMARY KEY (sourceIP,destURL)
-    (schema.getColumn("sourceIP")).setPrimaryKey(true);
-    (schema.getColumn("destURL")).setPrimaryKey(true);
+    (schema.getColumn("sourceip")).setPrimaryKey(true);
+    (schema.getColumn("desturl")).setPrimaryKey(true);
 
     tableName = "uservisits";
     catalog.createTable(new TableDesc(
