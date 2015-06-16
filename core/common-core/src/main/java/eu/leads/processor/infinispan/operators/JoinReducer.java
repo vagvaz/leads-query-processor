@@ -19,13 +19,14 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
     private transient String prefix;
     transient Logger profilerLog;
     protected ProfileEvent profCallable;
+    transient ProfileEvent reduceEvent;
     transient Map<String,List<Tuple>> relations;
     transient ArrayList<List<Tuple>> arrays;
     public JoinReducer(String s) {
         super(s);
         configString = s;
-        profilerLog  = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
-        profCallable = new ProfileEvent("JoinReducer Construct" + this.getClass().toString(),profilerLog);
+        //profilerLog  = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
+        //profCallable = new ProfileEvent("JoinReducer Construct" + this.getClass().toString(),profilerLog);
     }
 
     @Override
@@ -39,11 +40,15 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
 //        }
 //        profCallable.start("reduce init ");
         super.initialize();
+        profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
+        profCallable = new ProfileEvent("JoinReducer profCallable",profilerLog);
+        reduceEvent = new ProfileEvent("JoinReducer ReduceExecute",profilerLog);
         isInitialized = true;
         conf = new JsonObject(configString);
         prefix = outputCacheName+":";
          relations = new HashMap<>();
         arrays = new ArrayList<>(2);
+
         //      prefix = outputCacheName+":";
         //      outputCache = (Cache) InfinispanClusterSingleton.getInstance().getManager().getPersisentCache(conf.getString("output"));
 //        profCallable.end("reduce init");
@@ -52,17 +57,17 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
     @Override
     public void reduce(String reducedKey, Iterator<Tuple> iter,LeadsCollector collector) {
 
-        profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
-        profCallable.setProfileLogger(profilerLog);
-        if(profCallable!=null) {
-            profCallable.end("reduce reduce ");
-        } else {
-            profCallable = new ProfileEvent("reduce reduce " + this.getClass().toString(), profilerLog);
-        }
+
+//        profCallable.setProfileLogger(profilerLog);
+//        if(profCallable!=null) {
+//            profCallable.end("reduce reduce ");
+//        } else {
+//            profCallable = new ProfileEvent("reduce reduce " + this.getClass().toString(), profilerLog);
+//        }
 
         if(!isInitialized)
             initialize();
-
+        reduceEvent.start("JoinReducer ReduceExecute");
         ProfileEvent tmpprofCallable = new ProfileEvent("JoinReducer Manager " + this.getClass().toString(),
             profilerLog);
 
@@ -139,6 +144,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
         if(relations.size() < 2)
         {
             profCallable.end("reduce rest ");
+            reduceEvent.end();
             return;
         }
 //         arrays = new ArrayList<>(2);
@@ -189,6 +195,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
             profCallable.end("JoinReducerRest Exception");
         }
         profCallable.end("reduce rest ");
+        reduceEvent.end();
         return ;
     }
 }

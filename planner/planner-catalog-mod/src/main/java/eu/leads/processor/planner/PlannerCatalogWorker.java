@@ -340,6 +340,37 @@ public class PlannerCatalogWorker extends Verticle {
       catalog.createTable(CatalogUtil.newTableDesc(
               CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." +tableName)));
 
+    //##############################
+
+      schema = new Schema();
+      schema.addColumn("pageURL", Type.TEXT);
+      schema.addColumn("pageRank", Type.INT8);
+      schema.addColumn("avgDuration", Type.INT8);
+      //PRIMARY KEY (pageURL)
+       tableName = "rankings";
+      (schema.getColumn("pageURL")).setPrimaryKey(true);
+      catalog.createTable(new TableDesc(
+              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+
+    schema = new Schema();
+    schema.addColumn("sourceIP", Type.TEXT);
+    schema.addColumn("destURL", Type.TEXT);
+    schema.addColumn("visitDate", Type.TEXT);
+    schema.addColumn("adRevenue", Type.FLOAT4);
+    schema.addColumn("userAgent", Type.TEXT);
+    schema.addColumn("countryCode", Type.TEXT);
+    schema.addColumn("languageCode", Type.TEXT);
+    schema.addColumn("searchWord", Type.TEXT);
+    schema.addColumn("duration", Type.INT8);
+    //PRIMARY KEY (sourceIP,destURL)
+    (schema.getColumn("sourceIP")).setPrimaryKey(true);
+    (schema.getColumn("destURL")).setPrimaryKey(true);
+
+    tableName = "uservisits";
+    catalog.createTable(new TableDesc(
+            CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+
+
   }
 
 

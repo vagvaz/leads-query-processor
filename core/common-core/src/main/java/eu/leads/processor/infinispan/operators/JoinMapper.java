@@ -21,15 +21,17 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
   transient Map<String, List<String>> joinColumns;
   transient ProfileEvent profileEvent;
   transient Logger profilerLog;
+  transient ProfileEvent mapEvent;
   public JoinMapper(String s) {
     super(s);
   }
 
   @Override
   public void map(String key, Tuple t, Collector<String, Tuple> collector) {
+
     if (!isInitialized)
       initialize();
-
+    mapEvent.start("JoinMap MapExecute");
     StringBuilder builder = new StringBuilder();
     //        String tupleId = key.substring(key.indexOf(":"));
     //Tuple t = new Tuple(value);
@@ -50,7 +52,7 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
     profileEvent.start("JoinMapEMitIntermediateResult");
     collector.emit(outkey, t);
     profileEvent.end();
-
+    mapEvent.end();
   }
 
 
@@ -60,6 +62,7 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
     isInitialized = true;
     profilerLog = LoggerFactory.getLogger(JoinMapper.class);
     profileEvent = new ProfileEvent("JoinMapInitialize",profilerLog);
+    mapEvent = new ProfileEvent("JoinMapExecute ",profilerLog);
 
     //       System.err.println("-------------Initialize");
     super.initialize();

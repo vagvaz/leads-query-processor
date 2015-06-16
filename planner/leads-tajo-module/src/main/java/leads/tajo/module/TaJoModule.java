@@ -235,6 +235,7 @@ public class TaJoModule {
         }
     }
 
+    //FIX IT USE CATALOG INFO NOW !!
     private void initializePrimaryColumns(){
         primaryKeys = new HashMap<>();
         HashSet<String> commonKeys = new HashSet<>();
@@ -260,6 +261,15 @@ public class TaJoModule {
         Keys= new HashSet<>();
         Keys.add("keywords");
         primaryKeys.put(/*"adidas.*/"adidas_keywords", (Set<String>) Keys.clone());
+
+        Keys= new HashSet<>();
+        Keys.add("uservisits");
+        primaryKeys.put(/*"adidas.*/"sourceIP", (Set<String>) Keys.clone());
+        primaryKeys.put(/*"adidas.*/"destURL", (Set<String>) Keys.clone());
+
+        Keys= new HashSet<>();
+        Keys.add("rankings");
+        primaryKeys.put(/*"adidas.*/"pageURL", (Set<String>) Keys.clone());
     }
 
     public static Set<String> getPrimaryColumn(String tableName) {
