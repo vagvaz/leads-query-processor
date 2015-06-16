@@ -6,10 +6,7 @@ import org.infinispan.commons.util.concurrent.NotifyingFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -27,6 +24,7 @@ public class BatchPutAllAsyncThread extends Thread{
         this.caches = caches;
         this.objects = objects;
         futures = new ArrayList<>();
+        backup = new HashMap<>();
         log = LoggerFactory.getLogger(BatchPutAllAsyncThread.class);
     }
 

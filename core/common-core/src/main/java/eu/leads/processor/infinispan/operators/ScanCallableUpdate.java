@@ -2,6 +2,7 @@ package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
+import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.math.FilterOperatorTree;
@@ -200,7 +201,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
           //               log.info("--------------------    put into output with filter ------------------------");
           if (key != null && tuple != null) {
 //            profExecute.start("Scan_Put");
-            outputToCache(key.toString(), tuple);
+            EnsembleCacheUtils.putToCache(outputCache,key.toString(), tuple);
 //            profExecute.end();
           }
         }
@@ -211,7 +212,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
         //            log.info("--------------------    put into output without tree ------------------------");
         if (key != null && tuple != null){
 //          profExecute.start("Scan_outputToCache");
-          outputToCache(key,tuple);
+          EnsembleCacheUtils.putToCache(outputCache,key, tuple);
 //          profExecute.end();
         }
       }
