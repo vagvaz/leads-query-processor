@@ -287,7 +287,7 @@ public class LoadAmplab2 {
                     key += ":" + dataline[primaryKeysPos[i]];
                 }
 
-                System.out.println("putting... key:" + key.toString() + " -- data:" + data.toString());
+//                System.out.println("putting... key:" + key.toString() + " -- data:" + data.toString());
 
 //                try {
 //                    System.out.println("putting... pageURL:" + data.getField("default." + tableName + ".pageURL").toString() + " -- pageRank:" + data.getField("default." + tableName + ".pageRank").toString());
@@ -307,12 +307,12 @@ public class LoadAmplab2 {
                 if (delay > 50) {
                     System.out.println("Cache put: " + numofEntries);
                 }
-                if (numofEntries % 50 == 0){
+                if (numofEntries % 1000 == 0){
                     System.out.println("Imported: " + numofEntries+" -- size: "+sizeE);
                 }
 
-                if(numofEntries>100)
-                    break;
+//                if(numofEntries>100)
+//                    break;
             }
 
             System.out.println("Totally Imported: " + numofEntries);
