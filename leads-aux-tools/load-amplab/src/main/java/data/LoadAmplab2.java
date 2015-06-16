@@ -113,6 +113,7 @@ public class LoadAmplab2 {
                 dir = Paths.get(path+"/"+path1.getFileName());
 
                 try (DirectoryStream<Path> stream1 = Files.newDirectoryStream(dir, "{part}*")) {
+                    files.clear();
                     for (Path entry : stream1) {
                         files.add(entry.toFile());
                     }
@@ -125,9 +126,7 @@ public class LoadAmplab2 {
                     loadDataFromFile(csvfile,arg5,arg6);
                     System.out.println("Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - filestartTime, "HH:mm:ss,SSS"));
                 }
-                System.out.println("Loading finished.");
-                System.out.println("Overall Folder Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - startTime, "HH:mm:ss,SSS"));
-                System.exit(0);
+
 
 
 
@@ -136,7 +135,9 @@ public class LoadAmplab2 {
             e.printStackTrace();
         }
 
-
+        System.out.println("Loading finished.");
+        System.out.println("Overall Folder Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - startTime, "HH:mm:ss,SSS"));
+        System.exit(0);
 
     }
 
@@ -280,10 +281,13 @@ public class LoadAmplab2 {
                     }
                 }
 
+                // create key
                 key = dataline[primaryKeysPos[0]];
                 for (int i = 1; i < primaryKeysPos.length; i++) {
                     key += ":" + dataline[primaryKeysPos[i]];
                 }
+
+//                System.out.println("putting... key:" + key.toString() + " -- data:" + data.toString());
 
 //                try {
 //                    System.out.println("putting... pageURL:" + data.getField("default." + tableName + ".pageURL").toString() + " -- pageRank:" + data.getField("default." + tableName + ".pageRank").toString());
@@ -303,9 +307,12 @@ public class LoadAmplab2 {
                 if (delay > 50) {
                     System.out.println("Cache put: " + numofEntries);
                 }
-                if (numofEntries % 100 == 0){
+                if (numofEntries % 1000 == 0){
                     System.out.println("Imported: " + numofEntries+" -- size: "+sizeE);
                 }
+
+//                if(numofEntries>100)
+//                    break;
             }
 
             System.out.println("Totally Imported: " + numofEntries);
@@ -317,44 +324,6 @@ public class LoadAmplab2 {
         ObjectOutputStream o = new ObjectOutputStream(b);
         o.writeObject(obj.toString());
         return b.toByteArray();
-    }
-
-    public static int randInt(int min, int max) {
-        Random rand = new Random();
-        int randomNum = rand.nextInt((max - min) + 1) + min;
-        return randomNum;
-    }
-
-    public static Long randLong() {
-        long x = 1234567L;
-        long y = 23456789L;
-        Random r = new Random();
-        long number = x+((long)(r.nextDouble()*(y-x)));
-        return number;
-    }
-
-    public static String randSmallString() {
-        char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-        StringBuilder sb = new StringBuilder();
-        Random random = new Random();
-        for (int i = 0; i < 50; i++) {
-            char c = chars[random.nextInt(chars.length)];
-            sb.append(c);
-        }
-        String randomString = sb.toString();
-        return randomString;
-    }
-
-    public static String randBigString(int arg6) {
-        char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-        StringBuilder sb = new StringBuilder();
-        Random random = new Random();
-        for (int i = 0; i < arg6; i++) {
-            char c = chars[random.nextInt(chars.length)];
-            sb.append(c);
-        }
-        String randomString = sb.toString();
-        return randomString;
     }
 
     public static float nextFloat(float min, float max) {
