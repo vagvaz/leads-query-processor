@@ -60,6 +60,7 @@ public class BatchPutAllAsyncThread extends Thread{
             for(NotifyingFuture failedFuture : failed){
                 //for the failed redo the action
                 //Get Cache for that future
+                log.error("EnsembleRetrying putting data to " + backup.get(failed));
                 BasicCache cache = caches.get( backup.get(failedFuture) );
                 //Get Map that we need to put
                 Object ob = objects.get(cache.getName());

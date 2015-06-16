@@ -221,7 +221,7 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
     }
     else{
       EnsembleCacheUtils.putToCache(storeCache, key, value);
-      emitCount.incrementAndGet();
+//      emitCount.incrementAndGet();
     }
     // if (isOverflown() && mcc.hasCombiner()) {
     // combine(mcc, this);

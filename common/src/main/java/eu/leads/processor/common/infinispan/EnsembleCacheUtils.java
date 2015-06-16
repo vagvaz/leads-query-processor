@@ -1,5 +1,6 @@
 package eu.leads.processor.common.infinispan;
 
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.commons.api.BasicCache;
@@ -112,6 +113,8 @@ public class EnsembleCacheUtils {
                         t.join();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                        log.error("EnsembleCacheUtilsClearCompletedException " + e.getMessage());
+                        PrintUtilities.logStackTrace(log,e.getStackTrace());
                     }
                 }
             }
@@ -121,8 +124,8 @@ public class EnsembleCacheUtils {
             currentCaches = new ConcurrentHashMap<>();
             mapsToPut = new ConcurrentHashMap<>();
             BatchPutAllAsyncThread batchPutAllAsyncThread = new BatchPutAllAsyncThread(caches,objects);
-            batchPutAllAsyncThread.start();
             threads.add(batchPutAllAsyncThread);
+            batchPutAllAsyncThread.start();
         }
 
 
