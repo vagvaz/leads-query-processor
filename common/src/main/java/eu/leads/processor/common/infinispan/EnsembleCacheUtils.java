@@ -31,7 +31,7 @@ public class EnsembleCacheUtils {
     static int batchSize = 20;
     static long counter = 0;
     static long threadCounter = 0;
-    static long threadBatch = 2;
+    static long threadBatch = 4;
     private static ClearCompletedRunnable ccr;
 
     public static void initialize() {
