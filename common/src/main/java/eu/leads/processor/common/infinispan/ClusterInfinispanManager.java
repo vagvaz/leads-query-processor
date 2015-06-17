@@ -383,7 +383,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       HotRodServerConfigurationBuilder serverConfigurationBuilder = new HotRodServerConfigurationBuilder();
       if (externalIP != null && !externalIP.equals("")){
         serverConfigurationBuilder.host(localhost).port(serverPort).proxyHost(externalIP)
-            .proxyPort(serverPort);
+            .proxyPort(11222);
       }else{
         serverConfigurationBuilder.host(localhost).port(serverPort);
       }
