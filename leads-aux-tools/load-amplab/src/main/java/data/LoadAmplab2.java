@@ -1,6 +1,7 @@
 package data;
 
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
@@ -10,6 +11,7 @@ import org.infinispan.Cache;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
+import org.infinispan.commons.api.BasicCache;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.vertx.java.core.json.JsonObject;
@@ -55,6 +57,7 @@ public class LoadAmplab2 {
         }
 
         LQPConfiguration.initialize();
+        EnsembleCacheUtils.initialize();
 
         if (args[0].startsWith("l")) {
             if(args[0].equals("loadIspn")) {
@@ -304,7 +307,7 @@ public class LoadAmplab2 {
                     System.out.println("Imported: " + numofEntries+" -- size: "+sizeE + " -- file: "+csvfile);
                 }
             }
-
+            EnsembleCacheUtils.waitForAllPuts();
             System.out.println("Totally Imported: " + numofEntries);
         }
     }
@@ -323,11 +326,15 @@ public class LoadAmplab2 {
     private static void put(String key, String value) {
         Tuple tuple = new Tuple(value);
         if (remoteCache != null)
-            remoteCache.put(remoteCache.getName() + ":" + key, tuple);
+//            remoteCache.put(remoteCache.getName() + ":" + key, tuple);
+            EnsembleCacheUtils.putToCache(remoteCache,remoteCache.getName() + ":" + key, tuple);
         else if (embeddedCache != null)
-            embeddedCache.put(((Cache) embeddedCache).getName() + ":" + key, tuple);
+//            embeddedCache.put(((Cache) embeddedCache).getName() + ":" + key, tuple);
+            EnsembleCacheUtils.putToCache(
+                (BasicCache) embeddedCache,((Cache)embeddedCache).getName() + ":" + key, tuple);
         else if (ensembleCache!=null)
-            ensembleCache.put( ensembleCache.getName() + ":" + key, tuple);
+//            ensembleCache.put( ensembleCache.getName() + ":" + key, tuple);
+            EnsembleCacheUtils.putToCache(ensembleCache,ensembleCache.getName() + ":" + key, tuple);
         try {
             Thread.sleep(delay);
         } catch (InterruptedException e) {
