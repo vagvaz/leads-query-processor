@@ -5,14 +5,13 @@ import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.concurrent.NotifyingFuture;
-import org.infinispan.util.concurrent.ConcurrentHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Future;
 
 /**
  * Created by vagvaz on 3/7/15.
@@ -32,7 +31,7 @@ public class EnsembleCacheUtils {
     static int batchSize = 20;
     static long counter = 0;
     static long threadCounter = 0;
-    static long threadBatch = 4;
+    static long threadBatch = 2;
     private static ClearCompletedRunnable ccr;
 
     public static void initialize() {
