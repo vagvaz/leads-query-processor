@@ -307,7 +307,7 @@ public class LoadAmplab2 {
                     System.out.println("Imported: " + numofEntries+" -- size: "+sizeE + " -- file: "+csvfile);
                 }
             }
-
+            EnsembleCacheUtils.waitForAllPuts();
             System.out.println("Totally Imported: " + numofEntries);
         }
     }
