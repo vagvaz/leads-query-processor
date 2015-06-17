@@ -45,7 +45,7 @@
         </dependency>
         <!--<dependency>
             <groupId>gr.tuc.softnet</groupId>
-            <artifactId>pagerank-node</artifactId>
+            <artifactId>pagerank-node</afactId>
             <version>1.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>

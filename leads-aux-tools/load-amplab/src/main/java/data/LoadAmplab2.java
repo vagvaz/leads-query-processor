@@ -287,13 +287,6 @@ public class LoadAmplab2 {
                     key += ":" + dataline[primaryKeysPos[i]];
                 }
 
-//                System.out.println("putting... key:" + key.toString() + " -- data:" + data.toString());
-
-//                try {
-//                    System.out.println("putting... pageURL:" + data.getField("default." + tableName + ".pageURL").toString() + " -- pageRank:" + data.getField("default." + tableName + ".pageRank").toString());
-//                } catch(NullPointerException npe){
-//                    System.out.println("putting... sourceIP:" + data.getField("default." + tableName + ".sourceIP").toString() + " -- destURL:" + data.getField("default." + tableName + ".destURL").toString());
-//                }
                 put(key, data.toString());
 
                 try {
@@ -310,9 +303,6 @@ public class LoadAmplab2 {
                 if (numofEntries % 1000 == 0){
                     System.out.println("Imported: " + numofEntries+" -- size: "+sizeE);
                 }
-
-//                if(numofEntries>100)
-//                    break;
             }
 
             System.out.println("Totally Imported: " + numofEntries);
