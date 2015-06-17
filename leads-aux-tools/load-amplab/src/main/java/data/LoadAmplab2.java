@@ -301,7 +301,7 @@ public class LoadAmplab2 {
                     System.out.println("Cache put: " + numofEntries);
                 }
                 if (numofEntries % 1000 == 0){
-                    System.out.println("Imported: " + numofEntries+" -- size: "+sizeE);
+                    System.out.println("Imported: " + numofEntries+" -- size: "+sizeE + " -- file: "+csvfile);
                 }
             }
 
