@@ -265,15 +265,16 @@ public class LoadAmplab2 {
 
                 for (pos = 0; pos < columns.size(); pos++) {
                     String fullCollumnName =  "default."+tableName+"." + columns.get(pos);
+                    Class ct = columnType.get(pos);
                     try {
-                        if (columnType.get(pos) == String.class)
+                        if (ct == String.class)
                             data.putString(fullCollumnName, dataline[pos]);
-                        else if (columnType.get(pos) == Long.class)
+                        else if (ct == Long.class)
                             data.putNumber(fullCollumnName, Long.parseLong(dataline[pos]));
-                        else if (columnType.get(pos) == Integer.class)
+                        else if (ct == Integer.class)
                             data.putNumber(fullCollumnName,  Integer.parseInt(dataline[pos]));
-                        else if (columnType.get(pos) == Float.class)
-                            data.putNumber(fullCollumnName,  Float.parseFloat(dataline[pos]));
+                        else if (ct == Float.class)
+                            data.putNumber(fullCollumnName, Float.parseFloat(dataline[pos]));
                         else{
                             System.err.println("Not recognised type, stop importing");
                             return;
@@ -327,14 +328,14 @@ public class LoadAmplab2 {
         Tuple tuple = new Tuple(value);
         if (remoteCache != null)
 //            remoteCache.put(remoteCache.getName() + ":" + key, tuple);
-            EnsembleCacheUtils.putToCache(remoteCache,remoteCache.getName() + ":" + key, tuple);
+            EnsembleCacheUtils.putToCache(remoteCache, remoteCache.getName() + ":" + key, tuple);
         else if (embeddedCache != null)
 //            embeddedCache.put(((Cache) embeddedCache).getName() + ":" + key, tuple);
             EnsembleCacheUtils.putToCache(
-                (BasicCache) embeddedCache,((Cache)embeddedCache).getName() + ":" + key, tuple);
+                    (BasicCache) embeddedCache, ((Cache) embeddedCache).getName() + ":" + key, tuple);
         else if (ensembleCache!=null)
 //            ensembleCache.put( ensembleCache.getName() + ":" + key, tuple);
-            EnsembleCacheUtils.putToCache(ensembleCache,ensembleCache.getName() + ":" + key, tuple);
+            EnsembleCacheUtils.putToCache(ensembleCache, ensembleCache.getName() + ":" + key, tuple);
         try {
             Thread.sleep(delay);
         } catch (InterruptedException e) {
