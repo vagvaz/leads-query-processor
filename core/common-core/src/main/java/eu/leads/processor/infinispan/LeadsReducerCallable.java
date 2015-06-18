@@ -1,6 +1,9 @@
 package eu.leads.processor.infinispan;
 
+import org.infinispan.Cache;
+
 import java.io.Serializable;
+import java.util.Set;
 
 public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut,Object> implements
                                                                               Serializable {
@@ -23,7 +26,11 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut,Obj
         this.prefix = prefix;
     }
 
-  @Override public void executeOn(kOut key, Object value) {
+    @Override public void setEnvironment(Cache<kOut, Object> cache, Set<kOut> inputKeys) {
+        super.setEnvironment(cache, inputKeys);
+    }
+
+    @Override public void executeOn(kOut key, Object value) {
     LeadsIntermediateIterator<vOut> values = new LeadsIntermediateIterator<>((String) key,prefix,imanager);
     reducer.reduce(key,values,collector);
   }

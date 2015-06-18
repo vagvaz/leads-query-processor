@@ -1,5 +1,6 @@
 package eu.leads.processor.common.utils;
 
+import org.infinispan.commons.api.BasicCache;
 import org.slf4j.Logger;
 import org.vertx.java.core.json.JsonObject;
 
@@ -79,6 +80,20 @@ public class PrintUtilities {
     public static void logStackTrace(Logger profilerLog, StackTraceElement[] stackTrace) {
         for(StackTraceElement s : stackTrace){
             profilerLog.error(s.toString());
+        }
+    }
+
+    public static void logMapCache(Logger log, Map<String, BasicCache> caches) {
+        log.error("LOGMAPCACHE");
+        for(Map.Entry<String,BasicCache> entry : caches.entrySet()){
+            log.error(entry.getKey() + " --> " + entry.getValue()) ;
+        }
+    }
+
+    public static void logMapKeys(Logger log, Map<String, Map<Object, Object>> objects) {
+        log.error("LOGMAPKEYS");
+        for(Map.Entry<String,Map<Object, Object>> entry : objects.entrySet()){
+            log.error(entry.getKey() + " --> " + entry.getValue().size()) ;
         }
     }
 }

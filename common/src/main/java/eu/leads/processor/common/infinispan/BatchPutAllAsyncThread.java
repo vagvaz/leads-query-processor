@@ -32,9 +32,15 @@ public class BatchPutAllAsyncThread extends Thread{
 //        super.run();
         for(Map.Entry<String,Map<Object,Object>> entry : objects.entrySet()){
             BasicCache cache = caches.get(entry.getKey());
+            if(cache == null){
+                log.error("Cache " + entry.getKey() + " is not present in caches");
+                PrintUtilities.logMapCache(log, caches);
+                PrintUtilities.logMapKeys(log, objects);
+                continue;
+            }
             NotifyingFuture nextFuture = cache.putAllAsync(entry.getValue());
             futures.add(nextFuture);
-            backup.put(nextFuture,cache.getName());
+            backup.put(nextFuture, cache.getName());
         }
         List<NotifyingFuture> failed = null;
         while(!backup.isEmpty()) {
