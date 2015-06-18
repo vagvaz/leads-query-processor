@@ -89,7 +89,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     else{
       executeOnlyMap = true;
       executeOnlyReduce =true;
-      log.error("IS REMOTE FALSE ");
+     // log.info("IS REMOTE FALSE ");
     }
 
     this.globalConfig = action.getGlobalConf();
@@ -720,6 +720,8 @@ public abstract class BasicOperator extends Thread implements Operator{
   public String computeEnsembleHost() {
     String result = "";
     JsonObject targetEndpoints = action.getData().getObject("operator").getObject("targetEndpoints");
+    if(targetEndpoints==null)
+      return null;
     List<String> sites = new ArrayList<>();
     for(String targetMC : targetEndpoints.getFieldNames()){
       //         JsonObject mc = targetEndpoints.getObject(targetMC);

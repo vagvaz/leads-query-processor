@@ -39,6 +39,7 @@ public class DefaultNode implements Node, Handler<Long> {
     private Vertx vertx;
     public DefaultNode() {
         config = new JsonObject();
+        config.putString("id","Default");
         pending = new HashMap<Long, MessageWrapper>();
         pendingHandlers = new HashMap<Long, AckHandler>();
         requests = new HashSet<Long>();

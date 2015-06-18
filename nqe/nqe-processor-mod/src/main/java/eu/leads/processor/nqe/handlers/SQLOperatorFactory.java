@@ -71,6 +71,9 @@ public class SQLOperatorFactory {
          case INSERT:
              //Is Covered with EXPRS
             break;
+         case CREATE_INDEX:
+            //Is Covered with EXPRS
+            break;
          case DISTINCT_GROUP_BY:
             break;
          case CREATE_DATABASE:

@@ -22,10 +22,10 @@ public class TestLeadsIndex {
 //        InfinispanManager man2 = CacheManagerFactory.createCacheManager();
 //        Cache cachefoo = (Cache) man2.getPersisentCache("queriesfoo");
         InfinispanManager man = InfinispanClusterSingleton.getInstance().getManager();
-        Cache cache = (Cache) man.getPersisentCache("indexedCache");
+        Cache cache = (Cache) man.getPersisentCache("defaultCache");
 
-        int numStrings = 10000;// 10000
-        int numTuples = 5000000;// 15000000
+        int numStrings = 1000;// 10000
+        int numTuples = 500;// 15000000
 
         // find number of generated tuples: run until memory exception
         List<String> lstStr = new ArrayList<>();

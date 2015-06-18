@@ -25,6 +25,7 @@ public enum LeadsNodeType {
     BST_INDEX_SCAN(IndexScanNode.class),
     STORE(StoreTableNode.class),
     INSERT(InsertNode.class),
+    CREATE_INDEX(CreateIndexNode.class),
     DISTINCT_GROUP_BY(DistinctGroupbyNode.class),
 
     CREATE_DATABASE(CreateDatabaseNode.class),
