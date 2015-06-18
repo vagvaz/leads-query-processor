@@ -198,6 +198,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".site");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".adidas_keywords");
 
+    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".rankings");
+    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".uservisits");
+
+
     NutchLocalListener listener = new NutchLocalListener(this,"default.webpages",LQPConfiguration.getInstance().getConfiguration().getString("nutch.listener.prefix"),currentComponent);
 
     manager.getCache("WebPage").addListener(listener);
@@ -379,7 +383,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       HotRodServerConfigurationBuilder serverConfigurationBuilder = new HotRodServerConfigurationBuilder();
       if (externalIP != null && !externalIP.equals("")){
         serverConfigurationBuilder.host(localhost).port(serverPort).proxyHost(externalIP)
-            .proxyPort(serverPort);
+            .proxyPort(11222);
       }else{
         serverConfigurationBuilder.host(localhost).port(serverPort);
       }

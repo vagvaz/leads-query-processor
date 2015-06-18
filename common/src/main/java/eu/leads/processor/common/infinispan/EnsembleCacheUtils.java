@@ -1,17 +1,17 @@
 package eu.leads.processor.common.infinispan;
 
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.concurrent.NotifyingFuture;
-import org.infinispan.util.concurrent.ConcurrentHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Future;
 
 /**
  * Created by vagvaz on 3/7/15.
@@ -22,7 +22,7 @@ public class EnsembleCacheUtils {
         new ProfileEvent("Execute " + EnsembleCacheUtils.class, profilerLog);
     static Logger log = LoggerFactory.getLogger(EnsembleCacheUtils.class);
     static boolean useAsync;
-    static Queue<NotifyingFuture<Void>> concurrentQuue;
+//    static Queue<NotifyingFuture<Void>> concurrentQuue;
     static Map<String, BasicCache> currentCaches;
     static Map<String, Map<Object, Object>> mapsToPut;
     static Queue<Thread> threads;
@@ -32,7 +32,6 @@ public class EnsembleCacheUtils {
     static long counter = 0;
     static long threadCounter = 0;
     static long threadBatch = 4;
-    private static ClearCompletedRunnable ccr;
 
     public static void initialize() {
         synchronized (mutex) {
@@ -42,7 +41,7 @@ public class EnsembleCacheUtils {
             useAsync = LQPConfiguration.getInstance().getConfiguration()
                 .getBoolean("node.infinispan.putasync", true);
             log.info("Using asynchronous put " + useAsync);
-            concurrentQuue = new ConcurrentLinkedQueue<>();
+//            concurrentQuue = new ConcurrentLinkedQueue<>();
             threads = new ConcurrentLinkedQueue<>();
             //            ccr = new ClearCompletedRunnable(concurrentQuue,mutex,threads);
             initialized = true;
@@ -56,25 +55,25 @@ public class EnsembleCacheUtils {
     public static void waitForAllPuts() {
 //        profExecute.start("waitForAllPuts");
         clearCompleted();
-        while (!concurrentQuue.isEmpty()) {
-//            Iterator<NotifyingFuture<Void>> iterator = concurrentQuue.iterator();
-//            while (iterator.hasNext()) {
-                NotifyingFuture current = concurrentQuue.poll();
-                try {
-                    //                    if (current.isDone()) {
-                    //                        iterator.remove();
-                    //                    }
-                    //                    else{
-                    current.get();
-//                    iterator.remove();
-                } catch (Exception e) {
-                    log.error(
-                        "EnsembleCacheUtils waitForAllPuts Exception " + e.getClass().toString());
-                    log.error(e.getStackTrace().toString());
-                    e.printStackTrace();
-                }
-//            }
-        }
+//        while (!threads.isEmpty()) {
+////            Iterator<NotifyingFuture<Void>> iterator = concurrentQuue.iterator();
+////            while (iterator.hasNext()) {
+//                NotifyingFuture current = concurrentQuue.poll();
+//                try {
+//                    //                    if (current.isDone()) {
+//                    //                        iterator.remove();
+//                    //                    }
+//                    //                    else{
+//                    current.get();
+////                    iterator.remove();
+//                } catch (Exception e) {
+//                    log.error(
+//                        "EnsembleCacheUtils waitForAllPuts Exception " + e.getClass().toString());
+//                    log.error(e.getStackTrace().toString());
+//                    e.printStackTrace();
+//                }
+////            }
+//        }
 //        Iterator<Thread> threadIterator = threads.iterator();
         while (!threads.isEmpty()) {
             Thread t = threads.poll();
@@ -112,6 +111,8 @@ public class EnsembleCacheUtils {
                         t.join();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                        log.error("EnsembleCacheUtilsClearCompletedException " + e.getMessage());
+                        PrintUtilities.logStackTrace(log,e.getStackTrace());
                     }
                 }
             }
@@ -121,8 +122,8 @@ public class EnsembleCacheUtils {
             currentCaches = new ConcurrentHashMap<>();
             mapsToPut = new ConcurrentHashMap<>();
             BatchPutAllAsyncThread batchPutAllAsyncThread = new BatchPutAllAsyncThread(caches,objects);
-            batchPutAllAsyncThread.start();
             threads.add(batchPutAllAsyncThread);
+            batchPutAllAsyncThread.start();
         }
 
 
