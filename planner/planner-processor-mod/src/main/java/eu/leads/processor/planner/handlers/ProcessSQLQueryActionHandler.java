@@ -27,6 +27,7 @@ import org.vertx.java.core.json.JsonObject;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Created by vagvaz on 8/19/14.
@@ -88,19 +89,6 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
                 result.setResult(ignoreResult(sqlQuery));
                 completeQuery(sqlQuery);
                 return result;
-            }else if (expr.getType().equals(OpType.CreateIndex)) {
-                String res = expr.toJson();
-                CreateIndex newExpr = JsonHelper.fromJson(res, CreateIndex.class);//
-                JsonObject actionResult = new JsonObject();
-                actionResult.putString("status", "ok");
-                actionResult.putObject("query",  new JsonObject(res));
-                result.setStatus(ActionStatus.COMPLETED.toString());
-                result.setResult(actionResult);
-                return result;
-                //                            JsonArray columnNames = conf.getObject("CreateIndex").getArray("SortSpecs");
-                //                            JsonArray values = conf.getObject("body").getArray("exprs");
-                //                            JsonArray primaryArray = conf.getObject("Projection").getArray("TableName");
-
             }
         } catch (Exception e) {
             failQuery(e, sqlQuery);
@@ -162,6 +150,24 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
                 result = createInsertSQLPlan(session, expr, sqlQuery);
                 return result;
 
+            }else if (expr.getType().equals(OpType.CreateIndex)) {
+//                String res = expr.toJson();
+//                CreateIndex newExpr = JsonHelper.fromJson(res, CreateIndex.class);//
+//                //check array and table exist
+//                JsonObject actionResult = new JsonObject();
+//                actionResult.putString("status", "ok");
+//                SQLPlan selectedPlan = new SQLPlan(new JsonObject(res));
+//                sqlQuery.setPlan(selectedPlan);
+//
+//                actionResult.putObject("query", sqlQuery.asJsonObject());
+//                result.setStatus(ActionStatus.COMPLETED.toString());
+//                result.setResult(actionResult);
+                result = createIndexSQLPlan(session, expr, sqlQuery);
+                return result;
+                //                            JsonArray columnNames = conf.getObject("CreateIndex").getArray("SortSpecs");
+                //                            JsonArray values = conf.getObject("body").getArray("exprs");
+                //                            JsonArray primaryArray = conf.getObject("Projection").getArray("TableName");
+
             }
         }catch (Exception e){
             throw e;
@@ -220,6 +226,51 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         }
         return result;
     }
+
+    private SQLPlan createIndexSQLPlan(Session session, Expr expr, SQLQuery sqlQuery)  {
+        SQLPlan result = null;
+        CreateIndex opIndex = (CreateIndex)expr;
+
+        LogicalRootNode n = new LogicalRootNode(667);
+        result = new SQLPlan(sqlQuery.getId(),n);
+        PlanNode node = result.getNode(result.getQueryId()+".0");
+        node.getConfiguration().getObject("body").putString("operationType", OpType.CreateIndex.toString());
+        String tableName = (((Relation) ((Projection) opIndex.getChild()).getChild())).getName();
+        if(tableName.startsWith(StringConstants.DEFAULT_DATABASE_NAME))
+            node.getConfiguration().getObject("body").putString("tableName",tableName);
+        else
+        if(tableName.contains("."))
+            node.getConfiguration().getObject("body").putString("tableName",tableName);
+        else
+            node.getConfiguration().getObject("body").putString("tableName",StringConstants.DEFAULT_DATABASE_NAME+"."+tableName);
+
+        node.getConfiguration().getObject("body").putArray("primaryColumns",resolvePrimaryColumns(tableName));
+
+        String indexName = opIndex.getIndexName();
+        if (indexName.isEmpty())
+            indexName = "noname"+ UUID.randomUUID();
+
+        node.getConfiguration().getObject("body").putString("indexName", indexName);
+
+        Sort.SortSpec[] collumns = opIndex.getSortSpecs();
+        if(collumns!=null) {
+            JsonArray array = new JsonArray(collumns);
+            node.getConfiguration().getObject("body").putArray("columnNames", array);
+        }
+        else{
+            JsonArray array = new JsonArray();
+            Schema tableSchema = TaJoModule.getTableSchema(tableName);
+            for(Column c : tableSchema.getColumns()){
+                array.add(c.getSimpleName());
+            }
+            node.getConfiguration().getObject("body").putArray("columnNames",array);
+        }
+        node.getConfiguration().putString("rawquery",opIndex.toJson());
+        result.updateNode(node);
+        return result;
+    }
+
+    //do it with catalog
     private JsonArray resolvePrimaryColumns(String tableName) {
         String table = tableName;
         Set<String> primaryColumns = null;

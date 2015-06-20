@@ -59,7 +59,7 @@ public class CreateIndexOperator extends BasicOperator {
       emanager.start();
     }
 
-    String CreateIndexJ = conf.getString("query");
+    String CreateIndexJ = conf.getString("rawquery");
     CreateIndex newExpr = JsonHelper.fromJson(CreateIndexJ, CreateIndex.class);
 //    Projection prj = (Projection)newExpr.getChild();
 //    NamedExpr[] targets = prj.getNamedExprs();
