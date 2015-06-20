@@ -232,8 +232,13 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         CreateIndex opIndex = (CreateIndex)expr;
 
         LogicalRootNode n = new LogicalRootNode(667);
-        result = new SQLPlan(sqlQuery.getId(),n);
+        result = new SQLPlan(sqlQuery.getId());
+        result.setPlanGraph(new JsonObject());
         PlanNode node = result.getNode(result.getQueryId()+".0");
+        JsonObject te=new JsonObject();
+        te.putObject("body",new JsonObject());
+        node.setConfiguration(te);
+        ;
         node.getConfiguration().getObject("body").putString("operationType", OpType.CreateIndex.toString());
         String tableName = (((Relation) ((Projection) opIndex.getChild()).getChild())).getName();
         if(tableName.startsWith(StringConstants.DEFAULT_DATABASE_NAME))
@@ -265,7 +270,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             }
             node.getConfiguration().getObject("body").putArray("columnNames",array);
         }
-        node.getConfiguration().putString("rawquery",opIndex.toJson());
+        node.getConfiguration().putString("rawquery", opIndex.toJson());
         result.updateNode(node);
         return result;
     }
