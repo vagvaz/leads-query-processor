@@ -109,6 +109,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         SQLPlan plan = null;
         try {
             plan = getLogicaSQLPlan(expr,sqlQuery);
+
         } catch (Exception e) {
             failQuery(e, sqlQuery);
             result.setResult(createFailResult(e, sqlQuery));
@@ -119,11 +120,16 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             result.setResult(createFailResult(new Exception("Unable to create plan due to internal error"),sqlQuery));
             return result;
         }
-        Set<SQLPlan> candidatePlans = new HashSet<SQLPlan>();
-        candidatePlans.add(plan);
-        Set<SQLPlan> evaluatedPlans = evaluatePlansFromScheduler(candidatePlans);
-        SQLPlan selectedPlan = choosePlan(evaluatedPlans);
-        sqlQuery.setPlan(selectedPlan);
+        if(expr.getType().equals(OpType.CreateIndex))
+        {
+            sqlQuery.setPlan(plan);
+        }else {
+            Set<SQLPlan> candidatePlans = new HashSet<SQLPlan>();
+            candidatePlans.add(plan);
+            Set<SQLPlan> evaluatedPlans = evaluatePlansFromScheduler(candidatePlans);
+            SQLPlan selectedPlan = choosePlan(evaluatedPlans);
+            sqlQuery.setPlan(selectedPlan);
+        }
         //Inform scheduler for the selected plan.
         JsonObject actionResult = new JsonObject();
         actionResult.putString("status", "ok");
@@ -198,6 +204,12 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             LogicalRootNode n = CoreGsonHelper.fromJson(prelimPlan, LogicalRootNode.class);
             result = new SQLPlan(sqlQuery.getId(),n);
             PlanNode node = result.getNode(result.getQueryId()+".0");
+            String snode = node.toString();
+            PlanNode node2 = new PlanNode(new JsonObject(snode));
+            if(node.equals(node2))
+                System.out.print("EQQULALL");
+            else
+                System.err.print("EQQULALL");
             node.getConfiguration().getObject("body").putString("operationType", OpType.Insert.toString());
             if(opInsert.getTableName().startsWith(StringConstants.DEFAULT_DATABASE_NAME))
                 node.getConfiguration().getObject("body").putString("tableName",opInsert.getTableName());
@@ -231,14 +243,44 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         SQLPlan result = null;
         CreateIndex opIndex = (CreateIndex)expr;
 
-        LogicalRootNode n = new LogicalRootNode(667);
-        result = new SQLPlan(sqlQuery.getId());
-        result.setPlanGraph(new JsonObject());
+       // LogicalRootNode n = new LogicalRootNode(1);
+        String testNode = "{\n" +
+                "  \"child\": {\n" +
+                "    \"type\": \"EXPRS\",\n" +
+                "    \"body\": {\n" +
+                "      \"exprs\": [\n" +
+                "      ],\n" +
+                "      \"nodeId\": 0,\n" +
+                "      \"type\": \"EXPRS\",\n" +
+                "      \"outputSchema\": {\n" +
+                "      },\n" +
+                "      \"cost\": 0.0\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"nodeId\": 1,\n" +
+                "  \"type\": \"ROOT\",\n" +
+                "  \"inputSchema\": {\n" +
+                "  },\n" +
+                "  \"outputSchema\": {\n" +
+                "  },\n" +
+                "  \"cost\": 0.0\n" +
+                "}";
+
+        LogicalRootNode n = CoreGsonHelper.fromJson(testNode, LogicalRootNode.class);
+
+        result = new SQLPlan(sqlQuery.getId(),n);
+//        JsonObject jnode2 = new JsonObject();
+//        jnode2.putArray("nodes",new JsonArray());
+//        result.copy(jnode2);
+        JsonObject jnode = new JsonObject();
+        jnode.putObject(result.getQueryId()+".0",  new JsonObject());
+        result.setPlanGraph(jnode);
         PlanNode node = result.getNode(result.getQueryId()+".0");
+        node.setNodeType(LeadsNodeType.EXPRS);
         JsonObject te=new JsonObject();
         te.putObject("body",new JsonObject());
         node.setConfiguration(te);
-        ;
+
         node.getConfiguration().getObject("body").putString("operationType", OpType.CreateIndex.toString());
         String tableName = (((Relation) ((Projection) opIndex.getChild()).getChild())).getName();
         if(tableName.startsWith(StringConstants.DEFAULT_DATABASE_NAME))
@@ -259,7 +301,9 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
 
         Sort.SortSpec[] collumns = opIndex.getSortSpecs();
         if(collumns!=null) {
-            JsonArray array = new JsonArray(collumns);
+            JsonArray array = new JsonArray();
+            for (Sort.SortSpec sc : collumns)
+                array.add(((ColumnReferenceExpr) sc.getKey()).getName());
             node.getConfiguration().getObject("body").putArray("columnNames", array);
         }
         else{
@@ -271,7 +315,9 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             node.getConfiguration().getObject("body").putArray("columnNames",array);
         }
         node.getConfiguration().putString("rawquery", opIndex.toJson());
-        result.updateNode(node);
+        //JsonArray newNodesArray = new JsonArray();
+
+        //result.updateNode(node);
         return result;
     }
 
