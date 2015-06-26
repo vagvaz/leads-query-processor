@@ -5,10 +5,14 @@ import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.Tuple;
+import eu.leads.processor.core.index.LeadsIndex;
+import eu.leads.processor.core.index.LeadsIndexString;
 import eu.leads.processor.math.FilterOperatorTree;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
+import org.infinispan.query.SearchManager;
+import org.infinispan.query.dsl.QueryFactory;
 import org.infinispan.versioning.VersionedCache;
 import org.infinispan.versioning.utils.version.Version;
 import org.infinispan.versioning.utils.version.VersionScalar;
@@ -18,10 +22,7 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by vagvaz on 2/20/15.
@@ -36,6 +37,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
   transient protected Cache approxSumCache;
   protected String qualString;
   transient  boolean versioning;
+
   boolean onVersionedCache;
   transient protected long versionStart=-1,versionFinish=-1,range=-1;
 
@@ -101,7 +103,38 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
       tree =null;
     }
 
+
+    if(checkIndex_usage()){
+      // create query
+      org.infinispan.query.dsl.Query lquery = createLuceneQuery();
+      List<LeadsIndex> list = lquery.list();
+
+    }
+
     versioning = getVersionPredicate(conf);
+  }
+
+  org.infinispan.query.dsl.Query createLuceneQuery(){
+
+    SearchManager sm = org.infinispan.query.Search.getSearchManager(inputCache);
+    QueryFactory qf = sm.getQueryFactory();
+    org.infinispan.query.dsl.Query lucenequery = qf.from(LeadsIndexString.class)
+            .having("attributeName").eq("attributeName")
+            .toBuilder().build();
+    return null;
+  }
+  private boolean checkIndex_usage() {
+    JsonArray fields = inputSchema.getArray("fields");
+    Iterator<Object> iterator = fields.iterator();
+    String columnName = null;
+    indexCaches = new ArrayList<>();
+    while (iterator.hasNext()) {
+      JsonObject tmp = (JsonObject) iterator.next();
+      columnName = tmp.getString("name");
+      indexCaches.add((Cache) imanager.getIndexedPersistentCache(tableName + "." +columnName));
+    }
+
+    return indexCaches.size()>0;
   }
 
   /**

@@ -3,6 +3,7 @@ package eu.leads.processor.infinispan.operators;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.infinispan.LeadsBaseCallable;
+import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
@@ -22,6 +23,7 @@ public abstract  class LeadsSQLCallable<K,V> extends LeadsBaseCallable<K,V> impl
   transient protected JsonObject outputSchema;
   transient protected Map<String,String> outputMap;
   transient protected Map<String,List<JsonObject>> targetsMap;
+  ArrayList<Cache> indexCaches=null;
 
   public LeadsSQLCallable(String configString, String output) {
     super(configString, output);

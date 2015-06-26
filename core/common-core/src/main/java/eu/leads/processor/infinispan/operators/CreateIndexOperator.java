@@ -87,9 +87,6 @@ public class CreateIndexOperator extends BasicOperator {
 
     //fix IndexName
 
-    tableName = StringConstants.DEFAULT_DATABASE_NAME + "." + tableName;
-
-
     Cache<String, String> allIndexes = (Cache) manager.getPersisentCache("allIndexes");
     for (String column : columnNames)
       allIndexes.put(IndexName, tableName + "." + column);
@@ -99,7 +96,10 @@ public class CreateIndexOperator extends BasicOperator {
 
     for (int c = 0; c < columnNames.size(); c++) {
       indexCaches.add((Cache) manager.getIndexedPersistentCache(tableName + "." + columnNames.get(c)));
+      log.info("Creating Index Caches, column " +tableName + "." + columnNames.get(c));
+
     }
+
     //indexCaches
     //fix tablename
     inputCache = (Cache) manager.getPersisentCache(tableName);
@@ -122,7 +122,9 @@ public class CreateIndexOperator extends BasicOperator {
       }
       i++;
     }
-    //log.info("Succesfully completed indexing records, columns:" + columnNames.size() + " per column:" + i);
+    log.info("Succesfully completed indexing records, columns:" + columnNames.size() + " per column:" + i);
+   // EnsembleCacheUtils.waitForAllPuts();
+    cleanup();
   }
 
   @Override
