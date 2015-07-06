@@ -12,6 +12,11 @@ import static java.lang.Thread.sleep;
 public class LeadsQueryInterface {
 	
 	private static boolean isInitialized = false;
+	private static boolean queryMode = true;
+	
+	public static void setQueryMode(boolean on) {
+		queryMode = on;
+	}
 	
 	public static boolean initialize(String url, int p) {
 		try {
@@ -38,43 +43,45 @@ public class LeadsQueryInterface {
 
     public static QueryResults execute(String sql) {
     	QueryResults res = null;
-    	
-    	/* TIME */ long start = System.currentTimeMillis();
-    	
-    	for(int i=0; i<3; i++) {
-	    	try {
-	    		System.out.println(sql);
-		        QueryStatus currentStatus = WebServiceClient.submitQuery("adidas",sql);
-		        String statusString = "";
-		        while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")) {
-		            sleep(100);
-		            currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
-		            String currentStatusString = currentStatus.getStatus();
-		            if(!statusString.equals(currentStatusString))
-		            	System.out.println("The query with id " + currentStatus.getId() + " is " + currentStatus.getStatus());
-		            statusString = currentStatusString;
-		        }
-		        System.out.println("The query with id " + currentStatus.getId() + " " + currentStatus.getStatus());
-		        if(currentStatus.getStatus().equals("COMPLETED")) {
-		            System.out.println("Wait while we fetching your result...");
-		            res = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
-		        }
-		        else{
-		            System.out.println("because " + currentStatus.getErrorMessage());
-		        }
-	        
-	    	} catch (IOException e) {
-	    		e.printStackTrace();
-	    		sleep(500);
-	    		System.err.println("Repeating...");
-	    		continue;
+		System.out.println(sql);
+		
+		if(queryMode) {
+	    	/* TIME */ long start = System.currentTimeMillis();
+	    	
+	    	for(int i=0; i<3; i++) {
+		    	try {
+			        QueryStatus currentStatus = WebServiceClient.submitQuery("adidas",sql);
+			        String statusString = "";
+			        while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")) {
+			            sleep(100);
+			            currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
+			            String currentStatusString = currentStatus.getStatus();
+			            if(!statusString.equals(currentStatusString))
+			            	System.out.println("The query with id " + currentStatus.getId() + " is " + currentStatus.getStatus());
+			            statusString = currentStatusString;
+			        }
+			        System.out.println("The query with id " + currentStatus.getId() + " " + currentStatus.getStatus());
+			        if(currentStatus.getStatus().equals("COMPLETED")) {
+			            System.out.println("Wait while we fetching your result...");
+			            res = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
+			        }
+			        else{
+			            System.out.println("because " + currentStatus.getErrorMessage());
+			        }
+		        
+		    	} catch (IOException e) {
+		    		e.printStackTrace();
+		    		sleep(500);
+		    		System.err.println("Repeating...");
+		    		continue;
+		    	}
+		    	break;
 	    	}
-	    	break;
-    	}
-    	
-    	/* TIME */ System.err.println("+++ LeadsQueryInterface.sendQuery() time for '"
-    					+ (sql.length()>40 ? sql.substring(0,40) : sql) + "...':"
-    					+ ((System.currentTimeMillis()-start)/1000.0)+" s");
+	    	
+	    	/* TIME */ System.err.println("+++ LeadsQueryInterface.sendQuery() time for '"
+	    					+ (sql.length()>40 ? sql.substring(0,40) : sql) + "...':"
+	    					+ ((System.currentTimeMillis()-start)/1000.0)+" s");
+		}
     	
         return res;
 

@@ -26,6 +26,7 @@ import eu.leads.datastore.DataStoreSingleton;
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.utils.LEADSUtils;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -45,7 +46,10 @@ public class LeadsWP5DemoCrawler extends WebCrawler {
 	private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|bmp|gif|jpe?g" + "|png|tiff?|mid|mp2|mp3|mp4"
       + "|wav|avi|mov|mpeg|ram|m4v|pdf" + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
   	
-	private static String parametersFile = "eu/leads/crawler/c4j/seedlist.properties";
+	private static String parametersFile = "/leads/workm30/leads-query-processor/"
+			+ "nqe/system-plugins/adidas-processing-plugin/"
+			+ "src/main/java/"
+			+ "eu/leads/crawler/c4j/seedlist_ecom_m36.properties";
 	private Properties properties = new Properties();
 	
 	private String domainPattern = null;
@@ -56,7 +60,7 @@ public class LeadsWP5DemoCrawler extends WebCrawler {
 	private void init() {
 		InputStream input = null;
 		try {
-			input =  LeadsWP5DemoCrawler.class.getClassLoader().getResourceAsStream(parametersFile);
+			input = new FileInputStream(parametersFile);
 			// load a properties file
 			properties.load(input);
 		} catch (IOException ex) {
@@ -73,7 +77,7 @@ public class LeadsWP5DemoCrawler extends WebCrawler {
    * should be crawled or not (based on your crawling logic).
    */
     @Override
-	public boolean shouldVisit(WebURL url) {
+	public boolean shouldVisit(Page referringPage, WebURL url) {
     	String href = url.getURL().toLowerCase();
     	String domain = url.getDomain();
     	
@@ -124,7 +128,7 @@ public class LeadsWP5DemoCrawler extends WebCrawler {
       HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
       final String html = htmlParseData.getHtml();
       final ByteBuffer htmlBlob = ByteBuffer.wrap(html.getBytes());
-      List<WebURL> links = htmlParseData.getOutgoingUrls();
+      Set<WebURL> links = htmlParseData.getOutgoingUrls();
       
       
       
@@ -132,9 +136,10 @@ public class LeadsWP5DemoCrawler extends WebCrawler {
        * 1. Put content to Infinispan
        */
       //infinispanStoreCall.put(reverseUrl, html, LEADSUtils.getTimestampString());
-      List<Cell> cells = new ArrayList<Cell>() {{ 
-    	  add(new Cell(mapping.getProperty("leads_crawler_data-content"),html,0));
-    	  }};
+      List<Cell> cells = new ArrayList<Cell>();
+      String cellKey = mapping.getProperty("leads_crawler_data-content");
+      Cell cell = new Cell(cellKey,html,0);
+      cells.add(cell);
       
       boolean succeed = true; 
       do {

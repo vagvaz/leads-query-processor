@@ -260,8 +260,8 @@ public class LEADSUtils {
 	
 	public static String propertyValueToKey(Properties p, String v) {
 		String key = null;
-		for(Object x : p.keySet())
-			System.out.println(x+"="+p.getProperty(x.toString()));
+//		for(Object x : p.keySet())
+//			System.out.println(x+"="+p.getProperty(x.toString()));
 		Collection<Object> values = p.values();
 		if(values.contains(v)) {
 			for(Entry<Object, Object> e : p.entrySet()) {
@@ -356,6 +356,13 @@ public class LEADSUtils {
 			}
 		}
 		return filteredList;
+	}
+
+	public static Integer[] stringArray2integerArray(String[] stringArray) {
+		Integer[] intArray = new Integer[stringArray.length];
+		for(int i=0; i<stringArray.length; i++)
+			intArray [i] = Integer.parseInt(stringArray[i]);
+		return intArray;
 	}
 	
 }

@@ -8,51 +8,88 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 
+import eu.leads.datastore.DataStoreSingleton;
+import eu.leads.datastore.impl.LeadsQueryInterface;
+import eu.leads.infext.proc.com.indexing.KeywordsListSingletonExt;
 import eu.leads.processor.AdidasProcessingPlugin;
 import eu.leads.processor.core.Tuple;
 import eu.leads.utils.LEADSUtils;
 
-public class PluginTest {
+public class PluginTest extends Test {
+
+	@Override
+	protected void execute() {
+		
+		/* INIT */
+		boolean initiated = init();
+		
+		if(initiated) {
+			
+			/* PREPARE URI AND CONTENT LISTS */
+			List<String> stUriList = new ArrayList<>();
+//			uriList.add("http://www.runnersworld.com/");
+			stUriList.add("http://www.runnersworld.com/running-shoes/first-look-adidas-ultra-boost");
+//			uriList.add("http://runblogger.com/");
+//			uriList.add("http://runblogger.com/2015/03/nike-wildhorse-2-trail-shoe-review.html");
+//			uriList.add("http://www.solereview.com/");
+//			uriList.add("http://www.solereview.com/adidas-ultra-boost-review/");
+//			uriList.add("http://www.bbc.com/sport/0/");
+//			uriList.add("http://www.bbc.com/sport/0/football/33125007");
+//			uriList.add("http://footwearnews.com/");
+//			uriList.add("http://footwearnews.com/2015/fn-spy/celebrity-style/celebrity-shoe-style-what-they-wear-to-the-gym-36072/");
+//			uriList.add("http://www.runningshoesguru.com/");
+//			uriList.add("http://www.runningshoesguru.com/2013/02/adidas-energy-boost-review/");
+//			uriList.add("http://running.competitor.com/");
+//			uriList.add("http://running.competitor.com/2014/11/photos/6-fast-flats-2014-new-york-city-marathon_117188");
+			
+			for(String uri : stUriList) {
+				retrieveContent(uri);
+			}
+				
+			}
+	}
 	
-	public static void main(String[] args) throws ConfigurationException, UnsupportedEncodingException, IOException {
-		Configuration config = new XMLConfiguration(
-//				"/home/ubuntu/.adidas/test/leads-query-processor/nqe/system-plugins/adidas-processing-plugin/adidas-processing-plugin-conf.xml");
-				"/leads/workm30/leads-query-processor/nqe/system-plugins/adidas-processing-plugin/adidas-processing-plugin-conf.xml");
-		
-		AdidasProcessingPlugin plugin = new AdidasProcessingPlugin();
-		plugin.initialize(config, null);
-		
+	private void retrieveContent(String uri) {
+		String nutchUri = LEADSUtils.standardUrlToNutchUrl(uri);
 	    String content1 = "";
-//	    String uri = "http://runblogger.com/minimalist-running";
-//	    String uri = "http://runblogger.com/2011/06/vibram-fivefingers-komodosport-review.html?replytocom=215625693";
-	    String uri = "http://runblogger.com/2011/06/vibram-fivefingers-komodosport-review.html?replytocom=215625693";
-	    String nutchUri = LEADSUtils.standardUrlToNutchUrl(uri);
-	    
-		URLConnection connection = new URL(uri).openConnection();
-		connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-		connection.connect();
-	    URL url = new URL(uri);
-	    try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")))) {
-	        for (String line; (line = reader.readLine()) != null;) {
-	            content1 += line;
-	        }
-	    }
-	    final String content = content1;
-	    
-	    plugin.created("default.webpages:"+nutchUri, 
-				new Tuple() {{ 
-					setAttribute("body", content); 
-					setAttribute("published", System.currentTimeMillis());
-					setAttribute("headers", new HashMap<String,String>() 
-							{{ put("Content-Type","text/html; charset=UTF-8");}});
-					}}.asJsonObject().toString(),
-				null);
+		URLConnection connection;
+		try {
+			connection = new URL(uri).openConnection();
+			connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+			connection.connect();
+		    try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")))) {
+		        for (String line; (line = reader.readLine()) != null;) {
+		            content1 += line;
+		        }
+		    }
+		    
+		    this.content = content1;
+		    this.uri = nutchUri;
+		    this.ts = System.currentTimeMillis();
+
+			/* RUN */
+			run();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 }
+
+
+
+
+
+
+

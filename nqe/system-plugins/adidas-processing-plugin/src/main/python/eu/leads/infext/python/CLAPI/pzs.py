@@ -66,7 +66,6 @@ if __name__ == '__main__':
         logging.debug("I: Syntax: %s <endpoint>" % sys.argv[0])
         sys.exit(0)
         
-    
     endpoint = sys.argv[1]
     context = zmq.Context()
     server = context.socket(zmq.REP)
@@ -75,9 +74,9 @@ if __name__ == '__main__':
     
     logger.debug("I: Echo service is ready at %s" % endpoint)
     while True:
+        logger.debug("-----")
         logger.debug("In the loop")
         msg = server.recv_multipart()
-        logging.debug("msg: %s" % str(msg))
         if not msg:
             break  # Interrupted
         
@@ -88,7 +87,8 @@ if __name__ == '__main__':
         try:
             ap = factory(msg[0])
             # pt.2 all of the params
-            paramstr = str([(text if isinstance(text, basestring) else text.decode("utf-8")) for text in msg[1:]])
+            msgparts =     [(text if isinstance(text, basestring) else text.decode("utf-8")) for text in msg[1:]]
+            paramstr = str([(text if len(text)<30 else text[:30]+'...') for text in msgparts])
             logger.debug("input params: %s" % paramstr)
             params = translateInputParameters(msg)
         except:

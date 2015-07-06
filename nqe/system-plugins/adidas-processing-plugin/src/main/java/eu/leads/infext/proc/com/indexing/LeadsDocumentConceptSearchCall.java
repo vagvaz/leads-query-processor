@@ -86,12 +86,12 @@ public class LeadsDocumentConceptSearchCall {
         if(response != null)
 	        System.out.println("searchDocument(): Received reply:\n" + response);
         
-        if(response.size() >= 3) {
+        if(response.size() >= 4) {
         	boolean correctData = true;
 	        String contentPart = (String) response.get(0);
 	        List<KeywordMatchInfo> keywordsScoresList = new ArrayList<>();
 	        
-	        for(int i=1; i<response.size()-1;i++) {
+	        for(int i=1; i<response.size()-2;i=i+3) {
 	        	Long keyId = LEADSUtils.stringToLongOrNull(response.get(i).toString());
 	        	if(keyId==null) {
 	        		// Then it is a new part
@@ -113,6 +113,7 @@ public class LeadsDocumentConceptSearchCall {
 					keywordsScoresList.add(keywordMatchInfo);
 	        	}
 	        }
+			returnMap.put(contentPart, keywordsScoresList);
 	        
 	        if(!correctData) returnMap = null;
         }
@@ -136,7 +137,7 @@ public class LeadsDocumentConceptSearchCall {
         byte[] reply = null;
     	ZMsg req = new ZMsg();
     	for(String param : params) {
-    		System.out.println("Adding to send: "+param);
+//    		System.out.println("Adding to send: "+param);
     		req.add(new ZFrame(param.getBytes()));
     	}
         req.send(socket);
@@ -198,7 +199,7 @@ public class LeadsDocumentConceptSearchCall {
 			keywordRow.add(0);
 			keywordRow.add(0);
 			keywordRow.add(true);
-			keywordsDef.add(keywordRow);	
+			keywordsDef.add(keywordRow);
 			
 			// INPUT for searchDocument	
 			String content1 = "";

@@ -67,7 +67,7 @@ class AccessPoint:
             
         params = None 
         
-        pdb.set_trace()
+        #pdb.set_trace()
         correct_clustering = True
     
         clusterPages = ClusterProductCategoryPages()
@@ -87,7 +87,7 @@ class AccessPoint:
         
             nameextractiontuples = schema_extractor.getNameExtractionTuples()
             priceextractiontuples= schema_extractor.getPriceExtractionTuples()
-            pdb.set_trace()
+            #pdb.set_trace()
     #     print '1',str(nameextractiontuples),'2',str(priceextractiontuples),'3',str(clusterPages.product_cluster_center),'4',str(clusterPages.category_cluster_center),
     #     print '5',str(clusterPages.product_cluster_50pc_dist),'6',str(clusterPages.product_cluster_80pc_dist),'7',str(clusterPages.category_cluster_50pc_dist),
     #     print '8',str(clusterPages.category_cluster_80pc_dist),'9',str(clusterPages.pd.mean),'10',str(clusterPages.pd.std)
@@ -121,10 +121,10 @@ class AccessPoint:
 #################################################################        
         
 if __name__ == "__main__":
-    pdb.set_trace()
+    #pdb.set_trace()
     params = translateInputParameters(["eu.leads.infext.python.CLAPI.determineschemaforthesite_clinterface","paramsfile:/tmp/leadsjavapy-150306195527764495"])
     ap = AccessPoint()
-    pdb.set_trace()
+    #pdb.set_trace()
     ap.execute(params)
     pass
     

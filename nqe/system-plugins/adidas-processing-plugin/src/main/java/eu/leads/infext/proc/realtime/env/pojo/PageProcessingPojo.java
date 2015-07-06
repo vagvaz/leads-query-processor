@@ -1,6 +1,7 @@
 package eu.leads.infext.proc.realtime.env.pojo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -21,19 +22,33 @@ import eu.leads.utils.LEADSUtils;
 
 public class PageProcessingPojo extends AbstractExecutionPojo {
 	
-	public PageProcessingPojo() throws Exception {
+	private void applyStageOne() {
 		AbstractProcessing fqdnProc			  = new AllAtOnceProcessing(new FQDNDefiningHook());
 		AbstractProcessing textContentProc 	  = new AllAtOnceProcessing(new TextContentExtractionHook());
 		AbstractProcessing languageProc       = new AllAtOnceProcessing(new LanguageDetectionHook());
-		AbstractProcessing pageContentCheck   = new AllAtOnceProcessing(new PageCheckHook());
-		AbstractProcessing extractionProc	  = new AllAtOnceProcessing(new ValuableContentExtractionHook());
-		AbstractProcessing keywordExtr		  = new AllAtOnceProcessing(new KeywordExtractionHook());
 		processingQueue.add(fqdnProc);
 		processingQueue.add(textContentProc);
-		processingQueue.add(languageProc);
+		processingQueue.add(languageProc);		
+	}
+	
+	private void applyStateTwo() {
+		AbstractProcessing pageContentCheck   = new AllAtOnceProcessing(new PageCheckHook());
+		AbstractProcessing extractionProc	  = new AllAtOnceProcessing(new ValuableContentExtractionHook());
+		AbstractProcessing keywordExtr		  = new AllAtOnceProcessing(new KeywordExtractionHook());	
 		processingQueue.add(pageContentCheck);
 		processingQueue.add(extractionProc);
 		processingQueue.add(keywordExtr);
+	}
+	
+	public PageProcessingPojo() throws Exception {
+		applyStageOne();
+		applyStateTwo();
+	}
+	
+	public PageProcessingPojo(Integer [] stages) throws Exception {
+		List<Integer> stagesList = Arrays.asList(stages);
+		if(stagesList.contains(1)) applyStageOne();
+		if(stagesList.contains(2)) applyStateTwo();
 	}
 
 	@Override
@@ -124,6 +139,9 @@ public class PageProcessingPojo extends AbstractExecutionPojo {
 				if(familyKey.startsWith("new:leads_keywords:")) continue;
 				
 				HashMap<String,Object> mdFamilyMap = metadata.get(familyKey);
+				
+				if(familyKey.equals("new:leads_core")) 
+					mdFamilyMap.remove(mapping.getProperty("leads_core-textcontent"));
 				
 				List<Cell> cells = new ArrayList<>();
 				for(Entry<String, Object> newMetaColumn : mdFamilyMap.entrySet()) {

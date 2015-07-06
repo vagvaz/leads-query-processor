@@ -59,6 +59,11 @@ public class NewsBlogArticleAnalysis {
 				&& countParagraphs(content) >= PARA_LENGTH)
 			isArticle = true;
 		
+		if(isArticle)
+			System.out.println("Extracted content verified as article.");
+		else
+			System.out.println("Extracted content rejected - does not look like article.");			
+		
 		return isArticle;
 	}
 	

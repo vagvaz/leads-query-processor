@@ -345,34 +345,17 @@
 		    <artifactId>luwak</artifactId>
 		    <version>1.1.0-rc4-SNAPSHOT</version>
     	</dependency>
-
-<!--  		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-core</artifactId>
-			<version>4.10.1</version>
-			<scope>provided</scope>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-analyzers-common</artifactId>
-			<version>4.10.1</version>
-			<scope>provided</scope>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-queryparser</artifactId>
-			<version>4.10.1</version>
-			<scope>provided</scope>
-		</dependency> -->
+    	
+    	<dependency>
+        	<groupId>org.apache.httpcomponents</groupId>
+        	<artifactId>httpclient</artifactId>
+        	<version>4.3.5</version>
+   		</dependency>
 		
 		<dependency>
 	        <groupId>edu.uci.ics</groupId>
 	        <artifactId>crawler4j</artifactId>
-	        <version>3.5</version>
-	        <type>jar</type>
-	        <scope>compile</scope>
+	        <version>4.1</version>
 	    </dependency>
 	    
 	    <dependency>
@@ -398,7 +381,7 @@
           <artifactId>jzmq</artifactId>
           <version>3.1.0</version>
        </dependency>
-
+		
 <!-- 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-core</artifactId>

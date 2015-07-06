@@ -1,12 +1,20 @@
 package eu.leads.processor.sentiment;
 
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
+import edu.stanford.nlp.pipeline.Annotation;
 
-public interface SentimentAnalysis {
-    public Sentiment getOverallSentiment(String text);
 
-    public Sentiment getSentimentForEntity(String targetEntity, String text);
+public abstract class SentimentAnalysis {
+	
+	public SentimentAnalysis(Properties properties) {
+		initialize(properties);
+	}
 
-    public Set<Entity> getEntities(String text);
+	protected abstract void initialize(Properties properties);
+	
+	public abstract void setupSearchDocument(String text);
+	public abstract Sentiment getSentimentForFuzzyPhrase(Map<String,String> fuzzyKeywords);
 }

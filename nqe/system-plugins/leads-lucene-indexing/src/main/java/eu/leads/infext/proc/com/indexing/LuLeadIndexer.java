@@ -67,15 +67,18 @@ public class LuLeadIndexer {
 			int nonMatchingChars,
 			int distanceBetweenWords,
 			boolean inOrder
-			) throws IOException {	
+			) throws IOException {
 		QueryRepresentation qr = new ComplexNameQueryRepresentation(keywords, nonMatchingWords, nonMatchingChars, distanceBetweenWords, inOrder);
 		MonitorQuery mq = new MonitorQuery(id.toString(), qr);
 		monitor.update(mq);
-		System.out.println("Added keywords: "+keywords);
+		System.out.println("Added keywords: "+StringUtils.join(keywords," "));
 		return true;
 	}
 	
 	public Map<String, List<KeywordMatchInfo>> searchDocument(String url, Map<String,String> contentParts) throws IOException {
+
+		/* TIME */ long start = System.currentTimeMillis();
+		
 		Map<String, List<KeywordMatchInfo>> partKeywords = new HashMap<String, List<KeywordMatchInfo>>();
 		System.out.println("Searching keyword of uri: "+url);
 		for(Entry<String, String> part : contentParts.entrySet()) {
@@ -98,7 +101,7 @@ public class LuLeadIndexer {
 			for(ExplainingMatch match : explMatches.getMatches()) {
 				String queryId = match.getQueryId();
 				Explanation explanation = match.getExplanation();
-				Object[] matchedKeywords = getMatchedKeywords(explanation);;
+				Object[] matchedKeywords = getMatchedKeywords(explanation);
 				String matched = StringUtils.join(matchedKeywords," ");
 				Float score = explanation.getValue();
 				Long id = Long.parseLong(queryId);
@@ -106,14 +109,18 @@ public class LuLeadIndexer {
 			}
 			partKeywords.put(name, keywordsFound);
 		}
+
+		/* TIME */ System.err.println("+++ LuLeadIndexer.searchDocument() time: "+((System.currentTimeMillis()-start)/1000.0)+" s");
+		
 		return partKeywords;
 	}
 	
 	private String [] getMatchedKeywords(Explanation explanation) {
 		 List<String> allMatches = new ArrayList<String>();
 		 
+		 
 		 String description = explanation.toString();
-		 System.out.println(description);
+		 //System.out.println(description);
 		 String pattern = DEFAULT_FIELD+":";
 		 
 		 int fieldNameIndex = description.indexOf(pattern, 0);
@@ -122,7 +129,11 @@ public class LuLeadIndexer {
 			 
 			 int endIndexCand1 = description.indexOf(']', fieldNameIndex);
 			 int endIndexCand2 = description.indexOf('^', fieldNameIndex);
-			 int endIndex = Math.min(endIndexCand1 >= 0 ? endIndexCand1 : description.length()-1, endIndexCand2 >= 0 ? endIndexCand2 : description.length()-1);
+			 int endIndexCand3 = description.indexOf(',', fieldNameIndex);
+			 int endIndex = Math.min(Math.min(
+					 endIndexCand1 >= 0 ? endIndexCand1 : description.length()-1, 
+					 endIndexCand2 >= 0 ? endIndexCand2 : description.length()-1),
+					 endIndexCand3 >= 0 ? endIndexCand3 : description.length()-1);
 			 
 			 String word = description.substring(begIndex, endIndex);
 			 allMatches.add(word);
@@ -133,18 +144,21 @@ public class LuLeadIndexer {
 		 hs.addAll(allMatches);
 		 allMatches.clear();
 		 allMatches.addAll(hs);
+		 
+		 
+		 
 		 return allMatches.toArray(new String[allMatches.size()]);
 	}
 	
 	public static void main(String[] args) throws IOException {
 		LuLeadIndexer li = LuLeadIndexer.getInstance();	
-		li.addKeywords(0L, "adipure adidas".split("\\s+"), 0, 1, 2, false);
+		li.addKeywords(0L, "usa adidas".split("\\s+"), 0, 1, 2, false);
 		li.addKeywords(1L, "who".split("\\s+"), 1, 0, 1, false);
 		
 		long checkpoint = System.currentTimeMillis();
 //		Map<String, List<KeywordMatchInfo>> a = li.searchDocument("a", new HashMap<String, String>() {{ put("text", "Finally, today a long awaited premiere of a new adidas adipure adios Boost 2."); }});
 		long finish1 = System.currentTimeMillis();
-		Map<String, List<KeywordMatchInfo>> b = li.searchDocument("b", new HashMap<String, String>() {{ put("text", "adida adidas adipure adios Boost 2."); }});
+		Map<String, List<KeywordMatchInfo>> b = li.searchDocument("b", new HashMap<String, String>() {{ put("text", "Who does use adidas adipure adios Boost 2?"); }});
 		long finish2 = System.currentTimeMillis();
 		Map<String, List<KeywordMatchInfo>> c = li.searchDocument("c", new HashMap<String, String>() {{ put("text", "who are you ho ho ho ho?"); }});
 		long finish3 = System.currentTimeMillis();

@@ -28,10 +28,12 @@ public class LeadsIndexingServer {
         }
         
  	    String dir = args[0];
- 	    if(dir.startsWith("$")) dir = System.getenv(dir);
- 	    System.out.println("Logging to "+dir);
- 	    try { StdLoggerRedirect.initLogging(dir);
-		} catch (Exception e1) { e1.printStackTrace(); }
+ 	    if(!dir.equals("off")) {
+	 	    if(dir.startsWith("$")) dir = System.getenv(dir);
+	 	    System.out.println("Logging to "+dir);
+	 	    try { StdLoggerRedirect.initLogging(dir);
+			} catch (Exception e1) { e1.printStackTrace(); }
+ 	    }
         
         LuLeadIndexer dks = LuLeadIndexer.getInstance();
 
@@ -96,16 +98,18 @@ public class LeadsIndexingServer {
 	            		if(contentParts.size() > 0) {
 	            			// part -> keywords numbers
 	            			Map<String, List<KeywordMatchInfo>> kMap = dks.searchDocument(url, contentParts);
-							
+							System.out.println("Map of matched: "+kMap);
 				      		for(Entry<String, List<KeywordMatchInfo>> partKeywords : kMap.entrySet()) {
 				      			String part         		    = partKeywords.getKey();
 				      			List<KeywordMatchInfo> keywords = partKeywords.getValue();
-						        reply.add(part);
-						        for(KeywordMatchInfo keywordNo : keywords) {
-						        	reply.add(keywordNo.id.toString());
-						        	reply.add(keywordNo.matched);
-						        	reply.add(keywordNo.score.toString());
-						        }
+				      			if(!keywords.isEmpty()) {
+							        reply.add(part);
+							        for(KeywordMatchInfo keywordNo : keywords) {
+							        	reply.add(keywordNo.id.toString());
+							        	reply.add(keywordNo.matched);
+							        	reply.add(keywordNo.score.toString());
+							        }
+				      			}
 				      		}	
 	            		}
 	            	}
@@ -147,6 +151,8 @@ public class LeadsIndexingServer {
 	            		}
 	            	}
 
+            		if(reply.isEmpty())
+            			reply.add("null");
             		System.out.println(">>> Sending reply: "+reply+"\n<<<");
 	                reply.send(socket);
         	        System.err.println("P05");

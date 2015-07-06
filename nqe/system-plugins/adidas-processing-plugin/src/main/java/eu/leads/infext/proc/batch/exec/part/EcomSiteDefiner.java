@@ -22,7 +22,7 @@ import eu.leads.utils.LEADSUtils;
  * 
  * 
  * 
- * @author a'moremix
+ * @author amo_remix
  *
  */
 public class EcomSiteDefiner extends AbstractPartialSiteDefiner {

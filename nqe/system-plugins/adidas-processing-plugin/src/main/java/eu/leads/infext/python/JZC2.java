@@ -21,9 +21,7 @@ public class JZC2 {
     private String [] endpoints;
     
     public JZC2(List<String> list) {
-    	Collections.shuffle(list);
 		this.endpoints = list.toArray(new String[list.size()]);
-		System.out.println(list);
 	}
 
     private JSONArray tryRequest (ZContext ctx, String endpoint, ZMsg request)
@@ -61,7 +59,8 @@ public class JZC2 {
     private String[] shuffle(String [] endpoints) {
         ArrayList<String> endpointsList = new ArrayList<>(Arrays.asList(endpoints));
         Collections.shuffle(endpointsList);
-        return endpointsList.toArray(this.endpoints);   	
+		System.out.println("Endpoints queue: "+endpointsList);
+        return endpointsList.toArray(this.endpoints);	
     }
     
     //  The client uses a Lazy Pirate strategy if it only has one server to talk
@@ -83,8 +82,6 @@ public class JZC2 {
         JSONArray reply = null;
 
         int endpointsNo = this.endpoints.length;
-        ArrayList<String> endpointsList = new ArrayList<>(Arrays.asList(endpoints));
-        Collections.shuffle(endpointsList);
         this.endpoints = shuffle(this.endpoints);
         if (endpointsNo == 0)
             System.out.println("I: syntax: jzc <endpoint> …\n");
@@ -102,10 +99,9 @@ public class JZC2 {
         }
         else {
             //  For multiple endpoints, try each at most once
-        	// TODO CHANGE THAT TO RANDOM!!!!
             int endpointNbr;
             for (endpointNbr = 0; endpointNbr < endpointsNo; endpointNbr++) {
-                String endpoint = this.endpoints[endpointNbr];
+                String endpoint = endpoints[endpointNbr];
                 reply = tryRequest (ctx, endpoint, request);
                 if (reply != null)
                     break;          //  Successful

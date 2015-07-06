@@ -140,7 +140,7 @@ public class PythonQueueCall {
 		
 		String paramsString = StringUtils.join(params.toArray(),' ');
 		
-		System.out.println(paramsString);
+//		System.out.println(paramsString);
         
         retValue = jzc.send(params);
         if(retValue != null)

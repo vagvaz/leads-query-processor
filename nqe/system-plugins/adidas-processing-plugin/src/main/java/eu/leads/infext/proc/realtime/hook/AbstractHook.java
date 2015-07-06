@@ -69,8 +69,10 @@ public abstract class AbstractHook {
 			if(skipRetrieve) {
 				System.out.println("Not retrieving from family "+family);
 				newMetadata.put(familyKey, newMetadataFamily);
-				MDFamily mdFamily = new MDFamily(url,null,family);
-				editableFamilies.put(familyKey, mdFamily);
+				if(editableFamilies != null) {
+					MDFamily mdFamily = new MDFamily(url,null,family);
+					editableFamilies.put(familyKey, mdFamily);
+				}
 			}
 			else {
 				SortedSet<URIVersion> uriVersionSet = DataStoreSingleton.getDataStore().getLeadsResourceMDFamily(url, mapping.getProperty(family), lastVersionsNeeded, timestamp, !exactlyTimestamp);

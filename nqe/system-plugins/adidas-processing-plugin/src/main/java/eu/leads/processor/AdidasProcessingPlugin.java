@@ -56,75 +56,25 @@ public class AdidasProcessingPlugin implements PluginInterface {
 	  try {
 	      this.configuration = config;
 	      this.manager = manager;
-	      
-	      setLogging(configuration);
-	      
-	      System.out.println("%%%%% Initializing the plugin...");
-	      System.out.flush();
 	
-	      // KEEP config
-	      PropertiesSingleton.setConfig(config);
-		  System.out.println("...config set");
-	      
-	      // READ Configuration for Cassandra
-	      DataStoreSingleton.configureDataStore(config);
-		  System.out.println("...datastore configured");
-	      
-	      // READ Configuration for the plugin
-	      PropertiesSingleton.setResourcesDir(config.getString("resources_path"));
+	      SystemInit.init(config);
 
 	      // INIT page content processor
-	      if(pageProcessingPojo == null)
-	    	  pageProcessingPojo = new PageProcessingPojo();
-	      
-	      // ADD Keywords to Lucene
-	      addKeywordsToIndexer();
+	      if(pageProcessingPojo == null) {
+	    	  String [] strStages = config.getStringArray("processingStage");
+	    	  if(strStages == null) 
+	    		  pageProcessingPojo = new PageProcessingPojo();
+	    	  else
+		    	  pageProcessingPojo = new PageProcessingPojo(LEADSUtils.stringArray2integerArray(strStages));
+	      }
 	      
 	      // START Python ZeroMQ Server!
-	      PZSStart.start(config);
-	      
+//	      PZSStart.start(config);   
       } 
       catch (Exception e) {
     	  System.out.println("Exception during initializing the plugin!");
     	  e.printStackTrace();
       }
-   }
-   
-   private void addKeywordsToIndexer() {
-		List<List<Object>> keywordsDef = new ArrayList<>();
-		
-		Properties mapping = DataStoreSingleton.getMapping();
-		
-		List<Map<String, Object>> keywordsList = KeywordsListSingletonExt.getInstance().getKeywordsList();
-		for(Map<String, Object> keywordMap : keywordsList) {
-			List<Object> keywordInfo = new ArrayList<>();
-			
-			Long id 					= (Long) keywordMap.get(mapping.getProperty("leads_input_keywords-id"));
-			String keywordsString 		= (String) keywordMap.get(mapping.getProperty("leads_input_keywords-keywords"));	
-			int nonMatchingWords 		= (int) keywordMap.get(mapping.getProperty("leads_input_keywords-non_matching_words"));
-			int nonMatchingChars 		= (int) keywordMap.get(mapping.getProperty("leads_input_keywords-non_matching_chars"));
-			int distanceBetweenWords 	= (int) keywordMap.get(mapping.getProperty("leads_input_keywords-distance_between_words"));
-			boolean inOrder 		 	= (boolean) keywordMap.get(mapping.getProperty("leads_input_keywords-in_order"));
-
-			keywordInfo.add(id);
-			keywordInfo.add(keywordsString);
-			keywordInfo.add(nonMatchingWords);
-			keywordInfo.add(nonMatchingChars);
-			keywordInfo.add(distanceBetweenWords);
-			keywordInfo.add(inOrder);
-			
-			keywordsDef.add(keywordInfo);			
-		}
-		
-		LeadsDocumentConceptSearchCall.addKeywords(keywordsDef);
-   }
-
-private void setLogging(Configuration config) throws Exception {
-	   String dir = config.getString("loggingDir");
-	   System.out.println("Logging to "+dir);
-	   StdLoggerRedirect.initLogging(dir);
-//	   System.setOut(outputFile(dir+"/leads-java-"+(new Date().getTime())+".out"));
-//	   System.setErr(outputFile(dir+"/leads-java-"+(new Date().getTime())+".err"));
    }
 
 //   protected java.io.PrintStream outputFile(String name) throws java.io.FileNotFoundException {
@@ -187,13 +137,13 @@ private void setLogging(Configuration config) throws Exception {
 		if(content != null && timestamp != null && headersObj != null) {
 			if(isContentTypeHTML(headersObj)) {
 				HashMap<String,Object> cacheColumns = new HashMap<>();
-				cacheColumns.put("default.content.content", content);
+				cacheColumns.put(DataStoreSingleton.getMapping().getProperty("leads_crawler_data-content"), content);
 			
 				System.out.println("table:     " + table);
 				System.out.println("uri:       " + uri);
 				System.out.println("content:   " + (content.length()>80 ? content.substring(0,80)+"..." : content) );
 				System.out.println("timestamp: " + timestamp);
-				
+			
 				// Execute page processing
 				System.out.println("Starting with the page processing...");
 				System.err.println("Processing "+uri+" ...");

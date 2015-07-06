@@ -31,7 +31,7 @@ public class PageProcessingPojoPt1 extends AbstractExecutionPojo {
 	}
 
 	@Override
-	public void execute(String uri, String timestamp, String cacheName, HashMap<String, String> cacheColumns) {
+	public void execute(String uri, String timestamp, String cacheName, HashMap<String, Object> cacheColumns) {
 		
 		HashMap<String, String> newMain = new HashMap<>();
 		newMain.put("uri", uri);

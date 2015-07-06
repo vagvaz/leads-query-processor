@@ -125,7 +125,7 @@ class LeadsEcomSiteSchemaExtractor(object):
         # find price node:
         #   -> standard way
         
-        import pdb; pdb.set_trace()
+        import pdb; #pdb.set_trace()
         price_finder = PriceFinder(contents_list, namenode_list, buttonnode_list, basketnode_list) 
         pricenodes, is_extraction_sufficient = price_finder.find_price()
         

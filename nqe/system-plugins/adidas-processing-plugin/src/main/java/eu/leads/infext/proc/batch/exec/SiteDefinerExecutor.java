@@ -1,51 +1,49 @@
 package eu.leads.infext.proc.batch.exec;
 
-import java.util.ArrayList;
+import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.SortedSet;
 
-import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration.Configuration;
 
 import eu.leads.datastore.AbstractDataStore;
 import eu.leads.datastore.DataStoreSingleton;
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.URIVersion;
-import eu.leads.infext.logging.redirect.StdLoggerRedirect;
 import eu.leads.infext.proc.batch.exec.part.AbstractPartialSiteDefiner;
-import eu.leads.infext.proc.batch.exec.part.EcomSiteDefiner;
 import eu.leads.infext.proc.batch.exec.part.BlogNewsSiteDefiner;
+import eu.leads.infext.proc.batch.exec.part.EcomSiteDefiner;
 import eu.leads.infext.proc.batch.exec.part.EcomSiteDefinerMR;
-import eu.leads.infext.proc.batch.mapreduce.DefaultReducer;
-import eu.leads.infext.proc.batch.mapreduce.EcomSiteDefinerMapper;
-import eu.leads.infext.proc.com.categorization.ecom.EcommerceSiteExtractionSchemaDeterminer;
-import eu.leads.infext.proc.com.categorization.ecom.model.EcomPageDictionary;
-import eu.leads.infext.proc.com.categorization.ecom.model.EcomSiteDictionary;
-import eu.leads.utils.LEADSUtils;
+import eu.leads.processor.SystemInit;
 
 
 /***
  * 
  * The batch process defining the site to be run in the LEADS environment
  * 
- * @author amo remix
+ * @author amo_remix
  *
  */
 public class SiteDefinerExecutor {
-	
-	private static AbstractDataStore dataStore = DataStoreSingleton.getDataStore();;
-	private static Properties mapping =  DataStoreSingleton.getMapping();
+	private static AbstractDataStore dataStore;
+	private static Properties mapping;
     
 	public static void main(String[] args) throws Exception {
 		
-		String fqdn = args[0];
+		XMLConfiguration conf = new XMLConfiguration(
+				"/leads/workm30/leads-query-processor/nqe/system-plugins/adidas-processing-plugin/adidas-processing-plugin-conf-test.xml");
 		
-//		StdLoggerRedirect.initLogging();
+		SystemInit.init(conf);
+		
+		dataStore = DataStoreSingleton.getDataStore();
+		mapping =  DataStoreSingleton.getMapping();
+		
+		String fqdn = args[0];
 		
 		/////////////////////////
 		/////////////////////////
@@ -88,8 +86,11 @@ public class SiteDefinerExecutor {
 			pagesNoMap.put("", dirPagesNo);
 			
 			// Check if Ecom
-//			AbstractPartialSiteDefiner partDefiner = new EcomSiteDefinerMR(fqdn,pagesNoMap,dirUris);
-			AbstractPartialSiteDefiner partDefiner = new EcomSiteDefiner(fqdn,pagesNoMap,dirUris);
+			AbstractPartialSiteDefiner partDefiner;
+			if(conf.getBoolean("mapreduce"))
+				partDefiner = new EcomSiteDefinerMR(fqdn,pagesNoMap,dirUris);
+			else
+				partDefiner = new EcomSiteDefiner(fqdn,pagesNoMap,dirUris);
 			isEcom = partDefiner.defineAndStore();
 			
 			if(!isEcom) {	

@@ -127,6 +127,8 @@ public abstract class AbstractDataStore {
 	 */
 	public abstract Object getFamilyStorageHandle(String familyName);
 
+	public abstract String getFamilyNextUri(String family);
+
 	
 	
 }

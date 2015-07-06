@@ -400,6 +400,7 @@ public class CassandraCQLDataStore extends AbstractDataStore {
 	
 	private Iterator<Row> urisIterator = null;
 	
+	@Override
 	public String getFamilyNextUri(String family) {
 		
 		if(urisIterator == null) {
