@@ -161,11 +161,6 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
   }
 
   @Override public String toString() {
-    return "IndexedComplexIntermediateKey{" +
-             "site='" + site + '\'' +
-             ", node='" + node + '\'' +
-             ", cache='" + cache +'\''+
-             ", key='" + key + '\'' +
-             '}';
+    return key;
   }
 }

@@ -55,21 +55,21 @@ public class LeadsIntermediateIterator<V> implements Iterator<V> {
       CloseableIterable<Map.Entry<Object, Object>> myIterable = ((Cache)indexSiteCache).getAdvancedCache().filterEntries(new IndexedComplexIntermKeyFilter(key));
       for (Map.Entry<Object, Object> entry : myIterable) {
         //        System.err.println("ADDING TO LIST key: " + entry.getKey() + " value " + entry.getValue().toString());
-        if(entry.getKey() instanceof  IndexedComplexIntermediateKey) {
+//        if(entry.getKey() instanceof  IndexedComplexIntermediateKey) {
           ComplexIntermediateKey c = new ComplexIntermediateKey((IndexedComplexIntermediateKey) entry.getKey());
-          if (intermediateDataCache.containsKey(c)){
+//          if (intermediateDataCache.containsKey(c)){
             list.add((IndexedComplexIntermediateKey) entry.getKey());
-          }else{
-            log.error("Indexed cache rejected because data Cache does not contain");
-          }
-        }
-        else{
-          log.error("\n\nGET [B once again");
+//          }else{
+//            log.error("Indexed cache rejected because data Cache does not contain");
+//          }
+//        }
+//        else{
+//          log.error("\n\nGET [B once again");
           //          IndexedComplexIntermediateKey unserializedKey = new IndexedComplexIntermediateKey();
           //          unserializedKey.unserialize((byte[]) entry.getValue());
           //          System.err.println("ADDING [B] TO LIST key: " + entry.getKey() + " value " + unserializedKey.toString());
           //          list.add(unserializedKey);
-        }
+//        }
       }
     } catch (Exception e) {
       System.err.println("Exception on LeadsIntermediateIterator " + e.getClass().toString());
