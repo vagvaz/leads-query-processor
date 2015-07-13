@@ -124,7 +124,7 @@ public abstract class MapReduceOperator extends BasicOperator{
   }
   @Override
   public void setupReduceCallable(){
-    conf.putString("output",getOutput());
+    conf.putString("output", getOutput());
     intermediateCache = (BasicCache) manager.getPersisentCache(intermediateCacheName);
     log.error("ReducerIntermediate " + intermediateCache.size());
     //create Intermediate cache name for data on the same Sites as outputCache
@@ -140,8 +140,12 @@ public abstract class MapReduceOperator extends BasicOperator{
     outputCache = (BasicCache) manager.getPersisentCache(outputCacheName);
     reduceInputCache = (Cache) keysCache;
     collector = new LeadsCollector(0, outputCache.getName());
-    inputCache = (Cache) keysCache;
+    inputCache = (Cache) intermediateDataCache;
+//    inputCache = (Cache) keysCache;
     reducerCallable =  new LeadsReducerCallable(outputCache.getName(), reducer,
                                                                          intermediateCacheName);
+
+
+
   }
 }

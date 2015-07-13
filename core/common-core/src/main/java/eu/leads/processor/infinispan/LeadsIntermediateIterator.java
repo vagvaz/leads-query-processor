@@ -129,7 +129,7 @@ public class LeadsIntermediateIterator<V> implements Iterator<V> {
 
     this.list = new ArrayList<>();
     try{
-      CloseableIterable<Map.Entry<String, Object>> myIterable = ((Cache)indexSiteCache).getAdvancedCache().filterEntries(new IndexedComplexIntermKeyFilter(key));
+      CloseableIterable<Map.Entry<String, Object>> myIterable = ((Cache)indexSiteCache).getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(new IndexedComplexIntermKeyFilter(key));
       for (Map.Entry<String, Object> entry : myIterable) {
         //        System.err.println("ADDING TO LIST key: " + entry.getKey() + " value " + entry.getValue().toString());
         if(entry.getValue() instanceof  IndexedComplexIntermediateKey) {

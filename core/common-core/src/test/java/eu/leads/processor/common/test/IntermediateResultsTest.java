@@ -25,8 +25,8 @@ public class IntermediateResultsTest {
   static String[] microClouds = {"mc0"};//,"mc1"};//,"mc2","mc01","mc11","mc21"};
   static String[] keys;
   static String cacheName = "acache";
-  static int numOfkeys = 2;
-  static int numOfNodes = 1;
+  static int numOfkeys = 10;
+  static int numOfNodes = 2;
   static int numOfMicroClouds = 1000;
   static int valuesPerKey = 2;
   static RemoteCacheManager rmanager;
