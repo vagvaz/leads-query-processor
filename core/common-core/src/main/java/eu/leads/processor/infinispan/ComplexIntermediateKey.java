@@ -1,6 +1,5 @@
 package eu.leads.processor.infinispan;
 
-import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -13,15 +12,16 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
   private String cache;
   private String key;
   private Integer counter;
-  private static final long  serialVersionUID = -81923791823178123L;
+  private static final long serialVersionUID = -81923791823178123L;
 
-  public ComplexIntermediateKey(String site, String node,String cache) {
+  public ComplexIntermediateKey(String site, String node, String cache) {
     this.site = site;
     this.node = node;
     this.cache = cache;
   }
 
-  public ComplexIntermediateKey(String site, String node,String key, String cache, Integer counter) {
+  public ComplexIntermediateKey(String site, String node, String key, String cache,
+      Integer counter) {
     this.site = site;
     this.node = node;
     this.key = key;
@@ -38,10 +38,10 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
   }
 
   public ComplexIntermediateKey() {
-    site = null;
-    node = null;
-    key = null;
-    cache = null;
+    site = "";
+    node = "";
+    key = "";
+    cache = "";
     counter = -1;
   }
 
@@ -52,32 +52,28 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
     this.cache = currentChunk.getCache();
     this.counter = new Integer(0);
   }
-     private void writeObject(java.io.ObjectOutputStream out) throws Exception {
-       if(site== null || node == null || key == null || cache == null || counter < 0 ){
-         throw new Exception(this.toString() + " EXCEPTION");
-       }
-        out.writeObject(site);
-        out.writeObject(node);
-        out.writeObject(key);
-        out.writeObject(cache);
-        out.writeInt(counter);
-//        String toWrite =  site+"--"+node+"--"+key+"--"+counter;
-//        out.writeObject(toWrite);
-     }
-     private void readObject(java.io.ObjectInputStream in)
-             throws IOException, ClassNotFoundException{
-           site = (String) in.readObject();
-           node = (String) in.readObject();
-           key = (String) in.readObject();
-       cache = (String)in.readObject();
-           counter = new Integer(in.readInt());
-//        String stringRead = (String) in.readObject();
-//        String[] values = stringRead.split("--");
-//        site = values[0].trim();
-//        node = values[1].trim();
-//        key = values[2].trim();
-//        counter = Integer.parseInt(values[3].trim());
-     }
+  //   private void writeObject(java.io.ObjectOutputStream out)
+  //           throws IOException{
+  ////      out.writeObject(site);
+  ////      out.writeObject(node);
+  ////      out.writeObject(key);
+  ////      out.writeInt(counter);
+  //      String toWrite =  site+"--"+node+"--"+key+"--"+counter;
+  //      out.writeObject(toWrite);
+  //   }
+  //   private void readObject(java.io.ObjectInputStream in)
+  //           throws IOException, ClassNotFoundException{
+  ////         site = (String) in.readObject();
+  ////         node = (String) in.readObject();
+  ////         key = (String) in.readObject();
+  ////         counter = new Integer(in.readInt());
+  //      String stringRead = (String) in.readObject();
+  //      String[] values = stringRead.split("--");
+  //      site = values[0].trim();
+  //      node = values[1].trim();
+  //      key = values[2].trim();
+  //      counter = Integer.parseInt(values[3].trim());
+  //   }
 
   public String getSite() {
     return site;
@@ -113,84 +109,91 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
 
   @Override
   public int hashCode() {
-    return Integer.valueOf(key) %  2;// site.hashCode()+node.hashCode()+key.hashCode()+counter.hashCode();
-//  return 0;
+    return key.hashCode();// site.hashCode()+node.hashCode()+key.hashCode()+counter.hashCode();
   }
 
   @Override
   public boolean equals(Object o) {
-    if (o == null || getClass() != o.getClass()) return false;
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     ComplexIntermediateKey that = (ComplexIntermediateKey) o;
 
-          if (site != null ? !site.equals(that.site) : that.site != null) return false;
-          if (node != null ? !node.equals(that.node) : that.node != null) return false;
-          if (key != null ? !key.equals(that.key) : that.key != null) return false;
-          if(cache != null ? !cache.equals(that.cache ) : that.cache != null) return false;
-          return !(counter != null ? !counter.equals(that.counter) : that.counter != null);
-//    if(site.equals(that.getSite()))
-//      if(node.equals(that.getNode()))
-//        if(key.equals(that.getKey()))
-//          if(cache.equals(that.getCache()))
-//            if(counter.equals(that.getCounter()))
-//              return true;
-//    return false;
+    //      if (site != null ? !site.equals(that.site) : that.site != null) return false;
+    //      if (node != null ? !node.equals(that.node) : that.node != null) return false;
+    //      if (key != null ? !key.equals(that.key) : that.key != null) return false;
+    //      return !(counter != null ? !counter.equals(that.counter) : that.counter != null);
+    if (site.equals(that.getSite())) {
+      if (node.equals(that.getNode())) {
+        if (key.equals(that.getKey())) {
+          if (cache.equals(that.getCache())) {
+            if (counter.equals(that.getCounter())) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+    return false;
     //     return that.toString().equals(this.toString());
   }
 
   @Override
   public int compareTo(Object o) {
-    if (o == null || getClass() != o.getClass()) return -1;
+    if (o == null || getClass() != o.getClass()) {
+      return -1;
+    }
 
     ComplexIntermediateKey that = (ComplexIntermediateKey) o;
     int result = 0;
-    if (site != null){
-      result = site.compareTo(that.getSite());
-      if(result != 0)
+    if (site != null) {
+      result = site.compareTo(that.site);
+      if (result != 0) {
         return result;
-    }
-    else{
+      }
+    } else {
       return -1;
     }
 
-    if (node != null){
-      result = node.compareTo(that.getNode());
-      if(result != 0)
+    if (node != null) {
+      result = node.compareTo(that.node);
+      if (result != 0) {
         return result;
-    }
-    else{
+      }
+    } else {
       return -1;
     }
-    if(cache != null){
-      result = node.compareTo(that.getCache());
-      if(result != 0)
+    if (cache != null) {
+      result = node.compareTo(that.cache);
+      if (result != 0) {
         return result;
-    }
-    else{
+      }
+    } else {
       return -1;
     }
-    if (key != null )
-    {
-      result = key.compareTo(that.getKey());
-      if(result != 0)
+    if (key != null) {
+      result = key.compareTo(that.key);
+      if (result != 0) {
         return result;
-    }
-    else{
+      }
+    } else {
       return -1;
     }
-    if(counter != null){
-      return counter.compareTo(that.getCounter());
+    if (counter != null) {
+      return counter.compareTo(that.counter);
     }
     return -1;
     //      return o.toString().compareTo(this.toString());
   }
 
   public void next() {
-    counter = new Integer(counter+1);
+    counter = new Integer(counter + 1);
     //     return new ComplexIntermediateKey(site,node,key,counter);
   }
 
-  @Override public String toString() {
-    return key;
+  @Override
+  public String toString() {
+    return key.toString();
   }
 
   public String getCache() {
