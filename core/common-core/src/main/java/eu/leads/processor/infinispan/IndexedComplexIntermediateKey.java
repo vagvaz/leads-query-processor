@@ -7,14 +7,14 @@ import java.io.*;
 /**
  * Created by vagvaz on 3/7/15.
  */
-@Indexed
+//@Indexed
 public class IndexedComplexIntermediateKey implements Comparable,Serializable {
-  @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
+//  @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
   private String site;
 
-  @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
+//  @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
   private String node;
-  @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES,name="key")
+//  @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES,name="key")
   private String key;
 
 
@@ -22,16 +22,17 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
   private String cache;
 
   public IndexedComplexIntermediateKey(String site, String node,String cacheName) {
-    this.site = site;
-    this.node = node;
-    this.cache = cacheName;
+    this.site = new String(site);
+    this.node = new String(node);
+    this.cache = new String(cacheName);
+
   }
 
   public IndexedComplexIntermediateKey(String site, String node,String cacheName,String key) {
-    this.site = site;
-    this.node = node;
-    this.cache = cacheName;
-    this.key = key;
+    this.site = new String(site);
+    this.node = new String(node);
+    this.cache = new String(cacheName);
+    this.key = new String(key);
 
   }
   public IndexedComplexIntermediateKey(IndexedComplexIntermediateKey other){
@@ -43,10 +44,10 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
   }
   private void readObject(ObjectInputStream in
   ) throws ClassNotFoundException, IOException {
-    this.site = in.readUTF();
-    this.node = in.readUTF();
-    this.cache = in.readUTF();
-    this.key = in.readUTF();
+    this.site = (String) in.readObject();
+    this.node = (String) in.readObject();
+    this.cache = (String) in.readObject();
+    this.key = (String) in.readObject();
   }
 
   /**
@@ -54,10 +55,10 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
    * Customise if necessary.
    */
   private void writeObject(ObjectOutputStream out ) throws IOException {
-    out.writeUTF(site);
-    out.writeUTF(node);
-    out.writeUTF(cache);
-    out.writeUTF(key);
+    out.writeObject(site);
+    out.writeObject(node);
+    out.writeObject(cache);
+    out.writeObject(key);
   }
 
   public void unserialize(byte[] asbytes) throws IOException {
@@ -107,10 +108,10 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
 
     IndexedComplexIntermediateKey that = (IndexedComplexIntermediateKey) o;
 
-    if (site != null ? !site.equals(that.site) : that.site != null) return false;
-    if (node != null ? !node.equals(that.node) : that.node != null) return false;
-    if (cache != null ? !cache.equals(that.cache) : that.cache != null) return false;
-    return !(key != null ? !key.equals(that.key) : that.key != null);
+    if (site != null ? !site.equals(that.getSite()) : that.getSite() != null) return false;
+    if (node != null ? !node.equals(that.getNode()) : that.getNode() != null) return false;
+    if (cache != null ? !cache.equals(that.getCache()) : that.getCache() != null) return false;
+    return !(key != null ? !key.equals(that.getKey()) : that.getKey() != null);
 
   }
 
@@ -127,7 +128,7 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
     IndexedComplexIntermediateKey that = (IndexedComplexIntermediateKey) o;
     int result = -1;
     if (site != null){
-      result = site.compareTo(that.site);
+      result = site.compareTo(that.getSite());
       if(result != 0)
         return result;
     }
@@ -136,14 +137,14 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
     }
 
     if (node != null){
-      result = node.compareTo(that.node);
+      result = node.compareTo(that.getNode());
       if(result != 0)
         return result;
     }else{
       return -1;
     }
     if(cache != null){
-      result = cache.compareTo(that.cache);
+      result = cache.compareTo(that.getCache());
       if(result != 0)
         return result;
     }else{
@@ -151,7 +152,7 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
     }
     if (key != null )
     {
-      return  key.compareTo(that.key);
+      return  key.compareTo(that.getKey());
     }
     return -1;
   }
@@ -160,11 +161,6 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
   }
 
   @Override public String toString() {
-    return "IndexedComplexIntermediateKey{" +
-             "site='" + site + '\'' +
-             ", node='" + node + '\'' +
-             ", cache='" + cache +'\''+
-             ", key='" + key + '\'' +
-             '}';
+    return key;
   }
 }

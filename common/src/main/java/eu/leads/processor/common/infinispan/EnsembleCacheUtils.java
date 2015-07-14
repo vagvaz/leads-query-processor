@@ -4,10 +4,11 @@ import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.commons.api.BasicCache;
-import org.infinispan.commons.util.concurrent.NotifyingFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,7 +23,7 @@ public class EnsembleCacheUtils {
         new ProfileEvent("Execute " + EnsembleCacheUtils.class, profilerLog);
     static Logger log = LoggerFactory.getLogger(EnsembleCacheUtils.class);
     static boolean useAsync;
-//    static Queue<NotifyingFuture<Void>> concurrentQuue;
+    //    static Queue<NotifyingFuture<Void>> concurrentQuue;
     static Map<String, BasicCache> currentCaches;
     static Map<String, Map<Object, Object>> mapsToPut;
     static Queue<Thread> threads;
@@ -31,7 +32,7 @@ public class EnsembleCacheUtils {
     static int batchSize = 20;
     static long counter = 0;
     static long threadCounter = 0;
-    static long threadBatch = 4;
+    static long threadBatch = 3;
 
     public static void initialize() {
         synchronized (mutex) {
@@ -41,40 +42,22 @@ public class EnsembleCacheUtils {
             useAsync = LQPConfiguration.getInstance().getConfiguration()
                 .getBoolean("node.infinispan.putasync", true);
             log.info("Using asynchronous put " + useAsync);
-//            concurrentQuue = new ConcurrentLinkedQueue<>();
+            //            concurrentQuue = new ConcurrentLinkedQueue<>();
             threads = new ConcurrentLinkedQueue<>();
             //            ccr = new ClearCompletedRunnable(concurrentQuue,mutex,threads);
             initialized = true;
             batchSize = LQPConfiguration.getInstance().getConfiguration()
                 .getInt("node.ensemble.batchsize", 10);
+            threadBatch = LQPConfiguration.getInstance().getConfiguration().getInt(
+                "node.ensemble.threads", 2);
             currentCaches = new ConcurrentHashMap<>();
             mapsToPut = new ConcurrentHashMap<>();
         }
     }
 
     public static void waitForAllPuts() {
-//        profExecute.start("waitForAllPuts");
+        //        profExecute.start("waitForAllPuts");
         clearCompleted();
-//        while (!threads.isEmpty()) {
-////            Iterator<NotifyingFuture<Void>> iterator = concurrentQuue.iterator();
-////            while (iterator.hasNext()) {
-//                NotifyingFuture current = concurrentQuue.poll();
-//                try {
-//                    //                    if (current.isDone()) {
-//                    //                        iterator.remove();
-//                    //                    }
-//                    //                    else{
-//                    current.get();
-////                    iterator.remove();
-//                } catch (Exception e) {
-//                    log.error(
-//                        "EnsembleCacheUtils waitForAllPuts Exception " + e.getClass().toString());
-//                    log.error(e.getStackTrace().toString());
-//                    e.printStackTrace();
-//                }
-////            }
-//        }
-//        Iterator<Thread> threadIterator = threads.iterator();
         while (!threads.isEmpty()) {
             Thread t = threads.poll();
             try {
@@ -86,7 +69,7 @@ public class EnsembleCacheUtils {
                 e.printStackTrace();
             }
         }
-//        profExecute.end();
+        //        profExecute.end();
     }
 
     public static void putToCache(BasicCache cache, Object key, Object value) {
@@ -103,19 +86,42 @@ public class EnsembleCacheUtils {
     private static void clearCompleted() {
         Map<String,BasicCache> caches;
         Map<String,Map<Object,Object>> objects;
+        List<Thread> completedThreads = new LinkedList<>();
         synchronized (mutex) {
             threadCounter = threads.size();
+            //      System.err.println("Active threads: " + threadCounter);
             if(threadCounter > threadBatch){
                 for(Thread t : threads){
-                    try {
-                        t.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        log.error("EnsembleCacheUtilsClearCompletedException " + e.getMessage());
-                        PrintUtilities.logStackTrace(log,e.getStackTrace());
+                    if(!t.isAlive()){
+                        completedThreads.add(t);
+                    }
+
+                }
+                //        System.err.println("Completed threads: " + completedThreads.size());
+                while(threads.size() - completedThreads.size() > threadBatch) {
+                    for (Thread t : threads) {
+                        try {
+                            t.join();
+                            if (!t.isAlive()) {
+                                completedThreads.add(t);
+                                if(threads.size() - completedThreads.size() < threadBatch) {
+                                    //                 System.out.println("t " + threads.size() + "  c " + completedThreads.size() + " so " + (threads.size() - completedThreads.size() < threadBatch));
+                                    break;
+                                }
+                            }
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                            log.error("EnsembleCacheUtilsClearCompletedException " + e.getMessage());
+                            PrintUtilities.logStackTrace(log, e.getStackTrace());
+                        }
                     }
                 }
             }
+            for(Thread t : completedThreads){
+                threads.remove(t);
+            }
+            //      System.err.println("After cleanup Active threads: " + threads.size());
+            assert (threads.size() < threadBatch);
             caches = currentCaches;
             objects = mapsToPut;
 
@@ -125,19 +131,10 @@ public class EnsembleCacheUtils {
             threads.add(batchPutAllAsyncThread);
             batchPutAllAsyncThread.start();
         }
-
-
-        //        if(ccr == null)
-        //        {
-        //            ccr = new ClearCompletedRunnable(concurrentQuue,mutex,threads);
-        //        }
-        //        threads.add(ccr);
-        //        ccr.start();
-        //          ccr.run();
     }
 
     private static void putToCacheSync(BasicCache cache, Object key, Object value) {
-//        profExecute.start("putToCache Sync");
+        //        profExecute.start("putToCache Sync");
         boolean isok = false;
         while (!isok) {
             try {
@@ -179,12 +176,12 @@ public class EnsembleCacheUtils {
                 }
             }
         }
-//        profExecute.end();
+        //        profExecute.end();
     }
 
     private static void putToCacheAsync(BasicCache cache, Object key, Object value) {
         counter = (counter + 1) % Long.MAX_VALUE;
-//        profExecute.start("putToCache Async");
+        //        profExecute.start("putToCache Async");
         boolean isok = false;
         while (!isok) {
             try {
@@ -246,7 +243,7 @@ public class EnsembleCacheUtils {
                 }
             }
         }
-//        profExecute.end();
+        //        profExecute.end();
     }
 
     public static <KOut> void putIfAbsentToCache(BasicCache cache, KOut key, KOut value) {

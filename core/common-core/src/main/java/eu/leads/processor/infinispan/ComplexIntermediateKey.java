@@ -182,7 +182,7 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
   }
 
   @Override public String toString() {
-    return site+"--"+node+"--"+cache+"--"+key+"--"+counter;
+    return key;
   }
 
   public String getCache() {
