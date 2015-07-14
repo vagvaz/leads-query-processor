@@ -1,10 +1,14 @@
 package eu.leads.processor.infinispan;
 
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.core.TupleMarshaller;
 import org.infinispan.Cache;
+import org.infinispan.client.hotrod.RemoteCache;
+import org.infinispan.client.hotrod.Search;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.CloseableIterable;
-import org.infinispan.context.Flag;
+import org.infinispan.query.SearchManager;
+import org.infinispan.query.dsl.QueryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,8 +18,8 @@ import java.util.*;
  * Created by vagvaz on 3/7/15.
  */
 public class LeadsIntermediateIterator<V> implements Iterator<V> {
-  protected transient Cache intermediateDataCache;
-  protected transient Cache indexSiteCache;
+  protected transient BasicCache intermediateDataCache;
+  protected transient BasicCache indexSiteCache;
   private transient InfinispanManager imanager;
   private ComplexIntermediateKey baseIntermKey;
   private IndexedComplexIntermediateKey currentChunk;
@@ -24,17 +28,12 @@ public class LeadsIntermediateIterator<V> implements Iterator<V> {
   private List<IndexedComplexIntermediateKey> list;
   private static Logger log = null;
 
-
-
   public LeadsIntermediateIterator(String key, String prefix, InfinispanManager imanager){
     log = LoggerFactory.getLogger(LeadsIntermediateIterator.class);
     this.imanager = imanager;
-    intermediateDataCache =   (Cache) imanager.getPersisentCache(prefix + ".data");
-//    intermediateDataCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL);
-
+    intermediateDataCache = (Cache) imanager.getPersisentCache(prefix + ".data");
     //createIndexCache for getting all the nodes that contain values with the same key! in a mc
     indexSiteCache = (Cache) imanager.getPersisentCache(prefix + ".indexed");
-//    indexSiteCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL);
     baseIntermKey = new ComplexIntermediateKey();
     baseIntermKey.setCounter(currentCounter);
     baseIntermKey.setKey(key);
@@ -210,60 +209,43 @@ public class LeadsIntermediateIterator<V> implements Iterator<V> {
   }
 
   @Override public V next() {
-    //    if(!hasNext()){
-    //      throw new NoSuchElementException("LeadsIntermediateIterator the iterator does not have next");
-    //    }
+    if(!hasNext()){
+      throw new NoSuchElementException("LeadsIntermediateIterator the iterator does not have next");
+    }
     //    System.err.println("in next ");
     //    log.error(baseIntermKey.toString());
-    if(baseIntermKey == null || chunkIterator == null){
-      throw new NoSuchElementException("LeadIntermediateIterator no more Elements");
-      //return null;
-    }
     V returnValue = (V) intermediateDataCache.get(new ComplexIntermediateKey(baseIntermKey));
     if(returnValue == null){
-
-      if(chunkIterator.hasNext()) {
-        currentChunk = chunkIterator.next();
-        baseIntermKey = new ComplexIntermediateKey(currentChunk);
-        return next();
-      }
-      else{
-        baseIntermKey = null;
-        currentChunk = null;
-        throw new NoSuchElementException("LeadIntermediateIterator no more Elements");
-      }
-      //      System.err.println("\n\n\nERROR NULL GET FROM intermediate data cache " + baseIntermKey.toString() + "\n cache size = " + intermediateDataCache.size());
-      //      throw new NoSuchElementException("LeadsIntermediateIterator read from cache returned NULL");
+      System.err.println("\n\n\nERROR NULL GET FROM intermediate data cache " + baseIntermKey.toString() + "\n cache size = " + intermediateDataCache.size());
+      throw new NoSuchElementException("LeadsIntermediateIterator read from cache returned NULL");
     }
-    else {
-      baseIntermKey.next();
-    }
+    baseIntermKey.next();
     //    baseIntermKey = baseIntermKey.next();
     //    Object o = intermediateDataCache.get(baseIntermKey);
     //    if(o == null){
     //
-    //    if(!intermediateDataCache.containsKey(new ComplexIntermediateKey(baseIntermKey))){
-    //      if(chunkIterator.hasNext()) {
-    //        currentChunk = chunkIterator.next();
-    //        baseIntermKey = new ComplexIntermediateKey(currentChunk);
-    //      }
-    //      else{
-    //        baseIntermKey = null;
-    //        currentChunk = null;
-    //      }
-    //
-    //
-    //    }
+    if(!intermediateDataCache.containsKey(new ComplexIntermediateKey(baseIntermKey))){
+      if(chunkIterator.hasNext()) {
+        currentChunk = chunkIterator.next();
+        baseIntermKey = new ComplexIntermediateKey(currentChunk);
+      }
+      else{
+        baseIntermKey = null;
+        currentChunk = null;
+      }
+
+
+    }
     if(returnValue != null) {
       //      System.err.println("out next ");
       return returnValue;
     }
     else {
-      //      if(chunkIterator.hasNext()) {
-      //        System.err.println("TbaseInterm Key is not contained and chunkIterator has NeXt");
-      //        System.err.println(this.toString());
-      //      }
-      //      currentChunk = null;
+      if(chunkIterator.hasNext()) {
+        System.err.println("TbaseInterm Key is not contained and chunkIterator has NeXt");
+        System.err.println(this.toString());
+      }
+      currentChunk = null;
       throw new NoSuchElementException("LeadsIntermediateIterator return Value NULL at the end");
     }
   }

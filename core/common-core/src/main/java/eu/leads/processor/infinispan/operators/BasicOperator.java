@@ -707,6 +707,7 @@ public abstract class BasicOperator extends Thread implements Operator{
         replyForFailExecution(action);
       }
     }
+
     replyForSuccessfulExecution(action);
   }
 

@@ -4,6 +4,7 @@ package eu.leads.processor.infinispan;
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.Cache;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.distexec.mapreduce.Collector;
@@ -201,6 +202,11 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
 //        else{
 //          log.error("successfully added to indexed cache " + baseIndexedKey.getUniqueKey() + "\n" + o.toString());
 //        }
+        if(LQPConfiguration.getInstance().getConfiguration().getBoolean("processor.validate.intermediate")){
+          IndexedComplexIntermediateKey ik = new IndexedComplexIntermediateKey(baseIndexedKey.getSite(),baseIndexedKey.getNode(),baseIndexedKey.getCache(),key.toString());
+          Object o = indexSiteCache.get(ik.getUniqueKey());
+          assert (o.equals(baseIndexedKey));
+        }
       }
       else{
         currentCount = currentCount+1;
@@ -210,6 +216,15 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
       baseIntermKey.setCounter(currentCount);
       ComplexIntermediateKey newKey = new ComplexIntermediateKey(baseIntermKey.getSite(),baseIntermKey.getNode(),key.toString(),baseIntermKey.getCache(),currentCount);
       EnsembleCacheUtils.putToCache(intermediateDataCache,newKey,value);
+      if(LQPConfiguration.getInstance().getConfiguration().getBoolean("processor.validate.intermediate")){
+
+        ComplexIntermediateKey v = new ComplexIntermediateKey(baseIntermKey.getSite(),baseIntermKey.getNode(),key.toString(),baseIntermKey.getCache(),currentCount);
+        Object o = intermediateDataCache.get(v);
+        assert(o.equals(value));
+//        IndexedComplexIntermediateKey ik = new IndexedComplexIntermediateKey(baseIndexedKey.getSite(),baseIndexedKey.getNode(),baseIndexedKey.getCache());
+//        Object o = indexSiteCache.get(ik.getUniqueKey());
+
+      }
 //      Object o = intermediateDataCache.get(newKey);
 //      if(o == null){
 //        System.err.println("\n\n\n\n\n#@#@INTERMEDIATE KEY " + newKey.toString() + " was not saved exiting" );

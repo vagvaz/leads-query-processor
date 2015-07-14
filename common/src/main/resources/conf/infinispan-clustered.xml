@@ -9,6 +9,7 @@
    <jgroups>
       <stack-file name="tcp" path="conf/jgroups-tcp.xml"/>
    </jgroups>
+
    <threads>
       <thread-factory name="infinispan-factory" group-name="infinispan"
                       thread-name-pattern="%G %i" priority="5"/>
@@ -19,6 +20,7 @@
                                           keepalive-time="50000"/>
       <scheduled-thread-pool name="infinispan-eviction" thread-factory="infinispan-factory"/>
    </threads>
+
    <cache-container name="defaultContainer" statistics="false" default-cache="defaultCache"
                     start="true" >
       <transport stack="tcp"/>
@@ -35,7 +37,7 @@
             <expiration lifespan="-1" max-idle="-1" interval="-1" />
            <state-transfer enabled="true" await-initial-transfer="true"/>
       </distributed-cache>
-      <distributed-cache name="WebPage" mode="SYNC" segments="20" owners="1" remote-timeout="10000" start="EAGER">
+      <distributed-cache name="WebPage" mode="SYNC" segments="20" owners="1" remote-timeout="10000000" start="EAGER">
          <locking acquire-timeout="1000" concurrency-level="1000000" striping="false"/>
          <indexing index="LOCAL">
             <property name="hibernate.search.default.directory_provider">filesystem</property>

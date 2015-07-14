@@ -504,9 +504,9 @@ public class LoadCsv {
 //                    if (numofEntries % 1000 == 0) {
 //                        System.out.println("Imported: " + numofEntries);
                         //cache.endBatch(true);
-//                   if(numofEntries%3000==0)
-                        //         return;
-//                    }
+                   if(numofEntries%300==0){
+                                 return;
+                    }
                 }
                 System.out.println("Totally Imported: " + numofEntries);
             } catch (FileNotFoundException e) {

@@ -33,7 +33,6 @@ public class EnsembleCacheUtils {
     static long counter = 0;
     static long threadCounter = 0;
     static long threadBatch = 3;
-
     public static void initialize() {
         synchronized (mutex) {
             if (initialized) {

@@ -43,6 +43,11 @@
    <dependencies>
       <!--Vertx provided dependencies-->
       <dependency>
+         <groupId>gr.tuc.softnet</groupId>
+         <artifactId>common-core</artifactId>
+         <version>${processor.version}</version>
+      </dependency>
+      <dependency>
          <groupId>io.vertx</groupId>
          <artifactId>vertx-core</artifactId>
          <version>${vertx.version}</version>

@@ -301,13 +301,13 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .hash().numOwners(1)
             .indexing().index(Index.NONE).transaction().transactionMode(
             TransactionMode.NON_TRANSACTIONAL)
-            .persistence().passivation(true)
+            .persistence().passivation(false)
             //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
             //                                                                      .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
 
             .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath + "/")
             .fetchPersistentState(true)
-            .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
+            .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
             false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS);
 
@@ -319,7 +319,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .hash().numOwners(1)
             .indexing().index(Index.NONE).transaction().transactionMode(
             TransactionMode.NON_TRANSACTIONAL)
-            .persistence().passivation(true)
+            .persistence().passivation(false)
             .addStore(LevelDBStoreConfigurationBuilder.class)
             .location("/tmp/leadsprocessor-data/leveldb/" + uniquePath + "-data/")
                 //                                 .location("/tmp/leveldb/data-foo/" + "/")
@@ -729,7 +729,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .build();
 
       } else { //Use leveldb
-        defaultConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
+        defaultConfig = new ConfigurationBuilder() //.read(manager.getDefaultCacheConfiguration())
             .clustering()
             .cacheMode(CacheMode.DIST_SYNC)
             .hash().numOwners(1)

@@ -11,10 +11,8 @@
    </parent>
 
     <groupId>eu.leads</groupId>
-    <artifactId>distsum</artifactId>
+    <artifactId>topk-plugin</artifactId>
     <version>${processor.version}</version>
-
-    <name></name>
     <organization>
         <name>The LEADS project</name>
         <url>http://www.leads-project.eu/</url>

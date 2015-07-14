@@ -46,6 +46,12 @@
    <dependencies>
       <dependency>
          <groupId>gr.tuc.softnet</groupId>
+         <artifactId>common-core</artifactId>
+         <version>${processor.version}</version>
+      </dependency>
+
+      <dependency>
+         <groupId>gr.tuc.softnet</groupId>
          <artifactId>sse-module</artifactId>
          <version>1.0-SNAPSHOT</version>
          <exclusions>

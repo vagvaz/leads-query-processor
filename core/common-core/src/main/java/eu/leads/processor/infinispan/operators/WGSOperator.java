@@ -342,6 +342,7 @@ public class WGSOperator extends MapReduceOperator {
     for (Map.Entry<String, Integer> outerEntry : iterable) {
       totalSum += outerEntry.getValue() ;
     }
+    iterable.close();
     if(totalSum > 0){
       totalSum+=1;
     }

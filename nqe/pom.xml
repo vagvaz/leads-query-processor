@@ -29,6 +29,7 @@
          <groupId>gr.tuc.softnet</groupId>
          <artifactId>leads-query-processor-common</artifactId>
          <version>${processor.version}</version>
+         <!--<scope>provided</scope>-->
       </dependency>
       <!--        <dependency>
                   <groupId>gr.tuc.softnet</groupId>
@@ -40,6 +41,7 @@
          <groupId>gr.tuc.softnet</groupId>
          <artifactId>common-core</artifactId>
          <version>${processor.version}</version>
+         <!--<scope>provided</scope>-->
       </dependency>
 
    </dependencies>
