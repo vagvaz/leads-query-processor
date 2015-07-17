@@ -100,4 +100,6 @@ public interface InfinispanManager {
      * @return Value for property 'started'.
      */
     boolean isStarted();
+
+    Cache getLocalCache(String s);
 }

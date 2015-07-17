@@ -89,4 +89,8 @@ public class EnsembleInfinispanManager implements InfinispanManager {
   @Override public boolean isStarted() {
     return true;
   }
+
+  @Override public Cache getLocalCache(String s) {
+    return null;
+  }
 }
