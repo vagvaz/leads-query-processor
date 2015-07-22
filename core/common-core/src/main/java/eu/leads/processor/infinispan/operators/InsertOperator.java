@@ -35,6 +35,9 @@ import java.util.*;
 public class InsertOperator extends BasicOperator {
 
 
+  private ArrayList<Cache> indexCaches=null;
+
+
   public InsertOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
     super(com, persistence, log, action);
   }
@@ -127,15 +130,16 @@ public class InsertOperator extends BasicOperator {
 
             + key + "     \n" + data.toString());
     EnsembleCacheUtils.putToCache(ecache, key, data);
-    for (String column : data.getFieldNames()) {
-      LeadsIndexHelper lindHelp = new LeadsIndexHelper();
-      Cache indexCache = (Cache) manager.getPersisentCache(tableName + "." + column);
-      int i = indexCache.size() + 1;
-      if (indexCache != null) {
-        LeadsIndex lInd = lindHelp.CreateLeadsIndex(data.getGenericAttribute(column), key, column, tableName);
-        indexCache.put("i" + i, lInd);
-      }
-    }
+//    if(checkIndex_usage())
+//    for (String column : data.getFieldNames()) {
+//      LeadsIndexHelper lindHelp = new LeadsIndexHelper();
+//      Cache indexCache = (Cache) manager.getPersisentCache(tableName + "." + column);
+//      int i = indexCache.size() + 1;
+//      if (indexCache != null) {
+//        LeadsIndex lInd = lindHelp.CreateLeadsIndex(data.getGenericAttribute(column), key, column, tableName);
+//        indexCache.put(key, lInd);
+//      }
+//    }
 
 //                targetCache.put(key,data.toString());
 //                        versionedCache.put(key,data.toString(),version);
@@ -144,6 +148,21 @@ public class InsertOperator extends BasicOperator {
     }
     EnsembleCacheUtils.waitForAllPuts();
     cleanup();
+  }
+
+  private boolean checkIndex_usage() {
+ 
+    String columnName = null;
+    indexCaches = new ArrayList<>();
+    JsonArray columnNames = conf.getObject("body").getArray("columnNames");
+    Iterator<Object> iterator = columnNames.iterator();
+    while (iterator.hasNext()) {
+      JsonObject tmp = (JsonObject) iterator.next();
+      columnName = tmp.getString("name");
+      indexCaches.add((Cache) manager.getIndexedPersistentCache(tableName + "." +columnName));
+    }
+
+    return indexCaches.size()>0;
   }
 
   @Override

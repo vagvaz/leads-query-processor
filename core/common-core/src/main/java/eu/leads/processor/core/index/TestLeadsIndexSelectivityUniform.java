@@ -72,12 +72,15 @@ public class TestLeadsIndexSelectivityUniform {
             SearchManager sm = org.infinispan.query.Search.getSearchManager(cache);
             QueryFactory qf = sm.getQueryFactory();
             randomInd = rand.nextInt(numStrings);// uniform
-            org.infinispan.query.dsl.Query lucenequery = qf.from(LeadsIndexString.class)
+            org.infinispan.query.dsl.Query lucenequery = qf.from(LeadsIndex.class)
                     .having("attributeName").eq("attributeName")
                     .and()
                     .having("attributeValue").eq(lstStr.get(randomInd))
                     .toBuilder().build();
             List<LeadsIndex> list = lucenequery.list();
+            for (LeadsIndex lst : list) {
+                System.out.println(lst.getAttributeName()+":"+lst.getAttributeValue()+":"+lst.getKeyName());
+            }
             long stopTime = System.currentTimeMillis();
             listTimes.add(stopTime - startTime);
         }

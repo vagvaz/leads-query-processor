@@ -1,6 +1,9 @@
 package eu.leads.processor.math;
 
 import eu.leads.processor.core.Tuple;
+import org.infinispan.query.dsl.FilterConditionContext;
+import org.infinispan.query.dsl.QueryBuilder;
+import org.infinispan.query.dsl.QueryFactory;
 import org.vertx.java.core.json.JsonElement;
 import org.vertx.java.core.json.JsonObject;
 
@@ -49,6 +52,94 @@ public class FilterOperatorNode {
 
    public FilterOperatorNode() {
 
+   }
+
+   public Object CreateQuery(QueryBuilder q){
+      FilterConditionContext result =null;
+      FilterConditionContext left=(FilterConditionContext)CreateQuery(q);
+      FilterConditionContext right=(FilterConditionContext)CreateQuery(q);
+//      if(left != null)
+//         left.CreateQuery();
+//      if(right != null)
+//         right.CreateQuery();
+
+      switch (type) {
+         case NOT:
+            //TODO
+            break;
+         case AND: {
+//            boolean leftValue = left.getValueAsBoolean();
+//            boolean rightValue = right.getValueAsBoolean();
+//            result =  leftValue && rightValue;
+         }
+         break;
+         case OR: {
+//            boolean leftValue = left.getValueAsBoolean();
+//            boolean rightValue = right.getValueAsBoolean();
+//            result =  leftValue || rightValue;
+
+
+         }
+         break;
+         case EQUAL:
+            result = left.and().having("attributeValue").eq(right);//,right.getValueAsJson());
+            break;
+         case IS_NULL:
+           // result = left.isValueNull();
+            break;
+         case NOT_EQUAL:
+          //  result = !(MathUtils.equals(left.getValueAsJson(), right.getValueAsJson()));
+            break;
+         case LTH:
+           // result = MathUtils.lessThan(left.getValueAsJson(),right.getValueAsJson());
+            break;
+         case LEQ:
+          //  result = MathUtils.lessEqualThan(left.getValueAsJson(),right.getValueAsJson());
+            break;
+         case GTH:
+           // result = MathUtils.greaterThan(left.getValueAsJson(),right.getValueAsJson());
+            break;
+         case GEQ:
+           // result = MathUtils.greaterEqualThan(left.getValueAsJson(),right.getValueAsJson());
+            break;
+         case AGG_FUNCTION:
+            break;
+         case FUNCTION:
+            break;
+         case LIKE:
+           // result = MathUtils.like(left.getValueAsJson(),right.getValueAsJson(),value);
+            break;
+         case IN:
+            //TODO
+//            JsonObject val = null;
+//            JsonObject set = null;
+//            if(left.getValueAsJson().getString("type").equals("FIELD")){
+//               val = left.getValueAsJson();
+//               set = right.getValueAsJson();
+//            }
+//            else{
+//               val = right.getValueAsJson();
+//               set= left.getValueAsJson();
+//            }
+//            result =  MathUtils.checkIfIn(val,set);
+            // check conditino
+            // rerturn field in set
+         case ROW_CONSTANT:
+            //TODO
+            break;
+         case FIELD:
+//            JsonObject datum = computeDatum(t);
+//            if(datum != null)
+//               this.value.getObject("body").putObject("datum", datum);
+            //result = true;
+            return q.having("attributevalue").eq(MathUtils.getTextFrom(value));
+         case CONST:
+           // result = true;
+            return MathUtils.getTextFrom(value);
+
+      }
+     // putBooleanDatum(result);
+      return result;
    }
 
 

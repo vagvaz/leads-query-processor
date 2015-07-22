@@ -11,6 +11,8 @@ import eu.leads.processor.infinispan.operators.ScanOperator;
 import eu.leads.processor.infinispan.operators.mapreduce.UnionOperator;
 import org.apache.tajo.algebra.OpType;
 
+import java.util.UUID;
+
 /**
  * Created by vagvaz on 9/23/14.
  */
@@ -112,6 +114,11 @@ public class SQLOperatorFactory {
            result = new InsertOperator(com,persistence,log,action);
        }
        else if(opType.equals(OpType.CreateIndex.toString())){
+            System.out.print("CREATE INDEX yeah" + action.getId());
+          if(action.getId()==null) {
+             action.setId(UUID.randomUUID().toString());
+             System.out.print("RECREATE INDEX yeah" + action.getId());
+          }
            result = new CreateIndexOperator(com,persistence,log,action);
        }
        else{

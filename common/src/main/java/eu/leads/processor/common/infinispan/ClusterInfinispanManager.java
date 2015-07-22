@@ -715,7 +715,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .clustering()
             .cacheMode(CacheMode.DIST_SYNC)
             .hash().numOwners(1)
-            .indexing().index(Index.NONE).transaction().transactionMode(
+            .indexing().setProperty("auto-config", "true") .setProperty("default.directory_provider", "ram").index(Index.ALL).transaction().transactionMode(
                 TransactionMode.NON_TRANSACTIONAL)
             .persistence().passivation(true)
                 //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
@@ -733,7 +733,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .clustering()
             .cacheMode(CacheMode.DIST_SYNC)
             .hash().numOwners(1)
-            .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
+            .indexing().setProperty("auto-config", "true") .setProperty("default.directory_provider", "ram").index(Index.ALL).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
             .persistence().passivation(true)
             .addStore(LevelDBStoreConfigurationBuilder.class)
             .location("/tmp/leadsprocessor-data/leveldb/data-" + uniquePath + "/")
@@ -751,7 +751,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
           .clustering()
           .cacheMode(CacheMode.DIST_SYNC)
           .hash().numOwners(1)
-          .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility().enable()//.marshaller(new TupleMarshaller())
+          //.indexing().index(Index.NONE)
+          .indexing().setProperty("auto-config", "true") .setProperty("default.directory_provider", "ram").index(Index.ALL)
+          .transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility().enable()//.marshaller(new TupleMarshaller())
           .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
           .build();
     }

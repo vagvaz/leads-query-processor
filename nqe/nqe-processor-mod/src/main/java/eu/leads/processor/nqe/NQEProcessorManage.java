@@ -1,11 +1,15 @@
 package eu.leads.processor.nqe;
 
 import eu.leads.processor.core.ManageVerticle;
+import eu.leads.processor.core.PidFileUtil;
 import eu.leads.processor.core.comp.ServiceStatus;
 import eu.leads.processor.core.net.MessageUtils;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonObject;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by vagvaz on 8/6/14.
@@ -16,6 +20,7 @@ public class NQEProcessorManage extends ManageVerticle {
 
    @Override
    public void start() {
+
       super.start();
       initialize(config);
    }
@@ -37,6 +42,11 @@ public class NQEProcessorManage extends ManageVerticle {
                   workerId = event.result();
                   logProxy.info("NQEProcessorWorker " + config.getString("id") + " has been deployed");
                   com.sendTo(parent, MessageUtils.createServiceStatusMessage(status,id,serviceType));
+                  try {
+                     PidFileUtil.createPidFile(new File("/tmp/nqe.pid"));
+                  } catch (IOException e) {
+                     e.printStackTrace();
+                  }
                } else {
                   logProxy.info("NQEProcessorWorker " + config.getString("id") + " failed to deploy");
                   stopService();

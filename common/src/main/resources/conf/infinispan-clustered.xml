@@ -20,14 +20,14 @@
       <scheduled-thread-pool name="infinispan-eviction" thread-factory="infinispan-factory"/>
    </threads>
    <cache-container name="defaultContainer" statistics="false" default-cache="defaultCache"
-                    start="true" >
+                    start="true"   >
       <transport stack="tcp"/>
       <!--<serialization version="70"/>-->
       <jmx domain="eu.leads.processor" duplicate-domains="true"></jmx>
       <distributed-cache name="defaultCache" mode="SYNC" owners="2" l1-lifespan="600000" start="true"
                          statistics="true">
          <compatibility></compatibility>
-          <indexing index="NONE">
+          <indexing index="LOCAL">
               <property name="default.directory_provider">ram</property>
           </indexing>
             <!--<eviction max-entries="1000" strategy="LIRS" />-->

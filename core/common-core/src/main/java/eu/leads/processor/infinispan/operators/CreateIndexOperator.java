@@ -103,12 +103,15 @@ public class CreateIndexOperator extends BasicOperator {
     //indexCaches
     //fix tablename
     inputCache = (Cache) manager.getPersisentCache(tableName);
+
+    System.out.println(" output cache: " + getOutput() );
   }
 
   @Override
   public void run() {
     LeadsIndexHelper lindHelp = new LeadsIndexHelper();
     int i = 0;
+    System.out.println("inputCache Size : " + inputCache.getAdvancedCache());
     for (Object key : inputCache.getAdvancedCache().keySet()) {
 
       String ikey = (String) key;
@@ -118,12 +121,13 @@ public class CreateIndexOperator extends BasicOperator {
       for (int c = 0; c < columnNames.size(); c++) {
         String column = columnNames.get(c);
         LeadsIndex lInd = lindHelp.CreateLeadsIndex(value.getGenericAttribute(column), ikey, column, tableName);
-        indexCaches.get(c).put("i" + i, lInd);
+        indexCaches.get(c).put(ikey, lInd);
       }
       i++;
     }
     log.info("Succesfully completed indexing records, columns:" + columnNames.size() + " per column:" + i);
    // EnsembleCacheUtils.waitForAllPuts();
+
     cleanup();
   }
 

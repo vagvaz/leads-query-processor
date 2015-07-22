@@ -1,11 +1,11 @@
 package leads.tajo.module;
 
-import org.apache.tajo.algebra.CreateIndex;
-import org.apache.tajo.algebra.Expr;
-import org.apache.tajo.algebra.JsonHelper;
-import org.apache.tajo.algebra.OpType;
-import org.apache.tajo.engine.parser.SQLSyntaxError;
+import org.apache.tajo.algebra.*;
+import org.apache.tajo.algebra.Sort.*;
+
+ import org.apache.tajo.engine.parser.SQLSyntaxError;
 import org.apache.tajo.session.Session;
+import org.vertx.java.core.json.JsonArray;
 
 import java.io.*;
 
@@ -63,9 +63,23 @@ public class TajoModuleTest {
             if (res_expr.getType().equals(OpType.CreateIndex)) {
               res = res_expr.toJson();
               CreateIndex newExpr = JsonHelper.fromJson(res, CreateIndex.class);//
-//                            JsonArray columnNames = conf.getObject("CreateIndex").getArray("SortSpecs");
-//                            JsonArray values = conf.getObject("body").getArray("exprs");
-//                            JsonArray primaryArray = conf.getObject("Projection").getArray("TableName");
+              String IndexName = newExpr.getIndexName();
+              if(IndexName.isEmpty())
+                IndexName = "test";
+              String Table_name2index =(((Relation)((Projection)newExpr.getChild()).getChild())).getName();
+              SortSpec[] collumns = newExpr.getSortSpecs();
+
+              JsonArray columnNames = new JsonArray();//= conf.getObject("CreateIndex").getArray("SortSpecs");
+              for(SortSpec sc: collumns)
+                columnNames.addString(((ColumnReferenceExpr)sc.getKey()).getName());
+
+              System.out.println(" TableName: " + Table_name2index);
+              System.out.println(" IndexName: " + IndexName);
+              System.out.println(" columns found: " + columnNames.toString());
+
+                            JsonArray values ;//= conf.getObject("body").getArray("exprs");
+
+                            JsonArray primaryArray;// = conf.getObject("Projection").getArray("TableName");
 
             } else
               res = TaJoModule.Optimize(session, res_expr);//.Optimize(session, line);//res_expr.toJson();//;

@@ -1,11 +1,16 @@
 package eu.leads.processor.imanager;
 
 import eu.leads.processor.core.ManageVerticle;
+import eu.leads.processor.core.PidFileUtil;
 import eu.leads.processor.core.comp.ServiceStatus;
 import eu.leads.processor.core.net.MessageUtils;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonObject;
+
+import java.io.*;
+import java.lang.management.ManagementFactory;
+
 
 /**
  * Created by vagvaz on 8/6/14.
@@ -39,8 +44,14 @@ public class IManagerProcessorManage extends ManageVerticle {
                             workerId = event.result();
                             logProxy.info("IManagerProcessorWorker " + config.getString("id")
                                               + " has been deployed");
+
                             com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id,
-                                                                                          serviceType));
+                                    serviceType));
+                            try {
+                                PidFileUtil.createPidFile(new File("/tmp/iman.pid"));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         } else {
                             logProxy.info("IManagerProcessorWorker " + config.getString("id")
                                               + " failed to deploy");
@@ -52,6 +63,24 @@ public class IManagerProcessorManage extends ManageVerticle {
 
 
     }
+
+
+
+    void writePid(String filename){
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(filename, "UTF-8");
+        String pid = ManagementFactory.getRuntimeMXBean().getName();
+        pid = pid.split("@")[0];
+        writer.println(pid);
+        writer.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @Override
     public void cleanup() {
