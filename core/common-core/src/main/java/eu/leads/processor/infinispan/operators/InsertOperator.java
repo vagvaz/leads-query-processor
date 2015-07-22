@@ -4,6 +4,7 @@ package eu.leads.processor.infinispan.operators;
  * Created by vagvaz on 10/26/14.
  */
 
+import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
@@ -109,7 +110,7 @@ public class InsertOperator extends BasicOperator {
                key = key +",null";
             }
          }
-         data.setAttribute(column,value);
+         data.setAttribute(tableName+"."+column,value);
       }
 
    }
