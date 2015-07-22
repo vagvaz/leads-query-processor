@@ -248,7 +248,7 @@ public class PluginManager {
     File file = new File(fileName);
     ClassLoader cl = null;
     try {
-      cl = new URLClassLoader(new URL[]{file.toURI().toURL()});
+      cl = new URLClassLoader(new URL[]{file.toURI().toURL()},PluginManager.class.getClassLoader());
 
       Class<?> plugClass = null;
 
