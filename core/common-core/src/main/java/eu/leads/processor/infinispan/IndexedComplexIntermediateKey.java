@@ -42,33 +42,6 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
   public IndexedComplexIntermediateKey() {
 
   }
-  private void readObject(ObjectInputStream in
-  ) throws ClassNotFoundException, IOException {
-    this.site = (String) in.readObject();
-    this.node = (String) in.readObject();
-    this.cache = (String) in.readObject();
-    this.key = (String) in.readObject();
-  }
-
-  /**
-   * This is the default implementation of writeObject.
-   * Customise if necessary.
-   */
-  private void writeObject(ObjectOutputStream out ) throws IOException {
-    out.writeObject(site);
-    out.writeObject(node);
-    out.writeObject(cache);
-    out.writeObject(key);
-  }
-
-  public void unserialize(byte[] asbytes) throws IOException {
-    ByteArrayInputStream input = new ByteArrayInputStream(asbytes);
-    ObjectInputStream ios = new ObjectInputStream(input);
-    this.site = ios.readUTF();
-    this.node = ios.readUTF();
-    this.cache = ios.readUTF();
-    this.key = ios.readUTF();
-  }
 
   public String getSite() {
     return site;
@@ -117,7 +90,7 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
 
   @Override
   public int hashCode() {
-    int result = key.hashCode();
+    int result = Integer.valueOf(key) % 2;//key.hashCode();
     return result;
   }
 
@@ -156,6 +129,34 @@ public class IndexedComplexIntermediateKey implements Comparable,Serializable {
     }
     return -1;
   }
+
+
+  private void writeObject(java.io.ObjectOutputStream out) throws Exception {
+    if(site== null || node == null || key == null || cache == null  ){
+      throw new Exception(this.toString() + " EXCEPTION " + this.getClass().toString());
+    }
+    out.writeObject(site);
+    out.writeObject(node);
+    out.writeObject(key);
+    out.writeObject(cache);
+    //        String toWrite =  site+"--"+node+"--"+key+"--"+counter;
+    //        out.writeObject(toWrite);
+  }
+  private void readObject(java.io.ObjectInputStream in)
+      throws IOException, ClassNotFoundException{
+    site = (String) in.readObject();
+    node = (String) in.readObject();
+    key = (String) in.readObject();
+    cache = (String)in.readObject();
+    //        String stringRead = (String) in.readObject();
+    //        String[] values = stringRead.split("--");
+    //        site = values[0].trim();
+    //        node = values[1].trim();
+    //        key = values[2].trim();
+    //        counter = Integer.parseInt(values[3].trim());
+  }
+
+
   public String getUniqueKey(){
     return site+node+cache+key;
   }

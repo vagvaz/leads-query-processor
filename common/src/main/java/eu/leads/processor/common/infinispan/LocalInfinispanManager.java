@@ -209,4 +209,8 @@ public class LocalInfinispanManager implements InfinispanManager {
     public boolean isStarted() {
         return manager.getStatus().equals(ComponentStatus.RUNNING);
     }
+
+    @Override public Cache getLocalCache(String s) {
+        return null;
+    }
 }

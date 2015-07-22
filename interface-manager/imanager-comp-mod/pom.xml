@@ -45,6 +45,11 @@
    </repositories>
 
    <dependencies>
+      <dependency>
+         <groupId>gr.tuc.softnet</groupId>
+         <artifactId>common-core</artifactId>
+         <version>${processor.version}</version>
+      </dependency>
       <!--Vertx provided dependencies-->
       <dependency>
          <groupId>io.vertx</groupId>

@@ -156,7 +156,10 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
             profExecute.end();
           }
         }
-      } catch (Exception e) {
+      }
+      iterable.close();
+    }
+    catch(Exception e){
         iterable.close();
         profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
         PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());

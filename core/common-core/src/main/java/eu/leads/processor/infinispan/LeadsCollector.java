@@ -4,6 +4,7 @@ package eu.leads.processor.infinispan;
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.Cache;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.distexec.mapreduce.Collector;
@@ -156,7 +157,6 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
   public void initializeCache(String inputCacheName,InfinispanManager imanager){
     this.imanager = imanager;
     log = LoggerFactory.getLogger(LeadsCollector.class);
-//    storeCache = (Cache) imanager.getPersisentCache(cacheName);
     storeCache = emanager.getCache(cacheName,new ArrayList<>(emanager.sites()),
         EnsembleCacheManager.Consistency.DIST);
     if(onMap) {
@@ -177,30 +177,17 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
   public void emit(KOut key, VOut value) {
 
     if(onMap) {
-      //      List<VOut> list = (List<VOut>) storeCache.get(key);
 
-      //      if (list == null) {
-      //        list = new LinkedList<>();
-      //        //storeCache.put(key, list);
-      //
-      //      }
-      //      list.add(value);
-      //      emitCount.incrementAndGet();
       Integer currentCount = (Integer) counterCache.get(key);
       if(currentCount == null)
       {
         currentCount = new Integer(0);
         baseIndexedKey.setKey(key.toString());
-//        EnsembleCacheUtils.putIfAbsentToCache(keysCache, key, key);
-//        EnsembleCacheUtils.putToCache(indexSiteCache,baseIndexedKey, new IndexedComplexIntermediateKey(baseIndexedKey));
-//        Object o = indexSiteCache.get(baseIndexedKey.getUniqueKey());
-//        if(o == null)
-//        {
-//          log.error("Could not add to indexedCache indexedKey " + baseIndexedKey.toString());
-//        }
-//        else{
-//          log.error("successfully added to indexed cache " + baseIndexedKey.getUniqueKey() + "\n" + o.toString());
-//        }
+        if(LQPConfiguration.getInstance().getConfiguration().getBoolean("processor.validate.intermediate")){
+          IndexedComplexIntermediateKey ik = new IndexedComplexIntermediateKey(baseIndexedKey.getSite(),baseIndexedKey.getNode(),baseIndexedKey.getCache(),key.toString());
+          Object o = indexSiteCache.get(ik.getUniqueKey());
+          assert (o.equals(baseIndexedKey));
+        }
       }
       else{
         currentCount = currentCount+1;
@@ -210,24 +197,15 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
       baseIntermKey.setCounter(currentCount);
       ComplexIntermediateKey newKey = new ComplexIntermediateKey(baseIntermKey.getSite(),baseIntermKey.getNode(),key.toString(),baseIntermKey.getCache(),currentCount);
       EnsembleCacheUtils.putToCache(intermediateDataCache,newKey,value);
-//      Object o = intermediateDataCache.get(newKey);
-//      if(o == null){
-//        System.err.println("\n\n\n\n\n#@#@INTERMEDIATE KEY " + newKey.toString() + " was not saved exiting" );
-////        System.exit(-1);
-//      }
-//      else{
-//        log.error("intermediate key " + newKey.toString() + " saved ");
-//      }
+      if(LQPConfiguration.getInstance().getConfiguration().getBoolean("processor.validate.intermediate")){
+        ComplexIntermediateKey v = new ComplexIntermediateKey(baseIntermKey.getSite(),baseIntermKey.getNode(),key.toString(),baseIntermKey.getCache(),currentCount);
+        Object o = intermediateDataCache.get(v);
+        assert(o.equals(value));
+      }
     }
     else{
       EnsembleCacheUtils.putToCache(storeCache, key, value);
-//      emitCount.incrementAndGet();
     }
-    // if (isOverflown() && mcc.hasCombiner()) {
-    // combine(mcc, this);
-    // }
-//    Set<Object> keys = new HashSet<>();
-//    keys.add(key);
   }
 
 
@@ -242,25 +220,8 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
     emitCount.set(0);
   }
 
-  //  public void emit(Map<KOut, List<VOut>> combined) {
-  //    for (Entry<KOut, List<VOut>> e : combined.entrySet()) {
-  //      KOut k = e.getKey();
-  //      List<VOut> values = e.getValue();
-  //      for (VOut v : values) {
-  //        emit(k, v);
-  //      }
-  //    }
-  //  }
-
   public boolean isOverflown() {
     return emitCount.get() > maxCollectorSize;
   }
 
-  //  public void setCombiner(eu.leads.processor.infinispan.LeadsCombiner combiner) {
-  //    this.combiner = combiner;
-  //  }
-  //
-  //  public LeadsCombiner getCombiner() {
-  //    return combiner;
-  //  }
 }

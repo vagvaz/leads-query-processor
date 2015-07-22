@@ -113,6 +113,7 @@ import java.util.Set;
                     EnsembleCacheUtils.putToCache(data, prefix + tupleId, t);
                     counter++;
                 }
+                iterable.close();
 
             }
             EnsembleCacheUtils.waitForAllPuts();

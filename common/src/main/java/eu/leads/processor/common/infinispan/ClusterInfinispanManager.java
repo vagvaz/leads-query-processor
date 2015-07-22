@@ -301,13 +301,13 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .hash().numOwners(1)
             .indexing().index(Index.NONE).transaction().transactionMode(
             TransactionMode.NON_TRANSACTIONAL)
-            .persistence().passivation(true)
+            .persistence().passivation(false)
             //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
             //                                                                      .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
 
             .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath + "/")
             .fetchPersistentState(true)
-            .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
+            .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
             false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS);
 
@@ -319,7 +319,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .hash().numOwners(1)
             .indexing().index(Index.NONE).transaction().transactionMode(
             TransactionMode.NON_TRANSACTIONAL)
-            .persistence().passivation(true)
+            .persistence().passivation(false)
             .addStore(LevelDBStoreConfigurationBuilder.class)
             .location("/tmp/leadsprocessor-data/leveldb/" + uniquePath + "-data/")
                 //                                 .location("/tmp/leveldb/data-foo/" + "/")
@@ -663,6 +663,32 @@ public class ClusterInfinispanManager implements InfinispanManager {
     return manager.getStatus().equals(ComponentStatus.RUNNING);
   }
 
+  @Override public Cache getLocalCache(String cacheName) {
+    if(manager.cacheExists(cacheName)){
+      return manager.getCache(cacheName);
+    }
+    Configuration configuration = new ConfigurationBuilder()
+        .clustering()
+        .cacheMode(CacheMode.LOCAL)
+        .hash().numOwners(1)
+        .transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
+        .persistence().passivation(true)
+        .addStore(LevelDBStoreConfigurationBuilder.class)
+        .location("/tmp/leadsprocessor-data/leveldb/" + uniquePath + "-data/")
+            //                                 .location("/tmp/leveldb/data-foo/" + "/")
+        .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "-expired/")
+            //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
+        .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
+        .fetchPersistentState(true)
+        .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
+        .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
+            false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
+        .build();
+    manager.defineConfiguration(cacheName, configuration);
+    Cache startedCache = manager.getCache(cacheName);
+    return startedCache;
+  }
+
   private void createCache(String cacheName, Configuration cacheConfiguration) {
 //    if (!cacheConfiguration.clustering().cacheMode().isClustered()) {
 //      log.warn("Configuration given for " + cacheName
@@ -729,7 +755,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .build();
 
       } else { //Use leveldb
-        defaultConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
+        defaultConfig = new ConfigurationBuilder() //.read(manager.getDefaultCacheConfiguration())
             .clustering()
             .cacheMode(CacheMode.DIST_SYNC)
             .hash().numOwners(1)

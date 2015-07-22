@@ -5,6 +5,7 @@
    <modelVersion>4.0.0</modelVersion>
 
    <artifactId>common-core</artifactId>
+   <version>1.0-SNAPSHOT</version>
    <packaging>jar</packaging>
    <name>Project - common</name>
    <url>http://maven.apache.org</url>
@@ -74,30 +75,7 @@
          </exclusions>
       </dependency>
 
-      <dependency>
-         <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-cachestore-leveldb</artifactId>
-         <version>${infinispan.version}</version>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-            </exclusion>
-         </exclusions>
 
-      </dependency>
       <dependency>
          <groupId>org.infinispan</groupId>
          <artifactId>infinispan-server-hotrod</artifactId>
@@ -122,30 +100,7 @@
          </exclusions>
 
       </dependency>
-      <dependency>
-         <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-cachestore-leveldb</artifactId>
-         <version>${infinispan.version}</version>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-            </exclusion>
-         </exclusions>
 
-      </dependency>
       <dependency>
          <groupId>org.infinispan</groupId>
          <artifactId>infinispan-client-hotrod</artifactId>
@@ -170,29 +125,7 @@
          </exclusions>
 
       </dependency>
-      <dependency>
-         <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-ensemble</artifactId>
-         <version>${infinispan.version}</version>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-            </exclusion>
-         </exclusions>
-      </dependency>
+
       <dependency>
          <groupId>org.apache.hadoop</groupId>
          <artifactId>hadoop-common</artifactId>
@@ -269,30 +202,7 @@
 
          <version>2.1</version>
       </dependency>
-      <dependency>
-         <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-core</artifactId>
-         <version>${infinispan.version}</version>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-            </exclusion>
-         </exclusions>
 
-      </dependency>
       <dependency>
          <groupId>org.infinispan</groupId>
          <artifactId>infinispan-commons</artifactId>
@@ -341,77 +251,6 @@
          </exclusions>
 
       </dependency>
-
-      <dependency>
-         <groupId>junit</groupId>
-         <artifactId>junit</artifactId>
-         <version>4.11</version>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>com.google.guava</groupId>
-         <artifactId>guava</artifactId>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-            </exclusion>
-         </exclusions>
-
-      </dependency>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
       <dependency>
          <groupId>gr.tuc.softnet</groupId>
@@ -1086,14 +925,6 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-report-plugin</artifactId>
             <version>${maven.surefire.report.plugin.version}</version>
-         </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>${maven.javadoc.plugin.version}</version>
-            <configuration>
-               <aggregate>true</aggregate>
-            </configuration>
          </plugin>
       </plugins>
    </reporting>

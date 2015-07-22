@@ -70,6 +70,7 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
                 case PENDING: //probably received an action from an external source
                     if (label.equals(NQEConstants.DEPLOY_OPERATOR)) {
                         action.getData().putString("replyTo", action.getData().getString("monitor"));
+
                         action.setStatus(ActionStatus.INPROCESS.toString());
                         com.sendWithEventBus(workQueueAddress, action.asJsonObject());
                     }else if( (label.equals(NQEConstants.DEPLOY_PLUGIN)) || (label.equals(NQEConstants.UNDEPLOY_PLUGIN))){

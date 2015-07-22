@@ -398,13 +398,16 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
   }
 
   private void computeTotalSum() {
-    log.info("--------------------   Creating iterable over approx sum entries ------------------------");
+    log.info(
+        "--------------------   Creating iterable over approx sum entries ------------------------");
     CloseableIterable<Map.Entry<String, Integer>> iterable =
       approxSumCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
     log.info("--------------------    Iterating over approx sum entries cache ------------------------");
     for (Map.Entry<String, Integer> outerEntry : iterable) {
       totalSum += outerEntry.getValue() ;
     }
+    iterable.close();
+
     if(totalSum > 0){
       totalSum+=1;
     }

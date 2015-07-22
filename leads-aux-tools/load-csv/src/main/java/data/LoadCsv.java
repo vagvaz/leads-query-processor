@@ -506,8 +506,8 @@ public class LoadCsv {
                         System.out.println("Imported: " + numofEntries + ", Charbytes: " + numofChars + ", bytes: " + numofBytes + ", average: " + numofBytes/numofEntries);
                         System.out.println("Imported: " + numofEntries+" -- size: "+sizeE);
                         //cache.endBatch(true);
-//                   if(numofEntries%3000==0)
-                        //         return;
+                   if(numofEntries%300==0){
+                                 return;
                     }
                 }
                 all_bytes +=numofBytes;

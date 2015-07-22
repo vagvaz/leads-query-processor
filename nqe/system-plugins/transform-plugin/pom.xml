@@ -3,12 +3,12 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
-<parent>
-   <groupId>gr.tuc.softnet</groupId>
-   <artifactId>system-plugins</artifactId>
-   <version>1.0-SNAPSHOT</version>
-   <relativePath>../pom.xml</relativePath>
-</parent>
+   <parent>
+      <groupId>gr.tuc.softnet</groupId>
+      <artifactId>system-plugins</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <relativePath>../pom.xml</relativePath>
+   </parent>
 
 
    <groupId>gr.tuc.softnet</groupId>
@@ -42,32 +42,49 @@
          </exclusions>
       </dependency>
 
-       <dependency>
-           <groupId>gr.tuc.softnet</groupId>
-           <artifactId>simple-crawler</artifactId>
-           <version>${processor.version}</version>
-           <scope>test</scope>
-          <exclusions>
-             <exclusion>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.tajo</groupId>
-                <artifactId>tajo-jdbc</artifactId>
+      <dependency>
+         <groupId>gr.tuc.softnet</groupId>
+         <artifactId>simple-crawler</artifactId>
+         <version>${processor.version}</version>
+         <scope>test</scope>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
 
-             </exclusion>
-          </exclusions>
-       </dependency>
+            </exclusion>
+         </exclusions>
+      </dependency>
    </dependencies>
 
    <build>
 
       <plugins>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+               <execution>
+                  <id>copy-dependencies</id>
+                  <phase>process-resources</phase>
+                  <goals>
+                     <goal>copy-dependencies</goal>
+                  </goals>
+                  <configuration>
+                     <excludeScope>provided</excludeScope>
+                     <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
@@ -84,6 +101,9 @@
                <descriptorRefs>
                   <descriptorRef>jar-with-dependencies</descriptorRef>
                </descriptorRefs>
+               <descriptors>
+                  <descriptor>src/main/assembly/assembly.xml</descriptor>
+               </descriptors>
             </configuration>
          </plugin>
       </plugins>
