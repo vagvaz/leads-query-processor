@@ -236,10 +236,10 @@
          <artifactId>leads-query-processor-tajo-catalog-server</artifactId>
          <version>0.0.1-SNAPSHOT</version>
          <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
+            <!--<exclusion>-->
+               <!--<groupId>log4j</groupId>-->
+               <!--<artifactId>log4j</artifactId>-->
+            <!--</exclusion>-->
             <exclusion>
                <groupId>org.apache.logging.log4j</groupId>
                <artifactId>log4j-core</artifactId>

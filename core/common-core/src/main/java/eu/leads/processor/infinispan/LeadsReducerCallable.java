@@ -63,6 +63,7 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
         IntermediateKeyIndex index = null;
         for(Object listener : dataCache.getListeners()){
             if(listener instanceof LocalIndexListener){
+                System.err.println("listener class is " + listener.getClass().toString());
                 LocalIndexListener localIndexListener = (LocalIndexListener) listener;
                 index = localIndexListener.getIndex();
                 break;
