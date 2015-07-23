@@ -261,13 +261,16 @@ class LeadsEcomSiteSchemaExtractor(object):
                 
     def __eval_basketnodes2(self,basketnode_list):
         do = False
+        mostcommonpath = None
         if len(set(basketnode_list)) <= 1:
-            pass # it's ok - all the basket paths the same
+            # it's ok - all the basket paths the same
+            mostcommonpath = basketnode_list[0]
         else:
             from collections import Counter
             c = Counter(basketnode_list)
             mostcommon = c.most_common(1)[0]
-            if mostcommon[0] is None:
+            mostcommonpath = mostcommon[0]
+            if mostcommonpath is None:
                 basketnode_list = [None]*len(basketnode_list)
             else:
                 if mostcommon[1] >= 0.5*len(basketnode_list):
@@ -278,7 +281,7 @@ class LeadsEcomSiteSchemaExtractor(object):
                     # assumption: random results 
                     basketnode_list = [None]*len(basketnode_list)
         
-        return do,basketnode_list,mostcommon[0]
+        return do,basketnode_list,mostcommonpath
             
 
 

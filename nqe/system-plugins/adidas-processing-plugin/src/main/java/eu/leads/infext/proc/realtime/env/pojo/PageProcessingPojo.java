@@ -135,9 +135,9 @@ public class PageProcessingPojo extends AbstractExecutionPojo {
 				}
 				
 			}
-			else {
-				if(familyKey.startsWith("new:leads_keywords:")) continue;
-				
+			else if(familyKey.startsWith("new:leads_keywords:")) 
+				continue;
+			else {				
 				HashMap<String,Object> mdFamilyMap = metadata.get(familyKey);
 				
 				if(familyKey.equals("new:leads_core")) 
@@ -153,7 +153,8 @@ public class PageProcessingPojo extends AbstractExecutionPojo {
 					}
 				}
 				
-				DataStoreSingleton.getDataStore().putLeadsResourceMDFamily(url, ts, familyName, cells);
+				if(!cells.isEmpty())
+					DataStoreSingleton.getDataStore().putLeadsResourceMDFamily(url, ts, familyName, cells);
 			}
 			
 		}

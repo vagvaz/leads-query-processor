@@ -21,6 +21,17 @@ import eu.leads.infext.proc.com.indexing.model.KeywordMatchInfo;
 
 public class LeadsIndexingServer {
 
+	/**
+	 * Input for ZeroMQ:
+	 *  - Document: doc [key value]*
+	 *  - Keywords: key [id keywords nonmatchingwords nonmatchingchars distancebetweenwords inorder]*
+	 *  
+	 * Output for ZeroMQ:
+	 *  - Keywords: [false|true]*
+	 *  - Document: 
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
         if (args.length < 2) {
             System.out.printf("I: syntax: flserver1 <loggingdir> <endpoint>\n");

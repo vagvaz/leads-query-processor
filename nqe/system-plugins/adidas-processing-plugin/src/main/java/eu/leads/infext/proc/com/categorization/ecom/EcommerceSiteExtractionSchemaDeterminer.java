@@ -35,7 +35,7 @@ public class EcommerceSiteExtractionSchemaDeterminer {
 			paramsList.add(ecomPage.basketnode);
 		}
 		
-		PythonQueueCall pyCall = new PythonQueueCall();
+		PythonQueueCall pyCall = new PythonQueueCall(true);
 		List<Object> retValues = pyCall.call(cliName, paramsList);
 		
 		if(retValues != null && retValues.size() >= 12) {

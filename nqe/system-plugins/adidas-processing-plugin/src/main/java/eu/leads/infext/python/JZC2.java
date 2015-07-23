@@ -15,13 +15,26 @@ import org.zeromq.ZMQ.Socket;
 import org.zeromq.ZMsg;
 
 public class JZC2 {
-    private static final int REQUEST_TIMEOUT = 1000;
-    private static final int MAX_RETRIES = 3;       //  Before we abandon
+	private static final int [] timeouts = new int[] {1000,100000};
+	
+    private final int REQUEST_TIMEOUT;
+    private final int MAX_RETRIES = 3;       //  Before we abandon
     
     private String [] endpoints;
     
-    public JZC2(List<String> list) {
+    private void init(List<String> list) {
 		this.endpoints = list.toArray(new String[list.size()]);
+    }
+    
+    public JZC2(List<String> list) {
+		init(list);
+		this.REQUEST_TIMEOUT 			= timeouts[0];
+	}
+    
+    public JZC2(List<String> list, boolean longTimeout) {
+		init(list);
+		if(longTimeout) this.REQUEST_TIMEOUT 	= timeouts[1];
+		else this.REQUEST_TIMEOUT 		= timeouts[0];
 	}
 
     private JSONArray tryRequest (ZContext ctx, String endpoint, ZMsg request)
@@ -44,12 +57,14 @@ public class JZC2 {
         try{
         if(reply != null) {
 	        String strReply = reply.popString();
-	        if(strReply != null)
+	        if(strReply != null) {
+		        System.out.println("Python reply: "+strReply);
 	        	jsonReply = new JSONArray(strReply);
+	        }
 	        reply.destroy();
         }
         }catch(JSONException e){
-            System.err.println(e.getMessage());
+            System.err.println("Error parsing Python response: "+e.getMessage());
         }
         //  Close socket in any case, we're done with it now
         ctx.destroySocket(client);

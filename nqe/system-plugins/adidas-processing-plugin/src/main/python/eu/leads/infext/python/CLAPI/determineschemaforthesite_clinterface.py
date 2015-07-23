@@ -14,10 +14,15 @@ from eu.leads.infext.python.ecom.extrschema.siteschemaextractor import LeadsEcom
 from eu.leads.infext.python.ops import xpathops
 import time
 import pdb
+import logging
     
 
 #if __name__ == '__main__':
 class AccessPoint:
+    
+    def __init__(self):
+        self.logger = logging.getLogger("leads")
+        
     def execute(self,params):
         '''
         Parameters:

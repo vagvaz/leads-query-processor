@@ -39,8 +39,10 @@ public class EcommerceNewPageTypeEvaluation {
 	}
 	
 	private void setEcomAssumption(String string) {
-		if(string.equals("ecom_product"))
+		if(string.equals("ecom_product")) {
+			System.err.println("This is product offering page");
 			ecomAssumption = EcomClassificationEnum.ECOM_PRODUCT_OFFERING_PAGE;
+		}
 		else if(string.equals("ecom_category"))
 			ecomAssumption = EcomClassificationEnum.ECOM_CATEGORY_PAGE;
 		else

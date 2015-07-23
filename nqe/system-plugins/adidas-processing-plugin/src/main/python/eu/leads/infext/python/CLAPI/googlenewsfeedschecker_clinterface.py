@@ -42,4 +42,5 @@ class AccessPoint:
         
         # processing_off(processing)
         # print translateReturnValues(returnlist)
-        return translateReturnValues(returnlist)
+        # return translateReturnValues(returnlist)
+        return returnlist

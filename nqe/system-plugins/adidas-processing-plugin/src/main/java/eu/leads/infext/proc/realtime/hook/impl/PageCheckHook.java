@@ -1,29 +1,17 @@
 package eu.leads.infext.proc.realtime.hook.impl;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.SortedSet;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import eu.leads.datastore.DataStoreSingleton;
-import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.MDFamily;
-import eu.leads.datastore.datastruct.URIVersion;
 import eu.leads.infext.proc.com.categorization.ecom.EcomClassificationEnum;
-import eu.leads.infext.proc.com.categorization.ecom.EcommerceClassification;
 import eu.leads.infext.proc.com.categorization.ecom.EcommerceNewPageTypeEvaluation;
 import eu.leads.infext.proc.com.categorization.newsblog.NewsBlogArticleAnalysis;
 import eu.leads.infext.proc.com.core.UrlAssumptions;
 import eu.leads.infext.proc.realtime.hook.AbstractHook;
-import eu.leads.infext.python.PythonQueueCall;
 import eu.leads.utils.LEADSUtils;
 
 public class PageCheckHook extends AbstractHook {
@@ -190,7 +178,7 @@ public class PageCheckHook extends AbstractHook {
 			fqdnEcomParameters = generalEcomParametersList.get(0);
 		
 		if(fqdnEcomParameters != null) {
-			String isBagButtonOnSite = fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-is_atb_button_in_dir")).toString();
+			Object isBagButtonOnSiteObj = fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-is_atb_button_in_dir"));
 			List<String> kMeansParams = new ArrayList<>();
 			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-product_cluster_center")).toString());
 			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-category_cluster_center")).toString());
@@ -201,7 +189,8 @@ public class PageCheckHook extends AbstractHook {
 			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-scaler_mean")).toString());
 			kMeansParams.add(fqdnEcomParameters.get(mapping.get("leads_urldirectory_ecom-scaler_std")).toString());
 		
-			ecomPageEval = new EcommerceNewPageTypeEvaluation(content,lang, isBagButtonOnSite, kMeansParams);
+			ecomPageEval = new EcommerceNewPageTypeEvaluation(content,lang, 
+					isBagButtonOnSiteObj==null ? "false" : isBagButtonOnSiteObj.toString(), kMeansParams);
 			
 			// if the page has no older version and has url, check assumptions based on url's parent directories
 			if(previousVersionType == null) {

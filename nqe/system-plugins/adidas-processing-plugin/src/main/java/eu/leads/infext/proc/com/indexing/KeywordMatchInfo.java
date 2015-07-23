@@ -5,6 +5,12 @@ public class KeywordMatchInfo {
 	public String matched;
 	public Double score;
 	
+	/**
+	 * 
+	 * @param id Keyword id, as defined earlier
+	 * @param matched Which strings got matched
+	 * @param score Relevance of matching
+	 */
 	public KeywordMatchInfo(Long id, String matched, Double score) {
 		super();
 		this.id = id;

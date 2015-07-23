@@ -54,14 +54,14 @@ public class LeadsMainContentExtraction {
 				List<Object> retValues = pyCall.call(cliName, content, extractionGeneralName, extractionDefinitionString);
 				
 				if(retValues.size() >= 1) {
-					String successfulExtractionTuple = (String) retValues.get(0);
+					String successfulExtractionTuple = ((JSONArray)(retValues.get(0))).toString();
 					
 					extractionTypes[index] = extractionGeneralName;
 					extractionPaths[index]= successfulExtractionTuple;
 					
 					for(int i=1; i<retValues.size(); i+=2) {
-						String extractedKey = (String) retValues.get(i);
-						String extractedVal = (String) retValues.get(i+1);
+						String extractedKey = retValues.get(i).toString();
+						String extractedVal = retValues.get(i+1).toString();
 						List<String> extractedValuesList = extractedValues.get(extractedKey);
 						if(extractedValuesList==null)
 							extractedValuesList = new ArrayList<>();

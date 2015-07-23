@@ -17,6 +17,7 @@ from eu.leads.infext.python.CLAPI import helloworld_clinterface,\
 from eu.leads.infext.python.CLAPI.conversionmethods import translateInputParameters
 import logging
 import traceback
+from timeit import default_timer as timer
 
 def factory(str):
     if str == 'eu.leads.infext.python.CLAPI.helloworld_clinterface':
@@ -47,10 +48,11 @@ def factory(str):
 def setup_custom_logger(name,fhsuffix):
     formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
 
-    mainpythondir = os.path.dirname(os.path.realpath(__file__))+"../../../../../"
+    mainpythondir = os.path.dirname(os.path.realpath(__file__))+"../../../../.."
     loggingdir = os.environ.get('LEADS_ADIDAS_LOGS') or mainpythondir
+    print "Logging dir:",loggingdir
 
-    handler = logging.FileHandler(loggingdir+'leads-pzs-'+fhsuffix+'.log')
+    handler = logging.FileHandler(loggingdir+'/leads-pzs-'+fhsuffix+'.log')
     handler.setFormatter(formatter)
 
     logger = logging.getLogger(name)
@@ -83,6 +85,7 @@ if __name__ == '__main__':
         # read message
         # pt.1 module name
         logger.debug("module name: %s" % msg[0])
+        starttime = timer()
         ap = None
         try:
             ap = factory(msg[0])
@@ -103,6 +106,10 @@ if __name__ == '__main__':
             logger.debug("EXCEPTION during module %s execution: %s" % (msg[0], str(traceback.format_exc())))
         
         server.send_json(retval)
+        endtime = timer()
+        elapsedtime = endtime-starttime
+        logger.debug("!!! Elapsed time:")
+        logger.debug(elapsedtime)
     
     logger.debug("finishing")
     server.setsockopt(zmq.LINGER, 0) # Terminate immediately

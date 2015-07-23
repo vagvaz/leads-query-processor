@@ -42,6 +42,11 @@ public class PythonQueueCall {
         jzc = new JZC2(config.getList("pzsEndpoints"));
 	}
 	
+	public PythonQueueCall(boolean longTimeout) {
+		random = new SecureRandom();
+        jzc = new JZC2(config.getList("pzsEndpoints"),longTimeout);
+	}
+	
 	
 	boolean isHtml(String text) {
 		//return text.matches("[\\S\\s]*\\<html[\\S\\s]*\\>[\\S\\s]*\\<\\/html[\\S\\s]*\\>[\\S\\s]*");
@@ -90,6 +95,8 @@ public class PythonQueueCall {
 	public List<Object> call(String moduleName, Object... args) {
 		
 		/* TIME */ long start = System.currentTimeMillis();
+		
+		System.out.println("PythonQueueCall for module "+moduleName);
 		
 		List<Object> retValue = null;
 		

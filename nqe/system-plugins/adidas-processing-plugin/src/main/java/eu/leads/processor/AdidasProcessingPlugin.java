@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import eu.leads.ProcessingFilterSingleton;
 import eu.leads.PropertiesSingleton;
 import eu.leads.datastore.DataStoreSingleton;
 import eu.leads.infext.logging.redirect.StdLoggerRedirect;
@@ -62,7 +63,7 @@ public class AdidasProcessingPlugin implements PluginInterface {
 	      // INIT page content processor
 	      if(pageProcessingPojo == null) {
 	    	  String [] strStages = config.getStringArray("processingStage");
-	    	  if(strStages == null) 
+	    	  if(strStages == null || strStages.length == 0) 
 	    		  pageProcessingPojo = new PageProcessingPojo();
 	    	  else
 		    	  pageProcessingPojo = new PageProcessingPojo(LEADSUtils.stringArray2integerArray(strStages));
@@ -124,6 +125,11 @@ public class AdidasProcessingPlugin implements PluginInterface {
 		String table = tableUri[0];
 		String uri = tableUri[1];
 		uri = normalizeUri(uri);
+		
+		if(!ProcessingFilterSingleton.shouldProcess(uri)) {
+			System.out.println("Skipping "+uri);
+			return false;
+		}
 		
 		// Convert value into tuple
 		String webpageJson = (String)value;

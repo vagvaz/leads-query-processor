@@ -14,7 +14,7 @@ class AccessPoint:
         #time.sleep(1)
         logger = logging.getLogger("leads")
         logger.debug("params: %s" % str(params))
-        return translateReturnValues([params[0]+" "+params[1]+" of Java, it's Python!"])        
+        return ([params[0]+" "+params[1]+" of Java, it's Python!"])        
 
 # if __name__ == '__main__':
 #     '''
