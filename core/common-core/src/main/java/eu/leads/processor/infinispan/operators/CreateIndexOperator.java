@@ -45,6 +45,10 @@ public class CreateIndexOperator extends BasicOperator {
 
   public CreateIndexOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
     super(com, persistence, log, action);
+    if(this.action.getData().getObject("operator").getString("id")==null){
+      System.out.println("Create Index Action: " + this.action.toString());
+      this.action.getData().getObject("operator").putString("id","Cindex");
+    }
   }
 
   @Override
@@ -104,7 +108,7 @@ public class CreateIndexOperator extends BasicOperator {
     //fix tablename
     inputCache = (Cache) manager.getPersisentCache(tableName);
 
-    System.out.println(" output cache: " + getOutput() );
+    System.out.println(" output cache: " + getOutput() +  " Action " + action.asJsonObject().toString());
   }
 
   @Override

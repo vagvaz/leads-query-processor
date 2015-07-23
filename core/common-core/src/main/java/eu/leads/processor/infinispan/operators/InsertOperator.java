@@ -24,7 +24,10 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 //import org.infinispan.versioning.VersionedCache;
 //import org.infinispan.versioning.impl.VersionedCacheTreeMapImpl;
@@ -114,7 +117,7 @@ public class InsertOperator extends BasicOperator {
          }
          data.setAttribute(tableName+"."+column,value);
       }
-
+    System.out.println(" output cache: " + getOutput() +  " Action " + action.asJsonObject().toString());
   }
 
   @Override
