@@ -1,12 +1,13 @@
 #!/bin/bash
 FILE=$1
 echo "Checking $FILE does not exists"
-
+COUNTER=0;
 while [ ! -f "$FILE" ]; do
-    echo "."
+    printf "."
     sleep 1
+    COUNTER=$((COUNTER + 1))
 done
-echo "Now File $FILE does exists"
+echo "$COUNTER seconds passed, file $FILE created."
 
 #example usage
 #put it under .vertx_mods and

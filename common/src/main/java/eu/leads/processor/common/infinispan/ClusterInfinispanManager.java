@@ -301,13 +301,13 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .hash().numOwners(1)
             .indexing().index(Index.NONE).transaction().transactionMode(
             TransactionMode.NON_TRANSACTIONAL)
-            .persistence().passivation(false)
+            .persistence().passivation(true)
             //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
             //                                                                      .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
 
             .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath + "/")
             .fetchPersistentState(true)
-            .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
+            .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
             false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS);
 
@@ -319,7 +319,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .hash().numOwners(1)
             .indexing().index(Index.NONE).transaction().transactionMode(
             TransactionMode.NON_TRANSACTIONAL)
-            .persistence().passivation(false)
+            .persistence().passivation(true)
             .addStore(LevelDBStoreConfigurationBuilder.class)
             .location("/tmp/leadsprocessor-data/leveldb/" + uniquePath + "-data/")
                 //                                 .location("/tmp/leveldb/data-foo/" + "/")
@@ -383,7 +383,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       HotRodServerConfigurationBuilder serverConfigurationBuilder = new HotRodServerConfigurationBuilder();
       if (externalIP != null && !externalIP.equals("")){
         serverConfigurationBuilder.host(localhost).port(serverPort).proxyHost(externalIP)
-            .proxyPort(11222);
+            .proxyPort(serverPort);
       }else{
         serverConfigurationBuilder.host(localhost).port(serverPort);
       }
@@ -741,7 +741,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .clustering()
             .cacheMode(CacheMode.DIST_SYNC)
             .hash().numOwners(1)
-            .indexing().setProperty("auto-config", "true") .setProperty("default.directory_provider", "ram").index(Index.ALL).transaction().transactionMode(
+            .indexing().index(Index.NONE).transaction().transactionMode(
                 TransactionMode.NON_TRANSACTIONAL)
             .persistence().passivation(true)
                 //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
@@ -759,7 +759,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .clustering()
             .cacheMode(CacheMode.DIST_SYNC)
             .hash().numOwners(1)
-            .indexing().setProperty("auto-config", "true") .setProperty("default.directory_provider", "ram").index(Index.ALL).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
+            .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
             .persistence().passivation(true)
             .addStore(LevelDBStoreConfigurationBuilder.class)
             .location("/tmp/leadsprocessor-data/leveldb/data-" + uniquePath + "/")
@@ -777,9 +777,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
           .clustering()
           .cacheMode(CacheMode.DIST_SYNC)
           .hash().numOwners(1)
-          //.indexing().index(Index.NONE)
-          .indexing().setProperty("auto-config", "true") .setProperty("default.directory_provider", "ram").index(Index.ALL)
-          .transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility().enable()//.marshaller(new TupleMarshaller())
+          .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility().enable()//.marshaller(new TupleMarshaller())
           .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
           .build();
     }
@@ -790,7 +788,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       initDefaultCacheConfig();
     }
     defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).clustering()
-        .cacheMode(CacheMode.REPL_SYNC).l1().disable().indexing().index(Index.ALL).compatibility().enable()
+        .cacheMode(CacheMode.REPL_SYNC).l1().disable().indexing().index(Index.LOCAL).compatibility().enable()
         .build();
   }
 
@@ -833,7 +831,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
           .clustering()
           .cacheMode(CacheMode.DIST_SYNC)
           .hash().numOwners(1)
-          .indexing().setProperty("auto-config", "true") .setProperty("default.directory_provider", "ram").index(Index.ALL).transaction().transactionMode(TransactionMode
+          .indexing().setProperty("auto-config", "true") .setProperty("default.directory_provider", "ram").index(Index.LOCAL).transaction().transactionMode(TransactionMode
               .NON_TRANSACTIONAL)
           .persistence()
               //                            .addStore(LevelDBStoreConfigurationBuilder.class

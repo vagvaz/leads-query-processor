@@ -69,7 +69,7 @@ public class
       System.out.println("storing webpages");
       store("default.webpages",args[1]);
       System.out.println("storing entities");
-      store("default.entities",args[1]);
+      store("default.entities", args[1]);
       System.out.println("storing pagerankCache");
       storePagerank(args[1]);
       System.out.println("storing approx sum");
@@ -205,10 +205,19 @@ public class
 
    private static void loadDataWithRemote(String[] args) throws IOException, ClassNotFoundException {
       manager = createRemoteCacheManager(args[2],args[3]);
-      System.out.println("loading webpages");
-      loadCacheTo("default.webpages", args[1]);
-      System.out.println("loading entities");
-      loadCacheTo("default.entities", args[1]);
+      ArrayList<String> tables= new ArrayList<>();
+      tables.add("webpages");
+      tables.add("entities");
+
+      for( String t:tables) {
+         System.out.println("loading "+t);
+         try {
+            loadCacheTo("default."+t, args[1]);
+            System.out.println(t+" loaded");
+         } catch (FileNotFoundException e) {
+            System.out.println("Unable to load " + t);
+         }
+      }
 
       Map cache =  manager.getCache("approx_sum_cache");
       loadApproxSum(args[1], cache);

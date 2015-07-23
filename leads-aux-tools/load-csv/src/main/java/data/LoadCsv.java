@@ -327,7 +327,7 @@ public class LoadCsv {
         System.exit(0);
     }
 
-    private static void loadDataFromFile(File csvfile) {
+    private static void loadDataFromFile(File csvfile) throws IOException {
         String filename[] = csvfile.getAbsolutePath().split(".csv");
         //System.out.println("Filename" + csvfile.getAbsolutePath()+" "+filename[0]);
 
@@ -503,9 +503,10 @@ public class LoadCsv {
                         System.out.println("Cache put: " + numofEntries);
                     }
                     if (numofEntries % 1000 == 0) {
-                        System.out.println("Imported: " + numofEntries + ", Charbytes: " + numofChars + ", bytes: " + numofBytes + ", average: " + numofBytes/numofEntries);
-                        System.out.println("Imported: " + numofEntries+" -- size: "+sizeE);
+                        System.out.println("Imported: " + numofEntries + ", Charbytes: " + numofChars + ", bytes: " + numofBytes + ", average: " + numofBytes / numofEntries);
+                        System.out.println("Imported: " + numofEntries + " -- size: " + sizeE);
                         //cache.endBatch(true);
+                    }
                    if(numofEntries%300==0){
                                  return;
                     }
@@ -517,7 +518,6 @@ public class LoadCsv {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
-
             }
 
 
