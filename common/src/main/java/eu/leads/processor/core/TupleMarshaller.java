@@ -1,5 +1,8 @@
 package eu.leads.processor.core;
 
+import org.bson.BSONObject;
+import org.bson.BasicBSONDecoder;
+import org.bson.BasicBSONEncoder;
 import org.infinispan.commons.io.ByteBuffer;
 import org.infinispan.commons.io.ByteBufferImpl;
 import org.infinispan.commons.marshall.BufferSizePredictor;
@@ -21,7 +24,16 @@ public class TupleMarshaller implements Marshaller {
     public byte[] objectToByteBuffer(Object obj) throws IOException, InterruptedException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(obj);
+        if(obj instanceof Tuple){
+
+                Tuple t = (Tuple)obj;
+                BasicBSONEncoder encoder = new BasicBSONEncoder();
+                byte[] array = encoder.encode(t.asBsonObject());
+                oos.write(array);
+        }
+        else{
+            oos.writeObject(obj);
+        }
         return baos.toByteArray();
     }
 
@@ -30,7 +42,10 @@ public class TupleMarshaller implements Marshaller {
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(buf);
             ObjectInputStream ois = new ObjectInputStream(bais);
-            return ois.readObject();
+            BasicBSONDecoder decoder = new BasicBSONDecoder();
+            BSONObject data = decoder.readObject(buf);
+            Tuple result = new Tuple(data.toString());
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -40,7 +55,7 @@ public class TupleMarshaller implements Marshaller {
     @Override
     public Object objectFromByteBuffer(byte[] buf, int offset, int length) throws IOException, ClassNotFoundException {
         if (offset!=0||length!=buf.length) {
-            objectFromByteBuffer(Arrays.copyOfRange(buf, offset, length));
+            return objectFromByteBuffer(Arrays.copyOfRange(buf, offset, length));
         }
         return objectFromByteBuffer(buf);
     }

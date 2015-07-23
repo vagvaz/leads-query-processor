@@ -3,6 +3,7 @@ package eu.leads.processor.deployer;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.ConfigurationUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
@@ -44,6 +45,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
    private Map<String,Set<String>> pendingOperators;
    private Map<String,String> microclouds;
    private String localMicroCloud;
+   private JsonObject globalConfig;
 
 
    @Override
@@ -60,6 +62,10 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
       runningPlans = new HashMap<String, ExecutionPlanMonitor>();
       LQPConfiguration.initialize();
       LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component", "deployer");
+      globalConfig = config.getObject("global");
+      String publicIP = ConfigurationUtilities
+          .getPublicIPFromGlobal(LQPConfiguration.getInstance().getMicroClusterName(), globalConfig);
+      LQPConfiguration.getInstance().getConfiguration().setProperty(StringConstants.PUBLIC_IP,publicIP);
       localMicroCloud = LQPConfiguration.getInstance().getMicroClusterName();
       persistence = InfinispanClusterSingleton.getInstance().getManager();
       queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);

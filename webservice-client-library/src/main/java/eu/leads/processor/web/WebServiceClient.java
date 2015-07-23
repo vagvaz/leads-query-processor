@@ -51,7 +51,7 @@ public class WebServiceClient {
   public static boolean initialize(String uri) throws MalformedURLException {
     int lastIndex = uri.lastIndexOf(":");
     host = uri.substring(0,lastIndex);
-    port = uri.substring(lastIndex+1);
+    port = uri.substring(lastIndex + 1);
     address = new URL(host+":"+port);
     return true;
   }
@@ -140,6 +140,16 @@ public class WebServiceClient {
     os.close();
   }
 
+
+  public static ActionResult executeMapReduce(JsonObject newAction, String uri) throws IOException {
+    address = new URL(uri+"/rest/internal/executemr");
+    HttpURLConnection connection = (HttpURLConnection)address.openConnection();
+    connection = setUp(connection,"POST",MediaType.APPLICATION_JSON,true,true);
+    setBody(connection, newAction);
+    String response = getResult(connection);
+    ActionResult result = mapper.readValue(response,ActionResult.class);
+    return result;
+  }
   public static ActionResult executeMapReduce(JsonObject mrAction,String host, String port) throws IOException {
     address = new URL(host+":"+port+prefix+"internal/executemr");
     HttpURLConnection connection = (HttpURLConnection)address.openConnection();
@@ -150,8 +160,8 @@ public class WebServiceClient {
     return result;
   }
 
-  public static ActionResult completeMapReduce(JsonObject mrAction,String host, String port) throws IOException {
-    address = new URL(host+":"+port+prefix+"internal/completedmr");
+  public static ActionResult completeMapReduce(JsonObject mrAction, String uri) throws IOException {
+    address = new URL(uri+"/"+prefix+"internal/completedmr");
     HttpURLConnection connection = (HttpURLConnection)address.openConnection();
     connection = setUp(connection,"POST",MediaType.APPLICATION_JSON,true,true);
     setBody(connection,mrAction);
@@ -354,7 +364,7 @@ public class WebServiceClient {
     req.putString("pluginid",pluginId);
     req.putString("cachename",cacheName);
     req.putString("user",username);
-    req.putBinary("config",data);
+    req.putBinary("config", data);
 
 
     if(events == EventType.ALL)
@@ -629,4 +639,5 @@ public class WebServiceClient {
 
     return result;
   }
+
 }

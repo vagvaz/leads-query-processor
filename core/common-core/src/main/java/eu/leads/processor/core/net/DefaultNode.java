@@ -235,6 +235,7 @@ public class DefaultNode implements Node, Handler<Long> {
 
     @Override
     public void unsubscribe(final String groupId) {
+
         bus.unregisterHandler(groupId, comHandler, new Handler<AsyncResult<Void>>() {
             @Override
             public void handle(AsyncResult<Void> event) {

@@ -2,17 +2,22 @@ package eu.leads.processor.infinispan.operators;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
+import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import org.infinispan.Cache;
+import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.CloseableIterable;
+import org.infinispan.ensemble.EnsembleCacheManager;
 import org.vertx.java.core.json.JsonObject;
 
+import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Set;
 
 //import eu.leads.processor.plan.ExecutionPlanNode;
 //import eu.leads.processor.sql.PlanNode;
@@ -28,11 +33,13 @@ import java.util.concurrent.ConcurrentMap;
 @JsonAutoDetect
 public class LimitOperator extends BasicOperator {
     boolean sorted = false;
-    Cache inputMap=null;
-    ConcurrentMap data=null;
+//    Cache inputMap=null;
+    BasicCache data=null;
     public String prefix;
     public String inputPrefix;
     public long rowCount;
+    private EnsembleCacheManager emanager;
+
     public LimitOperator(Action action) {
       super(action);
    }
@@ -43,9 +50,12 @@ public class LimitOperator extends BasicOperator {
       rowCount = conf.getObject("body").getLong("fetchFirstNum");
       sorted = conf.getBoolean("isSorted");
       prefix =   getOutput() + ":";
-      inputMap = (Cache<String, String>) persistence.getPersisentCache(getInput());
-      data = persistence.getPersisentCache(getOutput());
-     inputPrefix = inputMap.getName()+":";
+      inputCache = (Cache) persistence.getPersisentCache(getInput());
+      emanager = new EnsembleCacheManager( computeEnsembleHost());
+     emanager.start();
+      data = emanager.getCache(getOutput());
+//      data = persistence.getPersisentCache(getOutput());
+     inputPrefix = inputCache.getName()+":";
    }
 
    @Override
@@ -57,47 +67,99 @@ public class LimitOperator extends BasicOperator {
 
     }
 
-    @Override
-    public void execute() {
-        long startTime = System.nanoTime();
-        int counter = 0;
-        if (sorted) {
-//            int sz = inputMap.size();
-//          CloseableIterable<Map.Entry<String, String>> iterable =
-//            inputMap.getAdvancedCache().filterEntries(new AcceptAllFilter());
-//          for (Map.Entry<String, String> entry : iterable) {
-//              System.err.println("e: " + entry.getKey().toString() + " ---> " + entry.getValue().toString());
-//            }
-            for (counter = 0; counter < rowCount ; counter++) {
-//                String tupleValue = (String) inputMap.get(inputPrefix + counter);
-                Tuple tupleValue = (Tuple) inputMap.get(inputPrefix + counter);
-                if(tupleValue == null)
-                   break;
-//                System.err.println("Read " + inputPrefix + counter + " --> " +tupleValue);
-                Tuple t = tupleValue;
-                handlePagerank(t);
-//                System.err.println(prefix+counter);
-                data.put(prefix + Integer.toString(counter), t);
-//                data.put(prefix + Integer.toString(counter), t.asString());
-            }
-        } else {
-          CloseableIterable<Map.Entry<String, Tuple>> iterable =
-            inputMap.getAdvancedCache().filterEntries(new AcceptAllFilter());
-          for (Map.Entry<String, Tuple> entry : iterable) {
-            if (counter >= rowCount)
-              break;
-            String tupleId = entry.getKey().substring(entry.getKey().indexOf(":") + 1);
-            Tuple t = entry.getValue();
-            handlePagerank(t);
-            data.put(prefix + tupleId, t);
-            counter++;
-          }
+  @Override
+  public void executeMap(){
 
+    subscribeToMapActions(pendingMMC);
+    if(!isRemote) {
+      for (String mc : pendingMMC) {
+        if (!mc.equals(currentCluster)) {
+          sendRemoteRequest(mc, true);
         }
-       cleanup();
+      }
+    }
+
+    if(pendingMMC.contains(currentCluster)){
+      int counter = 0;
+      if (sorted) {
+        //            int sz = inputMap.size();
+        //          CloseableIterable<Map.Entry<String, String>> iterable =
+        //            inputMap.getAdvancedCache().filterEntries(new AcceptAllFilter());
+        //          for (Map.Entry<String, String> entry : iterable) {
+        //              System.err.println("e: " + entry.getKey().toString() + " ---> " + entry.getValue().toString());
+        //            }
+        for (counter = 0; counter < rowCount ; counter++) {
+          //                String tupleValue = (String) inputMap.get(inputPrefix + counter);
+          Tuple tupleValue = (Tuple) inputCache.get(inputPrefix + counter);
+          if(tupleValue == null)
+            break;
+          //                System.err.println("Read " + inputPrefix + counter + " --> " +tupleValue);
+          Tuple t = tupleValue;
+          handlePagerank(t);
+          //                System.err.println(prefix+counter);
+          EnsembleCacheUtils.putToCache(data, prefix + Integer.toString(counter), t);
+          //                data.put(prefix + Integer.toString(counter), t.asString());
+        }
+      } else {
+        CloseableIterable<Map.Entry<String, Tuple>> iterable =
+            inputCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
+        for (Map.Entry<String, Tuple> entry : iterable) {
+          if (counter >= rowCount)
+            break;
+          String tupleId = entry.getKey().substring(entry.getKey().indexOf(":") + 1);
+          Tuple t = entry.getValue();
+          handlePagerank(t);
+          EnsembleCacheUtils.putToCache(data,prefix + tupleId, t);
+          counter++;
+        }
+
+      }
+      replyForSuccessfulExecution(action);
+    }
+
+    synchronized (mmcMutex){
+      while(pendingMMC.size() > 0)
+      {
+        System.out.println("Sleeping to executing " + this.getClass().toString() + " pending clusters ");
+        PrintUtilities.printList(Arrays.asList(pendingMMC));
+        try {
+          mmcMutex.wait(120000);
+        } catch (InterruptedException e) {
+          log.error("Interrupted " + e.getMessage());
+          break;
+        }
+      }
+    }
+    for(Map.Entry<String,String> entry : mcResults.entrySet()){
+      System.out.println("Execution on " + entry.getKey() + " was " + entry.getValue());
+      log.error("Execution on " + entry.getKey() + " was " + entry.getValue());
+      if(entry.getValue().equals("FAIL"))
+        failed =true;
+    }
+
+  }
+    @Override
+    public void run() {
+//      createCaches(isRemote,executeOnlyMap,executeOnlyReduce);
+      long startTime = System.nanoTime();
+      findPendingMMCFromGlobal();
+      findPendingRMCFromGlobal();
+      createCaches(isRemote, executeOnlyMap, executeOnlyReduce);
+      if(executeOnlyMap) {
+//        setupMapCallable();
+        executeMap();
+      }
+      if(!failed) {
+
+      }
+      else {
+        failCleanup();
+      }
+
         //Store Values for statistics
 //        updateStatistics(inputMap.size(), data.size(), System.nanoTime() - startTime);
-        updateStatistics(inputMap,null,(Cache)data);
+        updateStatistics(inputCache,null,data);
+      cleanup();
     }
 
     private void handlePagerank(Tuple t) {
@@ -120,10 +182,29 @@ public class LimitOperator extends BasicOperator {
         }
     }
 
-    @Override
-    public void cleanup() {
-      super.cleanup();
-    }
+
+   @Override
+   public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
+     Set<String> targetMC = getTargetMC();
+     for(String mc : targetMC){
+       createCache(mc,getOutput());
+     }
+   }
+
+   @Override
+   public void setupMapCallable() {
+
+   }
+
+   @Override
+   public void setupReduceCallable() {
+
+   }
+
+   @Override
+   public boolean isSingleStage() {
+      return true;
+   }
 }/*ExecutionPlanNode {
     private Limit limit;
 

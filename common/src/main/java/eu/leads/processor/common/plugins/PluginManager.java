@@ -13,12 +13,15 @@ import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.plugins.PluginInterface;
 import eu.leads.processor.plugins.SimplePluginRunner;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.hadoop.io.MD5Hash;
 import org.infinispan.Cache;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
+import org.infinispan.ensemble.EnsembleCacheManager;
+import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.remoting.transport.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,18 +41,18 @@ import java.util.concurrent.Future;
  * Created by vagvaz on 6/5/14.
  */
 public class PluginManager {
+  private static final String pluginPrefix = System.getProperty("java.io.tmpdir") + "/" + StringConstants
+          .TMPPREFIX + "/pluginstmp/";
   private static Logger log = LoggerFactory.getLogger(PluginManager.class);
   private static LeadsStorage storageLayer;
-  private static final String pluginPrefix = System.getProperty("java.io.tmpdir") +"/"+ StringConstants
-                                                                                     .TMPPREFIX + "/pluginstmp/";
 
-  public static boolean  initialize(String storageType, Properties configuration){
+
+  public static boolean initialize(String storageType, Properties configuration) {
     try {
       storageLayer = LeadsStorageFactory.getInitializedStorage(storageType, configuration);
-      File file = new File (pluginPrefix);
+      File file = new File(pluginPrefix);
       file.mkdirs();
-    }
-    catch(Exception e){
+    } catch (Exception e) {
       log.error(e.getMessage());
       return false;
 
@@ -57,23 +60,27 @@ public class PluginManager {
     return true;
   }
 
+  //WARNING Plugin are uploaded under "plugins" folder!!!!
   public static boolean uploadPlugin(PluginPackage plugin) {
     //        if(!plugin.getId().equals("eu.leads.processor.plugins.pagerank.PagerankPlugin") &&  !plugin.getId().equals("eu.leads.processor.plugins.sentiment")) {
     //Upload jar
     try {
       FileInputStream fileInputStream = new FileInputStream(plugin.getJarFilename());
-      byte[] chunk = new byte[1024*1024*20];
+      byte[] chunk = new byte[1024 * 1024 * 10];
       int chunkCounter = 0;
-      while(fileInputStream.available() > 0){
-        int count = fileInputStream.read(chunk);
+      storageLayer.delete("plugins/" + plugin.getId() + "/");
+      while (fileInputStream.available() > 0) {
+        int bytes_red = fileInputStream.read(chunk);
         byte[] uploadBytes = chunk;
-        if(count != chunk.length){
-          uploadBytes = Arrays.copyOf(chunk,count);
+        if (bytes_red != chunk.length) {
+          uploadBytes = Arrays.copyOf(chunk, bytes_red);
         }
-        if(!storageLayer.writeData("plugins/"+plugin.getId()+"/"+chunkCounter,uploadBytes))
-        {
+
+        if (!storageLayer.writeData("plugins/" + plugin.getId() + "/" + chunkCounter, uploadBytes)) {
           log.error("Could Not upload chunk data " + chunkCounter + " failed upload");
           return false;
+        } else {
+          log.info("Uploaded chunk " + chunkCounter + " size: " + bytes_red);
         }
         chunkCounter++;
       }
@@ -84,7 +91,7 @@ public class PluginManager {
       log.error(e.getMessage());
       return false;
     }
-    plugin.setJarFilename("plugins/"+plugin.getId());
+    plugin.setJarFilename("plugins/" + plugin.getId());
     if (!validatePlugin(plugin)) {
       log.error("Could validate Plugin " + plugin.getId() + " with class name " + plugin.getClassName());
       return false;
@@ -106,17 +113,38 @@ public class PluginManager {
   private static boolean validatePlugin(PluginPackage plugin) {
     //        if(plugin.getId().equals("eu.leads.processor.plugins.pagerank.PagerankPlugin")  ||  plugin.getId().equals("eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin"))
     //            return true;
-    if(!storageLayer.exists(plugin.getJarFilename())|| storageLayer.size(plugin.getJarFilename()) == 0){
+    String pluginFn = plugin.getJarFilename();
+    long plugin_size = storageLayer.size(pluginFn + "/");
+    boolean plugin_exists = storageLayer.exists(pluginFn);
+    if (!plugin_exists || plugin_size == 0) {
       //        if (plugin.getJar().length == 0) {
       log.error("Tried to upload plugin " + plugin.getId() + " without a valid jar file " + plugin.getJarFilename());
       return false;
     }
     //Donwload plugin to local file system in order to check initialization
-    String pluginTmpJar = downloadPlugin(plugin.getJarFilename());
+    String pluginTmpJar = downloadPlugin(pluginFn);
+    FileInputStream fileInputStream = null;
+    try {
+      fileInputStream = new FileInputStream(pluginTmpJar);
+      MD5Hash key = MD5Hash.digest(fileInputStream);
+      fileInputStream.close();
+      System.out.println("MD5 key : " + key);
+      if (!plugin.check_MD5(key)) {
+        System.out.println("Wrong file ");
+
+        log.info("Plugin downloaded corrupted?Or not initialized plugin package, MD5 check error");
+      }else{
+        System.out.println("Correct file ");
+      }
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
 
     if (!checkPluginNameFromFile(plugin.getClassName(), pluginTmpJar)) {
       log.error("Plugin " + plugin.getId() + " failed validation test. Class.getClassByName("
-                  + plugin.getClassName() + ")");
+              + plugin.getClassName() + ")");
       return false;
     }
     if (!checkInstantiate(plugin.getClassName(), pluginTmpJar, plugin.getConfig())) {
@@ -128,16 +156,16 @@ public class PluginManager {
   }
 
   private static String downloadPlugin(String jarFilename) {
-    String result = PluginManager.pluginPrefix+jarFilename+".jar";
-    storageLayer.download(jarFilename,result);
-    return result;
+    String destination_filename = PluginManager.pluginPrefix + jarFilename + ".jar";
+    storageLayer.download(jarFilename, destination_filename);
+    return destination_filename;
   }
 
   private static void upload(String pluginCache, PluginPackage plugin) {
 
     //Add plugin to cache
     Cache cache = (Cache) InfinispanClusterSingleton.getInstance().getManager()
-                            .getPersisentCache(pluginCache);
+            .getPersisentCache(pluginCache);
     //    if(!plugin.getId().equals("eu.leads.processor.plugins.pagerank.PagerankPlugin") &&  ! plugin.getId().equals("eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin")) {
     cache.put(plugin.getId(), plugin);
 
@@ -161,7 +189,7 @@ public class PluginManager {
     File file = new File(name);
     ClassLoader cl = null;
     try {
-      cl = new URLClassLoader(new URL[] {file.toURI().toURL()});
+      cl = new URLClassLoader(new URL[]{file.toURI().toURL()});
 
       Class<?> plugClass = null;
 
@@ -175,13 +203,14 @@ public class PluginManager {
     }
     return result;
   }
+
   private static boolean checkPluginNameFromFile(String className, String fileName) {
     boolean result = true;
 
     File file = new File(fileName);
     ClassLoader cl = null;
     try {
-      cl = new URLClassLoader(new URL[] {file.toURI().toURL()});
+      cl = new URLClassLoader(new URL[]{file.toURI().toURL()});
 
       Class<?> plugClass = null;
 
@@ -195,10 +224,11 @@ public class PluginManager {
     }
     return result;
   }
+
   private static boolean checkInstantiate(String className, String jarFileName, byte[] config) {
     boolean result = true;
     String name = jarFileName;
-    String configName = PluginManager.pluginPrefix +"/"+ className+"-conf.xml";
+    String configName = PluginManager.pluginPrefix + "/" + className + "-conf.xml";
     FileLockWrapper jarLock = new FileLockWrapper(name);
     FileLockWrapper confLock = new FileLockWrapper(configName);
     jarLock.lock();
@@ -208,7 +238,7 @@ public class PluginManager {
     File file = new File(name);
     ClassLoader cl = null;
     try {
-      cl = new URLClassLoader(new URL[] {file.toURI().toURL()},PluginManager.class.getClassLoader());
+      cl = new URLClassLoader(new URL[]{file.toURI().toURL()}, PluginManager.class.getClassLoader());
 
 
       Class<?> plugClass = null;
@@ -235,12 +265,13 @@ public class PluginManager {
     }
     return result;
   }
+
   private static boolean checkInstantiateFromFile(String className, String jarFileName, String
-                                                                                          configurationString) {
+          configurationString) {
     boolean result = true;
     //    String name = System.getProperty("java.io.tmpdir") + "/leads/processor/tmp/testplugin.jar";
     String configName =
-      System.getProperty("java.io.tmpdir") + StringConstants.TMPPREFIX+"/"+className+"-conf.xml";
+            System.getProperty("java.io.tmpdir") + StringConstants.TMPPREFIX + "/" + className + "-conf.xml";
     //    FileLockWrapper jarLock = new FileLockWrapper(name);
     //    FileLockWrapper confLock = new FileLockWrapper(configName);
     //    jarLock.lock();
@@ -250,7 +281,7 @@ public class PluginManager {
     File file = new File(jarFileName);
     ClassLoader cl = null;
     try {
-      cl = new URLClassLoader(new URL[] {file.toURI().toURL()});
+      cl = new URLClassLoader(new URL[]{file.toURI().toURL()});
 
 
       Class<?> plugClass = null;
@@ -274,11 +305,12 @@ public class PluginManager {
     }
     return result;
   }
-  public static boolean deployPlugin(String pluginId, String cacheName, EventType[] events,String user) {
+
+  public static boolean deployPlugin(String pluginId, String cacheName, EventType[] events, String user) {
     Cache configCache = (Cache) InfinispanClusterSingleton.getInstance().getManager()
-                                  .getPersisentCache(StringConstants.PLUGIN_ACTIVE_CACHE);
+            .getPersisentCache(StringConstants.PLUGIN_ACTIVE_CACHE);
     Cache pluginsCache = (Cache) InfinispanClusterSingleton.getInstance().getManager()
-                                   .getPersisentCache(StringConstants.PLUGIN_CACHE);
+            .getPersisentCache(StringConstants.PLUGIN_CACHE);
     boolean result = true;
     PluginPackage plugin = (PluginPackage) pluginsCache.get(pluginId);
     plugin.setUser(user);
@@ -289,7 +321,7 @@ public class PluginManager {
     }
     if (!validatePlugin(plugin)) {
       log.warn("Plugin " + plugin.getClassName()
-                 + " could not be validated so it could not be deployed");
+              + " could not be validated so it could not be deployed");
       result = false;
     }
     int eventmask = 0;
@@ -300,16 +332,16 @@ public class PluginManager {
         eventmask += e.getValue();
       }
     }
-    addPluginToCache(plugin, eventmask, configCache,cacheName);
-    deployPluginListener(plugin.getId(), cacheName,user,
-                          InfinispanClusterSingleton.getInstance().getManager());
+    addPluginToCache(plugin, eventmask, configCache, cacheName);
+    deployPluginListener(plugin.getId(), cacheName, user,
+            InfinispanClusterSingleton.getInstance().getManager());
 
     return result;
   }
 
-  public static void addPluginToCache(PluginPackage plugin, int eventmask, Cache configCache,String
-                                                                                                prefix) {
-    configCache.put(prefix+":"+plugin.getId()+plugin.getUser(),plugin);
+  public static void addPluginToCache(PluginPackage plugin, int eventmask, Cache configCache, String
+          prefix) {
+    configCache.put(prefix + ":" + plugin.getId() + plugin.getUser(), plugin);
     //    configCache.put(prefix+":"+plugin.getId() +user+ ":conf", plugin.getConfig());
     //    configCache.put(prefix+":"+plugin.getId() +user+ ":events", eventmask);
     //    configCache.put(prefix+":"+plugin.getId() +user+ ":className", plugin.getClassName());
@@ -325,8 +357,8 @@ public class PluginManager {
   }
 
 
-  public static PluginHandlerListener deployPluginListener(String pluginId, String cacheName,String user,
-                                            InfinispanManager manager, LeadsStorage storage) {
+  public static PluginHandlerListener deployPluginListener(String pluginId, String cacheName, String user,
+                                                           InfinispanManager manager, LeadsStorage storage) {
     Properties conf = new Properties();
     conf.put("target", cacheName);
     conf.put("config", StringConstants.PLUGIN_ACTIVE_CACHE);
@@ -369,14 +401,12 @@ public class PluginManager {
     //            return;
     //        }
     //
-    remoteCache.addClientListener(runner, new Object[] {configuration.toString()}, null);
+    remoteCache.addClientListener(runner, new Object[]{configuration.toString()}, null);
     return runner;
   }
 
-  public static PluginHandlerListener deployPluginListenerWithEvents(String pluginId, String cacheName,String
-                                                                                                     user,
-                                                            EventType[] events,
-                                                            InfinispanManager manager, LeadsStorage storage) {
+  public static PluginHandlerListener deployPluginListenerWithEvents(String pluginId, String cacheName, String
+          user, EventType[] events, InfinispanManager manager, LeadsStorage storage) {
     Properties conf = new Properties();
     conf.put("target", cacheName);
     conf.put("config", StringConstants.PLUGIN_ACTIVE_CACHE);
@@ -391,7 +421,7 @@ public class PluginManager {
     configuration.putArray("types", new JsonArray());
     configuration.putString("id", UUID.randomUUID().toString());
     configuration.putString("user", user);
-    for(EventType e : events){
+    for (EventType e : events) {
       configuration.getArray("types").add(e.toString());
     }
     configuration.putString("storageType", storage.getStorageType());
@@ -422,15 +452,79 @@ public class PluginManager {
     //            return;
     //        }
     //
-    remoteCache.addClientListener(runner, new Object[] {configuration.toString()}, new Object[0]);
+    remoteCache.addClientListener(runner, new Object[]{configuration.toString()}, new Object[0]);
     return runner;
   }
 
+  public static PluginHandlerListener deployPluginListenerWithEvents(String pluginId, String cacheName, String
+          user,
+                                                                     EventType[] events,
+                                                                     EnsembleCacheManager manager, LeadsStorage storage) {
+    Properties conf = new Properties();
+    conf.put("target", cacheName);
+    conf.put("config", StringConstants.PLUGIN_ACTIVE_CACHE);
+    conf.put("user", user);
+    ArrayList<String> alist = new ArrayList<String>();
+    alist.add(pluginId);
+    conf.put("pluginName", alist);
+    JsonObject configuration = new JsonObject();
+    configuration.putString("targetCache", cacheName);
+    configuration.putString("activePluginCache", StringConstants.PLUGIN_ACTIVE_CACHE);
+    configuration.putString("pluginName", pluginId);
+    configuration.putArray("types", new JsonArray());
+    configuration.putString("id", UUID.randomUUID().toString());
+    configuration.putString("user", user);
+    for (EventType e : events) {
+      configuration.getArray("types").add(e.toString());
+    }
+    configuration.putString("storageType", storage.getStorageType());
+    ByteArrayOutputStream storageConfigurationStream = new ByteArrayOutputStream();
+    try {
+      storage.getConfiguration().store(storageConfigurationStream, "");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    configuration.putBinary("storageConfiguration", storageConfigurationStream.toByteArray());
+    //        configuration.getArray("types").add(EventType.MODIFIED);
+    //    SimplePluginRunner listener = new SimplePluginRunner("TestSimplePluginDeployer", conf);
+    PluginHandlerListener runner = new PluginHandlerListener();
+    try {
+      EnsembleCache remoteTargetCache = manager.getCache(cacheName);
+      log.info("Using cache " + remoteTargetCache.getName() + " to deploy pluign");
+      if (remoteTargetCache == null) {
+        System.err.println("Cache " + cacheName + " not found!");
+        log.error("Target Cache was not found " + cacheName + " not deploying plugin");
+        return null;
+      }
+      remoteTargetCache.addClientListener(runner, new Object[]{configuration.toString()}, new Object[0]);
+      //    manager.addListener(listener, cacheName);
+//        RemoteCacheManager remoteCacheManager = createRemoteCacheManager();
+//      RemoteCache<Object, Object> remoteCache = remoteCacheManager.getCache(cacheName);
 
+      //
+//      System.out.println("Using cache " + cacheName);
+      //
+//      if (remoteCache == null) {
+//        System.err.println("Cache " + cacheName + " not found!");
+//        log.error("Target Cache was not found " + cacheName + " not deploying plugin");
+//        return null;
+//        System.exit(1);
+//      }
+      //        if (remoteCache == null) {
+      //            System.err.println("Cache " + cacheName + " not found!");
+      //            return;
+      //        }
+      //
+//      remoteCache.addClientListener(runner, new Object[] {configuration.toString()}, new Object[0]);
+    } catch (Exception e) {
+      log.error("Trying to add listener to ensemble cache problem");
+      e.printStackTrace();
+    }
+    return runner;
+  }
 
-
-  private static void deployPluginListener(String pluginId, String cacheName,String user,
-                                            InfinispanManager manager) {
+  private static void deployPluginListener(String pluginId, String cacheName, String user,
+                                           InfinispanManager manager) {
 //    Properties conf = new Properties();
 //    conf.put("target", cacheName);
 //    conf.put("config", StringConstants.PLUGIN_ACTIVE_CACHE);
@@ -439,21 +533,21 @@ public class PluginManager {
     alist.add(pluginId);
 //    conf.put("pluginName", alist);
     JsonObject configuration = new JsonObject();
-    configuration.putString("targetCache",cacheName);
-    configuration.putString("activePluginCache",StringConstants.PLUGIN_ACTIVE_CACHE);
+    configuration.putString("targetCache", cacheName);
+    configuration.putString("activePluginCache", StringConstants.PLUGIN_ACTIVE_CACHE);
     configuration.putString("pluginName", pluginId);
     configuration.putArray("types", new JsonArray());
     configuration.putString("id", UUID.randomUUID().toString());
-    configuration.putString("user",user);
+    configuration.putString("user", user);
     configuration.getArray("types").add(EventType.CREATED.toString());
-    configuration.putString("storageType",storageLayer.getStorageType());
+    configuration.putString("storageType", storageLayer.getStorageType());
     ByteArrayOutputStream storageConfigurationStream = new ByteArrayOutputStream();
     try {
-      storageLayer.getConfiguration().store(storageConfigurationStream,"");
+      storageLayer.getConfiguration().store(storageConfigurationStream, "");
     } catch (Exception e) {
       e.printStackTrace();
     }
-    configuration.putBinary("storageConfiguration",storageConfigurationStream.toByteArray());
+    configuration.putBinary("storageConfiguration", storageConfigurationStream.toByteArray());
     //        configuration.getArray("types").add(EventType.MODIFIED);
     //    SimplePluginRunner listener = new SimplePluginRunner("TestSimplePluginDeployer", conf);
     PluginHandlerListener runner = new PluginHandlerListener();
@@ -484,11 +578,11 @@ public class PluginManager {
 
 
   public static boolean deployPlugin(String pluginId, XMLConfiguration config, String cacheName,
-                                      EventType[] events,String user) {
+                                     EventType[] events, String user) {
     Cache configCache = (Cache) InfinispanClusterSingleton.getInstance().getManager()
-                                  .getPersisentCache(StringConstants.PLUGIN_ACTIVE_CACHE);
+            .getPersisentCache(StringConstants.PLUGIN_ACTIVE_CACHE);
     Cache pluginsCache = (Cache) InfinispanClusterSingleton.getInstance().getManager()
-                                   .getPersisentCache(StringConstants.PLUGIN_CACHE);
+            .getPersisentCache(StringConstants.PLUGIN_CACHE);
     boolean result = true;
     PluginPackage plugin = (PluginPackage) pluginsCache.get(pluginId);
     plugin.setUser(user);
@@ -498,17 +592,17 @@ public class PluginManager {
     }
 
     //Set configuration for the plugin to deploy
-      plugin.setConfig(FSUtilities.getBytesFromConfiguration(config));
+    plugin.setConfig(FSUtilities.getBytesFromConfiguration(config));
     if (!validatePlugin(plugin)) {
       log.warn("Plugin " + plugin.getClassName()
-                 + " could not be validated so it could not be deployed");
+              + " could not be validated so it could not be deployed");
       result = false;
     }
 
     int eventmask = computeEventMask(events);
-    addPluginToCache(plugin, eventmask, configCache,configCache.getName());
-    deployPluginListener(plugin.getId(), cacheName,user,
-                          InfinispanClusterSingleton.getInstance().getManager());
+    addPluginToCache(plugin, eventmask, configCache, configCache.getName());
+    deployPluginListener(plugin.getId(), cacheName, user,
+            InfinispanClusterSingleton.getInstance().getManager());
 
     return true;
   }
@@ -555,8 +649,8 @@ public class PluginManager {
   }
 
   public static void deployLocalPlugin(PluginInterface plugin, XMLConfiguration config,
-                                        String cacheName, EventType[] events,
-                                        InfinispanManager manager) {
+                                       String cacheName, EventType[] events,
+                                       InfinispanManager manager) {
     Properties conf = new Properties();
     conf.put("target", cacheName);
     conf.put("config", StringConstants.PLUGIN_ACTIVE_CACHE);

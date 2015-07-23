@@ -89,6 +89,8 @@ public class SortMerger {
 //        if(tmp == null || tmp.equals(""))
 //           return null;
 //        return new Tuple(tmp);
+      System.err.println("Trying reading from " +cacheNames.elementAt(cacheIndex) + " key " + key +
+                           counter.toString() );
       Tuple tmp = caches.get(cacheIndex).get(key  + counter.toString());
         if(tmp == null)
            return null;
@@ -99,6 +101,8 @@ public class SortMerger {
         String key = keys.get(cacheIndex);
         Integer counter = counters.get(cacheIndex);
         counter = counter + 1;
+        System.err.println("Trying reading from " +cacheNames.elementAt(cacheIndex) + " key " + key +
+                             counter.toString() );
        Tuple tmp = caches.get(cacheIndex).get(key +  counter.toString());
 //       String tmp = caches.get(cacheIndex).get(key +  counter.toString());
         if (tmp == null) {

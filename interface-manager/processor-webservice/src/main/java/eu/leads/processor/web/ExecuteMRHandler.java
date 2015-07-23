@@ -43,6 +43,7 @@ public class ExecuteMRHandler implements Handler<HttpServerRequest> {
       request.response().setStatusCode(200);
       request.response().putHeader(WebStrings.CONTENT_TYPE, WebStrings.APP_JSON);
       log.info("Execute MR Handler");
+      System.err.println(("Execute MR Handler"));
       String reqId = UUID.randomUUID().toString();
       ExecuteMRHandlerReplyHandler replyHandler = new ExecuteMRHandlerReplyHandler(reqId, request);
       ExecuteMRHandlerBodyHandler bodyHanlder = new ExecuteMRHandlerBodyHandler(reqId, replyHandler);

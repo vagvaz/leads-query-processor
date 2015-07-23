@@ -3,6 +3,8 @@ package eu.leads.processor.planner;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ServiceException;
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
+import eu.leads.processor.conf.ConfigurationUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import leads.tajo.catalog.LeadsCatalog;
 import org.apache.hadoop.fs.Path;
@@ -30,12 +32,18 @@ import java.util.Set;
 public class PlannerCatalogWorker extends Verticle {
   LeadsCatalog catalogServer = null;
   TajoConf conf = new TajoConf();
-
+  JsonObject globalConfig;
   @Override
   public void start() {
     super.start();
     LQPConfiguration.initialize();
-    LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component", "catalog-worker");
+    LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component",
+        "catalog-worker");
+    globalConfig = container.config().getObject("global");
+    globalConfig = container.config().getObject("global");
+    String publicIP = ConfigurationUtilities
+        .getPublicIPFromGlobal(LQPConfiguration.getInstance().getMicroClusterName(), globalConfig);
+    LQPConfiguration.getInstance().getConfiguration().setProperty(StringConstants.PUBLIC_IP,publicIP);
     //Read configuration
     JsonObject config = container.config();
     TajoConf conf = new TajoConf();
@@ -136,6 +144,9 @@ public class PlannerCatalogWorker extends Verticle {
 
       System.out.println(catalog.getFunctions().size() + " functions loaded.");
 
+
+
+
     Schema webPagesSchema = new Schema();
     webPagesSchema.addColumn("url",Type.TEXT);
     webPagesSchema.addColumn("domainname",Type.TEXT);
@@ -170,7 +181,15 @@ public class PlannerCatalogWorker extends Verticle {
     TableDesc webpages = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"webpages"), webPagesSchema, meta, getTestDir("webpages").toUri());
     catalog.createTable(webpages);
 
-      String databaseName = "default";
+    Schema testwebPagesSchema = new Schema();
+    testwebPagesSchema.addColumn("url",Type.TEXT);
+    testwebPagesSchema.addColumn("domainname",Type.TEXT);
+    testwebPagesSchema.addColumn("responsecode",Type.INT4);
+    TableDesc TESTwebpages = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"testpages"), testwebPagesSchema, meta, getTestDir("testpages").toUri());
+    catalog.createTable(TESTwebpages);
+
+
+      String databaseName = StringConstants.DEFAULT_DATABASE_NAME;
       String tableName = "defaultname";
     //New schema
 

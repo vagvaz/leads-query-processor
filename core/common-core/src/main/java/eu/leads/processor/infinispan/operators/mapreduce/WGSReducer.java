@@ -1,16 +1,15 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
 
-import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.infinispan.LeadsReducer;
 import org.infinispan.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
-import sun.rmi.runtime.Log;
 
 import java.util.Iterator;
 
@@ -34,7 +33,7 @@ public class WGSReducer extends LeadsReducer<String, String> {
       imanager = InfinispanClusterSingleton.getInstance().getManager();
       depth = conf.getInteger("depth");
       iteration = conf.getInteger("iteration");
-      outputCache = (Cache<String, String>) imanager.getPersisentCache(conf.getString("realOutput"));
+//      outputCache = (Cache<String, String>) imanager.getPersisentCache(conf.getString("realOutput"));
       log = LoggerFactory.getLogger(WGSReducer.class);
    }
    @Override
@@ -44,6 +43,7 @@ public class WGSReducer extends LeadsReducer<String, String> {
       progress();
       JsonArray resultArray = new JsonArray();
       log.error("KEY WGSReducer "  +reducedKey);
+     System.err.println(("KEY WGSReducer "  +reducedKey));
       while(iter.hasNext())
       {
 
@@ -53,10 +53,10 @@ public class WGSReducer extends LeadsReducer<String, String> {
 
       JsonObject result = new JsonObject();
 
-      result.putArray("result",resultArray);
-
-//         collector.emit(Integer.toString(iteration),result.toString());
-         outputCache.put(Integer.toString(iteration),result.toString());
+     result.putArray("result",resultArray);
+//      collector.emit(Integer.toString(iteration),result.toString());
+         collector.emit(Integer.toString(iteration),result.toString());
+//         outputCache.put(Integer.toString(iteration),result.toString());
 //      System.err.println(Integer.toString(iteration) + " ------------------------- cache mememres ------------------------ ");
 //       PrintUtilities.printList(outputCache.getAdvancedCache().getRpcManager().getMembers());
 //

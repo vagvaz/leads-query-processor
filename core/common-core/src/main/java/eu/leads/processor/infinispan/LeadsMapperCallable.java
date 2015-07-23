@@ -45,7 +45,7 @@ public class LeadsMapperCallable<K, V, kOut, vOut> extends LeadsBaseCallable<K,V
     collector.setManager(this.embeddedCacheManager);
     collector.setEmanager(emanager);
     collector.setSite(site);
-    collector.initializeCache(imanager);
+    collector.initializeCache(inputCache.getName(),imanager);
   }
 
 //	public String call() throws Exception {
@@ -74,13 +74,9 @@ public class LeadsMapperCallable<K, V, kOut, vOut> extends LeadsBaseCallable<K,V
     mapper.map(key,value,collector);
   }
 
-  @Override public void finalizeCallable() {
-
+  @Override public void finalize() {
+    super.finalizeCallable();
     mapper.finalizeTask();
     collector.getCounterCache().stop();
-//    collector.getIndexSiteCache().stop();
-//    collector.getIntermediateDataCache().stop();
-//    collector.getKeysCache().stop();
-    super.finalizeCallable();
   }
 }

@@ -12,7 +12,6 @@ import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
-import eu.leads.processor.deployer.DeployerConstants;
 import eu.leads.processor.nqe.NQEConstants;
 import eu.leads.processor.planner.QueryPlannerConstants;
 import org.vertx.java.core.json.JsonArray;
@@ -295,8 +294,8 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             JsonObject webServiceReply = action.getResult().getObject("status");
             com.sendTo(action.getData().getString("replyTo"),webServiceReply);
             newAction = createNewAction(action);
-            newAction.setLabel(DeployerConstants.DEPLOY_SINGLE_MR);
-            newAction.setDestination((StringConstants.DEPLOYERQUEUE));
+            newAction.setLabel(NQEConstants.DEPLOY_REMOTE_OPERATOR);
+            newAction.setDestination((StringConstants.NODEEXECUTORQUEUE));
             newAction.setData(action.getResult().getObject("result"));
             com.sendTo(newAction.getDestination(),newAction.asJsonObject());
 
@@ -305,8 +304,8 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             JsonObject webServiceReply = action.getResult().getObject("status");
             com.sendTo(action.getData().getString("replyTo"),webServiceReply);
             newAction = createNewAction(action);
-            newAction.setLabel(DeployerConstants.COMPLETED_SINGLE_MR);
-            newAction.setDestination(action.getResult().getString("deployerID"));
+            newAction.setLabel(NQEConstants.OPERATOR_COMPLETE);
+            newAction.setDestination(action.getResult().getString("replyGroup"));
             newAction.setData(action.getResult().getObject("result"));
             newAction.setStatus(ActionStatus.COMPLETED.toString());
             com.sendTo(newAction.getDestination(),newAction.asJsonObject());

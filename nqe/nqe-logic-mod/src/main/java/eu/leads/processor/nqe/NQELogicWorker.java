@@ -1,5 +1,6 @@
 package eu.leads.processor.nqe;
 
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
@@ -28,10 +29,11 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
     Node com;
     String id;
     String workQueueAddress;
-
+    String currentCluster;
     @Override
     public void start() {
         super.start();
+        LQPConfiguration.initialize();
         config = container.config();
         monitor = config.getString("monitor");
         nqeGroup = config.getString("nqe");
@@ -72,8 +74,13 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
                         com.sendWithEventBus(workQueueAddress, action.asJsonObject());
                     }else if( (label.equals(NQEConstants.DEPLOY_PLUGIN)) || (label.equals(NQEConstants.UNDEPLOY_PLUGIN))){
                       action.setStatus(ActionStatus.INPROCESS.toString());
+                      com.sendWithEventBus(workQueueAddress, action.asJsonObject());
+                    }else if(label.equals(NQEConstants.DEPLOY_REMOTE_OPERATOR)){
+                      System.err.println("RECEVEIVED REMOTE DEPLOY!!!!!!!!!!");
+                      action.setStatus(ActionStatus.INPROCESS.toString());
                       com.sendWithEventBus(workQueueAddress,action.asJsonObject());
                     }
+
                     else {
                         log.error("Unknown PENDING Action received " + action.toString());
                         return;
@@ -92,6 +99,11 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
                     }else if( (label.equals(NQEConstants.DEPLOY_PLUGIN)) || (label.equals(NQEConstants.UNDEPLOY_PLUGIN))){
 //                      action.setStatus(ActionStatus.INPROCESS.toString());
 //                      com.sendWithEventBus((workQueueAddress,action.asJsonObject());
+                    }else if(label.equals(NQEConstants.DEPLOY_REMOTE_OPERATOR)){
+                      newAction = new Action(action);
+                      newAction.setData(action.getData());
+                      newAction.getData().putString("microcloud", currentCluster);
+                      newAction.getData().putString("STATUS","SUCCESS");
                     }
 
                     else {

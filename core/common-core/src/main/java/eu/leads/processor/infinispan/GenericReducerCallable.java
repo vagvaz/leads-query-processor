@@ -49,7 +49,7 @@ public class GenericReducerCallable<K, V> extends LeadsBaseCallable<K,Object > {
     storageLayer.download(reducerJar,localMapJarPath);
     reducer = initializeReducer(localMapJarPath, reducerClassName, reducerConfig);
     //initialize cllector
-    collector.initializeCache(imanager);
+    collector.initializeCache(inputCache.getName(),imanager);
     //    collector.setCombiner(combiner);
   }
 

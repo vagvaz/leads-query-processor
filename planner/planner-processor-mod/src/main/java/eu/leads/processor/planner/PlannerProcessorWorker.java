@@ -1,7 +1,9 @@
 package eu.leads.processor.planner;
 
+import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.ConfigurationUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
@@ -41,7 +43,7 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
     InfinispanManager persistence;
     Map<String, ActionHandler> handlers;
     TaJoModule module;
-
+    JsonObject globalConfig;
     @Override
     public void start() {
         super.start();
@@ -73,10 +75,16 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
         com.initialize(id, gr, null, leadsHandler, leadsHandler, vertx);
         bus.registerHandler(id + ".process", this);
        LQPConfiguration.initialize();
-       LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component", "planner");
+       LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component",
+           "planner");
+      globalConfig = config.getObject("global");
+      String publicIP = ConfigurationUtilities
+          .getPublicIPFromGlobal(LQPConfiguration.getInstance().getMicroClusterName(), globalConfig);
+      LQPConfiguration.getInstance().getConfiguration().setProperty(StringConstants.PUBLIC_IP,publicIP);
         persistence = InfinispanClusterSingleton.getInstance().getManager();
-       schedHost = config.getString("schedulerHost");
-       schedPort = config.getString("schedulerPort");
+       String schedulerUri = config.getObject("global").getString("scheduler");
+       schedHost = schedulerUri.substring(0,schedulerUri.lastIndexOf(":"));
+       schedPort = schedulerUri.substring(schedulerUri.lastIndexOf(":")+1);
 
         JsonObject msg = new JsonObject();
         msg.putString("processor", id + ".process");
@@ -86,7 +94,8 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
         handlers.put(QueryPlannerConstants.PROCESS_WORKFLOW_QUERY,
                         new ProcessWorkflowQueryActionHandler(com, log, persistence, id, module,schedHost,schedPort));
         handlers.put(QueryPlannerConstants.PROCESS_SPECIAL_QUERY,
-                        new ProcessSpecialQueryActionHandler(com, log, persistence, id, module));
+                        new ProcessSpecialQueryActionHandler(com, log, persistence, id, module,schedHost,
+                                                              schedPort,config.getObject("global")));
         log = new LogProxy(config.getString("log"), com);
         bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {
             @Override

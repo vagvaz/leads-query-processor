@@ -64,6 +64,7 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
                 JsonObject object = new JsonObject();
                 request.response().setStatusCode(400);
                 request.response().putHeader(WebStrings.CONTENT_TYPE, WebStrings.APP_JSON);
+                System.out.println("Could not match " +request.uri());
                 object.putString("status", "failed");
                 object.putString("message", "Invalid requst path");
                 request.response().end(object.toString());
@@ -77,7 +78,13 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         matcher.post("/rest/data/upload",uploadDataHandler);
         matcher.post("/rest/data/submit/plugin",submitPluginHandler);
         matcher.post("/rest/internal/executemr",executeMRHandler);
+        matcher.post("//rest/internal/executemr",executeMRHandler);
+        matcher.post("//rest/internal/executemr/",executeMRHandler);
+        matcher.post("/rest/internal/executemr/",executeMRHandler);
         matcher.post("/rest/internal/completedmr",completedMRHandler);
+        matcher.post("//rest/internal/completedmr",completedMRHandler);
+        matcher.post("//rest/internal/completedmr/",completedMRHandler);
+        matcher.post("/rest/internal/completedmr/",completedMRHandler);
         //
         //      //query   [a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+
         matcher.get("/rest/query/status/:id", getQueryStatusHandler);

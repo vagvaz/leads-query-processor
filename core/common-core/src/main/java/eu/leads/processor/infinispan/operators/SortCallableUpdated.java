@@ -1,8 +1,11 @@
 package eu.leads.processor.infinispan.operators;
 
+import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.TupleComparator;
 import eu.leads.processor.infinispan.LeadsBaseCallable;
+import org.infinispan.commons.api.BasicCache;
 import org.infinispan.context.Flag;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 
@@ -24,23 +27,28 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
   private String output;
   transient String address;
   private String prefix;
+  private String addressesCacheName;
+  private transient BasicCache addressesCache;
 
-//  public SortCallableUpdated(String configString, String output){
-    public SortCallableUpdated(String[] sortColumns, Boolean[] ascending, String[] types, String output,
-                                String prefix){
-      super("{}", output);
-      this.sortColumns = sortColumns;
-      this.asceding = ascending;
-      this.types = types;
-      this.output = output;
-      this.prefix = prefix;
+  //  public SortCallableUpdated(String configString, String output){
+  public SortCallableUpdated(String[] sortColumns, Boolean[] ascending, String[] types, String output,
+                             String prefix){
+    super("{}", output);
+    this.sortColumns = sortColumns;
+    this.asceding = ascending;
+    this.types = types;
+    this.output = output;
+    this.prefix = prefix;
+    this.addressesCacheName = output.substring(0,output.lastIndexOf("."))+".addresses";
   }
 
   @Override public void initialize() {
     super.initialize();
     address = inputCache.getCacheManager().getAddress().toString();
 //    outputCache = (Cache) imanager.getPersisentCache(prefix+"."+address);
-    outputCache = emanager.getCache(prefix+"."+address);
+    outputCache = emanager.getCache(prefix+"."+LQPConfiguration.getInstance().getMicroClusterName()
+                                                 +"."+imanager.getMemberName());
+    addressesCache = emanager.getCache(addressesCacheName);
     tuples = new ArrayList<>(100);
   }
 
@@ -49,7 +57,7 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
       initialize();
     }
     final ClusteringDependentLogic cdl = inputCache.getAdvancedCache().getComponentRegistry().getComponent
-                                                                                                (ClusteringDependentLogic.class);
+                                                                                                      (ClusteringDependentLogic.class);
     for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
       if (!cdl.localNodeIsPrimaryOwner(key))
         continue;
@@ -82,11 +90,17 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
     int counter = 0;
     String prefix = outputCache.getName();
     for (Tuple t : tuples) {
-      outputToCache(prefix  + counter, t);
+      System.out.println("output to " + outputCache.getName() + "   key " + prefix + counter);
+      EnsembleCacheUtils.putToCache(outputCache,prefix + counter, t);
 
 //      outputCache.put(outputCache.getName()  + counter, t);
       counter++;
     }
+//    addressesCache.put(prefix+"."+LQPConfiguration.getInstance().getMicroClusterName()
+//                         +"."+imanager.getMemberName(),
+//                        prefix+"."+LQPConfiguration.getInstance().getMicroClusterName()
+//                          +"."+imanager.getMemberName());
+    EnsembleCacheUtils.putToCache(addressesCache,outputCache.getName(),outputCache.getName());
     tuples.clear();
     super.finalizeCallable();
   }

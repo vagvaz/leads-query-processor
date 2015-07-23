@@ -30,4 +30,5 @@ public class NQEConstants {
 
    public static final String OPERATOR_GET_OWNER = "getOwner";
    public static final String OPERATOR_GET_RUNNING_STATUS = "getOperatorStatus";
+   public static final String DEPLOY_REMOTE_OPERATOR = "remoteOperator";
 }

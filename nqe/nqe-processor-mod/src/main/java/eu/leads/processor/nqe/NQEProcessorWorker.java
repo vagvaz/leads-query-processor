@@ -1,7 +1,9 @@
 package eu.leads.processor.nqe;
 
+import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.ConfigurationUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
@@ -9,13 +11,16 @@ import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.nqe.handlers.DeployRemoteOpActionHandler;
 import eu.leads.processor.nqe.handlers.OperatorActionHandler;
+import eu.leads.processor.web.WebServiceClient;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +43,8 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
    InfinispanManager persistence;
    Map<String,ActionHandler> handlers;
    Map<String,Action> activeActions;
+   String currentCluster;
+   JsonObject globalConfig;
    @Override
    public void start() {
       super.start();
@@ -59,6 +66,25 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
                        log.info("Operator: " + action.getData().getString("operatorType") + " is completed");
                        com.sendTo(action.getData().getString("monitor"),action.asJsonObject());
                        activeActions.remove(action.getId());
+                     }
+                     else if (action.getLabel().equals(NQEConstants.DEPLOY_REMOTE_OPERATOR)){
+                       Action replyAction = new Action(action.getData());
+                       String coordinator = action.asJsonObject().getString("coordinator");
+                       replyAction.getData().putString("microcloud",currentCluster); //reduncdany to speed
+                       // up debuggin
+//                       replyAction.getData().putString("microcloud",currentCluster);
+                       replyAction.getData().putString("STATUS","SUCCESS");
+                       replyAction.getData().putString("replyGroup",action.asJsonObject().getString("replyGroup"));
+
+                       String webaddress = getURIFromGlobal(coordinator);
+                       try {
+                         WebServiceClient.completeMapReduce(replyAction.asJsonObject(),webaddress);
+                       } catch (IOException e) {
+                         e.printStackTrace();
+                       }
+//                       System.err.println("Remote DEPLOY of " + action.getData().getObject("operator").getObject
+//                                                                                                         ("configuration").toString() + " was successful");
+                       log.error("Remote DEPLOY of " + action.getId() + " was successful");
                      }
                      else{
                         log.error("COMPLETED Action " + action.toString() + "Received by NQEProcessor but cannot be handled" );
@@ -90,6 +116,19 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
                         com.sendTo(logic,action.asJsonObject());
                         activeActions.remove(action.getId());
                      }
+                     else if (action.getLabel().equals(NQEConstants.DEPLOY_REMOTE_OPERATOR)){
+                       Action replyAction = new Action(action.getData());
+                       String coordinator = action.getData().getString("coordinator");
+                       replyAction.getData().putString("microcloud",currentCluster);
+                       replyAction.getData().putString("STATUS","FAIL");
+                       String webaddress = getURIFromGlobal(coordinator);
+                       try {
+                         WebServiceClient.completeMapReduce(replyAction.asJsonObject(),webaddress);
+                       } catch (IOException e) {
+                         e.printStackTrace();
+                       }
+                       log.error("Remote DEPLOY of " + action.getId() + " failed");
+                     }
                      else{
                         log.error("FAILED Action " + action.toString() + "Received by NQEProcessor but cannot be handled" );
                      }
@@ -104,6 +143,8 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
       };
       bus = vertx.eventBus();
       config = container.config();
+      globalConfig = config.getObject("global");
+
       id = config.getString("id");
       gr = config.getString("group");
       logic = config.getString("logic");
@@ -113,16 +154,22 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
       bus.registerHandler(id + ".process", this);
       LQPConfiguration.initialize();
       LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component", "nqe");
+
+     String publicIP = ConfigurationUtilities
+         .getPublicIPFromGlobal(LQPConfiguration.getInstance().getMicroClusterName(), globalConfig);
+     LQPConfiguration.getInstance().getConfiguration().setProperty(StringConstants.PUBLIC_IP,publicIP);
+      currentCluster = LQPConfiguration.getInstance().getMicroClusterName();
       persistence = InfinispanClusterSingleton.getInstance().getManager();
-      JsonObject msg = new JsonObject();
+     JsonObject msg = new JsonObject();
       msg.putString("processor", id + ".process");
        log = new LogProxy(config.getString("log"),com);
        handlers = new HashMap<String,ActionHandler>();
+     ActionHandler pluginHandler = new DeployPluginActionHandler(com, log, persistence, id, globalConfig);
       handlers.put(NQEConstants.DEPLOY_OPERATOR,new OperatorActionHandler(com,log,persistence,id));
-      handlers.put(NQEConstants.DEPLOY_PLUGIN,new DeployPluginActionHandler(com,log,persistence,id));
-      handlers.put(NQEConstants.UNDEPLOY_PLUGIN,new DeployPluginActionHandler(com,log,persistence,id));
-
-
+      handlers.put(NQEConstants.DEPLOY_PLUGIN,pluginHandler );
+      handlers.put(NQEConstants.UNDEPLOY_PLUGIN,pluginHandler);
+      handlers.put(NQEConstants.DEPLOY_REMOTE_OPERATOR, new DeployRemoteOpActionHandler(com,log,persistence,id,globalConfig));
+//
       bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {
          @Override
          public void handle(Message<JsonObject> event) {
@@ -133,13 +180,41 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
      log.info(id +" started ....");
    }
 
-   @Override
+  private String getURIFromGlobal(String coordinator) {
+    System.err.println("IN NQE getting URI from global for " + coordinator + " while " + globalConfig
+                                                                                           .getObject
+                                                                                              ("microclouds`"));
+    String uri = globalConfig.getObject("microclouds").getArray(coordinator).get(0);
+
+
+    if (!uri.startsWith("http:")) {
+      uri ="http://" + uri;
+    }
+    try {
+      String portString = uri.substring(uri.lastIndexOf(":")+1);
+      int port = Integer.parseInt(portString);
+    }catch (Exception e){
+      log.error("Parsing port execption " + e.getMessage());
+      System.err.println("Parsing port execption " + e.getMessage());
+      if(uri.endsWith(":")){
+        uri = uri +"8080";
+      }
+      else{
+        uri = uri+":8080";
+      }
+
+    }
+    return uri;
+  }
+
+  @Override
    public void handle(Message<JsonObject> message) {
       try {
          JsonObject body = message.body();
          if (body.containsField("type")) {
             if (body.getString("type").equals("action")) {
                Action action = new Action(body);
+              action.setGlobalConf(globalConfig);
                ActionHandler ac = handlers.get(action.getLabel());
                Action result = ac.process(action);
 //               result.setStatus(ActionStatus.COMPLETED.toString());

@@ -2,12 +2,14 @@ package eu.leads.processor.plugins;
 
 import eu.leads.processor.core.Tuple;
 import org.apache.avro.generic.GenericData;
-//import org.apache.nutch.storage.WebPage;
-import org.bson.BasicBSONObject;
 
 import java.nio.ByteBuffer;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+//import org.apache.nutch.storage.WebPage;
 
 /**
  * Created by vagvaz on 4/11/15.

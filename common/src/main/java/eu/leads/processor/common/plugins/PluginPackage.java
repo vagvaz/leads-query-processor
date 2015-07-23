@@ -2,8 +2,12 @@ package eu.leads.processor.common.plugins;
 
 import com.google.common.base.Strings;
 import eu.leads.processor.common.utils.FSUtilities;
+import org.apache.hadoop.io.MD5Hash;
 import org.vertx.java.core.json.JsonObject;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -17,22 +21,40 @@ public class PluginPackage extends JsonObject implements Serializable {
   private String jarFilename;
   private String configFileName;
   private String user;
+  private String key=null;
 
+  public boolean check_MD5(MD5Hash key){
+      if(key!=null && this.key!=null)
+        return this.key.equals(key.toString());
+      else
+          return false;
+  }
 
+  public void calculate_MD5(){
+      if(jarFilename!=null){
+          key = null;
+          try {
+              FileInputStream fileInputStream= new FileInputStream(jarFilename);
+
+              key = MD5Hash.digest(fileInputStream).toString();
+              System.out.println("initializing MD5 key : " + key);
+              fileInputStream.close(); //mark/reset not supported
+          } catch (IOException e) {
+              System.err.println("Error with " + jarFilename + " check tha the file exists and is readable." );
+              e.printStackTrace();
+          }
+
+      }
+  }
   public PluginPackage(String id, String className) {
     this.id = id;
     this.className = className;
   }
 
   public PluginPackage(String id, String className, String jarFileName) {
-    this.id = id;
-    this.className = className;
-    if (!Strings.isNullOrEmpty(jarFileName)) {
-      //            loadJarFromFile(jarFileName);
-      this.jarFilename = jarFileName;
-    }
-
+    this(id, className, jarFileName, null);
   }
+
 
   public PluginPackage(String id, String className, String jarFileName, String configFileName) {
     this.id = id;
@@ -40,6 +62,7 @@ public class PluginPackage extends JsonObject implements Serializable {
     if (!Strings.isNullOrEmpty(jarFileName)) {
       //            loadJarFromFile(jarFileName);
       this.jarFilename = jarFileName;
+      calculate_MD5();
     }
     if (!Strings.isNullOrEmpty(configFileName)) {
       loadConfigFromFile(configFileName);

@@ -59,7 +59,7 @@ public class GenericMapperCallable<K,V,kOut,vOut> extends LeadsBaseCallable<K,V>
     combiner = initiliazeCombiner(localCombinerPath,combinerClassName,combinerConfig);
 
     //initialize cllector
-    collector.initializeCache(imanager);
+    collector.initializeCache(inputCache.getName(),imanager);
 //    collector.setCombiner(combiner);
 
   }

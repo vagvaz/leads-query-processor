@@ -44,7 +44,7 @@ public class ProcessWorkflowQueryActionHandler implements ActionHandler {
         this.id = id;
         this.module = module;
        queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
-       WP4Client.initialize(schedHost,schedHost);
+       WP4Client.initialize(schedHost,schedport);
     }
 
     @Override

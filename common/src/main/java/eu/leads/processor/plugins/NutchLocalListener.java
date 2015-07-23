@@ -218,7 +218,7 @@ public class NutchLocalListener {
       processWebPage(event.getKey(),event.getValue());
    }
 
-   private void processWebPage(Object key, Object value) {
+   public void processWebPage(Object key, Object value) {
 
 
       GenericData.Record page = (GenericData.Record) value;

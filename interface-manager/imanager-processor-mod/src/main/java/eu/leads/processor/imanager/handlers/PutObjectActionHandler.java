@@ -4,7 +4,6 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import org.infinispan.Cache;
@@ -36,7 +35,13 @@ public class PutObjectActionHandler implements ActionHandler {
          String key = action.getData().getString("key");
          JsonObject value = new JsonObject(action.getData().getString("object"));
          Cache<String, String> cache = (Cache<String, String>) persistence.getPersisentCache(cacheName);
-         cache.put(key, value.toString());
+         if(!key.equals("") && !value.equals("{}")) {
+            cache.put(key, value.toString());
+         }
+         else{
+            log.error("put object used for creating cache");
+            persistence.getPersisentCache(cacheName);
+         }
          actionResult.putString("status", "SUCCESS");
       } catch (Exception e) {
          actionResult.putString("status", "FAIL");

@@ -34,7 +34,27 @@ public class SSEPointQueryOperator extends BasicOperator {
         token = conf.getObject("body").getString("token");
     }
 
-    @Override
+   @Override
+   public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
+
+   }
+
+   @Override
+   public void setupMapCallable() {
+
+   }
+
+   @Override
+   public void setupReduceCallable() {
+
+   }
+
+   @Override
+   public boolean isSingleStage() {
+      return false;
+   }
+
+   @Override
     public void run() {
        Cache metadata = (Cache) manager.getPersisentCache(targetCacheName);
        JsonObject object = new JsonObject((String) metadata.get("metadata"));

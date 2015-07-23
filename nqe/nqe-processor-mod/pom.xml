@@ -226,6 +226,12 @@
              </exclusion>
           </exclusions>
        </dependency>
+
+      <dependency>
+         <groupId>org.infinispan</groupId>
+         <artifactId>infinispan-ensemble</artifactId>
+         <version>${infinispan.version}</version>
+      </dependency>
        <!-- Add any other dependencies that you want packaged into your module (in the lib dir) here
      as 'compile' dependencies. Here is an example
      <dependency>

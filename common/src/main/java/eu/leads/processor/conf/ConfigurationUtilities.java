@@ -1,13 +1,13 @@
 package eu.leads.processor.conf;
 
 import org.apache.commons.configuration.Configuration;
+import org.vertx.java.core.json.JsonObject;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.*;
-import java.util.Enumeration;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * Created by vagvaz on 6/1/14.
@@ -175,6 +175,28 @@ public class ConfigurationUtilities {
                 }
             }
         }
+        return result;
+    }
+
+    public static String getPublicIPFromGlobal(String microClusterName, JsonObject globalConfig) {
+        String result = globalConfig.getObject("componentsAddrs").getArray(microClusterName).get(0).toString();
+            return result;
+    }
+
+    public static String getEnsembleString(JsonObject globalConfig) {
+        String result = "";
+        List<String> sites = new ArrayList<>();
+
+        for(String targetMC : globalConfig.getObject("microclouds").getFieldNames()){
+            //         JsonObject mc = targetEndpoints.getObject(targetMC);
+            sites.add(targetMC);
+            //
+        }
+        Collections.sort(sites);
+        for(String site : sites){
+            result += globalConfig.getObject("componentsAddrs").getArray(site).get(0).toString()+":11222|";
+        }
+        result = result.substring(0,result.length()-1);
         return result;
     }
 }

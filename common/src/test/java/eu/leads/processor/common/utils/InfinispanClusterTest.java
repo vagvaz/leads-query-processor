@@ -8,10 +8,11 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import junit.framework.TestCase;
 
+import java.io.IOException;
 import java.util.Map;
 
 public class InfinispanClusterTest extends TestCase {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         LQPConfiguration.initialize();
        LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component", "catalog-worker");
        InfinispanManager manager = InfinispanClusterSingleton.getInstance().getManager();
@@ -20,7 +21,7 @@ public class InfinispanClusterTest extends TestCase {
                map2.put("1","11");
                map2.put("1","11");
                map.put("1","11");
-               map.put("22","222");
+               map.put("22", "222");
        LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component", "planner");
        InfinispanManager manager2 = CacheManagerFactory.createCacheManager();
        map2 = manager2.getPersisentCache("default.webpages");
@@ -31,7 +32,9 @@ public class InfinispanClusterTest extends TestCase {
                map.put("2f","22");
         PrintUtilities.printMap(map);
         PrintUtilities.printMap(map2);
-
+      System.in.read();
+      manager2.stopManager();
+      manager.stopManager();
        //        InfinispanCluster cluster = WeldContext.INSTANCE.getBean(InfinispanCluster.class);
         //
         ////        cluster.initialize();

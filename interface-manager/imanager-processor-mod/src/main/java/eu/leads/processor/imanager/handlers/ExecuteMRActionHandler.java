@@ -35,7 +35,7 @@ public class ExecuteMRActionHandler implements ActionHandler {
          statusResult.putString("status","SUCCESS");
          statusResult.putString("message","");
          actionResult.putObject("status", statusResult);
-         actionResult.putObject("result",data.getObject("MROperator"));
+         actionResult.putObject("result",data);
 
 
          if (!(actionResult == null || actionResult.equals(""))) {

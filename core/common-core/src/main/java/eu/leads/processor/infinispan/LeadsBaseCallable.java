@@ -5,9 +5,6 @@ import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.Cache;
-import org.infinispan.client.hotrod.RemoteCache;
-import org.infinispan.client.hotrod.RemoteCacheManager;
-import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
 import org.infinispan.ensemble.EnsembleCacheManager;
@@ -46,11 +43,21 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     this.output = output;
   }
 
-  public static RemoteCacheManager createRemoteCacheManager() {
-    ConfigurationBuilder builder = new ConfigurationBuilder();
-    builder.addServer().host(LQPConfiguration.getConf().getString("node.ip")).port(11222);
-    return new RemoteCacheManager(builder.build());
+
+  public String getEnsembleHost() {
+    return ensembleHost;
   }
+
+  public void setEnsembleHost(String ensembleHost) {
+    this.ensembleHost = ensembleHost;
+  }
+
+
+//  public static RemoteCacheManager createRemoteCacheManager() {
+//    ConfigurationBuilder builder = new ConfigurationBuilder();
+//    builder.addServer().host(LQPConfiguration.getConf().getString("node.ip")).port(11222);
+//    return new RemoteCacheManager(builder.build());
+//  }
   @Override public void setEnvironment(Cache<K, V> cache, Set<K> inputKeys) {
     embeddedCacheManager = cache.getCacheManager();
     imanager = new ClusterInfinispanManager(embeddedCacheManager);
@@ -59,12 +66,14 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     this.inputCache = cache;
     if(ensembleHost != null && !ensembleHost.equals("")) {
       emanager = new EnsembleCacheManager(ensembleHost);
+      emanager.start();
 //      emanager = createRemoteCacheManager();
       ecache = emanager.getCache(output);
     }
     else {
       LQPConfiguration.initialize();
       emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
+      emanager.start();
 //            emanager = createRemoteCacheManager();
     }
 
@@ -104,16 +113,13 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   @Override public void finalizeCallable(){
     try {
 
-//	if(ecache!=null) {
- //   ecache.stop();
-  //}
-//	if(outputCache!=null && !ecache.getName().equals(outputCache.getName()))
-  //    	  outputCache.stop();
-	if(emanager!=null)
-	  emanager.stop();
+      emanager.stop();
+//
+//      ecache.stop();
+//      outputCache.stop();
     }catch(Exception e){
-        System.err.println("LEADS Base callable "+e.getClass().toString());
-      e.printStackTrace();
+        System.err.println("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage() + " cause "
+                             + e.getCause().toString());
       }
   }
 
