@@ -1,6 +1,7 @@
 package eu.leads.processor.core.net;
 
 import eu.leads.processor.core.comp.LeadsMessageHandler;
+import org.slf4j.Logger;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonObject;
@@ -17,7 +18,7 @@ public class CommunicationHandler implements Handler<Message> {
     private Map<String, LeadsMessageHandler> handlers;
     private Node owner;
     private Set<String> requests;
-    private org.vertx.java.core.logging.Logger logger;
+    private Logger logger;
 
     public CommunicationHandler(LeadsMessageHandler defaultHandler, Node owner) {
         this.owner = owner;
