@@ -1,6 +1,7 @@
 package eu.leads.processor.infinispan;
 
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
+import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import org.infinispan.Cache;
@@ -63,8 +64,10 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
         IntermediateKeyIndex index = null;
         for(Object listener : dataCache.getListeners()){
             if(listener instanceof LocalIndexListener){
+                System.err.println("listener class is " + listener.getClass().toString());
                 LocalIndexListener localIndexListener = (LocalIndexListener) listener;
                 index = localIndexListener.getIndex();
+                EnsembleCacheUtils.waitForAllPuts();
                 break;
             }
         }

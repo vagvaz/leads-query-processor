@@ -1,5 +1,6 @@
 package eu.leads.processor.infinispan;
 
+import eu.leads.processor.common.LeadsListener;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.infinispan.IntermediateKeyIndex;
 import org.infinispan.Cache;
@@ -8,6 +9,7 @@ import org.infinispan.notifications.cachelistener.annotation.CacheEntryCreated;
 import org.infinispan.notifications.cachelistener.annotation.CacheEntryModified;
 import org.infinispan.notifications.cachelistener.event.CacheEntryCreatedEvent;
 import org.infinispan.notifications.cachelistener.event.CacheEntryModifiedEvent;
+import org.vertx.java.core.json.JsonObject;
 
 import java.io.FileWriter;
 import java.util.Map;
@@ -16,17 +18,14 @@ import java.util.Map;
  * Created by vagvaz on 16/07/15.
  */
 @Listener(sync = true,primaryOnly = true,clustered = false)
-public class LocalIndexListener {
+public class LocalIndexListener implements LeadsListener {
 
     String cacheName;
-    IntermediateKeyIndex index;
-    Cache keysCache;
-    Cache dataCache;
+    transient IntermediateKeyIndex index;
+    transient Cache keysCache;
+    transient Cache dataCache;
     public LocalIndexListener(InfinispanManager manager, String cacheName) {
         this.cacheName = cacheName;
-        this.keysCache = manager.getLocalCache(cacheName+".index.keys");
-        this.dataCache = manager.getLocalCache(cacheName+".index.data");
-        this.index = new IntermediateKeyIndex(keysCache,dataCache);
     }
 
     public String getCacheName() {
@@ -84,5 +83,27 @@ public class LocalIndexListener {
             System.err.println("Value modified key " + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
             index.put(key.getKey(),event.getValue());
         }
+    }
+
+    @Override public InfinispanManager getManager() {
+        return null;
+    }
+
+    @Override public void setManager(InfinispanManager manager) {
+
+    }
+
+    @Override public void initialize(InfinispanManager manager,JsonObject conf) {
+        this.keysCache = manager.getLocalCache(cacheName+".index.keys");
+        this.dataCache = manager.getLocalCache(cacheName+".index.data");
+        this.index = new IntermediateKeyIndex(keysCache,dataCache);
+    }
+
+    @Override public void initialize(InfinispanManager manager) {
+        initialize(manager,null);
+    }
+
+    @Override public String getId() {
+        return this.getClass().toString();
     }
 }

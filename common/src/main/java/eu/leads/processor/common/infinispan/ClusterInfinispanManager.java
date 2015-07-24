@@ -576,57 +576,11 @@ public class ClusterInfinispanManager implements InfinispanManager {
     addListener(listener, c);
   }
 
-  //  /** {@inheritDoc} */
-  //  @Override
-  //  public void addListener(Object listener, String name, KeyFilter filter) {
-  //    Cache c = (Cache) this.getPersisentCache(name);
-  //    c.addListener(listener, filter);
-  //  }
-  //
-  //  /** {@inheritDoc} */
-  //  @Override
-  //  public void addListener(Object listener, String name, KeyValueFilter filter, Converter converter) {
-  //    Cache c = (Cache) this.getPersisentCache(name);
-  //    c.addListener(listener, filter, converter);
-  //
-  //  }
-  //
-  //  /** {@inheritDoc} */
-  //  @Override
-  //  public void addListener(Object listener, Cache cache, KeyFilter filter) {
-  //    cache.addListener(listener, filter);
-  //  }
-  //
-  //  /** {@inheritDoc} */
-  //  @Override
-  //  public void addListener(Object listener, Cache cache, KeyValueFilter filter, Converter converter) {
-  ////        cache.addListener(listener,filter,converter);
-  //  }
-
   /**
    * {@inheritDoc}
    */
   @Override
   public void removeListener(Object listener, Cache cache) {
-    //    DistributedExecutorService des = new DefaultExecutorService(cache);
-    //    List<Future<Void>> list = new LinkedList<Future<Void>>();
-    //    for (Address a : getMembers()) {
-    //      //            des.submitEverywhere(new AddListenerCallable(cache.getName(),listener));
-    //      try {
-    //        list.add(des.submit(a, new RemoveListenerCallable(cache.getName(), listener)));
-    //      } catch (Exception e) {
-    //        log.error(e.getMessage());
-    //      }
-    //    }
-    //
-    //
-    //    for (Future<Void> future : list) {
-    //      try {
-    //        future.get(); // wait for task to complete
-    //      } catch (InterruptedException e) {
-    //      } catch (ExecutionException e) {
-    //      }
-    //    }
     cache.removeListener(listener);
   }
 

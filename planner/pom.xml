@@ -35,10 +35,10 @@
          <artifactId>tajo-core</artifactId>
          <version>${tajo.version}</version>
              <exclusions>
-                <exclusion>
-                   <groupId>log4j</groupId>
-                   <artifactId>log4j</artifactId>
-                </exclusion>
+                <!--<exclusion>-->
+                   <!--<groupId>log4j</groupId>-->
+                   <!--<artifactId>log4j</artifactId>-->
+                <!--</exclusion>-->
                 <exclusion>
                    <groupId>org.apache.logging.log4j</groupId>
                    <artifactId>log4j-core</artifactId>
@@ -59,10 +59,10 @@
          <artifactId>tajo-algebra</artifactId>
          <version>${tajo.version}</version>
          <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
+            <!--<exclusion>-->
+               <!--<groupId>log4j</groupId>-->
+               <!--<artifactId>log4j</artifactId>-->
+            <!--</exclusion>-->
             <exclusion>
                <groupId>org.apache.logging.log4j</groupId>
                <artifactId>log4j-core</artifactId>
@@ -83,10 +83,10 @@
          <artifactId>tajo-catalog-common</artifactId>
          <version>${tajo.version}</version>
          <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
+            <!--<exclusion>-->
+               <!--<groupId>log4j</groupId>-->
+               <!--<artifactId>log4j</artifactId>-->
+            <!--</exclusion>-->
             <exclusion>
                <groupId>org.apache.logging.log4j</groupId>
                <artifactId>log4j-core</artifactId>
@@ -107,10 +107,10 @@
          <artifactId>tajo-catalog-client</artifactId>
          <version>${tajo.version}</version>
          <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
+            <!--<exclusion>-->
+               <!--<groupId>log4j</groupId>-->
+               <!--<artifactId>log4j</artifactId>-->
+            <!--</exclusion>-->
             <exclusion>
                <groupId>org.apache.logging.log4j</groupId>
                <artifactId>log4j-core</artifactId>
@@ -131,10 +131,10 @@
          <artifactId>tajo-catalog-server</artifactId>
          <version>${tajo.version}</version>
          <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
+            <!--<exclusion>-->
+               <!--<groupId>log4j</groupId>-->
+               <!--<artifactId>log4j</artifactId>-->
+            <!--</exclusion>-->
             <exclusion>
                <groupId>org.apache.logging.log4j</groupId>
                <artifactId>log4j-core</artifactId>
@@ -155,10 +155,10 @@
          <artifactId>tajo-catalog</artifactId>
          <version>${tajo.version}</version>
          <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
+            <!--<exclusion>-->
+               <!--<groupId>log4j</groupId>-->
+               <!--<artifactId>log4j</artifactId>-->
+            <!--</exclusion>-->
             <exclusion>
                <groupId>org.apache.logging.log4j</groupId>
                <artifactId>log4j-core</artifactId>
@@ -181,10 +181,10 @@
          <!--<artifactId>tajo-storage</artifactId>-->
          <version>${tajo.version}</version>
          <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
+            <!--<exclusion>-->
+               <!--<groupId>log4j</groupId>-->
+               <!--<artifactId>log4j</artifactId>-->
+            <!--</exclusion>-->
             <exclusion>
                <groupId>org.apache.logging.log4j</groupId>
                <artifactId>log4j-core</artifactId>
@@ -205,10 +205,10 @@
          <artifactId>tajo-jdbc</artifactId>
          <version>${tajo.version}</version>
          <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
+            <!--<exclusion>-->
+               <!--<groupId>log4j</groupId>-->
+               <!--<artifactId>log4j</artifactId>-->
+            <!--</exclusion>-->
             <exclusion>
                <groupId>org.apache.logging.log4j</groupId>
                <artifactId>log4j-core</artifactId>
@@ -229,10 +229,10 @@
          <artifactId>tajo-rpc</artifactId>
          <version>${tajo.version}</version>
          <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
+            <!--<exclusion>-->
+               <!--<groupId>log4j</groupId>-->
+               <!--<artifactId>log4j</artifactId>-->
+            <!--</exclusion>-->
             <exclusion>
                <groupId>org.apache.logging.log4j</groupId>
                <artifactId>log4j-core</artifactId>
