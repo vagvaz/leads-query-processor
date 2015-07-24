@@ -258,11 +258,12 @@ public class DefaultNode implements Node, Handler<Long> {
     @Override
     public void initialize(JsonObject config, LeadsMessageHandler defaultHandler,
                               LeadsMessageHandler failHandler, Vertx vertx) {
+        this.config = config.copy();
         logger = org.slf4j.LoggerFactory.getLogger(this.getId());
         comHandler = new CommunicationHandler(defaultHandler, this);
         this.failHandler = failHandler;
         bus = vertx.eventBus();
-        this.config = config.copy();
+
         registerToEventBusAddresses(this.config);
         this.vertx = vertx;
         vertx.setPeriodic(timeout,this);
