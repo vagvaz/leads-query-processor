@@ -38,5 +38,19 @@ public class IntermediateKeyIndex {
         return new LocalIndexKeyIterator(key,counter,dataCache);
     }
 
+    public Map<String, Integer> getKeysCache() {
+        return keysCache;
+    }
 
+    public void setKeysCache(Map<String, Integer> keysCache) {
+        this.keysCache = keysCache;
+    }
+
+    public Map<String, Object> getDataCache() {
+        return dataCache;
+    }
+
+    public void setDataCache(Map<String, Object> dataCache) {
+        this.dataCache = dataCache;
+    }
 }
