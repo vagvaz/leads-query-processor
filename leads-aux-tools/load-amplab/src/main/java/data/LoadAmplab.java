@@ -9,6 +9,9 @@ import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.sentiment.SentimentAnalysisModule;
 import org.apache.commons.lang.time.DurationFormatUtils;
+import org.bson.BSONObject;
+import org.bson.BasicBSONEncoder;
+import org.bson.BasicBSONObject;
 import org.infinispan.Cache;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
@@ -421,57 +424,58 @@ public class LoadAmplab {
             long p_uri = 1500000L;
 
             for(int entry=0;entry<Integer.valueOf(arg5);entry++){
-                JsonObject data = new JsonObject();
+                BSONObject data = new BasicBSONObject();
 
                 for (pos = 0; pos < columns.size(); pos++) {
                     String fullCollumnName =  "default."+tableName+"." + columns.get(pos);
                     try {
                         if (columnType.get(pos) == String.class){
                             if (columns.get(pos).equals("textcontent") && tableName.equals("page_core"))
-                                data.putString(fullCollumnName, randBigString(Integer.valueOf(arg6)));
+                                data.put(fullCollumnName, randBigString(Integer.valueOf(arg6)));
                             else if (columns.get(pos).equals("uri") && tableName.equals("page_core")){
-                                data.putString(fullCollumnName, "adidas" + "" +p_uri);
+                                data.put(fullCollumnName, "adidas" + "" + p_uri);
                                 p_uri++;
                             }
                             else if (columns.get(pos).equals("uri") && tableName.equals("keywords")){
-                                data.putString(fullCollumnName, "adidas" + "" +k_uri);
+                                data.put(fullCollumnName, "adidas" + "" + k_uri);
                                 k_uri++;
                             }
                             else
-                                data.putString(fullCollumnName, randSmallString());
+                                data.put(fullCollumnName, randSmallString());
                         } else if (columnType.get(pos) == Long.class){
                             if (columns.get(pos).equals("ts") && tableName.equals("page_core")){
-                                data.putNumber(fullCollumnName, p_ts);
+                                data.put(fullCollumnName, p_ts);
                                 p_ts++;
                             }
                             else if (columns.get(pos).equals("ts") && tableName.equals("keywords")){
-                                data.putNumber(fullCollumnName, k_ts);
+                                data.put(fullCollumnName, k_ts);
                                 k_ts++;
                             }
                         } else if (columnType.get(pos) == Integer.class){
-                            data.putNumber(fullCollumnName, randInt(-10000, 10000));
+                            data.put(fullCollumnName, randInt(-10000, 10000));
                         } else if (columnType.get(pos) == Float.class){
-                            data.putNumber(fullCollumnName, nextFloat(-5, 5));
+                            data.put(fullCollumnName, nextFloat(-5, 5));
                         } else {
                             System.err.println("Not recognised type, stop importing");
                             return;
                         }
                     } catch (NumberFormatException e) {
                         System.err.println("Line: " + lines + "Parsing error");
-                        data.putNumber(fullCollumnName, nextFloat(-3, 3));
+                        data.put(fullCollumnName, nextFloat(-3, 3));
                     }
                 }
 
                 for (int i = 1; i < primaryKeys.length; i++) {
-                    key = ":" + data.getValue("default."+tableName+"." +primaryKeys[i]);
+                    key = ":" + data.get("default." + tableName + "." + primaryKeys[i]);
                 }
 
 //                System.out.println("putting... uri:" +data.getField("default."+tableName+".uri").toString()+" -- ts:"+data.getField("default."+tableName+".ts").toString());
-                put(key, data.toString());
+                put(key, data);
 
                 try {
-                    sizeE+=serialize(data).length;
-                } catch (IOException e) {
+                    BasicBSONEncoder nc = new BasicBSONEncoder();
+                    sizeE+=nc.encode(data).length;
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
@@ -534,7 +538,7 @@ public class LoadAmplab {
         return randomString;
     }
 
-    private static void put(String key, String value) {
+    private static void put(String key, BSONObject value) {
         Tuple tuple = new Tuple(value);
         if (remoteCache != null)
             remoteCache.put(remoteCache.getName() + ":" + key, tuple);
