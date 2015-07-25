@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by vagvaz on 22/05/15.
  */
-public class LocalDataFilter<K,V> implements KeyValueFilterConverter<K, V,V> {
+public class LocalDataFilter<K,V> implements KeyValueFilter<K, V> {
     ClusteringDependentLogic cdl;
     Logger profilerLog;
     ProfileEvent event;
@@ -31,7 +31,8 @@ public class LocalDataFilter<K,V> implements KeyValueFilterConverter<K, V,V> {
 
     }
 
-    @Override public V filterAndConvert(K key, V value, Metadata metadata) {
+//    @Override
+    public V filterAndConvert(K key, V value, Metadata metadata) {
         boolean result = false;
         //        event.start("dataFilter " + key.toString());
         if(cdl.localNodeIsPrimaryOwner(key))
@@ -44,7 +45,8 @@ public class LocalDataFilter<K,V> implements KeyValueFilterConverter<K, V,V> {
             return null;
     }
 
-    @Override public V convert(K key, V value, Metadata metadata) {
+//    @Override
+    public V convert(K key, V value, Metadata metadata) {
         return value;
     }
 }

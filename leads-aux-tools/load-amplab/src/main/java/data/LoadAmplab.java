@@ -3,6 +3,7 @@ package data;
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
@@ -16,6 +17,7 @@ import org.infinispan.Cache;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
+import org.infinispan.commons.api.BasicCache;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.vertx.java.core.json.JsonObject;
@@ -43,7 +45,7 @@ public class LoadAmplab {
     static InfinispanManager imanager = null;
     static EnsembleCacheManager emanager;
 
-    static ConcurrentMap embeddedCache = null;
+    static BasicCache embeddedCache = null;
     static RemoteCache remoteCache = null;
     static EnsembleCache ensembleCache = null;
     static ArrayList<EnsembleCache>  ecaches = new ArrayList<>();
@@ -65,6 +67,7 @@ public class LoadAmplab {
             System.exit(0);
         }
         LQPConfiguration.initialize();
+        EnsembleCacheUtils.initialize();
 
         if (args[0].startsWith("l")) {
             if(args[0].equals("loadIspn")) {
@@ -473,8 +476,8 @@ public class LoadAmplab {
                 put(key, data);
 
                 try {
-                    BasicBSONEncoder nc = new BasicBSONEncoder();
-                    sizeE+=nc.encode(data).length;
+//                    BasicBSONEncoder nc = new BasicBSONEncoder();
+//                    sizeE+=nc.encode(data).length;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -541,11 +544,12 @@ public class LoadAmplab {
     private static void put(String key, BSONObject value) {
         Tuple tuple = new Tuple(value);
         if (remoteCache != null)
-            remoteCache.put(remoteCache.getName() + ":" + key, tuple);
+            EnsembleCacheUtils.putToCache(remoteCache, remoteCache.getName() + ":" + key, tuple);
         else if (embeddedCache != null)
-            embeddedCache.put(((Cache) embeddedCache).getName() + ":" + key, tuple);
+            EnsembleCacheUtils.putToCache(embeddedCache,
+                ((Cache) embeddedCache).getName() + ":" + key, tuple);
         else if (ensembleCache!=null)
-            ensembleCache.put( ensembleCache.getName() + ":" + key, tuple);
+            EnsembleCacheUtils.putToCache(ensembleCache, ensembleCache.getName() + ":" + key, tuple);
         try {
             Thread.sleep(delay);
         } catch (InterruptedException e) {
@@ -565,7 +569,8 @@ public class LoadAmplab {
                 return false;
             }
         else if (imanager != null)
-            embeddedCache = imanager.getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
+            embeddedCache =
+                (BasicCache) imanager.getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName);
         else if (emanager != null)
             ensembleCache = emanager.getCache(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName,new ArrayList<>(emanager.sites()),
                     EnsembleCacheManager.Consistency.DIST);

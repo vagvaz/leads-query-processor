@@ -139,8 +139,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //        continue;
     Object filter = new LocalDataFilter<K,V>(cdl);
     CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(
-        (KeyValueFilter<? super K, ? super V>) filter)
-        .converter((Converter<? super K, ? super V, ?>) filter);
+        (KeyValueFilter<? super K, ? super V>) filter);
+//        .converter((Converter<? super K, ? super V, ?>) filter);
     profExecute.end();
     try {
       for (Object object : iterable) {
