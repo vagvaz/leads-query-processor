@@ -122,7 +122,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
             .having("attributeName").eq("collumname");
     filterC = filterC.and().having("attributeValue").eq("test");
     filterC = (FilterConditionContext)root.CreateQuery(qf.from(LeadsIndex.class));
-    //org.infinispan.query.dsl.Query lucenequery = filterC.toBuilder().build();
+    org.infinispan.query.dsl.Query lucenequery = filterC.toBuilder().build();
 
 
 

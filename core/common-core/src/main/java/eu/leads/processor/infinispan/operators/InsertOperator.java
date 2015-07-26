@@ -117,7 +117,7 @@ public class InsertOperator extends BasicOperator {
          }
          data.setAttribute(tableName+"."+column,value);
       }
-    System.out.println(" output cache: " + getOutput() +  " Action " + action.asJsonObject().toString());
+    System.out.println(" output cache: " + getOutput() + " Action " + action.asJsonObject().toString());
   }
 
   @Override
@@ -136,22 +136,27 @@ public class InsertOperator extends BasicOperator {
 
             + key + "     \n" + data.toString());
     EnsembleCacheUtils.putToCache(ecache, key, data);
-//    if(checkIndex_usage())
-//    for (String column : data.getFieldNames()) {
-//      LeadsIndexHelper lindHelp = new LeadsIndexHelper();
-//      Cache indexCache = (Cache) manager.getPersisentCache(tableName + "." + column);
-//      int i = indexCache.size() + 1;
-//      if (indexCache != null) {
-//        LeadsIndex lInd = lindHelp.CreateLeadsIndex(data.getGenericAttribute(column), key, column, tableName);
-//        indexCache.put(key, lInd);
-//      }
-//    }
+    if(checkIndex_usage())
+    for (String column : data.getFieldNames()) {
+      LeadsIndexHelper lindHelp = new LeadsIndexHelper();
+
+      if (manager.getCacheManager().cacheExists(tableName + "." + column)) {
+        Cache indexCache = (Cache) manager.getPersisentCache(tableName + "." + column);
+        LeadsIndex lInd = lindHelp.CreateLeadsIndex(data.getGenericAttribute(column), key, column, tableName);
+        indexCache.put(key, lInd);
+      }
+    }
 
 //                targetCache.put(key,data.toString());
 //                        versionedCache.put(key,data.toString(),version);
-    if (ecache.get(key) == null) {
-      log.error("Insert Failed " + ecache.size());
+    try {
+      if (ecache.get(key) == null) {
+        log.error("Insert Failed " + ecache.size());
+      }
+    }catch (java.lang.IllegalAccessError e){
+      log.error("Insert Failed ??? " + ecache.size() + "\n exception: " + e.getMessage() + "\n ex:" + e.toString());
     }
+
     EnsembleCacheUtils.waitForAllPuts();
     cleanup();
   }
@@ -165,6 +170,7 @@ public class InsertOperator extends BasicOperator {
     while (iterator.hasNext()) {
       JsonObject tmp = (JsonObject) iterator.next();
       columnName = tmp.getString("name");
+      if(manager.getCacheManager().cacheExists(tableName + "." +columnName))
       indexCaches.add((Cache) manager.getIndexedPersistentCache(tableName + "." +columnName));
     }
 

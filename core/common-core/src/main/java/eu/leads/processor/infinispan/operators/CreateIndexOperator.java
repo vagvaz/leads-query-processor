@@ -64,18 +64,14 @@ public class CreateIndexOperator extends BasicOperator {
     }
 
     String CreateIndexJ = conf.getString("rawquery");
+
     CreateIndex newExpr = JsonHelper.fromJson(CreateIndexJ, CreateIndex.class);
-//    Projection prj = (Projection)newExpr.getChild();
-//    NamedExpr[] targets = prj.getNamedExprs();
-//    for(NamedExpr target: targets){
-//      collumns.add(((ColumnReferenceExpr) target.getExpr()).getName());
-//    }
-//    Relation rel = (Relation)prj.getChild();
-//    tableName =  rel.getName();
+
     IndexName = newExpr.getIndexName();
     if (IndexName.isEmpty())
       IndexName = "noname"+UUID.randomUUID();
-    String tableName = (((Relation) ((Projection) newExpr.getChild()).getChild())).getName();
+
+    tableName = (((Relation) ((Projection) newExpr.getChild()).getChild())).getName();
     Sort.SortSpec[] collumns = newExpr.getSortSpecs();
 
     columnNames = new ArrayList<>();//= conf.getObject("CreateIndex").getArray("SortSpecs");
@@ -84,6 +80,7 @@ public class CreateIndexOperator extends BasicOperator {
 
     System.out.println(" TableName: " + tableName);
     tableName = StringConstants.DEFAULT_DATABASE_NAME + "." + tableName;
+
     System.out.println(" TableName: " + tableName);
 
     System.out.println(" IndexName: " + IndexName);
@@ -99,9 +96,14 @@ public class CreateIndexOperator extends BasicOperator {
 
 
     for (int c = 0; c < columnNames.size(); c++) {
-      indexCaches.add((Cache) manager.getIndexedPersistentCache(tableName + "." + columnNames.get(c)));
-      log.info("Creating Index Caches, column " +tableName + "." + columnNames.get(c));
+      if(!manager.getCacheManager().cacheExists(tableName + "." + columnNames.get(c))) {
+        indexCaches.add((Cache) manager.getIndexedPersistentCache(tableName + "." + columnNames.get(c)));
 
+        log.info("Creating Index Caches, column " +tableName + "." + columnNames.get(c));
+      }else {
+
+        log.info("Index Already exists on column ... but anyway reindexing" +tableName + "." + columnNames.get(c));
+      }
     }
 
     //indexCaches
@@ -121,9 +123,8 @@ public class CreateIndexOperator extends BasicOperator {
       String ikey = (String) key;
       Tuple value = (Tuple) inputCache.get(ikey);
 
-
       for (int c = 0; c < columnNames.size(); c++) {
-        String column = columnNames.get(c);
+        String column = tableName +'.' +columnNames.get(c);
         LeadsIndex lInd = lindHelp.CreateLeadsIndex(value.getGenericAttribute(column), ikey, column, tableName);
         indexCaches.get(c).put(ikey, lInd);
       }
