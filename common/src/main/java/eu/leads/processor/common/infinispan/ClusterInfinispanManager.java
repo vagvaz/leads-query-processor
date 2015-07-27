@@ -77,16 +77,16 @@ public class ClusterInfinispanManager implements InfinispanManager {
   public ClusterInfinispanManager() {
     host = "0.0.0.0";
     maxEntries = LQPConfiguration.getInstance().getConfiguration().getInt("node.infinispan.maxentries",5000);
-    System.out.println("maximum entries are " + maxEntries);
-    log.error("maximum entries are " + maxEntries);
+//    System.out.println("maximum entries are " + maxEntries);
+//    log.error("maximum entries are " + maxEntries);
     serverPort = 11222;
   }
 
   public ClusterInfinispanManager(EmbeddedCacheManager manager) {
     this.manager = manager;
     maxEntries = LQPConfiguration.getInstance().getConfiguration().getInt("node.infinispan.maxentries",5000);
-    System.out.println("maximum entries are " + maxEntries);
-    log.error("maximum entries are " + maxEntries);
+//    System.out.println("maximum entries are " + maxEntries);
+//    log.error("maximum entries are " + maxEntries);
     initDefaultCacheConfig();
   }
 
