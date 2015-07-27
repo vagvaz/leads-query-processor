@@ -1,17 +1,26 @@
 package eu.leads.processor.infinispan.operators;
 
+import org.infinispan.Cache;
+
 import java.util.Random;
 
 // NOT thread-safe, but we don't care!
 class DistArray {
-	public DistArray(int w, int d) {
+	Cache<Integer,Integer> ArrayCache=null;
+	int width=0;
+	int depth=0;
+	public DistArray(int w, int d, Cache<Integer,Integer> ArrayCache) {
 		//TODO: do
+
+		this.ArrayCache = ArrayCache;
 	}
 	int getValue(int x, int y) {
+		if(ArrayCache.containsKey(y*width+x))
+			return ArrayCache.get(y * width + x);
 		return -1;
 	}
 	void putValue(int x, int y, int newValue) {
-		;
+		ArrayCache.put(y * width + x, newValue);
 	}
 	void increase(int x, int y, int inc) {
 		putValue(x,y,getValue(x,y)+inc);
@@ -24,15 +33,15 @@ public class DistCMSketch {
 	final int w, d; // w=mod, d=levels
 	
 	// LEFTERIS USE THIS constructor. No parameters required 
-	public DistCMSketch() {
-		this(0.01,0.001);
+	public DistCMSketch(Cache<Integer,Integer> ArrayCache) {
+		this(0.01,0.001,ArrayCache);
 	}
 	
-	public DistCMSketch(double delta, double epsilon) {
+	public DistCMSketch(double delta, double epsilon,Cache<Integer,Integer> ArrayCache) {
 		double epsilonEach=epsilon;
 		w=(int)Math.ceil(Math.E/epsilonEach);
 		d=(int)Math.ceil(Math.log(1d/delta));
-		darray=new DistArray(w,d);
+		darray=new DistArray(w,d,ArrayCache);
 		// initialize a and b
 		Random mt = new Random(1234);
 		alphas=new long[d];
@@ -43,11 +52,11 @@ public class DistCMSketch {
 		}
 	}
 	
-	public DistCMSketch(double delta, double epsilon, int[][]array) {
+	public DistCMSketch(double delta, double epsilon, int[][]array,Cache<Integer,Integer> ArrayCache) {
 		double epsilonEach=epsilon;
 		w=(int)Math.ceil(Math.E/epsilonEach);
 		d=(int)Math.ceil(Math.log(1d/delta));
-		darray=new DistArray(w,d);
+		darray=new DistArray(w,d,ArrayCache);
 		// initialize a and b
 		Random mt = new Random(1234);
 		alphas=new long[d];

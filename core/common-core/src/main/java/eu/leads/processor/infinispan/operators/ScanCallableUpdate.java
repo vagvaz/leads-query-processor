@@ -119,12 +119,15 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
 
   Object getSubLucene(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
     FilterConditionContext result = null;
-    FilterConditionContext left = null;
-    FilterConditionContext right = null;
+    if(root==null)
+      return null;
+    FilterConditionContext left = (FilterConditionContext) getSubLucene(indexCaches,root.getLeft());
+    FilterConditionContext right = (FilterConditionContext) getSubLucene(indexCaches,root.getRight());
 
     switch (root.getType()) {
       case EQUAL:
-        result = left.and().having("attributeValue").eq(right);//,right.getValueAsJson());
+        if(left !=null && right !=null)
+          return left.and().having("attributeValue").eq(right);//,right.getValueAsJson());
         break;
       case IS_NULL:
         // result = left.isValueNull();
@@ -186,7 +189,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
         //TODO
         break;
     }
-  return null;
+    return null;
   }
 
 

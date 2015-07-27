@@ -130,7 +130,7 @@ public class CreateIndexOperator extends BasicOperator {
       }
       i++;
     }
-    log.info("Succesfully completed indexing records, columns:" + columnNames.size() + " per column:" + i);
+    log.info("Succesfully completed indexing records, columns:" + columnNames.size() + ", data per column:" + i);
    // EnsembleCacheUtils.waitForAllPuts();
 
     cleanup();
