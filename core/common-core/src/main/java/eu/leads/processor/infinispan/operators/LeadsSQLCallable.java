@@ -23,7 +23,7 @@ public abstract  class LeadsSQLCallable<K,V> extends LeadsBaseCallable<K,V> impl
   transient protected JsonObject outputSchema;
   transient protected Map<String,String> outputMap;
   transient protected Map<String,List<JsonObject>> targetsMap;
-  ArrayList<Cache> indexCaches=null;
+  transient HashMap<String,Cache> indexCaches=null;
 
   public LeadsSQLCallable(String configString, String output) {
     super(configString, output);

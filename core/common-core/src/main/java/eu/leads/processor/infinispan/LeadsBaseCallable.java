@@ -41,7 +41,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   transient protected  Cache<K,V> inputCache;
   transient protected EnsembleCache outputCache;
   protected String ensembleHost;
-  transient protected org.infinispan.query.dsl.Query lquery;
+  transient protected ArrayList<org.infinispan.query.dsl.Query> lquery;
 //  transient protected RemoteCache outputCache;
 //  transient protected RemoteCache ecache;
 //  transient protected RemoteCacheManager emanager;
@@ -166,9 +166,9 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     }else{
       profCallable.start("Search Over Indexed Data");
       ProfileEvent profExecute = new ProfileEvent("Get list " + this.getClass().toString(), profilerLog);
-      List<LeadsIndex> list = lquery.list();
+      List<LeadsIndex> list = lquery.get(0).list();
       profExecute.end();
-
+      //to do use sketches to find out what to do
       try {
         for (LeadsIndex lst : list) {
           System.out.println(lst.getAttributeName()+":"+lst.getAttributeValue());

@@ -9,11 +9,14 @@ import eu.leads.processor.core.index.LeadsIndex;
 import eu.leads.processor.core.index.LeadsIndexString;
 import eu.leads.processor.math.FilterOperatorNode;
 import eu.leads.processor.math.FilterOperatorTree;
+import eu.leads.processor.math.MathUtils;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
+import org.infinispan.query.dsl.Query;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.query.SearchManager;
 import org.infinispan.query.dsl.FilterConditionContext;
+import org.infinispan.query.dsl.QueryBuilder;
 import org.infinispan.query.dsl.QueryFactory;
 import org.infinispan.versioning.VersionedCache;
 import org.infinispan.versioning.utils.version.Version;
@@ -102,7 +105,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
       }
       if(checkIndex_usage()){
         // create query
-        lquery = createLuceneQuery(tree.getRoot());
+        lquery = createLuceneQuerys(indexCaches, tree.getRoot());
 //      List<LeadsIndex> list = lquery.list();
       }
     }
@@ -114,18 +117,112 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
     versioning = getVersionPredicate(conf);
   }
 
-  org.infinispan.query.dsl.Query createLuceneQuery(FilterOperatorNode root){
+  Object getSubLucene(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
+    FilterConditionContext result = null;
+    FilterConditionContext left = null;
+    FilterConditionContext right = null;
 
-    SearchManager sm = org.infinispan.query.Search.getSearchManager(inputCache);
-    QueryFactory qf = sm.getQueryFactory();
-    FilterConditionContext filterC =  qf.from(LeadsIndex.class)
-            .having("attributeName").eq("collumname");
-    filterC = filterC.and().having("attributeValue").eq("test");
-    filterC = (FilterConditionContext)root.CreateQuery(qf.from(LeadsIndex.class));
-    org.infinispan.query.dsl.Query lucenequery = filterC.toBuilder().build();
+    switch (root.getType()) {
+      case EQUAL:
+        result = left.and().having("attributeValue").eq(right);//,right.getValueAsJson());
+        break;
+      case IS_NULL:
+        // result = left.isValueNull();
+        break;
+      case NOT_EQUAL:
+        //  result = !(MathUtils.equals(left.getValueAsJson(), right.getValueAsJson()));
+        break;
+      case FIELD:
+        String collumnName = MathUtils.getTextFrom(root.getValueAsJson());
+        if (indexCaches.containsValue(collumnName)) {
+          SearchManager sm = org.infinispan.query.Search.getSearchManager(indexCaches.get(collumnName));
+          QueryFactory qf = sm.getQueryFactory();
+          FilterConditionContext filterC = qf.from(LeadsIndex.class)
+                  .having("attributeName").eq(collumnName);
+          return filterC;
+        }
+        break;
+
+      case CONST:
+        // result = true;
+        return MathUtils.getTextFrom(root.getValueAsJson());
+      case LTH:
+        // result = MathUtils.lessThan(left.getValueAsJson(),right.getValueAsJson());
+        break;
+      case LEQ:
+        //  result = MathUtils.lessEqualThan(left.getValueAsJson(),right.getValueAsJson());
+        break;
+      case GTH:
+        // result = MathUtils.greaterThan(left.getValueAsJson(),right.getValueAsJson());
+        break;
+      case GEQ:
+        // result = MathUtils.greaterEqualThan(left.getValueAsJson(),right.getValueAsJson());
+        break;
+      case AGG_FUNCTION:
+        break;
+      case FUNCTION:
+        break;
+      case LIKE:
+        // result = MathUtils.like(left.getValueAsJson(),right.getValueAsJson(),value);
+        break;
+      case IN:
+        //TODO
+//            JsonObject val = null;
+//            JsonObject set = null;
+//            if(left.getValueAsJson().getString("type").equals("FIELD")){
+//               val = left.getValueAsJson();
+//               set = right.getValueAsJson();
+//            }
+//            else{
+//               val = right.getValueAsJson();
+//               set= left.getValueAsJson();
+//            }
+//            result =  MathUtils.checkIfIn(val,set);
+        // check conditino
+        // rerturn field in set
+        break;
+
+      case ROW_CONSTANT:
+        //TODO
+        break;
+    }
+  return null;
+  }
 
 
 
+  ArrayList<Query> createLuceneQuerys(HashMap<String, Cache> indexCaches, FilterOperatorNode root){
+    ArrayList<Query> result = new ArrayList<>();
+    ArrayList<Query> left = null;
+    ArrayList<Query> right = null;
+    switch (root.getType()) {
+
+      case AND: {
+        left = createLuceneQuerys(indexCaches, root.getLeft());
+        right = createLuceneQuerys(indexCaches, root.getRight());
+      }
+      break;
+      case OR: {
+       left = createLuceneQuerys(indexCaches, root.getLeft());
+        right = createLuceneQuerys(indexCaches, root.getRight());
+        //if(left !=null && right !=null){
+        //use sketches to check
+      }
+      break;
+      default: {
+        System.out.println("SubQual " + root.getType());
+        FilterConditionContext qual = (FilterConditionContext) getSubLucene(indexCaches, root);
+        if(qual!=null)
+          result.add(qual.toBuilder().build());
+      }
+      if(left!=null)
+        result.addAll(left);
+      if(right!=null)
+        result.addAll(right);
+
+    }
+    return result;
+  }
 
 
 //    org.infinispan.query.dsl.Query lucenequery = qf.from(LeadsIndexString.class)
@@ -134,22 +231,20 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
 //            .having("attributeValue").eq(lstStr.get(randomInd))
 //            .toBuilder().build();
 
-    return null;
-  }
+
   private boolean checkIndex_usage() {
     System.out.println("Check if fields are indexed");
 
     JsonArray fields = inputSchema.getArray("fields");
     Iterator<Object> iterator = fields.iterator();
     String columnName = null;
-    indexCaches = new ArrayList<>();
+    indexCaches = new HashMap<>();
     while (iterator.hasNext()) {
       JsonObject tmp = (JsonObject) iterator.next();
       columnName = tmp.getString("name");
       System.out.print("Check if exists: " + "." + columnName + " ");
       if(imanager.getCacheManager().cacheExists(columnName)) {
-
-        indexCaches.add((Cache) imanager.getIndexedPersistentCache(columnName));
+        indexCaches.put(columnName, (Cache) imanager.getIndexedPersistentCache(columnName));
         System.out.println(" exists!");
       }else
         System.out.println(" does not exist!");

@@ -17,6 +17,35 @@ import java.util.Map;
 public class FilterOperatorNode {
    FilterOpType type;
    FilterOperatorNode left;
+
+   public FilterOperatorNode getRight() {
+      return right;
+   }
+
+   public void setRight(FilterOperatorNode right) {
+      this.right = right;
+   }
+
+   public FilterOperatorNode getLeft() {
+      return left;
+   }
+
+   public void setLeft(FilterOperatorNode left) {
+      this.left = left;
+   }
+
+   public FilterOpType getType() {
+      return type;
+   }
+
+   public void setType(FilterOpType type) {
+      this.type = type;
+   }
+
+   public void setValue(JsonObject value) {
+      this.value = value;
+   }
+
    FilterOperatorNode right;
    JsonObject value;
    public FilterOperatorNode(JsonElement node){
@@ -54,6 +83,7 @@ public class FilterOperatorNode {
 
    }
 
+   //
    public Object CreateQuery(QueryBuilder q){
       FilterConditionContext result =null;
       FilterConditionContext left=(FilterConditionContext)CreateQuery(q);
@@ -334,7 +364,9 @@ public class FilterOperatorNode {
       return value.getObject("body").getObject("datum").getObject("body").getValue("val").toString();
    }
 
-   private JsonObject getValueAsJson() {
+
+
+   public JsonObject getValueAsJson() {
       return value;
    }
 
