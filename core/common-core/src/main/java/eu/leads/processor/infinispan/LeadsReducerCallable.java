@@ -75,6 +75,9 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
             System.err.println("Index was not installed serious error exit...");
             System.exit(-1);
         }
+        System.err.println("LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache().size());
+        profilerLog.error("MRLOG: LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache()
+                .size());
         for(Map.Entry<String,Integer> entry : index.getKeysIterator()){
             LocalIndexKeyIterator iterator =
                 (LocalIndexKeyIterator) index.getKeyIterator(entry.getKey(),entry.getValue());

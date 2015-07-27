@@ -30,4 +30,23 @@ public class LocalDataFilter<K,V> implements KeyValueFilter<K, V> {
         return result;
 
     }
+
+//    @Override
+    public V filterAndConvert(K key, V value, Metadata metadata) {
+        boolean result = false;
+        //        event.start("dataFilter " + key.toString());
+        if(cdl.localNodeIsPrimaryOwner(key))
+            result=true;
+        //        event.end();
+        if(result){
+            return value;
+        }
+        else
+            return null;
+    }
+
+//    @Override
+    public V convert(K key, V value, Metadata metadata) {
+        return value;
+    }
 }

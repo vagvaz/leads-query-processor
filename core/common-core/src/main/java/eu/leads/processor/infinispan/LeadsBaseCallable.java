@@ -13,6 +13,8 @@ import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
+import org.infinispan.filter.Converter;
+import org.infinispan.filter.KeyValueFilter;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.slf4j.Logger;
@@ -140,21 +142,23 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //    for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
 //      if (!cdl.localNodeIsPrimaryOwner(key))
 //        continue;
-      CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(new LocalDataFilter<K, V>(cdl));
-      profExecute.end();
-      try {
-        for (Object object : iterable) {
-          Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
+    Object filter = new LocalDataFilter<K,V>(cdl);
+    CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(
+        (KeyValueFilter<? super K, ? super V>) filter);
+//        .converter((Converter<? super K, ? super V, ?>) filter);
+    profExecute.end();
+    try {
+      for (Object object : iterable) {
+        Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
 
-          //      V value = inputCache.get(key);
-          K key = (K) entry.getKey();
-          V value = (V) entry.getValue();
+        //      V value = inputCache.get(key);
+        K key = (K) entry.getKey();
+        V value = (V) entry.getValue();
 
-          if (value != null) {
-            profExecute.start("ExOn" + (++count));
-            executeOn((K) key, value);
-            profExecute.end();
-          }
+        if (value != null) {
+          profExecute.start("ExOn" + (++count));
+          executeOn((K) key, value);
+          profExecute.end();
         }
         iterable.close();
       }catch(Exception e){

@@ -309,7 +309,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-            false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS);
+            false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS);
 
       } else { //Use leveldb
         result = new ConfigurationBuilder();
@@ -329,7 +329,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-            false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
+            false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS)
             .build();
       }
     } else { //do not use persistence
@@ -341,7 +341,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
           .indexing().index(Index.NONE).transaction().transactionMode(
           TransactionMode.NON_TRANSACTIONAL).compatibility().enable()
           .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-          false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
+          false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS)
           .build();
     }
 
@@ -636,7 +636,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         .fetchPersistentState(true)
         .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
         .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-            false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
+            false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS)
         .build();
     manager.defineConfiguration(cacheName, configuration);
     Cache startedCache = manager.getCache(cacheName);
@@ -705,7 +705,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-                false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
+                false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS)
             .build();
 
       } else { //Use leveldb
@@ -723,7 +723,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
-            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
+            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS)
             .build();
       }
     } else { //do not use persistence
@@ -732,7 +732,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
           .cacheMode(CacheMode.DIST_SYNC)
           .hash().numOwners(1)
           .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility().enable()//.marshaller(new TupleMarshaller())
-          .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
+          .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS)
           .build();
     }
   }

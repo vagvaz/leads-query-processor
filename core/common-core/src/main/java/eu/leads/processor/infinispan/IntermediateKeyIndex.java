@@ -19,15 +19,16 @@ public class IntermediateKeyIndex {
     }
 
     public void put(String key, Object value){
-        Integer count = keysCache.get(key);
-        if(count == null){
-            count = 0;
+        synchronized (this) {
+            Integer count = keysCache.get(key);
+            if (count == null) {
+                count = 0;
+            } else {
+                count++;
+            }
+            dataCache.put(key + count.toString(), value);
+            keysCache.put(key, count);
         }
-        else{
-            count++;
-        }
-        dataCache.put(key+count.toString(),value);
-        keysCache.put(key,count);
     }
 
     public Set<Map.Entry<String,Integer>> getKeysIterator(){
@@ -38,5 +39,19 @@ public class IntermediateKeyIndex {
         return new LocalIndexKeyIterator(key,counter,dataCache);
     }
 
+    public Map<String, Integer> getKeysCache() {
+        return keysCache;
+    }
 
+    public void setKeysCache(Map<String, Integer> keysCache) {
+        this.keysCache = keysCache;
+    }
+
+    public Map<String, Object> getDataCache() {
+        return dataCache;
+    }
+
+    public void setDataCache(Map<String, Object> dataCache) {
+        this.dataCache = dataCache;
+    }
 }
