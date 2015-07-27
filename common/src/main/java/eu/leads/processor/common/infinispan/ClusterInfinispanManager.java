@@ -76,11 +76,17 @@ public class ClusterInfinispanManager implements InfinispanManager {
    */
   public ClusterInfinispanManager() {
     host = "0.0.0.0";
+    maxEntries = LQPConfiguration.getInstance().getConfiguration().getInt("node.infinispan.maxentries",5000);
+    System.out.println("maximum entries are " + maxEntries);
+    log.error("maximum entries are " + maxEntries);
     serverPort = 11222;
   }
 
   public ClusterInfinispanManager(EmbeddedCacheManager manager) {
     this.manager = manager;
+    maxEntries = LQPConfiguration.getInstance().getConfiguration().getInt("node.infinispan.maxentries",5000);
+    System.out.println("maximum entries are " + maxEntries);
+    log.error("maximum entries are " + maxEntries);
     initDefaultCacheConfig();
   }
 
@@ -99,8 +105,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
   @Override
   public void startManager(String configurationFile)  {
 
-    currentComponent = LQPConfiguration.getInstance().getConfiguration().getString("node.current.component");
-    maxEntries = LQPConfiguration.getInstance().getConfiguration().getInt("node.infinispan.maxentries",3000);
+    currentComponent = LQPConfiguration.getInstance().getConfiguration().getString(
+        "node.current.component");
     externalIP = LQPConfiguration.getInstance().getConfiguration().getString(StringConstants.PUBLIC_IP);
     if(currentComponent == null)
       currentComponent = "testingComponents-"+UUID.randomUUID();
