@@ -1,15 +1,11 @@
 package eu.leads.processor.core;
 
 import com.mongodb.util.JSON;
-import com.sun.jersey.core.util.Base64;
 import org.bson.BSONObject;
 import org.bson.BasicBSONDecoder;
 import org.bson.BasicBSONEncoder;
 import org.bson.BasicBSONObject;
 import org.infinispan.commons.marshall.AdvancedExternalizer;
-import org.infinispan.commons.marshall.Externalizer;
-import org.infinispan.commons.marshall.SerializeWith;
-import org.infinispan.commons.util.Util;
 
 import java.io.*;
 import java.util.*;

@@ -6,7 +6,6 @@ import org.apache.hadoop.io.MD5Hash;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 

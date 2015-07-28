@@ -1,8 +1,8 @@
 package eu.leads.infext.logging.redirect;
 
-import java.io.ByteArrayOutputStream; 
-import java.io.IOException; 
-import java.util.logging.Level; 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger; 
 
 

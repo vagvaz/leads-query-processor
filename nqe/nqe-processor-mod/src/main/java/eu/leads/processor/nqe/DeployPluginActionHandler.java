@@ -21,7 +21,6 @@ import org.infinispan.commons.api.BasicCache;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.vertx.java.core.json.JsonObject;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

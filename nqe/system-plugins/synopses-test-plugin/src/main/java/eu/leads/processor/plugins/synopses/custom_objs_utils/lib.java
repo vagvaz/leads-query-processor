@@ -1,12 +1,9 @@
 package eu.leads.processor.plugins.synopses.custom_objs_utils;
+
 import eu.leads.processor.plugins.synopses.slid_wind_structs.slidingCMSketch;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 
 public class lib {

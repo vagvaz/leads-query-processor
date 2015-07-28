@@ -1,20 +1,7 @@
 package eu.leads.utils;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.regex.Pattern;
-
+import eu.leads.datastore.datastruct.Cell;
+import eu.leads.datastore.datastruct.URIVersion;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
@@ -23,8 +10,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import eu.leads.datastore.datastruct.Cell;
-import eu.leads.datastore.datastruct.URIVersion;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 public class LEADSUtils {
 

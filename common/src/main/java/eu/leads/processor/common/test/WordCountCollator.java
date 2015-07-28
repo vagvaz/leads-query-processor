@@ -2,13 +2,7 @@ package eu.leads.processor.common.test;
 
 import org.infinispan.distexec.mapreduce.Collator;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Collates reduced results by grouping them into the top K most frequent words.

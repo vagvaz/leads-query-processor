@@ -1,31 +1,19 @@
 package eu.leads.infext.python;
 
-import java.io.BufferedReader;
+import eu.leads.PropertiesSingleton;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.lang.StringUtils;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.commons.lang.CharSet;
-import org.apache.commons.lang.StringUtils;
-import org.zeromq.ZContext;
-import org.zeromq.ZMQ;
-import org.zeromq.ZMQ.Context;
-import org.zeromq.ZMQ.PollItem;
-import org.zeromq.ZMQ.Poller;
-import org.zeromq.ZMQ.Socket;
-
-import scala.Array;
-import eu.leads.PropertiesSingleton;
 
 public class PythonQueueCall {
 

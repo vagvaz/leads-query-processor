@@ -32,10 +32,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.regex.Pattern;
-
-import org.apache.http.Header;
 
 /**
  * @author Yasser Ganjisaffar <lastname at gmail dot com>

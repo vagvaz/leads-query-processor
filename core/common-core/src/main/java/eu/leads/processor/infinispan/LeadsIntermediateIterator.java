@@ -3,9 +3,7 @@ package eu.leads.processor.infinispan;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.utils.ProfileEvent;
 import org.infinispan.Cache;
-import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.CloseableIterable;
-import org.infinispan.context.Flag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

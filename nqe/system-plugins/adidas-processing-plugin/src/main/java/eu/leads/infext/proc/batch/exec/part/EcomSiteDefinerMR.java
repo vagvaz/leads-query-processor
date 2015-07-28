@@ -1,27 +1,18 @@
 package eu.leads.infext.proc.batch.exec.part;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-
+import eu.leads.datastore.datastruct.Cell;
+import eu.leads.infext.proc.batch.mapreduce.DefaultReducer;
+import eu.leads.infext.proc.batch.mapreduce.EcomSiteDefinerMapper;
+import eu.leads.infext.proc.com.categorization.ecom.EcommerceSiteExtractionSchemaDeterminer;
+import eu.leads.infext.proc.com.categorization.ecom.model.EcomPageDictionary;
+import eu.leads.infext.proc.com.categorization.ecom.model.EcomSiteDictionary;
+import eu.leads.utils.LEADSUtils;
 import org.infinispan.Cache;
 import org.infinispan.distexec.mapreduce.MapReduceTask;
 import org.infinispan.distexec.mapreduce.Mapper;
 import org.infinispan.distexec.mapreduce.Reducer;
 
-import eu.leads.datastore.AbstractDataStore;
-import eu.leads.datastore.datastruct.Cell;
-import eu.leads.datastore.datastruct.URIVersion;
-import eu.leads.infext.proc.batch.mapreduce.DefaultReducer;
-import eu.leads.infext.proc.batch.mapreduce.EcomSiteDefinerMapper;
-import eu.leads.infext.proc.com.categorization.ecom.EcommerceClassification;
-import eu.leads.infext.proc.com.categorization.ecom.EcommerceSiteExtractionSchemaDeterminer;
-import eu.leads.infext.proc.com.categorization.ecom.model.EcomPageDictionary;
-import eu.leads.infext.proc.com.categorization.ecom.model.EcomSiteDictionary;
-import eu.leads.utils.LEADSUtils;
+import java.util.*;
 
 /***
  * 

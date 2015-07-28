@@ -3,24 +3,12 @@ package eu.leads.processor.infinispan.operators;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
-import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
-import eu.leads.processor.infinispan.LeadsMapper;
-import eu.leads.processor.infinispan.operators.mapreduce.ProjectMapper;
 import org.infinispan.Cache;
-import org.infinispan.distexec.DefaultExecutorService;
-import org.infinispan.distexec.DistributedExecutorService;
-import org.infinispan.distexec.DistributedTask;
-import org.infinispan.distexec.DistributedTaskBuilder;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 
 

@@ -2,7 +2,6 @@ package eu.leads.processor.infinispan;
 
 import eu.leads.processor.common.utils.ProfileEvent;
 import org.infinispan.filter.KeyValueFilter;
-import org.infinispan.filter.KeyValueFilterConverter;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 import org.infinispan.metadata.Metadata;
 import org.slf4j.Logger;

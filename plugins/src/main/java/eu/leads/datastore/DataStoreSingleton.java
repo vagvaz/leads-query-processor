@@ -1,14 +1,13 @@
 package eu.leads.datastore;
 
+import eu.leads.datastore.impl.CassandraCQLDataStore;
+import eu.leads.datastore.impl.LeadsDataStore;
+import org.apache.commons.configuration.Configuration;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
-import org.apache.commons.configuration.Configuration;
-
-import eu.leads.datastore.impl.CassandraCQLDataStore;
-import eu.leads.datastore.impl.LeadsDataStore;
 
 //import root.datastore.impl.HBaseDataStore;
 //import root.datastore.impl.HiveDataStore;

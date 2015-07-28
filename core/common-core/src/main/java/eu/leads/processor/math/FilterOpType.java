@@ -1,8 +1,5 @@
 package eu.leads.processor.math;
 
-import org.apache.tajo.plan.expr.CastEval;
-import org.apache.tajo.plan.expr.SignedEval;
-
 /**
  * Created by vagvaz on 9/24/14.
  */

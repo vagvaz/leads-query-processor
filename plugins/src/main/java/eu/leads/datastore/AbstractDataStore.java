@@ -1,15 +1,9 @@
 package eu.leads.datastore;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.URIVersion;
+
+import java.util.*;
 
 public abstract class AbstractDataStore {
 

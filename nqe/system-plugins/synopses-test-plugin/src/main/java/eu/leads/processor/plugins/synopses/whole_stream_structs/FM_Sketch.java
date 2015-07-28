@@ -1,18 +1,16 @@
 package eu.leads.processor.plugins.synopses.whole_stream_structs;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import cern.jet.random.engine.RandomEngine;
+import com.google.common.hash.Funnel;
+import com.google.common.hash.Hashing;
+import eu.leads.processor.plugins.synopses.custom_objs_utils.BitArray;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-import eu.leads.processor.plugins.synopses.custom_objs_utils.BitArray;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-
-import cern.jet.random.engine.RandomEngine;
-
-import com.google.common.hash.Funnel;
-import com.google.common.hash.Hashing;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 
 /**

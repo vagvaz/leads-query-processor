@@ -5,11 +5,11 @@ import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.CacheManagerFactory;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.plugins.PluginManager;
+import eu.leads.processor.common.plugins.PluginPackage;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.plugins.EventType;
-import eu.leads.processor.common.plugins.PluginManager;
-import eu.leads.processor.common.plugins.PluginPackage;
 import eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin;
 import org.infinispan.Cache;
 

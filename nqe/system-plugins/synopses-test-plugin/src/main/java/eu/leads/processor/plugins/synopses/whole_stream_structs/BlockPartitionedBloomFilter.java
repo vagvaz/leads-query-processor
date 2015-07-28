@@ -1,8 +1,8 @@
 package eu.leads.processor.plugins.synopses.whole_stream_structs;
 
-import java.util.Random;
-
 import com.google.common.hash.Funnel;
+
+import java.util.Random;
 
 public class BlockPartitionedBloomFilter<T> {
 	BloomFilter<T>[] blocks;

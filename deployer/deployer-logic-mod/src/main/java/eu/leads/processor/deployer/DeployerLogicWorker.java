@@ -19,7 +19,6 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
 
-import javax.xml.ws.WebServiceClient;
 import java.util.*;
 
 /**

@@ -1,14 +1,14 @@
 package eu.leads.infext.proc.realtime.env.pojo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
-
 import eu.leads.datastore.AbstractDataStore;
 import eu.leads.datastore.DataStoreSingleton;
 import eu.leads.infext.logging.redirect.StdLoggerRedirect;
 import eu.leads.infext.proc.realtime.wrapper.AbstractProcessing;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Properties;
 
 public abstract class AbstractExecutionPojo {
 	

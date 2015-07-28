@@ -10,7 +10,6 @@ import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.*;
 import eu.leads.processor.planner.PlanUtils;
-import eu.leads.processor.web.WP4Client;
 import leads.tajo.module.TaJoModule;
 import org.apache.hadoop.fs.Path;
 import org.apache.tajo.catalog.TableDesc;
@@ -21,7 +20,6 @@ import org.apache.tajo.util.KeyValueSet;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 

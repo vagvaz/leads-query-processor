@@ -11,7 +11,6 @@ import org.vertx.java.core.json.JsonObject;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
-import java.util.Map;
 
 /**
  * Created by vagvaz on 10/27/14.

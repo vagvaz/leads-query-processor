@@ -21,6 +21,7 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
     private LeadsReducer<kOut, vOut> reducer = null;
     private LeadsCollector collector;
     private String prefix;
+    private transient IntermediateKeyIndex index;
     String site;
 
     public LeadsReducerCallable(String cacheName, LeadsReducer<kOut, vOut> reducer, String prefix) {
@@ -61,13 +62,14 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
         //      if (!cdl.localNodeIsPrimaryOwner(key))
         //        continue;
         Cache dataCache = inputCache.getCacheManager().getCache(prefix+".data");
-        IntermediateKeyIndex index = null;
+        index = null;
+        EnsembleCacheUtils.waitForAllPuts();
         for(Object listener : dataCache.getListeners()){
             if(listener instanceof LocalIndexListener){
                 System.err.println("listener class is " + listener.getClass().toString());
                 LocalIndexListener localIndexListener = (LocalIndexListener) listener;
+                localIndexListener.waitForAllData();
                 index = localIndexListener.getIndex();
-                EnsembleCacheUtils.waitForAllPuts();
                 break;
             }
         }
@@ -75,7 +77,7 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
             System.err.println("Index was not installed serious error exit...");
             System.exit(-1);
         }
-        System.err.println("LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache().size());
+        System.err.println("LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache().size() + " input: " + inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size() );
         profilerLog.error("MRLOG: LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache()
                 .size());
         for(Map.Entry<String,Integer> entry : index.getKeysIterator()){
@@ -193,9 +195,12 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
     public void finalizeCallable() {
         System.err.println("reduce finalize reducer");
         reducer.finalizeTask();
+        ((Cache)index.getDataCache()).stop();
+        ((Cache)index.getKeysCache()).stop();
         System.err.println("reducer finalizee collector");
 //        collector.finalizeCollector();
         System.err.println("finalzie super");
+        EnsembleCacheUtils.waitForAllPuts();
         super.finalizeCallable();
     }
 }

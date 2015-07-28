@@ -1,10 +1,10 @@
 package eu.leads.infext.proc.realtime.hook.impl;
 
-import java.util.HashMap;
-
 import eu.leads.datastore.datastruct.MDFamily;
 import eu.leads.infext.proc.realtime.hook.AbstractHook;
 import eu.leads.utils.LEADSUtils;
+
+import java.util.HashMap;
 
 public class FQDNDefiningHook extends AbstractHook {
 

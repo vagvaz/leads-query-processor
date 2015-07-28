@@ -1,6 +1,7 @@
 package eu.leads.processor.plugins.pagerank.node;
 
 import gnu.trove.map.hash.THashMap;
+
 import java.util.TreeMap;
 
 public class FIPNode extends Node{

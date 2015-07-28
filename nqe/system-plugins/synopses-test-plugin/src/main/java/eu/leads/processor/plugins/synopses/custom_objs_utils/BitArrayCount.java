@@ -1,9 +1,9 @@
 package eu.leads.processor.plugins.synopses.custom_objs_utils;
 
-import java.math.RoundingMode;
-
 import com.google.common.math.LongMath;
 import com.google.common.primitives.Ints;
+
+import java.math.RoundingMode;
 
 public class BitArrayCount extends BitArrayAbstract {
 

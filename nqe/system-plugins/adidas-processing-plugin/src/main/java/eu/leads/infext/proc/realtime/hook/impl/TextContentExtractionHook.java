@@ -1,15 +1,10 @@
 package eu.leads.infext.proc.realtime.hook.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import eu.leads.datastore.DataStoreSingleton;
-import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.MDFamily;
-import eu.leads.datastore.datastruct.URIVersion;
 import eu.leads.infext.proc.com.maincontent.JerichoTextContentExtraction;
 import eu.leads.infext.proc.realtime.hook.AbstractHook;
+
+import java.util.HashMap;
 
 public class TextContentExtractionHook extends AbstractHook {
 	

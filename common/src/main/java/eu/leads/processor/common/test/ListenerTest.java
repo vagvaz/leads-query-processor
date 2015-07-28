@@ -1,6 +1,5 @@
 package eu.leads.processor.common.test;
 
-import eu.leads.processor.common.infinispan.InfinispanCluster;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.Cache;

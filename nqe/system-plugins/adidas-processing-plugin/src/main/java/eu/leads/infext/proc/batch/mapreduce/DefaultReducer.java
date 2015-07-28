@@ -1,8 +1,8 @@
 package eu.leads.infext.proc.batch.mapreduce;
 
-import java.util.Iterator;
-
 import org.infinispan.distexec.mapreduce.Reducer;
+
+import java.util.Iterator;
 
 public class DefaultReducer implements Reducer<Object, Object> {
 
