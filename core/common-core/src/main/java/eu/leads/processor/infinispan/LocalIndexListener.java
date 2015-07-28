@@ -2,28 +2,30 @@ package eu.leads.processor.infinispan;
 
 import eu.leads.processor.common.LeadsListener;
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.infinispan.IntermediateKeyIndex;
 import org.infinispan.Cache;
+import org.infinispan.context.Flag;
 import org.infinispan.notifications.Listener;
 import org.infinispan.notifications.cachelistener.annotation.CacheEntryCreated;
 import org.infinispan.notifications.cachelistener.annotation.CacheEntryModified;
 import org.infinispan.notifications.cachelistener.event.CacheEntryCreatedEvent;
 import org.infinispan.notifications.cachelistener.event.CacheEntryModifiedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
-
-import java.io.FileWriter;
-import java.util.Map;
 
 /**
  * Created by vagvaz on 16/07/15.
  */
-@Listener(sync = true,primaryOnly = true,clustered = false)
+@Listener(sync = false,primaryOnly = true,clustered = false)
 public class LocalIndexListener implements LeadsListener {
 
+    transient private volatile Object mutex ;
     String cacheName;
     transient IntermediateKeyIndex index;
+    transient Cache targetCache;
     transient Cache keysCache;
     transient Cache dataCache;
+    transient Logger log;
     public LocalIndexListener(InfinispanManager manager, String cacheName) {
         this.cacheName = cacheName;
     }
@@ -68,6 +70,9 @@ public class LocalIndexListener implements LeadsListener {
         if(event.getKey() instanceof ComplexIntermediateKey) {
             ComplexIntermediateKey key = (ComplexIntermediateKey) event.getKey();
             index.put(key.getKey(),event.getValue());
+            synchronized (mutex){
+                mutex.notifyAll();
+            }
         }
 
     }
@@ -94,9 +99,12 @@ public class LocalIndexListener implements LeadsListener {
     }
 
     @Override public void initialize(InfinispanManager manager,JsonObject conf) {
+        this.targetCache = (Cache) manager.getPersisentCache(cacheName);
         this.keysCache = manager.getLocalCache(cacheName+".index.keys");
         this.dataCache = manager.getLocalCache(cacheName+".index.data");
         this.index = new IntermediateKeyIndex(keysCache,dataCache);
+        log = LoggerFactory.getLogger(LocalIndexListener.class);
+        mutex = new Object();
     }
 
     @Override public void initialize(InfinispanManager manager) {
@@ -105,5 +113,22 @@ public class LocalIndexListener implements LeadsListener {
 
     @Override public String getId() {
         return this.getClass().toString();
+    }
+
+    void waitForAllData(){
+        synchronized (mutex){
+            int size  = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size();
+            System.err.println("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
+            log.error("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
+            while( size != dataCache.size()){
+                System.err.println("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
+                log.error("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
+                try {
+                    mutex.wait(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

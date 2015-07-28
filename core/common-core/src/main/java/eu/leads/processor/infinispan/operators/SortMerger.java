@@ -6,7 +6,9 @@ import eu.leads.processor.core.TupleComparator;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * Created with IntelliJ IDEA.

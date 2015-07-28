@@ -8,11 +8,7 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.List;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * Created by vagvaz on 2/18/15.

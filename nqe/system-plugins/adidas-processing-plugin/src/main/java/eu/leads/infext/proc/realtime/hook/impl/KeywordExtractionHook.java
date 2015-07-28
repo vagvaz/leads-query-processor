@@ -1,9 +1,5 @@
 package eu.leads.infext.proc.realtime.hook.impl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-
 import eu.leads.datastore.datastruct.MDFamily;
 import eu.leads.datastore.datastruct.UrlTimestamp;
 import eu.leads.infext.proc.com.indexing.DocumentKeywordSearch;
@@ -12,6 +8,10 @@ import eu.leads.infext.proc.com.keyword.RelevanceScore;
 import eu.leads.infext.proc.com.keyword.SentimentScore;
 import eu.leads.infext.proc.realtime.hook.AbstractHook;
 import eu.leads.processor.sentiment.Sentiment;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 public class KeywordExtractionHook extends AbstractHook {
 	

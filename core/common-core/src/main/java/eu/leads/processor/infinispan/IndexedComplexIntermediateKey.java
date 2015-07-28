@@ -1,8 +1,7 @@
 package eu.leads.processor.infinispan;
 
-import org.hibernate.search.annotations.*;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * Created by vagvaz on 3/7/15.

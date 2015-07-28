@@ -1,6 +1,5 @@
 package eu.leads.processor.infinispan.operators;
 
-import com.hazelcast.logging.LoggerFactory;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.infinispan.QualFilter;
 import eu.leads.processor.math.FilterOperatorTree;

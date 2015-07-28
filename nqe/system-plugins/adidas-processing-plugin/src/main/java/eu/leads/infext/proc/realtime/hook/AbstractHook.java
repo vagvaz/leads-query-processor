@@ -1,19 +1,13 @@
 package eu.leads.infext.proc.realtime.hook;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.SortedSet;
-
 import eu.leads.datastore.AbstractDataStore;
 import eu.leads.datastore.DataStoreSingleton;
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.MDFamily;
 import eu.leads.datastore.datastruct.URIVersion;
-import eu.leads.utils.LEADSUtils;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 public abstract class AbstractHook {
 	

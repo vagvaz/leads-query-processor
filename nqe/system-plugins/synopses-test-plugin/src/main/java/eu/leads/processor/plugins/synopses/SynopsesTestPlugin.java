@@ -1,8 +1,8 @@
 package eu.leads.processor.plugins.synopses;
 
 import cern.jet.random.engine.RandomEngine;
-import eu.leads.processor.core.Tuple;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.PluginInterface;
 import eu.leads.processor.plugins.synopses.custom_objs_utils.StringFunnel;
 import eu.leads.processor.plugins.synopses.whole_stream_structs.BloomFilter;

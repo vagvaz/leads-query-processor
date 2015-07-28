@@ -3,8 +3,6 @@ package eu.leads.processor.plugins.pagerank.graph;
 import cern.jet.random.Uniform;
 import cern.jet.random.engine.RandomEngine;
 import comm.ComChannel;
-import comm.Coordinator;
-import comm.Message;
 import comm.Worker;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import gnu.trove.iterator.TObjectIntIterator;

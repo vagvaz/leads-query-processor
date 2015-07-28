@@ -1,6 +1,5 @@
 package eu.leads.processor.core;
 
-import com.sun.jersey.core.util.Base64;
 import org.bson.BSONObject;
 import org.bson.BasicBSONDecoder;
 import org.bson.BasicBSONEncoder;

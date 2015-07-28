@@ -3,8 +3,6 @@ package eu.leads.processor.plugins.pagerank.graph;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.plugins.pagerank.node.FIPNode;
 import eu.leads.processor.plugins.pagerank.utils.Const;
-import gnu.trove.iterator.TIntObjectIterator;
-import gnu.trove.procedure.TObjectObjectProcedure;
 import org.apache.commons.configuration.Configuration;
 
 import java.util.Map.Entry;

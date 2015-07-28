@@ -1,7 +1,7 @@
 package eu.leads.processor.plugins.transform;
 
-import eu.leads.processor.core.Tuple;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.PluginInterface;
 import org.apache.commons.configuration.Configuration;
 import org.infinispan.Cache;

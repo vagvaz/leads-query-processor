@@ -1,14 +1,9 @@
 package eu.leads.infext.proc.com.categorization.ecom;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-
 import eu.leads.infext.logging.ErrorStrings;
 import eu.leads.infext.python.PythonQueueCall;
-import eu.leads.utils.LEADSUtils;
+
+import java.util.List;
 
 public class EcommerceNewPageTypeEvaluation {
 	

@@ -1,14 +1,12 @@
 package eu.leads.processor.common.infinispan;
 
 import eu.leads.processor.common.utils.PrintUtilities;
-
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.concurrent.NotifyingFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by vagvaz on 20/05/15.

@@ -1,11 +1,12 @@
 package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
-import eu.leads.processor.infinispan.*;
+import eu.leads.processor.infinispan.GenericMapperCallable;
+import eu.leads.processor.infinispan.GenericReducerCallable;
+import eu.leads.processor.infinispan.LeadsReducer;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;

@@ -1,20 +1,17 @@
 package eu.leads.infext.proc.com.categorization.newsblog;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
+import eu.leads.PropertiesSingleton;
+import eu.leads.infext.python.PythonQueueCall;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 
-import eu.leads.PropertiesSingleton;
-import eu.leads.infext.python.PythonQueueCall;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.List;
 
 public class NewsBlogArticleAnalysis {
 	

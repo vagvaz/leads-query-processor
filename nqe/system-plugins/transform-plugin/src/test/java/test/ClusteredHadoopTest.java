@@ -1,7 +1,6 @@
 package test;
 
 import eu.leads.processor.common.StringConstants;
-//import eu.leads.processor.common.infinispan.CacheManagerFactory;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.plugins.PluginManager;
@@ -11,13 +10,13 @@ import eu.leads.processor.common.utils.storage.LeadsStorage;
 import eu.leads.processor.common.utils.storage.LeadsStorageFactory;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.plugins.transform.TransformPlugin;
-import eu.leads.processor.plugins.PluginInterface;
-//import eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin;
 import org.infinispan.Cache;
-import eu.leads.processor.plugins.transform.TransformPlugin;
 
 import java.util.ArrayList;
 import java.util.Properties;
+
+//import eu.leads.processor.common.infinispan.CacheManagerFactory;
+//import eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin;
 
 /**
  * Created by vagvaz on 6/8/14.

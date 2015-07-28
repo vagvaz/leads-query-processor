@@ -1,29 +1,13 @@
 package eu.leads.infext.proc.realtime.hook.impl;
 
-import java.io.Reader;
+import eu.leads.datastore.datastruct.MDFamily;
+import eu.leads.infext.proc.com.lang.JavaLanguageDetection;
+import eu.leads.infext.proc.realtime.hook.AbstractHook;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.Map.Entry;
-
-
-
-
-
-import com.cybozu.labs.langdetect.Detector;
-import com.cybozu.labs.langdetect.DetectorFactory;
-import com.cybozu.labs.langdetect.LangDetectException;
-
-import eu.leads.datastore.DataStoreSingleton;
-import eu.leads.datastore.datastruct.Cell;
-import eu.leads.datastore.datastruct.MDFamily;
-import eu.leads.datastore.datastruct.URIVersion;
-import eu.leads.infext.proc.com.lang.JavaLanguageDetection;
-import eu.leads.infext.proc.realtime.hook.AbstractHook;
-import eu.leads.utils.LEADSUtils;
 
 public class LanguageDetectionHook extends AbstractHook {
 	

@@ -1,9 +1,9 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
-import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.core.Tuple;
+import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.infinispan.LeadsReducer;
 import eu.leads.processor.math.MathUtils;
 import org.infinispan.Cache;

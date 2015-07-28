@@ -1,12 +1,13 @@
 package eu.leads.datastore.impl;
 
+import eu.leads.processor.web.QueryResults;
+import eu.leads.processor.web.QueryStatus;
+import eu.leads.processor.web.WebServiceClient;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
-import eu.leads.processor.web.QueryResults;
-import eu.leads.processor.web.QueryStatus;
-import eu.leads.processor.web.WebServiceClient;
 import static java.lang.Thread.sleep;
 
 public class LeadsQueryInterface {

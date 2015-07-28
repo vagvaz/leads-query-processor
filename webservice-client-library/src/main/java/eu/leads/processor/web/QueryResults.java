@@ -1,7 +1,6 @@
 package eu.leads.processor.web;
 
 import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonElement;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.ArrayList;

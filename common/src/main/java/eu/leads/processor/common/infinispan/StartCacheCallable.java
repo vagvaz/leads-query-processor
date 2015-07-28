@@ -1,15 +1,8 @@
 package eu.leads.processor.common.infinispan;
 
 import org.infinispan.Cache;
-import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.Configuration;
-import org.infinispan.configuration.cache.ConfigurationBuilder;
-import org.infinispan.configuration.global.GlobalConfiguration;
-import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.distexec.DistributedCallable;
-import org.infinispan.eviction.EvictionStrategy;
-import org.infinispan.manager.EmbeddedCacheManager;
-import org.infinispan.transaction.TransactionMode;
 
 import java.io.Serializable;
 import java.util.Set;

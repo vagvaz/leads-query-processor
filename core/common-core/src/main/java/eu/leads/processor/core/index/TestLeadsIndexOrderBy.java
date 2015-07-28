@@ -3,8 +3,6 @@ package eu.leads.processor.core.index;
 import eu.leads.processor.common.infinispan.CacheManagerFactory;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.core.index.LeadsIndex;
-import eu.leads.processor.core.index.LeadsIndexString;
 import org.apache.commons.lang.RandomStringUtils;
 import org.infinispan.Cache;
 import org.infinispan.query.SearchManager;

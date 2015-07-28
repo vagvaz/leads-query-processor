@@ -1,14 +1,5 @@
 package eu.leads.infext.proc.batch.exec;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.SortedSet;
-
 import eu.leads.datastore.AbstractDataStore;
 import eu.leads.datastore.DataStoreSingleton;
 import eu.leads.datastore.datastruct.Cell;
@@ -19,6 +10,8 @@ import eu.leads.infext.proc.com.categorization.ecom.EcommerceSiteExtractionSchem
 import eu.leads.infext.proc.com.categorization.ecom.model.EcomPageDictionary;
 import eu.leads.infext.proc.com.categorization.ecom.model.EcomSiteDictionary;
 import eu.leads.utils.LEADSUtils;
+
+import java.util.*;
 
 public class EcomSiteDefinerBatch {
 

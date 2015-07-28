@@ -11,7 +11,6 @@ import eu.leads.processor.core.Tuple;
 import eu.leads.processor.sentiment.SentimentAnalysisModule;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.bson.BSONObject;
-import org.bson.BasicBSONEncoder;
 import org.bson.BasicBSONObject;
 import org.infinispan.Cache;
 import org.infinispan.client.hotrod.RemoteCache;
@@ -28,7 +27,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.ConcurrentMap;
 
 import static data.LoadAmplab.plugs.PAGERANK;
 import static data.LoadAmplab.plugs.SENTIMENT;

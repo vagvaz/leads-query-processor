@@ -100,11 +100,10 @@ public class EnsembleCacheUtils {
                 while(threads.size() - completedThreads.size() > threadBatch) {
                     for (Thread t : threads) {
                         try {
-                            t.join();
+                            t.join(100);
                             if (!t.isAlive()) {
                                 completedThreads.add(t);
                                 if(threads.size() - completedThreads.size() < threadBatch) {
-                                    //                 System.out.println("t " + threads.size() + "  c " + completedThreads.size() + " so " + (threads.size() - completedThreads.size() < threadBatch));
                                     break;
                                 }
                             }

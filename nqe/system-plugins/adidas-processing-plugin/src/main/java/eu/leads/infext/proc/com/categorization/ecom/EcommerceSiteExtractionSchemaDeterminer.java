@@ -1,15 +1,12 @@
 package eu.leads.infext.proc.com.categorization.ecom;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import eu.leads.infext.logging.ErrorStrings;
 import eu.leads.infext.proc.com.categorization.ecom.model.EcomPageDictionary;
 import eu.leads.infext.proc.com.categorization.ecom.model.EcomSiteDictionary;
 import eu.leads.infext.python.PythonQueueCall;
-import eu.leads.utils.LEADSUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EcommerceSiteExtractionSchemaDeterminer {
 

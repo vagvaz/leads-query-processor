@@ -17,16 +17,15 @@
 
 package eu.leads.crawler.c4j;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
-import eu.leads.datastore.DataStoreSingleton;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 /**
  * @author Yasser Ganjisaffar <lastname at gmail dot com>

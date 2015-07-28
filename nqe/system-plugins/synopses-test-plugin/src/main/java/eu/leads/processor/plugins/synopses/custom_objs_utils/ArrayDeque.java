@@ -1,6 +1,9 @@
 package eu.leads.processor.plugins.synopses.custom_objs_utils;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.*;
 
 

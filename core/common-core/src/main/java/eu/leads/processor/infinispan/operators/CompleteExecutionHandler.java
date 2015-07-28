@@ -5,8 +5,6 @@ import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.net.Node;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.Set;
-
 /**
  * Created by vagvaz on 4/16/15.
  */

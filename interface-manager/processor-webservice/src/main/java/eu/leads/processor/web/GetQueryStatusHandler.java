@@ -38,7 +38,7 @@ public class GetQueryStatusHandler implements Handler<HttpServerRequest> {
     public void handle(HttpServerRequest request) {
         request.response().setStatusCode(200);
         request.response().putHeader(WebStrings.CONTENT_TYPE, WebStrings.APP_JSON);
-        log.info("Get Query Results Request");
+//        log.info("Get Query Results Request");
         String reqId = UUID.randomUUID().toString();
         GetQueryStatusReplyHandler replyHandler = new GetQueryStatusReplyHandler(reqId, request);
 
@@ -85,7 +85,7 @@ public class GetQueryStatusHandler implements Handler<HttpServerRequest> {
                 replyForError(message);
                 return;
             }
-            log.info("GetStatus webservice received reply " + message.getString(MessageUtils.TO) + " " + message.getValue(MessageUtils.MSGID).toString());
+//            log.info("GetStatus webservice received reply " + message.getString(MessageUtils.TO) + " " + message.getValue(MessageUtils.MSGID).toString());
             message.removeField(MessageUtils.FROM);
             message.removeField(MessageUtils.TO);
             message.removeField(MessageUtils.COMTYPE);

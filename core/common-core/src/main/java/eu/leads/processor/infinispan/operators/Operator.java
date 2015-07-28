@@ -4,9 +4,6 @@ package eu.leads.processor.infinispan.operators;
 import eu.leads.processor.infinispan.LeadsBaseCallable;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.Collection;
-import java.util.Map;
-
 public interface Operator{
     void failCleanup();
 

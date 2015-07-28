@@ -1,11 +1,11 @@
 package eu.leads.processor.plugins.synopses.whole_stream_structs;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.hash.Funnel;
 import com.google.common.hash.Hashing;
 import eu.leads.processor.plugins.synopses.custom_objs_utils.BitArrayCount;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 
 public class CountingBloomFilter<T> {

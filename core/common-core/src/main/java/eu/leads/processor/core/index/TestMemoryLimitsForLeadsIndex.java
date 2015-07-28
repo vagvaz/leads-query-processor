@@ -1,7 +1,7 @@
 package eu.leads.processor.core.index;
 
-import eu.leads.processor.core.index.LeadsIndexString;
 import org.apache.commons.lang.RandomStringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

@@ -1,13 +1,12 @@
 package eu.leads.infext.proc.com.indexing;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
-
 import eu.leads.datastore.DataStoreSingleton;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class KeywordsListSingleton {
 
