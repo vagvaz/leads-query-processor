@@ -26,7 +26,8 @@ public class leadsCli {
         InitializeWebClient(args);
         System.out.println("=== Leads Command Line Interface ===");
 
-        String sql = "";
+        ArrayList<String> sqlCmds = new ArrayList<>();
+        String nonTerminalString="";
         BufferedReader in = null;
         try {
 
@@ -36,49 +37,54 @@ public class leadsCli {
                 System.out.print("Using default username leads ");
 //                username = in.readLine();
                 username = "leads";
-                System.out.print("\nPlease enter your SQL query: ");
-                line = in.readLine();
+
 
                 do {
 
                     try {
+                        System.out.print("\nPlease enter your SQL query: ");
+                        line = in.readLine();
 
-                        if (!line.contains(";")) {
-                            StringBuilder everything = new StringBuilder();
-                            everything.append(line);
-                            while ((line = in.readLine()) != null && !line.equals("")) {
-                                everything.append(line);
-                                if (line.contains(";"))
-                                    break;
+                        nonTerminalString+=line;
+                        if (nonTerminalString.contains(";")) {
+                            String[] parts = nonTerminalString.split(";",0);
+                            for(int i=0;i<parts.length-1;i++) {
+                                if (parts[i].length() > 3)
+                                    sqlCmds.add(parts[i] + ";");
                             }
-                            System.out.println(everything.toString());
-                            sql = everything.toString();
-                        } else {
-                            sql = line;
+                            if(nonTerminalString.trim().endsWith(";")) {
+                                sqlCmds.add(parts[parts.length - 1]);
+                                nonTerminalString = "";
+                            }else{
+                                nonTerminalString +=parts[parts.length - 1];
+                            }
+                            if(sqlCmds.size()>0){
+                                int count=0;
+
+                                for(String sql:sqlCmds)
+                                {
+                                    count++;
+                                    if(sql.toLowerCase().equals("quit")) {
+                                        System.out.println("Exiting, Thank you");
+                                        System.exit(0);
+                                    }
+                                    System.out.println("#"+count+"/"+ sqlCmds.size() + " Executing command: " + sql);
+                                    send_query_and_wait(sql);
+                                }
+                                sqlCmds.clear();
+                            }
                         }
-
-                        String[] parts = sql.split(";");
-//                        System.out.println("#Sql commands: " + parts.length);
-
-                        //Get first command
-
-                        sql = parts[0] + ";";
-
                     } catch (Exception e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
+                        if(e instanceof  java.net.ConnectException){
+                            System.out.println("Exiting, Thank you");
+                            System.exit(0);
+                        }
                     }
-
-                    send_query_and_wait(sql);
-
-                    System.out.print("\nPlease enter your SQL query: ");
-                } while ((line = in.readLine()) != null);
+                } while (true);
 
             }
-
-        } catch (IOException e) {
-            System.err.println("IOException reading System.in" + e.toString());
-
         } catch (Exception e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();

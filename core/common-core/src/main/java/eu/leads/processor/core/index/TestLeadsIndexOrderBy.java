@@ -25,7 +25,7 @@ public class TestLeadsIndexOrderBy {
 //        InfinispanManager man2 = InfinispanClusterSingleton.getInstance().getManager();
 //        Cache cachefoo = (Cache) man2.getPersisentCache("queriesfoo");
         InfinispanManager man = CacheManagerFactory.createCacheManager();
-        Cache cache = (Cache) man.getPersisentCache("indexedCache");
+        Cache cache = (Cache) man.getIndexedPersistentCache("indexedCache");
 
         int numStrings = 5;// 10000
         int numTuples = 8;// 1500000

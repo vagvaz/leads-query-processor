@@ -667,7 +667,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       DistributedExecutorService des = new DefaultExecutorService(manager.getCache("clustered"));
       List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
       //
-      System.out.println("list " + list.size());
+      System.out.println(cacheName+"  " + list.size());
       for (Future<Void> future : list) {
         try {
           future.get(); // wait for task to complete
@@ -679,11 +679,11 @@ public class ClusterInfinispanManager implements InfinispanManager {
   }
 
   private void createIndexedCache(String name, Configuration configuration) {
-    manager.defineConfiguration(name,getCacheDefaultConfiguration(name));
+    manager.defineConfiguration(name,getIndexedCacheDefaultConfiguration(name));
     DistributedExecutorService des = new DefaultExecutorService(manager.getCache("clustered"));
     List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(name,true));
     //
-    System.out.println("list " + list.size());
+    System.out.println(" i "+ name +" " + list.size());
     for (Future<Void> future : list) {
       try {
         future.get(); // wait for task to complete
@@ -756,7 +756,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
   public Configuration getCacheDefaultConfiguration(String cacheName) {
     Configuration cacheConfig = null;
-    if(cacheName.equals("clustered") && cacheName.equals("default")){
+    if(cacheName.equals("clustered") || cacheName.equals("default")){
 
 
       cacheConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
@@ -784,7 +784,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
   public Configuration getIndexedCacheDefaultConfiguration(String cacheName) {
     Configuration cacheConfig = null;
-    if(cacheName.equals("clustered") && cacheName.equals("default")){
+    if(cacheName.equals("clustered") || cacheName.equals("default")){
 
 
       cacheConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())

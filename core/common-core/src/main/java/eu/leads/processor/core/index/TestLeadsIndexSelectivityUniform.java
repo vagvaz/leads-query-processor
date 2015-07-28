@@ -3,8 +3,6 @@ package eu.leads.processor.core.index;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.core.index.LeadsIndex;
-import eu.leads.processor.core.index.LeadsIndexString;
 import org.apache.commons.lang.RandomStringUtils;
 import org.infinispan.Cache;
 import org.infinispan.query.SearchManager;
@@ -24,10 +22,10 @@ public class TestLeadsIndexSelectivityUniform {
 //        InfinispanManager man2 = CacheManagerFactory.createCacheManager();
 //        Cache cachefoo = (Cache) man2.getPersisentCache("queriesfoo");
         InfinispanManager man = InfinispanClusterSingleton.getInstance().getManager();
-        Cache cache = (Cache) man.getPersisentCache("indexedCache");
-
-        int numStrings = 10000;// 10000
-        int numTuples = 150000;// 150000
+        Cache cache = (Cache) man.getIndexedPersistentCache("indexedCache");
+        System.out.println("Creating Tuples");
+        int numStrings = 10;// 10000
+        int numTuples = 150;// 150000
 
         // find number of generated tuples: run until memory exception
         List<String> lstStr = new ArrayList<>();
@@ -45,6 +43,7 @@ public class TestLeadsIndexSelectivityUniform {
             lstFloat.add(rand.nextFloat());
             lstLong.add(rand.nextLong());
         }
+        System.out.println("putting Tuples");
 
         for(int i=0;i<numTuples;i++){
             randomInd = rand.nextInt(numStrings);// uniform
@@ -63,6 +62,7 @@ public class TestLeadsIndexSelectivityUniform {
 
             cache.put("infinispanKey" + i, lInd);
         }
+        System.out.println("putting Tuples finished");
 
         List<Long> listTimes = new ArrayList<>();
 
@@ -72,7 +72,7 @@ public class TestLeadsIndexSelectivityUniform {
             SearchManager sm = org.infinispan.query.Search.getSearchManager(cache);
             QueryFactory qf = sm.getQueryFactory();
             randomInd = rand.nextInt(numStrings);// uniform
-            org.infinispan.query.dsl.Query lucenequery = qf.from(LeadsIndex.class)
+            org.infinispan.query.dsl.Query lucenequery = qf.from(LeadsIndexString.class)
                     .having("attributeName").eq("attributeName")
                     .and()
                     .having("attributeValue").eq(lstStr.get(randomInd))

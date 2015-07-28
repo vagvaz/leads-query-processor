@@ -119,15 +119,22 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
 
   Object getSubLucene(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
     FilterConditionContext result = null;
+    FilterConditionContext left = null;
+    FilterConditionContext right = null;
     if(root==null)
       return null;
-    FilterConditionContext left = (FilterConditionContext) getSubLucene(indexCaches,root.getLeft());
-    FilterConditionContext right = (FilterConditionContext) getSubLucene(indexCaches,root.getRight());
+    Object oleft = getSubLucene(indexCaches,root.getLeft());
+    Object oright =  getSubLucene(indexCaches,root.getRight());
+
+    if(oleft instanceof    FilterConditionContext)
+     left = (FilterConditionContext)oleft;
+    if(oright instanceof    FilterConditionContext)
+      right = (FilterConditionContext)oright;
 
     switch (root.getType()) {
       case EQUAL:
-        if(left !=null && right !=null)
-          return left.and().having("attributeValue").eq(right);//,right.getValueAsJson());
+        if(left !=null && oright !=null)
+          return left.and().having("attributeValue").eq(oright);//,right.getValueAsJson());
         break;
       case IS_NULL:
         // result = left.isValueNull();
@@ -136,12 +143,28 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
         //  result = !(MathUtils.equals(left.getValueAsJson(), right.getValueAsJson()));
         break;
       case FIELD:
-        String collumnName = MathUtils.getTextFrom(root.getValueAsJson());
-        if (indexCaches.containsValue(collumnName)) {
+        String collumnName = root.getValueAsJson().getObject("body").getObject("column").getString("name");
+        String type = root.getValueAsJson().getObject("body").getObject("column").getObject("dataType").getString("type");
+                //MathUtils.getTextFrom(root.getValueAsJson());
+
+        if (indexCaches.containsKey(collumnName)) {
+          
           SearchManager sm = org.infinispan.query.Search.getSearchManager(indexCaches.get(collumnName));
           QueryFactory qf = sm.getQueryFactory();
-          FilterConditionContext filterC = qf.from(LeadsIndex.class)
-                  .having("attributeName").eq(collumnName);
+          QueryBuilder Qb;
+          if (type.equals("TEXT"))
+            Qb = qf.from(LeadsIndexString.class);
+          else if (type.equals("FLOAT"))
+            Qb = qf.from(LeadsIndexString.class);
+          else if (type.equals("DOUBLE"))
+            Qb = qf.from(LeadsIndexString.class);
+          else if (type.equals("INT"))
+            Qb = qf.from(LeadsIndexString.class);
+          else if (type.equals("LONG"))
+            Qb = qf.from(LeadsIndexString.class);
+          else
+            Qb = qf.from(LeadsIndex.class);
+          FilterConditionContext filterC= Qb.having("attributeName").eq(collumnName);
           return filterC;
         }
         break;
@@ -150,40 +173,28 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
         // result = true;
         return MathUtils.getTextFrom(root.getValueAsJson());
       case LTH:
-        // result = MathUtils.lessThan(left.getValueAsJson(),right.getValueAsJson());
+        if(left !=null && oright !=null)
+          return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
+
         break;
       case LEQ:
-        //  result = MathUtils.lessEqualThan(left.getValueAsJson(),right.getValueAsJson());
+        if(left !=null && oright !=null)
+          return left.and().having("attributeValue").lte(oright);//,right.getValueAsJson());
         break;
       case GTH:
-        // result = MathUtils.greaterThan(left.getValueAsJson(),right.getValueAsJson());
+        if(left !=null && oright !=null)
+          return left.and().having("attributeValue").gt(oright);//,right.getValueAsJson());
         break;
       case GEQ:
-        // result = MathUtils.greaterEqualThan(left.getValueAsJson(),right.getValueAsJson());
+        if(left !=null && oright !=null)
+          return left.and().having("attributeValue").gte(oright);//,right.getValueAsJson());
         break;
-      case AGG_FUNCTION:
-        break;
-      case FUNCTION:
-        break;
+
       case LIKE:
-        // result = MathUtils.like(left.getValueAsJson(),right.getValueAsJson(),value);
-        break;
-      case IN:
-        //TODO
-//            JsonObject val = null;
-//            JsonObject set = null;
-//            if(left.getValueAsJson().getString("type").equals("FIELD")){
-//               val = left.getValueAsJson();
-//               set = right.getValueAsJson();
-//            }
-//            else{
-//               val = right.getValueAsJson();
-//               set= left.getValueAsJson();
-//            }
-//            result =  MathUtils.checkIfIn(val,set);
-        // check conditino
-        // rerturn field in set
-        break;
+        if(left !=null && oright !=null) {
+          return left.and().having("attributeValue").like((String) oright);//,right.getValueAsJson());
+        }break;
+
 
       case ROW_CONSTANT:
         //TODO
@@ -224,7 +235,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
         result.addAll(right);
 
     }
-    return result;
+    return (result.isEmpty())?null:result;
   }
 
 

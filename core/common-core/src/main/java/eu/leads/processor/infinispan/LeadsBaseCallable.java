@@ -148,17 +148,18 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //        .converter((Converter<? super K, ? super V, ?>) filter);
     profExecute.end();
     try {
-      for (Object object : iterable) {
-        Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
+        for (Object object : iterable) {
+          Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
 
-        //      V value = inputCache.get(key);
-        K key = (K) entry.getKey();
-        V value = (V) entry.getValue();
+          //      V value = inputCache.get(key);
+          K key = (K) entry.getKey();
+          V value = (V) entry.getValue();
 
-        if (value != null) {
-          profExecute.start("ExOn" + (++count));
-          executeOn((K) key, value);
-          profExecute.end();
+          if (value != null) {
+            profExecute.start("ExOn" + (++count));
+            executeOn((K) key, value);
+            profExecute.end();
+          }
         }
         iterable.close();
       }catch(Exception e){
