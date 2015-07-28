@@ -173,13 +173,13 @@ public class ClusterInfinispanManager implements InfinispanManager {
         ("/tmp/leadsprocessor-data/"+uniquePath+"/webpage/")
         .fetchPersistentState(true)
         .shared(false).purgeOnStartup(false).preload(false).expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-            false);
+        false);
     //    builder.transaction().transactionManagerLookup(new GenericTransactionManagerLookup()).dataContainer().valueEquivalence(AnyEquivalence.getInstance());
     Configuration configuration = builder.build();
     manager.defineConfiguration("WebPage", configuration);
     //    Cache nutchCache = manager.getCache("WebPage", true);
 
-    getPersisentCache("clustered");
+
     getPersisentCache("pagerankCache");
     getPersisentCache("approx_sum_cache");
     getPersisentCache(StringConstants.STATISTICS_CACHE);
@@ -206,7 +206,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".rankings");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".uservisits");
 
-
+    getPersisentCache("clustered");
     NutchLocalListener listener = new NutchLocalListener(this,"default.webpages",LQPConfiguration.getInstance().getConfiguration().getString("nutch.listener.prefix"),currentComponent);
 
     manager.getCache("WebPage").addListener(listener);
@@ -314,7 +314,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-            false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.UNORDERED).threadPolicy(
+            false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(
             EvictionThreadPolicy.PIGGYBACK);
 
       } else { //Use leveldb
@@ -335,7 +335,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-            false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.UNORDERED).threadPolicy(EvictionThreadPolicy.PIGGYBACK)
+            false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.PIGGYBACK)
             .build();
       }
     } else { //do not use persistence
@@ -711,7 +711,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-                false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.UNORDERED).threadPolicy(EvictionThreadPolicy.PIGGYBACK)
+                false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.PIGGYBACK)
             .build();
 
       } else { //Use leveldb
@@ -732,7 +732,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
                 false).eviction().maxEntries(maxEntries).strategy(
-                EvictionStrategy.UNORDERED).threadPolicy(EvictionThreadPolicy.PIGGYBACK)
+                EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.PIGGYBACK)
             .build();
       }
     } else { //do not use persistence
