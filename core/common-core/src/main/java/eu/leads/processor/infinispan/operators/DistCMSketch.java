@@ -13,6 +13,8 @@ class DistArray {
 		//TODO: do
 
 		this.ArrayCache = ArrayCache;
+		ArrayCache.put(-1,w);
+		ArrayCache.put(-2,w);
 	}
 	int getValue(int x, int y) {
 		if(ArrayCache.containsKey(y*width+x))

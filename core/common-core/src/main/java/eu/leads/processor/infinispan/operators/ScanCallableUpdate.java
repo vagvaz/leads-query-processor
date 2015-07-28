@@ -263,6 +263,12 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
         System.out.println(" exists!");
       }else
         System.out.println(" does not exist!");
+
+      if(imanager.getCacheManager().cacheExists(columnName + ".sketch")) {
+        sketches.put(columnName, new DistCMSketch((Cache) imanager.getIndexedPersistentCache(columnName+ ".sketch")));
+        System.out.println(" exists!");
+      }else
+        System.out.println(" does not exist!");
     }
 
     return indexCaches.size()>0;

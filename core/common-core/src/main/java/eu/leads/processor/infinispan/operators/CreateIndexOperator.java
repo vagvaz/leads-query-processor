@@ -42,6 +42,9 @@ public class CreateIndexOperator extends BasicOperator {
   //JsonArray columnNames;
   private String ensembleHost;
   ArrayList<Cache> indexCaches;
+  ArrayList<Cache> sketchCaches;
+  ArrayList<DistCMSketch> sketches;
+
 
   public CreateIndexOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
     super(com, persistence, log, action);
@@ -93,13 +96,15 @@ public class CreateIndexOperator extends BasicOperator {
       allIndexes.put(IndexName, tableName + "." + column);
 
     indexCaches = new ArrayList<>();
-
+    sketchCaches = new ArrayList<>();
 
     for (int c = 0; c < columnNames.size(); c++) {
       if(!manager.getCacheManager().cacheExists(tableName + "." + columnNames.get(c))) {
         indexCaches.add((Cache) manager.getIndexedPersistentCache(tableName + "." + columnNames.get(c)));
-
-        log.info("Creating Index Caches, column " +tableName + "." + columnNames.get(c));
+        Cache tmp =(Cache) manager.getPersisentCache(tableName + "." + columnNames.get(c) + ".sketch");
+        sketchCaches.add(tmp);
+        sketches.add(new DistCMSketch(tmp));
+        log.info("Creating Index Caches, column " + tableName + "." + columnNames.get(c));
       }else {
 
         log.info("Index Already exists on column ... but anyway reindexing" +tableName + "." + columnNames.get(c));
@@ -127,6 +132,7 @@ public class CreateIndexOperator extends BasicOperator {
         String column = tableName +'.' +columnNames.get(c);
         LeadsIndex lInd = lindHelp.CreateLeadsIndex(value.getGenericAttribute(column), ikey, column, tableName);
         indexCaches.get(c).put(ikey, lInd);
+        sketches.get(c).add(value.getGenericAttribute(column));
       }
       i++;
     }
