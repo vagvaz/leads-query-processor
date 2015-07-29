@@ -12,7 +12,7 @@ import java.util.Set;
 public class IntermediateKeyIndex {
     private Map<String,Integer> keysCache;
     private Map<String,Object> dataCache;
-
+    private int putCounter;
     public IntermediateKeyIndex(Cache keysCache, Cache dataCache) {
         this.keysCache = keysCache;
         this.dataCache = dataCache;

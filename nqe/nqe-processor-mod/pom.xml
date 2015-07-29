@@ -153,35 +153,35 @@
          </exclusions>
       </dependency>
    
-       <dependency>
-           <groupId>org.infinispan</groupId>
-           <artifactId>infinispan-core</artifactId>
-           <version>${infinispan.version}</version>
-          <exclusions>
-             <exclusion>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.tajo</groupId>
-                <artifactId>tajo-jdbc</artifactId>
+       <!--<dependency>-->
+           <!--<groupId>org.infinispan</groupId>-->
+           <!--<artifactId>infinispan-core</artifactId>-->
+           <!--<version>${infinispan.version}</version>-->
+          <!--<exclusions>-->
+             <!--<exclusion>-->
+                <!--<groupId>log4j</groupId>-->
+                <!--<artifactId>log4j</artifactId>-->
+             <!--</exclusion>-->
+             <!--<exclusion>-->
+                <!--<groupId>org.apache.logging.log4j</groupId>-->
+                <!--<artifactId>log4j-core</artifactId>-->
+             <!--</exclusion>-->
+             <!--<exclusion>-->
+                <!--<groupId>org.slf4j</groupId>-->
+                <!--<artifactId>slf4j-log4j12</artifactId>-->
+             <!--</exclusion>-->
+             <!--<exclusion>-->
+                <!--<groupId>org.apache.tajo</groupId>-->
+                <!--<artifactId>tajo-jdbc</artifactId>-->
 
-             </exclusion>
-          </exclusions>
-       </dependency>
+             <!--</exclusion>-->
+          <!--</exclusions>-->
+       <!--</dependency>-->
       <dependency>
          <groupId>gr.tuc.softnet</groupId>
          <artifactId>common-core</artifactId>
          <version>${processor.version}</version>
-         <scope>provided</scope>
+         <!--<scope>provided</scope>-->
          <exclusions>
             <exclusion>
                <groupId>log4j</groupId>
@@ -203,31 +203,31 @@
          </exclusions>
       </dependency>
 
-      <dependency>
-         <groupId>gr.tuc.softnet</groupId>
-         <artifactId>leads-query-processor-common</artifactId>
-         <version>${processor.version}</version>
-         <scope>provided</scope>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
+      <!--<dependency>-->
+         <!--<groupId>gr.tuc.softnet</groupId>-->
+         <!--<artifactId>leads-query-processor-common</artifactId>-->
+         <!--<version>${processor.version}</version>-->
+         <!--<scope>provided</scope>-->
+         <!--<exclusions>-->
+            <!--<exclusion>-->
+               <!--<groupId>log4j</groupId>-->
+               <!--<artifactId>log4j</artifactId>-->
+            <!--</exclusion>-->
+            <!--<exclusion>-->
+               <!--<groupId>org.apache.logging.log4j</groupId>-->
+               <!--<artifactId>log4j-core</artifactId>-->
+            <!--</exclusion>-->
+            <!--<exclusion>-->
+               <!--<groupId>org.slf4j</groupId>-->
+               <!--<artifactId>slf4j-log4j12</artifactId>-->
+            <!--</exclusion>-->
+            <!--<exclusion>-->
+               <!--<groupId>org.apache.tajo</groupId>-->
+               <!--<artifactId>tajo-jdbc</artifactId>-->
 
-            </exclusion>
-         </exclusions>
-      </dependency>
+            <!--</exclusion>-->
+         <!--</exclusions>-->
+      <!--</dependency>-->
 
        <dependency>
            <groupId>gr.tuc.softnet</groupId>
@@ -254,12 +254,12 @@
           </exclusions>
        </dependency>
 
-      <dependency>
-         <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-ensemble</artifactId>
-         <version>${infinispan.version}</version>
-         <scope>provided</scope>
-      </dependency>
+      <!--<dependency>-->
+         <!--<groupId>org.infinispan</groupId>-->
+         <!--<artifactId>infinispan-ensemble</artifactId>-->
+         <!--<version>${infinispan.version}</version>-->
+         <!--<scope>provided</scope>-->
+      <!--</dependency>-->
        <!-- Add any other dependencies that you want packaged into your module (in the lib dir) here
      as 'compile' dependencies. Here is an example
      <dependency>

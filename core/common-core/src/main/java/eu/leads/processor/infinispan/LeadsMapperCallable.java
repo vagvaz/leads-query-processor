@@ -1,5 +1,6 @@
 package eu.leads.processor.infinispan;
 
+import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import org.infinispan.Cache;
 
 import java.io.Serializable;
@@ -76,6 +77,7 @@ public class LeadsMapperCallable<K, V, kOut, vOut> extends LeadsBaseCallable<K,V
 
   @Override public void finalizeCallable() {
     mapper.finalizeTask();
+    EnsembleCacheUtils.waitForAllPuts();
     super.finalizeCallable();
     collector.getCounterCache().stop();
   }

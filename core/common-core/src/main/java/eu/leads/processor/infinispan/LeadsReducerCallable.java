@@ -77,9 +77,22 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
             System.err.println("Index was not installed serious error exit...");
             System.exit(-1);
         }
-        System.err.println("LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache().size() + " input: " + inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size() );
+        System.err.println(
+            "LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache()
+                .size() + " input: " + inputCache.getAdvancedCache()
+                .withFlags(Flag.CACHE_MODE_LOCAL).size());
         profilerLog.error("MRLOG: LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache()
                 .size());
+        if(index.getKeysCache().size() != index.getDataCache().size()/2) {
+            for (Map.Entry<String, Integer> entry : index.getKeysIterator()) {
+                if (entry.getValue() != 1) {
+                    System.err.println("THE KEY IS " + entry.getKey() + " " + entry.getValue());
+                    profilerLog
+                        .error("MRLOG: " + "THE KEY IS " + entry.getKey() + " " + entry.getValue());
+
+                }
+            }
+        }
         for(Map.Entry<String,Integer> entry : index.getKeysIterator()){
             LocalIndexKeyIterator iterator =
                 (LocalIndexKeyIterator) index.getKeyIterator(entry.getKey(),entry.getValue());
@@ -193,7 +206,10 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
 
     @Override
     public void finalizeCallable() {
-        System.err.println("reduce finalize reducer");
+        System.err.println("FINALIZEREPEATLeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache().size() + " input: " + inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size() );
+        profilerLog.error("MRLOGREPEAT: LeadsIndex size " + index.getKeysCache().size() + " data " + index
+                .getDataCache());
+            System.err.println("reduce finalize reducer");
         reducer.finalizeTask();
         ((Cache)index.getDataCache()).stop();
         ((Cache)index.getKeysCache()).stop();
