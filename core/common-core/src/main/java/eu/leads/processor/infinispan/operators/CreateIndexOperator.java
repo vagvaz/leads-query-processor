@@ -103,7 +103,7 @@ public class CreateIndexOperator extends BasicOperator {
         indexCaches.add((Cache) manager.getIndexedPersistentCache(tableName + "." + columnNames.get(c)));
         Cache tmp =(Cache) manager.getPersisentCache(tableName + "." + columnNames.get(c) + ".sketch");
         sketchCaches.add(tmp);
-        sketches.add(new DistCMSketch(tmp));
+        sketches.add(new DistCMSketch(tmp,false));
         log.info("Creating Index Caches, column " + tableName + "." + columnNames.get(c));
       }else {
 

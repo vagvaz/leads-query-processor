@@ -9,12 +9,17 @@ class DistArray {
 	Cache<Integer,Integer> ArrayCache=null;
 	int width=0;
 	int depth=0;
-	public DistArray(int w, int d, Cache<Integer,Integer> ArrayCache) {
+	public DistArray(int w, int d, Cache<Integer,Integer> ArrayCache, boolean reload  ) {
 		//TODO: do
 
 		this.ArrayCache = ArrayCache;
-		ArrayCache.put(-1,w);
-		ArrayCache.put(-2,w);
+		if(reload) {
+			width =ArrayCache.get(-1);
+			depth = ArrayCache.get(-2);
+		}else{
+			ArrayCache.put(-1, w);
+			ArrayCache.put(-2, w);
+		}
 	}
 	int getValue(int x, int y) {
 		if(ArrayCache.containsKey(y*width+x))
@@ -35,15 +40,16 @@ public class DistCMSketch {
 	final int w, d; // w=mod, d=levels
 	
 	// LEFTERIS USE THIS constructor. No parameters required 
-	public DistCMSketch(Cache<Integer,Integer> ArrayCache) {
-		this(0.01,0.001,ArrayCache);
+	public DistCMSketch(Cache<Integer,Integer> ArrayCache, boolean load) {
+		this(0.01,0.001,ArrayCache, load);
 	}
 	
-	public DistCMSketch(double delta, double epsilon,Cache<Integer,Integer> ArrayCache) {
+	public DistCMSketch(double delta, double epsilon,Cache<Integer,Integer> ArrayCache, boolean load) {
 		double epsilonEach=epsilon;
+
 		w=(int)Math.ceil(Math.E/epsilonEach);
 		d=(int)Math.ceil(Math.log(1d/delta));
-		darray=new DistArray(w,d,ArrayCache);
+		darray=new DistArray(w,d,ArrayCache, load);
 		// initialize a and b
 		Random mt = new Random(1234);
 		alphas=new long[d];
@@ -54,11 +60,11 @@ public class DistCMSketch {
 		}
 	}
 	
-	public DistCMSketch(double delta, double epsilon, int[][]array,Cache<Integer,Integer> ArrayCache) {
+	public DistCMSketch(double delta, double epsilon, int[][]array, Cache<Integer,Integer> ArrayCache, boolean load) {
 		double epsilonEach=epsilon;
 		w=(int)Math.ceil(Math.E/epsilonEach);
 		d=(int)Math.ceil(Math.log(1d/delta));
-		darray=new DistArray(w,d,ArrayCache);
+		darray=new DistArray(w,d,ArrayCache, load);
 		// initialize a and b
 		Random mt = new Random(1234);
 		alphas=new long[d];

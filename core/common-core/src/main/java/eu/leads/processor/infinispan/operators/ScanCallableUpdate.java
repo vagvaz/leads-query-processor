@@ -33,39 +33,39 @@ import java.util.*;
 /**
  * Created by vagvaz on 2/20/15.
  */
-public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Serializable {
+public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements Serializable {
 
   transient protected VersionedCache versionedCache;
 
-  transient  protected Cache pageRankCache;
+  transient protected Cache pageRankCache;
   transient protected FilterOperatorTree tree;
   transient protected double totalSum;
   transient protected Cache approxSumCache;
   protected String qualString;
-  transient  boolean versioning;
-
-  boolean onVersionedCache;
-  transient protected long versionStart=-1,versionFinish=-1,range=-1;
-
-
-    //  transient protected InfinispanManager manager;
+  transient protected long versionStart = -1, versionFinish = -1, range = -1;
+  //  transient protected InfinispanManager manager;
   protected Logger log = LoggerFactory.getLogger(ScanCallableUpdate.class.toString());
-    private VersionScalar minVersion=null;
-    private VersionScalar maxVersion=null;
   transient protected boolean renameTableInTree;
-  transient  private String toRename;
-  transient  private String tableName;
+  transient boolean versioning;
+  boolean onVersionedCache;
+  private VersionScalar minVersion = null;
+  private VersionScalar maxVersion = null;
+  transient private String toRename;
+  transient private String tableName;
+
   public ScanCallableUpdate(String configString, String output) {
     super(configString, output);
   }
-  public ScanCallableUpdate(String configString, String output,boolean onVersionedCache) {
+
+  public ScanCallableUpdate(String configString, String output, boolean onVersionedCache) {
     super(configString, output);
     this.onVersionedCache = onVersionedCache;
   }
 
-  @Override public void initialize() {
+  @Override
+  public void initialize() {
     super.initialize();
-    lquery=null;
+    lquery = null;
 //    versionedCache = new VersionedCacheTreeMapImpl(inputCache,new VersionScalarGenerator(),inputCache.getName());
 
     pageRankCache = (Cache) imanager.getPersisentCache("pagerankCache");
@@ -73,68 +73,137 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
     approxSumCache = (Cache) imanager.getPersisentCache("approx_sum_cache");
     totalSum = -1f;
 
-      if(conf.getObject("body").containsField("versionStart"))
-      {
-          versionStart=conf.getObject("body").getLong("versionStart");
-          if (versionStart>0) {
-              versioning = true;
-              minVersion=new VersionScalar(versionStart);
-          }
+    if (conf.getObject("body").containsField("versionStart")) {
+      versionStart = conf.getObject("body").getLong("versionStart");
+      if (versionStart > 0) {
+        versioning = true;
+        minVersion = new VersionScalar(versionStart);
       }
-      if(conf.getObject("body").containsField("versionFinish"))
-      {
-          versionFinish=conf.getObject("body").getLong("versionFinish");
-          if (versionFinish>0) {
-              versioning = true;
-              maxVersion=new VersionScalar(versionFinish);
-          }
+    }
+    if (conf.getObject("body").containsField("versionFinish")) {
+      versionFinish = conf.getObject("body").getLong("versionFinish");
+      if (versionFinish > 0) {
+        versioning = true;
+        maxVersion = new VersionScalar(versionFinish);
       }
+    }
 
 
-    if(conf.getObject("body").containsField("qual"))
-    {
+    if (conf.getObject("body").containsField("qual")) {
       tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
       System.out.print("Quaaal : " + conf.getObject("body").getObject("qual").toString());
       toRename = getRenamingTableFromSchema(inputSchema);
       tableName = conf.getObject("body").getObject("tableDesc").getString("tableName");
       tableName = tableName.replace(StringConstants.DEFAULT_DATABASE_NAME + ".", "");
-      if(tableName.equals(toRename)){
+      if (tableName.equals(toRename)) {
         renameTableInTree = false;
-      }
-      else{
+      } else {
         renameTableInTree = true;
       }
-      if(checkIndex_usage()){
+      if (checkIndex_usage()) {
         // create query
         lquery = createLuceneQuerys(indexCaches, tree.getRoot());
 //      List<LeadsIndex> list = lquery.list();
       }
-    }
-    else{
-      tree =null;
+    } else {
+      tree = null;
     }
 
 
     versioning = getVersionPredicate(conf);
   }
 
+  Object getSubSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
+    Object result = null;
+    double dleft = -1000;
+    double dright = -1000;
+    String sleft = null;
+    String sright = null;
+    if (root == null)
+      return null;
+    Object oleft = getSubSelectivity(sketchCaches, root.getLeft());
+    Object oright = getSubSelectivity(sketchCaches, root.getRight());
+
+    if (oleft instanceof Double)
+      dleft = (double) oleft;
+    if (oright instanceof Double)
+      dright = (double) oright;
+    if (oleft instanceof String)
+      sleft = (String) oleft;
+    if (oright instanceof String)
+      sright = (String) oright;
+
+    switch (root.getType()) {
+      case EQUAL:
+        if (sleft != null && sright != null) {
+          String collumnName = sleft;
+          return sketchCaches.get(collumnName).get(sright);
+        }
+        break;
+      case FIELD:
+        String collumnName = root.getValueAsJson().getObject("body").getObject("column").getString("name");
+        String type = root.getValueAsJson().getObject("body").getObject("column").getObject("dataType").getString("type");
+        //MathUtils.getTextFrom(root.getValueAsJson());
+
+        if (sketchCaches.containsKey(collumnName)) {
+          if (type.equals("TEXT"))
+            return collumnName;
+          return null;
+        }
+        break;
+
+      case CONST:
+        // result = true;
+        return MathUtils.getTextFrom(root.getValueAsJson());
+//      case LTH:
+////        if(left !=null && oright !=null)
+////          return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
+//        return null;
+//        break;
+//      case LEQ:
+//        if(left !=null && oright !=null)
+//          return left.and().having("attributeValue").lte(oright);//,right.getValueAsJson());
+//        break;
+//      case GTH:
+//        if(left !=null && oright !=null)
+//          return left.and().having("attributeValue").gt(oright);//,right.getValueAsJson());
+//        break;
+//      case GEQ:
+//        if(left !=null && oright !=null)
+//          return left.and().having("attributeValue").gte(oright);//,right.getValueAsJson());
+//        break;
+//
+//      case LIKE:
+//        if(left !=null && oright !=null) {
+//          return left.and().having("attributeValue").like((String) oright);//,right.getValueAsJson());
+//        }break;
+//
+//
+//      case ROW_CONSTANT:
+//        //TODO
+//        break;
+    }
+    return null;
+  }
+
+
   Object getSubLucene(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
     FilterConditionContext result = null;
     FilterConditionContext left = null;
     FilterConditionContext right = null;
-    if(root==null)
+    if (root == null)
       return null;
-    Object oleft = getSubLucene(indexCaches,root.getLeft());
-    Object oright =  getSubLucene(indexCaches,root.getRight());
+    Object oleft = getSubLucene(indexCaches, root.getLeft());
+    Object oright = getSubLucene(indexCaches, root.getRight());
 
-    if(oleft instanceof    FilterConditionContext)
-     left = (FilterConditionContext)oleft;
-    if(oright instanceof    FilterConditionContext)
-      right = (FilterConditionContext)oright;
+    if (oleft instanceof FilterConditionContext)
+      left = (FilterConditionContext) oleft;
+    if (oright instanceof FilterConditionContext)
+      right = (FilterConditionContext) oright;
 
     switch (root.getType()) {
       case EQUAL:
-        if(left !=null && oright !=null)
+        if (left != null && oright != null)
           return left.and().having("attributeValue").eq(oright);//,right.getValueAsJson());
         break;
       case IS_NULL:
@@ -146,10 +215,10 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
       case FIELD:
         String collumnName = root.getValueAsJson().getObject("body").getObject("column").getString("name");
         String type = root.getValueAsJson().getObject("body").getObject("column").getObject("dataType").getString("type");
-                //MathUtils.getTextFrom(root.getValueAsJson());
+        //MathUtils.getTextFrom(root.getValueAsJson());
 
         if (indexCaches.containsKey(collumnName)) {
-          
+
           SearchManager sm = org.infinispan.query.Search.getSearchManager(indexCaches.get(collumnName));
           QueryFactory qf = sm.getQueryFactory();
           QueryBuilder Qb;
@@ -165,7 +234,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
             Qb = qf.from(LeadsIndexString.class);
           else
             Qb = qf.from(LeadsIndex.class);
-          FilterConditionContext filterC= Qb.having("attributeName").eq(collumnName);
+          FilterConditionContext filterC = Qb.having("attributeName").eq(collumnName);
           return filterC;
         }
         break;
@@ -174,27 +243,28 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
         // result = true;
         return MathUtils.getTextFrom(root.getValueAsJson());
       case LTH:
-        if(left !=null && oright !=null)
+        if (left != null && oright != null)
           return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
 
         break;
       case LEQ:
-        if(left !=null && oright !=null)
+        if (left != null && oright != null)
           return left.and().having("attributeValue").lte(oright);//,right.getValueAsJson());
         break;
       case GTH:
-        if(left !=null && oright !=null)
+        if (left != null && oright != null)
           return left.and().having("attributeValue").gt(oright);//,right.getValueAsJson());
         break;
       case GEQ:
-        if(left !=null && oright !=null)
+        if (left != null && oright != null)
           return left.and().having("attributeValue").gte(oright);//,right.getValueAsJson());
         break;
 
       case LIKE:
-        if(left !=null && oright !=null) {
+        if (left != null && oright != null) {
           return left.and().having("attributeValue").like((String) oright);//,right.getValueAsJson());
-        }break;
+        }
+        break;
 
 
       case ROW_CONSTANT:
@@ -204,9 +274,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
     return null;
   }
 
-
-
-  ArrayList<Query> createLuceneQuerys(HashMap<String, Cache> indexCaches, FilterOperatorNode root){
+  ArrayList<Query> createLuceneQuerys(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
     ArrayList<Query> result = new ArrayList<>();
     ArrayList<Query> left = null;
     ArrayList<Query> right = null;
@@ -218,7 +286,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
       }
       break;
       case OR: {
-       left = createLuceneQuerys(indexCaches, root.getLeft());
+        left = createLuceneQuerys(indexCaches, root.getLeft());
         right = createLuceneQuerys(indexCaches, root.getRight());
         //if(left !=null && right !=null){
         //use sketches to check
@@ -227,24 +295,38 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
       default: {
         System.out.println("SubQual " + root.getType());
         FilterConditionContext qual = (FilterConditionContext) getSubLucene(indexCaches, root);
-        if(qual!=null)
+        if (qual != null)
           result.add(qual.toBuilder().build());
       }
-      if(left!=null)
+      if (left != null)
         result.addAll(left);
-      if(right!=null)
+      if (right != null)
         result.addAll(right);
 
     }
-    return (result.isEmpty())?null:result;
+    return (result.isEmpty()) ? null : result;
   }
 
+  Object getSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
+    Object left = getSelectivity(sketchCaches, root.getLeft());
+    Object right = getSelectivity(sketchCaches, root.getRight());
 
-//    org.infinispan.query.dsl.Query lucenequery = qf.from(LeadsIndexString.class)
-//            .having("attributeName").eq("attributeName")
-//            .and()
-//            .having("attributeValue").eq(lstStr.get(randomInd))
-//            .toBuilder().build();
+    switch (root.getType()) {
+      case AND:
+        if (left != null && right != null)
+          return Math.min((double) left, (double) right);
+        break;
+      case OR:
+        if (left != null && right != null)
+          return (double) left + (double) right;
+        break;
+      default:
+        System.out.println("SubQual " + root.getType());
+        return getSubSelectivity(sketchCaches, root);
+    }
+    return (left != null) ? left : right;
+  }
+
 
 
   private boolean checkIndex_usage() {
@@ -258,25 +340,32 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
       JsonObject tmp = (JsonObject) iterator.next();
       columnName = tmp.getString("name");
       System.out.print("Check if exists: " + "." + columnName + " ");
-      if(imanager.getCacheManager().cacheExists(columnName)) {
+      if (imanager.getCacheManager().cacheExists(columnName)) {
         indexCaches.put(columnName, (Cache) imanager.getIndexedPersistentCache(columnName));
         System.out.println(" exists!");
-      }else
+      } else
         System.out.println(" does not exist!");
 
-      if(imanager.getCacheManager().cacheExists(columnName + ".sketch")) {
-        sketches.put(columnName, new DistCMSketch((Cache) imanager.getIndexedPersistentCache(columnName+ ".sketch")));
+      if (imanager.getCacheManager().cacheExists(columnName + ".sketch")) {
+        sketches.put(columnName, new DistCMSketch((Cache) imanager.getIndexedPersistentCache(columnName + ".sketch"), true));
         System.out.println(" exists!");
-      }else
+      } else
         System.out.println(" does not exist!");
     }
 
-    return indexCaches.size()>0;
+    Object selectivity = getSelectivity(sketches, tree.getRoot());
+    if (selectivity != null)
+      if ((double) selectivity < 0.5)
+        return indexCaches.size() > 0;
+
+    return false;
+
   }
 
   /**
    * This method shoul read the Versions if any , from the configuration of the Scan operator and return true
    * if there are specific versions required, false otherwise
+   *
    * @param conf the configuration of the operator
    * @return returns true if there is a query on specific versions false otherwise
    */
@@ -284,23 +373,23 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
     return false;
   }
 
-  @Override public void executeOn(K key, V ivalue) {
+  @Override
+  public void executeOn(K key, V ivalue) {
     Logger profilerLog = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
 
 //    ProfileEvent profExecute = new ProfileEvent("Execute " + this.getClass().toString(),profilerLog);
 
     //         System.err.println(manager.getCacheManager().getAddress().toString() + " "+ entry.getKey() + "       " + entry.getValue());
     Tuple toRunValue = null;
-    if(onVersionedCache){
+    if (onVersionedCache) {
       String versionedKey = (String) key;
       String ikey = pruneVersion(versionedKey);
       Version currentVersion = getVersion(versionedKey);
-      if(versioning){
-        if(isInVersionRange(currentVersion)){
+      if (versioning) {
+        if (isInVersionRange(currentVersion)) {
           toRunValue = (Tuple) ivalue;
         }
-      }
-      else{
+      } else {
         Version latestVersion = versionedCache.getLatestVersion(ikey);
         if (latestVersion == null) {
           return;
@@ -309,9 +398,8 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
         toRunValue = (Tuple) objectValue;
 //        toRunValue = (String) objectValue;
       }
-    }
-    else{
-      toRunValue = (Tuple)ivalue;
+    } else {
+      toRunValue = (Tuple) ivalue;
     }
 //    if(versioning) {
 //      String versionedKey = (String) key;
@@ -328,11 +416,11 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
 
 //      String ikey = (String) key;
 //      String value = (String) inputCache.get(ikey);
-      //ENDNONVERSIONDING
-      //         String value = (String) entry.getValue();
+    //ENDNONVERSIONDING
+    //         String value = (String) entry.getValue();
 
-      //          String value = (String) entry.getValue();
-      //          String value = (String)inputCache.get(key);
+    //          String value = (String) entry.getValue();
+    //          String value = (String)inputCache.get(key);
 //      Tuple tuple = new Tuple(toRunValue);
 //<<<<<<< HEAD
 //      profExecute.start("new Tuple");
@@ -346,46 +434,46 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
 //      profExecute.start("renameAllTupleAttributes");
 //      renameAllTupleAttributes(tuple);
 //=======
-      //profExecute.start("new Tuple");
-      Tuple tuple = toRunValue;//new Tuple(toRunValue);
-      //profExecute.end();
+    //profExecute.start("new Tuple");
+    Tuple tuple = toRunValue;//new Tuple(toRunValue);
+    //profExecute.end();
 
-      //profExecute.start("namesToLowerCase");
-      //namesToLowerCase(tuple);
-      //profExecute.end();
-     // profExecute.start("renameAllTupleAttributes");
-      //renameAllTupleAttributes(tuple);
+    //profExecute.start("namesToLowerCase");
+    //namesToLowerCase(tuple);
+    //profExecute.end();
+    // profExecute.start("renameAllTupleAttributes");
+    //renameAllTupleAttributes(tuple);
 //      profExecute.end();
-      if (tree != null) {
-        if(renameTableInTree){
-          tree.renameTableDatum(tableName,toRename);
-        }
+    if (tree != null) {
+      if (renameTableInTree) {
+        tree.renameTableDatum(tableName, toRename);
+      }
 //        profExecute.start("tree.accept");
-        boolean accept = tree.accept(tuple);
+      boolean accept = tree.accept(tuple);
 //        profExecute.end();
-        if (accept) {
+      if (accept) {
 //          profExecute.start("prepareOutput");
 
-          tuple = prepareOutput(tuple);
-//          profExecute.end();
-          //               log.info("--------------------    put into output with filter ------------------------");
-          if (key != null && tuple != null) {
-//            profExecute.start("Scan_Put");
-            EnsembleCacheUtils.putToCache(outputCache,key.toString(), tuple);
-//            profExecute.end();
-          }
-        }
-      } else {
-//        profExecute.start("prepareOutput");
         tuple = prepareOutput(tuple);
-//        profExecute.end();
-        //            log.info("--------------------    put into output without tree ------------------------");
-        if (key != null && tuple != null){
-//          profExecute.start("Scan_outputToCache");
-          EnsembleCacheUtils.putToCache(outputCache,key, tuple);
 //          profExecute.end();
+        //               log.info("--------------------    put into output with filter ------------------------");
+        if (key != null && tuple != null) {
+//            profExecute.start("Scan_Put");
+          EnsembleCacheUtils.putToCache(outputCache, key.toString(), tuple);
+//            profExecute.end();
         }
       }
+    } else {
+//        profExecute.start("prepareOutput");
+      tuple = prepareOutput(tuple);
+//        profExecute.end();
+      //            log.info("--------------------    put into output without tree ------------------------");
+      if (key != null && tuple != null) {
+//          profExecute.start("Scan_outputToCache");
+        EnsembleCacheUtils.putToCache(outputCache, key, tuple);
+//          profExecute.end();
+      }
+    }
   }
 
   private boolean needsREnaming() {
@@ -393,12 +481,12 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
   }
 
   private String getRenamingTableFromSchema(JsonObject inputSchema) {
-    if(inputSchema!=null) {
+    if (inputSchema != null) {
 
-      String fieldname =((JsonObject)(inputSchema.getArray("fields").iterator().next())).getString("name");
+      String fieldname = ((JsonObject) (inputSchema.getArray("fields").iterator().next())).getString("name");
       //fieldname database.table.collumncolumnName = tmp.getString("name");
-      String result = fieldname.substring(fieldname.indexOf(".")+1,fieldname.lastIndexOf("."));
-      if(result != null && !result.equals(""))
+      String result = fieldname.substring(fieldname.indexOf(".") + 1, fieldname.lastIndexOf("."));
+      if (result != null && !result.equals(""))
         return result;
     }
     return null;
@@ -406,33 +494,32 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
 
   //TODO write checks
   private String getTableNameFromTuple(Tuple tuple) {
-    if(tuple!=null) {
+    if (tuple != null) {
 
       String fieldname = tuple.getFieldNames().iterator().next();
       //fieldname database.table.collumn
-      String result = fieldname.substring(fieldname.indexOf(".")+1,fieldname.lastIndexOf("."));
-      if(result != null && !result.equals(""))
+      String result = fieldname.substring(fieldname.indexOf(".") + 1, fieldname.lastIndexOf("."));
+      if (result != null && !result.equals(""))
         return result;
     }
 
-    return  null;
+    return null;
   }
 
 
   /**
-   *
    * @param currentVersion the version of the tuple currently processed by the operator
    * @return true if it satisfies the version range defined in the operator false otherwise
    */
   private boolean isInVersionRange(Version currentVersion) {
     //SAMPLE CODE NOT NECESSARILY exactly like that
-    if(minVersion!=null)
-      if(currentVersion.compareTo(minVersion)<0) {
+    if (minVersion != null)
+      if (currentVersion.compareTo(minVersion) < 0) {
         return false;
-    }
-    if(maxVersion!=null)
-        if(currentVersion.compareTo(maxVersion)>0)
-            return false;
+      }
+    if (maxVersion != null)
+      if (currentVersion.compareTo(maxVersion) > 0)
+        return false;
     return true;
   }
 
@@ -444,15 +531,15 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
   }
 
   private String pruneVersion(String versionedKey) {
-    String result = versionedKey.substring(0,versionedKey.lastIndexOf(":"));
+    String result = versionedKey.substring(0, versionedKey.lastIndexOf(":"));
     return result;
   }
 
 
   private void namesToLowerCase(Tuple tuple) {
-    Set<String> fieldNames  =  new HashSet<>(tuple.getFieldNames());
-    for(String field : fieldNames){
-      tuple.renameAttribute(field,field.toLowerCase());
+    Set<String> fieldNames = new HashSet<>(tuple.getFieldNames());
+    for (String field : fieldNames) {
+      tuple.renameAttribute(field, field.toLowerCase());
     }
   }
 
@@ -472,26 +559,24 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
 //  }
 
   protected void handlePagerank(String substring, Tuple t) {
-    if(conf.getObject("body").getObject("tableDesc").getString("tableName").equals("default.webpages")){
-      if(totalSum < 0){
+    if (conf.getObject("body").getObject("tableDesc").getString("tableName").equals("default.webpages")) {
+      if (totalSum < 0) {
         computeTotalSum();
       }
       String url = t.getAttribute("default.webpages.url");
       DSPMNode currentPagerank = (DSPMNode) pageRankCache.get(url);
-      if(currentPagerank == null || totalSum <= 0)
-      {
+      if (currentPagerank == null || totalSum <= 0) {
 //        t.setAttribute("default.webpages.pagerank",0f);
-       t.setAttribute("default.webpages.pagerank",Double.toString(  (10000/ url.length() )/10000 ));
+        t.setAttribute("default.webpages.pagerank", Double.toString((10000 / url.length()) / 10000));
 
         return;
       }
       //            t.setNumberAttribute("default.webpages.pagerank",0.032342);
-      t.setNumberAttribute("default.webpages.pagerank",currentPagerank.getVisitCount()/totalSum);
+      t.setNumberAttribute("default.webpages.pagerank", currentPagerank.getVisitCount() / totalSum);
 
       //READ PAGERANK FROM PAGERANK CACHE;
       //READ TOTAL ONCE
       //compute value update it to tuple
-
 
 
       //      if (t.hasField("default.webpages.pagerank")) {
@@ -515,17 +600,17 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
 
   private void computeTotalSum() {
     log.info(
-        "--------------------   Creating iterable over approx sum entries ------------------------");
+            "--------------------   Creating iterable over approx sum entries ------------------------");
     CloseableIterable<Map.Entry<String, Integer>> iterable =
-      approxSumCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
+            approxSumCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
     log.info("--------------------    Iterating over approx sum entries cache ------------------------");
     for (Map.Entry<String, Integer> outerEntry : iterable) {
-      totalSum += outerEntry.getValue() ;
+      totalSum += outerEntry.getValue();
     }
     iterable.close();
 
-    if(totalSum > 0){
-      totalSum+=1;
+    if (totalSum > 0) {
+      totalSum += 1;
     }
   }
 }
