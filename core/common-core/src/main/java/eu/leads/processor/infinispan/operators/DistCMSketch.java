@@ -10,15 +10,13 @@ class DistArray {
 	int width=0;
 	int depth=0;
 	public DistArray(int w, int d, Cache<Integer,Integer> ArrayCache, boolean reload  ) {
-		//TODO: do
-
 		this.ArrayCache = ArrayCache;
 		if(reload) {
 			width =ArrayCache.get(-1);
 			depth = ArrayCache.get(-2);
 		}else{
-			ArrayCache.put(-1, w);
-			ArrayCache.put(-2, w);
+			this.ArrayCache.put(-1, w);
+			this.ArrayCache.put(-2, w);
 		}
 	}
 	int getValue(int x, int y) {

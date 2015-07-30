@@ -97,7 +97,7 @@ public class CreateIndexOperator extends BasicOperator {
 
     indexCaches = new ArrayList<>();
     sketchCaches = new ArrayList<>();
-
+    sketches = new ArrayList<>();
     for (int c = 0; c < columnNames.size(); c++) {
       if(!manager.getCacheManager().cacheExists(tableName + "." + columnNames.get(c))) {
         indexCaches.add((Cache) manager.getIndexedPersistentCache(tableName + "." + columnNames.get(c)));
@@ -106,7 +106,6 @@ public class CreateIndexOperator extends BasicOperator {
         sketches.add(new DistCMSketch(tmp,false));
         log.info("Creating Index Caches, column " + tableName + "." + columnNames.get(c));
       }else {
-
         log.info("Index Already exists on column ... but anyway reindexing" +tableName + "." + columnNames.get(c));
       }
     }

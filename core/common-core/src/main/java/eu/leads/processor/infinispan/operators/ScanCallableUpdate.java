@@ -347,16 +347,19 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
         System.out.println(" does not exist!");
 
       if (imanager.getCacheManager().cacheExists(columnName + ".sketch")) {
-        sketches.put(columnName, new DistCMSketch((Cache) imanager.getIndexedPersistentCache(columnName + ".sketch"), true));
+        sketches.put(columnName, new DistCMSketch((Cache) imanager.getPersisentCache(columnName + ".sketch"), true));
         System.out.println(" exists!");
       } else
-        System.out.println(" does not exist!");
+        System.out.println(columnName + ".sketch" +" does not exist!");
     }
 
-    Object selectivity = getSelectivity(sketches, tree.getRoot());
-    if (selectivity != null)
-      if ((double) selectivity < 0.5)
+    Object selectvt = getSelectivity(sketches, tree.getRoot());
+    if (selectvt != null) {
+      double selectivity= (double)selectvt/inputCache.size();
+      System.out.print("Selectivity: " + selectivity);
+      if(selectivity < 0.5)
         return indexCaches.size() > 0;
+    }
 
     return false;
 
