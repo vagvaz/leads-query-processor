@@ -205,6 +205,12 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".rankings");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".uservisits");
+    getPersisentCache("leads.processor.catalog.tablespaces");
+    getPersisentCache("leads.processor.catalog.databases");
+    getPersisentCache("leads.processor.catalog.functions");
+    getPersisentCache("leads.processor.catalog.indexes");
+    getPersisentCache("leads.processor.catalog.indexesByColumn");
+    getPersisentCache("leads.processor.databases.sub."+StringConstants.DEFAULT_DATABASE_NAME);
 
     getPersisentCache("clustered");
     NutchLocalListener listener = new NutchLocalListener(this,"default.webpages",LQPConfiguration.getInstance().getConfiguration().getString("nutch.listener.prefix"),currentComponent);

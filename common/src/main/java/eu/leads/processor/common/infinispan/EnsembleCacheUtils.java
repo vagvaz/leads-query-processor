@@ -48,7 +48,7 @@ public class EnsembleCacheUtils {
             batchSize = LQPConfiguration.getInstance().getConfiguration()
                 .getInt("node.ensemble.batchsize", 10);
             threadBatch = LQPConfiguration.getInstance().getConfiguration().getInt(
-                "node.ensemble.threads", 2);
+                "node.ensemble.threads", 3);
             currentCaches = new ConcurrentHashMap<>();
             mapsToPut = new ConcurrentHashMap<>();
         }
@@ -199,26 +199,32 @@ public class EnsembleCacheUtils {
                     }
                     //                    NotifyingFuture fut = cache.putAsync(key, value);
                     //                    concurrentQuue.add(fut);
-                    BasicCache currentCache = currentCaches.get(cache.getName());
-                    if (currentCache == null) {
-                        synchronized (mutex) {
+                    synchronized (mutex) {
+                        BasicCache currentCache = currentCaches.get(cache.getName());
+                        if (currentCache == null) {
+
                             currentCaches.put(cache.getName(), cache);
 
                             Map<Object, Object> newMap = new ConcurrentHashMap<>();
                             newMap.put(key, value);
                             mapsToPut.put(cache.getName(), newMap);
-                        }
-                    } else {
-                        Map<Object, Object> cacheMap = mapsToPut.get(cache.getName());
-                        if(cacheMap == null){
-                            synchronized (mutex){
-                                cacheMap = new ConcurrentHashMap<>();
-                                mapsToPut.put(cache.getName(),cacheMap);
-                            }
-                        }
-                        cacheMap.put(key, value);
-                    }
+                        } else {
+                            Map<Object, Object> cacheMap = mapsToPut.get(cache.getName());
+                            if (cacheMap == null) {
+//                                synchronized (mutex) {
+                                    cacheMap = new ConcurrentHashMap<>();
 
+                                    mapsToPut.put(cache.getName(), cacheMap);
+//                                }
+                            }
+                            if(cacheMap.containsKey(key))
+                            {
+                                System.err.println("ERROR: " + currentCache.getName() + " already contains key " + key.toString() + " with value\n" + cacheMap.get(key).toString() );
+                                System.exit(-1);
+                            }
+                            cacheMap.put(key, value);
+                        }
+                    }
                     //              log.error("Successful " + key);
                     isok = true;
                 } else {
