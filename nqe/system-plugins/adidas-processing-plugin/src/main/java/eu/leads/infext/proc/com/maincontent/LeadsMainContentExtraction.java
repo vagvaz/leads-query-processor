@@ -53,7 +53,7 @@ public class LeadsMainContentExtraction {
 				pyCall.sendViaFile(0);
 				List<Object> retValues = pyCall.call(cliName, content, extractionGeneralName, extractionDefinitionString);
 				
-				if(retValues.size() >= 1) {
+				if(retValues.size() >= 1 && retValues.get(0)!=org.json.JSONObject.NULL) {
 					String successfulExtractionTuple = ((JSONArray)(retValues.get(0))).toString();
 					
 					extractionTypes[index] = extractionGeneralName;

@@ -17,4 +17,6 @@ public abstract class SentimentAnalysis {
 	
 	public abstract void setupSearchDocument(String text);
 	public abstract Sentiment getSentimentForFuzzyPhrase(Map<String,String> fuzzyKeywords);
+	
+	public abstract Set<Entity> getEntities(String text);
 }

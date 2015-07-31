@@ -18,13 +18,16 @@ public abstract class Test {
 	private static Test test;
 	private String tableName = "leads.page_content";
 //	private String tableName = "default.webpages";
-	private static String urlFilter = null;
+	protected static String urlFilter = null;
+	protected static boolean isFilter = false;
 	
 	public static void main(String[] args) {
 		String type = args[0];
 		
 		if(type.equals("system"))
 			test = new SystemTest();
+		if(type.equals("system_page"))
+			test = new SystemPageTest();
 		else if(type.equals("plugin"))
 			test = new PluginTest();
 		
@@ -47,7 +50,7 @@ public abstract class Test {
 			
 			LeadsQueryInterface.setQueryMode(false);
 			KeywordsListSingletonExt.testKeywordsMode(defineKeywordsMap());
-			if(urlFilter!=null) ProcessingFilterSingleton.setFilterString(urlFilter);
+			if(isFilter) ProcessingFilterSingleton.setFilterString(urlFilter);
 			
 			plugin = new AdidasProcessingPlugin();
 			plugin.initialize(config, null);

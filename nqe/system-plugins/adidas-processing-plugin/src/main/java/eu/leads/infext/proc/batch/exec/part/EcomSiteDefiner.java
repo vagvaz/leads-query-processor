@@ -143,7 +143,7 @@ public class EcomSiteDefiner extends AbstractPartialSiteDefiner {
 					pagesNoMap.put("ecom", ecomPagesNo);
 					ecomSiteDictionary = schemaDeterminer.getEcomSiteDictionary();
 					productEcomPageList = schemaDeterminer.getProductEcomPageList();
-					categoryEcomPageList = schemaDeterminer.getCategoryEcomPageList();						
+					categoryEcomPageList = schemaDeterminer.getCategoryEcomPageList();
 				}
 			}
 		}

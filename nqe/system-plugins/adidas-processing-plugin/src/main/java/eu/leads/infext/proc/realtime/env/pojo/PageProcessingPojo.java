@@ -92,6 +92,8 @@ public class PageProcessingPojo extends AbstractExecutionPojo {
 		
 		String now = timestamp;
 		
+		postProcessingHacks(metadata);
+		
 		for(Entry<String,MDFamily> editedFamily : editableFamilies.entrySet()) {
 			String familyKey = editedFamily.getKey();
 			
@@ -185,9 +187,30 @@ public class PageProcessingPojo extends AbstractExecutionPojo {
 //					DataStoreSingleton.getDataStore().putLeadsResourceMDFamily(url, ts, family, cells);
 //				}
 //			}
-//		}	
+//		}
 		
 		System.out.println();
+	}
+
+	private void postProcessingHacks(HashMap<String, HashMap<String, Object>> metadata) {
+
+		HashMap<String, Object> resourceParts = metadata.get("new:leads_resourceparts");
+		
+		if(resourceParts != null) {
+
+			Object name = resourceParts.get("ecom_prod_name:000");
+			Object currency = resourceParts.get("ecom_prod_currency.000");
+			if(name!=null && (currency==null || currency.equals("null"))) {
+				resourceParts.put("ecom_prod_currency:000", "USD");
+				metadata.put("new:leads_resourceparts", resourceParts);
+			}
+			
+			if(name!=null && name.toString().contains("Holabird Sports")) {
+				resourceParts.clear();
+				metadata.put("new:leads_resourceparts", resourceParts);
+			}
+			
+		}
 		
 	}
 

@@ -36,11 +36,11 @@ public class SentimentAnalysisModule {
 
     static Properties props;
     static StanfordCoreNLP pipeline;
-//    static String serializedClassifier;
-//    static AbstractSequenceClassifier<CoreLabel> classifier;
+    static String serializedClassifier;
+    static AbstractSequenceClassifier<CoreLabel> classifier;
 	private static SentimentAnalysisModule sam;
 
-    private SentimentAnalysisModule(String serializedClassifier) {
+    public SentimentAnalysisModule(String serializedClassifier) {
         initialize(serializedClassifier);
     }
     
@@ -59,11 +59,11 @@ public class SentimentAnalysisModule {
         props.setProperty("tokenize.options", "untokenizable=noneDelete"); // sentences with more than 20 words
         pipeline = new StanfordCoreNLP(props);
       
-/*
+
         serializedClassifier = classifierName;
         classifier = CRFClassifier
                          .getClassifierNoExceptions(serializedClassifier);
-*/
+
         System.err.println("CoreNLP init: "+(System.currentTimeMillis()-start));
     }
 
@@ -359,24 +359,23 @@ public class SentimentAnalysisModule {
         return s;
     }
 
-//    @Override
-//    public Set<Entity> getEntities(String text) {
-//
-//        Set<Entity> entities = new HashSet<Entity>();
-//        List<List<CoreLabel>> out = classifier.classify(text);
-//        for (List<CoreLabel> sentence : out) {
-//            for (CoreLabel word : sentence) {
-//                if (!word.get(CoreAnnotations.AnswerAnnotation.class)
-//                         .equalsIgnoreCase("O")) {
-//                    Entity e = new Entity();
-//                    e.name = word.word();
-//                    e.type = word.get(CoreAnnotations.AnswerAnnotation.class);
-//                    entities.add(e);
-//                }
-//            }
-//        }
-//        return entities;
-//    }
+    public Set<Entity> getEntities(String text) {
+
+        Set<Entity> entities = new HashSet<Entity>();
+        List<List<CoreLabel>> out = classifier.classify(text);
+        for (List<CoreLabel> sentence : out) {
+            for (CoreLabel word : sentence) {
+                if (!word.get(CoreAnnotations.AnswerAnnotation.class)
+                         .equalsIgnoreCase("O")) {
+                    Entity e = new Entity();
+                    e.name = word.word();
+                    e.type = word.get(CoreAnnotations.AnswerAnnotation.class);
+                    entities.add(e);
+                }
+            }
+        }
+        return entities;
+    }
 
     static enum Output {
         PENNTREES, VECTORS, ROOT, PROBABILITIES

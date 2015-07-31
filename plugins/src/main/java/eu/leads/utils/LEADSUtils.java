@@ -221,11 +221,13 @@ public class LEADSUtils {
 		JSONArray jsonArray = new JSONArray();
 		for(int i=0; i<extractionTuplesArray.length; i++) {
 			JSONObject jsonObject = new JSONObject();
-			try {
-				jsonObject.put(extractionTuplesTypes[i],extractionTuplesArray[i]);
-				jsonArray.put(jsonObject);
-			} catch (JSONException e) {
-				e.printStackTrace();
+			if(extractionTuplesTypes[i]!=null && extractionTuplesArray!=null) {
+				try {
+					jsonObject.put(extractionTuplesTypes[i],extractionTuplesArray[i]);
+					jsonArray.put(jsonObject);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		return jsonArray.toString();
