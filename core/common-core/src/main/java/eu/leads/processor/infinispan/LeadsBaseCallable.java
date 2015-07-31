@@ -168,9 +168,12 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       }
       profCallable.end();
     }else{
-      profCallable.start("Search Over Indexed Data");
+      profCallable.start("Search_Over_Indexed_Data");
+      System.out.println("Search Over Indexed Data");
       ProfileEvent profExecute = new ProfileEvent("Get list " + this.getClass().toString(), profilerLog);
-      List<LeadsIndex> list = lquery.get(0).list();
+      List<LeadsIndex> list = lquery.get(0).list(); //TODO fix it
+      System.out.println(" Indexed Data Size: " + list.size());
+
       profExecute.end();
       //to do use sketches to find out what to do
       try {

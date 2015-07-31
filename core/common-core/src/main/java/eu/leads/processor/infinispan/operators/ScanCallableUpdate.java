@@ -41,7 +41,6 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
   transient protected FilterOperatorTree tree;
   transient protected double totalSum;
   transient protected Cache approxSumCache;
-  protected String qualString;
   transient protected long versionStart = -1, versionFinish = -1, range = -1;
   //  transient protected InfinispanManager manager;
   protected Logger log = LoggerFactory.getLogger(ScanCallableUpdate.class.toString());
@@ -155,20 +154,24 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
       case CONST:
         // result = true;
         return MathUtils.getTextFrom(root.getValueAsJson());
-//      case LTH:
+     case LTH:
+       return 0.4;
 ////        if(left !=null && oright !=null)
 ////          return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
 //        return null;
 //        break;
-//      case LEQ:
+      case LEQ:
+        return 0.4;
 //        if(left !=null && oright !=null)
 //          return left.and().having("attributeValue").lte(oright);//,right.getValueAsJson());
 //        break;
-//      case GTH:
+      case GTH:
+        return 0.4;
 //        if(left !=null && oright !=null)
 //          return left.and().having("attributeValue").gt(oright);//,right.getValueAsJson());
 //        break;
-//      case GEQ:
+      case GEQ:
+        return 0.4;
 //        if(left !=null && oright !=null)
 //          return left.and().having("attributeValue").gte(oright);//,right.getValueAsJson());
 //        break;
@@ -182,6 +185,8 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 //      case ROW_CONSTANT:
 //        //TODO
 //        break;
+      default:
+        return 0.01;
     }
     return null;
   }
@@ -279,10 +284,10 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
     ArrayList<Query> left = null;
     ArrayList<Query> right = null;
     switch (root.getType()) {
-
       case AND: {
         left = createLuceneQuerys(indexCaches, root.getLeft());
         right = createLuceneQuerys(indexCaches, root.getRight());
+        System.out.println("Fix AND with multiple indexes");
       }
       break;
       case OR: {
@@ -290,6 +295,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
         right = createLuceneQuerys(indexCaches, root.getRight());
         //if(left !=null && right !=null){
         //use sketches to check
+        System.out.println("Fix OR with multiple indexes");
       }
       break;
       default: {
@@ -308,6 +314,8 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
   }
 
   Object getSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
+    if(root==null)
+      return null;
     Object left = getSelectivity(sketchCaches, root.getLeft());
     Object right = getSelectivity(sketchCaches, root.getRight());
 
@@ -321,12 +329,11 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
           return (double) left + (double) right;
         break;
       default:
-        System.out.println("SubQual " + root.getType());
+        System.out.println("Selectivity SubQual " + root.getType());
         return getSubSelectivity(sketchCaches, root);
     }
     return (left != null) ? left : right;
   }
-
 
 
   private boolean checkIndex_usage() {
@@ -336,6 +343,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
     Iterator<Object> iterator = fields.iterator();
     String columnName = null;
     indexCaches = new HashMap<>();
+    sketches = new HashMap<>();
     while (iterator.hasNext()) {
       JsonObject tmp = (JsonObject) iterator.next();
       columnName = tmp.getString("name");
@@ -356,13 +364,13 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
     Object selectvt = getSelectivity(sketches, tree.getRoot());
     if (selectvt != null) {
       double selectivity= (double)selectvt/inputCache.size();
-      System.out.print("Selectivity: " + selectivity);
-      if(selectivity < 0.5)
+      System.out.println("Selectivity: " + selectivity);
+      if(selectivity < 0.5){
+        System.out.println("Use indexes!!");
         return indexCaches.size() > 0;
+      }
     }
-
     return false;
-
   }
 
   /**
