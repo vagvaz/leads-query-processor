@@ -4,7 +4,7 @@
 public class DataRemoteReaderTest {
   public static void main(String[] args) {
 
-    String conString = "5.147.254.167:11222";
+    String conString = "clusterinfo.unineuchatel.ch:11222";
     String ensemble  = "192.168.1.76:11223";
     boolean distributed = false;
     String prefix = "/tmp/leads-crawler-snapshot1/";
