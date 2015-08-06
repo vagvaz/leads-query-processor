@@ -263,8 +263,6 @@ public class LoadAmplab {
                                 writer.flush();
                             }
                         }
-
-
                         newStringData[index] = newValue;
                     }
                     writer.writeNext(newStringData);
@@ -414,6 +412,8 @@ public class LoadAmplab {
             }
         }
 
+         int reportRate = 10000;
+        long lastReportTime=System.currentTimeMillis() ;
         if (initialize_cache(tableName)){
             long StartTime = System.currentTimeMillis();
             int numofEntries = 0;
@@ -487,11 +487,13 @@ public class LoadAmplab {
                 if (delay > 50) {
                     System.out.println("Cache put: " + numofEntries);
                 }
-                if (numofEntries % 10000 == 0)
-                    System.out.println("Mean Rate : " +(float)numofEntries/(float)((System.currentTimeMillis() - StartTime)/1000.0) + " Imported: " + numofEntries+" -- size: "+sizeE);
+                if (numofEntries % reportRate == 0) {
+                    System.out.println("Rate(t/s):" + (float) reportRate / (float) ((System.currentTimeMillis() - lastReportTime) / 1000.0) + " Mean Rate (t/s): " + (float) numofEntries / (float) ((System.currentTimeMillis() - StartTime) / 1000.0) + " Imported: " + numofEntries + " -- size: " + sizeE);
+                    lastReportTime=System.currentTimeMillis();
+                }
 
             }
-            System.out.println("Mean Rate : " +(float)numofEntries/(float)((System.currentTimeMillis() - StartTime)/1000.0) + " Totally Imported: " + numofEntries);
+            System.out.println("Mean Rate(tuples/sec): " +(float)numofEntries/(float)((System.currentTimeMillis() - StartTime)/1000.0) + " Totally Imported: " + numofEntries);
         }
     }
 
@@ -546,7 +548,7 @@ public class LoadAmplab {
             EnsembleCacheUtils.putToCache(remoteCache, remoteCache.getName() + ":" + key, tuple);
         else if (embeddedCache != null)
             EnsembleCacheUtils.putToCache(embeddedCache,
-                ((Cache) embeddedCache).getName() + ":" + key, tuple);
+                    ((Cache) embeddedCache).getName() + ":" + key, tuple);
         else if (ensembleCache!=null)
             EnsembleCacheUtils.putToCache(ensembleCache, ensembleCache.getName() + ":" + key, tuple);
         try {
