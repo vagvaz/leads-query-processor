@@ -1,6 +1,8 @@
 package eu.leads.processor.conf;
 
 import org.apache.commons.configuration.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.File;
@@ -14,6 +16,7 @@ import java.util.*;
  */
 public class ConfigurationUtilities {
 
+    static Logger log = LoggerFactory.getLogger(ConfigurationUtilities.class);
     public static File[] getConfigurationFiles(String directory) {
         return ConfigurationUtilities.getConfigurationFiles(directory, null);
     }
@@ -183,6 +186,8 @@ public class ConfigurationUtilities {
         String[] ips = result.split(";");
         Random random = new Random();
         int index = random.nextInt(ips.length);
+        System.out.println("\n\nEXTERNAL IP " + ips[index]);
+        log.error("EXTERNAL IP " + ips[index]);
             return ips[index];
     }
 
