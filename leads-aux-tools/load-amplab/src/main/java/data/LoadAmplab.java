@@ -410,6 +410,7 @@ public class LoadAmplab {
         }
 
         if (initialize_cache(tableName)){
+            long StartTime = System.currentTimeMillis();
             int numofEntries = 0;
             int lines = 0;
             String key="";
@@ -480,12 +481,11 @@ public class LoadAmplab {
                 if (delay > 50) {
                     System.out.println("Cache put: " + numofEntries);
                 }
-                if (numofEntries % 1000 == 0) {
-                    System.out.println("Imported: " + numofEntries+" -- size: "+sizeE);
-                }
-            }
+                if (numofEntries % 10000 == 0)
+                    System.out.println("Mean Rate : " +(float)numofEntries/(float)((System.currentTimeMillis() - StartTime)/1000.0) + " Imported: " + numofEntries+" -- size: "+sizeE);
 
-            System.out.println("Totally Imported: " + numofEntries);
+            }
+            System.out.println("Mean Rate : " +(float)numofEntries/(float)((System.currentTimeMillis() - StartTime)/1000.0) + " Totally Imported: " + numofEntries);
         }
     }
 

@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentMap;
@@ -30,8 +31,13 @@ import java.util.concurrent.ConcurrentMap;
  * Created by vagvaz on 05/13/15.
  */
 public class LoadAmplab2 {
+    private static long  AllstartTime;
+
     enum plugs {SENTIMENT, PAGERANK};
     transient protected static Random r;
+
+    static HashMap<String,Integer> loaded_tuples;
+    static HashMap<String,Long> loading_times;
 
     static int delay = 0;
     static RemoteCacheManager remoteCacheManager = null;
@@ -45,7 +51,7 @@ public class LoadAmplab2 {
     static boolean ensemple_multi = false;
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         r = new Random(0);
-
+        loaded_tuples = new HashMap<>();
         if (args.length == 0) {
             System.out.print(" Syntax:\tconvertadd filename {inputcollumn conversion}+ \n where convertion type: sentiment, pagerank");
             System.err.println("or  \t\t$prog loadIspn dir (delay per put)\n ");
@@ -97,6 +103,7 @@ public class LoadAmplab2 {
 
     private static void loadData(String path, String arg5, String arg6) throws IOException, ClassNotFoundException {
         Long startTime = System.currentTimeMillis();
+        AllstartTime = System.currentTimeMillis();
         Path dir = Paths.get(path);
         List<File> files = new ArrayList<>();
 
@@ -129,10 +136,6 @@ public class LoadAmplab2 {
                     loadDataFromFile(csvfile,arg5,arg6);
                     System.out.println("Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - filestartTime, "HH:mm:ss,SSS"));
                 }
-
-
-
-
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -140,6 +143,9 @@ public class LoadAmplab2 {
 
         System.out.println("Loading finished.");
         System.out.println("Overall Folder Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - startTime, "HH:mm:ss,SSS"));
+        for(String tableName : loaded_tuples.keySet()){
+            System.out.println(" TableName: " + tableName + " # Tuples: " + loaded_tuples.get(tableName) + " Rate: " + loaded_tuples.get(tableName)/(float)loading_times.get(tableName));
+        }
         System.exit(0);
 
     }
@@ -149,6 +155,15 @@ public class LoadAmplab2 {
         String keysFilename = csvfile.getAbsoluteFile().getParent() + "/" + tableName + ".keys";
         Path path = Paths.get(keysFilename);
 
+        int maxTuples = Integer.parseInt(arg5);
+        if(loaded_tuples.containsKey(tableName)){
+            if(loaded_tuples.get(tableName)>maxTuples){
+                System.out.println(" Max entries reached for " + tableName + " skiping " + csvfile.getName());
+            }
+        }else{
+           loaded_tuples.put(tableName,0);
+           loading_times.put(tableName,0L);
+        }
         BufferedReader keyReader = null;
         if (Files.exists(path)) {
             try {
@@ -241,7 +256,7 @@ public class LoadAmplab2 {
         }
 
         if (initialize_cache(tableName)){
-            int numofEntries = 0;
+            int numofEntries =loaded_tuples.get(tableName);
             int lines = 0;
             String key="";
             System.out.println("Importing data ... ");
@@ -257,7 +272,12 @@ public class LoadAmplab2 {
                 return;
             }
 
+            Long currentStartTime = System.currentTimeMillis();
             while ((keyLine = keyReader.readLine()) != null){
+                if (numofEntries > maxTuples){
+                    System.out.println("Stopping import limit reached " + maxTuples + " " );
+                    break;
+                }
                 JsonObject data = new JsonObject();
 
                 // read line and values separated by commas
@@ -298,18 +318,21 @@ public class LoadAmplab2 {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
                 numofEntries++;
-
-                if (delay > 50) {
+                if (delay > 50)
                     System.out.println("Cache put: " + numofEntries);
-                }
-                if (numofEntries % 1000 == 0){
-                    System.out.println("Imported: " + numofEntries+" -- size: "+sizeE + " -- file: "+csvfile);
-                }
+
+                if (numofEntries % 10000 == 0)
+                    System.out.println("File Import Mean Rate: " +(numofEntries-loaded_tuples.get(tableName))/((System.currentTimeMillis() - currentStartTime)/1000.0) + " Imported: " + numofEntries + " -- size: " + sizeE + " -- file: " + csvfile);
+
             }
             EnsembleCacheUtils.waitForAllPuts();
-            System.out.println("Totally Imported: " + numofEntries);
+            System.out.println("File Import Mean Rate: " + (numofEntries - loaded_tuples.get(tableName)) / ((System.currentTimeMillis() - currentStartTime) / 1000.0) + " Imported: " + numofEntries + " -- size: " + sizeE + " -- file: " + csvfile);
+
+            loaded_tuples.put(tableName, numofEntries);
+            loading_times.put(tableName, loading_times.get(tableName) + (System.currentTimeMillis() - currentStartTime));
+            System.out.println("Overall table "+ tableName+ " import time: " +DurationFormatUtils.formatDuration(loading_times.get(tableName), "HH:mm:ss,SSS") + " Totally Imported: " + numofEntries +" Mean Rate "+numofEntries/(float)(loading_times.get(tableName)/1000.0));
+
         }
     }
 
