@@ -47,6 +47,9 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
   transient protected boolean renameTableInTree;
   transient  private String toRename;
   transient  private String tableName;
+  transient Logger profilerLog;
+  private ProfileEvent fullProcessing;
+
   public ScanCallableUpdate(String configString, String output) {
     super(configString, output);
   }
@@ -58,6 +61,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
   @Override public void initialize() {
     super.initialize();
 //    versionedCache = new VersionedCacheTreeMapImpl(inputCache,new VersionScalarGenerator(),inputCache.getName());
+     profilerLog = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
 
     pageRankCache = (Cache) imanager.getPersisentCache("pagerankCache");
     log.info("--------------------    get approxSum cache ------------------------");
@@ -102,6 +106,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
     }
 
     versioning = getVersionPredicate(conf);
+    fullProcessing = new ProfileEvent("FullScanProcessing",profilerLog);
   }
 
   /**
@@ -115,9 +120,8 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
   }
 
   @Override public void executeOn(K key, V ivalue) {
-    Logger profilerLog = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
 
-//    ProfileEvent profExecute = new ProfileEvent("Execute " + this.getClass().toString(),profilerLog);
+    ProfileEvent scanExecute = new ProfileEvent("ScanExecute",profilerLog);
 
     //         System.err.println(manager.getCacheManager().getAddress().toString() + " "+ entry.getKey() + "       " + entry.getValue());
     Tuple toRunValue = null;
@@ -133,6 +137,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
       else{
         Version latestVersion = versionedCache.getLatestVersion(ikey);
         if (latestVersion == null) {
+          scanExecute.end();
           return;
         }
         Object objectValue = versionedCache.get(ikey);
@@ -143,49 +148,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
     else{
       toRunValue = (Tuple)ivalue;
     }
-//    if(versioning) {
-//      String versionedKey = (String) key;
-//      String ikey = pruneVersion(versionedKey);
-//      Version latestVersion = versionedCache.getLatestVersion(ikey);
-//      if (latestVersion == null) {
-//        continue;
-//      }
-//      Version currentVersion = getVersion(versionedKey);
-//      Object objectValue = versionedCache.get(ikey);
-//      String value = (String) objectValue;
-//    }
-//    else {
-
-//      String ikey = (String) key;
-//      String value = (String) inputCache.get(ikey);
-      //ENDNONVERSIONDING
-      //         String value = (String) entry.getValue();
-
-      //          String value = (String) entry.getValue();
-      //          String value = (String)inputCache.get(key);
-//      Tuple tuple = new Tuple(toRunValue);
-//<<<<<<< HEAD
-//      profExecute.start("new Tuple");
-////      Tuple tuple = toRunValue;//new Tuple(toRunValue);
-//      Tuple tuple = new Tuple(toRunValue);
-//      profExecute.end();
-//
-//      profExecute.start("namesToLowerCase");
-//      namesToLowerCase(tuple);
-//      profExecute.end();
-//      profExecute.start("renameAllTupleAttributes");
-//      renameAllTupleAttributes(tuple);
-//=======
-      //profExecute.start("new Tuple");
       Tuple tuple = toRunValue;//new Tuple(toRunValue);
-      //profExecute.end();
-
-      //profExecute.start("namesToLowerCase");
-      //namesToLowerCase(tuple);
-      //profExecute.end();
-     // profExecute.start("renameAllTupleAttributes");
-      //renameAllTupleAttributes(tuple);
-//      profExecute.end();
       if (tree != null) {
         if(renameTableInTree){
           tree.renameTableDatum(tableName,toRename);
@@ -216,6 +179,7 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
 //          profExecute.end();
         }
       }
+    scanExecute.end();
   }
 
   private boolean needsREnaming() {
@@ -354,5 +318,10 @@ public class ScanCallableUpdate<K,V> extends LeadsSQLCallable<K,V> implements Se
     if(totalSum > 0){
       totalSum+=1;
     }
+  }
+
+  @Override public void finalizeCallable() {
+    fullProcessing.end();
+    super.finalizeCallable();
   }
 }

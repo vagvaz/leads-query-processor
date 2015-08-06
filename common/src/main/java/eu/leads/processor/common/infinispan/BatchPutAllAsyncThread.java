@@ -1,6 +1,7 @@
 package eu.leads.processor.common.infinispan;
 
 import eu.leads.processor.common.utils.PrintUtilities;
+import eu.leads.processor.common.utils.ProfileEvent;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.concurrent.NotifyingFuture;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ public class BatchPutAllAsyncThread extends Thread{
     private Map<NotifyingFuture, String> backup;
     private List<NotifyingFuture> futures;
     private Logger log;
+    private ProfileEvent batchPut;
     public BatchPutAllAsyncThread(Map<String, BasicCache> caches,
         Map<String, Map<Object, Object>> objects) {
         this.caches = caches;
@@ -26,10 +28,12 @@ public class BatchPutAllAsyncThread extends Thread{
         futures = new ArrayList<>();
         backup = new HashMap<>();
         log = LoggerFactory.getLogger(BatchPutAllAsyncThread.class);
+
     }
 
     @Override public void run() {
 //        super.run();
+        batchPut = new ProfileEvent("batchPut",log);
         for(Map.Entry<String,Map<Object,Object>> entry : objects.entrySet()){
             BasicCache cache = caches.get(entry.getKey());
             if(cache == null){
@@ -82,5 +86,6 @@ public class BatchPutAllAsyncThread extends Thread{
         }
         caches.clear();
         objects.clear();
+        batchPut.end();
     }
 }

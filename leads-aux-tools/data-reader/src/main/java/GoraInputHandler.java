@@ -5,6 +5,7 @@ import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.NutchTransformer;
 import org.apache.avro.generic.GenericData;
 import org.apache.gora.infinispan.query.InfinispanQuery;
+import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
@@ -154,7 +155,12 @@ public class GoraInputHandler implements InputHandler<String,WebPage> {
         query.setLimit(batchSize);
         query.setSortingOrder(true);
         query.setSortingField("fetchTime");
-        currentResult = query.execute();
+        List<PartitionQuery> queries = ((InfinispanQuery)query).split();
+        listOfResults = new LinkedList<>();
+        for(PartitionQuery partitionQuery : queries) {
+            listOfResults.add(partitionQuery.execute());
+        }
+        currentResult = listOfResults.remove(0);
         this.offset += batchSize;
         return currentResult;
     }
@@ -194,6 +200,10 @@ public class GoraInputHandler implements InputHandler<String,WebPage> {
                     WebPage page = (WebPage) currentResult.get();
                         numberOfValues++;
                         return new AbstractMap.SimpleEntry<String, WebPage>(page.getUrl(), page);
+                }
+                else if(listOfResults.size() > 0){
+                    currentResult = listOfResults.remove(0);
+                    return next();
                 }
                 else{
                     if(hasNext()){
