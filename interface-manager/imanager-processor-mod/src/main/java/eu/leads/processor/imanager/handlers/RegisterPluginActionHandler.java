@@ -10,7 +10,6 @@ import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
-import org.apache.avro.data.Json;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 

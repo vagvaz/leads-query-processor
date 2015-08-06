@@ -3,11 +3,11 @@ package test;
 import eu.leads.crawler.PersistentCrawl;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
+import eu.leads.processor.common.plugins.PluginManager;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.plugins.PluginInterface;
-import eu.leads.processor.common.plugins.PluginManager;
 import eu.leads.processor.plugins.synopses.SynopsesTestPlugin;
 import org.apache.commons.configuration.XMLConfiguration;
 

@@ -52,10 +52,10 @@
          <artifactId>vertx-core</artifactId>
          <version>${vertx.version}</version>
          <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
+            <!--<exclusion>-->
+               <!--<groupId>log4j</groupId>-->
+               <!--<artifactId>log4j</artifactId>-->
+            <!--</exclusion>-->
             <exclusion>
                <groupId>org.apache.logging.log4j</groupId>
                <artifactId>log4j-core</artifactId>
@@ -78,10 +78,10 @@
          <version>${vertx.version}</version>
          <scope>provided</scope>
          <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
+            <!--<exclusion>-->
+               <!--<groupId>log4j</groupId>-->
+               <!--<artifactId>log4j</artifactId>-->
+            <!--</exclusion>-->
             <exclusion>
                <groupId>org.apache.logging.log4j</groupId>
                <artifactId>log4j-core</artifactId>
@@ -103,10 +103,10 @@
          <version>${vertx.version}</version>
          <scope>provided</scope>
          <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
+            <!--<exclusion>-->
+               <!--<groupId>log4j</groupId>-->
+               <!--<artifactId>log4j</artifactId>-->
+            <!--</exclusion>-->
             <exclusion>
                <groupId>org.apache.logging.log4j</groupId>
                <artifactId>log4j-core</artifactId>
@@ -178,10 +178,10 @@
          <artifactId>common-core</artifactId>
          <version>${processor.version}</version>
          <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
+            <!--<exclusion>-->
+               <!--<groupId>log4j</groupId>-->
+               <!--<artifactId>log4j</artifactId>-->
+            <!--</exclusion>-->
             <exclusion>
                <groupId>org.apache.logging.log4j</groupId>
                <artifactId>log4j-core</artifactId>

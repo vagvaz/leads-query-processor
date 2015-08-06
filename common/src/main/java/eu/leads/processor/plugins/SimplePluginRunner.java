@@ -18,6 +18,7 @@ import org.infinispan.notifications.cachelistener.event.CacheEntryModifiedEvent;
 import org.infinispan.notifications.cachelistener.event.CacheEntryRemovedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vertx.java.core.json.JsonObject;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -137,6 +138,10 @@ public class
     @Override
     public void setManager(InfinispanManager manager) {
         this.manager = manager;
+    }
+
+    @Override public void initialize(InfinispanManager manager, JsonObject conf) {
+        initialize(manager);
     }
 
     /**

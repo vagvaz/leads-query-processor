@@ -1,21 +1,17 @@
 package test.eu.leads.infext.proc.realtime.hook.impl;
 
+import eu.leads.PropertiesSingleton;
+import eu.leads.infext.proc.realtime.hook.impl.PageCheckHook;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.XMLConfiguration;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
-
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.XMLConfiguration;
-
-import eu.leads.PropertiesSingleton;
-import eu.leads.datastore.DataStoreSingleton;
-import eu.leads.infext.proc.realtime.hook.impl.PageCheckHook;
 
 public class PageCheckHookTest {
 

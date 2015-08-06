@@ -2,13 +2,15 @@ package eu.leads.processor.infinispan.operators.mapreduce;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.leads.processor.infinispan.LeadsReducer;
-import eu.leads.processor.core.Tuple;
 import eu.leads.processor.common.utils.InfinispanUtils;
+import eu.leads.processor.core.Tuple;
+import eu.leads.processor.infinispan.LeadsReducer;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
 /**

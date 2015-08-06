@@ -1,20 +1,19 @@
 package eu.leads.infext.proc.realtime.env.pojo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-
 import eu.leads.datastore.DataStoreSingleton;
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.MDFamily;
 import eu.leads.infext.proc.realtime.hook.impl.FQDNDefiningHook;
 import eu.leads.infext.proc.realtime.hook.impl.LanguageDetectionHook;
-import eu.leads.infext.proc.realtime.hook.impl.PageCheckHook;
 import eu.leads.infext.proc.realtime.hook.impl.TextContentExtractionHook;
 import eu.leads.infext.proc.realtime.wrapper.AbstractProcessing;
 import eu.leads.infext.proc.realtime.wrapper.AllAtOnceProcessing;
 import eu.leads.utils.LEADSUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 
 public class BasicNewExecutionPojo extends AbstractExecutionPojo {

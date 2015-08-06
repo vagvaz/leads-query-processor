@@ -2,8 +2,8 @@ package eu.leads.processor.web;
 
 import data.MetaData;
 import data.PluginStatus;
-import eu.leads.processor.core.Tuple;
 import eu.leads.processor.common.plugins.PluginPackage;
+import eu.leads.processor.core.Tuple;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

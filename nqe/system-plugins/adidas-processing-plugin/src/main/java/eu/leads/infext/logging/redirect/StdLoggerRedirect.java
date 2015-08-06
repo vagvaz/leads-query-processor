@@ -3,13 +3,7 @@ package eu.leads.infext.logging.redirect;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.LogManager;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-import java.util.logging.Formatter;
+import java.util.logging.*;
 
 public class StdLoggerRedirect {
 	

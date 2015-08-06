@@ -1,7 +1,5 @@
 package eu.leads.processor.deployer;
 
-import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
-import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;

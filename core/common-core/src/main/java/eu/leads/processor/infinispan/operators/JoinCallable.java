@@ -1,8 +1,8 @@
 package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
-import eu.leads.processor.infinispan.QualFilter;
 import eu.leads.processor.core.Tuple;
+import eu.leads.processor.infinispan.QualFilter;
 import eu.leads.processor.math.FilterOperatorTree;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;

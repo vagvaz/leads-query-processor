@@ -93,7 +93,7 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
     int counter = 0;
     String prefix = outputCache.getName();
     for (Tuple t : tuples) {
-      System.out.println("output to " + outputCache.getName() + "   key " + prefix + counter);
+//      System.out.println("output to " + outputCache.getName() + "   key " + prefix + counter);
       EnsembleCacheUtils.putToCache(outputCache,prefix + counter, t);
 
 //      outputCache.put(outputCache.getName()  + counter, t);

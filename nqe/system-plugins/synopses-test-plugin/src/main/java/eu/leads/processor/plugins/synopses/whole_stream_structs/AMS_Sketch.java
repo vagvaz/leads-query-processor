@@ -1,13 +1,11 @@
 package eu.leads.processor.plugins.synopses.whole_stream_structs;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-
+import cern.jet.random.engine.RandomEngine;
 import com.google.common.hash.Funnel;
 import com.google.common.hash.Hashing;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-import cern.jet.random.engine.RandomEngine;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Partially migrated from:

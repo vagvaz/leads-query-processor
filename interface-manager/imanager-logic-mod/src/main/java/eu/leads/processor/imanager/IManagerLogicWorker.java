@@ -108,11 +108,11 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             action.getData().putString("replyTo", msg.getString("from"));
             com.sendWithEventBus(workQueueAddress, action.asJsonObject());
           } else if (label.equals(IManagerConstants.GET_QUERY_STATUS)) {
-            log.info("peding get query status");
+//            log.info("peding get query status");
             action.getData().putString("replyTo", msg.getString("from"));
             com.sendWithEventBus(workQueueAddress, action.asJsonObject());
           } else if (label.equals(IManagerConstants.GET_RESULTS)) {
-            log.info("completed reply get results");
+//            log.info("completed reply get results");
             action.getData().putString("replyTo", msg.getString("from"));
             com.sendWithEventBus(workQueueAddress, action.asJsonObject());
           } else if (label.equals(IManagerConstants.SUBMIT_QUERY)) {
@@ -238,7 +238,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
               com.sendTo(undeployAction.getData().getString("owner"), undeployAction.asJsonObject());
             }
           } else if (label.equals(IManagerConstants.GET_RESULTS)) {
-            log.info("completed reply get query results");
+//            log.info("completed reply get query results");
             com.sendTo(action.getData().getString("replyTo"), action.getResult());
           } else if (label.equals(IManagerConstants.CREATE_NEW_QUERY)) {
             JsonObject webServiceReply = action.getResult().getObject("status");

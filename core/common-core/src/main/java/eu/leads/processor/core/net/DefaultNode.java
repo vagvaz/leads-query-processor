@@ -6,14 +6,13 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import eu.leads.processor.core.ReplyHandler;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
+import org.slf4j.Logger;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.core.logging.impl.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -49,6 +48,7 @@ public class DefaultNode implements Node, Handler<Long> {
             }
         };
         incomingMessages = CacheBuilder.newBuilder().expireAfterWrite((retries / 3) * timeout, TimeUnit.MILLISECONDS).build();
+        logger = org.slf4j.LoggerFactory.getLogger(DefaultNode.class);
     }
 
     /**
@@ -257,11 +257,12 @@ public class DefaultNode implements Node, Handler<Long> {
     @Override
     public void initialize(JsonObject config, LeadsMessageHandler defaultHandler,
                               LeadsMessageHandler failHandler, Vertx vertx) {
-        logger = LoggerFactory.getLogger(this.getClass().getCanonicalName() + "." + this.getId());
+        this.config = config.copy();
+        logger = org.slf4j.LoggerFactory.getLogger(this.getId());
         comHandler = new CommunicationHandler(defaultHandler, this);
         this.failHandler = failHandler;
         bus = vertx.eventBus();
-        this.config = config.copy();
+
         registerToEventBusAddresses(this.config);
         this.vertx = vertx;
         vertx.setPeriodic(timeout,this);
@@ -333,15 +334,48 @@ public class DefaultNode implements Node, Handler<Long> {
         if (msg.getString(MessageUtils.COMTYPE).equals(ComUtils.P2P)) {
             //resend message through event bus to the nodeid
 //            bus.sendWithTimeout(msg.getString(MessageUtils.TO), msg, timeout, handler);
-             bus.send(msg.getString(MessageUtils.TO),msg);
+             if(msg == null || msg.getString(MessageUtils.TO) == null ) {
+                 logger.error("PROBLEWITH MESSAGE RETRYING msg " + (msg == null) + " to " + (  msg.getString(MessageUtils.TO) == null)   );
+             }
+             else{
+                 try {
+                     bus.send(msg.getString(MessageUtils.TO), msg);
+                 }catch (Exception e){
+                     e.printStackTrace();
+                     logger.error(e.getClass().toString() + " msg: " + (msg == null) + " bus " + (bus == null));
+                     logger.error(e.getClass().toString()+  " TO " + msg.getString(MessageUtils.TO));
+                 }
+             }
         } else if (msg.getString(MessageUtils.COMTYPE).equals(ComUtils.GROUP)) {
             //resend message through event bus to the groupId, it is essentially the same as
             //sending to one node since the event bus address is just an id.
 //            bus.sendWithTimeout(msg.getString(MessageUtils.TO), msg, timeout, handler);
-            bus.send(msg.getString(MessageUtils.TO),msg);
+            if(msg == null || msg.getString(MessageUtils.TO) == null) {
+                logger.error("PROBLEWITH MESSAGE RETRYING msg " + (msg == null) + " to " + (  msg.getString(MessageUtils.TO) == null)   );
+            }
+            else{
+                try {
+                    bus.send(msg.getString(MessageUtils.TO), msg);
+                }catch (Exception e){
+                    e.printStackTrace();
+                    logger.error(e.getClass().toString() + " msg: " + (msg == null) + " bus " + (bus == null));
+                    logger.error(e.getClass().toString()+  " TO " + msg.getString(MessageUtils.TO));
+                }
+            }
         }
         else{
-            bus.send(msg.getString(MessageUtils.TO),msg);
+            if(msg == null || msg.getString(MessageUtils.TO) == null ) {
+                logger.error("PROBLEWITH MESSAGE RETRYING msg " + (msg == null) + " to " + (  msg.getString(MessageUtils.TO) == null)   );
+            }
+            else{
+                try {
+                    bus.send(msg.getString(MessageUtils.TO), msg);
+                }catch (Exception e){
+                    e.printStackTrace();
+                    logger.error(e.getClass().toString() + " msg: " + (msg == null) + " bus " + (bus == null));
+                    logger.error(e.getClass().toString()+  " TO " + msg.getString(MessageUtils.TO));
+                }
+            }
         }
     }
 
@@ -363,7 +397,7 @@ public class DefaultNode implements Node, Handler<Long> {
             msg = null;
             wrapper = null;
         }catch (Exception e){
-            logger.fatal(getId() + " Exception in succeed " + messageId);
+            logger.error(getId() + " Exception in succeed " + messageId);
             e.printStackTrace();
         }
     }

@@ -1,8 +1,8 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
-import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.core.Tuple;
+import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.infinispan.LeadsReducer;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;

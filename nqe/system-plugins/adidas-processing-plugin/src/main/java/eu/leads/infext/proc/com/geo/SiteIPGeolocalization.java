@@ -1,16 +1,14 @@
 package eu.leads.infext.proc.com.geo;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import com.maxmind.geoip2.*;
+import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CountryResponse;
-
 import eu.leads.PropertiesSingleton;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class SiteIPGeolocalization {
 	

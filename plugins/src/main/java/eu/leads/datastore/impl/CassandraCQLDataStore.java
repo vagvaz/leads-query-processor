@@ -1,39 +1,13 @@
 package eu.leads.datastore.impl;
 
-import static ch.lambdaj.Lambda.filter;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.regex.Pattern;
-
-import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.ColumnDefinitions;
+import com.datastax.driver.core.*;
 import com.datastax.driver.core.ColumnDefinitions.Definition;
-import com.datastax.driver.core.DataType;
-import com.datastax.driver.core.Host;
-import com.datastax.driver.core.Metadata;
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.SimpleStatement;
-import com.datastax.driver.core.Statement;
-
 import eu.leads.datastore.AbstractDataStore;
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.URIVersion;
-import eu.leads.utils.LEADSUtils;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 public class CassandraCQLDataStore extends AbstractDataStore {
 

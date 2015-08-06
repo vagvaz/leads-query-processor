@@ -3,10 +3,8 @@ package eu.leads.processor.common.infinispan;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.core.TupleMarshaller;
 import eu.leads.processor.plugins.NutchLocalListener;
 import org.infinispan.Cache;
-import org.infinispan.commons.marshall.Marshaller;
 import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
@@ -17,6 +15,7 @@ import org.infinispan.configuration.parsing.ParserRegistry;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.eviction.EvictionStrategy;
+import org.infinispan.eviction.EvictionThreadPolicy;
 import org.infinispan.lifecycle.ComponentStatus;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
@@ -76,11 +75,17 @@ public class ClusterInfinispanManager implements InfinispanManager {
    */
   public ClusterInfinispanManager() {
     host = "0.0.0.0";
+    maxEntries = LQPConfiguration.getInstance().getConfiguration().getInt("node.infinispan.maxentries",5000);
+//    System.out.println("maximum entries are " + maxEntries);
+//    log.error("maximum entries are " + maxEntries);
     serverPort = 11222;
   }
 
   public ClusterInfinispanManager(EmbeddedCacheManager manager) {
     this.manager = manager;
+    maxEntries = LQPConfiguration.getInstance().getConfiguration().getInt("node.infinispan.maxentries",5000);
+//    System.out.println("maximum entries are " + maxEntries);
+//    log.error("maximum entries are " + maxEntries);
     initDefaultCacheConfig();
   }
 
@@ -99,8 +104,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
   @Override
   public void startManager(String configurationFile)  {
 
-    currentComponent = LQPConfiguration.getInstance().getConfiguration().getString("node.current.component");
-    maxEntries = LQPConfiguration.getInstance().getConfiguration().getInt("node.infinispan.maxentries",3000);
+    currentComponent = LQPConfiguration.getInstance().getConfiguration().getString(
+        "node.current.component");
     externalIP = LQPConfiguration.getInstance().getConfiguration().getString(StringConstants.PUBLIC_IP);
     if(currentComponent == null)
       currentComponent = "testingComponents-"+UUID.randomUUID();
@@ -168,13 +173,13 @@ public class ClusterInfinispanManager implements InfinispanManager {
         ("/tmp/leadsprocessor-data/"+uniquePath+"/webpage/")
         .fetchPersistentState(true)
         .shared(false).purgeOnStartup(false).preload(false).expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-            false);
+        false);
     //    builder.transaction().transactionManagerLookup(new GenericTransactionManagerLookup()).dataContainer().valueEquivalence(AnyEquivalence.getInstance());
     Configuration configuration = builder.build();
     manager.defineConfiguration("WebPage", configuration);
     //    Cache nutchCache = manager.getCache("WebPage", true);
 
-    getPersisentCache("clustered");
+
     getPersisentCache("pagerankCache");
     getPersisentCache("approx_sum_cache");
     getPersisentCache(StringConstants.STATISTICS_CACHE);
@@ -200,8 +205,14 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".rankings");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".uservisits");
+    getPersisentCache("leads.processor.catalog.tablespaces");
+    getPersisentCache("leads.processor.catalog.databases");
+    getPersisentCache("leads.processor.catalog.functions");
+    getPersisentCache("leads.processor.catalog.indexes");
+    getPersisentCache("leads.processor.catalog.indexesByColumn");
+    getPersisentCache("leads.processor.databases.sub."+StringConstants.DEFAULT_DATABASE_NAME);
 
-
+    getPersisentCache("clustered");
     NutchLocalListener listener = new NutchLocalListener(this,"default.webpages",LQPConfiguration.getInstance().getConfiguration().getString("nutch.listener.prefix"),currentComponent);
 
     manager.getCache("WebPage").addListener(listener);
@@ -301,7 +312,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .hash().numOwners(1)
             .indexing().index(Index.NONE).transaction().transactionMode(
             TransactionMode.NON_TRANSACTIONAL)
-            .persistence().passivation(false)
+            .persistence().passivation(true)
             //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
             //                                                                      .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
 
@@ -309,7 +320,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-            false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS);
+            false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(
+            EvictionThreadPolicy.PIGGYBACK);
 
       } else { //Use leveldb
         result = new ConfigurationBuilder();
@@ -329,7 +341,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-            false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
+            false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.PIGGYBACK)
             .build();
       }
     } else { //do not use persistence
@@ -341,7 +353,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
           .indexing().index(Index.NONE).transaction().transactionMode(
           TransactionMode.NON_TRANSACTIONAL).compatibility().enable()
           .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-          false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
+          false)//.eviction().maxEntries(maxEntries).strategy(EvictionStrategy.NONE)
           .build();
     }
 
@@ -576,57 +588,11 @@ public class ClusterInfinispanManager implements InfinispanManager {
     addListener(listener, c);
   }
 
-  //  /** {@inheritDoc} */
-  //  @Override
-  //  public void addListener(Object listener, String name, KeyFilter filter) {
-  //    Cache c = (Cache) this.getPersisentCache(name);
-  //    c.addListener(listener, filter);
-  //  }
-  //
-  //  /** {@inheritDoc} */
-  //  @Override
-  //  public void addListener(Object listener, String name, KeyValueFilter filter, Converter converter) {
-  //    Cache c = (Cache) this.getPersisentCache(name);
-  //    c.addListener(listener, filter, converter);
-  //
-  //  }
-  //
-  //  /** {@inheritDoc} */
-  //  @Override
-  //  public void addListener(Object listener, Cache cache, KeyFilter filter) {
-  //    cache.addListener(listener, filter);
-  //  }
-  //
-  //  /** {@inheritDoc} */
-  //  @Override
-  //  public void addListener(Object listener, Cache cache, KeyValueFilter filter, Converter converter) {
-  ////        cache.addListener(listener,filter,converter);
-  //  }
-
   /**
    * {@inheritDoc}
    */
   @Override
   public void removeListener(Object listener, Cache cache) {
-    //    DistributedExecutorService des = new DefaultExecutorService(cache);
-    //    List<Future<Void>> list = new LinkedList<Future<Void>>();
-    //    for (Address a : getMembers()) {
-    //      //            des.submitEverywhere(new AddListenerCallable(cache.getName(),listener));
-    //      try {
-    //        list.add(des.submit(a, new RemoveListenerCallable(cache.getName(), listener)));
-    //      } catch (Exception e) {
-    //        log.error(e.getMessage());
-    //      }
-    //    }
-    //
-    //
-    //    for (Future<Void> future : list) {
-    //      try {
-    //        future.get(); // wait for task to complete
-    //      } catch (InterruptedException e) {
-    //      } catch (ExecutionException e) {
-    //      }
-    //    }
     cache.removeListener(listener);
   }
 
@@ -682,7 +648,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         .fetchPersistentState(true)
         .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
         .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-            false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
+            false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
         .build();
     manager.defineConfiguration(cacheName, configuration);
     Cache startedCache = manager.getCache(cacheName);
@@ -751,7 +717,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-                false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
+                false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.PIGGYBACK)
             .build();
 
       } else { //Use leveldb
@@ -759,7 +725,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .clustering()
             .cacheMode(CacheMode.DIST_SYNC)
             .hash().numOwners(1)
-            .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
+            .indexing().index(Index.NONE).transaction().transactionMode(
+                TransactionMode.NON_TRANSACTIONAL)
             .persistence().passivation(true)
             .addStore(LevelDBStoreConfigurationBuilder.class)
             .location("/tmp/leadsprocessor-data/leveldb/data-" + uniquePath + "/")
@@ -769,7 +736,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
-            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
+            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
+                false).eviction().maxEntries(maxEntries).strategy(
+                EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.PIGGYBACK)
             .build();
       }
     } else { //do not use persistence
@@ -778,7 +747,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
           .cacheMode(CacheMode.DIST_SYNC)
           .hash().numOwners(1)
           .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility().enable()//.marshaller(new TupleMarshaller())
-          .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(5000).strategy(EvictionStrategy.LIRS)
+          .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)//.eviction().maxEntries(maxEntries).strategy(EvictionStrategy.NONE)
           .build();
     }
   }

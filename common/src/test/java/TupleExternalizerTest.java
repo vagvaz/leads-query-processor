@@ -1,8 +1,5 @@
-import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
-import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
-import eu.leads.processor.core.TupleMarshaller;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
 

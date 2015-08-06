@@ -1,6 +1,5 @@
 package eu.leads.processor.common.infinispan;
 
-import eu.leads.processor.common.infinispan.ProcessorEntry;
 import org.infinispan.client.hotrod.annotation.ClientCacheEntryCreated;
 import org.infinispan.client.hotrod.annotation.ClientCacheEntryModified;
 import org.infinispan.client.hotrod.annotation.ClientCacheEntryRemoved;

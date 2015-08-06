@@ -1,5 +1,6 @@
 package eu.leads.processor.infinispan.operators;
 
+import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.Tuple;
@@ -243,6 +244,7 @@ public class SortOperator extends BasicOperator {
       emanager.start();
       SortMerger2 merger = new SortMerger2(addresses, getOutput(),comparator,manager,emanager,conf,getRowcount());
       merger.merge();
+       EnsembleCacheUtils.waitForAllPuts();
    }
 
    @Override

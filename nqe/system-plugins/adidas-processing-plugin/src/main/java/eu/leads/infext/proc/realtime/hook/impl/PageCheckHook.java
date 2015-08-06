@@ -1,30 +1,17 @@
 package eu.leads.infext.proc.realtime.hook.impl;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.SortedSet;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import eu.leads.datastore.DataStoreSingleton;
-import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.MDFamily;
-import eu.leads.datastore.datastruct.URIVersion;
 import eu.leads.infext.proc.com.categorization.ecom.EcomClassificationEnum;
-import eu.leads.infext.proc.com.categorization.ecom.EcommerceClassification;
 import eu.leads.infext.proc.com.categorization.ecom.EcommerceNewPageTypeEvaluation;
 import eu.leads.infext.proc.com.categorization.newsblog.NewsBlogArticleAnalysis;
 import eu.leads.infext.proc.com.core.UrlAssumptions;
 import eu.leads.infext.proc.realtime.hook.AbstractHook;
-import eu.leads.infext.python.PythonQueueCall;
 import eu.leads.utils.LEADSUtils;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class PageCheckHook extends AbstractHook {
 

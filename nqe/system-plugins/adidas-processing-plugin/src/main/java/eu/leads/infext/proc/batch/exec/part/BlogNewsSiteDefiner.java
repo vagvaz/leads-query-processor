@@ -1,12 +1,12 @@
 package eu.leads.infext.proc.batch.exec.part;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.infext.python.PythonQueueCall;
 import eu.leads.utils.LEADSUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class BlogNewsSiteDefiner extends AbstractPartialSiteDefiner {
 

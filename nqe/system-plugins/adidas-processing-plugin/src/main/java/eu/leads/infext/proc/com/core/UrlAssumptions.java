@@ -1,17 +1,14 @@
 package eu.leads.infext.proc.com.core;
 
+import eu.leads.datastore.DataStoreSingleton;
+import eu.leads.utils.LEADSUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import eu.leads.datastore.DataStoreSingleton;
-import eu.leads.utils.LEADSUtils;
 
 public class UrlAssumptions {
 	

@@ -2,7 +2,6 @@ package eu.leads.processor.encrypt;
 
 import eu.leads.processor.common.infinispan.InfinispanManager;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 

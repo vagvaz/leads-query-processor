@@ -1,6 +1,5 @@
 package test;
 
-import eu.leads.crawler.PersistentCrawl;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.CacheManagerFactory;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;

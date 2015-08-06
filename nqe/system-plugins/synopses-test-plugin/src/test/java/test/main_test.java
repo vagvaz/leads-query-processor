@@ -1,11 +1,5 @@
 package test;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Map.Entry;
-
 import cern.jet.random.Normal;
 import cern.jet.random.engine.RandomEngine;
 import eu.leads.processor.plugins.synopses.custom_objs_utils.IntFunnel;
@@ -13,6 +7,12 @@ import eu.leads.processor.plugins.synopses.slid_wind_structs.ExponentialHistogra
 import eu.leads.processor.plugins.synopses.slid_wind_structs.compositeRandWaveDeque;
 import eu.leads.processor.plugins.synopses.slid_wind_structs.slidingCMSketch;
 import eu.leads.processor.plugins.synopses.whole_stream_structs.*;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map.Entry;
+import java.util.Random;
 
 
 public class main_test {

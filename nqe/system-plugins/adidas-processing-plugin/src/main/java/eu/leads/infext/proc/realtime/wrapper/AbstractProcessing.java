@@ -1,10 +1,9 @@
 package eu.leads.infext.proc.realtime.wrapper;
 
-import java.util.HashMap;
-import java.util.List;
-
 import eu.leads.datastore.datastruct.MDFamily;
 import eu.leads.infext.proc.realtime.hook.AbstractHook;
+
+import java.util.HashMap;
 
 public abstract class AbstractProcessing {
 	

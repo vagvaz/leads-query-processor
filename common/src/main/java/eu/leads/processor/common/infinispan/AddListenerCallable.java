@@ -32,7 +32,7 @@ public class AddListenerCallable<K, V> implements DistributedCallable<K, V, Void
             if (cache.getAdvancedCache().getRpcManager().getMembers().contains(cache.getCacheManager().getAddress())) {
                 if (listner instanceof LeadsListener) {
                     LeadsListener leadsListener = (LeadsListener) listner;
-                    leadsListener.initialize(new ClusterInfinispanManager((cache.getCacheManager())));
+                    leadsListener.initialize(new ClusterInfinispanManager((cache.getCacheManager())),null);
 
                 }
                 cache.getCacheManager().getCache(cacheName).addListener(listner);

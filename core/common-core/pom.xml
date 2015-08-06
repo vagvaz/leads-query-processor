@@ -76,108 +76,108 @@
       </dependency>
 
 
-      <dependency>
-         <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-server-hotrod</artifactId>
-         <version>${infinispan.version}</version>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-            </exclusion>
-         </exclusions>
+      <!--<dependency>-->
+      <!--<groupId>org.infinispan</groupId>-->
+      <!--<artifactId>infinispan-server-hotrod</artifactId>-->
+      <!--<version>${infinispan.version}</version>-->
+      <!--<exclusions>-->
+      <!--<exclusion>-->
+      <!--<groupId>log4j</groupId>-->
+      <!--<artifactId>log4j</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.logging.log4j</groupId>-->
+      <!--<artifactId>log4j-core</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.slf4j</groupId>-->
+      <!--<artifactId>slf4j-log4j12</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.tajo</groupId>-->
+      <!--<artifactId>tajo-jdbc</artifactId>-->
+      <!--</exclusion>-->
+      <!--</exclusions>-->
 
-      </dependency>
+      <!--</dependency>-->
 
-      <dependency>
-         <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-client-hotrod</artifactId>
-         <version>${infinispan.version}</version>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-            </exclusion>
-         </exclusions>
+      <!--<dependency>-->
+         <!--<groupId>org.infinispan</groupId>-->
+         <!--<artifactId>infinispan-client-hotrod</artifactId>-->
+         <!--<version>${infinispan.version}</version>-->
+         <!--<exclusions>-->
+            <!--<exclusion>-->
+               <!--<groupId>log4j</groupId>-->
+               <!--<artifactId>log4j</artifactId>-->
+            <!--</exclusion>-->
+            <!--<exclusion>-->
+               <!--<groupId>org.apache.logging.log4j</groupId>-->
+               <!--<artifactId>log4j-core</artifactId>-->
+            <!--</exclusion>-->
+            <!--<exclusion>-->
+               <!--<groupId>org.slf4j</groupId>-->
+               <!--<artifactId>slf4j-log4j12</artifactId>-->
+            <!--</exclusion>-->
+            <!--<exclusion>-->
+               <!--<groupId>org.apache.tajo</groupId>-->
+               <!--<artifactId>tajo-jdbc</artifactId>-->
+            <!--</exclusion>-->
+         <!--</exclusions>-->
 
-      </dependency>
+      <!--</dependency>-->
 
-      <dependency>
-         <groupId>org.apache.hadoop</groupId>
-         <artifactId>hadoop-common</artifactId>
-         <version>${hadoop.version}</version>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>jboss</groupId>
-               <artifactId>jboss-*</artifactId>
-            </exclusion>
-         </exclusions>
+      <!--<dependency>-->
+      <!--<groupId>org.apache.hadoop</groupId>-->
+      <!--<artifactId>hadoop-common</artifactId>-->
+      <!--<version>${hadoop.version}</version>-->
+      <!--<exclusions>-->
+      <!--<exclusion>-->
+      <!--<groupId>log4j</groupId>-->
+      <!--<artifactId>log4j</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.logging.log4j</groupId>-->
+      <!--<artifactId>log4j-core</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.slf4j</groupId>-->
+      <!--<artifactId>slf4j-log4j12</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.tajo</groupId>-->
+      <!--<artifactId>tajo-jdbc</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>jboss</groupId>-->
+      <!--<artifactId>jboss-*</artifactId>-->
+      <!--</exclusion>-->
+      <!--</exclusions>-->
 
-      </dependency>
-      <dependency>
-         <groupId>commons-configuration</groupId>
-         <artifactId>commons-configuration</artifactId>
-         <version>1.7</version>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-            </exclusion>
-         </exclusions>
+      <!--</dependency>-->
+      <!--<dependency>-->
+      <!--<groupId>commons-configuration</groupId>-->
+      <!--<artifactId>commons-configuration</artifactId>-->
+      <!--<version>1.7</version>-->
+      <!--<exclusions>-->
+      <!--<exclusion>-->
+      <!--<groupId>log4j</groupId>-->
+      <!--<artifactId>log4j</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.logging.log4j</groupId>-->
+      <!--<artifactId>log4j-core</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.slf4j</groupId>-->
+      <!--<artifactId>slf4j-log4j12</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.tajo</groupId>-->
+      <!--<artifactId>tajo-jdbc</artifactId>-->
+      <!--</exclusion>-->
+      <!--</exclusions>-->
 
-      </dependency>
+      <!--</dependency>-->
       <dependency>
          <groupId>com.martiansoftware</groupId>
          <artifactId>jsap</artifactId>
@@ -203,54 +203,54 @@
          <version>2.1</version>
       </dependency>
 
-      <dependency>
-         <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-commons</artifactId>
-         <version>${infinispan.version}</version>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-            </exclusion>
-         </exclusions>
+      <!--<dependency>-->
+      <!--<groupId>org.infinispan</groupId>-->
+      <!--<artifactId>infinispan-commons</artifactId>-->
+      <!--<version>${infinispan.version}</version>-->
+      <!--<exclusions>-->
+      <!--<exclusion>-->
+      <!--<groupId>log4j</groupId>-->
+      <!--<artifactId>log4j</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.logging.log4j</groupId>-->
+      <!--<artifactId>log4j-core</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.slf4j</groupId>-->
+      <!--<artifactId>slf4j-log4j12</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.tajo</groupId>-->
+      <!--<artifactId>tajo-jdbc</artifactId>-->
+      <!--</exclusion>-->
+      <!--</exclusions>-->
 
-      </dependency>
-      <dependency>
-         <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-query</artifactId>
-         <version>${infinispan.version}</version>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-            </exclusion>
-         </exclusions>
+      <!--</dependency>-->
+      <!--<dependency>-->
+      <!--<groupId>org.infinispan</groupId>-->
+      <!--<artifactId>infinispan-query</artifactId>-->
+      <!--<version>${infinispan.version}</version>-->
+      <!--<exclusions>-->
+      <!--<exclusion>-->
+      <!--<groupId>log4j</groupId>-->
+      <!--<artifactId>log4j</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.logging.log4j</groupId>-->
+      <!--<artifactId>log4j-core</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.slf4j</groupId>-->
+      <!--<artifactId>slf4j-log4j12</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.tajo</groupId>-->
+      <!--<artifactId>tajo-jdbc</artifactId>-->
+      <!--</exclusion>-->
+      <!--</exclusions>-->
 
-      </dependency>
+      <!--</dependency>-->
 
       <dependency>
          <groupId>gr.tuc.softnet</groupId>
@@ -413,30 +413,30 @@
          </exclusions>
 
       </dependency>
-       <dependency>
-           <groupId>gr.tuc.softnet</groupId>
-           <artifactId>pagerank-node</artifactId>
-           <version>${processor.version}</version>
-          <exclusions>
-             <exclusion>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.tajo</groupId>
-                <artifactId>tajo-jdbc</artifactId>
-             </exclusion>
-          </exclusions>
+      <dependency>
+         <groupId>gr.tuc.softnet</groupId>
+         <artifactId>pagerank-node</artifactId>
+         <version>${processor.version}</version>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+            </exclusion>
+         </exclusions>
 
-       </dependency>
+      </dependency>
       <!-- Add any other dependencies that you want packaged into your module (in the lib dir) here
   as 'compile' dependencies. Here is an example
   <dependency>
@@ -446,30 +446,30 @@
     <scope>compile</scope>
   </dependency>
   -->
-       <dependency>
-           <groupId>org.apache.commons</groupId>
-           <artifactId>commons-math3</artifactId>
-           <version>3.3</version>
-          <exclusions>
-             <exclusion>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.tajo</groupId>
-                <artifactId>tajo-jdbc</artifactId>
-             </exclusion>
-          </exclusions>
+      <dependency>
+         <groupId>org.apache.commons</groupId>
+         <artifactId>commons-math3</artifactId>
+         <version>3.3</version>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+            </exclusion>
+         </exclusions>
 
-       </dependency>
+      </dependency>
       <dependency>
          <groupId>gr.tuc.softnet</groupId>
          <artifactId>leads-query-processor-common</artifactId>
@@ -493,9 +493,105 @@
             </exclusion>
          </exclusions>
       </dependency>
+      <!--<dependency>-->
+      <!--<groupId>org.infinispan</groupId>-->
+      <!--<artifactId>infinispan-ensemble</artifactId>-->
+      <!--<version>${infinispan.version}</version>-->
+      <!--<exclusions>-->
+      <!--<exclusion>-->
+      <!--<groupId>log4j</groupId>-->
+      <!--<artifactId>log4j</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.logging.log4j</groupId>-->
+      <!--<artifactId>log4j-core</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.slf4j</groupId>-->
+      <!--<artifactId>slf4j-log4j12</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.tajo</groupId>-->
+      <!--<artifactId>tajo-jdbc</artifactId>-->
+      <!--</exclusion>-->
+      <!--</exclusions>-->
+      <!--</dependency>-->
+      <!--<dependency>-->
+      <!--<groupId>org.infinispan</groupId>-->
+      <!--<artifactId>infinispan-cachestore-leveldb</artifactId>-->
+      <!--<version>${infinispan.version}</version>-->
+      <!--<exclusions>-->
+      <!--<exclusion>-->
+      <!--<groupId>log4j</groupId>-->
+      <!--<artifactId>log4j</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.logging.log4j</groupId>-->
+      <!--<artifactId>log4j-core</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.slf4j</groupId>-->
+      <!--<artifactId>slf4j-log4j12</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.tajo</groupId>-->
+      <!--<artifactId>tajo-jdbc</artifactId>-->
+      <!--</exclusion>-->
+      <!--</exclusions>-->
+
+      <!--</dependency>-->
+      <!--<dependency>-->
+      <!--<groupId>org.infinispan</groupId>-->
+      <!--<artifactId>infinispan-core</artifactId>-->
+      <!--<version>${infinispan.version}</version>-->
+      <!--<exclusions>-->
+      <!--<exclusion>-->
+      <!--<groupId>log4j</groupId>-->
+      <!--<artifactId>log4j</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.logging.log4j</groupId>-->
+      <!--<artifactId>log4j-core</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.slf4j</groupId>-->
+      <!--<artifactId>slf4j-log4j12</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.tajo</groupId>-->
+      <!--<artifactId>tajo-jdbc</artifactId>-->
+      <!--</exclusion>-->
+      <!--</exclusions>-->
+
+      <!--</dependency>-->
       <dependency>
          <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-ensemble</artifactId>
+         <artifactId>infinispan-versioning</artifactId>
+         <version>${infinispan.version}</version>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+            </exclusion>
+         </exclusions>
+
+      </dependency>
+
+      <dependency>
+         <groupId>org.infinispan</groupId>
+         <artifactId>infinispan-atomic-factory</artifactId>
          <version>${infinispan.version}</version>
          <exclusions>
             <exclusion>
@@ -517,8 +613,9 @@
          </exclusions>
       </dependency>
       <dependency>
+
          <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-cachestore-leveldb</artifactId>
+         <artifactId>infinispan-remote-query-server</artifactId>
          <version>${infinispan.version}</version>
          <exclusions>
             <exclusion>
@@ -542,7 +639,7 @@
       </dependency>
       <dependency>
          <groupId>org.infinispan</groupId>
-         <artifactId>infinispan-core</artifactId>
+         <artifactId>infinispan-query-dsl</artifactId>
          <version>${infinispan.version}</version>
          <exclusions>
             <exclusion>
@@ -564,178 +661,76 @@
          </exclusions>
 
       </dependency>
-              <dependency>
-                  <groupId>org.infinispan</groupId>
-                  <artifactId>infinispan-versioning</artifactId>
-                  <version>${infinispan.version}</version>
-                 <exclusions>
-                    <exclusion>
-                       <groupId>log4j</groupId>
-                       <artifactId>log4j</artifactId>
-                    </exclusion>
-                    <exclusion>
-                       <groupId>org.apache.logging.log4j</groupId>
-                       <artifactId>log4j-core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                       <groupId>org.slf4j</groupId>
-                       <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                    <exclusion>
-                       <groupId>org.apache.tajo</groupId>
-                       <artifactId>tajo-jdbc</artifactId>
-                    </exclusion>
-                 </exclusions>
+      <dependency>
+         <groupId>org.hibernate</groupId>
+         <artifactId>hibernate-search-engine</artifactId>
+         <version>5.0.0.Alpha4</version>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+            </exclusion>
+         </exclusions>
 
-              </dependency>
-
-              <dependency>
-                  <groupId>org.infinispan</groupId>
-                  <artifactId>infinispan-atomic-factory</artifactId>
-                  <version>${infinispan.version}</version>
-              </dependency>
-       <!--dependency>
-           <groupId>org.infinispan</groupId>
-           <artifactId>infinispan-lucene-v4</artifactId>
-           <version>${infinispan.version}</version>
-          <exclusions>
-             <exclusion>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.tajo</groupId>
-                <artifactId>tajo-jdbc</artifactId>
-             </exclusion>
-          </exclusions>
-
-       </dependency-->
-       <dependency>
-           <groupId>org.infinispan</groupId>
-           <artifactId>infinispan-remote-query-server</artifactId>
-           <version>${infinispan.version}</version>
-          <exclusions>
-             <exclusion>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.tajo</groupId>
-                <artifactId>tajo-jdbc</artifactId>
-             </exclusion>
-          </exclusions>
-
-       </dependency>
-       <dependency>
-           <groupId>org.infinispan</groupId>
-           <artifactId>infinispan-query-dsl</artifactId>
-           <version>${infinispan.version}</version>
-          <exclusions>
-             <exclusion>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.tajo</groupId>
-                <artifactId>tajo-jdbc</artifactId>
-             </exclusion>
-          </exclusions>
-
-       </dependency>
-              <dependency>
-                  <groupId>org.hibernate</groupId>
-                  <artifactId>hibernate-search-engine</artifactId>
-                  <version>5.0.0.Alpha4</version>
-                 <exclusions>
-                    <exclusion>
-                       <groupId>log4j</groupId>
-                       <artifactId>log4j</artifactId>
-                    </exclusion>
-                    <exclusion>
-                       <groupId>org.apache.logging.log4j</groupId>
-                       <artifactId>log4j-core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                       <groupId>org.slf4j</groupId>
-                       <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                    <exclusion>
-                       <groupId>org.apache.tajo</groupId>
-                       <artifactId>tajo-jdbc</artifactId>
-                    </exclusion>
-                 </exclusions>
-
-              </dependency>
-       <dependency>
-           <groupId>org.mongodb</groupId>
-           <artifactId>bson</artifactId>
-           <version>2.13.0</version>
-          <exclusions>
-             <exclusion>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.tajo</groupId>
-                <artifactId>tajo-jdbc</artifactId>
-             </exclusion>
-          </exclusions>
-       </dependency>
-       <dependency>
-           <groupId>org.mongodb</groupId>
-           <artifactId>mongo-java-driver</artifactId>
-           <version>3.0.0-beta2</version>
-          <exclusions>
-             <exclusion>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-             </exclusion>
-             <exclusion>
-                <groupId>org.apache.tajo</groupId>
-                <artifactId>tajo-jdbc</artifactId>
-             </exclusion>
-          </exclusions>
-       </dependency>
+      </dependency>
+      <dependency>
+         <groupId>org.mongodb</groupId>
+         <artifactId>bson</artifactId>
+         <version>2.13.0</version>
+         <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+            </exclusion>
+         </exclusions>
+      </dependency>
+      <!--<dependency>-->
+      <!--<groupId>org.mongodb</groupId>-->
+      <!--<artifactId>mongo-java-driver</artifactId>-->
+      <!--<version>3.0.0-beta2</version>-->
+      <!--<exclusions>-->
+      <!--<exclusion>-->
+      <!--<groupId>log4j</groupId>-->
+      <!--<artifactId>log4j</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.logging.log4j</groupId>-->
+      <!--<artifactId>log4j-core</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.slf4j</groupId>-->
+      <!--<artifactId>slf4j-log4j12</artifactId>-->
+      <!--</exclusion>-->
+      <!--<exclusion>-->
+      <!--<groupId>org.apache.tajo</groupId>-->
+      <!--<artifactId>tajo-jdbc</artifactId>-->
+      <!--</exclusion>-->
+      <!--</exclusions>-->
+      <!--</dependency>-->
 
    </dependencies>
 

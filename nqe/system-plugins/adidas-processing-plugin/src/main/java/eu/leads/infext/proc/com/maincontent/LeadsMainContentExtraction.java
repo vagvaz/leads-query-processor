@@ -1,17 +1,14 @@
 package eu.leads.infext.proc.com.maincontent;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import eu.leads.infext.logging.ErrorStrings;
 import eu.leads.infext.proc.com.categorization.newsblog.NewsBlogArticleAnalysis;
 import eu.leads.infext.python.PythonQueueCall;
 import eu.leads.utils.LEADSUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 public class LeadsMainContentExtraction {
 

@@ -1,15 +1,14 @@
 package eu.leads.datastore.impl;
 
-import java.util.*;
-import java.util.Map.Entry;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import eu.leads.datastore.AbstractDataStore;
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.URIVersion;
 import eu.leads.processor.web.QueryResults;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 public class LeadsDataStore extends AbstractDataStore {
 

@@ -2,13 +2,8 @@ package eu.leads.processor.plugins.pagerank.graph;
 
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
-import eu.leads.processor.plugins.pagerank.node.Node;
 import eu.leads.processor.plugins.pagerank.utils.Const;
-import gnu.trove.iterator.TIntIntIterator;
-import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.iterator.TObjectIntIterator;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.apache.commons.configuration.Configuration;
 

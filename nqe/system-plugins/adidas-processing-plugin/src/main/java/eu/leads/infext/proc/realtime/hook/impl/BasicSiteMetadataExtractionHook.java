@@ -1,12 +1,11 @@
 package eu.leads.infext.proc.realtime.hook.impl;
 
-import java.io.IOException;
-import java.util.HashMap;
-
 import eu.leads.datastore.datastruct.MDFamily;
 import eu.leads.infext.proc.com.geo.SiteIPGeolocalization;
 import eu.leads.infext.proc.realtime.hook.AbstractHook;
 import eu.leads.utils.LEADSUtils;
+
+import java.util.HashMap;
 
 public class BasicSiteMetadataExtractionHook extends AbstractHook {
 	

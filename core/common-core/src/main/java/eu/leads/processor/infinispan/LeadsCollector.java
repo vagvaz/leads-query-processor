@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
@@ -183,11 +181,11 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
       {
         currentCount = new Integer(0);
         baseIndexedKey.setKey(key.toString());
-        if(LQPConfiguration.getInstance().getConfiguration().getBoolean("processor.validate.intermediate")){
-          IndexedComplexIntermediateKey ik = new IndexedComplexIntermediateKey(baseIndexedKey.getSite(),baseIndexedKey.getNode(),baseIndexedKey.getCache(),key.toString());
-          Object o = indexSiteCache.get(ik.getUniqueKey());
-          assert (o.equals(baseIndexedKey));
-        }
+//        if(LQPConfiguration.getInstance().getConfiguration().getBoolean("processor.validate.intermediate")){
+//          IndexedComplexIntermediateKey ik = new IndexedComplexIntermediateKey(baseIndexedKey.getSite(),baseIndexedKey.getNode(),baseIndexedKey.getCache(),key.toString());
+//          Object o = indexSiteCache.get(ik.getUniqueKey());
+//          assert (o.equals(baseIndexedKey));
+//        }
       }
       else{
         currentCount = currentCount+1;

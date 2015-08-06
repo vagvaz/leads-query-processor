@@ -1,14 +1,13 @@
 package test;
 
-import java.io.IOException;
-import java.util.List;
-
+import eu.leads.PropertiesSingleton;
+import eu.leads.datastore.DataStoreSingleton;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 
-import eu.leads.PropertiesSingleton;
-import eu.leads.datastore.DataStoreSingleton;
+import java.io.IOException;
+import java.util.List;
 
 public class EnvironmentInit {
 	

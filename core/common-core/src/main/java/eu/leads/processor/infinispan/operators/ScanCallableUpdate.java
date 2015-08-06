@@ -3,7 +3,6 @@ package eu.leads.processor.infinispan.operators;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
-import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.math.FilterOperatorTree;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
@@ -14,12 +13,10 @@ import org.infinispan.versioning.utils.version.Version;
 import org.infinispan.versioning.utils.version.VersionScalar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 

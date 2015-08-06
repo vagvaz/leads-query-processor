@@ -1,32 +1,14 @@
 package eu.leads.infext.proc.batch.exec;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.SortedSet;
-
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.XMLConfiguration;
-
 import eu.leads.datastore.AbstractDataStore;
 import eu.leads.datastore.DataStoreSingleton;
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.URIVersion;
-import eu.leads.infext.logging.redirect.StdLoggerRedirect;
 import eu.leads.infext.proc.batch.exec.part.AbstractPartialSiteDefiner;
-import eu.leads.infext.proc.batch.exec.part.EcomSiteDefiner;
 import eu.leads.infext.proc.batch.exec.part.BlogNewsSiteDefiner;
-import eu.leads.infext.proc.batch.exec.part.EcomSiteDefinerMR;
-import eu.leads.infext.proc.batch.mapreduce.DefaultReducer;
-import eu.leads.infext.proc.batch.mapreduce.EcomSiteDefinerMapper;
-import eu.leads.infext.proc.com.categorization.ecom.EcommerceSiteExtractionSchemaDeterminer;
-import eu.leads.infext.proc.com.categorization.ecom.model.EcomPageDictionary;
-import eu.leads.infext.proc.com.categorization.ecom.model.EcomSiteDictionary;
-import eu.leads.utils.LEADSUtils;
+import eu.leads.infext.proc.batch.exec.part.EcomSiteDefiner;
+
+import java.util.*;
 
 
 /***

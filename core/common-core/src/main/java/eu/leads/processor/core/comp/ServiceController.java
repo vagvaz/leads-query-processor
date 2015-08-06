@@ -1,6 +1,5 @@
 package eu.leads.processor.core.comp;
 
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.ServiceCommand;
 import eu.leads.processor.core.net.MessageTypeConstants;
 import eu.leads.processor.core.net.MessageUtils;

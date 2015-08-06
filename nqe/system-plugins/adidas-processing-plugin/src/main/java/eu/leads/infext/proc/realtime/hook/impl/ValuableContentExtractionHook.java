@@ -1,12 +1,12 @@
 package eu.leads.infext.proc.realtime.hook.impl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-
 import eu.leads.datastore.datastruct.MDFamily;
 import eu.leads.infext.proc.com.maincontent.LeadsMainContentExtraction;
 import eu.leads.infext.proc.realtime.hook.AbstractHook;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 public class ValuableContentExtractionHook extends AbstractHook {
 	

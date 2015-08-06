@@ -95,7 +95,7 @@ public abstract class MapReduceOperator extends BasicOperator{
       createCache(mc,getOutput());
       createCache(mc, intermediateCacheName);
       //create Intermediate cache name for data on the same Sites as outputCache
-      createCache(mc,intermediateCacheName+".data");
+      createCache(mc,intermediateCacheName+".data","localIndexListener");
       //create Intermediate  keys cache name for data on the same Sites as outputCache;
       createCache(mc,intermediateCacheName+".keys");
       //createIndexCache for getting all the nodes that contain values with the same key! in a mc

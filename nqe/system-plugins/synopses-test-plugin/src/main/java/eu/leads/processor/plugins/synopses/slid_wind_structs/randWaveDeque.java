@@ -1,11 +1,11 @@
 package eu.leads.processor.plugins.synopses.slid_wind_structs;
 
+import cern.jet.random.engine.MersenneTwister64;
+import eu.leads.processor.plugins.synopses.custom_objs_utils.*;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
-
-import cern.jet.random.engine.MersenneTwister64;
-import eu.leads.processor.plugins.synopses.custom_objs_utils.*;
 
 public class randWaveDeque implements slidingwindow {
 	boolean generic=true;

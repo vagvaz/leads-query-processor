@@ -24,7 +24,6 @@ import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
