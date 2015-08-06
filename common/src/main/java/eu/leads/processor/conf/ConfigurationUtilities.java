@@ -1,6 +1,8 @@
 package eu.leads.processor.conf;
 
 import org.apache.commons.configuration.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.File;
@@ -14,6 +16,7 @@ import java.util.*;
  */
 public class ConfigurationUtilities {
 
+    static Logger log = LoggerFactory.getLogger(ConfigurationUtilities.class);
     public static File[] getConfigurationFiles(String directory) {
         return ConfigurationUtilities.getConfigurationFiles(directory, null);
     }
@@ -180,7 +183,12 @@ public class ConfigurationUtilities {
 
     public static String getPublicIPFromGlobal(String microClusterName, JsonObject globalConfig) {
         String result = globalConfig.getObject("componentsAddrs").getArray(microClusterName).get(0).toString();
-            return result;
+        String[] ips = result.split(";");
+        Random random = new Random();
+        int index = random.nextInt(ips.length);
+        System.out.println("\n\nEXTERNAL IP " + ips[index]);
+        log.error("EXTERNAL IP " + ips[index]);
+            return ips[index];
     }
 
     public static String getEnsembleString(JsonObject globalConfig) {
@@ -194,7 +202,7 @@ public class ConfigurationUtilities {
         }
         Collections.sort(sites);
         for(String site : sites){
-            result += globalConfig.getObject("componentsAddrs").getArray(site).get(0).toString()+":11222|";
+            result += globalConfig.getObject("componentsAddrs").getArray(site).get(0).toString()+"|";//:11222|";
         }
         result = result.substring(0,result.length()-1);
         return result;

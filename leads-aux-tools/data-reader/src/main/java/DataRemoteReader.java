@@ -5,6 +5,7 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
+import org.apache.gora.infinispan.query.InfinispanQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
@@ -27,7 +28,7 @@ import java.util.Map;
  */
 public class DataRemoteReader {
   NutchTransformer transformer;
-  DataStore store;
+  DataStore<String,WebPage> store;
   public DataRemoteReader(String connectionString){
 
     LQPConfiguration.initialize();
@@ -43,9 +44,9 @@ public class DataRemoteReader {
     configuration.set("gora.datastore.connectionstring",connectionString);
     configuration.set("gora.datastore.default","org.apache.gora.infinipan.store.InfinispanStoreer");
     try {
-      store = StorageUtils.createStore(                                                               configuration, String.class, WebPage.class);
+      store =  StorageUtils.createStore(
+          configuration, String.class, WebPage.class);
       store.createSchema();
-
 //      query.setLimit(100);
 //      query.setOffset(0);
     } catch (Exception e) {
@@ -117,7 +118,7 @@ public class DataRemoteReader {
       e.printStackTrace();
     }
 
-    store.createSchema();
+//    store.createSchema();
 
     long nullContentCounter = 0;
     int batchRead=100;
@@ -127,9 +128,15 @@ public class DataRemoteReader {
       do {
         small_count= 0;
         Query query = store.newQuery();
+
 //        query.setFields("content");
         query.setOffset(counter);
 //        query.setLimit(batchRead);
+//        query.setFields();
+        query.setLimit(1);
+        query.execute();
+        int total = ((InfinispanQuery)query).getResultSize();
+        System.out.println("Total amount of pages (in the store): " + total);
         result = query.execute();
         while (result.next()) {
           WebPage page = result.get();
