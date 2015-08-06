@@ -745,7 +745,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     }
     Collections.sort(sites);
     for(String site : sites){
-      result += globalConfig.getObject("componentsAddrs").getArray(site).get(0).toString()+":11222|";
+      result += globalConfig.getObject("componentsAddrs").getArray(site).get(0).toString()+"|";//+":11222|";
     }
     result = result.substring(0,result.length()-1);
     log.error("EnsembleHost: " + result);
@@ -908,7 +908,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     }
     Collections.sort(sites);
     for(String site : sites){
-      result += globalConfig.getObject("componentsAddrs").getArray(site).get(0).toString()+":11222|";
+      result += globalConfig.getObject("componentsAddrs").getArray(site).get(0).toString()+"|";//:11222|";
     }
     result = result.substring(0,result.length()-1);
     return result;

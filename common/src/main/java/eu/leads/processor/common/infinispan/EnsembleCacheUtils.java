@@ -33,6 +33,8 @@ public class EnsembleCacheUtils {
     static long counter = 0;
     static long threadCounter = 0;
     static long threadBatch = 3;
+    static ProfileEvent putEvent;
+//    private static ClearCompletedRunnable ccr;
     public static void initialize() {
         synchronized (mutex) {
             if (initialized) {
@@ -49,6 +51,8 @@ public class EnsembleCacheUtils {
                 .getInt("node.ensemble.batchsize", 10);
             threadBatch = LQPConfiguration.getInstance().getConfiguration().getInt(
                 "node.ensemble.threads", 3);
+
+            System.out.println("threads " + threadBatch + " batchSize " + batchSize + " async = " + useAsync);
             currentCaches = new ConcurrentHashMap<>();
             mapsToPut = new ConcurrentHashMap<>();
         }
@@ -72,6 +76,7 @@ public class EnsembleCacheUtils {
     }
 
     public static void putToCache(BasicCache cache, Object key, Object value) {
+        putEvent = new ProfileEvent("profPutToCache",profilerLog);
         if (useAsync) {
             putToCacheAsync(cache, key, value);
             if (counter % batchSize == 0) {
@@ -80,6 +85,7 @@ public class EnsembleCacheUtils {
             return;
         }
         putToCacheSync(cache, key, value);
+        putEvent.end();
     }
 
     private static void clearCompleted() {

@@ -24,6 +24,7 @@ public class NutchTransformer {
    }
 
 
+
    public Tuple transform(GenericData.Record wp) {
       Tuple tuple =  new Tuple();
 
