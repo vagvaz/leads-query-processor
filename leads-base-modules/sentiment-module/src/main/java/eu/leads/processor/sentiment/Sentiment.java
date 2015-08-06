@@ -26,9 +26,9 @@ public class Sentiment {
 
     public void setValue(double value) {
 		this.value = value;
-        if(value < - 0.3)
+        if(value < - 0.2)
         	setTag("Negative");
-        else if(value > 0.3)
+        else if(value > 0.2)
         	setTag("Positive");
         else
         	setTag("Neutral");

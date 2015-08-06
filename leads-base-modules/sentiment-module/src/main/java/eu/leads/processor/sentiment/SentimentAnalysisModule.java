@@ -1,35 +1,27 @@
 package eu.leads.processor.sentiment;
 
+import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
+
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
-import edu.stanford.nlp.parser.common.ParserGrammar;
-import edu.stanford.nlp.parser.shiftreduce.ShiftReduceOptions;
-import edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser;
 import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.BinarizerAnnotator;
-import edu.stanford.nlp.pipeline.POSTaggerAnnotator;
-/*import edu.stanford.nlp.pipeline.BinarizerAnnotator;
-*/import edu.stanford.nlp.pipeline.ParserAnnotator;
-import edu.stanford.nlp.pipeline.SentimentAnnotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.pipeline.TokenizerAnnotator;
-import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.BinarizedTreeAnnotation;
 import edu.stanford.nlp.util.CoreMap;
-
-import java.io.PrintStream;
-import java.io.Reader;
-import java.util.*;
-import java.util.Map.Entry;
-
-import javax.swing.plaf.synth.SynthSplitPaneUI;
+/*import edu.stanford.nlp.pipeline.BinarizerAnnotator;
+*/
 
 
 public class SentimentAnalysisModule {
@@ -192,7 +184,9 @@ public class SentimentAnalysisModule {
         
         List<CoreMap> sentences = this.documentAnnotation.get(CoreAnnotations.SentencesAnnotation.class);
         double [] sentencesWeight = new double[sentences.size()];
-        int [] sentencesSentiment = new int[sentences.size()];
+        Double [] sentencesSentiment = new Double[sentences.size()];
+        Arrays.fill(sentencesSentiment, Double.NaN);
+        
         
         for (int i=0; i<sentences.size(); i++) {
             CoreMap sentence = sentences.get(i);
@@ -210,23 +204,29 @@ public class SentimentAnalysisModule {
             	int sentenceNo = i;
             	
             	double weight  = originalKeywordsInSentence.size()/originalKeywordsCount;
-            	int sentiment_s = RNNCoreAnnotations.getPredictedClass(sentences.get(sentenceNo).get(SentimentCoreAnnotations.SentimentAnnotatedTree.class));
             	sentencesWeight[sentenceNo] += weight;
-            	if(sentencesSentiment[sentenceNo]==0) sentencesSentiment[sentenceNo] = sentiment_s;
+            	if(sentencesSentiment[sentenceNo].equals(Double.NaN)) { 
+                	int sentiment_s = RNNCoreAnnotations.getPredictedClass(sentences.get(sentenceNo).get(SentimentCoreAnnotations.AnnotatedTree.class));
+            		sentencesSentiment[sentenceNo] = (double) sentiment_s;
+            	}
             	
             	weight = weight/4.0;
             	
             	if(sentenceNo != 0) {
             		int thisSentenceNo = sentenceNo-1;
-            		sentiment_s = RNNCoreAnnotations.getPredictedClass(sentences.get(thisSentenceNo).get(SentimentCoreAnnotations.SentimentAnnotatedTree.class));
                 	sentencesWeight[thisSentenceNo] += weight;
-	            	if(sentencesSentiment[thisSentenceNo]==0) sentencesSentiment[thisSentenceNo] = sentiment_s;
+	            	if(sentencesSentiment[thisSentenceNo].equals(Double.NaN)) {
+	            		int sentiment_s = RNNCoreAnnotations.getPredictedClass(sentences.get(thisSentenceNo).get(SentimentCoreAnnotations.AnnotatedTree.class));
+	            		sentencesSentiment[thisSentenceNo] = (double) sentiment_s;
+	            	}
             	}
             	if(sentenceNo != sentences.size()-1) {
             		int thisSentenceNo = sentenceNo+1;
-            		sentiment_s  = RNNCoreAnnotations.getPredictedClass(sentences.get(thisSentenceNo).get(SentimentCoreAnnotations.SentimentAnnotatedTree.class));
 	            	sentencesWeight[thisSentenceNo] += weight;
-	            	if(sentencesSentiment[thisSentenceNo]==0) sentencesSentiment[thisSentenceNo] = sentiment_s;
+	            	if(sentencesSentiment[thisSentenceNo].equals(Double.NaN)) {
+	            		int sentiment_s  = RNNCoreAnnotations.getPredictedClass(sentences.get(thisSentenceNo).get(SentimentCoreAnnotations.AnnotatedTree.class));
+	            		sentencesSentiment[thisSentenceNo] = (double) sentiment_s;
+	            	}
             	}
             }
         }
@@ -237,17 +237,19 @@ public class SentimentAnalysisModule {
         
         // COUNTING THE SENTIMENT
         for (int i=0; i<sentences.size(); i++) {
-        	double s = sentencesSentiment[i];
-        	double w    = sentencesWeight[i];
-        	sum_w_x_s += s*w;
-        	sum_w     += w;
-        	//System.out.println("Sentence "+i+": weight "+w+" -> sum weights "+sum_w+", sentiment "+s+" -> sum weighted sentiments "+sum_w_x_s);
+        	Double s = sentencesSentiment[i];
+        	if(!s.equals(Double.NaN)) {
+	        	double w    = sentencesWeight[i];
+	        	sum_w_x_s += s*w;
+	        	sum_w     += w;
+	        	System.out.println("Sentence "+i+": weight "+w+" -> sum weights "+sum_w+", sentiment "+s+" -> sum weighted sentiments "+sum_w_x_s);
+        	}
         }
         sentimentValue = sum_w_x_s / sum_w + SENTIMENT_VAL_CORRECTION;
-        //System.out.println("Temp value "+sentimentValue);
+        System.out.println("Temp value "+sentimentValue);
         if(sentimentValue > 0) sentimentValue /= 4+SENTIMENT_VAL_CORRECTION;
         else sentimentValue /= -SENTIMENT_VAL_CORRECTION;
-        //System.out.println("Final sentiment "+sentimentValue);
+        System.out.println("Final sentiment "+sentimentValue);
         
         return new Sentiment(sentimentValue);
     }

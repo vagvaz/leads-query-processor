@@ -115,6 +115,7 @@ public class DocumentSentimentScore {
 				+ "I first tested the shoe during my build-up for the 2014 Boston Marathon after a recommendation from one of my runners. "
 				+ "At first, I didn’t love it. "
 				+ "I wasn’t used to the midsole material and the lacing system is a bit cumbersome. "
+				+ "I love my adidas Boost! "
 				+ "But it grew on me and after a few weeks I loved every run in the Boost.",
 				"en");
 		

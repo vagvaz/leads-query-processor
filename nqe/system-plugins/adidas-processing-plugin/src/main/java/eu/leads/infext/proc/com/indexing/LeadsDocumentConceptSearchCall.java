@@ -91,31 +91,76 @@ public class LeadsDocumentConceptSearchCall {
 	        String contentPart = (String) response.get(0);
 	        List<KeywordMatchInfo> keywordsScoresList = new ArrayList<>();
 	        
-	        for(int i=1; i<response.size()-2;i=i+3) {
-	        	Long keyId = LEADSUtils.stringToLongOrNull(response.get(i).toString());
-	        	if(keyId==null) {
-	        		// Then it is a new part
-	        		if(keywordsScoresList.size()>0) {
-	        			returnMap.put(contentPart, keywordsScoresList);
-	        			keywordsScoresList = new ArrayList<>();
-	        		}
-	        		contentPart = response.get(i).toString();
-	        		continue;
-	        	}
-	        	else {
-	        		String matched = response.get(i+1).toString();
-	        		Double score = LEADSUtils.stringToDoubleOrNull(response.get(i+2).toString());
-	        		if(score==null) {
-		        		correctData = false;
-		        		break;
-		        	}
-					KeywordMatchInfo keywordMatchInfo = new KeywordMatchInfo(keyId, matched, score);
-					keywordsScoresList.add(keywordMatchInfo);
-	        	}
-	        }
-			returnMap.put(contentPart, keywordsScoresList);
-	        
-	        if(!correctData) returnMap = null;
+            int baseindex = 1;
+            boolean partfinished = false;
+            boolean allfinished = false;
+            
+            while(!allfinished) {
+                if(baseindex >= response.size()) {
+                    partfinished = true;
+                    allfinished = true;
+                }
+                else {
+    	        	Long keyId = LEADSUtils.stringToLongOrNull(response.get(baseindex).toString());
+                    
+    	        	if(keyId==null) {
+    	        		// Then it is a new part
+    	        		if(keywordsScoresList.size()>0) {
+    	        			returnMap.put(contentPart, keywordsScoresList);
+    	        			keywordsScoresList = new ArrayList<>();
+    	        		}
+    	        		contentPart = response.get(baseindex).toString();
+                        baseindex++;
+                        partfinished = true;
+    	        	}
+                    else {
+    	        		String matched = response.get(baseindex+1).toString();
+    	        		Double score = LEADSUtils.stringToDoubleOrNull(response.get(baseindex+2).toString());
+                        if(score==null) {
+    		        		correctData = false;
+    		        		break;
+                        }
+						KeywordMatchInfo keywordMatchInfo = new KeywordMatchInfo(keyId, matched, score);
+						keywordsScoresList.add(keywordMatchInfo);
+                        baseindex += 3;
+                    }
+                }
+                
+                if(partfinished) {
+        			returnMap.put(contentPart, keywordsScoresList);
+                    partfinished = false;
+                }
+            }
+            
+            if(!correctData)
+                returnMap = null;
+            
+//	        for(int i=1; i<response.size()-2;i=i+3) {
+//	        	Long keyId = LEADSUtils.stringToLongOrNull(response.get(i).toString());
+//	        	if(keyId==null) {
+//	        		// Then it is a new part
+//	        		if(keywordsScoresList.size()>0) {
+//	        			returnMap.put(contentPart, keywordsScoresList);
+//	        			keywordsScoresList = new ArrayList<>();
+//	        		}
+//	        		contentPart = response.get(i).toString();
+//	        		continue;
+//	        	}
+//	        	else {
+//	        		String matched = response.get(i+1).toString();
+//	        		Double score = LEADSUtils.stringToDoubleOrNull(response.get(i+2).toString());
+//	        		if(score==null) {
+//		        		correctData = false;
+//		        		break;
+//		        	}
+//					KeywordMatchInfo keywordMatchInfo = new KeywordMatchInfo(keyId, matched, score);
+//					keywordsScoresList.add(keywordMatchInfo);
+//	        	}
+//	        }
+//			returnMap.put(contentPart, keywordsScoresList);
+//	        
+//	        if(!correctData) returnMap = null;
+            
         }
         System.out.println("Keywords found: " + returnMap);
 
@@ -228,12 +273,11 @@ public class LeadsDocumentConceptSearchCall {
 //			catch (InterruptedException e) { 
 //				e.printStackTrace(); 
 //			}
-			searchCall.searchDocument(uri,new HashMap<String,String>() {{ put("content",text); }});
+			searchCall.searchDocument(uri,new HashMap<String,String>() {{ put("content",text); put("title",text); }});
 //			try { Thread.sleep(1); } 
 //			catch (InterruptedException e) { 
 //				e.printStackTrace(); 
 //			}
-			searchCall.searchDocument(uri,new HashMap<String,String>() {{ put("content",text); }});
 			
 		} catch (ConfigurationException e) {
 			e.printStackTrace();
