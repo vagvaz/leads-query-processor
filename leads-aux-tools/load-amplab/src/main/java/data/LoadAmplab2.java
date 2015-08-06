@@ -61,6 +61,8 @@ public class LoadAmplab2 {
 
             System.exit(-1);
         }
+        loaded_tuples = new HashMap<>();
+        loading_times = new HashMap<>();
 
         LQPConfiguration.initialize();
         EnsembleCacheUtils.initialize();
@@ -254,6 +256,8 @@ public class LoadAmplab2 {
                 return;
             }
         }
+        int reportRate = 10000;
+        long lastReportTime=System.currentTimeMillis() ;
 
         if (initialize_cache(tableName)){
             int numofEntries =loaded_tuples.get(tableName);
@@ -322,9 +326,10 @@ public class LoadAmplab2 {
                 if (delay > 50)
                     System.out.println("Cache put: " + numofEntries);
 
-                if (numofEntries % 10000 == 0)
-                    System.out.println("File Import Mean Rate: " +(numofEntries-loaded_tuples.get(tableName))/((System.currentTimeMillis() - currentStartTime)/1000.0) + " Imported: " + numofEntries + " -- size: " + sizeE + " -- file: " + csvfile);
-
+                if (numofEntries % reportRate == 0) {
+                    System.out.println("File Import Rate(t/s):" + (float) reportRate / (float) ((System.currentTimeMillis() - lastReportTime) / 1000.0)+" Mean Rate: " + (numofEntries - loaded_tuples.get(tableName)) / ((System.currentTimeMillis() - currentStartTime) / 1000.0) + " Imported: " + numofEntries + " -- size: " + sizeE + " -- file: " + csvfile);
+                    lastReportTime=System.currentTimeMillis();
+                }
             }
             EnsembleCacheUtils.waitForAllPuts();
             System.out.println("File Import Mean Rate: " + (numofEntries - loaded_tuples.get(tableName)) / ((System.currentTimeMillis() - currentStartTime) / 1000.0) + " Imported: " + numofEntries + " -- size: " + sizeE + " -- file: " + csvfile);
