@@ -7,7 +7,10 @@ import eu.leads.processor.web.WebServiceClient;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Random;
 import java.util.Set;
 
@@ -151,7 +154,7 @@ public class leadsCli {
     static void send_query_and_wait(String sql) throws IOException, InterruptedException {
         long start = System.currentTimeMillis();
         long resultArrived, resultPrinted;
-        QueryStatus currentStatus = WebServiceClient.submitQuery(username,sql);
+        QueryStatus currentStatus = WebServiceClient.submitQuery(username, sql);
         while(!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")) {
             sleep(2000);
             currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
@@ -161,13 +164,16 @@ public class leadsCli {
             System.out.print(".");
 
         }  //currentStatus.getStatus()!= QueryState.COMPLETED
-        System.out.println("The query with id " + currentStatus.getId() + " " + currentStatus.getStatus());
+        Date curr_date = new Date(System.currentTimeMillis());
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        System.out.println("\n"+df.format(curr_date)+" The query with id " + currentStatus.getId() + " " + currentStatus.getStatus());
         if(currentStatus.getStatus().equals("COMPLETED")) {
             System.out.println("Please wait ...");
             QueryResults res = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
             resultArrived = System.currentTimeMillis();
             print_results(res);
             resultPrinted  = System.currentTimeMillis();
+
             System.out.println("Found " + res.getResult().size() + " results.");
             System.out.println("Result acquisition (execution + delivery) time: " +  (resultArrived - start) + " ms.");
             System.out.println("Display time: " +  (resultPrinted-resultArrived) + " ms.");
