@@ -27,7 +27,7 @@ public class HDFSStorage implements LeadsStorage {
     private Logger log = LoggerFactory.getLogger(HDFSStorage.class);
     private Path basePath;
     private Properties storageConfiguration;
-    private LocalFileStorage cache;
+    private LocalFileStorage cache = new LocalFileStorage();
     UserGroupInformation ugi;
 
     @Override
