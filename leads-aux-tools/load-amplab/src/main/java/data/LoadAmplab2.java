@@ -161,6 +161,7 @@ public class LoadAmplab2 {
         if(loaded_tuples.containsKey(tableName)){
             if(maxTuples > 0 && loaded_tuples.get(tableName)>maxTuples){
                 System.out.println(" Max entries reached for " + tableName + " skiping " + csvfile.getName());
+                return;
             }
         }else{
            loaded_tuples.put(tableName,0);
@@ -335,11 +336,11 @@ public class LoadAmplab2 {
             keyReader.close();
             System.out.println("File Closed. Wait For All Puts");
             EnsembleCacheUtils.waitForAllPuts();
-            System.out.println("File Import Mean Rate: " + (numofEntries - loaded_tuples.get(tableName)) / ((System.currentTimeMillis() - currentStartTime) / 1000.0) + " Imported: " + numofEntries + " -- size: " + sizeE + " -- file: " + csvfile);
+            System.out.println("File Import Mean Rate(t/s): " + (numofEntries - loaded_tuples.get(tableName)) / ((System.currentTimeMillis() - currentStartTime) / 1000.0) + " Imported: " + numofEntries + " -- size: " + sizeE + " -- file: " + csvfile);
 
             loaded_tuples.put(tableName, numofEntries);
             loading_times.put(tableName, loading_times.get(tableName) + (System.currentTimeMillis() - currentStartTime));
-            System.out.println("Overall table "+ tableName+ " import time: " +DurationFormatUtils.formatDuration(loading_times.get(tableName), "HH:mm:ss,SSS") + " Totally Imported: " + numofEntries +" Mean Rate "+numofEntries/(float)(loading_times.get(tableName)/1000.0));
+            System.out.println("Overall table "+ tableName+ " import time: " +DurationFormatUtils.formatDuration(loading_times.get(tableName), "HH:mm:ss,SSS") + " Totally Imported: " + numofEntries +" Mean Rate(t/s) "+numofEntries/(float)(loading_times.get(tableName)/1000.0));
 
         }
     }
