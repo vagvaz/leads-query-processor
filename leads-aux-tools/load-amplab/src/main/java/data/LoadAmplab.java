@@ -485,6 +485,7 @@ public class LoadAmplab {
                 if (numofEntries % reportRate == 0) {
                     System.out.println("Rate(t/s):" + (float) reportRate / (float) ((System.currentTimeMillis() - lastReportTime) / 1000.0) + " Avg (t/s): " + (float) numofEntries / (float) ((System.currentTimeMillis() - StartTime) / 1000.0) + " Imported: " + numofEntries + " size " + sizeE);
                     lastReportTime=System.currentTimeMillis();
+                    reportRate= (int) (reportRate*1.2);
                 }
 
             }

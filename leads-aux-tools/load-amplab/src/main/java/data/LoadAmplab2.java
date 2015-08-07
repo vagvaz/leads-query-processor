@@ -159,7 +159,7 @@ public class LoadAmplab2 {
 
         int maxTuples = Integer.parseInt(arg5);
         if(loaded_tuples.containsKey(tableName)){
-            if(maxTuples > 0 && loaded_tuples.get(tableName)>maxTuples){
+            if(maxTuples > 0 && loaded_tuples.get(tableName)>=maxTuples){
                 System.out.println(" Max entries reached for " + tableName + " skiping " + csvfile.getName());
                 return;
             }
@@ -331,6 +331,7 @@ public class LoadAmplab2 {
                 if (numofEntries % reportRate == 0) {
                     System.out.println("File Import (t/s):" + (float) reportRate / (float) ((System.currentTimeMillis() - lastReportTime) / 1000.0)+" Avg (t/s): " + (numofEntries - loaded_tuples.get(tableName)) / ((System.currentTimeMillis() - currentStartTime) / 1000.0) + " Imported: " + numofEntries + " size: " + sizeE + " Avg tpl size: " + sizeE/(numofEntries - loaded_tuples.get(tableName)));
                     lastReportTime=System.currentTimeMillis();
+                    reportRate= (int) (reportRate*1.2);
                 }
             }
             keyReader.close();
