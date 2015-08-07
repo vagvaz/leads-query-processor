@@ -314,7 +314,7 @@ public class LoadAmplab {
         System.exit(0);
     }
 
-    private static void loadDataFromFile(File csvfile, String arg5, String arg6) {
+    private static void loadDataFromFile(File csvfile, String arg5, String arg6) throws IOException {
         String filename[] = csvfile.getAbsolutePath().split(".csv");
         String fulltableName[] = (csvfile.getName().split(".csv")[0]).split("-");
         String tableName = fulltableName[fulltableName.length - 1];
@@ -415,6 +415,7 @@ public class LoadAmplab {
 
          int reportRate = 10000;
         long lastReportTime=System.currentTimeMillis() ;
+        BSONObject data = new BasicBSONObject();
         if (initialize_cache(tableName)){
             long StartTime = System.currentTimeMillis();
             int numofEntries = 0;
@@ -428,7 +429,7 @@ public class LoadAmplab {
             long p_uri = 1500000L;
 
             for(int entry=0;entry<Integer.valueOf(arg5);entry++){
-                BSONObject data = new BasicBSONObject();
+                data = new BasicBSONObject();
 
                 for (pos = 0; pos < columns.size(); pos++) {
                     String fullCollumnName =  "default."+tableName+"." + columns.get(pos);
@@ -476,29 +477,22 @@ public class LoadAmplab {
 //                System.out.println("putting... uri:" +data.getField("default."+tableName+".uri").toString()+" -- ts:"+data.getField("default."+tableName+".ts").toString());
                 put(key, data);
 
-                try {
-//                    BasicBSONEncoder nc = new BasicBSONEncoder();
-//                    sizeE+=nc.encode(data).length;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
                 numofEntries++;
 
                 if (delay > 50) {
                     System.out.println("Cache put: " + numofEntries);
                 }
                 if (numofEntries % reportRate == 0) {
-                    System.out.println("Rate(t/s):" + (float) reportRate / (float) ((System.currentTimeMillis() - lastReportTime) / 1000.0) + " Mean Rate (t/s): " + (float) numofEntries / (float) ((System.currentTimeMillis() - StartTime) / 1000.0) + " Imported: " + numofEntries + " -- size: " + sizeE);
+                    System.out.println("Rate(t/s):" + (float) reportRate / (float) ((System.currentTimeMillis() - lastReportTime) / 1000.0) + " Avg (t/s): " + (float) numofEntries / (float) ((System.currentTimeMillis() - StartTime) / 1000.0) + " Imported: " + numofEntries + " size " + sizeE);
                     lastReportTime=System.currentTimeMillis();
                 }
 
             }
-            System.out.println("Mean Rate(tuples/sec): " +(float)numofEntries/(float)((System.currentTimeMillis() - StartTime)/1000.0) + " Totally Imported: " + numofEntries);
+            System.out.println( tableName +" Avg Rate(tuples/sec): " +(float)numofEntries/(float)((System.currentTimeMillis() - StartTime)/1000.0) + " Totally Imported: " + numofEntries + " tuple byte size: " + serialize(data).length );
         }
     }
 
-    public static byte[] serialize(JsonObject obj) throws IOException {
+    public static byte[] serialize(BSONObject  obj) throws IOException {
         ByteArrayOutputStream b = new ByteArrayOutputStream();
         ObjectOutputStream o = new ObjectOutputStream(b);
         o.writeObject(obj.toString());
