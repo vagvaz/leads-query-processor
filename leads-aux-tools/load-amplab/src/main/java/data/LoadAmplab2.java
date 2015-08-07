@@ -159,7 +159,7 @@ public class LoadAmplab2 {
 
         int maxTuples = Integer.parseInt(arg5);
         if(loaded_tuples.containsKey(tableName)){
-            if(maxTuples > 0 && loaded_tuples.get(tableName)>maxTuples){
+            if(maxTuples > 0 && loaded_tuples.get(tableName)>=maxTuples){
                 System.out.println(" Max entries reached for " + tableName + " skiping " + csvfile.getName());
                 return;
             }
