@@ -237,6 +237,7 @@ public class LoadAmplab2 {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        keyReader.close();
         if (primaryKeys == null) {
             System.err.println("Unable to find primary keys not importing file !");
             return;
@@ -331,7 +332,8 @@ public class LoadAmplab2 {
                     lastReportTime=System.currentTimeMillis();
                 }
             }
-            System.out.println("Wait For All Puts");
+            keyReader.close();
+            System.out.println("File Closed. Wait For All Puts");
             EnsembleCacheUtils.waitForAllPuts();
             System.out.println("File Import Mean Rate: " + (numofEntries - loaded_tuples.get(tableName)) / ((System.currentTimeMillis() - currentStartTime) / 1000.0) + " Imported: " + numofEntries + " -- size: " + sizeE + " -- file: " + csvfile);
 
