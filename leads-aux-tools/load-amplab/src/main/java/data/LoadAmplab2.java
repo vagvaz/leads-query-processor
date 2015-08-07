@@ -146,7 +146,7 @@ public class LoadAmplab2 {
         System.out.println("Loading finished.");
         System.out.println("Overall Folder Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - startTime, "HH:mm:ss,SSS"));
         for(String tableName : loaded_tuples.keySet()){
-            System.out.println(" TableName: " + tableName + " # Tuples: " + loaded_tuples.get(tableName) + " Rate: " + loaded_tuples.get(tableName)/(float)loading_times.get(tableName));
+            System.out.println(" TableName: " + tableName + " # Tuples: " + loaded_tuples.get(tableName) +" Time "+ DurationFormatUtils.formatDuration(loading_times.get(tableName), "HH:mm:ss,SSS")  +" Mean Rate: " + loaded_tuples.get(tableName)/((float)loading_times.get(tableName)/1000.0));
         }
         System.exit(0);
 
@@ -159,7 +159,7 @@ public class LoadAmplab2 {
 
         int maxTuples = Integer.parseInt(arg5);
         if(loaded_tuples.containsKey(tableName)){
-            if(loaded_tuples.get(tableName)>maxTuples){
+            if(maxTuples > 0 && loaded_tuples.get(tableName)>maxTuples){
                 System.out.println(" Max entries reached for " + tableName + " skiping " + csvfile.getName());
             }
         }else{
@@ -278,7 +278,7 @@ public class LoadAmplab2 {
 
             Long currentStartTime = System.currentTimeMillis();
             while ((keyLine = keyReader.readLine()) != null){
-                if (numofEntries > maxTuples){
+                if (maxTuples>0 && numofEntries > maxTuples){
                     System.out.println("Stopping import limit reached " + maxTuples + " " );
                     break;
                 }
