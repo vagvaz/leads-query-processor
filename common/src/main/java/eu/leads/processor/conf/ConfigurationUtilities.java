@@ -186,6 +186,12 @@ public class ConfigurationUtilities {
         String[] ips = result.split(";");
         Random random = new Random();
         int index = random.nextInt(ips.length);
+//        if(ips[index].contains(":")){
+//            String[] hostAndPort = ips[index].split(":");
+//            System.out.println("\n\nEXTERNAL IP " + hostAndPort[0]);
+//            log.error("\n\nEXTERNAL IP " + hostAndPort[0]);
+//            return hostAndPort[0];
+//        }
         System.out.println("\n\nEXTERNAL IP " + ips[index]);
         log.error("EXTERNAL IP " + ips[index]);
             return ips[index];
