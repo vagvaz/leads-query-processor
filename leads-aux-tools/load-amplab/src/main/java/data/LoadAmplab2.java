@@ -331,6 +331,7 @@ public class LoadAmplab2 {
                     lastReportTime=System.currentTimeMillis();
                 }
             }
+            System.out.println("Wait For All Puts");
             EnsembleCacheUtils.waitForAllPuts();
             System.out.println("File Import Mean Rate: " + (numofEntries - loaded_tuples.get(tableName)) / ((System.currentTimeMillis() - currentStartTime) / 1000.0) + " Imported: " + numofEntries + " -- size: " + sizeE + " -- file: " + csvfile);
 

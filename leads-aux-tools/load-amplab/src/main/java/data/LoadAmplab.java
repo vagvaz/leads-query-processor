@@ -307,6 +307,7 @@ public class LoadAmplab {
             loadDataFromFile(csvfile,arg5,arg6);
             System.out.println("Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - filestartTime, "HH:mm:ss,SSS"));
         }
+        System.out.println("Wait For All Puts");
         EnsembleCacheUtils.waitForAllPuts();
         System.out.println("Loading finished.");
         System.out.println("Overall Folder Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - startTime, "HH:mm:ss,SSS"));
