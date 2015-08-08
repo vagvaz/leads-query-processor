@@ -40,13 +40,18 @@ public class EnsembleCacheUtils {
             if (initialized) {
                 return;
             }
+            if(currentCaches != null || mapsToPut != null)
+            {
+                System.err.println("SERIOUS ERRROR " + (currentCaches == null) +" "+ (mapsToPut == null) );
+                System.exit(-1);
+            }
             useAsync = LQPConfiguration.getInstance().getConfiguration()
                 .getBoolean("node.infinispan.putasync", true);
             log.info("Using asynchronous put " + useAsync);
             //            concurrentQuue = new ConcurrentLinkedQueue<>();
             threads = new ConcurrentLinkedQueue<>();
             //            ccr = new ClearCompletedRunnable(concurrentQuue,mutex,threads);
-            initialized = true;
+
             batchSize = LQPConfiguration.getInstance().getConfiguration()
                 .getInt("node.ensemble.batchsize", 10);
             threadBatch = LQPConfiguration.getInstance().getConfiguration().getInt(
@@ -55,6 +60,7 @@ public class EnsembleCacheUtils {
             System.out.println("threads " + threadBatch + " batchSize " + batchSize + " async = " + useAsync);
             currentCaches = new ConcurrentHashMap<>();
             mapsToPut = new ConcurrentHashMap<>();
+            initialized = true;
         }
     }
 

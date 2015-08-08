@@ -759,7 +759,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       DistributedExecutorService des = new DefaultExecutorService(reduceInputCache);
      setReducerCallableEnsembleHost();
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder(reducerCallable);
-      builder.timeout(1, TimeUnit.HOURS);
+      builder.timeout(10, TimeUnit.HOURS);
       DistributedTask task = builder.build();
       List<Future<String>> res = des.submitEverywhere(task);
       //      Future<String> res = des.submit(callable);

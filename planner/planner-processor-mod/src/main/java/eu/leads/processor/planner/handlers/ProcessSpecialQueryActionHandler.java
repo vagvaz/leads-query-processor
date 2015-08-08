@@ -18,6 +18,7 @@ import org.apache.tajo.catalog.proto.CatalogProtos;
 import org.apache.tajo.plan.logical.ScanNode;
 import org.apache.tajo.util.KeyValueSet;
 import org.infinispan.Cache;
+import org.infinispan.commons.api.BasicCache;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.HashSet;
@@ -32,8 +33,8 @@ public class ProcessSpecialQueryActionHandler implements ActionHandler {
     private final InfinispanManager persistence;
     private final String id;
     private final TaJoModule module;
-  private final Cache statisticsCache;
-  private Cache<String,String> queriesCache;
+  private final BasicCache statisticsCache;
+  private BasicCache<String,String> queriesCache;
     private String schedHost;
     private String schedPort;
   private String currentCluster;
@@ -52,8 +53,10 @@ public class ProcessSpecialQueryActionHandler implements ActionHandler {
       this.schedHost = schedHost;
       this.schedPort = schedPort;
     this.globalInformation = globalInformation;
-      statisticsCache = (Cache) persistence.getPersisentCache(StringConstants.STATISTICS_CACHE);
-       queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
+      statisticsCache =
+          (BasicCache) persistence.getPersisentCache(StringConstants.STATISTICS_CACHE);
+       queriesCache =
+           (BasicCache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
       currentCluster = LQPConfiguration.getInstance().getMicroClusterName();
     }
 

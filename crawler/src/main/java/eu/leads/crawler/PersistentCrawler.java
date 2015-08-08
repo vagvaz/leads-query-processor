@@ -6,8 +6,6 @@ import eu.leads.crawler.model.Page;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.sentiment.Sentiment;
-import eu.leads.processor.sentiment.SentimentAnalysisModule;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jsoup.Jsoup;
@@ -31,7 +29,7 @@ public class PersistentCrawler extends DefaultCrawler {
     private static Log log = LogFactory.getLog(PersistentCrawler.class.getName());
 
 //  private static JavaLanguageDetection det = JavaLanguageDetection.getInstance();
-   private final static SentimentAnalysisModule sentimentAnalysisModule = new SentimentAnalysisModule("classifiers/english.all.3class.distsim.crf.ser.gz");
+//   private final static SentimentAnalysisModule sentimentAnalysisModule = new SentimentAnalysisModule("classifiers/english.all.3class.distsim.crf.ser.gz");
     /**
      * Constructs a new PersistentCrawler.
      */
@@ -102,8 +100,8 @@ public class PersistentCrawler extends DefaultCrawler {
    private void additionalAttributes(JsonObject object) {
      Double minusOne = new Double(-1.9);
     object.putNumber("pagerank", minusOne);
-    Sentiment sentiment = sentimentAnalysisModule.getOverallSentiment(object.getString("body"));
-    object.putValue("sentiment",sentiment.getValue());
+//    Sentiment sentiment = sentimentAnalysisModule.getOverallSentiment(object.getString("body"));
+    object.putValue("sentiment",1.0);
 //    String language = det.detectLanguage(object.getString("content"));
 
     object.putString("language","en");

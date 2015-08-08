@@ -42,7 +42,7 @@ public class LogSink extends Verticle implements LeadsMessageHandler {
         //      LQPConfiguration.parseFile(configuration);
         com = new DefaultNode();
         com.initialize(id, "leads.log.sink", groups, this, this, vertx);
-
+        System.out.println("LogSink Started");
     }
 
     @Override

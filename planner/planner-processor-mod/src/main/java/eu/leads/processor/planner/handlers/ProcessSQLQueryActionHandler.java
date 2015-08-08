@@ -21,6 +21,7 @@ import org.apache.tajo.plan.PlanningException;
 import org.apache.tajo.plan.logical.LogicalRootNode;
 import org.apache.tajo.session.Session;
 import org.infinispan.Cache;
+import org.infinispan.commons.api.BasicCache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
@@ -37,8 +38,8 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
     private final String id;
     private String currentCluster;
     private final TaJoModule module;
-    private Cache<String,String> queriesCache;
-    private Cache statisticsCache;
+    private BasicCache<String,String> queriesCache;
+    private BasicCache statisticsCache;
     private  Session session;
     private WP4Client wp4Client;
     private JsonObject globalInformation;
@@ -53,8 +54,10 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         this.persistence = persistence;
         this.id = id;
         this.module = module;
-        queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
-        statisticsCache = (Cache) persistence.getPersisentCache(StringConstants.STATISTICS_CACHE);
+        queriesCache =
+            (BasicCache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
+        statisticsCache =
+            (BasicCache) persistence.getPersisentCache(StringConstants.STATISTICS_CACHE);
         session = new Session("defaultQueryId", "defaultUser",StringConstants.DEFAULT_DATABASE_NAME);
 //        WP4Client.initialize(schedHost,schedPort);
         this.schedHost  = schedHost;

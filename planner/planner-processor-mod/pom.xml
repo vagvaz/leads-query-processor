@@ -52,10 +52,6 @@
          <version>${vertx.version}</version>
          <scope>provided</scope>
          <exclusions>
-            <!--<exclusion>-->
-               <!--<groupId>log4j</groupId>-->
-               <!--<artifactId>log4j</artifactId>-->
-            <!--</exclusion>-->
             <exclusion>
                <groupId>org.apache.logging.log4j</groupId>
                <artifactId>log4j-core</artifactId>
@@ -103,104 +99,11 @@
          </exclusions>
       </dependency>
       <!--Test dependencies-->
-      <dependency>
-         <groupId>junit</groupId>
-         <artifactId>junit</artifactId>
-         <version>${junit.version}</version>
-         <scope>test</scope>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-
-            </exclusion>
-         </exclusions>
-      </dependency>
-      <dependency>
-         <groupId>io.vertx</groupId>
-         <artifactId>testtools</artifactId>
-         <version>${vertx.testtools.version}</version>
-         <scope>test</scope>
-         <exclusions>
-            <exclusion>
-               <groupId>log4j</groupId>
-               <artifactId>log4j</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-
-            </exclusion>
-         </exclusions>
-      </dependency>
-      <dependency>
-         <groupId>gr.tuc.softnet</groupId>
-         <artifactId>common-core</artifactId>
-         <version>${processor.version}</version>
-         <exclusions>
-            <!--<exclusion>-->
-               <!--<groupId>log4j</groupId>-->
-               <!--<artifactId>log4j</artifactId>-->
-            <!--</exclusion>-->
-            <exclusion>
-               <groupId>org.apache.logging.log4j</groupId>
-               <artifactId>log4j-core</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.apache.tajo</groupId>
-               <artifactId>tajo-jdbc</artifactId>
-
-            </exclusion>
-         </exclusions>
-      </dependency>
 
       <dependency>
          <groupId>gr.tuc.softnet</groupId>
          <artifactId>leads-query-processor-tajo-module</artifactId>
          <version>0.0.2-SNAPSHOT</version>
-         <!--<exclusions>-->
-            <!--<exclusion>-->
-               <!--<groupId>log4j</groupId>-->
-               <!--<artifactId>log4j</artifactId>-->
-            <!--</exclusion>-->
-            <!--<exclusion>-->
-               <!--<groupId>org.apache.logging.log4j</groupId>-->
-               <!--<artifactId>log4j-core</artifactId>-->
-            <!--</exclusion>-->
-            <!--<exclusion>-->
-               <!--<groupId>org.slf4j</groupId>-->
-               <!--<artifactId>slf4j-log4j12</artifactId>-->
-            <!--</exclusion>-->
-            <!--<exclusion>-->
-               <!--<groupId>org.apache.tajo</groupId>-->
-               <!--<artifactId>tajo-jdbc</artifactId>-->
-
-            <!--</exclusion>-->
-         <!--</exclusions>-->
       </dependency>
       
 
@@ -209,9 +112,33 @@
          <artifactId>wp4-scheduler-client</artifactId>
          <version>1.0-SNAPSHOT</version>
          <exclusions>
+            <exclusion>
+               <groupId>log4j</groupId>
+               <artifactId>log4j</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.logging.log4j</groupId>
+               <artifactId>log4j-core</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.apache.tajo</groupId>
+               <artifactId>tajo-jdbc</artifactId>
+            </exclusion>
+         </exclusions>
+      </dependency>
+
+      <dependency>
+         <groupId>gr.tuc.softnet</groupId>
+         <artifactId>common-core</artifactId>
+         <version>${processor.version}</version>
+         <exclusions>
             <!--<exclusion>-->
-               <!--<groupId>log4j</groupId>-->
-               <!--<artifactId>log4j</artifactId>-->
+            <!--<groupId>log4j</groupId>-->
+            <!--<artifactId>log4j</artifactId>-->
             <!--</exclusion>-->
             <exclusion>
                <groupId>org.apache.logging.log4j</groupId>
@@ -228,16 +155,11 @@
             </exclusion>
          </exclusions>
       </dependency>
-      <!-- Add any other dependencies that you want packaged into your module (in the lib dir) here
-    as 'compile' dependencies. Here is an example
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-core</artifactId>
-      <version>1.3</version>
-      <scope>compile</scope>
-    </dependency>
-    -->
-
+      <dependency>
+         <groupId>io.netty</groupId>
+         <artifactId>netty-all</artifactId>
+         <version>4.0.21.Final</version>
+      </dependency>
    </dependencies>
 
    <build>
@@ -426,14 +348,6 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-report-plugin</artifactId>
             <version>${maven.surefire.report.plugin.version}</version>
-         </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>${maven.javadoc.plugin.version}</version>
-            <configuration>
-               <aggregate>true</aggregate>
-            </configuration>
          </plugin>
       </plugins>
    </reporting>

@@ -24,7 +24,7 @@ import org.infinispan.persistence.leveldb.configuration.LevelDBStoreConfiguratio
 import org.infinispan.remoting.transport.Address;
 import org.infinispan.server.hotrod.HotRodServer;
 import org.infinispan.server.hotrod.configuration.HotRodServerConfigurationBuilder;
-import org.infinispan.server.hotrod.test.HotRodTestingUtil;
+//import org.infinispan.server.hotrod.test.HotRodTestingUtil;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
 import org.infinispan.transaction.TransactionMode;
 import org.infinispan.transaction.lookup.JBossStandaloneJTAManagerLookup;
@@ -147,14 +147,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     //    manager.getCache();
     //    startHotRodServer(manager,host,serverPort);
-    if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
-    {
-      host = LQPConfiguration.getConf().getString("node.ip");
-      startHotRodServer(manager,host, serverPort);
-    }
+
     //Join Infinispan Cluster
     //      manager.start();
-    ConfigurationBuilder builder = HotRodTestingUtil.hotRodCacheConfiguration(getDefaultClusteredCacheConfig(CacheMode.DIST_SYNC, false));
+    ConfigurationBuilder builder = getDefaultClusteredCacheConfig(CacheMode.DIST_SYNC, false);
     //    builder.read(holder.getGlobalConfigurationBuilder().serialization().marshaller(marshaller).build());
     builder.indexing()
         .enable()
@@ -216,6 +212,13 @@ public class ClusterInfinispanManager implements InfinispanManager {
     NutchLocalListener listener = new NutchLocalListener(this,"default.webpages",LQPConfiguration.getInstance().getConfiguration().getString("nutch.listener.prefix"),currentComponent);
 
     manager.getCache("WebPage").addListener(listener);
+
+    if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
+    {
+      host = LQPConfiguration.getConf().getString("node.ip");
+      if(!LQPConfiguration.getConf().getString("node.current.component").equals("planner"))
+        startHotRodServer(manager,host, serverPort);
+    }
     //    System.err.println("Loading all the available data from nutch Cache");
     //    final ClusteringDependentLogic cdl = manager.getCache("WebPage").getAdvancedCache().getComponentRegistry()
     //                                           .getComponent

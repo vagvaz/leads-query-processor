@@ -16,7 +16,7 @@ import java.util.*;
  */
 public class ConfigurationUtilities {
 
-    static Logger log = LoggerFactory.getLogger(ConfigurationUtilities.class);
+//    static Logger log = LoggerFactory.getLogger(ConfigurationUtilities.class);
     public static File[] getConfigurationFiles(String directory) {
         return ConfigurationUtilities.getConfigurationFiles(directory, null);
     }
@@ -193,7 +193,7 @@ public class ConfigurationUtilities {
 //            return hostAndPort[0];
 //        }
         System.out.println("\n\nEXTERNAL IP " + ips[index]);
-        log.error("EXTERNAL IP " + ips[index]);
+//        log.error("EXTERNAL IP " + ips[index]);
             return ips[index];
     }
 

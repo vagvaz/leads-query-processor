@@ -161,12 +161,12 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
       intermediateDataCache = (BasicCache) emanager.getCache(storeCache.getName() + ".data",new ArrayList<>(emanager.sites()),
           EnsembleCacheManager.Consistency.DIST);
       //create Intermediate  keys cache name for data on the same Sites as outputCache;
-      keysCache = (BasicCache) emanager.getCache(storeCache.getName() + ".keys",new ArrayList<>(emanager.sites()),
-          EnsembleCacheManager.Consistency.DIST);
+//      keysCache = (BasicCache) emanager.getCache(storeCache.getName() + ".keys",new ArrayList<>(emanager.sites()),
+//          EnsembleCacheManager.Consistency.DIST);
       //createIndexCache for getting all the nodes that contain values with the same key! in a mc
-      indexSiteCache = (BasicCache) emanager.getCache(storeCache.getName() + ".indexed",new ArrayList<>(emanager.sites()),
-          EnsembleCacheManager.Consistency.DIST);
-      counterCache = manager.getCache(storeCache.getName()+"."+inputCacheName+"."+manager.getAddress().toString()
+//      indexSiteCache = (BasicCache) emanager.getCache(storeCache.getName() + ".indexed",new ArrayList<>(emanager.sites()),
+//          EnsembleCacheManager.Consistency.DIST);
+      counterCache = imanager.getLocalCache(storeCache.getName()+"."+inputCacheName+"."+manager.getAddress().toString()
                                         + ".counters");
       baseIndexedKey = new IndexedComplexIntermediateKey(site, manager.getAddress().toString(),inputCacheName);
       baseIntermKey = new ComplexIntermediateKey(site, manager.getAddress().toString(),inputCacheName);
@@ -190,16 +190,16 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
       else{
         currentCount = currentCount+1;
       }
-      counterCache.put(key.toString(), currentCount);
+      counterCache.put(key, currentCount);
       baseIntermKey.setKey(key.toString());
       baseIntermKey.setCounter(currentCount);
       ComplexIntermediateKey newKey = new ComplexIntermediateKey(baseIntermKey.getSite(),baseIntermKey.getNode(),key.toString(),baseIntermKey.getCache(),currentCount);
       EnsembleCacheUtils.putToCache(intermediateDataCache,newKey,value);
-      if(LQPConfiguration.getInstance().getConfiguration().getBoolean("processor.validate.intermediate")){
-        ComplexIntermediateKey v = new ComplexIntermediateKey(baseIntermKey.getSite(),baseIntermKey.getNode(),key.toString(),baseIntermKey.getCache(),currentCount);
-        Object o = intermediateDataCache.get(v);
-        assert(o.equals(value));
-      }
+//      if(LQPConfiguration.getInstance().getConfiguration().getBoolean("processor.validate.intermediate")){
+//        ComplexIntermediateKey v = new ComplexIntermediateKey(baseIntermKey.getSite(),baseIntermKey.getNode(),key.toString(),baseIntermKey.getCache(),currentCount);
+//        Object o = intermediateDataCache.get(v);
+//        assert(o.equals(value));
+//      }
     }
     else{
       EnsembleCacheUtils.putToCache(storeCache, key, value);
