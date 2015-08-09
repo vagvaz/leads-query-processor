@@ -12,7 +12,7 @@ import java.util.*;
 /**
  * Created by vagvaz on 20/05/15.
  */
-public class BatchPutAllAsyncThread extends Thread {
+public class BatchPutAllAsyncThread implements Runnable {
 
     private final Map<String, Map<Object, Object>> objects;
     private final Map<String, BasicCache> caches;
@@ -22,7 +22,7 @@ public class BatchPutAllAsyncThread extends Thread {
     private ProfileEvent batchPut;
     public BatchPutAllAsyncThread(Map<String, BasicCache> caches,
         Map<String, Map<Object, Object>> objects) {
-        super("Thread-" + UUID.randomUUID().toString());
+//        super("Thread-" + UUID.randomUUID().toString());
         this.caches = caches;
         this.objects = objects;
         futures = new ArrayList<>();

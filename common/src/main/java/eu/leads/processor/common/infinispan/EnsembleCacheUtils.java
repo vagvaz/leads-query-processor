@@ -4,6 +4,7 @@ import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.commons.api.BasicCache;
+import org.jgroups.util.ConcurrentLinkedBlockingQueue2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,30 +12,32 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.*;
 
 /**
  * Created by vagvaz on 3/7/15.
  */
 public class EnsembleCacheUtils {
-    static Logger profilerLog = LoggerFactory.getLogger("###PROF###" + EnsembleCacheUtils.class);
-    static ProfileEvent profExecute =
+    private static Logger profilerLog = LoggerFactory.getLogger("###PROF###" + EnsembleCacheUtils.class);
+    private static ProfileEvent profExecute =
         new ProfileEvent("Execute " + EnsembleCacheUtils.class, profilerLog);
-    static Logger log = LoggerFactory.getLogger(EnsembleCacheUtils.class);
-    static boolean useAsync;
+    private static Logger log = LoggerFactory.getLogger(EnsembleCacheUtils.class);
+    private static boolean useAsync;
     //    static Queue<NotifyingFuture<Void>> concurrentQuue;
-    static Map<String, BasicCache> currentCaches;
-    static Map<String, Map<Object, Object>> mapsToPut;
-    static Queue<Thread> threads;
-    static volatile Object mutex = new Object();
-    static Boolean initialized = false;
-    static int batchSize = 20;
-    static long counter = 0;
-    static long threadCounter = 0;
-    static long threadBatch = 3;
-    static ProfileEvent putEvent;
+    private static Map<String, BasicCache> currentCaches;
+    private static Map<String, Map<Object, Object>> mapsToPut;
+    private static Queue<Thread> threads;
+    private static volatile Object mutex = new Object();
+    private static Boolean initialized = false;
+    private static int batchSize = 20;
+    private static long counter = 0;
+    private static long threadCounter = 0;
+    private static long threadBatch = 3;
+    private static ProfileEvent putEvent;
+    private static ThreadPoolExecutor executor;
+    private static ConcurrentLinkedDeque<SyncPutRunnable> runnables;
 //    private static ClearCompletedRunnable ccr;
+    private static volatile Object runnableMutex = new Object();
     public static void initialize() {
         synchronized (mutex) {
             if (initialized) {
@@ -61,23 +64,58 @@ public class EnsembleCacheUtils {
             currentCaches = new ConcurrentHashMap<>();
             mapsToPut = new ConcurrentHashMap<>();
             initialized = true;
+            executor = new ThreadPoolExecutor((int)threadBatch,(int)(2*threadBatch),5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>((int)threadBatch));
+            runnables = new ConcurrentLinkedDeque<>();
+            for (int i = 0; i < 2 * (threadBatch); i++) {
+                runnables.add(new SyncPutRunnable());
+            }
+//            executor.prestartAllCoreThreads();
         }
     }
 
-    public static void waitForAllPuts() {
-        //        profExecute.start("waitForAllPuts");
-        clearCompleted();
-        while (!threads.isEmpty()) {
-            Thread t = threads.poll();
-            try {
-                t.join();
-            } catch (InterruptedException e) {
-                log.error("EnsembleCacheUtils waitForAllPuts Wait clean threads " + e.getClass()
-                    .toString());
-                log.error(e.getStackTrace().toString());
-                e.printStackTrace();
+    public  static SyncPutRunnable getRunnable(){
+        SyncPutRunnable result = null;
+        synchronized (runnableMutex){
+            result = runnables.poll();
+            while(result == null){
+                try {
+                    runnableMutex.wait(20);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                result = runnables.poll();
             }
         }
+
+        return result;
+    }
+
+    public static void addRunnable(SyncPutRunnable runnable){
+        synchronized (runnableMutex){
+            runnables.add(runnable);
+            runnableMutex.notify();
+        }
+    }
+    public static void waitForAllPuts() {
+        //        profExecute.start("waitForAllPuts");
+        while(executor.getActiveCount() > 0)
+        try {
+            executor.awaitTermination(100,TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+//        if(!executor.isShutdown())
+//            executor.shutdown();
+//            Thread t = threads.poll();
+//            try {
+//                t.join();
+//            } catch (InterruptedException e) {
+//                log.error("EnsembleCacheUtils waitForAllPuts Wait clean threads " + e.getClass()
+//                    .toString());
+//                log.error(e.getStackTrace().toString());
+//                e.printStackTrace();
+//            }
+//        }
         //        profExecute.end();
     }
 
@@ -85,9 +123,9 @@ public class EnsembleCacheUtils {
         putEvent = new ProfileEvent("profPutToCache",profilerLog);
         if (useAsync) {
             putToCacheAsync(cache, key, value);
-            if (counter % batchSize == 0) {
-                clearCompleted();
-            }
+//            if (counter % batchSize == 0) {
+//                clearCompleted();
+//            }
             return;
         }
         putToCacheSync(cache, key, value);
@@ -138,8 +176,8 @@ public class EnsembleCacheUtils {
             currentCaches = new ConcurrentHashMap<>();
             mapsToPut = new ConcurrentHashMap<>();
             BatchPutAllAsyncThread batchPutAllAsyncThread = new BatchPutAllAsyncThread(caches,objects);
-            threads.add(batchPutAllAsyncThread);
-            batchPutAllAsyncThread.start();
+//            threads.add(batchPutAllAsyncThread);
+//            batchPutAllAsyncThread.start();
         }
     }
 
@@ -189,8 +227,8 @@ public class EnsembleCacheUtils {
         //        profExecute.end();
     }
 
-    private static void putToCacheAsync(BasicCache cache, Object key, Object value) {
-        counter = (counter + 1) % Long.MAX_VALUE;
+    private static void putToCacheAsync(final BasicCache cache, final Object key, final Object value) {
+//        counter = (counter + 1) % Long.MAX_VALUE;
         //        profExecute.start("putToCache Async");
         boolean isok = false;
         while (!isok) {
@@ -211,33 +249,37 @@ public class EnsembleCacheUtils {
                     }
                     //                    NotifyingFuture fut = cache.putAsync(key, value);
                     //                    concurrentQuue.add(fut);
-                    synchronized (mutex) {
-                        BasicCache currentCache = currentCaches.get(cache.getName());
-                        if (currentCache == null) {
+//                    synchronized (mutex) {
+//                        BasicCache currentCache = currentCaches.get(cache.getName());
+//                        if (currentCache == null) {
 
-                            currentCaches.put(cache.getName(), cache);
+//                            currentCaches.put(cache.getName(), cache);
 
-                            Map<Object, Object> newMap = new ConcurrentHashMap<>();
-                            newMap.put(key, value);
-                            mapsToPut.put(cache.getName(), newMap);
-                        } else {
-                            Map<Object, Object> cacheMap = mapsToPut.get(cache.getName());
-                            if (cacheMap == null) {
-//                                synchronized (mutex) {
-                                    cacheMap = new ConcurrentHashMap<>();
-
-                                    mapsToPut.put(cache.getName(), cacheMap);
-//                                }
-                            }
-                            if(cacheMap.containsKey(key))
-                            {
-                                System.err.println("ERROR: " + currentCache.getName() + " already contains key " + key.toString() + " with value\n" + cacheMap.get(key).toString() );
-                                System.exit(-1);
-                            }
-                            cacheMap.put(key, value);
-                        }
-                    }
+//                            Map<Object, Object> newMap = new ConcurrentHashMap<>();
+//                            newMap.put(key, value);
+//                            mapsToPut.put(cache.getName(), newMap);
+//                        } else {
+//                            Map<Object, Object> cacheMap = mapsToPut.get(cache.getName());
+//                            if (cacheMap == null) {
+////                                synchronized (mutex) {
+//                                    cacheMap = new ConcurrentHashMap<>();
+//
+//                                    mapsToPut.put(cache.getName(), cacheMap);
+////                                }
+//                            }
+//                            if(cacheMap.containsKey(key))
+//                            {
+//                                System.err.println("ERROR: " + currentCache.getName() + " already contains key " + key.toString() + " with value\n" + cacheMap.get(key).toString() );
+//                                System.exit(-1);
+//                            }
+//                            cacheMap.put(key, value);
+//                        }
+//                    }
                     //              log.error("Successful " + key);
+
+                    SyncPutRunnable putRunnable = EnsembleCacheUtils.getRunnable();
+                    putRunnable.setParameters(cache,key,value);
+                    executor.submit(putRunnable);
                     isok = true;
                 } else {
                     log.error("CACHE IS NULL IN PUT TO CACHE for " + key.toString() + " " + value
@@ -246,7 +288,14 @@ public class EnsembleCacheUtils {
                 }
             } catch (Exception e) {
                 isok = false;
-
+                if(e instanceof RejectedExecutionException){
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                    continue;
+                }
                 log.error("PUT TO CACHE " + e.getMessage() + " " + key);
                 log.error("key " + (key == null) + " value " + (value == null) + " cache " + (cache
                     == null) + " log " + (log == null));
