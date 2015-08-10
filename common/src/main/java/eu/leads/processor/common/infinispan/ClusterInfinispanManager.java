@@ -19,6 +19,7 @@ import org.infinispan.eviction.EvictionThreadPolicy;
 import org.infinispan.lifecycle.ComponentStatus;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
+import org.infinispan.persistence.leveldb.configuration.CompressionType;
 import org.infinispan.persistence.leveldb.configuration.LevelDBStoreConfiguration;
 import org.infinispan.persistence.leveldb.configuration.LevelDBStoreConfigurationBuilder;
 import org.infinispan.remoting.transport.Address;
@@ -340,7 +341,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
                 //                                 .location("/tmp/leveldb/data-foo/" + "/")
             .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "-expired/")
                 //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
-            .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
+            .implementationType(LevelDBStoreConfiguration.ImplementationType.AUTO)
+            .blockSize(32*1024*1024)
+            .compressionType(CompressionType.SNAPPY)
+            .cacheSize(64*1024*1024)
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
@@ -744,7 +748,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
                 //                                 .location("/tmp/leveldb/data-foo/" + "/")
             .expiredLocation("/tmp/leadsprocessor-data/expired-" + uniquePath + "/")
                 //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
-            .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
+            .implementationType(LevelDBStoreConfiguration.ImplementationType.AUTO)
+            .blockSize(32 * 1024 * 1024)
+            .compressionType(CompressionType.SNAPPY)
+            .cacheSize(64 * 1024 * 1024)
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
