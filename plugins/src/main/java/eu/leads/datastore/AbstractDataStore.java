@@ -1,9 +1,15 @@
 package eu.leads.datastore;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.URIVersion;
-
-import java.util.*;
 
 public abstract class AbstractDataStore {
 
@@ -28,7 +34,7 @@ public abstract class AbstractDataStore {
 	 * 
 	 * @return set of versions of URI family, starting with the freshest one (descending timestamp), if none - returns an empty set
 	 */
-	public abstract SortedSet<URIVersion> getLeadsResourceMDFamily(String uri, String family, int lastVersions, String beforeTimestamp);
+	public abstract SortedSet<URIVersion> getLeadsResourceMDFamily(String uri, String family, int lastVersions, String timestamp, boolean before);
 	
 	/**
 	 * Puts cell(s) of URI's family into the storage
@@ -103,11 +109,25 @@ public abstract class AbstractDataStore {
 	public abstract List<String> getFQDNList();
 	
 	/**
+	 * 	
+	 * @return
+	 */
+	public abstract List<String> getUsersKeywordsList();
+	
+	/**
+	 * 	
+	 * @return
+	 */
+	public abstract Map<Long,Map<String, Object>> getUsersKeywordsListExt();
+	
+	/**
 	 * Returns an object representing family storage handle, in case some method runs some custom retrieval/storage functionality
 	 * 
 	 * @return
 	 */
 	public abstract Object getFamilyStorageHandle(String familyName);
+
+	public abstract String getFamilyNextUri(String family);
 
 	
 	

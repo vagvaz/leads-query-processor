@@ -6,6 +6,7 @@ Created on Jun 27, 2014
 from eu.leads.infext.python.ops import xpathops
 from lxml import html
 import lxml
+import logging
 
 class ExtractValues():
     
@@ -23,6 +24,7 @@ class ExtractValues():
         worked = False
         working_schema_tuple = None
         for schema_tuple in extractionlist:
+            logging.getLogger("leads").debug("schema_tuple"+', '.join([str(x) for x in schema_tuple]))
             if schema_tuple[1] == 0:
                 paths_versions = schema_tuple[0]
                 usednodes = set()

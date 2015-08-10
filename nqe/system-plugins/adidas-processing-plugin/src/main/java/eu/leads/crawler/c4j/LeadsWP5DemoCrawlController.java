@@ -17,15 +17,21 @@
 
 package eu.leads.crawler.c4j;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.XMLConfiguration;
+
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import eu.leads.datastore.DataStoreSingleton;
 
 /**
  * @author Yasser Ganjisaffar <lastname at gmail dot com>
@@ -33,18 +39,31 @@ import java.util.Properties;
 public class LeadsWP5DemoCrawlController {
 	
 	private static int numberOfCrawlers;
-	private static CrawlConfig config;
-	private static String parametersFile = "eu/leads/crawler/c4j/seedlist.properties";
+	private static CrawlConfig crawlConfig;
+	private static String parametersFile = "/leads/workm30/leads-query-processor/"
+			+ "nqe/system-plugins/adidas-processing-plugin/"
+			+ "src/main/java/"
+			+ "eu/leads/crawler/c4j/seedlist_ecom_m36.properties";
 	private Properties properties = new Properties();
+	
+	Configuration config;
 	
 	private void init() {
 		InputStream input = null;
 		try {
-			input = LeadsWP5DemoCrawlController.class.getClassLoader().getResourceAsStream(parametersFile);
+			input = new FileInputStream(parametersFile);
 			// load a properties file
 			properties.load(input);
+			config = new XMLConfiguration(
+						"/leads/workm30/leads-query-processor/"
+						+ "nqe/system-plugins/adidas-processing-plugin/"
+						+ "adidas-processing-plugin-conf-test.xml");
+			DataStoreSingleton.configureDataStore(config);
 		} catch (IOException ex) {
 			ex.printStackTrace();
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
@@ -63,17 +82,17 @@ public class LeadsWP5DemoCrawlController {
 	     * be initiated for crawling.
 	     */
 	    numberOfCrawlers = 1;
-	    config = new CrawlConfig();
+	    crawlConfig = new CrawlConfig();
 	    /*
 	     * Be polite: Make sure that we don't send more than 1 request per
 	     * second (1000 milliseconds between requests).
 	     */
-	    config.setPolitenessDelay(10000);
+	    crawlConfig.setPolitenessDelay(5000);
 	    /*
 	     * You can set the maximum crawl depth here. The default value is -1 for
 	     * unlimited depth
 	     */
-	    config.setMaxDepthOfCrawling(-1);
+	    crawlConfig.setMaxDepthOfCrawling(-1);
 	    /*
 	     * This config parameter can be used to set your crawl to be resumable
 	     * (meaning that you can resume the crawl from a previously
@@ -81,7 +100,7 @@ public class LeadsWP5DemoCrawlController {
 	     * want to start a fresh crawl, you need to delete the contents of
 	     * rootFolder manually.
 	     */
-	    config.setResumableCrawling(false);
+	    crawlConfig.setResumableCrawling(false);
 	}
 
   public void crawlDomain(String domain) throws Exception {
@@ -92,7 +111,7 @@ public class LeadsWP5DemoCrawlController {
 	     * You can set the maximum number of pages to crawl. The default value
 	     * is -1 for unlimited number of pages
 	     */
-	    config.setMaxPagesToFetch(Integer.parseInt(propValues[2]));
+	    crawlConfig.setMaxPagesToFetch(Integer.parseInt(propValues[2]));
 	    /*
 	     * crawlStorageFolder is a folder where intermediate crawl data is
 	     * stored.
@@ -100,15 +119,15 @@ public class LeadsWP5DemoCrawlController {
 	    String suffix = null;
 	    if(domain.indexOf('/') > -1) suffix = domain.substring(0, domain.indexOf('/'));
 	    else suffix = domain;
-	    String crawlStorageFolder = "/data/workspace/crawl4j_intermediate/"+suffix;
-	    config.setCrawlStorageFolder(crawlStorageFolder);
+	    String crawlStorageFolder = "/data/crawled/"+suffix;
+	    crawlConfig.setCrawlStorageFolder(crawlStorageFolder);
 	    /*
 		 * Instantiate the controller for this crawl.
 		 */
-		PageFetcher pageFetcher = new PageFetcher(config);
+		PageFetcher pageFetcher = new PageFetcher(crawlConfig);
 		RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
 		RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
-		CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
+		CrawlController controller = new CrawlController(crawlConfig, pageFetcher, robotstxtServer);
 		/*
 		 * For each crawl, you need to add some seed urls. These are the first
 		 * URLs that are fetched and then the crawler starts following links

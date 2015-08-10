@@ -1,13 +1,14 @@
 package eu.leads.datastore;
 
-import eu.leads.datastore.impl.CassandraCQLDataStore;
-import eu.leads.datastore.impl.LeadsDataStore;
-import org.apache.commons.configuration.Configuration;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+
+import org.apache.commons.configuration.Configuration;
+
+import eu.leads.datastore.impl.CassandraCQLDataStore;
+import eu.leads.datastore.impl.LeadsDataStore;
 
 //import root.datastore.impl.HBaseDataStore;
 //import root.datastore.impl.HiveDataStore;
@@ -21,31 +22,36 @@ public class DataStoreSingleton {
 	static String storagePropertiesDir = "/temp";
 	
 	static AbstractDataStore dataStore = null;
-	static Properties prop = new Properties();
+//	static Properties prop = new Properties();
 	static Properties mapping = new Properties();
 	static Properties parameters = new Properties();
+	
+	public static String storeTechnology = null;
 	
 	public static void configureDataStore(Configuration conf) {
 		if(dataStore == null) {
 			storagePropertiesDir = conf.getString("storagePropertiesDir");
-			String technology = conf.getString("technology");
-			if(technology.toLowerCase().equals("cassandra")) {
+			storeTechnology = conf.getString("technology").toLowerCase();
+			if(storeTechnology.toLowerCase().equals("cassandra")) {
 				mappingFile = "mapping/casscql.properties";
-				initProperties();
+//				initProperties();
 				initMapping();
 				initParameters();
 				int port = conf.getInt("port");
 				String [] hosts = conf.getStringArray("host");
 				dataStore = new CassandraCQLDataStore(mapping,port,hosts);
 			}
-			else if(technology.toLowerCase().equals("leads")) {
+			else if(storeTechnology.toLowerCase().equals("leads")) {
+				System.out.println("Configuring data store...");
 				mappingFile = "mapping/leadsstore.properties";
-				initProperties();
+//				initProperties();
 				initMapping();
 				initParameters();
+				System.out.println("...initiated properties");
 				int port = conf.getInt("port");
 				String [] hosts = conf.getStringArray("host");
-				dataStore = new LeadsDataStore(mapping,port,hosts);				
+				dataStore = new LeadsDataStore(mapping,port,hosts);	
+				System.out.println("...initiated datastore");			
 			}
 		}
 	}
@@ -96,19 +102,23 @@ public class DataStoreSingleton {
 		}
 	}
 
-	private static void initProperties() {
-		InputStream input = null;
-	 
-		try {
-			String filePath = storagePropertiesDir+"/"+storagePropsFile;
-			input = new FileInputStream(filePath);
-			//input =  DataStoreSingleton.class.getClassLoader().getResourceAsStream(storagePropsFile);
-			// load a properties file
-			prop.load(input);
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
+	public static String getStoreTechnology() {
+		return storeTechnology;
 	}
+
+//	private static void initProperties() {
+//		InputStream input = null;
+//	 
+//		try {
+//			String filePath = storagePropertiesDir+"/"+storagePropsFile;
+//			input = new FileInputStream(filePath);
+//			//input =  DataStoreSingleton.class.getClassLoader().getResourceAsStream(storagePropsFile);
+//			// load a properties file
+//			prop.load(input);
+//		} catch (IOException ex) {
+//			ex.printStackTrace();
+//		}
+//	}
 	
 	
 }

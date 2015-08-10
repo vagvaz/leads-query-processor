@@ -1,14 +1,17 @@
 package eu.leads.infext.proc.com.maincontent;
 
-import eu.leads.infext.logging.ErrorStrings;
-import eu.leads.infext.proc.com.categorization.newsblog.NewsBlogArticleAnalysis;
-import eu.leads.infext.python.PythonQueueCall;
-import eu.leads.utils.LEADSUtils;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import eu.leads.infext.logging.ErrorStrings;
+import eu.leads.infext.proc.com.categorization.newsblog.NewsBlogArticleAnalysis;
+import eu.leads.infext.python.PythonQueueCall;
+import eu.leads.utils.LEADSUtils;
 
 public class LeadsMainContentExtraction {
 
@@ -34,10 +37,10 @@ public class LeadsMainContentExtraction {
 			
 			if(extractionGeneralName.equals("article_content")
 					&& extractionDefinitionString.equals("boilerpipe")) {
-				String article = boilerpipe.extractArticle(content);
+				final String article = boilerpipe.extractArticle(content);
 				if(NewsBlogArticleAnalysis.isArticle(article)) {
 					extractedValues.put(extractionGeneralName, 
-							new ArrayList<String>() {{ add(boilerpipe.extractArticle(content)); }});
+							new ArrayList<String>() {{ add(article); }});
 					extractionTypes[index] = extractionGeneralName;
 					extractionPaths[index] = "boilerpipe";
 				}
@@ -50,15 +53,15 @@ public class LeadsMainContentExtraction {
 				pyCall.sendViaFile(0);
 				List<Object> retValues = pyCall.call(cliName, content, extractionGeneralName, extractionDefinitionString);
 				
-				if(retValues.size() >= 1) {
-					String successfulExtractionTuple = (String) retValues.get(0);
+				if(retValues.size() >= 1 && retValues.get(0)!=org.json.JSONObject.NULL) {
+					String successfulExtractionTuple = ((JSONArray)(retValues.get(0))).toString();
 					
 					extractionTypes[index] = extractionGeneralName;
 					extractionPaths[index]= successfulExtractionTuple;
 					
 					for(int i=1; i<retValues.size(); i+=2) {
-						String extractedKey = (String) retValues.get(i);
-						String extractedVal = (String) retValues.get(i+1);
+						String extractedKey = retValues.get(i).toString();
+						String extractedVal = retValues.get(i+1).toString();
 						List<String> extractedValuesList = extractedValues.get(extractedKey);
 						if(extractedValuesList==null)
 							extractedValuesList = new ArrayList<>();

@@ -71,7 +71,8 @@ class AccessPoint:
         returnlist.append(str(features))
         # processing_off(processing)
         # print translateReturnValues(returnlist)
-        return translateReturnValues(returnlist)
+        # return translateReturnValues(returnlist)
+        return returnlist
         
     #     returnlist.append("true" if certainty==1 else "false")
     #     returnlist.extend([str(f) for f in features])

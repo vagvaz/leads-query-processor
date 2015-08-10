@@ -1,20 +1,28 @@
 package eu.leads.infext.proc.batch.exec.part;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+
+import eu.leads.datastore.AbstractDataStore;
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.URIVersion;
+import eu.leads.infext.proc.batch.mapreduce.DefaultReducer;
+import eu.leads.infext.proc.batch.mapreduce.EcomSiteDefinerMapper;
 import eu.leads.infext.proc.com.categorization.ecom.EcommerceClassification;
 import eu.leads.infext.proc.com.categorization.ecom.EcommerceSiteExtractionSchemaDeterminer;
 import eu.leads.infext.proc.com.categorization.ecom.model.EcomPageDictionary;
 import eu.leads.infext.proc.com.categorization.ecom.model.EcomSiteDictionary;
 import eu.leads.utils.LEADSUtils;
 
-import java.util.*;
-
 /***
  * 
  * 
  * 
- * @author a'moremix
+ * @author amo_remix
  *
  */
 public class EcomSiteDefiner extends AbstractPartialSiteDefiner {
@@ -59,7 +67,7 @@ public class EcomSiteDefiner extends AbstractPartialSiteDefiner {
 				String timestamp1 = null;
 				String timestamp2 = null;
 				
-				SortedSet<URIVersion> uriCrawlerMdFamilyVersions = dataStore.getLeadsResourceMDFamily(uri, mapping.getProperty("leads_crawler_data"), 1, null);
+				SortedSet<URIVersion> uriCrawlerMdFamilyVersions = dataStore.getLeadsResourceMDFamily(uri, mapping.getProperty("leads_crawler_data"), 1, null, true);
 				if(uriCrawlerMdFamilyVersions != null && !uriCrawlerMdFamilyVersions.isEmpty()) {
 					URIVersion uriCrawlerMdFamilyVersion = uriCrawlerMdFamilyVersions.first();
 					timestamp1 = uriCrawlerMdFamilyVersion.getTimestamp();
@@ -70,7 +78,7 @@ public class EcomSiteDefiner extends AbstractPartialSiteDefiner {
 					}
 				}
 				
-				SortedSet<URIVersion> uriCoreMdFamilyVersions = dataStore.getLeadsResourceMDFamily(uri, mapping.getProperty("leads_core"), 1, null);
+				SortedSet<URIVersion> uriCoreMdFamilyVersions = dataStore.getLeadsResourceMDFamily(uri, mapping.getProperty("leads_core"), 1, null, true);
 				if(uriCoreMdFamilyVersions != null && !uriCoreMdFamilyVersions.isEmpty()) {
 					URIVersion uriCoreMdFamilyVersion = uriCoreMdFamilyVersions.first();
 					timestamp2 = uriCoreMdFamilyVersion.getTimestamp();
@@ -135,7 +143,7 @@ public class EcomSiteDefiner extends AbstractPartialSiteDefiner {
 					pagesNoMap.put("ecom", ecomPagesNo);
 					ecomSiteDictionary = schemaDeterminer.getEcomSiteDictionary();
 					productEcomPageList = schemaDeterminer.getProductEcomPageList();
-					categoryEcomPageList = schemaDeterminer.getCategoryEcomPageList();						
+					categoryEcomPageList = schemaDeterminer.getCategoryEcomPageList();
 				}
 			}
 		}

@@ -8,7 +8,6 @@ import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
-import eu.leads.processor.sentiment.SentimentAnalysisModule;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
@@ -111,7 +110,6 @@ public class LoadAmplab {
         String tableName = fulltableName[fulltableName.length - 1];
         String keysFilename = filename[0] + ".keys";
         Path path = Paths.get(keysFilename);
-        SentimentAnalysisModule sentimentAnalysisModule = null;
 
         if (args.length % 2 != 0) {
             System.err.print("Not enougth arguments, Syntax: convertadd filename {inputcollumn conversion}+ \n where convertion type: sentiment, pagerank");
@@ -150,7 +148,6 @@ public class LoadAmplab {
             }
         }
 
-        SentimentAnalysisModule module;
         HashSet<Integer> errorenousline = new HashSet<Integer>();
         try {
             CSVReader reader = new CSVReader(new FileReader(initfilename));

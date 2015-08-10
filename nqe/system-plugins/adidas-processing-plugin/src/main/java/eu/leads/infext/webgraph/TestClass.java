@@ -1,9 +1,9 @@
 package eu.leads.infext.webgraph;
 
-import eu.leads.utils.LEADSUtils;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import eu.leads.utils.LEADSUtils;
 
 
 public class TestClass {

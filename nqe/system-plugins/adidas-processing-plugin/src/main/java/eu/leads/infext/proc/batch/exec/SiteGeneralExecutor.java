@@ -3,16 +3,23 @@ package eu.leads.infext.proc.batch.exec;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+
 import eu.leads.datastore.AbstractDataStore;
 import eu.leads.datastore.DataStoreSingleton;
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.URIVersion;
 import eu.leads.datastore.impl.CassandraCQLDataStore;
+import eu.leads.datastore.impl.LeadsQueryInterface;
 import eu.leads.infext.logging.redirect.StdLoggerRedirect;
 import eu.leads.infext.proc.batch.exec.part.ops.MapValueComparator;
 import eu.leads.infext.proc.com.geo.LocalizationWrapper;
+import eu.leads.processor.web.QueryResults;
 import eu.leads.utils.LEADSUtils;
+
+import org.apache.commons.lang.StringEscapeUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -29,21 +36,20 @@ public class SiteGeneralExecutor {
 	
 	private static AbstractDataStore dataStore = DataStoreSingleton.getDataStore();
 	private static Properties mapping = DataStoreSingleton.getMapping();
-	private static Properties parameters = DataStoreSingleton.getParameters();
 	
 	
 	public static void main(String[] args) throws Exception {
 		
 		String fqdn = args[0];
 		
-		StdLoggerRedirect.initLogging();
+//		StdLoggerRedirect.initLogging();
 		
 		/////////////////////////
 		/////////////////////////
 		/////////////////////////
 		
 		// a. see if already defined
-		SortedSet<URIVersion> dirMdFamilyVersions = dataStore.getLeadsResourceMDFamily(fqdn, mapping.getProperty("leads_site"), 1, null);
+		SortedSet<URIVersion> dirMdFamilyVersions = dataStore.getLeadsResourceMDFamily(fqdn, mapping.getProperty("leads_site"), 1, null, true);
 		Map<String, Cell> dirMdFamily = null;
 		
 		boolean isKnown = false;
@@ -67,20 +73,37 @@ public class SiteGeneralExecutor {
 			countryCodes = locWrapper.localizeSite(site);
 		}
 		
-		Session session = (Session) ((CassandraCQLDataStore)dataStore).getFamilyStorageHandle(null);
 		
 		// Run query: SELECT lang, count(*) from webpages where fqdn = fqdn GROUP BY lang;
 		HashMap<String, Integer> languagesCounters = new HashMap<>();
-		String query = "SELECT lang FROM "+ mapping.getProperty("leads_core") +" WHERE fqdnurl='"+fqdn+"';";
-		ResultSet rs = session.execute(query);
-		for(Row row : rs) {
-			String lang = row.getString(0);
-			if(lang != null) {
-				Integer occurencesNo = languagesCounters.get(lang);
-				if(occurencesNo == null) occurencesNo = 0;
-				languagesCounters.put(lang, ++occurencesNo);
+		String query = "SELECT " + mapping.getProperty("leads_core-lang") + " FROM "+ mapping.getProperty("leads_core") +" WHERE fqdnurl='"+fqdn+"';";
+		
+		Object session = dataStore.getFamilyStorageHandle(null);
+		
+		if(DataStoreSingleton.getStoreTechnology().equals("cassandra")) {
+			ResultSet rs = ((Session)session).execute(query);
+			for(Row row : rs) {
+				String lang = row.getString(0);
+				if(lang != null) {
+					Integer occurencesNo = languagesCounters.get(lang);
+					if(occurencesNo == null) occurencesNo = 0;
+					languagesCounters.put(lang, ++occurencesNo);
+				}
 			}
 		}
+		else if(DataStoreSingleton.getStoreTechnology().equals("leads")) {
+			QueryResults rs = ((LeadsQueryInterface)session).execute(query);
+			for(String row : rs.getResult()) {
+				JSONObject jsonRow = new JSONObject(row);
+				String lang = jsonRow.getString(mapping.getProperty("leads_core-lang"));
+				if(lang != null) {
+					Integer occurencesNo = languagesCounters.get(lang);
+					if(occurencesNo == null) occurencesNo = 0;
+					languagesCounters.put(lang, ++occurencesNo);
+				}
+			}
+		}
+		
 		MapValueComparator bvc =  new MapValueComparator(languagesCounters);
         TreeMap<String,Integer> languagesCountersSorted = new TreeMap<String,Integer>((Comparator<String>) bvc);
         languagesCountersSorted.putAll(languagesCounters);

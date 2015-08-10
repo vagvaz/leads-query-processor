@@ -1,17 +1,21 @@
 package eu.leads.infext.proc.com.categorization.newsblog;
 
-import eu.leads.PropertiesSingleton;
-import eu.leads.infext.python.PythonQueueCall;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.XMLConfiguration;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.XMLConfiguration;
+
+import eu.leads.PropertiesSingleton;
+import eu.leads.infext.python.PythonQueueCall;
+import eu.leads.infext.python.PythonQueueCall;
 
 public class NewsBlogArticleAnalysis {
 	
@@ -31,7 +35,7 @@ public class NewsBlogArticleAnalysis {
 		pyCall.sendViaFile(0);
 		List<Object> retValues = pyCall.call(apName, content, url);
 		
-		if(retValues.size()>=3) {		
+		if(retValues.size()>=3) {
 			int year = (int) retValues.get(0);
 			int month = (int) retValues.get(1);
 			int day = (int) retValues.get(2);
@@ -54,6 +58,11 @@ public class NewsBlogArticleAnalysis {
 				&& countSentences(content) >= SENT_LENGTH
 				&& countParagraphs(content) >= PARA_LENGTH)
 			isArticle = true;
+		
+		if(isArticle)
+			System.out.println("Extracted content verified as article.");
+		else
+			System.out.println("Extracted content rejected - does not look like article.");			
 		
 		return isArticle;
 	}

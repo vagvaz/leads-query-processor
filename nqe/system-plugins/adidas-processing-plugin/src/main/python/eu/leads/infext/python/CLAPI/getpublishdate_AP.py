@@ -40,7 +40,8 @@ class DateSearch:
     p = parser()
     info = p.info
     
-    pattern = "/(\d{4}-[01]\d-[0-3]\d[\s|T][0-2]\d:[0-5]\d:[0-5]\d\.\d+)|(\d{4}-[01]\d-[0-3]\d[\s|T][0-2]\d:[0-5]\d:[0-5]\d)|(\d{4}-[01]\d-[0-3]\d[\s|T][0-2]\d:[0-5]\d)|(\d{4}-[01]\d-[0-3]\d)/"
+    #pattern = "/(\d{4}-[01]\d-[0-3]\d[\s|T][0-2]\d:[0-5]\d:[0-5]\d\.\d+)|(\d{4}-[01]\d-[0-3]\d[\s|T][0-2]\d:[0-5]\d:[0-5]\d)|(\d{4}-[01]\d-[0-3]\d[\s|T][0-2]\d:[0-5]\d)|(\d{4}-[01]\d-[0-3]\d)/"
+    pattern = "(\d{4}[^a-zA-Z\d\s:][01]\d[^a-zA-Z\d\s:][0-3]\d[\s|T][0-2]\d:[0-5]\d(:[0-5]\d((\.\d+)|(\+[01]\d:[03]0))?)?)"
     dateregex = re.compile(pattern)
     
     def getdate(self,strings, url):
@@ -59,7 +60,7 @@ class DateSearch:
             #print string,"|||",
             result = self.dateregex.match(string)
             if result is not None:
-                #print string
+                print string
                 datelist.append(self.p.parse(string))
             #else:
                 #print ""
@@ -166,15 +167,18 @@ class DateSearch:
 
 if __name__=='__main__':
     pages = [
-            "http://www.bbc.com/news/blogs-trending-31019565",
-            "http://wiadomosci.onet.pl/kraj/siemoniak-ostrzega-czekaja-nas-trudne-lata-polityka-rosji-stwarza-zagrozenie/nfvxq",
-            "http://www.spiegel.de/wirtschaft/unternehmen/deutsche-bank-bilanz-von-anshu-jain-und-juergen-fitschen-a-1015665.html",
-            "http://edition.cnn.com/2015/01/28/africa/boko-haram-raids/index.html",
-            "http://www.runnersworld.com/other-gear/6-gym-bags-for-runners",
-            "http://thebullrunner.com/2015/01/dream-chasers-2015/#.VMpKBGjF-So",
-            "http://www.sbnation.com/lookit/2015/1/29/7938937/new-england-patriots-hotel-fire-alarm-prank",
-            "http://www.thystride.com/nnautica-malibu-international-triathlon.html",
-            "http://strengthrunning.com/2015/01/running-for-weight-loss/"
+            "http://www.bbc.com/sport/0/football/33125007",
+#             "http://www.bbc.com/news/blogs-trending-31019565",
+#             "http://wiadomosci.onet.pl/kraj/siemoniak-ostrzega-czekaja-nas-trudne-lata-polityka-rosji-stwarza-zagrozenie/nfvxq",
+#             "http://www.spiegel.de/wirtschaft/unternehmen/deutsche-bank-bilanz-von-anshu-jain-und-juergen-fitschen-a-1015665.html",
+#             "http://edition.cnn.com/2015/01/28/africa/boko-haram-raids/index.html",
+#             "http://www.runnersworld.com/other-gear/6-gym-bags-for-runners",
+#             "http://thebullrunner.com/2015/01/dream-chasers-2015/#.VMpKBGjF-So",
+#             "http://www.sbnation.com/lookit/2015/1/29/7938937/new-england-patriots-hotel-fire-alarm-prank",
+#             "http://www.thystride.com/nnautica-malibu-international-triathlon.html",
+#             "http://strengthrunning.com/2015/01/running-for-weight-loss/",
+#             "http://www.bbc.com/news/uk-31545744",
+#             "http://www.theguardian.com/sport/2015/apr/09/lewis-hamilton-new-mercedes-f1-contract",
              ]
     
     for page in pages:

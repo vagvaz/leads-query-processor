@@ -1,7 +1,23 @@
 package eu.leads.utils;
 
-import eu.leads.datastore.datastruct.Cell;
-import eu.leads.datastore.datastruct.URIVersion;
+import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.MalformedURLException;
+import java.net.ServerSocket;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.regex.Pattern;
+
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
@@ -10,11 +26,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.regex.Pattern;
+import eu.leads.datastore.datastruct.Cell;
+import eu.leads.datastore.datastruct.URIVersion;
 
 public class LEADSUtils {
 
@@ -35,7 +48,7 @@ public class LEADSUtils {
 		
 		String urlparts[] = url.split("/");
 		String result = "";
-		for(int i=0; i<=urlparts.length-1; i++) {
+		for(int i=0; i<=/*urlparts.length-1*/0; i++) {
 			result += urlparts[i] + "/";
 			generalizationsList.add(result);
 		}
@@ -171,16 +184,16 @@ public class LEADSUtils {
 			return 1.0;
 	}
 	
-	public static List<HashMap<String,String>> getMetadataOfDirectories(HashMap<String, HashMap<String, String>> urlParameters, String suffix) {
-		List<HashMap<String,String>> generalParametersList = new ArrayList<>();
+	public static List<HashMap<String,Object>> getMetadataOfDirectories(HashMap<String, HashMap<String, Object>> urlParameters, String suffix) {
+		List<HashMap<String,Object>> generalParametersList = new ArrayList<>();
 		
 		int number = 0;
 		boolean isMoreGeneral = true;
 		while(isMoreGeneral) {
 			String key = "general"+number;
 			key += (suffix == null) ? "" : ":"+suffix;
-			HashMap<String,String> generalParameters = urlParameters.get(key);
-			if(generalParameters == null)
+			HashMap<String,Object> generalParameters = urlParameters.get(key);
+			if(generalParameters == null || generalParameters.isEmpty())
 				isMoreGeneral = false;
 			else
 				generalParametersList.add(generalParameters);
@@ -208,11 +221,13 @@ public class LEADSUtils {
 		JSONArray jsonArray = new JSONArray();
 		for(int i=0; i<extractionTuplesArray.length; i++) {
 			JSONObject jsonObject = new JSONObject();
-			try {
-				jsonObject.put(extractionTuplesTypes[i],extractionTuplesArray[i]);
-				jsonArray.put(jsonObject);
-			} catch (JSONException e) {
-				e.printStackTrace();
+			if(extractionTuplesTypes[i]!=null && extractionTuplesArray!=null) {
+				try {
+					jsonObject.put(extractionTuplesTypes[i],extractionTuplesArray[i]);
+					jsonArray.put(jsonObject);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		return jsonArray.toString();
@@ -247,6 +262,8 @@ public class LEADSUtils {
 	
 	public static String propertyValueToKey(Properties p, String v) {
 		String key = null;
+//		for(Object x : p.keySet())
+//			System.out.println(x+"="+p.getProperty(x.toString()));
 		Collection<Object> values = p.values();
 		if(values.contains(v)) {
 			for(Entry<Object, Object> e : p.entrySet()) {
@@ -303,6 +320,51 @@ public class LEADSUtils {
 		Pattern r = Pattern.compile(pattern);
 		java.util.regex.Matcher m = r.matcher(uuidCand);
 		return m.matches();
+	}
+	
+	public static Long stringToLongOrNull(String str) {
+		try {return Long.parseLong(str);}
+		catch (NumberFormatException e) {
+			return null;
+		}
+	}
+	
+	public static Double stringToDoubleOrNull(String str) {
+		try {return Double.parseDouble(str);}
+		catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
+	public static boolean isNumber(Object value) {
+		if(value instanceof java.lang.Integer)
+			return true;
+		if(value instanceof java.lang.Long)
+			return true;
+		if(value instanceof java.lang.Double)
+			return true;
+		if(value instanceof java.lang.Float)
+			return true;
+		return false;
+	}
+	
+	public static List<Object> getMatchingStrings(List<Object> list, String regex) {
+		List<Object> filteredList = new ArrayList<>();
+		Pattern p = Pattern.compile(regex);
+		for(Object obj : list) {
+			String str = obj.toString();
+			if (p.matcher(str).matches()) {
+				filteredList.add(str);
+			}
+		}
+		return filteredList;
+	}
+
+	public static Integer[] stringArray2integerArray(String[] stringArray) {
+		Integer[] intArray = new Integer[stringArray.length];
+		for(int i=0; i<stringArray.length; i++)
+			intArray [i] = Integer.parseInt(stringArray[i]);
+		return intArray;
 	}
 	
 }

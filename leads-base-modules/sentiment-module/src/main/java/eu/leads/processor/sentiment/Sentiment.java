@@ -3,12 +3,20 @@ package eu.leads.processor.sentiment;
 public class Sentiment {
     String tag;
     double value;
+    
+    public Sentiment() {
+		// TODO Auto-generated constructor stub
+	}
+    
+    public Sentiment(double value) {
+    	setValue(value);
+	}
 
     public String getTag() {
         return tag;
     }
 
-    public void setTag(String tag) {
+    protected void setTag(String tag) {
         this.tag = tag;
     }
 
@@ -17,7 +25,13 @@ public class Sentiment {
     }
 
     public void setValue(double value) {
-        this.value = value;
+		this.value = value;
+        if(value < - 0.2)
+        	setTag("Negative");
+        else if(value > 0.2)
+        	setTag("Positive");
+        else
+        	setTag("Neutral");
     }
 
     @Override
