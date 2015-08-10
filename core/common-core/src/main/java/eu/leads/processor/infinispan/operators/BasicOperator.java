@@ -747,7 +747,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     }
     Collections.sort(sites);
     for(String site : sites){
-      result += globalConfig.getObject("componentsAddrs").getArray(site).get(0).toString()+":11222|";
+      result += globalConfig.getObject("componentsAddrs").getArray(site).get(0).toString()+"|";//+":11222|";
     }
     result = result.substring(0,result.length()-1);
     log.error("EnsembleHost: " + result);
@@ -761,7 +761,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       DistributedExecutorService des = new DefaultExecutorService(reduceInputCache);
      setReducerCallableEnsembleHost();
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder(reducerCallable);
-      builder.timeout(1, TimeUnit.HOURS);
+      builder.timeout(10, TimeUnit.HOURS);
       DistributedTask task = builder.build();
       List<Future<String>> res = des.submitEverywhere(task);
       //      Future<String> res = des.submit(callable);
@@ -910,7 +910,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     }
     Collections.sort(sites);
     for(String site : sites){
-      result += globalConfig.getObject("componentsAddrs").getArray(site).get(0).toString()+":11222|";
+      result += globalConfig.getObject("componentsAddrs").getArray(site).get(0).toString()+"|";//:11222|";
     }
     result = result.substring(0,result.length()-1);
     return result;

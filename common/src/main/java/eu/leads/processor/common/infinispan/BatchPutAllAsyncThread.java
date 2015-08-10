@@ -1,6 +1,7 @@
 package eu.leads.processor.common.infinispan;
 
 import eu.leads.processor.common.utils.PrintUtilities;
+import eu.leads.processor.common.utils.ProfileEvent;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.concurrent.NotifyingFuture;
 import org.slf4j.Logger;
@@ -11,29 +12,30 @@ import java.util.*;
 /**
  * Created by vagvaz on 20/05/15.
  */
-public class BatchPutAllAsyncThread extends Thread {
+public class BatchPutAllAsyncThread implements Runnable {
 
     private final Map<String, Map<Object, Object>> objects;
     private final Map<String, BasicCache> caches;
     private Map<NotifyingFuture, String> backup;
     private List<NotifyingFuture> futures;
     private Logger log;
-
+    private ProfileEvent batchPut;
     public BatchPutAllAsyncThread(Map<String, BasicCache> caches,
         Map<String, Map<Object, Object>> objects) {
-        super("Thread-" + UUID.randomUUID().toString());
+//        super("Thread-" + UUID.randomUUID().toString());
         this.caches = caches;
         this.objects = objects;
         futures = new ArrayList<>();
         backup = new HashMap<>();
         log = LoggerFactory.getLogger(BatchPutAllAsyncThread.class);
+
     }
 
-    @Override
-    public void run() {
-        //        super.run();
-        //    System.out.println("Output async");
-        for (Map.Entry<String, Map<Object, Object>> entry : objects.entrySet()) {
+
+    @Override public void run() {
+//        super.run();
+        batchPut = new ProfileEvent("batchPut",log);
+        for(Map.Entry<String,Map<Object,Object>> entry : objects.entrySet()){
             BasicCache cache = caches.get(entry.getKey());
             NotifyingFuture nextFuture = cache.putAllAsync(entry.getValue());
             futures.add(nextFuture);
@@ -84,5 +86,6 @@ public class BatchPutAllAsyncThread extends Thread {
         }
         caches.clear();
         objects.clear();
+        batchPut.end();
     }
 }

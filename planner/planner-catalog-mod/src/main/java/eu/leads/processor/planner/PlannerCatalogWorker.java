@@ -116,35 +116,29 @@ public class PlannerCatalogWorker extends Verticle {
       e.printStackTrace();
     }
     catalog.createTablespace(StringConstants.DEFAULT_TABLE_SPACE,
-                              "leadsfs://localhost:"+container.config().getInteger("port")+"/warehouse");
+            "leadsfs://localhost:" + container.config().getInteger("port") + "/warehouse");
     catalog
-      .createDatabase(StringConstants.DEFAULT_DATABASE_NAME, StringConstants.DEFAULT_TABLE_SPACE);
-      System.out.println("Loading functions");
+            .createDatabase(StringConstants.DEFAULT_DATABASE_NAME, StringConstants.DEFAULT_TABLE_SPACE);
+    System.out.println("Loading functions");
     try {
-        int k=-29;
-        List<FunctionDesc> builtin = initFunctions("org.apache.tajo.engine.function");
-      if((k =builtin.size()) == 0){
-            container.logger().error("\n\n\n\n\n\n\n SIZE 0 \n\n\n\n\n");
-        }else{
-          System.out.println("Found Builtin Functions  = " + k );
+      int k = -29;
+      List<FunctionDesc> builtin = initFunctions("org.apache.tajo.engine.function");
+      if ((k = builtin.size()) == 0) {
+        container.logger().error("BUILDING FUNCTION NOT FOOUND\n\n\n\n\n\n\n SIZE 0 \n\n\n\n\n");
+      } else {
+        System.out.println("Found Builtin Functions  = " + k);
+        container.logger().info("Found Builtin Functions  = " + k);
       }
       for (FunctionDesc funcDesc : builtin) {
-        container.logger().info(funcDesc.toString()+" " + funcDesc.getFuncType());
-       // System.out.println(funcDesc.getFuncType());
+        //container.logger().info(funcDesc.toString()+" " + funcDesc.getFuncType());
+        // System.out.println(funcDesc.getFuncType());
         catalog.createFunction(funcDesc);
       }
     } catch (ServiceException e) {
       e.printStackTrace();
     }
 //      SELECT C.fqdnurl AS fqdn,k.sentiment FROM keywords as k JOIN page_core as C  ON C.uri = k.uri  where k.partid like 'ecom_prod_name:000' group by fqdn order by  k.sentiment ;
-
-
-
-
-      System.out.println(catalog.getFunctions().size() + " functions loaded.");
-
-
-
+    System.out.println(catalog.getFunctions().size() + " functions loaded.");
 
     Schema webPagesSchema = new Schema();
     webPagesSchema.addColumn("url",Type.TEXT);
@@ -171,185 +165,204 @@ public class PlannerCatalogWorker extends Verticle {
     TableMeta meta = CatalogUtil.newTableMeta(CatalogProtos.StoreType.MEM );
 
     TableDesc entities  = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"entities"), entitiesSchema, meta, getTestDir("entities").toUri());
-    catalog.createTable(entities);
-
+    //catalog.createTable(entities);
+    createTable(catalog, entities);
 
 //    TableDesc webpages = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"webpages"), webPagesSchema, CatalogProtos.StoreType.MEM,
 //                                                                new KeyValueSet(),
 //                                                                getTestDir("webpages"));
     TableDesc webpages = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"webpages"), webPagesSchema, meta, getTestDir("webpages").toUri());
-    catalog.createTable(webpages);
+    //catalog.createTable(webpages);
+    createTable(catalog,webpages);
 
     Schema testwebPagesSchema = new Schema();
     testwebPagesSchema.addColumn("url",Type.TEXT);
     testwebPagesSchema.addColumn("domainname",Type.TEXT);
-    testwebPagesSchema.addColumn("responsecode",Type.INT4);
-    TableDesc TESTwebpages = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"testpages"), testwebPagesSchema, meta, getTestDir("testpages").toUri());
-    catalog.createTable(TESTwebpages);
+    testwebPagesSchema.addColumn("responsecode", Type.INT4);
+    TableDesc TESTwebpages = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME, "testpages"), testwebPagesSchema, meta, getTestDir("testpages").toUri());
+    //catalog.createTable(TESTwebpages);
+    createTable(catalog, TESTwebpages);
 
-
-      String databaseName = StringConstants.DEFAULT_DATABASE_NAME;
-      String tableName = "defaultname";
+    String databaseName = StringConstants.DEFAULT_DATABASE_NAME;
+    String tableName = "defaultname";
     //New schema
 
-      //catalog.createDatabase("internal", StringConstants.DEFAULT_TABLESPACE_NAME);
-      //catalog.createDatabase("crawler", StringConstants.DEFAULT_TABLESPACE_NAME);
-      //catalog.createDatabase("leads", StringConstants.DEFAULT_TABLESPACE_NAME);
-      //catalog.createDatabase("adidas", StringConstants.DEFAULT_TABLESPACE_NAME);
+    //catalog.createDatabase("internal", StringConstants.DEFAULT_TABLESPACE_NAME);
+    //catalog.createDatabase("crawler", StringConstants.DEFAULT_TABLESPACE_NAME);
+    //catalog.createDatabase("leads", StringConstants.DEFAULT_TABLESPACE_NAME);
+    //catalog.createDatabase("adidas", StringConstants.DEFAULT_TABLESPACE_NAME);
 
 
-      Schema schema = new Schema();
-      schema.addColumn("uri", Type.TEXT);
-      schema.addColumn("ts", Type.INT8);
-      schema.addColumn("content", Type.TEXT);
-      //PRIMARY KEY (uri, ts)
-      //databaseName = "crawler";
-      tableName = "content";
-      catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+    Schema schema = new Schema();
+    schema.addColumn("uri", Type.TEXT);
+    schema.addColumn("ts", Type.INT8);
+    schema.addColumn("content", Type.TEXT);
+    //PRIMARY KEY (uri, ts)
+    //databaseName = "crawler";
+    tableName = "content";
+    //catalog.createTable(new TableDesc(
+    //        CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+    createTable(catalog, new TableDesc(
+            CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." + tableName).toUri()));
+
+    schema = new Schema();
+    schema.addColumn("uri", Type.TEXT);
+    schema.addColumn("ts", Type.INT8);
+    schema.addColumn("pagetypeassumption", Type.TEXT);
+    schema.addColumn("ecomfeatures", Type.TEXT);
+    schema.addColumn("extractioncandidates", Type.TEXT);
+    schema.addColumn("successfulextractions", Type.TEXT);
+    //PRIMARY KEY (uri, ts)
+    //databaseName = "internal";
+    tableName = "page";
+
+    //catalog.createTable(new TableDesc(
+    //        CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+    createTable(catalog, new TableDesc(
+            CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." + tableName).toUri()));
+
+    schema = new Schema();
+    schema.addColumn("uri", Type.TEXT);
+    schema.addColumn("ts", Type.INT8);
+    schema.addColumn("dirassumption", Type.TEXT);
+    schema.addColumn("ecomassumptionpagesno", Type.TEXT);
+    schema.addColumn("pagesno", Type.TEXT);
+    //PRIMARY KEY (uri, ts)
+    //databaseName = "internal";
+    tableName = "urldirectory";
+    //catalog.createTable(new TableDesc(
+    //        CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+    createTable(catalog, new TableDesc(
+            CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." + tableName).toUri()));
+
+    schema = new Schema();
+    schema.addColumn("uri", Type.TEXT);
+    schema.addColumn("ts", Type.INT8);
+    schema.addColumn("isatbbuttonindir", Type.TEXT);
+    schema.addColumn("atbbuttonextractionlog", Type.TEXT);
+    schema.addColumn("nameextractiontuples", Type.TEXT);
+    schema.addColumn("priceextractiontuples", Type.TEXT);
+    schema.addColumn("productclustercenter", Type.TEXT);
+    schema.addColumn("categoryclustercenter", Type.TEXT);
+    schema.addColumn("productcluster50pcdist", Type.TEXT);
+    schema.addColumn("productcluster80pcdist", Type.TEXT);
+    schema.addColumn("categorycluster50pcdist", Type.TEXT);
+    schema.addColumn("categorycluster80pcdist", Type.TEXT);
+    schema.addColumn("scalermean", Type.TEXT);
+    schema.addColumn("scalerstd", Type.TEXT);
+    //PRIMARY KEY (uri, ts)
+    //databaseName = "internal";
+    tableName = "urldirectory_ecom";
+    //catalog.createTable(new TableDesc(
+    //        CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+    createTable(catalog, new TableDesc(
+            CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." + tableName).toUri()));
 
 
-      schema = new Schema();
-      schema.addColumn("uri", Type.TEXT);
-      schema.addColumn("ts", Type.INT8);
-      schema.addColumn("pagetypeassumption", Type.TEXT);
-      schema.addColumn("ecomfeatures", Type.TEXT);
-      schema.addColumn("extractioncandidates", Type.TEXT);
-      schema.addColumn("successfulextractions", Type.TEXT);
-      //PRIMARY KEY (uri, ts)
-      //databaseName = "internal";
-      tableName = "page";
+    schema = new Schema();
+    schema.addColumn("uri", Type.TEXT);
+    schema.addColumn("ts", Type.INT8);
+    schema.addColumn("partid", Type.TEXT);
+    schema.addColumn("keywords", Type.TEXT);
+    schema.addColumn("relevance", Type.TEXT);
+    schema.addColumn("sentiment", Type.FLOAT4);
+    //	PRIMARY KEY (uri,ts,partid,keywords)
+    //databaseName = "leads";
+    tableName = "keywords";
+    //catalog.createTable(new TableDesc(
+    //        CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+    createTable(catalog, new TableDesc(
+            CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." + tableName).toUri()));
 
-      catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+    schema = new Schema();
+    schema.addColumn("uri", Type.TEXT);
+    schema.addColumn("ts", Type.INT8);
+    schema.addColumn("fqdnurl", Type.TEXT);
+    schema.addColumn("lang", Type.TEXT);
+    schema.addColumn("maincontent", Type.TEXT);
+    schema.addColumn("contentdate", Type.TEXT);
+    schema.addColumn("oldsentiment", Type.TEXT);
+    schema.addColumn("textcontent", Type.TEXT);
+    schema.addColumn("type", Type.TEXT);
+    schema.addColumn("sentiment", Type.FLOAT4);
+    schema.addColumn("pagerank", Type.FLOAT4);
 
+    //	PRIMARY KEY (uri,ts)
+    //databaseName = "leads";
+    tableName = "page_core";
+    //catalog.createTable(new TableDesc(
+    //        CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+    createTable(catalog, new TableDesc(
+            CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." + tableName).toUri()));
 
-      schema = new Schema();
-      schema.addColumn("uri", Type.TEXT);
-      schema.addColumn("ts", Type.INT8);
-      schema.addColumn("dirassumption", Type.TEXT);
-      schema.addColumn("ecomassumptionpagesno", Type.TEXT);
-      schema.addColumn("pagesno", Type.TEXT);
-      //PRIMARY KEY (uri, ts)
-      //databaseName = "internal";
-      tableName = "urldirectory";
-      catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+    schema = new Schema();
+    schema.addColumn("uri", Type.TEXT);
+    schema.addColumn("textcontent", Type.TEXT);
+    //databaseName = "leads";
+    tableName = "page_textcontent";
 
+    //catalog.createTable(new TableDesc(
+    //        CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+    createTable(catalog, new TableDesc(
+            CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." + tableName).toUri()));
 
-      schema = new Schema();
-      schema.addColumn("uri", Type.TEXT);
-      schema.addColumn("ts", Type.INT8);
-      schema.addColumn("isatbbuttonindir", Type.TEXT);
-      schema.addColumn("atbbuttonextractionlog", Type.TEXT);
-      schema.addColumn("nameextractiontuples", Type.TEXT);
-      schema.addColumn("priceextractiontuples", Type.TEXT);
-      schema.addColumn("productclustercenter", Type.TEXT);
-      schema.addColumn("categoryclustercenter", Type.TEXT);
-      schema.addColumn("productcluster50pcdist", Type.TEXT);
-      schema.addColumn("productcluster80pcdist", Type.TEXT);
-      schema.addColumn("categorycluster50pcdist", Type.TEXT);
-      schema.addColumn("categorycluster80pcdist", Type.TEXT);
-      schema.addColumn("scalermean", Type.TEXT);
-      schema.addColumn("scalerstd", Type.TEXT);
-      //PRIMARY KEY (uri, ts)
-      //databaseName = "internal";
-      tableName = "urldirectory_ecom";
-      catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
-
-
-
-      schema = new Schema();
-      schema.addColumn("uri", Type.TEXT);
-      schema.addColumn("ts", Type.INT8);
-      schema.addColumn("partid", Type.TEXT);
-      schema.addColumn("keywords", Type.TEXT);
-      schema.addColumn("relevance", Type.TEXT);
-      schema.addColumn("sentiment", Type.FLOAT4);
-      //	PRIMARY KEY (uri,ts,partid,keywords)
-      //databaseName = "leads";
-      tableName = "keywords";
-      catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+    schema = new Schema();
+    schema.addColumn("uri", Type.TEXT);
+    schema.addColumn("ts", Type.INT8);
+    schema.addColumn("partid", Type.TEXT);
+    schema.addColumn("resourceparttype", Type.TEXT);
+    schema.addColumn("resourcepartvalue", Type.TEXT);
+    //PRIMARY KEY (uri,ts,partid,resourceparttype)
+    //databaseName = "leads";
+    tableName = "resourcepart";
+    //catalog.createTable(new TableDesc(
+    //        CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+    createTable(catalog, new TableDesc(
+            CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." + tableName).toUri()));
 
 
-      schema = new Schema();
-      schema.addColumn("uri", Type.TEXT);
-      schema.addColumn("ts", Type.INT8);
-      schema.addColumn("fqdnurl", Type.TEXT);
-      schema.addColumn("lang", Type.TEXT);
-      schema.addColumn("maincontent", Type.TEXT);
-      schema.addColumn("contentdate",Type.TEXT);
-      schema.addColumn("oldsentiment", Type.TEXT);
-      schema.addColumn("textcontent", Type.TEXT);
-      schema.addColumn("type", Type.TEXT);
-      schema.addColumn("sentiment", Type.FLOAT4);
-      schema.addColumn("pagerank", Type.FLOAT4);
-
-      //	PRIMARY KEY (uri,ts)
-      //databaseName = "leads";
-      tableName = "page_core";
-      catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
-
-      schema = new Schema();
-      schema.addColumn("uri", Type.TEXT);
-      schema.addColumn("textcontent", Type.TEXT);
-      //databaseName = "leads";
-      tableName = "page_textcontent";
-      catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+    schema = new Schema();
+    schema.addColumn("uri", Type.TEXT);
+    schema.addColumn("ts", Type.INT8);
+    schema.addColumn("category", Type.TEXT);
+    schema.addColumn("country", Type.TEXT);
+    schema.addColumn("domaincountry", Type.TEXT);
+    schema.addColumn("ipgeoinfo", Type.TEXT);
+    schema.addColumn("mainlanguages", Type.TEXT);
+    schema.addColumn("whoiscountry", Type.TEXT);
+    //	PRIMARY KEY (uri,ts)
+    //databaseName = "leads";
+    tableName = "site";
+    //      catalog.createTable(new TableDesc(
+//              CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." + tableName).toUri()));
+    createTable(catalog, new TableDesc(
+            CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." + tableName).toUri()));
 
 
-      schema = new Schema();
-      schema.addColumn("uri", Type.TEXT);
-      schema.addColumn("ts", Type.INT8);
-      schema.addColumn("partid", Type.TEXT);
-      schema.addColumn("resourceparttype", Type.TEXT);
-      schema.addColumn("resourcepartvalue", Type.TEXT);
-      //PRIMARY KEY (uri,ts,partid,resourceparttype)
-      //databaseName = "leads";
-      tableName = "resourcepart";
-      catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
-
-
-      schema = new Schema();
-      schema.addColumn("uri", Type.TEXT);
-      schema.addColumn("ts", Type.INT8);
-      schema.addColumn("category", Type.TEXT);
-      schema.addColumn("country", Type.TEXT);
-      schema.addColumn("domaincountry", Type.TEXT);
-      schema.addColumn("ipgeoinfo", Type.TEXT);
-      schema.addColumn("mainlanguages", Type.TEXT);
-      schema.addColumn("whoiscountry", Type.TEXT);
-      //	PRIMARY KEY (uri,ts)
-      //databaseName = "leads";
-      tableName = "site";
-      catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
-
-
-      schema = new Schema();
-      schema.addColumn("keywords", Type.TEXT);
-      //	PRIMARY KEY (keywords)
-      //databaseName = "adidas";
-      tableName = "adidas_keywords";//"keywords";
-      catalog.createTable(CatalogUtil.newTableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." +tableName)));
+    schema = new Schema();
+    schema.addColumn("keywords", Type.TEXT);
+    //	PRIMARY KEY (keywords)
+    //databaseName = "adidas";
+    tableName = "adidas_keywords";//"keywords";
+    //      catalog.createTable(new TableDesc(
+//              CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." + tableName).toUri()));
+    createTable(catalog, new TableDesc(
+            CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." + tableName).toUri()));
 
     //##############################
 
-      schema = new Schema();
-      schema.addColumn("pageurl", Type.TEXT);
-      schema.addColumn("pagerank", Type.INT8);
-      schema.addColumn("avgduration", Type.INT8);
-      //PRIMARY KEY (pageURL)
-       tableName = "rankings";
-      (schema.getColumn("pageurl")).setPrimaryKey(true);
-      catalog.createTable(new TableDesc(
-              CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+    schema = new Schema();
+    schema.addColumn("pageurl", Type.TEXT);
+    schema.addColumn("pagerank", Type.INT8);
+    schema.addColumn("avgduration", Type.INT8);
+    //PRIMARY KEY (pageURL)
+    tableName = "rankings";
+    (schema.getColumn("pageurl")).setPrimaryKey(true);
+//      catalog.createTable(new TableDesc(
+//              CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." + tableName).toUri()));
+    createTable(catalog, new TableDesc(
+            CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." + tableName).toUri()));
+
 
     schema = new Schema();
     schema.addColumn("sourceip", Type.TEXT);
@@ -366,10 +379,18 @@ public class PlannerCatalogWorker extends Verticle {
     (schema.getColumn("desturl")).setPrimaryKey(true);
 
     tableName = "uservisits";
-    catalog.createTable(new TableDesc(
-            CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+//    catalog.createTable(new TableDesc(
+//            CatalogUtil.buildFQName(databaseName, tableName),schema,meta, getTestDir(databaseName+"."+tableName).toUri()));
+    createTable(catalog, new TableDesc(
+            CatalogUtil.buildFQName(databaseName, tableName), schema, meta, getTestDir(databaseName + "." + tableName).toUri()));
 
-
+  }
+  public boolean createTable(CatalogClient catalog,   final TableDesc desc){
+    if(!catalog.existsTable(desc.getName()))
+      return catalog.createTable(desc);
+    else
+      System.out.println(" Table " + desc.getName()+ " exists ..");
+    return false;
   }
 
 

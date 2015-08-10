@@ -24,7 +24,7 @@ import org.infinispan.persistence.leveldb.configuration.LevelDBStoreConfiguratio
 import org.infinispan.remoting.transport.Address;
 import org.infinispan.server.hotrod.HotRodServer;
 import org.infinispan.server.hotrod.configuration.HotRodServerConfigurationBuilder;
-import org.infinispan.server.hotrod.test.HotRodTestingUtil;
+//import org.infinispan.server.hotrod.test.HotRodTestingUtil;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
 import org.infinispan.transaction.TransactionMode;
 import org.infinispan.transaction.lookup.JBossStandaloneJTAManagerLookup;
@@ -147,14 +147,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     //    manager.getCache();
     //    startHotRodServer(manager,host,serverPort);
-    if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
-    {
-      host = LQPConfiguration.getConf().getString("node.ip");
-      startHotRodServer(manager,host, serverPort);
-    }
+
     //Join Infinispan Cluster
     //      manager.start();
-    ConfigurationBuilder builder = HotRodTestingUtil.hotRodCacheConfiguration(getDefaultClusteredCacheConfig(CacheMode.DIST_SYNC, false));
+    ConfigurationBuilder builder = getDefaultClusteredCacheConfig(CacheMode.DIST_SYNC, false);
     //    builder.read(holder.getGlobalConfigurationBuilder().serialization().marshaller(marshaller).build());
     builder.indexing()
         .enable()
@@ -216,6 +212,13 @@ public class ClusterInfinispanManager implements InfinispanManager {
     NutchLocalListener listener = new NutchLocalListener(this,"default.webpages",LQPConfiguration.getInstance().getConfiguration().getString("nutch.listener.prefix"),currentComponent);
 
     manager.getCache("WebPage").addListener(listener);
+
+    if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
+    {
+      host = LQPConfiguration.getConf().getString("node.ip");
+      if(!LQPConfiguration.getConf().getString("node.current.component").equals("planner"))
+        startHotRodServer(manager,host, serverPort);
+    }
     //    System.err.println("Loading all the available data from nutch Cache");
     //    final ClusteringDependentLogic cdl = manager.getCache("WebPage").getAdvancedCache().getComponentRegistry()
     //                                           .getComponent
@@ -318,7 +321,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
             .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath + "/")
             .fetchPersistentState(true)
-            .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
+            .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
             false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(
             EvictionThreadPolicy.PIGGYBACK);
@@ -331,7 +334,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .hash().numOwners(1)
             .indexing().index(Index.NONE).transaction().transactionMode(
             TransactionMode.NON_TRANSACTIONAL)
-            .persistence().passivation(true)
+            .persistence().passivation(false)
             .addStore(LevelDBStoreConfigurationBuilder.class)
             .location("/tmp/leadsprocessor-data/leveldb/" + uniquePath + "-data/")
                 //                                 .location("/tmp/leveldb/data-foo/" + "/")
@@ -394,8 +397,16 @@ public class ClusterInfinispanManager implements InfinispanManager {
       server = new HotRodServer();
       HotRodServerConfigurationBuilder serverConfigurationBuilder = new HotRodServerConfigurationBuilder();
       if (externalIP != null && !externalIP.equals("")){
-        serverConfigurationBuilder.host(localhost).port(serverPort).proxyHost(externalIP)
-            .proxyPort(serverPort);
+	if(externalIP.contains(":")) {
+          String external = externalIP.split(":")[0];
+          String portString = externalIP.split(":")[1];
+          serverConfigurationBuilder.host(localhost).port(serverPort).proxyHost(external)
+              .proxyPort(Integer.parseInt(portString));
+        }
+        else{
+          serverConfigurationBuilder.host(localhost).port(serverPort).proxyHost(externalIP)
+              .proxyPort(11222);
+        }
       }else{
         serverConfigurationBuilder.host(localhost).port(serverPort);
       }

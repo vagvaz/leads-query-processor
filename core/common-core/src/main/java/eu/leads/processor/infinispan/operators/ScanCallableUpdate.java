@@ -3,6 +3,7 @@ package eu.leads.processor.infinispan.operators;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
+import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.index.LeadsIndex;
 import eu.leads.processor.core.index.LeadsIndexString;
@@ -41,16 +42,19 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
   transient protected FilterOperatorTree tree;
   transient protected double totalSum;
   transient protected Cache approxSumCache;
+  protected String qualString;
+  transient  boolean versioning;
+  boolean onVersionedCache;
   transient protected long versionStart = -1, versionFinish = -1, range = -1;
   //  transient protected InfinispanManager manager;
   protected Logger log = LoggerFactory.getLogger(ScanCallableUpdate.class.toString());
+   private VersionScalar minVersion=null;
+    private VersionScalar maxVersion=null;
   transient protected boolean renameTableInTree;
-  transient boolean versioning;
-  boolean onVersionedCache;
-  private VersionScalar minVersion = null;
-  private VersionScalar maxVersion = null;
-  transient private String toRename;
-  transient private String tableName;
+  transient  private String toRename;
+  transient  private String tableName;
+  transient Logger profilerLog;
+  private ProfileEvent fullProcessing;
 
   public ScanCallableUpdate(String configString, String output) {
     super(configString, output);
@@ -61,11 +65,11 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
     this.onVersionedCache = onVersionedCache;
   }
 
-  @Override
-  public void initialize() {
+  @Override  public void initialize() {
     super.initialize();
     lquery = null;
 //    versionedCache = new VersionedCacheTreeMapImpl(inputCache,new VersionScalarGenerator(),inputCache.getName());
+     profilerLog = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
 
     pageRankCache = (Cache) imanager.getPersisentCache("pagerankCache");
     log.info("--------------------    get approxSum cache ------------------------");
@@ -102,14 +106,13 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
       if (checkIndex_usage()) {
         // create query
         lquery = createLuceneQuerys(indexCaches, tree.getRoot());
-//      List<LeadsIndex> list = lquery.list();
       }
     } else {
       tree = null;
     }
 
-
     versioning = getVersionPredicate(conf);
+    fullProcessing = new ProfileEvent("FullScanProcessing",profilerLog);
   }
 
   Object getSubSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
@@ -279,6 +282,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
     return null;
   }
 
+
   ArrayList<Query> createLuceneQuerys(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
     ArrayList<Query> result = new ArrayList<>();
     ArrayList<Query> left = null;
@@ -376,7 +380,6 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
   /**
    * This method shoul read the Versions if any , from the configuration of the Scan operator and return true
    * if there are specific versions required, false otherwise
-   *
    * @param conf the configuration of the operator
    * @return returns true if there is a query on specific versions false otherwise
    */
@@ -384,11 +387,9 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
     return false;
   }
 
-  @Override
-  public void executeOn(K key, V ivalue) {
-    Logger profilerLog = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
+  @Override public void executeOn(K key, V ivalue) {
 
-//    ProfileEvent profExecute = new ProfileEvent("Execute " + this.getClass().toString(),profilerLog);
+    ProfileEvent scanExecute = new ProfileEvent("ScanExecute",profilerLog);
 
     //         System.err.println(manager.getCacheManager().getAddress().toString() + " "+ entry.getKey() + "       " + entry.getValue());
     Tuple toRunValue = null;
@@ -403,6 +404,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
       } else {
         Version latestVersion = versionedCache.getLatestVersion(ikey);
         if (latestVersion == null) {
+          scanExecute.end();
           return;
         }
         Object objectValue = versionedCache.get(ikey);
@@ -412,53 +414,12 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
     } else {
       toRunValue = (Tuple) ivalue;
     }
-//    if(versioning) {
-//      String versionedKey = (String) key;
-//      String ikey = pruneVersion(versionedKey);
-//      Version latestVersion = versionedCache.getLatestVersion(ikey);
-//      if (latestVersion == null) {
-//        continue;
-//      }
-//      Version currentVersion = getVersion(versionedKey);
-//      Object objectValue = versionedCache.get(ikey);
-//      String value = (String) objectValue;
-//    }
-//    else {
-
-//      String ikey = (String) key;
-//      String value = (String) inputCache.get(ikey);
-    //ENDNONVERSIONDING
-    //         String value = (String) entry.getValue();
-
-    //          String value = (String) entry.getValue();
-    //          String value = (String)inputCache.get(key);
-//      Tuple tuple = new Tuple(toRunValue);
-//<<<<<<< HEAD
-//      profExecute.start("new Tuple");
-////      Tuple tuple = toRunValue;//new Tuple(toRunValue);
-//      Tuple tuple = new Tuple(toRunValue);
-//      profExecute.end();
-//
-//      profExecute.start("namesToLowerCase");
-//      namesToLowerCase(tuple);
-//      profExecute.end();
-//      profExecute.start("renameAllTupleAttributes");
-//      renameAllTupleAttributes(tuple);
-//=======
-    //profExecute.start("new Tuple");
     Tuple tuple = toRunValue;//new Tuple(toRunValue);
-    //profExecute.end();
-
-    //profExecute.start("namesToLowerCase");
-    //namesToLowerCase(tuple);
-    //profExecute.end();
-    // profExecute.start("renameAllTupleAttributes");
-    //renameAllTupleAttributes(tuple);
-//      profExecute.end();
     if (tree != null) {
       if (renameTableInTree) {
         tree.renameTableDatum(tableName, toRename);
       }
+
 //        profExecute.start("tree.accept");
       boolean accept = tree.accept(tuple);
 //        profExecute.end();
@@ -484,7 +445,9 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
         EnsembleCacheUtils.putToCache(outputCache, key, tuple);
 //          profExecute.end();
       }
+
     }
+    scanExecute.end();
   }
 
   private boolean needsREnaming() {
@@ -519,6 +482,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 
 
   /**
+   *
    * @param currentVersion the version of the tuple currently processed by the operator
    * @return true if it satisfies the version range defined in the operator false otherwise
    */
@@ -623,5 +587,10 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
     if (totalSum > 0) {
       totalSum += 1;
     }
+  }
+
+  @Override public void finalizeCallable() {
+    fullProcessing.end();
+    super.finalizeCallable();
   }
 }

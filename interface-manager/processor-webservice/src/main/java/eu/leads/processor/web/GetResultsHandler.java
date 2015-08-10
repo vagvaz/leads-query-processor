@@ -99,7 +99,7 @@ public class GetResultsHandler implements Handler<HttpServerRequest> {
             message.removeField(MessageUtils.COMTYPE);
             message.removeField(MessageUtils.MSGID);
             message.removeField(MessageUtils.MSGTYPE);
-            log.info("end requests");
+//            log.info("end requests");
             request.response().end(message.toString());
             cleanup(requestId);
         }

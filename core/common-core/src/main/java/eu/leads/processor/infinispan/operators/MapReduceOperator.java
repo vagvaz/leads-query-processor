@@ -125,20 +125,20 @@ public abstract class MapReduceOperator extends BasicOperator{
   @Override
   public void setupReduceCallable(){
     conf.putString("output", getOutput());
-    intermediateCache = (BasicCache) manager.getPersisentCache(intermediateCacheName);
-    log.error("ReducerIntermediate " + intermediateCache.size());
+//    intermediateCache = (BasicCache) manager.getPersisentCache(intermediateCacheName);
+//    log.error("ReducerIntermediate " + intermediateCache.size());
     //create Intermediate cache name for data on the same Sites as outputCache
     intermediateDataCache = (BasicCache) manager.getPersisentCache(intermediateCacheName+".data");
-    log.error("ReducerIntermediateData " + intermediateDataCache.size());
+//    log.error("ReducerIntermediateData " + intermediateDataCache.size());
     //create Intermediate  keys cache name for data on the same Sites as outputCache;
-    keysCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".keys");
-    log.error("ReducerIntermediateKeys " + keysCache.size());
+//    keysCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".keys");
+//    log.error("ReducerIntermediateKeys " + keysCache.size());
     //createIndexCache for getting all the nodes that contain values with the same key! in a mc
-    indexSiteCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".indexed");
+//    indexSiteCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".indexed");
     //    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
-    log.error("ReducerIntermediateSite " + indexSiteCache.size());
+//    log.error("ReducerIntermediateSite " + indexSiteCache.size());
     outputCache = (BasicCache) manager.getPersisentCache(outputCacheName);
-    reduceInputCache = (Cache) keysCache;
+//    reduceInputCache = (Cache) keysCache;
     collector = new LeadsCollector(0, outputCache.getName());
     inputCache = (Cache) intermediateDataCache;
 //    inputCache = (Cache) keysCache;

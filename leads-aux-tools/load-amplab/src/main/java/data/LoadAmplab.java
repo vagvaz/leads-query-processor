@@ -263,8 +263,6 @@ public class LoadAmplab {
                                 writer.flush();
                             }
                         }
-
-
                         newStringData[index] = newValue;
                     }
                     writer.writeNext(newStringData);
@@ -296,28 +294,27 @@ public class LoadAmplab {
         Long startTime = System.currentTimeMillis();
         Path dir = Paths.get(path);
         List<File> files = new ArrayList<>();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*.{csv}")) {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*.{keys}")) {
             for (Path entry : stream) {
                 files.add(entry.toFile());
             }
         } catch (IOException x) {
             throw new RuntimeException(String.format("error reading folder %s: %s", dir, x.getMessage()), x);
         }
-        for (File csvfile : files) {
-            System.out.print("Loading file: " + csvfile.getName());
+        for (File keysfile : files) {
+            System.out.print("Loading file: " + keysfile.getName());
             Long filestartTime = System.currentTimeMillis();
-            loadDataFromFile(csvfile,arg5,arg6);
+            loadDataFromFile(keysfile,arg5,arg6);
             System.out.println("Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - filestartTime, "HH:mm:ss,SSS"));
         }
-        EnsembleCacheUtils.waitForAllPuts();
         System.out.println("Loading finished.");
         System.out.println("Overall Folder Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - startTime, "HH:mm:ss,SSS"));
         System.exit(0);
     }
 
-    private static void loadDataFromFile(File csvfile, String arg5, String arg6) {
-        String filename[] = csvfile.getAbsolutePath().split(".csv");
-        String fulltableName[] = (csvfile.getName().split(".csv")[0]).split("-");
+    private static void loadDataFromFile(File csvfile, String arg5, String arg6) throws IOException {
+        String filename[] = csvfile.getAbsolutePath().split(".keys");
+        String fulltableName[] = (csvfile.getName().split(".keys")[0]).split("-");
         String tableName = fulltableName[fulltableName.length - 1];
         String keysFilename = filename[0] + ".keys";
         Path path = Paths.get(keysFilename);
@@ -327,13 +324,13 @@ public class LoadAmplab {
             try {
                 keyReader = new BufferedReader(new InputStreamReader(new FileInputStream(keysFilename)));
             } catch (FileNotFoundException e) {
-                System.out.println("Unable to read keys file, skipping " + filename[0] + ".csv");
+                System.out.println("Unable to read keys file, skipping " + filename[0] + ".keys");
                 e.printStackTrace();
                 return;
             }
             System.out.println(" Loading key from file " + filename[0] + ".keys");
         } else {
-            System.err.println(" No keys file, skipping " + filename[0] + ".csv");
+            System.err.println(" No keys file, skipping " + filename[0] + ".keys");
             return;
         }
 
@@ -414,7 +411,11 @@ public class LoadAmplab {
             }
         }
 
+         int reportRate = 10000;
+        long lastReportTime=System.currentTimeMillis() ;
+        BSONObject data = new BasicBSONObject();
         if (initialize_cache(tableName)){
+            long StartTime = System.currentTimeMillis();
             int numofEntries = 0;
             int lines = 0;
             String key="";
@@ -426,7 +427,7 @@ public class LoadAmplab {
             long p_uri = 1500000L;
 
             for(int entry=0;entry<Integer.valueOf(arg5);entry++){
-                BSONObject data = new BasicBSONObject();
+                data = new BasicBSONObject();
 
                 for (pos = 0; pos < columns.size(); pos++) {
                     String fullCollumnName =  "default."+tableName+"." + columns.get(pos);
@@ -474,28 +475,26 @@ public class LoadAmplab {
 //                System.out.println("putting... uri:" +data.getField("default."+tableName+".uri").toString()+" -- ts:"+data.getField("default."+tableName+".ts").toString());
                 put(key, data);
 
-                try {
-//                    BasicBSONEncoder nc = new BasicBSONEncoder();
-//                    sizeE+=nc.encode(data).length;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
                 numofEntries++;
 
                 if (delay > 50) {
                     System.out.println("Cache put: " + numofEntries);
                 }
-                if (numofEntries % 1000 == 0) {
-                    System.out.println("Imported: " + numofEntries+" -- size: "+sizeE);
+                if (numofEntries % reportRate == 0) {
+                    System.out.println("Rate(t/s):" + (float) reportRate / (float) ((System.currentTimeMillis() - lastReportTime) / 1000.0) + " Avg (t/s): " + (float) numofEntries / (float) ((System.currentTimeMillis() - StartTime) / 1000.0) + " Imported: " + numofEntries + " size " + sizeE);
+                    lastReportTime=System.currentTimeMillis();
+                    reportRate= (int) (reportRate*1.2);
                 }
-            }
 
-            System.out.println("Totally Imported: " + numofEntries);
+            }
+            System.out.println("Wait For All Puts");
+            EnsembleCacheUtils.waitForAllPuts();
+            System.out.println(tableName + " Avg Rate(tuples/sec): " + (float) numofEntries / (float) ((System.currentTimeMillis() - StartTime) / 1000.0) + " Totally Imported: " + numofEntries + " tuple byte size: " + serialize(data).length);
+            System.out.println("Overall File Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - StartTime, "HH:mm:ss,SSS"));
         }
     }
 
-    public static byte[] serialize(JsonObject obj) throws IOException {
+    public static byte[] serialize(BSONObject  obj) throws IOException {
         ByteArrayOutputStream b = new ByteArrayOutputStream();
         ObjectOutputStream o = new ObjectOutputStream(b);
         o.writeObject(obj.toString());
@@ -546,7 +545,7 @@ public class LoadAmplab {
             EnsembleCacheUtils.putToCache(remoteCache, remoteCache.getName() + ":" + key, tuple);
         else if (embeddedCache != null)
             EnsembleCacheUtils.putToCache(embeddedCache,
-                ((Cache) embeddedCache).getName() + ":" + key, tuple);
+                    ((Cache) embeddedCache).getName() + ":" + key, tuple);
         else if (ensembleCache!=null)
             EnsembleCacheUtils.putToCache(ensembleCache, ensembleCache.getName() + ":" + key, tuple);
         try {

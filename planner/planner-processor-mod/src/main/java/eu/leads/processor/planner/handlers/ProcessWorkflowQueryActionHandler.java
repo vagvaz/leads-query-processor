@@ -19,6 +19,7 @@ import org.apache.tajo.engine.json.CoreGsonHelper;
 import org.apache.tajo.plan.logical.LogicalRootNode;
 import org.apache.tajo.session.Session;
 import org.infinispan.Cache;
+import org.infinispan.commons.api.BasicCache;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class ProcessWorkflowQueryActionHandler implements ActionHandler {
     private final InfinispanManager persistence;
     private final String id;
     private final TaJoModule module;
-    private Cache<String,String> queriesCache;
+    private BasicCache<String,String> queriesCache;
     public ProcessWorkflowQueryActionHandler(Node com, LogProxy log, InfinispanManager persistence,
                                              String id, TaJoModule module,String schedHost,String schedport) {
         this.com = com;
@@ -43,7 +44,8 @@ public class ProcessWorkflowQueryActionHandler implements ActionHandler {
         this.persistence = persistence;
         this.id = id;
         this.module = module;
-       queriesCache = (Cache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
+       queriesCache =
+           (BasicCache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
        WP4Client.initialize(schedHost,schedport);
     }
 

@@ -215,7 +215,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             }
             com.sendTo(action.getData().getString("replyTo"), action.getResult());
           } else if (label.equals(IManagerConstants.GET_QUERY_STATUS)) {
-            log.info("completed reply get query status");
+//            log.info("completed reply get query status");
             com.sendTo(action.getData().getString("replyTo"), action.getResult());
 
           } else if (label.equals(IManagerConstants.DEPLOY_PLUGIN)) {

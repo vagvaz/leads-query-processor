@@ -67,13 +67,13 @@ public class LocalIndexListener implements LeadsListener {
         if (event.isPre()) {
             return;
         }
-        if(event.getKey() instanceof ComplexIntermediateKey) {
+//        if(event.getKey() instanceof ComplexIntermediateKey) {
             ComplexIntermediateKey key = (ComplexIntermediateKey) event.getKey();
             index.put(key.getKey(),event.getValue());
             synchronized (mutex){
                 mutex.notifyAll();
             }
-        }
+//        }
 
     }
 
@@ -83,11 +83,11 @@ public class LocalIndexListener implements LeadsListener {
             return;
         }
 
-        if(event.getKey() instanceof ComplexIntermediateKey) {
+//        if(event.getKey() instanceof ComplexIntermediateKey) {
             ComplexIntermediateKey key = (ComplexIntermediateKey) event.getKey();
             System.err.println("Value modified key " + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
             index.put(key.getKey(),event.getValue());
-        }
+//        }
     }
 
     @Override public InfinispanManager getManager() {
@@ -99,12 +99,13 @@ public class LocalIndexListener implements LeadsListener {
     }
 
     @Override public void initialize(InfinispanManager manager,JsonObject conf) {
+        mutex = new Object();
         this.targetCache = (Cache) manager.getPersisentCache(cacheName);
         this.keysCache = manager.getLocalCache(cacheName+".index.keys");
         this.dataCache = manager.getLocalCache(cacheName+".index.data");
         this.index = new IntermediateKeyIndex(keysCache,dataCache);
         log = LoggerFactory.getLogger(LocalIndexListener.class);
-        mutex = new Object();
+
     }
 
     @Override public void initialize(InfinispanManager manager) {

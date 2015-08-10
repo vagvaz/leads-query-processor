@@ -1,8 +1,11 @@
 package eu.leads.processor.infinispan.operators.mapreduce;
 
+import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.infinispan.LeadsMapper;
 import org.infinispan.distexec.mapreduce.Collector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
@@ -22,6 +25,8 @@ import java.util.List;
 public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
 
     transient List<String> columns;
+    transient Logger log;
+    transient private ProfileEvent groupEvent;
 
     public GroupByMapper(JsonObject configuration) {
         super(configuration);
@@ -36,9 +41,7 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
    @Override
     public void map(String key, Tuple value, Collector<String, Tuple> collector) {
 //      System.out.println("Called for " + key + "     " + value);
-      if (!isInitialized)
-            intialize();
-        StringBuilder builder = new StringBuilder();
+          StringBuilder builder = new StringBuilder();
 //        String tupleId = key.substring(key.indexOf(":"));
         Tuple t = (value);
 //        Tuple t = new Tuple(value);
@@ -59,9 +62,13 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
         }
     }
 
-    private void intialize() {
-       isInitialized = true;
+    @Override
+    public void initialize() {
+       super.initialize();
+
+        isInitialized = true;
 //       System.err.println("-------------Initialize");
+        log = LoggerFactory.getLogger(GroupByMapper.class);
        super.initialize();
        JsonArray columnArray = conf.getObject("body").getArray("groupingKeys");
        Iterator<Object> columnsIterator = columnArray.iterator();
@@ -70,8 +77,11 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
           JsonObject current = (JsonObject) columnsIterator.next();
           columns.add(current.getString("name"));
        }
-
+        groupEvent = new ProfileEvent("groupbymap",log);
     }
 
-
+    @Override protected void finalizeTask() {
+        groupEvent.end();
+        super.finalizeTask();
+    }
 }

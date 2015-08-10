@@ -43,26 +43,31 @@ import java.util.UUID;
 public class TaJoModule {
 
     private static LeadsSQLAnalyzer sqlAnalyzer = null;
-    private static LogicalPlanner planner;
+    private static LogicalPlanner planner =null;
     private static LogicalOptimizer optimizer = null;
     private static CatalogClient catalog = null;
     private static TajoConf c = null;
     private static HashMap<String,Set<String>> primaryKeys = null;
 
-    private static UserGroupInformation dummyUserInfo;
-    private static QueryContext defaultContext;
+    private static UserGroupInformation dummyUserInfo = null;
+    private static QueryContext defaultContext = null;
 
 
-    static {
+//    static {
+//        try {
+//            dummyUserInfo = UserGroupInformation.getCurrentUser();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+
+    public TaJoModule() {
         try {
             dummyUserInfo = UserGroupInformation.getCurrentUser();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-
-    public TaJoModule() {
         c = new TajoConf();
         optimizer = new LogicalOptimizer(c);
         sqlAnalyzer = new LeadsSQLAnalyzer();

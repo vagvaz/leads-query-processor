@@ -27,6 +27,7 @@ public class HDFSStorage implements LeadsStorage {
     private Logger log = LoggerFactory.getLogger(HDFSStorage.class);
     private Path basePath;
     private Properties storageConfiguration;
+    private LocalFileStorage cache = new LocalFileStorage();
     UserGroupInformation ugi;
 
     @Override
@@ -40,6 +41,14 @@ public class HDFSStorage implements LeadsStorage {
         }
         result = initializeReader(configuration);
         ugi = UserGroupInformation.createRemoteUser(configuration.getProperty("hdfs.user"));
+        if(configuration.containsKey("local_prefix")){
+            Properties properties = new Properties();
+            properties.setProperty("prefix",configuration.getProperty("local_prefix"));
+            cache.initialize(properties);
+        }
+        else{
+            cache.initialize(new Properties());
+        }
 
         if (!result)
             return result;

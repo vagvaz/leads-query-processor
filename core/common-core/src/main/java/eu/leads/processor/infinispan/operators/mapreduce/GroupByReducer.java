@@ -2,6 +2,7 @@ package eu.leads.processor.infinispan.operators.mapreduce;
 
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
+import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.infinispan.LeadsReducer;
@@ -40,6 +41,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
    transient Set<String> inputFields;
    transient ArrayList<String> aggregateInferred;
    transient Logger log = null;
+   transient ProfileEvent groupReducerEvent;
 
    public GroupByReducer(JsonObject configuration) {
       super(configuration);
@@ -126,6 +128,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
          }
       }
       aggregateInferred = inferFinalAggNames();
+      groupReducerEvent = new ProfileEvent("groupReducer",log);
    }
 
    private ArrayList<String> inferFinalAggNames() {
@@ -253,5 +256,10 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
       for (int i = 0; i < aggregateValues.size(); i++) {
          aggregateValues.set(i,MathUtils.getInitialValue(columnTypes.get(i),functionType.get(i)));
       }
+   }
+
+   @Override protected void finalizeTask() {
+      groupReducerEvent.end();
+      super.finalizeTask();
    }
 }
