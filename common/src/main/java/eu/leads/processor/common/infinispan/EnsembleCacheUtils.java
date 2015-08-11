@@ -98,6 +98,9 @@ public class EnsembleCacheUtils {
     }
     public static void waitForAllPuts() {
         //        profExecute.start("waitForAllPuts");
+        synchronized (runnableMutex){
+            runnableMutex.notifyAll();
+        }
         while(executor.getActiveCount() > 0)
         try {
             executor.awaitTermination(100,TimeUnit.MILLISECONDS);

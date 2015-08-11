@@ -57,7 +57,7 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
            collector.emit(outkey, t);
         }else {
 //           System.out.println("**************" + t.asString() + " emit");
-           collector.emit("***" ,  t);
+           collector.emit("***" ,  new Tuple());
 //           collector.emit("***" ,  t.asString());
         }
     }
