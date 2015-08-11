@@ -1,5 +1,6 @@
 package eu.leads.processor.common.infinispan;
 
+import eu.leads.processor.common.utils.PrintUtilities;
 import org.infinispan.commons.api.BasicCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,19 +24,25 @@ public class SyncPutRunnable implements Runnable {
         this.value = value;
     }
     @Override public void run() {
-        if(key != null && value != null){
+        if(key != null && value != null) {
             boolean done = false;
-            try{
-                while(!done){
-                    cache.put(key,value);
-                    done = true;
-                }
-            }catch (Exception e){
-                done = false;
-                System.err.println("puting key " + key + " into " + cache.getName() + " failed for " + e.getClass().toString());
-                logger.error("puting key " + key + " into " + cache.getName() + " failed for " + e.getClass().toString());
-            }
+            while (!done) {
+                try {
 
+                    cache.put(key, value);
+                    done = true;
+
+                } catch (Exception e) {
+                    done = false;
+                    System.err.println(
+                        "puting key " + key + " into " + cache.getName() + " failed for " + e
+                            .getClass().toString());
+                    logger.error("puting key " + key + " into " + cache.getName() + " failed for " + e
+                            .getClass().toString());
+                    PrintUtilities.logStackTrace(logger, e.getStackTrace());
+                }
+
+            }
         }
         EnsembleCacheUtils.addRunnable(this);
     }

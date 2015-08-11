@@ -69,6 +69,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
   private String currentComponent;
   private String externalIP =null;
   private int maxEntries;
+  private int blockSize = 32;
+  private int cacheSize = 64;
+  private CompressionType compressionType = CompressionType.NONE;
   //  private static final EquivalentConcurrentHashMapV8<String, TestResources> testResources = new EquivalentConcurrentHashMapV8<>(AnyEquivalence.getInstance(), AnyEquivalence.getInstance());
 
   /**
@@ -77,6 +80,15 @@ public class ClusterInfinispanManager implements InfinispanManager {
   public ClusterInfinispanManager() {
     host = "0.0.0.0";
     maxEntries = LQPConfiguration.getInstance().getConfiguration().getInt("node.infinispan.maxentries",5000);
+    blockSize = LQPConfiguration.getInstance().getConfiguration().getInt("leads.processor.infinispan.leveldb.blocksize",blockSize);
+    cacheSize = LQPConfiguration.getInstance().getConfiguration().getInt("leads.processor.infinispan.leveldb.cachesize",cacheSize);
+    if(LQPConfiguration.getInstance().getConfiguration().getBoolean("leads.processor.infinispan.leveldb.compression",false)){
+      compressionType =CompressionType.SNAPPY;
+    }
+    else{
+      compressionType = CompressionType.SNAPPY;
+    }
+
 //    System.out.println("maximum entries are " + maxEntries);
 //    log.error("maximum entries are " + maxEntries);
     serverPort = 11222;
@@ -85,6 +97,14 @@ public class ClusterInfinispanManager implements InfinispanManager {
   public ClusterInfinispanManager(EmbeddedCacheManager manager) {
     this.manager = manager;
     maxEntries = LQPConfiguration.getInstance().getConfiguration().getInt("node.infinispan.maxentries",5000);
+    blockSize = LQPConfiguration.getInstance().getConfiguration().getInt("leads.processor.infinispan.leveldb.blocksize",blockSize);
+    cacheSize = LQPConfiguration.getInstance().getConfiguration().getInt("leads.processor.infinispan.leveldb.cachesize",cacheSize);
+    if(LQPConfiguration.getInstance().getConfiguration().getBoolean("leads.processor.infinispan.leveldb.compression",false)){
+      compressionType =CompressionType.SNAPPY;
+    }
+    else{
+      compressionType = CompressionType.SNAPPY;
+    }
 //    System.out.println("maximum entries are " + maxEntries);
 //    log.error("maximum entries are " + maxEntries);
     initDefaultCacheConfig();
@@ -749,9 +769,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .expiredLocation("/tmp/leadsprocessor-data/expired-" + uniquePath + "/")
                 //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
             .implementationType(LevelDBStoreConfiguration.ImplementationType.AUTO)
-            .blockSize(32 * 1024 * 1024)
-            .compressionType(CompressionType.SNAPPY)
-            .cacheSize(64 * 1024 * 1024)
+            .blockSize(blockSize * 1024 * 1024)
+            .compressionType(compressionType)
+            .cacheSize(cacheSize * 1024 * 1024)
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(

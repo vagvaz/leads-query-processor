@@ -305,22 +305,22 @@ public abstract class BasicOperator extends Thread implements Operator{
 
     long inputSize = 1;
     long outputSize = 1;
-    if(input1 != null)
-      inputSize += input1.size();
-    if(input2 != null)
-      inputSize += input2.size();
-    if(output != null){
-      outputSize = output.size();
-    }
-    else{
-      outputCache = (BasicCache) manager.getPersisentCache(getOutput());
-      outputSize = outputCache.size();
-    }
-    if(outputSize == 0){
-      outputSize =1;
-    }
+//    if(input1 != null)
+//      inputSize += input1.size();
+//    if(input2 != null)
+//      inputSize += input2.size();
+//    if(output != null){
+//      outputSize = output.size();
+//    }
+//    else{
+//      outputCache = (BasicCache) manager.getPersisentCache(getOutput());
+//      outputSize = outputCache.size();
+//    }
+//    if(outputSize == 0){
+//      outputSize =1;
+//    }
     System.out.println("In#: " + inputSize + " Out#:" + outputSize + " Execution time: " + (endTime - startTime) / 1000.0 + " s");
-    updateStatisticsCache(inputSize, outputSize, (endTime - startTime));
+//    updateStatisticsCache(inputSize, outputSize, (endTime - startTime));
   }
 
   public void updateStatisticsCache(double inputSize, double outputSize, double executionTime){
