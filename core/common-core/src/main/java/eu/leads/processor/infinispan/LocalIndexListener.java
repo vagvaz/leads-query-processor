@@ -16,7 +16,7 @@ import org.vertx.java.core.json.JsonObject;
 /**
  * Created by vagvaz on 16/07/15.
  */
-@Listener(sync = false,primaryOnly = true,clustered = false)
+@Listener(sync = true,primaryOnly = true,clustered = false)
 public class LocalIndexListener implements LeadsListener {
 
     transient private volatile Object mutex ;
@@ -73,9 +73,9 @@ public class LocalIndexListener implements LeadsListener {
 //        System.err.println("PREKey created " + event.getKey() + " key " + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
 
         index.put(key.getKey(), event.getValue());
-            synchronized (mutex){
-                mutex.notifyAll();
-            }
+//            synchronized (mutex){
+//                mutex.notifyAll();
+//            }
 //        }
 
     }
@@ -92,9 +92,9 @@ public class LocalIndexListener implements LeadsListener {
             ComplexIntermediateKey key = (ComplexIntermediateKey) event.getKey();
 //            System.err.println("AFTERValue modified " + event.getKey() + " key " + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
             index.put(key.getKey(),event.getValue());
-            synchronized (mutex){
-                mutex.notifyAll();
-            }
+//            synchronized (mutex){
+//                mutex.notifyAll();
+//            }
 //        }
     }
 
@@ -125,19 +125,19 @@ public class LocalIndexListener implements LeadsListener {
     }
 
     void waitForAllData(){
-        synchronized (mutex){
+//        synchronized (mutex){
             int size  = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size();
             System.err.println("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
             log.error("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
             while( size != dataCache.size()){
                 System.err.println("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
                 log.error("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
-                try {
-                    mutex.wait(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+//                try {
+//                    mutex.wait(500);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
         }
     }
 }
