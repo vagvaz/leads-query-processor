@@ -1,6 +1,9 @@
 package eu.leads.processor.infinispan;
 
+import eu.leads.processor.common.utils.ProfileEvent;
 import org.infinispan.Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -17,12 +20,16 @@ public class LocalIndexKeyIterator implements Iterator<Object> {
     Integer currentCounter;
     Cache<String,Object> dataCache;
     Future<Object> nextResult;
+    ProfileEvent event;
+    Logger logger;
     public LocalIndexKeyIterator(String key, Integer counter,Map<String,Object> dataCache) {
         this.currentCounter = 0;
         this.numberOfValues = counter;
         this.key = key;
         this.dataCache  = (Cache<String, Object>) dataCache;
         nextResult = ((Cache<String, Object>) dataCache).getAsync(key+currentCounter);
+        logger = LoggerFactory.getLogger(LocalIndexListener.class);
+        event = new ProfileEvent("",logger);
     }
 
 
@@ -34,17 +41,21 @@ public class LocalIndexKeyIterator implements Iterator<Object> {
     }
 
     @Override public Object next() {
+        event.start("Next1");
         if(currentCounter <= numberOfValues){
             Object result = null;
             try {
                 result = nextResult.get();
+                event.end();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
                 e.printStackTrace();
             }
+            event.start("Next2");
             currentCounter++;
             nextResult = dataCache.getAsync(key+currentCounter);
+            event.end();
             return result;
             //            }
             //            throw new NoSuchElementException("LocalIndexIterator GOT NULL VALUE for  key " + key + " currentCounter " + currentCounter + " maximum " + numberOfValues);

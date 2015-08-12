@@ -29,6 +29,7 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
     transient private ProfileEvent groupEvent;
     transient private ProfileEvent mapEvent;
     transient  private Tuple emptyTuple;
+    transient private StringBuilder builder;
     public GroupByMapper(JsonObject configuration) {
         super(configuration);
         columns = new ArrayList<String>();
@@ -43,7 +44,8 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
     public void map(String key, Tuple value, Collector<String, Tuple> collector) {
 //      System.out.println("Called for " + key + "     " + value);
        mapEvent.start("mapEvent");
-          StringBuilder builder = new StringBuilder();
+
+       builder.delete(0,builder.length());
 //        String tupleId = key.substring(key.indexOf(":"));
         Tuple t = (value);
 //        Tuple t = new Tuple(value);
@@ -80,6 +82,7 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
           JsonObject current = (JsonObject) columnsIterator.next();
           columns.add(current.getString("name"));
        }
+        builder = new StringBuilder();
         groupEvent = new ProfileEvent("groupbymap",log);
         mapEvent = new ProfileEvent("groupbymap",log);
     }

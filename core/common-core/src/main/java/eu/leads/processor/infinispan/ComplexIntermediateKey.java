@@ -104,7 +104,7 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
   }
 
   public void setCounter(Integer counter) {
-    this.counter = new Integer(counter);
+    this.counter = counter;
   }
 
   @Override
@@ -194,6 +194,10 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
   @Override
   public String toString() {
     return key.toString();
+  }
+
+  public String asString(){
+    return  "cache " + cache + " site " + site + " node " + node + " key " + key.toString() + " counter " + counter;
   }
 
   public String getCache() {

@@ -38,7 +38,10 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
   private String node;
   private String cacheName;
   private ComplexIntermediateKey baseIntermKey;
-  private IndexedComplexIntermediateKey  baseIndexedKey;
+  private ComplexIntermediateKey currentKey;
+  private transient volatile Object mutex;
+//  private IndexedComplexIntermediateKey  baseIndexedKey;
+
 
 
   public LeadsCollector(int maxCollectorSize,
@@ -168,32 +171,35 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
 //          EnsembleCacheManager.Consistency.DIST);
       counterCache = imanager.getLocalCache(storeCache.getName()+"."+inputCacheName+"."+manager.getAddress().toString()
                                         + ".counters");
-      baseIndexedKey = new IndexedComplexIntermediateKey(site, manager.getAddress().toString(),inputCacheName);
+//      baseIndexedKey = new IndexedComplexIntermediateKey(site, manager.getAddress().toString(),inputCacheName);
       baseIntermKey = new ComplexIntermediateKey(site, manager.getAddress().toString(),inputCacheName);
+      mutex = new Object();
     }
   }
   public void emit(KOut key, VOut value) {
 
     if(onMap) {
-
-      Integer currentCount = (Integer) counterCache.get(key);
-      if(currentCount == null)
-      {
-        currentCount = new Integer(0);
-        baseIndexedKey.setKey(key.toString());
-//        if(LQPConfiguration.getInstance().getConfiguration().getBoolean("processor.validate.intermediate")){
-//          IndexedComplexIntermediateKey ik = new IndexedComplexIntermediateKey(baseIndexedKey.getSite(),baseIndexedKey.getNode(),baseIndexedKey.getCache(),key.toString());
-//          Object o = indexSiteCache.get(ik.getUniqueKey());
-//          assert (o.equals(baseIndexedKey));
-//        }
+      Integer currentCount = -1;
+      synchronized (mutex) {
+         currentCount = (Integer) counterCache.get(key);
+        if (currentCount == null) {
+          currentCount = new Integer(0);
+          //        baseIndexedKey.setKey(key.toString());
+          //        if(LQPConfiguration.getInstance().getConfiguration().getBoolean("processor.validate.intermediate")){
+          //          IndexedComplexIntermediateKey ik = new IndexedComplexIntermediateKey(baseIndexedKey.getSite(),baseIndexedKey.getNode(),baseIndexedKey.getCache(),key.toString());
+          //          Object o = indexSiteCache.get(ik.getUniqueKey());
+          //          assert (o.equals(baseIndexedKey));
+          //        }
+        } else {
+          currentCount = currentCount + 1;
+        }
+        counterCache.put(key, currentCount);
       }
-      else{
-        currentCount = currentCount+1;
-      }
-      counterCache.put(key, currentCount);
-      baseIntermKey.setKey(key.toString());
-      baseIntermKey.setCounter(currentCount);
+//      baseIntermKey.setKey(key.toString());
+//      baseIntermKey.setCounter(currentCount);
+//      baseIntermKey.setCounter(currentCount);
       ComplexIntermediateKey newKey = new ComplexIntermediateKey(baseIntermKey.getSite(),baseIntermKey.getNode(),key.toString(),baseIntermKey.getCache(),currentCount);
+//      System.err.println("WRITING " + baseIntermKey + " " + baseIntermKey.asString());
       EnsembleCacheUtils.putToCache(intermediateDataCache,newKey,value);
 //      if(LQPConfiguration.getInstance().getConfiguration().getBoolean("processor.validate.intermediate")){
 //        ComplexIntermediateKey v = new ComplexIntermediateKey(baseIntermKey.getSite(),baseIntermKey.getNode(),key.toString(),baseIntermKey.getCache(),currentCount);
