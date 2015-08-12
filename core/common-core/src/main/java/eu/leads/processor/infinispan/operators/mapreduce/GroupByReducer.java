@@ -159,7 +159,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
    @Override
    public void reduce(String key, Iterator<Tuple> iterator,LeadsCollector collector) {
       //Reduce takes all the grouped Typles per key
-      reducerEvent.start("reduceEvent");
+      reducerEvent.start("reduceEvent_1");
       if (key == null || key.equals("")){
          log.error("reduce called with null key? " + (key == null));
          return;
@@ -171,8 +171,10 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
 //        progress();
       //Iterate overall values
       int tuplecounter =0;
+      reducerEvent.end();
       while (true) {
          try {
+            reducerEvent.start("reduceEvent_2");
             tuplecounter++;
             Tuple itTuple = iterator.next();
             if (itTuple == null) {
@@ -181,8 +183,8 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
                continue;
             }
             t =(itTuple);
-
-
+            reducerEvent.end();
+            reducerEvent.start("reduceEvent_3");
             Iterator<String> funcTypeIterator = functionType.iterator();
             //           Iterator<Object> aggValuesIterator = aggregateValues.iterator();
             Iterator<String> columnTypesIterator = columnTypes.iterator();
@@ -212,8 +214,9 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
 //            log.error(t.toString());
             break;
          }
+         reducerEvent.end();
       }
-
+      reducerEvent.start("reduceEvent_4");
          Iterator<String> nameIterator = aggregateInferred.iterator();
          Iterator<Object> aggValuesIterator = aggregateValues.iterator();
          Iterator<String> funcTypeIterator = functionType.iterator();
@@ -243,6 +246,8 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
             return;
 
          }
+      reducerEvent.end();
+      reducerEvent.start("reduceEvent_5");
          //prepare output
          //        System.err.println("t: " + t.toString());
          t = prepareOutput(t);

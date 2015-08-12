@@ -55,7 +55,7 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
         final ClusteringDependentLogic cdl = inputCache.getAdvancedCache().getComponentRegistry().getComponent
             (ClusteringDependentLogic.class);
         profCallable.end();
-        profCallable.start("Iterate Over Local Data");
+        profCallable.start("InitIndex");
         ProfileEvent profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(),profilerLog);
         int count=0;
         //    for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
@@ -93,6 +93,7 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
 //                }
 //            }
 //        }
+        profCallable.end();
         for(Map.Entry<String,Integer> entry : index.getKeysIterator()){
             LocalIndexKeyIterator iterator =
                 (LocalIndexKeyIterator) index.getKeyIterator(entry.getKey(),entry.getValue());
