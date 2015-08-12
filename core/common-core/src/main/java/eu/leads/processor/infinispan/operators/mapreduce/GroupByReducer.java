@@ -184,7 +184,6 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
             }
             t =(itTuple);
             reducerEvent.end();
-            reducerEvent.start("reduceEvent_3");
             Iterator<String> funcTypeIterator = functionType.iterator();
             //           Iterator<Object> aggValuesIterator = aggregateValues.iterator();
             Iterator<String> columnTypesIterator = columnTypes.iterator();
@@ -214,9 +213,9 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
 //            log.error(t.toString());
             break;
          }
-         reducerEvent.end();
+
       }
-      reducerEvent.start("reduceEvent_4");
+
          Iterator<String> nameIterator = aggregateInferred.iterator();
          Iterator<Object> aggValuesIterator = aggregateValues.iterator();
          Iterator<String> funcTypeIterator = functionType.iterator();
@@ -246,15 +245,12 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
             return;
 
          }
-      reducerEvent.end();
-      reducerEvent.start("reduceEvent_5");
          //prepare output
          //        System.err.println("t: " + t.toString());
          t = prepareOutput(t);
          //        System.err.println("tout: " + t.toString());
          //        collector.emit(prefix + key, t.asString());
          collector.emit(prefix + key, t);
-      reducerEvent.end();
       return ;
    }
 
