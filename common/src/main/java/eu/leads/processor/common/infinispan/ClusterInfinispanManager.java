@@ -195,7 +195,12 @@ public class ClusterInfinispanManager implements InfinispanManager {
     Configuration configuration = builder.build();
     manager.defineConfiguration("WebPage", configuration);
     //    Cache nutchCache = manager.getCache("WebPage", true);
-
+    if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
+    {
+      host = LQPConfiguration.getConf().getString("node.ip");
+      if(!LQPConfiguration.getConf().getString("node.current.component").equals("planner"))
+        startHotRodServer(manager,host, serverPort);
+    }
 
     getPersisentCache("pagerankCache");
     getPersisentCache("approx_sum_cache");
@@ -234,12 +239,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     manager.getCache("WebPage").addListener(listener);
 
-    if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
-    {
-      host = LQPConfiguration.getConf().getString("node.ip");
-      if(!LQPConfiguration.getConf().getString("node.current.component").equals("planner"))
-        startHotRodServer(manager,host, serverPort);
-    }
+
     //    System.err.println("Loading all the available data from nutch Cache");
     //    final ClusteringDependentLogic cdl = manager.getCache("WebPage").getAdvancedCache().getComponentRegistry()
     //                                           .getComponent

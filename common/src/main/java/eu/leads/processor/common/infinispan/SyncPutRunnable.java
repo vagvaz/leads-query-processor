@@ -40,9 +40,9 @@ public class SyncPutRunnable implements Runnable {
                     done = false;
                     System.err.println(
                         "puting key " + key + " into " + cache.getName() + " failed for " + e
-                            .getClass().toString());
+                            .getClass().toString() + " " + e.getMessage());
                     logger.error("puting key " + key + " into " + cache.getName() + " failed for " + e
-                            .getClass().toString());
+                            .getClass().toString() + " " + e.getMessage());
                     PrintUtilities.logStackTrace(logger, e.getStackTrace());
                 }
 
