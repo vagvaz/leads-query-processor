@@ -82,7 +82,7 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
                 .size() + " input: " + inputCache.getAdvancedCache()
                 .withFlags(Flag.CACHE_MODE_LOCAL).size());
         profilerLog.error("MRLOG: LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache()
-                .size() + " members " + ((Cache)index.getKeysCache()).getAdvancedCache().getRpcManager().getMembers().size() + " datamem ");
+                .size() );
 //        if(index.getKeysCache().size() != index.getDataCache().size()/2) {
 //            for (Map.Entry<String, Integer> entry : index.getKeysIterator()) {
 //                if (entry.getValue() != 1) {
