@@ -27,7 +27,8 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
     transient List<String> columns;
     transient Logger log;
     transient private ProfileEvent groupEvent;
-
+    transient private ProfileEvent mapEvent;
+    transient  private Tuple emptyTuple;
     public GroupByMapper(JsonObject configuration) {
         super(configuration);
         columns = new ArrayList<String>();
@@ -41,6 +42,7 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
    @Override
     public void map(String key, Tuple value, Collector<String, Tuple> collector) {
 //      System.out.println("Called for " + key + "     " + value);
+       mapEvent.start("mapEvent");
           StringBuilder builder = new StringBuilder();
 //        String tupleId = key.substring(key.indexOf(":"));
         Tuple t = (value);
@@ -57,15 +59,16 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
            collector.emit(outkey, t);
         }else {
 //           System.out.println("**************" + t.asString() + " emit");
-           collector.emit("***" ,  new Tuple());
+           collector.emit("***" ,  emptyTuple);
 //           collector.emit("***" ,  t.asString());
         }
+       mapEvent.end();
     }
 
     @Override
     public void initialize() {
        super.initialize();
-
+        emptyTuple = new Tuple();
         isInitialized = true;
 //       System.err.println("-------------Initialize");
         log = LoggerFactory.getLogger(GroupByMapper.class);
@@ -78,6 +81,7 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
           columns.add(current.getString("name"));
        }
         groupEvent = new ProfileEvent("groupbymap",log);
+        mapEvent = new ProfileEvent("groupbymap",log);
     }
 
     @Override protected void finalizeTask() {

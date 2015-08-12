@@ -669,17 +669,17 @@ public class ClusterInfinispanManager implements InfinispanManager {
       return manager.getCache(cacheName);
     }
     Configuration configuration = new ConfigurationBuilder()
-        .clustering()
-        .cacheMode(CacheMode.LOCAL)
-        .hash().numOwners(1)
+        .clustering().cacheMode(CacheMode.LOCAL)
         .transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
-        .persistence().passivation(true)
+        .persistence().passivation(false)
         .addStore(LevelDBStoreConfigurationBuilder.class)
         .location("/tmp/leadsprocessor-data/leveldb/" + uniquePath + "-data/")
             //                                 .location("/tmp/leveldb/data-foo/" + "/")
         .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "-expired/")
             //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
-        .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
+        .implementationType(LevelDBStoreConfiguration.ImplementationType.AUTO)
+        .blockSize(blockSize * 1024 * 1024).compressionType(compressionType)
+        .cacheSize(cacheSize * 1024 * 1024)
         .fetchPersistentState(true)
         .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
         .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(

@@ -83,16 +83,16 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
                 .withFlags(Flag.CACHE_MODE_LOCAL).size());
         profilerLog.error("MRLOG: LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache()
                 .size());
-        if(index.getKeysCache().size() != index.getDataCache().size()/2) {
-            for (Map.Entry<String, Integer> entry : index.getKeysIterator()) {
-                if (entry.getValue() != 1) {
-                    System.err.println("THE KEY IS " + entry.getKey() + " " + entry.getValue());
-                    profilerLog
-                        .error("MRLOG: " + "THE KEY IS " + entry.getKey() + " " + entry.getValue());
-
-                }
-            }
-        }
+//        if(index.getKeysCache().size() != index.getDataCache().size()/2) {
+//            for (Map.Entry<String, Integer> entry : index.getKeysIterator()) {
+//                if (entry.getValue() != 1) {
+//                    System.err.println("THE KEY IS " + entry.getKey() + " " + entry.getValue());
+//                    profilerLog
+//                        .error("MRLOG: " + "THE KEY IS " + entry.getKey() + " " + entry.getValue());
+//
+//                }
+//            }
+//        }
         for(Map.Entry<String,Integer> entry : index.getKeysIterator()){
             LocalIndexKeyIterator iterator =
                 (LocalIndexKeyIterator) index.getKeyIterator(entry.getKey(),entry.getValue());
@@ -125,39 +125,39 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
         return embeddedCacheManager.getAddress().toString();
     }
 
-    private Map<String, List<vOut>> createInMemoryDataStruct(Cache dataCache) {
-        Map<String,List<vOut>>  result = new HashMap<>();
-        CloseableIterable iterable = dataCache.getAdvancedCache().withFlags(
-            Flag.CACHE_MODE_LOCAL).filterEntries(new AcceptAllFilter());
-        try {
-            for (Object object : iterable) {
-                Map.Entry<ComplexIntermediateKey, vOut> entry = (Map.Entry<ComplexIntermediateKey, vOut>) object;
-                List<vOut> list = result.get(entry.getKey().getKey());
-                if (list == null) {
-                    list = new LinkedList<>();
-                    result.put(entry.getKey().getKey(), list);
-                }
-                list.add(entry.getValue());
-                //
-                //                    //      V value = inputCache.get(key);
-                //                    K key = (K) entry.getKey();
-                //                    V value = (V) entry.getValue();
-                //
-                //                    if (value != null) {
-                //                        profExecute.start("ExOn" + (++count));
-                //                        executeOn((K) key, value);
-                //                        profExecute.end();
-                //                    }
-                //                }
-            }
-        }
-        catch(Exception e){
-            iterable.close();
-            profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
-            PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
-        }
-        return result;
-    }
+//    private Map<String, List<vOut>> createInMemoryDataStruct(Cache dataCache) {
+//        Map<String,List<vOut>>  result = new HashMap<>();
+//        CloseableIterable iterable = dataCache.getAdvancedCache().withFlags(
+//            Flag.CACHE_MODE_LOCAL).filterEntries(new AcceptAllFilter());
+//        try {
+//            for (Object object : iterable) {
+//                Map.Entry<ComplexIntermediateKey, vOut> entry = (Map.Entry<ComplexIntermediateKey, vOut>) object;
+//                List<vOut> list = result.get(entry.getKey().getKey());
+//                if (list == null) {
+//                    list = new LinkedList<>();
+//                    result.put(entry.getKey().getKey(), list);
+//                }
+//                list.add(entry.getValue());
+//                //
+//                //                    //      V value = inputCache.get(key);
+//                //                    K key = (K) entry.getKey();
+//                //                    V value = (V) entry.getValue();
+//                //
+//                //                    if (value != null) {
+//                //                        profExecute.start("ExOn" + (++count));
+//                //                        executeOn((K) key, value);
+//                //                        profExecute.end();
+//                //                    }
+//                //                }
+//            }
+//        }
+//        catch(Exception e){
+//            iterable.close();
+//            profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
+//            PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
+//        }
+//        return result;
+//    }
 
     @Override
     public void initialize() {
