@@ -126,6 +126,7 @@ public class LocalIndexListener implements LeadsListener {
 
     void waitForAllData(){
 //        synchronized (mutex){
+        System.err.println("get the size of target");
             int size  = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size();
             System.err.println("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
             log.error("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
