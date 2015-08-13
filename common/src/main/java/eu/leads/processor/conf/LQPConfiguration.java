@@ -74,11 +74,14 @@ public class LQPConfiguration {
             generateDefaultValues();
             resolveDyanmicParameters();
             loadSystemPropertiesFile();
-
+            readPublicIp();
             if (!lite) {
                 updateConfigurationFiles();
             }
         }
+    }
+
+    private static void readPublicIp() {
     }
 
     private static void generateDefaultValues() {
