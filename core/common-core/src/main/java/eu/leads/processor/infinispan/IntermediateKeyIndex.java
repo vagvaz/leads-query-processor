@@ -13,7 +13,7 @@ public class IntermediateKeyIndex {
     private Map<String,Integer> keysCache;
     private Map<String,Object> dataCache;
     private int putCounter;
-    public IntermediateKeyIndex(Cache keysCache, Cache dataCache) {
+    public IntermediateKeyIndex(Map keysCache, Map dataCache) {
         this.keysCache = keysCache;
         this.dataCache = dataCache;
     }

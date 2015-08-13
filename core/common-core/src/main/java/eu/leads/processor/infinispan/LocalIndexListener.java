@@ -13,6 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by vagvaz on 16/07/15.
  */
@@ -23,8 +26,8 @@ public class LocalIndexListener implements LeadsListener {
     String cacheName;
     transient IntermediateKeyIndex index;
     transient Cache targetCache;
-    transient Cache keysCache;
-    transient Cache dataCache;
+    transient Map keysCache;
+    transient Map dataCache;
     transient Logger log;
     public LocalIndexListener(InfinispanManager manager, String cacheName) {
         this.cacheName = cacheName;
@@ -47,7 +50,7 @@ public class LocalIndexListener implements LeadsListener {
     }
 
     public Cache getKeysCache() {
-        return keysCache;
+        return (Cache) keysCache;
     }
 
     public void setKeysCache(Cache keysCache) {
@@ -55,7 +58,7 @@ public class LocalIndexListener implements LeadsListener {
     }
 
     public Cache getDataCache() {
-        return dataCache;
+        return (Cache) dataCache;
     }
 
     public void setDataCache(Cache dataCache) {
@@ -109,8 +112,10 @@ public class LocalIndexListener implements LeadsListener {
     @Override public void initialize(InfinispanManager manager,JsonObject conf) {
         mutex = new Object();
         this.targetCache = (Cache) manager.getPersisentCache(cacheName);
-        this.keysCache = manager.getLocalCache(cacheName+".index.keys");
-        this.dataCache = manager.getLocalCache(cacheName+".index.data");
+//        this.keysCache = manager.getLocalCache(cacheName+".index.keys");
+//        this.dataCache = manager.getLocalCache(cacheName+".index.data");
+        this.keysCache = new HashMap<>();
+        this.dataCache = new HashMap();
         this.index = new IntermediateKeyIndex(keysCache,dataCache);
         log = LoggerFactory.getLogger(LocalIndexListener.class);
 
