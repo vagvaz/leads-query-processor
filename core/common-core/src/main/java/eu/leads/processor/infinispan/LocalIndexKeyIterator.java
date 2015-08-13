@@ -23,7 +23,7 @@ public class LocalIndexKeyIterator implements Iterator<Object> {
     ProfileEvent event;
     Logger logger;
     public LocalIndexKeyIterator(String key, Integer counter,Map<String,Object> dataCache) {
-        this.currentCounter = 0;
+        this.currentCounter = numberOfValues;
         this.numberOfValues = counter;
         this.key = key;
         this.dataCache  = (Cache<String, Object>) dataCache;
@@ -36,15 +36,17 @@ public class LocalIndexKeyIterator implements Iterator<Object> {
 
     private void readNextBatch() {
         int counter = 0;
-        while(currentCounter <= numberOfValues && counter < 50000){
+        while(currentCounter >= 0 && counter < 50000){
+//        while(currentCounter <= numberOfValues && counter < 50000){
             batch.add(dataCache.getAsync(key+currentCounter));
-            currentCounter++;
+            currentCounter--;
         }
     }
 
 
     @Override public boolean hasNext() {
-        if(currentCounter <= numberOfValues || batch.size() > 0 || nextResult != null) {
+        if(currentCounter >= 0 || batch.size() > 0 || nextResult != null) {
+//        if(currentCounter <= numberOfValues || batch.size() > 0 || nextResult != null) {
             return true;
         }
         return false;
@@ -53,7 +55,8 @@ public class LocalIndexKeyIterator implements Iterator<Object> {
     @Override public Object next() {
         event.start("Next1");
         Object result = null;
-        if(currentCounter <= numberOfValues || batch.size() > 0 || nextResult != null){
+        if(currentCounter >= 0 || batch.size() > 0 || nextResult != null){
+//        if(currentCounter <= numberOfValues || batch.size() > 0 || nextResult != null){
             try {
                 result = nextResult.get();
             } catch (InterruptedException e) {
@@ -65,7 +68,8 @@ public class LocalIndexKeyIterator implements Iterator<Object> {
                 nextResult = batch.remove(0);
             else
             nextResult = null;
-            if(batch.size() < 50 && currentCounter <= numberOfValues)
+            if(batch.size() < 50 && currentCounter >= 0)
+//            if(batch.size() < 50 && currentCounter <= numberOfValues)
                 readNextBatch();
             event.end();
             event.start("Next2");

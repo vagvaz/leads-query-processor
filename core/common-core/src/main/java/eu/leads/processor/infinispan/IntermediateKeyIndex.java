@@ -28,7 +28,7 @@ public class IntermediateKeyIndex {
             }
             dataCache.put(key + count.toString(), value);
             keysCache.put(key, count);
-            dataCache.get(key+count.toString());
+//            dataCache.get(key+count.toString());
         }
     }
 
