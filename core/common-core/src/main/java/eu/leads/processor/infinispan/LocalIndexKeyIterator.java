@@ -18,7 +18,7 @@ public class LocalIndexKeyIterator implements Iterator<Object> {
     String key;
     Integer numberOfValues;
     Integer currentCounter;
-    Cache<String,Object> dataCache;
+    Map<String,Object> dataCache;
     Future<Object> nextResult;
     ProfileEvent event;
     Logger logger;
@@ -27,7 +27,7 @@ public class LocalIndexKeyIterator implements Iterator<Object> {
         this.numberOfValues = counter;
         this.key = key;
         this.dataCache  = (Cache<String, Object>) dataCache;
-        nextResult = ((Cache<String, Object>) dataCache).getAsync(key+currentCounter);
+//        nextResult = ((Cache<String, Object>) dataCache).getAsync(key+currentCounter);
         logger = LoggerFactory.getLogger(LocalIndexListener.class);
         event = new ProfileEvent("",logger);
     }
@@ -44,17 +44,19 @@ public class LocalIndexKeyIterator implements Iterator<Object> {
         event.start("Next1");
         if(currentCounter <= numberOfValues){
             Object result = null;
-            try {
-                result = nextResult.get();
-                event.end();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                result = nextResult.get();
+//                event.end();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            } catch (ExecutionException e) {
+//                e.printStackTrace();
+//            }
             event.start("Next2");
+//            currentCounter++;
+//            nextResult = dataCache.getAsync(key+currentCounter);
+            result = dataCache.get(key+currentCounter);
             currentCounter++;
-            nextResult = dataCache.getAsync(key+currentCounter);
             event.end();
             return result;
             //            }
