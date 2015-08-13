@@ -193,10 +193,11 @@ public class ConfigurationUtilities {
 ////            log.error("\n\nEXTERNAL IP " + hostAndPort[0]);
 ////            return hostAndPort[0];
 ////        }
-//        System.out.println("\n\nEXTERNAL IP " + ips[index]);
+        String result =LQPConfiguration.getInstance().getConfiguration().getString(StringConstants.PUBLIC_IP);
+        System.out.println("\n\nEXTERNAL IP " + result);
 ////        log.error("EXTERNAL IP " + ips[index]);
 //            return ips[index];
-        return LQPConfiguration.getInstance().getConfiguration().getString(StringConstants.PUBLIC_IP);
+        return result;
     }
 
     public static String getEnsembleString(JsonObject globalConfig) {

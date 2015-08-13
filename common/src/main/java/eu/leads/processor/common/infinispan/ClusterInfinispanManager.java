@@ -424,14 +424,17 @@ public class ClusterInfinispanManager implements InfinispanManager {
         if(externalIP.contains(":")) {
           String external = externalIP.split(":")[0];
           String portString = externalIP.split(":")[1];
+          System.err.println("EXPOSED IP = " + external + ":"+portString);
           serverConfigurationBuilder.host(localhost).port(serverPort).proxyHost(external)
               .proxyPort(Integer.parseInt(portString));
         }
         else{
+          System.err.println("EXPOSED IP = " + externalIP + ":11222");
           serverConfigurationBuilder.host(localhost).port(serverPort).proxyHost(externalIP)
               .proxyPort(11222);
         }
       }else{
+        System.err.println("NO EXTERNAL IP DEFINES SO EXPOSED IP = " + localhost + ":"+serverPort);
         serverConfigurationBuilder.host(localhost).port(serverPort);
       }
       //.defaultCacheName("defaultCache");

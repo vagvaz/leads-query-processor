@@ -83,7 +83,7 @@ public class LQPConfiguration {
 
     private static void readPublicIp() {
         try {
-            PropertiesConfiguration publicProperties =  new PropertiesConfiguration(instance.getBaseDir() +"public_ip.properties.example");
+            PropertiesConfiguration publicProperties =  new PropertiesConfiguration(instance.getBaseDir() +"public_ip.properties");
             instance.getConfiguration().setProperty(StringConstants.PUBLIC_IP, publicProperties
                 .getString(StringConstants.PUBLIC_IP,
                     instance.getConfiguration().getString("node.ip")));
