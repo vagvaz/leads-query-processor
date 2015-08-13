@@ -26,7 +26,8 @@ public class LocalIndexKeyIterator implements Iterator<Object> {
         this.currentCounter = 0;
         this.numberOfValues = counter;
         this.key = key;
-        this.dataCache  = (Cache<String, Object>) dataCache;
+//        this.dataCache  = (Cache<String, Object>) dataCache;
+        this.dataCache = dataCache;
 //        nextResult = ((Cache<String, Object>) dataCache).getAsync(key+currentCounter);
         logger = LoggerFactory.getLogger(LocalIndexListener.class);
         event = new ProfileEvent("",logger);
