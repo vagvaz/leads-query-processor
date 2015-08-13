@@ -215,8 +215,8 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
                 .getDataCache());
             System.err.println("reduce finalize reducer");
         reducer.finalizeTask();
-        ((Cache)index.getDataCache()).stop();
-        ((Cache)index.getKeysCache()).stop();
+//        ((Cache)index.getDataCache()).stop();
+//        ((Cache)index.getKeysCache()).stop();
         System.err.println("reducer finalizee collector");
 //        collector.finalizeCollector();
         System.err.println("finalzie super");
