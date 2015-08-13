@@ -18,7 +18,7 @@ public class LocalIndexKeyIterator implements Iterator<Object> {
     Integer numberOfValues;
     Integer currentCounter;
     Cache<String,Object> dataCache;
-    Future<Object> nextResult;
+    Future<Object> nextResult =null;
     List<Future<Object>> batch;
     ProfileEvent event;
     Logger logger;
@@ -44,7 +44,7 @@ public class LocalIndexKeyIterator implements Iterator<Object> {
 
 
     @Override public boolean hasNext() {
-        if(currentCounter <= numberOfValues || batch.size() > 0 ) {
+        if(currentCounter <= numberOfValues || batch.size() > 0 || nextResult != null) {
             return true;
         }
         return false;
@@ -53,12 +53,7 @@ public class LocalIndexKeyIterator implements Iterator<Object> {
     @Override public Object next() {
         event.start("Next1");
         Object result = null;
-        if(currentCounter <= numberOfValues || batch.size() > 0){
-            nextResult = batch.remove(0);
-            if(batch.size() < 50 && currentCounter <= numberOfValues)
-                readNextBatch();
-            event.end();
-            event.start("Next2");
+        if(currentCounter <= numberOfValues || batch.size() > 0 || nextResult != null){
             try {
                 result = nextResult.get();
             } catch (InterruptedException e) {
@@ -66,6 +61,15 @@ public class LocalIndexKeyIterator implements Iterator<Object> {
             } catch (ExecutionException e) {
                 e.printStackTrace();
             }
+            if(batch.size() > 0)
+                nextResult = batch.remove(0);
+            else
+            nextResult = null;
+            if(batch.size() < 50 && currentCounter <= numberOfValues)
+                readNextBatch();
+            event.end();
+            event.start("Next2");
+
             event.end();
             return result;
             //            }

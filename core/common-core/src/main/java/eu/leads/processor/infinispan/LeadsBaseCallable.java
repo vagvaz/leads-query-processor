@@ -92,6 +92,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     if(ensembleHost != null && !ensembleHost.equals("")) {
       tmpprofCallable.start("Start EnsemlbeCacheManager");
       profilerLog.error("EnsembleHost EXIST " + ensembleHost);
+      System.err.println("EnsembleHost EXIST " + ensembleHost);
       emanager = new EnsembleCacheManager(ensembleHost);
 //      emanager.start();
 //      emanager = createRemoteCacheManager();
@@ -100,6 +101,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     }
     else {
       profilerLog.error("EnsembleHost NULL");
+      System.err.println("EnsembleHost NULL");
       tmpprofCallable.start("Start EnsemlbeCacheManager");
       emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
 //      emanager.start();
