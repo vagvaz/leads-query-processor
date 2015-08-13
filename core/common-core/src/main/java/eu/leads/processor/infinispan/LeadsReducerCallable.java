@@ -56,14 +56,14 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
             (ClusteringDependentLogic.class);
         profCallable.end();
         profCallable.start("InitIndex");
-        ProfileEvent profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(),profilerLog);
+//        ProfileEvent profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(),profilerLog);
         int count=0;
         //    for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
         //      if (!cdl.localNodeIsPrimaryOwner(key))
         //        continue;
         Cache dataCache = inputCache.getCacheManager().getCache(prefix+".data");
         index = null;
-        EnsembleCacheUtils.waitForAllPuts();
+//        EnsembleCacheUtils.waitForAllPuts();
         for(Object listener : dataCache.getListeners()){
             if(listener instanceof LocalIndexListener){
                 System.err.println("listener class is " + listener.getClass().toString());
@@ -80,12 +80,12 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
             System.err.println("Index was not installed serious error exit...");
             System.exit(-1);
         }
-        System.err.println(
-            "LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache()
-                .size() + " input: " + inputCache.getAdvancedCache()
-                .withFlags(Flag.CACHE_MODE_LOCAL).size());
-        profilerLog.error("MRLOG: LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache()
-                .size() );
+//        System.err.println(
+//            "LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache()
+//                .size() + " input: " + inputCache.getAdvancedCache()
+//                .withFlags(Flag.CACHE_MODE_LOCAL).size());
+//        profilerLog.error("MRLOG: LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache()
+//                .size() );
 //        if(index.getKeysCache().size() != index.getDataCache().size()/2) {
 //            for (Map.Entry<String, Integer> entry : index.getKeysIterator()) {
 //                if (entry.getValue() != 1) {
