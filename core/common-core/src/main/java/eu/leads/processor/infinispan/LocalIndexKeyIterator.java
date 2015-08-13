@@ -40,6 +40,7 @@ public class LocalIndexKeyIterator implements Iterator<Object> {
 //        while(currentCounter <= numberOfValues && counter < 50000){
             batch.add(dataCache.getAsync(key+currentCounter));
             currentCounter--;
+            counter++;
         }
     }
 
