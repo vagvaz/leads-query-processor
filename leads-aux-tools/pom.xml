@@ -14,6 +14,7 @@
    <packaging>pom</packaging>
    <modules>
         <!--<module>data-collection</module>-->
+        <module>bootstrapper</module>
         <module>data-snapshot</module>
         <module>uber-snapshot</module>
        <!--<module>data-reader</module>-->

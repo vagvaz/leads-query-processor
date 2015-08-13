@@ -1,4 +1,4 @@
-package eu.leads.processor.system;
+package boot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
