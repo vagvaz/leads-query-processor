@@ -23,7 +23,7 @@ public class LocalIndexKeyIterator implements Iterator<Object> {
     ProfileEvent event;
     Logger logger;
     public LocalIndexKeyIterator(String key, Integer counter,Map<String,Object> dataCache) {
-        this.currentCounter = numberOfValues;
+        this.currentCounter = counter;
         this.numberOfValues = counter;
         this.key = key;
         this.dataCache  = (Cache<String, Object>) dataCache;
