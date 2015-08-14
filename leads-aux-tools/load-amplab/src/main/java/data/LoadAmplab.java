@@ -90,7 +90,7 @@ public class LoadAmplab {
                 }
                 String ensembleString = args[2];
                 System.out.println("Using ensemble sring " + ensembleString);
-                emanager = new EnsembleCacheManager((ensembleString));
+                emanager = new EnsembleCacheManager(ensembleString);
                 System.out.println("Emanager has " + emanager.sites().size() + " sites");
                 emanager.start();
             }else{
