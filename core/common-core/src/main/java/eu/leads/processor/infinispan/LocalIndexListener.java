@@ -26,6 +26,7 @@ public class LocalIndexListener implements LeadsListener {
     transient Cache keysCache;
     transient Cache dataCache;
     transient Logger log;
+
     public LocalIndexListener(InfinispanManager manager, String cacheName) {
         this.cacheName = cacheName;
     }

@@ -10,12 +10,12 @@ import java.util.Set;
  * Created by vagvaz on 16/07/15.
  */
 public class IntermediateKeyIndex {
-    private Map<String,Integer> keysCache;
-    private Map<String,Object> dataCache;
+    private Cache<String,Integer> keysCache;
+    private Cache<String,Object> dataCache;
     private int putCounter;
     public IntermediateKeyIndex(Map keysCache, Map dataCache) {
-        this.keysCache = keysCache;
-        this.dataCache = dataCache;
+        this.keysCache = (Cache<String, Integer>) keysCache;
+        this.dataCache = (Cache<String, Object>) dataCache;
     }
 
     public void put(String key, Object value){
@@ -26,8 +26,8 @@ public class IntermediateKeyIndex {
             } else {
                 count++;
             }
-            dataCache.put(key + count.toString(), value);
-            keysCache.put(key, count);
+            dataCache.putAsync(key + count.toString(), value);
+            keysCache.putAsync(key, count);
 //            dataCache.get(key+count.toString());
         }
     }
@@ -45,7 +45,7 @@ public class IntermediateKeyIndex {
     }
 
     public void setKeysCache(Map<String, Integer> keysCache) {
-        this.keysCache = keysCache;
+        this.keysCache = (Cache<String, Integer>) keysCache;
     }
 
     public Map<String, Object> getDataCache() {
@@ -53,6 +53,6 @@ public class IntermediateKeyIndex {
     }
 
     public void setDataCache(Map<String, Object> dataCache) {
-        this.dataCache = dataCache;
+        this.dataCache = (Cache<String, Object>) dataCache;
     }
 }
