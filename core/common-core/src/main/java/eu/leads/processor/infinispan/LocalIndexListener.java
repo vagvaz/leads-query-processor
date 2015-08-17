@@ -1,5 +1,6 @@
 package eu.leads.processor.infinispan;
 
+import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.BerkeleyDBIndex;
 import eu.leads.processor.common.LeadsListener;
 import eu.leads.processor.common.StringConstants;
@@ -29,6 +30,7 @@ public class LocalIndexListener implements LeadsListener {
     transient Cache keysCache;
     transient Cache dataCache;
     transient Logger log;
+    transient ProfileEvent pevent;
 
     public LocalIndexListener(InfinispanManager manager, String cacheName) {
         this.cacheName = cacheName;
@@ -73,10 +75,15 @@ public class LocalIndexListener implements LeadsListener {
         }
 
         //        if(event.getKey() instanceof ComplexIntermediateKey) {
+
             ComplexIntermediateKey key = (ComplexIntermediateKey) event.getKey();
 //        System.err.println("PREKey created " + event.getKey() + " key " + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
-        ((Tuple)event.getValue()).setAttribute("__complexKey",key.asString());
+//        if(index instanceof BerkeleyDBIndex) {
+            ((Tuple) event.getValue()).setAttribute("__complexKey", key.asString());
+//        }
+        pevent.start("IndexPut");
         index.put(key.getKey(), event.getValue());
+        pevent.end();
 //            synchronized (mutex){
 //                mutex.notifyAll();
 //            }
@@ -119,7 +126,7 @@ public class LocalIndexListener implements LeadsListener {
         this.index = new LevelDBIndex(StringConstants.TMPPREFIX+"/bdb/"+ manager
             .getCacheManager().getAddress().toString()+cacheName,cacheName+".index");
         log = LoggerFactory.getLogger(LocalIndexListener.class);
-
+        pevent = new ProfileEvent("indexPut",log);
     }
 
     @Override public void initialize(InfinispanManager manager) {
