@@ -75,8 +75,8 @@ public class BerkeleyDBIndex {
     public static void main(String[] args) {
         BerkeleyDBIndex index = new BerkeleyDBIndex("/tmp/testdb/","mydb");
         initTuple();
-        int numberofkeys = 1000;
-        int numberofvalues = 200;
+        int numberofkeys = 200000;
+        int numberofvalues = 2;
         String baseKey= "baseKeyString";
 
         long start = System.nanoTime();

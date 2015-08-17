@@ -90,8 +90,8 @@ public class LevelDBIndex {
     public static void main(String[] args) {
         LevelDBIndex index = new LevelDBIndex("/tmp/testdb/","mydb");
         initTuple();
-        int numberofkeys = 1;
-        int numberofvalues = 200;
+        int numberofkeys = 200000;
+        int numberofvalues = 2;
         String baseKey= "baseKeyString";
 
         long start = System.nanoTime();
@@ -118,7 +118,7 @@ public class LevelDBIndex {
         for(Map.Entry<String,Integer> entry : index.getKeysIterator()){
             counter = 0;
 //            System.out.println("iter key "+entry.getKey());
-            Iterator<Object> iterator = index.getKeyIterator(entry.getKey(),numberofvalues);
+            Iterator<Object> iterator = index.getKeyIterator(entry.getKey(),entry.getValue());
             while(true){
                 try {
                     Tuple t = (Tuple) iterator.next();
@@ -129,7 +129,7 @@ public class LevelDBIndex {
                 }
             }
             if(counter != numberofvalues){
-                System.err.println("Iteration failed for key " + entry.getKey());
+                System.err.println("Iteration failed for key " + entry.getKey() + " c " + counter);
             }
         }
         end = System.nanoTime();
@@ -192,38 +192,8 @@ public class LevelDBIndex {
         dataDB.put(bytes(key+"{}"+counter),encoder.encode(value.asBsonObject()));
     }
 
-    private DatabaseEntry getDBValue(Object valueObject) {
-//        DatabaseEntry result = new DatabaseEntry();
-//        Object value = null;
-//        if(valueObject instanceof TupleWrapper){
-//            value = (TupleWrapper)valueObject;
-//        }
-//        else if (valueObject instanceof Tuple){
-//            value = valueObject;
-//        }
-//        else {
-//
-//            System.err.println("value class of " + valueObject.getClass().toString());
-//        }
-//        tupleBinding.objectToEntry(value,result);
-//        return result;
-        return null;
-    }
 
-    private DatabaseEntry getDBKey(Object keyObject) {
 //
-//        String key = null;
-//        if(keyObject instanceof ComplexIntermediateKey){
-//            key = ((ComplexIntermediateKey)keyObject).asString();
-//        }
-//        else{
-//            //                System.err.println("key class of " + keyObject.getClass().toString());
-//            key = keyObject.toString();
-//        }
-//        DatabaseEntry result = new DatabaseEntry(key.getBytes(Charset.forName("UTF-8")));
-        return null;
-//        return result;
-    }
 
     public void close() {
         if(keyIterator != null){
@@ -247,31 +217,6 @@ public class LevelDBIndex {
             }
         }
 
-//        if(iterator != null)
-//        {
-//            iterator.close();
-//        }
-//        if(keyIterable != null){
-//            keyIterable.close();
-//        }
-//        if (indexDB != null) {
-//            try {
-//                indexDB.close();
-//            } catch (DatabaseException dbe) {
-//                System.err.println("Error closing store: " + dbe.toString());
-//                System.exit(-1);
-//            }
-//        }
-//
-//        if (env != null) {
-//            try {
-//                // Finally, close environment.
-//                env.close();
-//            } catch (DatabaseException dbe) {
-//                System.err.println("Error closing MyDbEnv: " + dbe.toString());
-//                System.exit(-1);
-//            }
-//        }
         baseDirFile = new File(baseDirFile.toString()+"/");
         for(File f : baseDirFile.listFiles())
         {

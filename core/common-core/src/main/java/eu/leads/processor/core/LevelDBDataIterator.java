@@ -25,14 +25,14 @@ public class LevelDBDataIterator implements Iterator<Object> {
     }
 
     @Override public boolean hasNext() {
-        if(currentCounter < total){
+        if(currentCounter <= total){
             return true;
         }
         return false;
     }
 
     @Override public Object next() {
-        if(currentCounter < total){
+        if(currentCounter <= total){
             Map.Entry<byte[],byte[]> entry = iterator.next();
             if(validateKey(entry.getKey())){
                 BasicBSONDecoder decoder = new BasicBSONDecoder();
