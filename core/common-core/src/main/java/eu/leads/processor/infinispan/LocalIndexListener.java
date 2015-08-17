@@ -1,12 +1,11 @@
 package eu.leads.processor.infinispan;
 
-import eu.leads.processor.BerkeleyDBIndex;
+import eu.leads.processor.core.BerkeleyDBIndex;
 import eu.leads.processor.common.LeadsListener;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Tuple;
 import org.infinispan.Cache;
-import org.infinispan.context.Flag;
 import org.infinispan.notifications.Listener;
 import org.infinispan.notifications.cachelistener.annotation.CacheEntryCreated;
 import org.infinispan.notifications.cachelistener.annotation.CacheEntryModified;
@@ -116,7 +115,8 @@ public class LocalIndexListener implements LeadsListener {
         this.keysCache = manager.getLocalCache(cacheName+".index.keys");
         this.dataCache = manager.getLocalCache(cacheName+".index.data");
 //        this.index = new IntermediateKeyIndex(keysCache,dataCache);
-        this.index = new BerkeleyDBIndex(StringConstants.TMPPREFIX+"/bdb/",cacheName+".index");
+        this.index = new BerkeleyDBIndex(StringConstants.TMPPREFIX+"/bdb/"+ manager
+            .getCacheManager().getAddress().toString(),cacheName+".index");
         log = LoggerFactory.getLogger(LocalIndexListener.class);
 
     }

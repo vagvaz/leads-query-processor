@@ -1,8 +1,6 @@
-package eu.leads.processor;
+package eu.leads.processor.core;
 
-import com.sleepycat.bind.serial.StoredClassCatalog;
 import com.sleepycat.je.*;
-import eu.leads.processor.core.*;
 import eu.leads.processor.infinispan.ComplexIntermediateKey;
 
 import java.io.File;
@@ -24,7 +22,8 @@ public class BerkeleyDBIndex {
     TupleWrapperBinding tupleBinding;
 
     BerkeleyDBIterator iterator = null;
-    StoredClassCatalog catalog;
+    private BerkeleyDBKeyIterable keyIterable;
+
     public BerkeleyDBIndex(String baseDir, String dbName) {
         environmentConfig = new EnvironmentConfig();
         environmentConfig.setAllowCreate(true);
@@ -35,6 +34,8 @@ public class BerkeleyDBIndex {
         dbConfig = new DatabaseConfig();
         dbConfig.setTransactional(false);
         dbConfig.setAllowCreate(true);
+        dbConfig.setTemporary(true);
+        dbConfig.setCacheMode(CacheMode.DEFAULT);
 
         dbFile = new File(baseDir);
         dbFile.mkdirs();
@@ -43,13 +44,13 @@ public class BerkeleyDBIndex {
             tupleBinding = new TupleWrapperBinding();
             //            primaryIndex = store.getPrimaryIndex(String.class, TupleWrapper.class);
             //            secondaryIndex = store.getSecondaryIndex(primaryIndex, String.class, "key");
-            dbConfig.setDeferredWrite(true);
+//            dbConfig.setDeferredWrite(true);
+            dbConfig.setTransactional(false);
             dbConfig.setSortedDuplicates(true);
 //            dbConfig.setDuplicateComparator( new DummyComparator());
 
 //            dbConfig.setOverrideDuplicateComparator(true);
             indexDB = env.openDatabase(null,dbName,dbConfig);
-
 
             iterator = new BerkeleyDBIterator(indexDB,"");
         } catch (DatabaseException e) {
@@ -59,7 +60,7 @@ public class BerkeleyDBIndex {
     }
 
     public Iterable<Map.Entry<String,Integer>> getKeysIterator(){
-                BerkeleyDBKeyIterable keyIterable = new BerkeleyDBKeyIterable(indexDB);
+                 keyIterable = new BerkeleyDBKeyIterable(indexDB);
 
         return keyIterable;
     }
@@ -192,6 +193,9 @@ public class BerkeleyDBIndex {
         if(iterator != null)
         {
             iterator.close();
+        }
+        if(keyIterable != null){
+            keyIterable.close();
         }
         if (indexDB != null) {
             try {

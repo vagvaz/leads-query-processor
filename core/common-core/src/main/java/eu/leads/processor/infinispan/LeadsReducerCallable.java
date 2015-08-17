@@ -1,14 +1,9 @@
 package eu.leads.processor.infinispan;
 
-import eu.leads.processor.BerkeleyDBIndex;
+import eu.leads.processor.core.BerkeleyDBIndex;
 import eu.leads.processor.common.LeadsListener;
-import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
-import eu.leads.processor.common.utils.PrintUtilities;
-import eu.leads.processor.common.utils.ProfileEvent;
 import org.infinispan.Cache;
-import org.infinispan.commons.util.CloseableIterable;
-import org.infinispan.context.Flag;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 
 import java.io.Serializable;

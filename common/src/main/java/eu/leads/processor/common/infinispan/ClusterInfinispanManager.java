@@ -431,7 +431,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         else{
           System.err.println("EXPOSED IP = " + externalIP + ":11222");
           serverConfigurationBuilder.host(localhost).port(serverPort).proxyHost(externalIP)
-              .proxyPort(11222);
+              .proxyPort(serverPort);
         }
       }else{
         System.err.println("NO EXTERNAL IP DEFINES SO EXPOSED IP = " + localhost + ":"+serverPort);

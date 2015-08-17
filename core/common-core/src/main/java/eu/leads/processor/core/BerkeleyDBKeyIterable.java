@@ -57,4 +57,7 @@ public class BerkeleyDBKeyIterable implements Iterable<Map.Entry<String,Integer>
     @Override public void remove() {
 
     }
+    public void close(){
+        cursor.close();
+    }
 }
