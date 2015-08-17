@@ -75,13 +75,13 @@ public class LocalIndexListener implements LeadsListener {
         }
 
         //        if(event.getKey() instanceof ComplexIntermediateKey) {
-
+        pevent.start("IndexPut");
             ComplexIntermediateKey key = (ComplexIntermediateKey) event.getKey();
 //        System.err.println("PREKey created " + event.getKey() + " key " + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
 //        if(index instanceof BerkeleyDBIndex) {
-            ((Tuple) event.getValue()).setAttribute("__complexKey", key.asString());
+//            ((Tuple) event.getValue()).setAttribute("__complexKey", key.asString());
 //        }
-        pevent.start("IndexPut");
+
         index.put(key.getKey(), event.getValue());
         pevent.end();
 //            synchronized (mutex){
@@ -99,10 +99,12 @@ public class LocalIndexListener implements LeadsListener {
 //            System.err.println("PREKey modified " + event.getKey() + " key "  + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
             return;
         }
+        pevent.start("IndexPut");
 //        if(event.getKey() instanceof ComplexIntermediateKey) {
             ComplexIntermediateKey key = (ComplexIntermediateKey) event.getKey();
 //            System.err.println("AFTERValue modified " + event.getKey() + " key " + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
             index.put(key.getKey(),event.getValue());
+        pevent.end();
 //            synchronized (mutex){
 //                mutex.notifyAll();
 //            }
