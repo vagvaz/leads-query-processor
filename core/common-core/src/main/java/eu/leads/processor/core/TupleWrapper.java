@@ -2,21 +2,19 @@ package eu.leads.processor.core;
 
 import com.sleepycat.persist.model.*;
 
+import java.io.Serializable;
+
 /**
  * Created by vagvaz on 8/14/15.
  */
-@Entity
-public class TupleWrapper {
-    @PrimaryKey
-    String id;
-    @SecondaryKey(relate= Relationship.MANY_TO_ONE)
+public class TupleWrapper implements Serializable {
+
     String key;
     private Tuple tuple;
 
     public TupleWrapper(){}
 
     public TupleWrapper(String key , int counter, Tuple tuple){
-        id = key+counter;
         this.key = key;
         this.tuple = tuple;
     }

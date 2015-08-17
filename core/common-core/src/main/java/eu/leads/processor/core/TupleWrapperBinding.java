@@ -14,17 +14,21 @@ import java.io.IOException;
  * Created by vagvaz on 8/14/15.
  */
 public class TupleWrapperBinding extends TupleBinding{
-    BSONDecoder decoder = new BasicBSONDecoder();
-    BSONEncoder bsonEncoder = new BasicBSONEncoder();
+
+
+
     @Override public Object entryToObject(TupleInput tupleInput) {
-        TupleWrapper result = new TupleWrapper();
-        result.setKey(tupleInput.readString());
+//        TupleWrapper result = new TupleWrapper();
+//        result.setKey(tupleInput.readString());
+        BSONDecoder decoder = new BasicBSONDecoder();
+        Tuple result = null;
         int size = tupleInput.readInt();
         byte[] tupleBytes = new byte[size];
         try {
             tupleInput.read(tupleBytes);
-            result.setTuple((Tuple) decoder.readObject(tupleBytes));
-        } catch (IOException e) {
+            result= new Tuple( decoder.readObject(tupleBytes));
+//            result.setTuple((Tuple) decoder.readObject(tupleBytes));
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -32,13 +36,16 @@ public class TupleWrapperBinding extends TupleBinding{
     }
 
     @Override public void objectToEntry(Object o, TupleOutput tupleOutput) {
-        TupleWrapper wrapper = (TupleWrapper)o;
-        tupleOutput.writeString(wrapper.getKey());
-        byte[] tupleBytes = bsonEncoder.encode(wrapper.getTuple().asBsonObject());
+//        TupleWrapper wrapper = (TupleWrapper)o;
+        BSONEncoder bsonEncoder = new BasicBSONEncoder();
+        Tuple wrapper = (Tuple)o;
+//        tupleOutput.writeString(wrapper.getKey());
+        byte[] tupleBytes = bsonEncoder.encode(wrapper.asBsonObject());
+//        byte[] tupleBytes = bsonEncoder.encode(wrapper.getTuple().asBsonObject());
         tupleOutput.writeInt(tupleBytes.length);
         try {
             tupleOutput.write(tupleBytes);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

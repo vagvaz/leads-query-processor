@@ -1,12 +1,10 @@
 package eu.leads.processor.infinispan;
 
-import eu.leads.processor.common.infinispan.AcceptAllFilter;
+import eu.leads.processor.core.BerkeleyDBIndex;
+import eu.leads.processor.common.LeadsListener;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
-import eu.leads.processor.common.utils.PrintUtilities;
-import eu.leads.processor.common.utils.ProfileEvent;
+import eu.leads.processor.core.LevelDBIndex;
 import org.infinispan.Cache;
-import org.infinispan.commons.util.CloseableIterable;
-import org.infinispan.context.Flag;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 
 import java.io.Serializable;
@@ -21,7 +19,8 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
     private LeadsReducer<kOut, vOut> reducer = null;
     private LeadsCollector collector;
     private String prefix;
-    private transient IntermediateKeyIndex index;
+    private transient LevelDBIndex index;
+    private transient LeadsListener leadsListener;
     String site;
 
     public LeadsReducerCallable(String cacheName, LeadsReducer<kOut, vOut> reducer, String prefix) {
@@ -68,6 +67,7 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
             if(listener instanceof LocalIndexListener){
                 System.err.println("listener class is " + listener.getClass().toString());
                 LocalIndexListener localIndexListener = (LocalIndexListener) listener;
+                leadsListener = localIndexListener;
                 System.err.println("WaitForAllData");
 //                localIndexListener.waitForAllData();
 
@@ -98,8 +98,8 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
 //        }
         profCallable.end();
         for(Map.Entry<String,Integer> entry : index.getKeysIterator()){
-            LocalIndexKeyIterator iterator =
-                (LocalIndexKeyIterator) index.getKeyIterator(entry.getKey(),entry.getValue());
+            Iterator iterator =
+                 index.getKeyIterator(entry.getKey(),entry.getValue());
             executeOn((kOut)entry.getKey(),iterator);
         }
         //            CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(new LocalDataFilter<K,V>(cdl));
@@ -210,11 +210,13 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
 
     @Override
     public void finalizeCallable() {
-        System.err.println("FINALIZEREPEATLeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache().size() + " input: " + inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size() );
-        profilerLog.error("MRLOGREPEAT: LeadsIndex size " + index.getKeysCache().size() + " data " + index
-                .getDataCache());
+//        System.err.println("FINALIZEREPEATLeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache().size() + " input: " + inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size() );
+//        profilerLog.error("MRLOGREPEAT: LeadsIndex size " + index.getKeysCache().size() + " data " + index
+//                .getDataCache());
             System.err.println("reduce finalize reducer");
         reducer.finalizeTask();
+        index.close();
+        inputCache.removeListener(leadsListener);
 //        ((Cache)index.getDataCache()).stop();
 //        ((Cache)index.getKeysCache()).stop();
         System.err.println("reducer finalizee collector");

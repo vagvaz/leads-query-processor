@@ -431,7 +431,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         else{
           System.err.println("EXPOSED IP = " + externalIP + ":11222");
           serverConfigurationBuilder.host(localhost).port(serverPort).proxyHost(externalIP)
-              .proxyPort(11222);
+              .proxyPort(serverPort);
         }
       }else{
         System.err.println("NO EXTERNAL IP DEFINES SO EXPOSED IP = " + localhost + ":"+serverPort);
@@ -680,7 +680,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             //                                 .location("/tmp/leveldb/data-foo/" + "/")
         .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "-expired/")
             //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
-        .implementationType(LevelDBStoreConfiguration.ImplementationType.AUTO)
+        .implementationType(LevelDBStoreConfiguration.ImplementationType.JNI)
         .blockSize(blockSize * 1024 * 1024).compressionType(compressionType)
         .cacheSize(cacheSize * 1024 * 1024)
         .fetchPersistentState(true)
@@ -771,7 +771,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
                 //                                 .location("/tmp/leveldb/data-foo/" + "/")
             .expiredLocation("/tmp/leadsprocessor-data/expired-" + uniquePath + "/")
                 //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
-            .implementationType(LevelDBStoreConfiguration.ImplementationType.AUTO)
+            .implementationType(LevelDBStoreConfiguration.ImplementationType.JNI)
             .blockSize(blockSize * 1024 * 1024)
             .compressionType(compressionType)
             .cacheSize(cacheSize * 1024 * 1024)

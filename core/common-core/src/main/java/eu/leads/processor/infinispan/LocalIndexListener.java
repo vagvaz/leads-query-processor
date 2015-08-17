@@ -1,9 +1,12 @@
 package eu.leads.processor.infinispan;
 
+import eu.leads.processor.core.BerkeleyDBIndex;
 import eu.leads.processor.common.LeadsListener;
+import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.core.LevelDBIndex;
+import eu.leads.processor.core.Tuple;
 import org.infinispan.Cache;
-import org.infinispan.context.Flag;
 import org.infinispan.notifications.Listener;
 import org.infinispan.notifications.cachelistener.annotation.CacheEntryCreated;
 import org.infinispan.notifications.cachelistener.annotation.CacheEntryModified;
@@ -21,7 +24,7 @@ public class LocalIndexListener implements LeadsListener {
 
     transient private volatile Object mutex ;
     String cacheName;
-    transient IntermediateKeyIndex index;
+    transient LevelDBIndex index;
     transient Cache targetCache;
     transient Cache keysCache;
     transient Cache dataCache;
@@ -39,11 +42,11 @@ public class LocalIndexListener implements LeadsListener {
         this.cacheName = cacheName;
     }
 
-    public IntermediateKeyIndex getIndex() {
+    public LevelDBIndex getIndex() {
         return index;
     }
 
-    public void setIndex(IntermediateKeyIndex index) {
+    public void setIndex(LevelDBIndex index) {
         this.index = index;
     }
 
@@ -72,7 +75,7 @@ public class LocalIndexListener implements LeadsListener {
         //        if(event.getKey() instanceof ComplexIntermediateKey) {
             ComplexIntermediateKey key = (ComplexIntermediateKey) event.getKey();
 //        System.err.println("PREKey created " + event.getKey() + " key " + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
-
+        ((Tuple)event.getValue()).setAttribute("__complexKey",key.asString());
         index.put(key.getKey(), event.getValue());
 //            synchronized (mutex){
 //                mutex.notifyAll();
@@ -112,7 +115,9 @@ public class LocalIndexListener implements LeadsListener {
         this.targetCache = (Cache) manager.getPersisentCache(cacheName);
         this.keysCache = manager.getLocalCache(cacheName+".index.keys");
         this.dataCache = manager.getLocalCache(cacheName+".index.data");
-        this.index = new IntermediateKeyIndex(keysCache,dataCache);
+//        this.index = new IntermediateKeyIndex(keysCache,dataCache);
+        this.index = new LevelDBIndex(StringConstants.TMPPREFIX+"/bdb/"+ manager
+            .getCacheManager().getAddress().toString()+cacheName,cacheName+".index");
         log = LoggerFactory.getLogger(LocalIndexListener.class);
 
     }

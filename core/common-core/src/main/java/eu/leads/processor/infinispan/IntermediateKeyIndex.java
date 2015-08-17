@@ -26,8 +26,8 @@ public class IntermediateKeyIndex {
             } else {
                 count++;
             }
-            dataCache.putAsync(key + count.toString(), value);
-            keysCache.putAsync(key, count);
+            dataCache.put(key + count.toString(), value);
+            keysCache.put(key, count);
 //            dataCache.get(key+count.toString());
         }
     }
@@ -54,5 +54,10 @@ public class IntermediateKeyIndex {
 
     public void setDataCache(Map<String, Object> dataCache) {
         this.dataCache = (Cache<String, Object>) dataCache;
+    }
+
+    public void close(){
+        keysCache.stop();
+        dataCache.stop();
     }
 }
