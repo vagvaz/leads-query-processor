@@ -18,6 +18,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * Created by vagvaz on 8/17/15.
@@ -89,7 +90,7 @@ public class LevelDBIndex {
     public static void main(String[] args) {
         LevelDBIndex index = new LevelDBIndex("/tmp/testdb/","mydb");
         initTuple();
-        int numberofkeys = 1000;
+        int numberofkeys = 1;
         int numberofvalues = 200;
         String baseKey= "baseKeyString";
 
@@ -118,10 +119,14 @@ public class LevelDBIndex {
             counter = 0;
 //            System.out.println("iter key "+entry.getKey());
             Iterator<Object> iterator = index.getKeyIterator(entry.getKey(),numberofvalues);
-            while(iterator.hasNext()){
-                Tuple t = (Tuple) iterator.next();
-//                System.out.println(t.getAttribute("key")+" --- " + t.getAttribute("value"));
-                counter++;
+            while(true){
+                try {
+                    Tuple t = (Tuple) iterator.next();
+                    //                System.out.println(t.getAttribute("key")+" --- " + t.getAttribute("value"));
+                    counter++;
+                }catch(NoSuchElementException e){
+                    break;
+                }
             }
             if(counter != numberofvalues){
                 System.err.println("Iteration failed for key " + entry.getKey());

@@ -3,6 +3,7 @@ package eu.leads.processor.infinispan;
 import eu.leads.processor.core.BerkeleyDBIndex;
 import eu.leads.processor.common.LeadsListener;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
+import eu.leads.processor.core.LevelDBIndex;
 import org.infinispan.Cache;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 
@@ -18,7 +19,7 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
     private LeadsReducer<kOut, vOut> reducer = null;
     private LeadsCollector collector;
     private String prefix;
-    private transient BerkeleyDBIndex index;
+    private transient LevelDBIndex index;
     private transient LeadsListener leadsListener;
     String site;
 

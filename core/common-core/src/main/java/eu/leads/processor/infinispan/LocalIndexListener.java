@@ -4,6 +4,7 @@ import eu.leads.processor.core.BerkeleyDBIndex;
 import eu.leads.processor.common.LeadsListener;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.core.LevelDBIndex;
 import eu.leads.processor.core.Tuple;
 import org.infinispan.Cache;
 import org.infinispan.notifications.Listener;
@@ -23,7 +24,7 @@ public class LocalIndexListener implements LeadsListener {
 
     transient private volatile Object mutex ;
     String cacheName;
-    transient BerkeleyDBIndex index;
+    transient LevelDBIndex index;
     transient Cache targetCache;
     transient Cache keysCache;
     transient Cache dataCache;
@@ -41,11 +42,11 @@ public class LocalIndexListener implements LeadsListener {
         this.cacheName = cacheName;
     }
 
-    public BerkeleyDBIndex getIndex() {
+    public LevelDBIndex getIndex() {
         return index;
     }
 
-    public void setIndex(BerkeleyDBIndex index) {
+    public void setIndex(LevelDBIndex index) {
         this.index = index;
     }
 
@@ -115,7 +116,7 @@ public class LocalIndexListener implements LeadsListener {
         this.keysCache = manager.getLocalCache(cacheName+".index.keys");
         this.dataCache = manager.getLocalCache(cacheName+".index.data");
 //        this.index = new IntermediateKeyIndex(keysCache,dataCache);
-        this.index = new BerkeleyDBIndex(StringConstants.TMPPREFIX+"/bdb/"+ manager
+        this.index = new LevelDBIndex(StringConstants.TMPPREFIX+"/bdb/"+ manager
             .getCacheManager().getAddress().toString()+cacheName,cacheName+".index");
         log = LoggerFactory.getLogger(LocalIndexListener.class);
 
