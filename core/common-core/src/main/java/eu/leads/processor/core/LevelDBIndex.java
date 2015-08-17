@@ -4,6 +4,9 @@ import com.sleepycat.je.DatabaseEntry;
 import com.sleepycat.je.DatabaseException;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.infinispan.ComplexIntermediateKey;
+import org.bson.BSONEncoder;
+import org.bson.BasicBSONDecoder;
+import org.bson.BasicBSONEncoder;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
@@ -11,6 +14,7 @@ import org.iq80.leveldb.Options;
 import static org.iq80.leveldb.impl.Iq80DBFactory.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Map;
@@ -56,21 +60,34 @@ public class LevelDBIndex {
         }
 
     }
+    public  void printKeys(){
+        DBIterator iterator = keysDB.iterator();
+        while(iterator.hasNext()){
+            System.out.println(asString(iterator.next().getKey()));
+        }
 
+        iterator = dataDB.iterator();
+        while(iterator.hasNext()){
+            System.out.println(asString(iterator.next().getKey()));
+        }
+        System.out.println("values-------------\n");
+    }
     public Iterable<Map.Entry<String,Integer>> getKeysIterator(){
-        return new LevelDBIterator(keysDB);
+        keyIterator = new LevelDBIterator(keysDB);
+        return keyIterator;
     }
     public Iterator<Object> getKeyIterator(String key , Integer counter){
-//        if(iterator == null){
-//            iterator = new BerkeleyDBIterator(indexDB,key);
-//        }
-//        iterator.initialize(key);
-//        return iterator;
-        return null;
+        if(valuesIterator == null){
+            valuesIterator = new LevelDBDataIterator(dataDB,key,counter);
+        }
+
+        valuesIterator.initialize(key,counter);
+        return valuesIterator;
+
     }
 
     public static void main(String[] args) {
-        BerkeleyDBIndex index = new BerkeleyDBIndex("/tmp/testdb/","mydb");
+        LevelDBIndex index = new LevelDBIndex("/tmp/testdb/","mydb");
         initTuple();
         int numberofkeys = 1000;
         int numberofvalues = 200;
@@ -92,13 +109,18 @@ public class LevelDBIndex {
 
         System.out.println("Put " + (total) + " in " + (dur) + " avg " + avg);
         int counter  =0;
+
+//        index.printKeys();
+
         start = System.nanoTime();
         //        for(int key = 0; key < numberofkeys; key++) {
         for(Map.Entry<String,Integer> entry : index.getKeysIterator()){
             counter = 0;
+//            System.out.println("iter key "+entry.getKey());
             Iterator<Object> iterator = index.getKeyIterator(entry.getKey(),numberofvalues);
             while(iterator.hasNext()){
                 Tuple t = (Tuple) iterator.next();
+//                System.out.println(t.getAttribute("key")+" --- " + t.getAttribute("value"));
                 counter++;
             }
             if(counter != numberofvalues){
@@ -129,6 +151,8 @@ public class LevelDBIndex {
         t = new Tuple();
         //        int key = 4;
         //        int value = 5;
+        t.setAttribute("key",Integer.toString(key));
+        t.setAttribute("value",Integer.toString(value));
         for(int i = 0 ; i < 10; i++){
             t.setAttribute("key-"+key+"-"+i,key);
             t.setAttribute("value-"+value+"-"+i,value);
@@ -144,9 +168,23 @@ public class LevelDBIndex {
         String key = null;
         Tuple value = null;
 
-
-
-
+        key = keyObject.toString();
+        value = (Tuple) valueObject;
+        byte[] count = keysDB.get(bytes(key+"{}"));
+        Integer counter = -1;
+        if(count == null)
+        {
+            counter = 0;
+        }
+        else{
+            ByteBuffer bytebuf = ByteBuffer.wrap(count);
+            counter = bytebuf.getInt();
+            counter += 1;
+        }
+        byte[] keyvalue = ByteBuffer.allocate(4).putInt(counter).array();
+        keysDB.put(bytes(key+"{}"), keyvalue);
+        BSONEncoder encoder = new BasicBSONEncoder();
+        dataDB.put(bytes(key+"{}"+counter),encoder.encode(value.asBsonObject()));
     }
 
     private DatabaseEntry getDBValue(Object valueObject) {
@@ -183,6 +221,27 @@ public class LevelDBIndex {
     }
 
     public void close() {
+        if(keyIterator != null){
+            keyIterator.close();
+        }
+        if(valuesIterator!= null){
+            valuesIterator.close();
+        }
+        if(keysDB != null){
+            try {
+                keysDB.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if(dataDB != null){
+            try {
+                dataDB.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
 //        if(iterator != null)
 //        {
 //            iterator.close();
@@ -208,12 +267,12 @@ public class LevelDBIndex {
 //                System.exit(-1);
 //            }
 //        }
-//        dbFile = new File(dbFile.toString()+"/");
-//        for(File f : dbFile.listFiles())
-//        {
-//            f.delete();
-//        }
-//        dbFile.delete();
+        baseDirFile = new File(baseDirFile.toString()+"/");
+        for(File f : baseDirFile.listFiles())
+        {
+            f.delete();
+        }
+        baseDirFile.delete();
 
     }
 }

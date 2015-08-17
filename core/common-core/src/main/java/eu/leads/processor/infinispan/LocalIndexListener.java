@@ -116,7 +116,7 @@ public class LocalIndexListener implements LeadsListener {
         this.dataCache = manager.getLocalCache(cacheName+".index.data");
 //        this.index = new IntermediateKeyIndex(keysCache,dataCache);
         this.index = new BerkeleyDBIndex(StringConstants.TMPPREFIX+"/bdb/"+ manager
-            .getCacheManager().getAddress().toString(),cacheName+".index");
+            .getCacheManager().getAddress().toString()+cacheName,cacheName+".index");
         log = LoggerFactory.getLogger(LocalIndexListener.class);
 
     }

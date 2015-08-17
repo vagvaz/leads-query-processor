@@ -38,7 +38,7 @@ public class LevelDBIterator implements Iterable<Map.Entry<String, Integer>>,
             key = new String(entry.getKey());
             ByteBuffer buf =  ByteBuffer.wrap(entry.getValue());
             value = buf.getInt();
-            return new AbstractMap.SimpleEntry<String, Integer>(key, value);
+            return new AbstractMap.SimpleEntry<String, Integer>(key.substring(0,key.length()-2), value);
         }
         return null;
     }
