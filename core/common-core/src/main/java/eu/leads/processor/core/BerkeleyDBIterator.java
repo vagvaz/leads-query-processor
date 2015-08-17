@@ -8,6 +8,7 @@ import com.sleepycat.persist.SecondaryIndex;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Created by vagvaz on 8/14/15.
@@ -78,7 +79,8 @@ public class BerkeleyDBIterator implements Iterator<Object> {
         } catch (DatabaseException e) {
             e.printStackTrace();
         }
-        return null;
+        throw new NoSuchElementException("Iterator no more elements");
+
     }
 
     @Override public void remove() {
@@ -87,6 +89,7 @@ public class BerkeleyDBIterator implements Iterator<Object> {
 
     public void close() {
         try {
+            if(cursor != null)
             cursor.close();
         } catch (DatabaseException e) {
             e.printStackTrace();

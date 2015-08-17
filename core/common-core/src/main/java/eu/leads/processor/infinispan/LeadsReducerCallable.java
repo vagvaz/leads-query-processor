@@ -97,8 +97,8 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
 //        }
         profCallable.end();
         for(Map.Entry<String,Integer> entry : index.getKeysIterator()){
-            LocalIndexKeyIterator iterator =
-                (LocalIndexKeyIterator) index.getKeyIterator(entry.getKey(),entry.getValue());
+            Iterator iterator =
+                 index.getKeyIterator(entry.getKey(),entry.getValue());
             executeOn((kOut)entry.getKey(),iterator);
         }
         //            CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(new LocalDataFilter<K,V>(cdl));
