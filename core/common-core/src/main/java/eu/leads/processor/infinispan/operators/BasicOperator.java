@@ -305,12 +305,12 @@ public abstract class BasicOperator extends Thread implements Operator{
 
     long inputSize = 1;
     long outputSize = 1;
-//    if(input1 != null)
-//      inputSize += input1.size();
-//    if(input2 != null)
-//      inputSize += input2.size();
-//    if(output != null){
-//      outputSize = output.size();
+    if(input1 != null)
+      inputSize += input1.size();
+    if(input2 != null)
+      inputSize += input2.size();
+    if(output != null){
+      outputSize = output.size();
 //    }
 //    else{
 //      outputCache = (BasicCache) manager.getPersisentCache(getOutput());
