@@ -13,24 +13,24 @@ import java.util.Properties;
 /**
  * Created by vagvaz on 02/08/15.
  */
-public class ReadData {
+public class PushData {
     public static void main(String[] args) {
         OutputHandler dummy = new DummyOutputHandler();
 
-        InputHandler inputHandler = new GoraInputHandler();
-        Properties inputConfig = new Properties();
-        inputConfig.setProperty("limit",Integer.toString(200000));
-        inputConfig.setProperty("batchSize",Integer.toString(1000));
-        inputConfig.setProperty("connectionString", "clusterinfo.unineuchatel.ch:11225");
-        inputConfig.setProperty("offset", Integer.toString(55000));
-
-//        InputHandler<String,GenericData.Record> inputHandler = new FileInputHandler();
+//        InputHandler inputHandler = new GoraInputHandler();
 //        Properties inputConfig = new Properties();
-//        inputConfig.setProperty("baseDir", "/tmp/leads/unine");
-////        inputConfig.setProperty("prefix","crawling");
-//        inputConfig.setProperty("limit", "2000000");
-//        inputConfig.put("valueClass", (new GenericData.Record(WebPage.SCHEMA$)));
-//        inputConfig.put("keyClass", String.class);
+//        inputConfig.setProperty("limit",Integer.toString(200000));
+//        inputConfig.setProperty("batchSize",Integer.toString(1000));
+//        inputConfig.setProperty("connectionString", "clusterinfo.unineuchatel.ch:11225");
+//        inputConfig.setProperty("offset", Integer.toString(55000));
+
+        InputHandler<String,WebPage> inputHandler = new FileInputHandler();
+        Properties inputConfig = new Properties();
+        inputConfig.setProperty("baseDir", "/tmp/leads/unine");
+//        inputConfig.setProperty("prefix","crawling");
+        inputConfig.setProperty("limit", "2000000");
+        inputConfig.put("valueClass", (new GenericData.Record(WebPage.SCHEMA$)));
+        inputConfig.put("keyClass", String.class);
 //
 //
 //
@@ -68,7 +68,8 @@ public class ReadData {
         int rejected = 0;
         int processed = 0;
         while(inputHandler.hasNext()){
-            Map.Entry<String,WebPage> entry = (Map.Entry<String,WebPage>) inputHandler.next();
+            Map.Entry<String,WebPage> entry;
+            entry = (Map.Entry<String,WebPage>) inputHandler.next();
 //            Map.Entry<String,GenericData.Record> entry = (Map.Entry<String, GenericData.Record>) inputHandler.next();
             processed++;
             if(processed % 100 == 0){
