@@ -1,11 +1,11 @@
 package eu.leads.infext.proc.batch.exec.part;
 
-import eu.leads.datastore.AbstractDataStore;
-import eu.leads.datastore.DataStoreSingleton;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+
+import eu.leads.datastore.AbstractDataStore;
+import eu.leads.datastore.DataStoreSingleton;
 
 public abstract class AbstractPartialSiteDefiner {
 	

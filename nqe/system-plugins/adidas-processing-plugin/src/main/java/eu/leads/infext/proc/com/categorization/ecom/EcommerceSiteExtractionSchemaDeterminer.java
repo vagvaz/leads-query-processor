@@ -1,12 +1,15 @@
 package eu.leads.infext.proc.com.categorization.ecom;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import eu.leads.infext.logging.ErrorStrings;
 import eu.leads.infext.proc.com.categorization.ecom.model.EcomPageDictionary;
 import eu.leads.infext.proc.com.categorization.ecom.model.EcomSiteDictionary;
 import eu.leads.infext.python.PythonQueueCall;
-
-import java.util.ArrayList;
-import java.util.List;
+import eu.leads.utils.LEADSUtils;
 
 public class EcommerceSiteExtractionSchemaDeterminer {
 
@@ -32,7 +35,7 @@ public class EcommerceSiteExtractionSchemaDeterminer {
 			paramsList.add(ecomPage.basketnode);
 		}
 		
-		PythonQueueCall pyCall = new PythonQueueCall();
+		PythonQueueCall pyCall = new PythonQueueCall(true);
 		List<Object> retValues = pyCall.call(cliName, paramsList);
 		
 		if(retValues != null && retValues.size() >= 12) {

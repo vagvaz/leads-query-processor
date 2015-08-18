@@ -1,9 +1,14 @@
 package eu.leads.infext.proc.com.categorization.ecom;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
 import eu.leads.infext.logging.ErrorStrings;
 import eu.leads.infext.python.PythonQueueCall;
-
-import java.util.List;
+import eu.leads.utils.LEADSUtils;
 
 public class EcommerceNewPageTypeEvaluation {
 	
@@ -34,8 +39,10 @@ public class EcommerceNewPageTypeEvaluation {
 	}
 	
 	private void setEcomAssumption(String string) {
-		if(string.equals("ecom_product"))
+		if(string.equals("ecom_product")) {
+			System.err.println("This is product offering page");
 			ecomAssumption = EcomClassificationEnum.ECOM_PRODUCT_OFFERING_PAGE;
+		}
 		else if(string.equals("ecom_category"))
 			ecomAssumption = EcomClassificationEnum.ECOM_CATEGORY_PAGE;
 		else

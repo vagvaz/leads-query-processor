@@ -95,6 +95,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     if(ensembleHost != null && !ensembleHost.equals("")) {
       tmpprofCallable.start("Start EnsemlbeCacheManager");
       profilerLog.error("EnsembleHost EXIST " + ensembleHost);
+      System.err.println("EnsembleHost EXIST " + ensembleHost);
       emanager = new EnsembleCacheManager(ensembleHost);
 //      emanager.start();
 //      emanager = createRemoteCacheManager();
@@ -103,6 +104,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     }
     else {
       profilerLog.error("EnsembleHost NULL");
+      System.err.println("EnsembleHost NULL");
       tmpprofCallable.start("Start EnsemlbeCacheManager");
       emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
 //      emanager.start();
@@ -147,18 +149,19 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //        .converter((Converter<? super K, ? super V, ?>) filter);
     profExecute.end();
     try {
-        for (Object object : iterable) {
-          Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
 
-          //      V value = inputCache.get(key);
-          K key = (K) entry.getKey();
-          V value = (V) entry.getValue();
+      for (Object object : iterable) {
+        Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
 
-          if (value != null) {
-            profExecute.start("ExOn" + (++count));
-            executeOn((K) key, value);
-            profExecute.end();
-          }
+        //      V value = inputCache.get(key);
+        K key = (K) entry.getKey();
+        V value = (V) entry.getValue();
+
+        if (value != null) {
+//          profExecute.start("ExOn" + (++count));
+          executeOn((K) key, value);
+//          profExecute.end();
+	  }
         }
         iterable.close();
       }catch(Exception e){
@@ -208,7 +211,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
   @Override public void finalizeCallable(){
     try {
-      profCallable.start("finalize");
+      profCallable.start("finalizeBaseCallable");
       EnsembleCacheUtils.waitForAllPuts();
 //      emanager.stop();
 //
@@ -219,7 +222,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       profilerLog.error(("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage() + " cause "));
        PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
       }
-    profCallable.end("finalize");
+    profCallable.end("finalizeBaseCallable");
   }
 
   public void outputToCache(Object key, Object value){

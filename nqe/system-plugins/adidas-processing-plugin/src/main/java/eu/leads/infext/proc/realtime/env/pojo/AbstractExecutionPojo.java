@@ -1,14 +1,14 @@
 package eu.leads.infext.proc.realtime.env.pojo;
 
-import eu.leads.datastore.AbstractDataStore;
-import eu.leads.datastore.DataStoreSingleton;
-import eu.leads.infext.logging.redirect.StdLoggerRedirect;
-import eu.leads.infext.proc.realtime.wrapper.AbstractProcessing;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+
+import eu.leads.datastore.AbstractDataStore;
+import eu.leads.datastore.DataStoreSingleton;
+import eu.leads.infext.logging.redirect.StdLoggerRedirect;
+import eu.leads.infext.proc.realtime.wrapper.AbstractProcessing;
 
 public abstract class AbstractExecutionPojo {
 	
@@ -19,9 +19,9 @@ public abstract class AbstractExecutionPojo {
 	protected List<AbstractProcessing> processingQueue = new ArrayList<>();
 	
 	public AbstractExecutionPojo() throws Exception {
-		StdLoggerRedirect.initLogging();
+//		StdLoggerRedirect.initLogging();
 	}
 
-	public abstract void execute(String uri, String timestamp, String cacheName, HashMap<String, String> cacheColumns);
+	public abstract void execute(String uri, String timestamp, String cacheName, HashMap<String, Object> cacheColumns);
 	
 }

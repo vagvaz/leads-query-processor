@@ -130,6 +130,7 @@ public class IntermediateResultsTest {
         String[] nodes, String[] microClouds) {
         //    IndexedComplexIntermediateKey indexedKey = new IndexedComplexIntermediateKey();
         //    ComplexIntermediateKey ikey = new ComplexIntermediateKey();
+
         for(String node : nodes){
             for(String site : microClouds) {
                 for (String key : keys) {

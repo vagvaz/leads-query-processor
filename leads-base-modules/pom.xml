@@ -13,7 +13,7 @@
    <artifactId>leads-base-modules</artifactId>
    <packaging>pom</packaging>
    <modules>
-      <module>sentiment-module</module>
+       <module>sentiment-module</module>
        <module>pagerank-node</module>
        <module>wp4-rest-client</module>
        <module>sse-module</module>

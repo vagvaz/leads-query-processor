@@ -23,6 +23,10 @@ public class URIVersion implements Comparable<URIVersion> {
 	public String getTimestamp() {
 		return timestamp;
 	}
+	
+	public Long getTimestampL() {
+		return Long.parseLong(timestamp);
+	}	
 
 	public Map<String, Cell> getFamily() {
 		return family;

@@ -1,5 +1,6 @@
 package eu.leads.processor.conf;
 
+import eu.leads.processor.common.StringConstants;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,19 +183,21 @@ public class ConfigurationUtilities {
     }
 
     public static String getPublicIPFromGlobal(String microClusterName, JsonObject globalConfig) {
-        String result = globalConfig.getObject("componentsAddrs").getArray(microClusterName).get(0).toString();
-        String[] ips = result.split(";");
-        Random random = new Random();
-        int index = random.nextInt(ips.length);
-//        if(ips[index].contains(":")){
-//            String[] hostAndPort = ips[index].split(":");
-//            System.out.println("\n\nEXTERNAL IP " + hostAndPort[0]);
-//            log.error("\n\nEXTERNAL IP " + hostAndPort[0]);
-//            return hostAndPort[0];
-//        }
-        System.out.println("\n\nEXTERNAL IP " + ips[index]);
-//        log.error("EXTERNAL IP " + ips[index]);
-            return ips[index];
+//        String result = globalConfig.getObject("componentsAddrs").getArray(microClusterName).get(0).toString();
+//        String[] ips = result.split(";");
+//        Random random = new Random();
+//        int index = random.nextInt(ips.length);
+////        if(ips[index].contains(":")){
+////            String[] hostAndPort = ips[index].split(":");
+////            System.out.println("\n\nEXTERNAL IP " + hostAndPort[0]);
+////            log.error("\n\nEXTERNAL IP " + hostAndPort[0]);
+////            return hostAndPort[0];
+////        }
+        String result =LQPConfiguration.getInstance().getConfiguration().getString(StringConstants.PUBLIC_IP);
+        System.out.println("\n\nEXTERNAL IP " + result);
+////        log.error("EXTERNAL IP " + ips[index]);
+//            return ips[index];
+        return result;
     }
 
     public static String getEnsembleString(JsonObject globalConfig) {

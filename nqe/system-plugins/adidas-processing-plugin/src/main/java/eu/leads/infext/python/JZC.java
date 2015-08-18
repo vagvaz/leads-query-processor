@@ -1,17 +1,18 @@
 package eu.leads.infext.python;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.PollItem;
 import org.zeromq.ZMQ.Socket;
 import org.zeromq.ZMsg;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 public class JZC {
     private static final int REQUEST_TIMEOUT = 1000;
@@ -27,7 +28,6 @@ public class JZC {
 
     private JSONArray tryRequest (ZContext ctx, String endpoint, ZMsg request)
     {
-        //System.out.printf("I: trying echo service at %s…\n",new Object[]{endpoint});
         Socket client = ctx.createSocket(ZMQ.REQ);
         client.connect(endpoint);
 
@@ -36,6 +36,7 @@ public class JZC {
         msg.send(client);
         PollItem[] items = { new PollItem(client, ZMQ.Poller.POLLIN) };
         ZMQ.poll(items, REQUEST_TIMEOUT);
+
         ZMsg reply = null;
         if (items[0].isReadable()) {
             reply = ZMsg.recvMsg(client);
@@ -124,8 +125,8 @@ public class JZC {
                 System.err.println(e.getMessage());
             }
         }
-        else
-        	returnList = null;
+//        else
+//        	returnList = null;
         request.destroy();
         ctx.destroy();
         

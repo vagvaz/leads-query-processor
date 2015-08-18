@@ -27,7 +27,9 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
     transient List<String> columns;
     transient Logger log;
     transient private ProfileEvent groupEvent;
-
+    transient private ProfileEvent mapEvent;
+    transient  private Tuple emptyTuple;
+    transient private StringBuilder builder;
     public GroupByMapper(JsonObject configuration) {
         super(configuration);
         columns = new ArrayList<String>();
@@ -41,7 +43,9 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
    @Override
     public void map(String key, Tuple value, Collector<String, Tuple> collector) {
 //      System.out.println("Called for " + key + "     " + value);
-          StringBuilder builder = new StringBuilder();
+       mapEvent.start("mapEvent");
+
+       builder.delete(0,builder.length());
 //        String tupleId = key.substring(key.indexOf(":"));
         Tuple t = (value);
 //        Tuple t = new Tuple(value);
@@ -57,15 +61,16 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
            collector.emit(outkey, t);
         }else {
 //           System.out.println("**************" + t.asString() + " emit");
-           collector.emit("***" ,  t);
+           collector.emit("***" ,  emptyTuple);
 //           collector.emit("***" ,  t.asString());
         }
+       mapEvent.end();
     }
 
     @Override
     public void initialize() {
        super.initialize();
-
+        emptyTuple = new Tuple();
         isInitialized = true;
 //       System.err.println("-------------Initialize");
         log = LoggerFactory.getLogger(GroupByMapper.class);
@@ -77,7 +82,9 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
           JsonObject current = (JsonObject) columnsIterator.next();
           columns.add(current.getString("name"));
        }
+        builder = new StringBuilder();
         groupEvent = new ProfileEvent("groupbymap",log);
+        mapEvent = new ProfileEvent("groupbymap",log);
     }
 
     @Override protected void finalizeTask() {

@@ -7,6 +7,8 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import org.apache.commons.lang.time.DurationFormatUtils;
+import org.bson.BSONObject;
+import org.bson.BasicBSONObject;
 import org.infinispan.Cache;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
@@ -284,7 +286,7 @@ public class LoadAmplab2 {
                     System.out.println("Stopping import limit reached " + maxTuples + " " );
                     break;
                 }
-                JsonObject data = new JsonObject();
+                BSONObject data = new BasicBSONObject();
 
                 // read line and values separated by commas
                 String[] dataline = keyLine.split(",");
@@ -294,20 +296,20 @@ public class LoadAmplab2 {
                     Class ct = columnType.get(pos);
                     try {
                         if (ct == String.class)
-                            data.putString(fullCollumnName, dataline[pos]);
+                            data.put(fullCollumnName, dataline[pos]);
                         else if (ct == Long.class)
-                            data.putNumber(fullCollumnName, Long.parseLong(dataline[pos]));
+                            data.put(fullCollumnName, Long.parseLong(dataline[pos]));
                         else if (ct == Integer.class)
-                            data.putNumber(fullCollumnName,  Integer.parseInt(dataline[pos]));
+                            data.put(fullCollumnName, Integer.parseInt(dataline[pos]));
                         else if (ct == Float.class)
-                            data.putNumber(fullCollumnName, Float.parseFloat(dataline[pos]));
+                            data.put(fullCollumnName, Float.parseFloat(dataline[pos]));
                         else{
                             System.err.println("Not recognised type, stop importing");
                             return;
                         }
                     } catch (NumberFormatException e) {
                         System.err.println("Line: " + lines + "Parsing error, put random generated float number");
-                        data.putNumber(fullCollumnName, nextFloat(-3, 3));
+                        data.put(fullCollumnName, nextFloat(-3, 3));
                     }
                 }
 
@@ -317,13 +319,13 @@ public class LoadAmplab2 {
                     key += ":" + dataline[primaryKeysPos[i]];
                 }
 
-                put(key, data.toString());
+                put(key, data);
 
-                try {
-                    sizeE+=serialize(data).length;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    sizeE+=serialize(data).length;
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
                 numofEntries++;
                 if (delay > 50)
                     System.out.println("Cache put: " + numofEntries);
@@ -357,7 +359,7 @@ public class LoadAmplab2 {
         return min + r.nextFloat() * (max - min);
     }
 
-    private static void put(String key, String value) {
+    private static void put(String key, BSONObject value) {
         Tuple tuple = new Tuple(value);
         if (remoteCache != null)
 //            remoteCache.put(remoteCache.getName() + ":" + key, tuple);

@@ -1,11 +1,11 @@
 package eu.leads.infext.proc.com.keyword;
 
-import eu.leads.infext.proc.com.keyword.model.Relevance;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import eu.leads.infext.proc.com.keyword.model.Relevance;
 
 public class RelevanceScore {
 

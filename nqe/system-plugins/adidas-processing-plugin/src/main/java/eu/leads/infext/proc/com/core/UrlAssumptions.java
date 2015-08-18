@@ -1,14 +1,17 @@
 package eu.leads.infext.proc.com.core;
 
-import eu.leads.datastore.DataStoreSingleton;
-import eu.leads.utils.LEADSUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import eu.leads.datastore.DataStoreSingleton;
+import eu.leads.utils.LEADSUtils;
 
 public class UrlAssumptions {
 	
@@ -21,7 +24,7 @@ public class UrlAssumptions {
 	 * @param urlFQDNParameters
 	 * @return
 	 */
-	public List<String> getFQDNAssumption(HashMap<String,String> urlFQDNParameters) {
+	public List<String> getFQDNAssumption(HashMap<String,Object> urlFQDNParameters) {
 //		List<String> assumptionsLists = new ArrayList<>();
 //		
 //		long currentTimestamp = LEADSUtils.getTimestamp();
@@ -52,7 +55,7 @@ public class UrlAssumptions {
 //		return assumptionsLists;
 		
 		List<String> assumptionsList = new ArrayList<>();
-		String assump = urlFQDNParameters.get(mapping.getProperty("leads_urldirectory-dir_assumption"));
+		String assump = urlFQDNParameters.get(mapping.getProperty("leads_urldirectory-dir_assumption")).toString();
 		if(assump != null)
 			assumptionsList.add(assump);
 		

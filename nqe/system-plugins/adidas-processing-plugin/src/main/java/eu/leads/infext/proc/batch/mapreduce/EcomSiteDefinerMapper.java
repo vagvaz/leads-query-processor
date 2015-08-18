@@ -1,17 +1,18 @@
 package eu.leads.infext.proc.batch.mapreduce;
 
+import java.util.Map;
+import java.util.Properties;
+import java.util.SortedSet;
+
+import org.infinispan.distexec.mapreduce.Collector;
+import org.infinispan.distexec.mapreduce.Mapper;
+
 import eu.leads.datastore.AbstractDataStore;
 import eu.leads.datastore.DataStoreSingleton;
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.URIVersion;
 import eu.leads.infext.proc.com.categorization.ecom.EcommerceClassification;
 import eu.leads.infext.proc.com.categorization.ecom.model.EcomPageDictionary;
-import org.infinispan.distexec.mapreduce.Collector;
-import org.infinispan.distexec.mapreduce.Mapper;
-
-import java.util.Map;
-import java.util.Properties;
-import java.util.SortedSet;
 
 public class EcomSiteDefinerMapper implements Mapper<Object, Object, Object, Object> {
 	
@@ -31,7 +32,7 @@ public class EcomSiteDefinerMapper implements Mapper<Object, Object, Object, Obj
 		
 		EcomPageDictionary ecomPageDictionary = null;
 		
-		SortedSet<URIVersion> uriCrawlerMdFamilyVersions = dataStore.getLeadsResourceMDFamily(uri, mapping.getProperty("leads_crawler_data"), 1, null);
+		SortedSet<URIVersion> uriCrawlerMdFamilyVersions = dataStore.getLeadsResourceMDFamily(uri, mapping.getProperty("leads_crawler_data"), 1, null, true);
 		if(uriCrawlerMdFamilyVersions != null && !uriCrawlerMdFamilyVersions.isEmpty()) {
 			URIVersion uriCrawlerMdFamilyVersion = uriCrawlerMdFamilyVersions.first();
 			timestamp1 = uriCrawlerMdFamilyVersion.getTimestamp();
@@ -42,7 +43,7 @@ public class EcomSiteDefinerMapper implements Mapper<Object, Object, Object, Obj
 			}
 		}
 		
-		SortedSet<URIVersion> uriCoreMdFamilyVersions = dataStore.getLeadsResourceMDFamily(uri, mapping.getProperty("leads_core"), 1, null);
+		SortedSet<URIVersion> uriCoreMdFamilyVersions = dataStore.getLeadsResourceMDFamily(uri, mapping.getProperty("leads_core"), 1, null, true);
 		if(uriCoreMdFamilyVersions != null && !uriCoreMdFamilyVersions.isEmpty()) {
 			URIVersion uriCoreMdFamilyVersion = uriCoreMdFamilyVersions.first();
 			timestamp2 = uriCoreMdFamilyVersion.getTimestamp();

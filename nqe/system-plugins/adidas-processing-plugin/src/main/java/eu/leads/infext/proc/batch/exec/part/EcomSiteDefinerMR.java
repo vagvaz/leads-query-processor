@@ -1,18 +1,27 @@
 package eu.leads.infext.proc.batch.exec.part;
 
-import eu.leads.datastore.datastruct.Cell;
-import eu.leads.infext.proc.batch.mapreduce.DefaultReducer;
-import eu.leads.infext.proc.batch.mapreduce.EcomSiteDefinerMapper;
-import eu.leads.infext.proc.com.categorization.ecom.EcommerceSiteExtractionSchemaDeterminer;
-import eu.leads.infext.proc.com.categorization.ecom.model.EcomPageDictionary;
-import eu.leads.infext.proc.com.categorization.ecom.model.EcomSiteDictionary;
-import eu.leads.utils.LEADSUtils;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+
 import org.infinispan.Cache;
 import org.infinispan.distexec.mapreduce.MapReduceTask;
 import org.infinispan.distexec.mapreduce.Mapper;
 import org.infinispan.distexec.mapreduce.Reducer;
 
-import java.util.*;
+import eu.leads.datastore.AbstractDataStore;
+import eu.leads.datastore.datastruct.Cell;
+import eu.leads.datastore.datastruct.URIVersion;
+import eu.leads.infext.proc.batch.mapreduce.DefaultReducer;
+import eu.leads.infext.proc.batch.mapreduce.EcomSiteDefinerMapper;
+import eu.leads.infext.proc.com.categorization.ecom.EcommerceClassification;
+import eu.leads.infext.proc.com.categorization.ecom.EcommerceSiteExtractionSchemaDeterminer;
+import eu.leads.infext.proc.com.categorization.ecom.model.EcomPageDictionary;
+import eu.leads.infext.proc.com.categorization.ecom.model.EcomSiteDictionary;
+import eu.leads.utils.LEADSUtils;
 
 /***
  * 
@@ -44,7 +53,8 @@ public class EcomSiteDefinerMR extends AbstractPartialSiteDefiner {
 			int countedPagesNo = dirPagesNo;
 			int ecomPagesNo = 0;
 			
-	        MapReduceTask<Object, Object, Object, Object> task = new MapReduceTask<Object, Object, Object, Object>((Cache<Object, Object>) dataStore.getFamilyStorageHandle(null));
+			// TODO Vaggelis
+	        MapReduceTask<Object, Object, Object, Object> task = new MapReduceTask<Object, Object, Object, Object>((Cache<Object, Object>) new Object());
 	        task.onKeys(dirUris.toArray());
 			
 	        Mapper<Object, Object, Object, Object> ecomSiteDefinerMapper = new EcomSiteDefinerMapper();

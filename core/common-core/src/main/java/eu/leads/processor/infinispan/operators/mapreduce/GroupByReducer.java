@@ -42,6 +42,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
    transient ArrayList<String> aggregateInferred;
    transient Logger log = null;
    transient ProfileEvent groupReducerEvent;
+   transient ProfileEvent reducerEvent;
 
    public GroupByReducer(JsonObject configuration) {
       super(configuration);
@@ -128,6 +129,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
          }
       }
       aggregateInferred = inferFinalAggNames();
+      reducerEvent = new ProfileEvent("reduceEvent",log);
       groupReducerEvent = new ProfileEvent("groupReducer",log);
    }
 
@@ -157,20 +159,22 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
    @Override
    public void reduce(String key, Iterator<Tuple> iterator,LeadsCollector collector) {
       //Reduce takes all the grouped Typles per key
-
+      reducerEvent.start("reduceEvent_1");
       if (key == null || key.equals("")){
          log.error("reduce called with null key? " + (key == null));
          return;
       }
       log.error("Computing values for group " + key + " .");
-      if (!isInitialized) initialize();
+//      if (!isInitialized) initialize();
       resetValues();
       Tuple t = null;
 //        progress();
       //Iterate overall values
       int tuplecounter =0;
+      reducerEvent.end();
       while (true) {
          try {
+            reducerEvent.start("reduceEvent_2");
             tuplecounter++;
             Tuple itTuple = iterator.next();
             if (itTuple == null) {
@@ -179,8 +183,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
                continue;
             }
             t =(itTuple);
-
-
+            reducerEvent.end();
             Iterator<String> funcTypeIterator = functionType.iterator();
             //           Iterator<Object> aggValuesIterator = aggregateValues.iterator();
             Iterator<String> columnTypesIterator = columnTypes.iterator();
@@ -210,6 +213,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
 //            log.error(t.toString());
             break;
          }
+
       }
 
          Iterator<String> nameIterator = aggregateInferred.iterator();
@@ -237,6 +241,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
             log.error(e.getClass() + " " + e.getMessage());
             log.error(iterator.toString());
 //            log.error(t.toString());
+            reducerEvent.end();
             return;
 
          }
@@ -246,7 +251,6 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
          //        System.err.println("tout: " + t.toString());
          //        collector.emit(prefix + key, t.asString());
          collector.emit(prefix + key, t);
-
       return ;
    }
 

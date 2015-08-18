@@ -150,7 +150,7 @@ public class PlannerCatalogWorker extends Verticle {
     webPagesSchema.addColumn("responsetime",Type.INT4);
     webPagesSchema.addColumn("links",Type.TEXT);
     webPagesSchema.addColumn("title",Type.TEXT);
-    webPagesSchema.addColumn("published",Type.INT8);
+    webPagesSchema.addColumn("ts",Type.INT8);
     webPagesSchema.addColumn("pagerank",Type.FLOAT8);
     webPagesSchema.addColumn("sentiment",Type.FLOAT8);
 

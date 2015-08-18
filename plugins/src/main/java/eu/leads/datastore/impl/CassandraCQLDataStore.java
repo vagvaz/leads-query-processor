@@ -1,13 +1,39 @@
 package eu.leads.datastore.impl;
 
-import com.datastax.driver.core.*;
+import static ch.lambdaj.Lambda.filter;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
+
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ColumnDefinitions;
 import com.datastax.driver.core.ColumnDefinitions.Definition;
+import com.datastax.driver.core.DataType;
+import com.datastax.driver.core.Host;
+import com.datastax.driver.core.Metadata;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
+import com.datastax.driver.core.Session;
+import com.datastax.driver.core.SimpleStatement;
+import com.datastax.driver.core.Statement;
+
 import eu.leads.datastore.AbstractDataStore;
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.URIVersion;
-
-import java.util.*;
-import java.util.Map.Entry;
+import eu.leads.utils.LEADSUtils;
 
 public class CassandraCQLDataStore extends AbstractDataStore {
 
@@ -35,7 +61,7 @@ public class CassandraCQLDataStore extends AbstractDataStore {
 
 	@Override
 	public SortedSet<URIVersion> getLeadsResourceMDFamily(String uri,
-			String family, int lastVersions, String beforeTimestamp) {
+			String family, int lastVersions, String timestamp, boolean before) {
 		SortedSet<URIVersion> uriVersions = new TreeSet<URIVersion>();
 		
 		boolean reverse = false;
@@ -47,8 +73,8 @@ public class CassandraCQLDataStore extends AbstractDataStore {
 		String queryP03 = "uri = '" + uri + "'";
 		//
 		String queryP04 = "";
-		if(beforeTimestamp != null) {
-			queryP04 += " AND ts < " + beforeTimestamp;
+		if(timestamp != null) {
+			queryP04 += " AND ts < " + timestamp;
 		}
 		//
 		String queryP05 = "\nORDER BY ts DESC";
@@ -374,6 +400,7 @@ public class CassandraCQLDataStore extends AbstractDataStore {
 	
 	private Iterator<Row> urisIterator = null;
 	
+	@Override
 	public String getFamilyNextUri(String family) {
 		
 		if(urisIterator == null) {
@@ -403,6 +430,18 @@ public class CassandraCQLDataStore extends AbstractDataStore {
 	@Override
 	public Object getFamilyStorageHandle(String familyName) {
 		return session;
+	}
+
+	@Override
+	public List<String> getUsersKeywordsList() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Map<Long, Map<String, Object>> getUsersKeywordsListExt() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

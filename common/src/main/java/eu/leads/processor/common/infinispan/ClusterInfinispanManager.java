@@ -19,6 +19,7 @@ import org.infinispan.eviction.EvictionThreadPolicy;
 import org.infinispan.lifecycle.ComponentStatus;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
+import org.infinispan.persistence.leveldb.configuration.CompressionType;
 import org.infinispan.persistence.leveldb.configuration.LevelDBStoreConfiguration;
 import org.infinispan.persistence.leveldb.configuration.LevelDBStoreConfigurationBuilder;
 import org.infinispan.remoting.transport.Address;
@@ -68,6 +69,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
   private String currentComponent;
   private String externalIP =null;
   private int maxEntries;
+  private int blockSize = 32;
+  private int cacheSize = 64;
+  private CompressionType compressionType = CompressionType.NONE;
   //  private static final EquivalentConcurrentHashMapV8<String, TestResources> testResources = new EquivalentConcurrentHashMapV8<>(AnyEquivalence.getInstance(), AnyEquivalence.getInstance());
 
   /**
@@ -76,6 +80,15 @@ public class ClusterInfinispanManager implements InfinispanManager {
   public ClusterInfinispanManager() {
     host = "0.0.0.0";
     maxEntries = LQPConfiguration.getInstance().getConfiguration().getInt("node.infinispan.maxentries",5000);
+    blockSize = LQPConfiguration.getInstance().getConfiguration().getInt("leads.processor.infinispan.leveldb.blocksize",blockSize);
+    cacheSize = LQPConfiguration.getInstance().getConfiguration().getInt("leads.processor.infinispan.leveldb.cachesize",cacheSize);
+    if(LQPConfiguration.getInstance().getConfiguration().getBoolean("leads.processor.infinispan.leveldb.compression",false)){
+      compressionType =CompressionType.SNAPPY;
+    }
+    else{
+      compressionType = CompressionType.SNAPPY;
+    }
+
 //    System.out.println("maximum entries are " + maxEntries);
 //    log.error("maximum entries are " + maxEntries);
     serverPort = 11222;
@@ -84,6 +97,14 @@ public class ClusterInfinispanManager implements InfinispanManager {
   public ClusterInfinispanManager(EmbeddedCacheManager manager) {
     this.manager = manager;
     maxEntries = LQPConfiguration.getInstance().getConfiguration().getInt("node.infinispan.maxentries",5000);
+    blockSize = LQPConfiguration.getInstance().getConfiguration().getInt("leads.processor.infinispan.leveldb.blocksize",blockSize);
+    cacheSize = LQPConfiguration.getInstance().getConfiguration().getInt("leads.processor.infinispan.leveldb.cachesize",cacheSize);
+    if(LQPConfiguration.getInstance().getConfiguration().getBoolean("leads.processor.infinispan.leveldb.compression",false)){
+      compressionType =CompressionType.SNAPPY;
+    }
+    else{
+      compressionType = CompressionType.SNAPPY;
+    }
 //    System.out.println("maximum entries are " + maxEntries);
 //    log.error("maximum entries are " + maxEntries);
     initDefaultCacheConfig();
@@ -174,7 +195,12 @@ public class ClusterInfinispanManager implements InfinispanManager {
     Configuration configuration = builder.build();
     manager.defineConfiguration("WebPage", configuration);
     //    Cache nutchCache = manager.getCache("WebPage", true);
-
+    if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
+    {
+      host = LQPConfiguration.getConf().getString("node.ip");
+      if(!LQPConfiguration.getConf().getString("node.current.component").equals("planner"))
+        startHotRodServer(manager,host, serverPort);
+    }
 
     getPersisentCache("pagerankCache");
     getPersisentCache("approx_sum_cache");
@@ -213,12 +239,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     manager.getCache("WebPage").addListener(listener);
 
-    if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
-    {
-      host = LQPConfiguration.getConf().getString("node.ip");
-      if(!LQPConfiguration.getConf().getString("node.current.component").equals("planner"))
-        startHotRodServer(manager,host, serverPort);
-    }
+
     //    System.err.println("Loading all the available data from nutch Cache");
     //    final ClusteringDependentLogic cdl = manager.getCache("WebPage").getAdvancedCache().getComponentRegistry()
     //                                           .getComponent
@@ -340,7 +361,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
                 //                                 .location("/tmp/leveldb/data-foo/" + "/")
             .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "-expired/")
                 //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
-            .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
+            .implementationType(LevelDBStoreConfiguration.ImplementationType.AUTO)
+            .blockSize(32*1024*1024)
+            .compressionType(CompressionType.SNAPPY)
+            .cacheSize(64*1024*1024)
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
@@ -400,14 +424,17 @@ public class ClusterInfinispanManager implements InfinispanManager {
 	if(externalIP.contains(":")) {
           String external = externalIP.split(":")[0];
           String portString = externalIP.split(":")[1];
+          System.err.println("EXPOSED IP = " + external + ":"+portString);
           serverConfigurationBuilder.host(localhost).port(serverPort).proxyHost(external)
               .proxyPort(Integer.parseInt(portString));
         }
         else{
+          System.err.println("EXPOSED IP = " + externalIP + ":11222");
           serverConfigurationBuilder.host(localhost).port(serverPort).proxyHost(externalIP)
-              .proxyPort(11222);
+              .proxyPort(serverPort);
         }
       }else{
+        System.err.println("NO EXTERNAL IP DEFINES SO EXPOSED IP = " + localhost + ":"+serverPort);
         serverConfigurationBuilder.host(localhost).port(serverPort);
       }
       //.defaultCacheName("defaultCache");
@@ -645,17 +672,17 @@ public class ClusterInfinispanManager implements InfinispanManager {
       return manager.getCache(cacheName);
     }
     Configuration configuration = new ConfigurationBuilder()
-        .clustering()
-        .cacheMode(CacheMode.LOCAL)
-        .hash().numOwners(1)
+        .clustering().cacheMode(CacheMode.LOCAL)
         .transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
-        .persistence().passivation(true)
+        .persistence().passivation(false)
         .addStore(LevelDBStoreConfigurationBuilder.class)
         .location("/tmp/leadsprocessor-data/leveldb/" + uniquePath + "-data/")
             //                                 .location("/tmp/leveldb/data-foo/" + "/")
         .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "-expired/")
             //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
-        .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
+        .implementationType(LevelDBStoreConfiguration.ImplementationType.JNI)
+        .blockSize(blockSize * 1024 * 1024).compressionType(compressionType)
+        .cacheSize(cacheSize * 1024 * 1024)
         .fetchPersistentState(true)
         .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
         .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
@@ -744,7 +771,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
                 //                                 .location("/tmp/leveldb/data-foo/" + "/")
             .expiredLocation("/tmp/leadsprocessor-data/expired-" + uniquePath + "/")
                 //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
-            .implementationType(LevelDBStoreConfiguration.ImplementationType.JAVA)
+            .implementationType(LevelDBStoreConfiguration.ImplementationType.JNI)
+            .blockSize(blockSize * 1024 * 1024)
+            .compressionType(compressionType)
+            .cacheSize(cacheSize * 1024 * 1024)
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(

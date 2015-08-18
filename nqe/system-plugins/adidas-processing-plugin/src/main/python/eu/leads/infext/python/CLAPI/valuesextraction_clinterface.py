@@ -56,9 +56,13 @@ class AccessPoint:
             extraction_tuples_list = [extraction_tuples_list]       
         
         returnlist = []
+
+ 	if len(extraction_tuples_list) > 1 and isinstance(extraction_tuples_list[1],(int,long)):
+            # that means tuple was given as a list
+            extraction_tuples_list = [extraction_tuples_list]
         
         if len(extraction_tuples_list) > 0:
-        
+                      
             values_extractor = ExtractValues(page_dict)
             verifier = extracthelpersfactory.verifierFactoryMethod(extraction_obj_name)
             miner = extracthelpersfactory.minerFactoryMethod(extraction_obj_name)
@@ -72,6 +76,7 @@ class AccessPoint:
             
         # processing_off(processing)
         # print translateReturnValues(returnlist)
-        return translateReturnValues(returnlist)
+        # return translateReturnValues(returnlist)
+        return returnlist
         
         
