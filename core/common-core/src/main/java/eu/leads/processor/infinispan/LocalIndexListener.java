@@ -83,6 +83,7 @@ public class LocalIndexListener implements LeadsListener {
 //        }
 
         index.put(key.getKey(), event.getValue());
+        targetCache.removeAsync(key.getKey());
         pevent.end();
 //            synchronized (mutex){
 //                mutex.notifyAll();
