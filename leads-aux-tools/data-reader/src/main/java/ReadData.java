@@ -51,7 +51,7 @@ public class ReadData {
 
         Properties outputConfig = new Properties();
         outputConfig.setProperty("nutchData","true");
-        outputConfig.setProperty("baseDir", "/tmp/leads/nutctRaw");
+        outputConfig.setProperty("baseDir", "/tmp/leads/nutchRaw");
         outputConfig.setProperty("filename", "nutch");
         outputConfig.setProperty("valueThreshold", "10000");
         OutputHandler outputHandler = new FileHandlerOutput<String,WebPage>();

@@ -24,10 +24,16 @@ public class PushData {
 //        inputConfig.setProperty("connectionString", "clusterinfo.unineuchatel.ch:11225");
 //        inputConfig.setProperty("offset", Integer.toString(55000));
 
-        InputHandler<String,WebPage> inputHandler = new FileInputHandler();
+        String baseDir = "/tmp/leads/nutchRaw";
+        if (args.length > 0) {
+            baseDir = args[0];
+        }
+        System.out.println("BaseDir " + baseDir);
+
+        InputHandler<String, GenericData.Record> inputHandler = new FileInputHandler();
         Properties inputConfig = new Properties();
-        inputConfig.setProperty("baseDir", "/tmp/leads/unine");
-//        inputConfig.setProperty("prefix","crawling");
+        inputConfig.setProperty("baseDir", baseDir);
+        inputConfig.setProperty("prefix", "nutch");
         inputConfig.setProperty("limit", "2000000");
         inputConfig.put("valueClass", (new GenericData.Record(WebPage.SCHEMA$)));
         inputConfig.put("keyClass", String.class);
@@ -37,68 +43,71 @@ public class PushData {
         inputHandler.initialize(inputConfig);
 
         Properties outputConfig = new Properties();
-        outputConfig.setProperty("nutchData","false");
+        outputConfig.setProperty("nutchData", "true");
         outputConfig.setProperty("baseDir", "/tmp/leads/transform");
         outputConfig.setProperty("filename", "tuples");
         outputConfig.setProperty("valueThreshold", "10000");
-        OutputHandler outputHandler = new FileHandlerOutput<String,Tuple>();
+        String tablename = "emptyName";
+        if (args.length > 2) {
+            tablename = args[1];
+            outputConfig.setProperty("cacheName", tablename);
+            System.out.println(" cacheName: " + tablename);
+        }
+
+        if (args.length > 3) {
+            outputConfig.setProperty("remote", args[2]);
+            System.out.println(" remoteString: " + args[2]);
+        }
+
+
+
+        OutputHandler outputHandler = new CacheOutputHandler();
         outputHandler.initialize(outputConfig);
 
-        outputConfig.setProperty("nutchData","false");
-        outputConfig.setProperty("baseDir","/tmp/leads/sampling");
-        outputConfig.setProperty("filename","tuples");
-        outputConfig.setProperty("valueThreshold", "3");
-        OutputHandler outputHandler2 = new FileHandlerOutput<String,String>();
-        outputHandler2.initialize(outputConfig);
-        outputConfig.setProperty("filename", "nutch");
-        OutputHandler outputHandler3 = new FileHandlerOutput<String,String>();
-        outputHandler3.initialize(outputConfig);
-
-        //        outputHandler = new DummyOutputHandler();
         LQPConfiguration.initialize();
         List<String> mappings = LQPConfiguration.getInstance().getConfiguration().getList("nutch.mappings");
-        Map<String,String> nutchToLQE = new HashMap<String,String>();
+        Map<String, String> nutchToLQE = new HashMap<String, String>();
 
-        for(String mapping : mappings ){
+        for (String mapping : mappings) {
             String[] keyValue = mapping.split(":");
-            nutchToLQE.put(keyValue[0].trim(),keyValue[1].trim());
+            nutchToLQE.put(keyValue[0].trim(), keyValue[1].trim());
         }
         NutchTransformer transformer = new NutchTransformer(nutchToLQE);
-        int counter =0 ;
+        int counter = 0;
         int rejected = 0;
         int processed = 0;
-        while(inputHandler.hasNext()){
-            Map.Entry<String,WebPage> entry;
-            entry = (Map.Entry<String,WebPage>) inputHandler.next();
-//            Map.Entry<String,GenericData.Record> entry = (Map.Entry<String, GenericData.Record>) inputHandler.next();
+        while (inputHandler.hasNext()) {
+            // Map.Entry<String,WebPage> entry;
+//            entry = (Map.Entry<String,WebPage>) inputHandler.next();
+            Map.Entry<String, GenericData.Record> entry = inputHandler.next();
             processed++;
-            if(processed % 100 == 0){
+            if (processed % 100 == 0) {
                 System.err.println("processed " + processed);
             }
 //            Map.Entry<String,GenericData.Record> entry = (Map.Entry<String, GenericData.Record>) inputHandler.next();
 //            if(entry != null)
 //           System.err.println("key: " + entry.getKey() + " value " + entry.getValue().toString() +"\ncontent ==" + );
 //            dummy.append(tuple.getAttribute("url"), tuple);
-            if(entry == null){
+            if (entry == null) {
                 continue;
             }
-            if((entry.getValue().get(entry.getValue().getSchema().getField("content").pos()) != null)) {
-//                Tuple tuple = transformer.transform(entry.getValue());
+            if ((entry.getValue().get(entry.getValue().getSchema().getField("content").pos()) != null)) {
+                Tuple tuple = transformer.transform(entry.getValue());
 //                outputHandler.append(tuple.getAttribute("url"), tuple);
 //                outputHandler2.append(tuple.getAttribute("url"), new JsonObject(tuple.toString()).encodePrettily());
 //                outputHandler3.append(entry.getValue().get(entry.getValue().getSchema().getField("url").pos()).toString(), entry.getValue().toString());
+                String key =  tablename + ":" + entry.getKey();
+                outputHandler.append(key, entry.getValue());
 
-//                outputHandler.append(entry.getKey(), entry.getValue());
-
-                dummy.append(entry.getKey(), entry.getValue());
+                //   dummy.append(entry.getKey(), entry.getValue());
                 counter++;
-                if(counter % 100 == 0){
-                    System.err.println("read " +counter);
+                if (counter % 100 == 0) {
+                    System.err.println("read " + counter);
                 }
-            }else{
+            } else {
 //                System.err.println("reject cause not having content");
                 rejected++;
-                if(rejected % 100==0){
+                if (rejected % 100 == 0) {
                     System.err.println("rejected " + rejected);
                 }
             }
