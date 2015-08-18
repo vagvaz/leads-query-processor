@@ -2,6 +2,7 @@ import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.ensemble.EnsembleCacheManager;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
 
@@ -31,7 +32,8 @@ public class CacheOutputHandler<K,V> implements  OutputHandler<K,V>{
         if(conf.containsKey("remote")){
             String remoteString = conf.getProperty("remote");
             manager = new EnsembleCacheManager(remoteString);
-            cache = manager.getCache(cacheName);
+            cache = manager.getCache(cacheName,new ArrayList<>(manager.sites()),
+                EnsembleCacheManager.Consistency.DIST);
         }
         else{
             cache = (BasicCache) conf.get(cacheName);
