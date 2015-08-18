@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+ /**
+ * A Factory for {@link DataStore}s. DataStoreFactory instances are thread-safe.
+ */
 
 /**
  * Created by vagvaz on 02/08/15.
@@ -19,9 +22,15 @@ public class ReadData {
 
         InputHandler inputHandler = new GoraInputHandler();
         Properties inputConfig = new Properties();
-        inputConfig.setProperty("limit",Integer.toString(200000));
+        inputConfig.setProperty("limit",Integer.toString(1000000));
         inputConfig.setProperty("batchSize",Integer.toString(1000));
-        inputConfig.setProperty("connectionString", "clusterinfo.unineuchatel.ch:11225");
+        //inputConfig.setProperty("connectionString", "clusterinfo.unineuchatel.ch:11225");
+        String ensembleString = "clusterinfo.unineuchatel.ch:11225";
+        ensembleString = "192.42.43.31:11222;192.42.43.31:11223;192.42.43.31:11224;192.42.43.31:11225;192.42.43.31:11226;192.42.43.31:11227;192.42.43.31:11228;192.42.43.31:11229;192.42.43.31:11230";
+        if(args.length>0)
+            ensembleString  = args[0];
+        System.out.println("Using  connection String: " + ensembleString);
+        inputConfig.setProperty("connectionString", ensembleString );
         inputConfig.setProperty("offset", Integer.toString(55000));
 
 //        InputHandler<String,GenericData.Record> inputHandler = new FileInputHandler();
@@ -44,15 +53,15 @@ public class ReadData {
         OutputHandler outputHandler = new FileHandlerOutput<String,Tuple>();
         outputHandler.initialize(outputConfig);
 
-        outputConfig.setProperty("nutchData","false");
-        outputConfig.setProperty("baseDir","/tmp/leads/sampling");
-        outputConfig.setProperty("filename","tuples");
-        outputConfig.setProperty("valueThreshold", "3");
-        OutputHandler outputHandler2 = new FileHandlerOutput<String,String>();
-        outputHandler2.initialize(outputConfig);
-        outputConfig.setProperty("filename", "nutch");
-        OutputHandler outputHandler3 = new FileHandlerOutput<String,String>();
-        outputHandler3.initialize(outputConfig);
+//        outputConfig.setProperty("nutchData","false");
+//        outputConfig.setProperty("baseDir","/tmp/leads/sampling");
+//        outputConfig.setProperty("filename","tuples");
+//        outputConfig.setProperty("valueThreshold", "3");
+       // OutputHandler outputHandler2 = new FileHandlerOutput<String,String>();
+       // outputHandler2.initialize(outputConfig);
+//        outputConfig.setProperty("filename", "nutch");
+        //OutputHandler outputHandler3 = new FileHandlerOutput<String,String>();
+        //outputHandler3.initialize(outputConfig);
 
         //        outputHandler = new DummyOutputHandler();
         LQPConfiguration.initialize();
@@ -68,8 +77,8 @@ public class ReadData {
         int rejected = 0;
         int processed = 0;
         while(inputHandler.hasNext()){
-            Map.Entry<String,WebPage> entry = (Map.Entry<String,WebPage>) inputHandler.next();
-//            Map.Entry<String,GenericData.Record> entry = (Map.Entry<String, GenericData.Record>) inputHandler.next();
+           // Map.Entry<String,WebPage> entry = (Map.Entry<String,WebPage>) inputHandler.next();
+            Map.Entry<String,GenericData.Record> entry = (Map.Entry<String, GenericData.Record>) inputHandler.next();
             processed++;
             if(processed % 100 == 0){
                 System.err.println("processed " + processed);
@@ -82,8 +91,8 @@ public class ReadData {
                 continue;
             }
             if((entry.getValue().get(entry.getValue().getSchema().getField("content").pos()) != null)) {
-//                Tuple tuple = transformer.transform(entry.getValue());
-//                outputHandler.append(tuple.getAttribute("url"), tuple);
+                Tuple tuple = transformer.transform(entry.getValue());
+                outputHandler.append(tuple.getAttribute("url"), tuple);
 //                outputHandler2.append(tuple.getAttribute("url"), new JsonObject(tuple.toString()).encodePrettily());
 //                outputHandler3.append(entry.getValue().get(entry.getValue().getSchema().getField("url").pos()).toString(), entry.getValue().toString());
 
