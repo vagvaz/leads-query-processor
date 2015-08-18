@@ -1,0 +1,12 @@
+ReadData
+args
+1  optional ensembleString eg, clusterinfo.unineuchatel.ch:11225
+2  optional limit Value
+
+output at /tmp/leads/nutchRaw
+
+PushData
+args
+1 inputBaseDir eg. /tmp/leads/nutchRaw
+2 CacheName eg. default.webpages
+3 ensemlbeStrign eg. ip:port;ip:port
