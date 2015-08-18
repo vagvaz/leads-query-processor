@@ -19,7 +19,8 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
     private LeadsReducer<kOut, vOut> reducer = null;
     private LeadsCollector collector;
     private String prefix;
-    private transient LevelDBIndex index;
+//    private transient LevelDBIndex index;
+    private transient IntermediateKeyIndex index;
     private transient LeadsListener leadsListener;
     String site;
 
@@ -73,7 +74,7 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
 
                 System.err.println("getIndex");
                 index = localIndexListener.getIndex();
-                index.flush();
+//                index.flush();
                 break;
             }
         }
