@@ -1,0 +1,18 @@
+COMPILE !!!
+
+use clone and install https://github.com/otrack/gora compile first
+clone and install https://github.com/otrack/Leads-infinispan
+clone and install https://github.com/otrack/nutch BUT use the configuration that is inside the same folder .. nutch-maven-settings.xml
+
+ReadData
+args
+1  optional ensembleString eg, clusterinfo.unineuchatel.ch:11225
+2  optional limit Value
+
+output at /tmp/leads/nutchRaw
+
+PushData
+args
+1 inputBaseDir eg. /tmp/leads/nutchRaw
+2 CacheName eg. default.webpages
+3 ensemlbeString eg. ip:port;ip:port
