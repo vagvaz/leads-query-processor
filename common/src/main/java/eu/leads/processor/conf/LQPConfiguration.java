@@ -88,7 +88,8 @@ public class LQPConfiguration {
                 .getString(StringConstants.PUBLIC_IP,
                     instance.getConfiguration().getString("node.ip")));
         } catch (ConfigurationException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            log.error(e.getMessage());
         }
     }
 

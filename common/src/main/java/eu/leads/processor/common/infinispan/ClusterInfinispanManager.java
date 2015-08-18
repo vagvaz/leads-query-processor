@@ -429,7 +429,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
               .proxyPort(Integer.parseInt(portString));
         }
         else{
-          System.err.println("EXPOSED IP = " + externalIP + ":11222");
+          System.err.println("EXPOSED IP = " + externalIP + ":"+server);
           serverConfigurationBuilder.host(localhost).port(serverPort).proxyHost(externalIP)
               .proxyPort(serverPort);
         }

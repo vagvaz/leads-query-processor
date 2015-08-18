@@ -73,6 +73,7 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
 
                 System.err.println("getIndex");
                 index = localIndexListener.getIndex();
+                index.flush();
                 break;
             }
         }
