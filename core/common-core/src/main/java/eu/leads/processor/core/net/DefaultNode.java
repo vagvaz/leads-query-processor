@@ -412,7 +412,7 @@ public class DefaultNode implements Node, Handler<Long> {
         handler = null;
         if(!getId().endsWith(".log"))
         {
-            logger.error(getId() + " Failed Message: " + msg.toString());
+            logger.error(getId() + " Failed Message: " + messageId + " to " + msg.getString(MessageUtils.TO));
         }
         if (requests.remove(messageId)) {
             comHandler.unregisterRequest(getId() + "-request-" + messageId);

@@ -34,6 +34,11 @@ public class LevelDBDataIterator implements Iterator<Object> {
         if(currentCounter <= total){
             return true;
         }
+        try {
+            iterator.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 
@@ -49,6 +54,11 @@ public class LevelDBDataIterator implements Iterator<Object> {
            // else{
 //                throw new NoSuchElementException("Counter " + currentCounter + " total " + total + " but next returned key " + getKey(entry.getKey()));
 //            }
+        }
+        try {
+            iterator.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         throw new NoSuchElementException("Leveldb Iterator no more values");
     }
@@ -80,12 +90,12 @@ public class LevelDBDataIterator implements Iterator<Object> {
             iterator = data.iterator(readOptions);
             iterator.seekToFirst();
 //            reportState(key,tot);
-            Map.Entry<byte[],byte[]> entry = iterator.peekNext();
-            if(!validateKey(entry.getKey())){
-                System.out.println("Unsuccessful for key " + this.key + " was " + new String(entry.getKey()));
+//            Map.Entry<byte[],byte[]> entry = iterator.peekNext();
+//            if(!validateKey(entry.getKey())){
+//                System.out.println("Unsuccessful for key " + this.key + " was " + new String(entry.getKey()));
                 String searchKey = key + "{}";
                 iterator.seek(searchKey.getBytes());
-            }
+//            }
             return;
         }
         Map.Entry<byte[],byte[]> entry = iterator.peekNext();
