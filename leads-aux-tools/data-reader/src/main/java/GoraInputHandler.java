@@ -4,6 +4,8 @@ import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.NutchTransformer;
 import org.apache.avro.generic.GenericData;
+import org.apache.gora.filter.FilterOp;
+import org.apache.gora.filter.MapFieldValueFilter;
 import org.apache.gora.infinispan.query.InfinispanQuery;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
@@ -11,6 +13,7 @@ import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.nutch.storage.Mark;
 import org.apache.nutch.storage.StorageUtils;
 import org.apache.nutch.storage.WebPage;
 import org.apache.nutch.util.NutchConfiguration;
@@ -32,6 +35,7 @@ public class GoraInputHandler implements InputHandler<String,WebPage> {
     Result currentResult;
     List<Result> listOfResults;
     GenericData.Record record = new GenericData.Record(WebPage.SCHEMA$);
+    MapFieldValueFilter filter = new MapFieldValueFilter();
 
     @Override public void initialize(Properties conf) {
 
@@ -54,10 +58,17 @@ public class GoraInputHandler implements InputHandler<String,WebPage> {
             e.printStackTrace();
         }
 
+        filter.setFieldName(WebPage.Field.MARKERS.getName());
+        filter.setFilterOp(FilterOp.LIKE);
+        filter.setFilterIfMissing(false);
+        filter.setMapKey(Mark.FETCH_MARK.getName());
+        filter.getOperands().add("*");
+
         store.createSchema();
         Query query = store.newQuery();
         query.setFields("key");
         query.setLimit(1);
+        query.setFilter(filter);
         query.execute();
         totalResults = ((InfinispanQuery)query).getResultSize();
         System.out.println("Total amount of pages (in the store): " + totalResults);

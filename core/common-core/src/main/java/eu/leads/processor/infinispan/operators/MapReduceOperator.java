@@ -54,13 +54,13 @@ public abstract class MapReduceOperator extends BasicOperator{
   public void init(JsonObject config) {
     conf.putString("output",getOutput());
     inputCache = (Cache) manager.getPersisentCache(inputCacheName);
-    intermediateCache = (BasicCache) manager.getPersisentCache(intermediateCacheName);
+//    intermediateCache = (BasicCache) manager.getPersisentCache(intermediateCacheName);
     //create Intermediate cache name for data on the same Sites as outputCache
     intermediateDataCache = (BasicCache) manager.getPersisentCache(intermediateCacheName+".data");
     //create Intermediate  keys cache name for data on the same Sites as outputCache;
-    keysCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".keys");
+//    keysCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".keys");
     //createIndexCache for getting all the nodes that contain values with the same key! in a mc
-    indexSiteCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".indexed");
+//    indexSiteCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".indexed");
 //    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
     outputCache = (BasicCache) manager.getPersisentCache(outputCacheName);
     reduceInputCache = (Cache) keysCache;
@@ -75,6 +75,7 @@ public abstract class MapReduceOperator extends BasicOperator{
 
   @Override
   public void cleanup() {
+    inputCache = (Cache) manager.getPersisentCache(inputCacheName);
     super.cleanup();
     if(executeOnlyReduce) {
       intermediateCache.stop();
@@ -93,13 +94,13 @@ public abstract class MapReduceOperator extends BasicOperator{
     Set<String> targetMC = getTargetMC();
     for(String mc : targetMC){
       createCache(mc,getOutput());
-      createCache(mc, intermediateCacheName);
+//      createCache(mc, intermediateCacheName);
       //create Intermediate cache name for data on the same Sites as outputCache
       createCache(mc,intermediateCacheName+".data","localIndexListener");
       //create Intermediate  keys cache name for data on the same Sites as outputCache;
-      createCache(mc,intermediateCacheName+".keys");
+//      createCache(mc,intermediateCacheName+".keys");
       //createIndexCache for getting all the nodes that contain values with the same key! in a mc
-      createCache(mc,intermediateCacheName+".indexed");
+//      createCache(mc,intermediateCacheName+".indexed");
 //    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
 
     }

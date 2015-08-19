@@ -1,4 +1,4 @@
-package eu.leads.processor.system;
+package boot;
 
 import com.jcraft.jsch.*;
 import org.apache.commons.configuration.*;
@@ -19,7 +19,7 @@ import java.util.*;
 /**
  * Created by vagvaz on 8/21/14.
  */
-public class LeadsProcessorBootstrapper2 {
+public class Boot2 {
     static String[] adresses;
     static String[] components;
     static String[] configurationFiles;
@@ -50,7 +50,7 @@ public class LeadsProcessorBootstrapper2 {
     public static void main(String[] args) {
         org.apache.log4j.BasicConfigurator.configure();
 
-        logger = LoggerFactory.getLogger(LeadsProcessorBootstrapper2.class.getCanonicalName());
+        logger = LoggerFactory.getLogger(Boot2.class.getCanonicalName());
 
         componentsXml = new HashMap<>();
         componentsConf = new HashMap<>();
@@ -78,13 +78,10 @@ public class LeadsProcessorBootstrapper2 {
         }
         conf.addConfiguration(xmlConfiguration);
 
-
         baseDir = getStringValue(conf, "baseDir", null, true); //FIX IT using pwd and configuration file path!?
         globalJson = checkandget(conf, "hdfs.user", globalJson, true);
         globalJson = checkandget(conf, "hdfs.prefix", globalJson, true);
         globalJson = checkandget(conf, "hdfs.uri", globalJson, true);
-        //
-
         globalJson = checkandget(conf, "scheduler", globalJson, true);
 
 
@@ -116,7 +113,6 @@ public class LeadsProcessorBootstrapper2 {
                 globalJson.putString("hdfs.uri",hdfs_uri);
             }
         }
-
 
         List<HierarchicalConfiguration> components = ((XMLConfiguration) xmlConfiguration).configurationsAt("processor.component");
         if (components == null) { //Maybe components is jsut empty...
@@ -167,8 +163,15 @@ public class LeadsProcessorBootstrapper2 {
 
         String deploymentType = getStringValue(conf, "deploymentType", "singlecloud", false);
         adresses = conf.getStringArray("adresses");
+        List<HierarchicalConfiguration> cmplXadresses = ((XMLConfiguration) xmlConfiguration).configurationsAt("adresses.MC");
+        if (cmplXadresses == null) { //
+            logger.error("No cmplXadresses found exiting");
+        }
+        for (HierarchicalConfiguration c : cmplXadresses) {
+            ConfigurationNode node = c.getRootNode();
+        }
 
-        if (deploymentType.equals("singlecloud")) {
+            if (deploymentType.equals("singlecloud")) {
             System.out.println("Single cloud deployment");
 
             if (adresses == null) {

@@ -1,6 +1,10 @@
 package eu.leads.processor.infinispan;
 
+import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import org.infinispan.Cache;
+import org.infinispan.commons.util.CloseableIterable;
+import org.infinispan.context.Flag;
+import org.infinispan.filter.KeyValueFilter;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -32,8 +36,10 @@ public class IntermediateKeyIndex {
         }
     }
 
-    public Set<Map.Entry<String,Integer>> getKeysIterator(){
-        return keysCache.entrySet();
+    public Iterable<Map.Entry<String,Integer>> getKeysIterator(){
+        CloseableIterable iterable = keysCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(
+            new AcceptAllFilter());
+        return iterable;
     }
 
     public Iterator<Object> getKeyIterator(String key, Integer counter){
