@@ -21,7 +21,7 @@ import org.vertx.java.core.json.JsonObject;
 /**
  * Created by vagvaz on 16/07/15.
  */
-@Listener(sync = false,primaryOnly = true,clustered = false)
+@Listener(sync = true,primaryOnly = true,clustered = false)
 public class LocalIndexListener implements LeadsListener {
 
     transient private volatile Object mutex ;
@@ -145,26 +145,27 @@ public class LocalIndexListener implements LeadsListener {
     void waitForAllData(){
         System.err.println("get the size of target");
         index.flush();
-        int size  = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size();
+        //int size  = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size();
+//        boolean isEmpty = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).isEmpty();
         //            int size = targetCache.getAdvancedCache().getDataContainer().size();
         //            System.err.println("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
         //            log.error("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
-        System.err.println("Size = " + size + " index ");
-        synchronized (mutex){
-
-
-            while( size > 0){
-//                System.err.println("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
-//                log.error("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
-                try {
-                    mutex.wait(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                 size  = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size();
-                System.err.println("Size = " + size);
-
-            }
-        }
+//        System.err.println("Size = " + isEmpty+ " index ");
+//        synchronized (mutex){
+//
+//
+//            while( !isEmpty){
+////                System.err.println("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
+////                log.error("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
+//                try {
+//                    mutex.wait(10);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+////                 size  = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size();
+////                System.err.println("Size = " + size);
+//                isEmpty = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).isEmpty();
+//            }
+//        }
     }
 }
