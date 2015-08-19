@@ -25,7 +25,7 @@ public class LocalIndexListener implements LeadsListener {
 
     transient private volatile Object mutex ;
     String cacheName;
-    transient IntermediateKeyIndex index;
+    transient LevelDBIndex index;
     transient Cache targetCache;
     transient Cache keysCache;
     transient Cache dataCache;
@@ -44,11 +44,11 @@ public class LocalIndexListener implements LeadsListener {
         this.cacheName = cacheName;
     }
 
-    public IntermediateKeyIndex getIndex() {
+    public LevelDBIndex getIndex() {
         return index;
     }
 
-    public void setIndex(IntermediateKeyIndex index) {
+    public void setIndex(LevelDBIndex index) {
         this.index = index;
     }
 
@@ -83,7 +83,7 @@ public class LocalIndexListener implements LeadsListener {
 //        }
 
         index.put(key.getKey(), event.getValue());
-        targetCache.removeAsync(key.getKey());
+//        targetCache.removeAsync(key.getKey());
         pevent.end();
 //            synchronized (mutex){
 //                mutex.notifyAll();
@@ -125,9 +125,9 @@ public class LocalIndexListener implements LeadsListener {
         this.targetCache = (Cache) manager.getPersisentCache(cacheName);
         this.keysCache = manager.getLocalCache(cacheName+".index.keys");
         this.dataCache = manager.getLocalCache(cacheName+".index.data");
-        this.index = new IntermediateKeyIndex(keysCache,dataCache);
-//        this.index = new LevelDBIndex( System.getProperties().getProperty("java.io.tmpdir")+"/"+StringConstants.TMPPREFIX+"/interm-index/"+ manager
-//            .getCacheManager().getAddress().toString()+cacheName,cacheName+".index");
+//        this.index = new IntermediateKeyIndex(keysCache,dataCache);
+        this.index = new LevelDBIndex( System.getProperties().getProperty("java.io.tmpdir")+"/"+StringConstants.TMPPREFIX+"/interm-index/"+ manager
+            .getCacheManager().getAddress().toString()+cacheName,cacheName+".index");
         log = LoggerFactory.getLogger(LocalIndexListener.class);
         pevent = new ProfileEvent("indexPut",log);
     }
