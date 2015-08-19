@@ -3,7 +3,6 @@ import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.NutchTransformer;
 import org.apache.avro.generic.GenericData;
 import org.apache.nutch.storage.WebPage;
-import org.vertx.java.core.json.JsonObject;
 
 import java.util.HashMap;
 import java.util.List;
@@ -48,13 +47,13 @@ public class PushData {
         outputConfig.setProperty("filename", "tuples");
         outputConfig.setProperty("valueThreshold", "10000");
         String tablename = "emptyName";
-        if (args.length > 2) {
+        if (args.length > 1) {
             tablename = args[1];
             outputConfig.setProperty("cacheName", tablename);
             System.out.println(" cacheName: " + tablename);
         }
 
-        if (args.length > 3) {
+        if (args.length > 2) {
             outputConfig.setProperty("remote", args[2]);
             System.out.println(" remoteString: " + args[2]);
         }
