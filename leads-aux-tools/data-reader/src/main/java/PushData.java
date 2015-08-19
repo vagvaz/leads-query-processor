@@ -96,7 +96,7 @@ public class PushData {
 //                outputHandler2.append(tuple.getAttribute("url"), new JsonObject(tuple.toString()).encodePrettily());
 //                outputHandler3.append(entry.getValue().get(entry.getValue().getSchema().getField("url").pos()).toString(), entry.getValue().toString());
                 String key =  tuple.getAttribute("default.webpages.url");
-                outputHandler.append(key, entry.getValue());
+                outputHandler.append(key, tuple);
 
                 //   dummy.append(entry.getKey(), entry.getValue());
                 counter++;
