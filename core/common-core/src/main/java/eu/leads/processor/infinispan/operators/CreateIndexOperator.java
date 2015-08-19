@@ -30,6 +30,8 @@ import org.vertx.java.core.json.JsonObject;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static eu.leads.processor.common.infinispan.EnsembleCacheUtils.putToCache;
+
 
 public class CreateIndexOperator extends BasicOperator {
 
@@ -123,19 +125,36 @@ public class CreateIndexOperator extends BasicOperator {
   public void run() {
     LeadsIndexHelper lindHelp = new LeadsIndexHelper();
     int i = 0;
+    if(tableName==null)
+    {
+      log.error("EROOORRRR tableName: " + tableName +" null");
+      return;
+    }
     System.out.println("inputCache Size : " + inputCache.getAdvancedCache());
     for (Object key : inputCache.getAdvancedCache().keySet()) {
+      try {
 
-      String ikey = (String) key;
-      Tuple value = (Tuple) inputCache.get(ikey);
 
-      for (int c = 0; c < columnNames.size(); c++) {
-        String column = tableName +'.' +columnNames.get(c);
-        LeadsIndex lInd = lindHelp.CreateLeadsIndex(value.getGenericAttribute(column), ikey, column, tableName);
-        indexCaches.get(c).put(ikey, lInd);
-        sketches.get(c).add(value.getGenericAttribute(column));
+        String ikey = (String) key;
+        Tuple value = (Tuple) inputCache.get(ikey);
+        if (value == null) {
+          log.error("key: " + key + " value null");
+          continue;
+        }
+        for (int c = 0; c < columnNames.size(); c++) {
+          String column = tableName + '.' + columnNames.get(c);
+          LeadsIndex lInd = lindHelp.CreateLeadsIndex(value.getGenericAttribute(column), ikey, column, tableName);
+          putToCache(indexCaches.get(c),ikey, lInd);
+          //indexCaches.get(c).put(ikey, lInd);
+          //sketches.get(c).add(value.getGenericAttribute(column));
+          //if(i%10==0)
+            System.out.println(" Put " + i + " " + column + " c: " + c  + " key: " + key);
+        }
+        i++;
+      }catch (Exception e){
+        System.err.println(" Exception " + i + " " + e.toString());
       }
-      i++;
+
     }
     log.info("Succesfully completed indexing records, columns:" + columnNames.size() + ", data per column:" + i);
    // EnsembleCacheUtils.waitForAllPuts();
