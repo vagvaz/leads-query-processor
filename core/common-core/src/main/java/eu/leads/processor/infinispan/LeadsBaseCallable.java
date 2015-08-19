@@ -130,7 +130,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     profCallable.end("end_setEnv");
     executor = new ThreadPoolExecutor(4,8,5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>(8));
     runnables = new ConcurrentLinkedDeque<>();
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 100; i++) {
       runnables.add(new ExecuteRunnable(this));
     }
   }
@@ -141,7 +141,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       result = runnables.poll();
       while(result == null){
         try {
-          runableMutex.wait(5);
+          runableMutex.wait(10);
         } catch (InterruptedException e) {
           e.printStackTrace();
         }
