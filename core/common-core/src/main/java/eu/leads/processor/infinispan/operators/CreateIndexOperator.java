@@ -150,9 +150,13 @@ public class CreateIndexOperator extends BasicOperator {
           //indexCaches.get(c).put(ikey, lInd);
           //sketches.get(c).add(value.getGenericAttribute(column));
           //if(i%10==0)
-            System.out.println(" Put " + i + " " + column + " c: " + c  + " key: " + key);
+          //
+           if(i%10000==0)
+           System.out.println(" Put " + i + " " + column + " c: " + c  + " key: " + key);
         }
         i++;
+
+
       }catch (Exception e){
         System.err.println(" Exception " + i + " " + e.toString());
       }
