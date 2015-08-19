@@ -45,9 +45,18 @@ public class Boot2 {
     static HashSet<String> webservicesAddrs = new HashSet<>();
     static HashSet<String> log_sinkAddrs = new HashSet<>();
 
+
+    static JsonArray jallAddrs = new JsonArray();
+    static JsonArray jwebServiceAddrs = new JsonArray();
+    static  JsonArray jcomponentsAddrs = new JsonArray();
+    static JsonObject jwebServiceClusterAddrs = new JsonObject();
+    static JsonObject jcomponetsClusterAddrs = new JsonObject();
+
+
+
     private static boolean norun;
 
-    public static void main(String[] args) {
+    public static void readConfiguration(String[] args) {
         org.apache.log4j.BasicConfigurator.configure();
 
         logger = LoggerFactory.getLogger(Boot2.class.getCanonicalName());
@@ -79,12 +88,14 @@ public class Boot2 {
         conf.addConfiguration(xmlConfiguration);
 
         baseDir = getStringValue(conf, "baseDir", null, true); //FIX IT using pwd and configuration file path!?
+
+    }
+
+    public static void get_hdfs_conf() {
         globalJson = checkandget(conf, "hdfs.user", globalJson, true);
         globalJson = checkandget(conf, "hdfs.prefix", globalJson, true);
         globalJson = checkandget(conf, "hdfs.uri", globalJson, true);
         globalJson = checkandget(conf, "scheduler", globalJson, true);
-
-
         if (globalJson.getString("hdfs.uri").equals("obtain")) {
             String hdfs_uri = System.getenv("LEADS_QUERY_ENGINE_HADOOP_FS");//LEADS_CURRENT_CLUSTER");
             if (hdfs_uri == null) {
@@ -109,11 +120,14 @@ public class Boot2 {
                             globalJson.putString("hdfs.uri", yarnpIps.get(0).toString()); //Fix it hardcode for the moment
                         }
                     }
-            }else{
-                globalJson.putString("hdfs.uri",hdfs_uri);
+            } else {
+                globalJson.putString("hdfs.uri", hdfs_uri);
             }
         }
 
+    }
+
+    public static void init_components_configuration() {
         List<HierarchicalConfiguration> components = ((XMLConfiguration) xmlConfiguration).configurationsAt("processor.component");
         if (components == null) { //Maybe components is jsut empty...
             logger.error("No components found exiting");
@@ -151,177 +165,204 @@ public class Boot2 {
                     componentsJson.put(c.getString("name"), modjson);
             }
         }
-        int ip = 0;
+    }
 
-        sleepTime = conf.getInt("startUpDelay", 5);
-
-        JsonArray jallAddrs = new JsonArray();
-        JsonArray jwebServiceAddrs = new JsonArray();
-        JsonArray jcomponentsAddrs = new JsonArray();
-        JsonObject jwebServiceClusterAddrs = new JsonObject();
-        JsonObject jcomponetsClusterAddrs = new JsonObject();
-
-        String deploymentType = getStringValue(conf, "deploymentType", "singlecloud", false);
+    public static void getClusterAdresses() {
         adresses = conf.getStringArray("adresses");
         List<HierarchicalConfiguration> cmplXadresses = ((XMLConfiguration) xmlConfiguration).configurationsAt("adresses.MC");
         if (cmplXadresses == null) { //
-            logger.error("No cmplXadresses found exiting");
+            logger.error("cmplXadresses found");
         }
         for (HierarchicalConfiguration c : cmplXadresses) {
             ConfigurationNode node = c.getRootNode();
+
+
+            System.out.println("Found Cluster : " + c.getString("[@name]"));
+            System.out.println("Cluster Attributes : " + node.getAttributeCount());
+            String puIP = c.getString("node");
+            String name = c.getString("node[@name]");
+            String prIP = c.getString("node[@privateIp]");
+            System.out.println("puIP: " + puIP + " name " + name + " prIP:" + prIP);
+            Iterator<String> sf = c.getKeys();
+            while (sf.hasNext()) {
+                String key = sf.next();
+                System.out.println("Key: " + key + " value " + c.getString(key));
+            }
         }
 
-            if (deploymentType.equals("singlecloud")) {
-            System.out.println("Single cloud deployment");
+    }
 
-            if (adresses == null) {
-                logger.error("No Addrs value in the configuration file and single cloud execution, please add at least <adresses>localhost</adresses> for local execution, Exiting");
-                System.exit(-1);
+    public static void singleCloud(){
+        System.out.println("Single cloud deployment");
+
+        if (adresses == null) {
+            logger.error("No Addrs value in the configuration file and single cloud execution, please add at least <adresses>localhost</adresses> for local execution, Exiting");
+            System.exit(-1);
+        }
+
+        for (String c : adresses)
+            jallAddrs.addString(c);
+
+        jwebServiceAddrs.add(jallAddrs.get(0)); //TODO FIX is run for instances
+
+        //predict where the components should be running
+
+        Set<String> scheduled_components_run = new HashSet<>();
+        //Add all possible compondend adresses to a set
+        int ip = 0;
+        for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
+            for (int i = 0; i < componentsInstances.get(e.getKey()); i++) {
+                scheduled_components_run.add(adresses[ip]);
+                ip = (ip + 1) % adresses.length;
             }
+        }
+        //extract the unique values from the set
+        for (String c : scheduled_components_run)
+            jcomponentsAddrs.addString(c);
 
-            for (String c : adresses)
-                jallAddrs.addString(c);
+        //get env LEADS_CURRENT_CLUSTER and put the json arrays under it
+        String current_cluster = System.getenv("LEADS_QUERY_ENGINE_UCLOUD_NAME");//LEADS_CURRENT_CLUSTER");
+        if (current_cluster == null)
+            current_cluster = "LEADS_CURRENT_CLUSTER";
 
-            jwebServiceAddrs.add(jallAddrs.get(0)); //TODO FIX is run for instances
+        JsonObject JsonClouds = new JsonObject();
+        JsonClouds.putArray(current_cluster, jallAddrs);
+        globalJson.putObject("microclouds", JsonClouds);
 
-            //predict where the components should be running
+        jwebServiceClusterAddrs.putArray(current_cluster, jwebServiceAddrs);
+        jcomponetsClusterAddrs.putArray(current_cluster, jcomponentsAddrs);
 
-            Set<String> scheduled_components_run = new HashSet<>();
-            //Add all possible compondend adresses to a set
-            ip = 0;
-            for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
-                for (int i = 0; i < componentsInstances.get(e.getKey()); i++) {
-                    scheduled_components_run.add(adresses[ip]);
-                    ip = (ip + 1) % adresses.length;
-                }
+        webserviceJson = set_global_addresses(webserviceJson, jwebServiceClusterAddrs, jcomponetsClusterAddrs);
+        log_sinkJson = set_global_addresses(log_sinkJson, jwebServiceClusterAddrs, jcomponetsClusterAddrs);
+
+        //Finally deploy modules !
+        ip = 0;
+        System.out.println(" Deploying log-sink to Ip: " + adresses[ip]); //TODO FIX is run for instances
+        deployComponent("log-sink-module", log_sinkJson, adresses[ip]);
+
+        System.out.println(" Deploying webservice Ip: " + adresses[ip]); //TODO FIX is run for instances
+        deployComponent("processor-webservice", webserviceJson, adresses[ip]);
+        //Deploy other modules
+        for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
+            JsonObject modJson = componentsJson.get(e.getKey());
+            modJson = set_global_addresses(modJson, jwebServiceClusterAddrs, jcomponetsClusterAddrs);
+            for (int i = 0; i < componentsInstances.get(e.getKey()); i++) {
+                deployComponent(e.getKey(), modJson, adresses[ip]);
+                System.out.println("\nStarted : " + e.getKey() + " At: " + adresses[ip] + "Waiting for " + sleepTime + " seconds to start the next module.");
+                ip = (ip + 1) % adresses.length;
             }
-            //extract the unique values from the set
-            for (String c : scheduled_components_run)
-                jcomponentsAddrs.addString(c);
+        }
 
-            //get env LEADS_CURRENT_CLUSTER and put the json arrays under it
-            String current_cluster = System.getenv("LEADS_QUERY_ENGINE_UCLOUD_NAME");//LEADS_CURRENT_CLUSTER");
-            if (current_cluster == null)
-                current_cluster = "LEADS_CURRENT_CLUSTER";
+    }
 
-            JsonObject JsonClouds = new JsonObject();
-            JsonClouds.putArray(current_cluster,jallAddrs);
-            globalJson.putObject("microclouds", JsonClouds);
 
-            jwebServiceClusterAddrs.putArray(current_cluster, jwebServiceAddrs);
-            jcomponetsClusterAddrs.putArray(current_cluster, jcomponentsAddrs);
+    public static void multiCloud(){
+        //multicloud deployment
+        System.out.println("Multi-cloud deployment");
+        System.exit(-1);
 
-            webserviceJson = set_global_addresses(webserviceJson, jwebServiceClusterAddrs, jcomponetsClusterAddrs);
-            log_sinkJson = set_global_addresses(log_sinkJson, jwebServiceClusterAddrs, jcomponetsClusterAddrs);
 
-            //Finally deploy modules !
-            ip = 0;
-            System.out.println(" Deploying log-sink to Ip: " + adresses[ip]); //TODO FIX is run for instances
-            deployComponent("log-sink-module", log_sinkJson, adresses[ip]);
+        logger.info("Assuming that all the adresses shall be retrieved from the microclouds.json file.");
+        //globalJson.putObject("microclouds", salt_get("leads_query-engine.map", true));
 
-            System.out.println(" Deploying webservice Ip: " + adresses[ip]); //TODO FIX is run for instances
-            deployComponent("processor-webservice", webserviceJson, adresses[ip]);
-            //Deploy other modules
-            for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
-                JsonObject modJson = componentsJson.get(e.getKey());
-                modJson = set_global_addresses(modJson, jwebServiceClusterAddrs, jcomponetsClusterAddrs);
-                for (int i = 0; i < componentsInstances.get(e.getKey()); i++) {
-                    deployComponent(e.getKey(), modJson, adresses[ip]);
-                    System.out.println("\nStarted : " + e.getKey() + " At: " + adresses[ip] + "Waiting for " + sleepTime + " seconds to start the next module.");
-                    ip = (ip + 1) % adresses.length;
-                }
+        String JsonCloudsEnv = System.getenv("LEADS_QUERY_ENGINE_CLUSTER_TOPOLOGY");//LEADS_CURRENT_CLUSTER");
+        JsonObject JsonClouds;
+        if (JsonCloudsEnv == null)
+            JsonClouds = read_salt(getJsonfile(baseDir + "microclouds.json", false), true);
+        else
+            JsonClouds = read_salt(new JsonObject(JsonCloudsEnv), true);
+
+        globalJson.putObject("microclouds", JsonClouds);
+
+        //execute webservice in all clouds
+
+        //TODO
+        //Verify that available nodes are accessible
+
+        //predicted adresses of running  components
+        //predict-prederermine webservice modules adresses //todo make also use of # of instances variable
+        JsonArray componentsInstancesNames = new JsonArray(); //An array that keeps the order of the components executed
+        for (Map.Entry<String, JsonObject> e : componentsJson.entrySet())
+            for (int i = 0; i < componentsInstances.get(e.getKey()); i++)
+                componentsInstancesNames.addString(e.getKey());
+
+        JsonObject compAlladresses = new JsonObject();
+        JsonObject webserviceAlladresses = new JsonObject();
+
+        int instancesCnt = 0;
+        for (Map.Entry<String, JsonArray> entry : allmcAddrs.entrySet()) {//TODO fix multicloud only with obtain
+            JsonArray pAddrs = entry.getValue();
+            JsonArray clusterComponentsAddressed = new JsonArray();
+            JsonArray clusterWebServiceAddressed = new JsonArray();
+            if (pAddrs.size() == 0)
+                continue;
+
+            for (int i = 0; i < pAddrs.size() && i < componentsInstances.get("webservice"); i++) {
+                clusterWebServiceAddressed.addString((String) pAddrs.get(i));
+                webservicesAddrs.add((String) pAddrs.get(i));
             }
+            //for all available ips of current microcloud that are used save them to a set
+            for (int s = 0; s < pAddrs.size() && instancesCnt < componentsInstancesNames.size(); s++) {
+                clusterComponentsAddressed.addString((String) pAddrs.get(s));
+                logger.info("Curcomp" + componentsInstancesNames.get(instancesCnt) + " instances " + componentsInstances.get(componentsInstancesNames.get(instancesCnt)));
 
+
+                //Also write the cluster name in a text file into home dir ...
+                remoteExecute((String) pAddrs.get(s), "echo " + entry.getKey() + " > ~/micro_cloud.txt");
+                instancesCnt++;
+            }
+            compAlladresses.putArray(entry.getKey(), clusterComponentsAddressed);
+            webserviceAlladresses.putArray(entry.getKey(), clusterWebServiceAddressed);
+            if (instancesCnt >= componentsInstancesNames.size()) {
+                break;
+            }
+        }
+        /////////////////
+        //set also global variable adresses to
+        webserviceJson = set_global_addresses(webserviceJson, webserviceAlladresses, compAlladresses);
+        log_sinkJson = set_global_addresses(log_sinkJson, webserviceAlladresses, compAlladresses);
+        instancesCnt = 0;
+        for (Map.Entry<String, JsonArray> entry : allmcAddrs.entrySet()) {
+            JsonArray pAddrs = entry.getValue();
+            if (pAddrs.size() == 0)
+                continue;
+
+            //deploy at least one log one webservice modules to each microcloud
+            for (int i = 0; i < pAddrs.size() && i < componentsInstances.get("log-sink"); i++) {
+                System.out.println(" Deploying log-sink to: " + entry.getKey() + " Ip: " + pAddrs.get(i));
+                deployComponent("log-sink-module", log_sinkJson, pAddrs.get(i).toString());
+            }
+            for (int i = 0; i < pAddrs.size() && i < componentsInstances.get("webservice"); i++) {
+
+                System.out.println(" Deploying webservice to: " + entry.getKey() + " Ip: " + pAddrs.get(i));
+                deployComponent("processor-webservice", webserviceJson, pAddrs.get(i).toString());
+            }
+            //TODO Check if successfull deployment ...
+
+            //deploy all other components
+            for (int s = 0; s < pAddrs.size() && instancesCnt < componentsInstancesNames.size(); s++) {
+                JsonObject modJson = componentsJson.get(componentsInstancesNames.get(instancesCnt));
+                modJson = set_global_addresses(modJson, webserviceAlladresses, compAlladresses);
+                deployComponent(componentsInstancesNames.get(instancesCnt).toString(), modJson, pAddrs.get(s).toString());
+                System.out.println("\nStarted : " + componentsInstancesNames.get(instancesCnt) + " At: " + pAddrs.get(s).toString() + "Waiting for " + sleepTime + " seconds to start the next module.");
+                instancesCnt++;
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+
+        readConfiguration(args);
+        get_hdfs_conf();
+        init_components_configuration();
+        sleepTime = conf.getInt("startUpDelay", 5);
+         getClusterAdresses();
+        String deploymentType = getStringValue(conf, "deploymentType", "singlecloud", false);
+
+        if (deploymentType.equals("singlecloud")) {
+            singleCloud();
         } else if (deploymentType.equals("multicloud")) {
-            //multicloud deployment
-            System.out.println("Multi-cloud deployment");
-
-            logger.info("Assuming that all the adresses shall be retrieved from the microclouds.json file.");
-            //globalJson.putObject("microclouds", salt_get("leads_query-engine.map", true));
-
-            String JsonCloudsEnv = System.getenv("LEADS_QUERY_ENGINE_CLUSTER_TOPOLOGY");//LEADS_CURRENT_CLUSTER");
-            JsonObject JsonClouds;
-            if (JsonCloudsEnv == null)
-                JsonClouds =  read_salt(getJsonfile(baseDir + "microclouds.json", false), true);
-            else
-                JsonClouds =  read_salt(new JsonObject(JsonCloudsEnv),true);
-
-            globalJson.putObject("microclouds", JsonClouds);
-
-            //execute webservice in all clouds
-
-            //TODO
-            //Verify that available nodes are accessible
-
-            //predicted adresses of running  components
-            //predict-prederermine webservice modules adresses //todo make also use of # of instances variable
-            JsonArray componentsInstancesNames = new JsonArray(); //An array that keeps the order of the components executed
-            for (Map.Entry<String, JsonObject> e : componentsJson.entrySet())
-                for (int i = 0; i < componentsInstances.get(e.getKey()); i++)
-                    componentsInstancesNames.addString(e.getKey());
-
-            JsonObject compAlladresses = new JsonObject();
-            JsonObject webserviceAlladresses = new JsonObject();
-
-            int instancesCnt = 0;
-            for (Map.Entry<String, JsonArray> entry : allmcAddrs.entrySet()) {//TODO fix multicloud only with obtain
-                JsonArray pAddrs = entry.getValue();
-                JsonArray clusterComponentsAddressed = new JsonArray();
-                JsonArray clusterWebServiceAddressed = new JsonArray();
-                if (pAddrs.size() == 0)
-                    continue;
-
-                for (int i = 0; i < pAddrs.size() && i < componentsInstances.get("webservice"); i++) {
-                    clusterWebServiceAddressed.addString((String) pAddrs.get(i));
-                    webservicesAddrs.add((String) pAddrs.get(i));
-                }
-                //for all available ips of current microcloud that are used save them to a set
-                for (int s = 0; s < pAddrs.size() && instancesCnt < componentsInstancesNames.size(); s++) {
-                    clusterComponentsAddressed.addString((String) pAddrs.get(s));
-                    logger.info("Curcomp" + componentsInstancesNames.get(instancesCnt) + " instances " + componentsInstances.get(componentsInstancesNames.get(instancesCnt)));
-
-
-                    //Also write the cluster name in a text file into home dir ...
-                    remoteExecute((String) pAddrs.get(s), "echo " + entry.getKey() + " > ~/micro_cloud.txt");
-                    instancesCnt++;
-                }
-                compAlladresses.putArray(entry.getKey(), clusterComponentsAddressed);
-                webserviceAlladresses.putArray(entry.getKey(), clusterWebServiceAddressed);
-                if (instancesCnt >= componentsInstancesNames.size()) {
-                    break;
-                }
-            }
-            /////////////////
-            //set also global variable adresses to
-            webserviceJson = set_global_addresses(webserviceJson, webserviceAlladresses, compAlladresses);
-            log_sinkJson = set_global_addresses(log_sinkJson, webserviceAlladresses, compAlladresses);
-            instancesCnt = 0;
-            for (Map.Entry<String, JsonArray> entry : allmcAddrs.entrySet()) {
-                JsonArray pAddrs = entry.getValue();
-                if (pAddrs.size() == 0)
-                    continue;
-
-                //deploy at least one log one webservice modules to each microcloud
-                for (int i = 0; i < pAddrs.size() && i < componentsInstances.get("log-sink"); i++) {
-                    System.out.println(" Deploying log-sink to: " + entry.getKey() + " Ip: " + pAddrs.get(i));
-                    deployComponent("log-sink-module", log_sinkJson, pAddrs.get(i).toString());
-                }
-                for (int i = 0; i < pAddrs.size() && i < componentsInstances.get("webservice"); i++) {
-
-                    System.out.println(" Deploying webservice to: " + entry.getKey() + " Ip: " + pAddrs.get(i));
-                    deployComponent("processor-webservice", webserviceJson, pAddrs.get(i).toString());
-                }
-                //TODO Check if successfull deployment ...
-
-                //deploy all other components
-                for (int s = 0; s < pAddrs.size() && instancesCnt < componentsInstancesNames.size(); s++) {
-                    JsonObject modJson = componentsJson.get(componentsInstancesNames.get(instancesCnt));
-                    modJson = set_global_addresses(modJson, webserviceAlladresses, compAlladresses);
-                    deployComponent(componentsInstancesNames.get(instancesCnt).toString(), modJson, pAddrs.get(s).toString());
-                    System.out.println("\nStarted : " + componentsInstancesNames.get(instancesCnt) + " At: " + pAddrs.get(s).toString() + "Waiting for " + sleepTime + " seconds to start the next module.");
-                    instancesCnt++;
-                }
-            }
+            multiCloud();
         }
     }
 
