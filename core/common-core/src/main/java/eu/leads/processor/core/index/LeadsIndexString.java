@@ -9,13 +9,13 @@ import java.io.Serializable;
  */
 @Indexed
 public class LeadsIndexString implements Serializable, LeadsIndex {
-    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
-    private String cacheName;
-    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
-    private String  attributeName;
+//    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
+//    private String cacheName;
+//    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
+//    private String  attributeName;
     @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
     private String attributeValue;
-    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
+    @Field(index= Index.NO, analyze= Analyze.NO, store= Store.YES)
     private String keyName;
 
     public LeadsIndexString(){
@@ -23,7 +23,7 @@ public class LeadsIndexString implements Serializable, LeadsIndex {
     }
 
     public void setCacheName(String cacheName) {
-        this.cacheName = cacheName;
+        ;//this.cacheName = cacheName;
     }
 
     public void setKeyName(String keyName) {
@@ -31,7 +31,7 @@ public class LeadsIndexString implements Serializable, LeadsIndex {
     }
 
     public void setAttributeName(String attributeName) {
-        this.attributeName = attributeName;
+       ;// this.attributeName = attributeName;
     }
 
     public void setAttributeValue(Object attributeValue) {
@@ -39,7 +39,8 @@ public class LeadsIndexString implements Serializable, LeadsIndex {
     }
 
     public String getCacheName() {
-        return cacheName;
+        return "er";
+        //return cacheName;
     }
 
     public String getKeyName() {
@@ -47,7 +48,8 @@ public class LeadsIndexString implements Serializable, LeadsIndex {
     }
 
     public String getAttributeName() {
-        return attributeName;
+        return "er";
+        //return attributeName;
     }
 
     public Object getAttributeValue() {

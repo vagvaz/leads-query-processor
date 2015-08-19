@@ -67,6 +67,8 @@ public class CreateIndexOperator extends BasicOperator {
       emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
       emanager.start();
     }
+    System.out.println("Emanager has " + emanager.sites().size() + " sites");
+
 
     String CreateIndexJ = conf.getString("rawquery");
 
