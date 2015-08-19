@@ -1,6 +1,7 @@
 package eu.leads.processor.conf;
 
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import org.apache.commons.configuration.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +79,8 @@ public class LQPConfiguration {
             if (!lite) {
                 updateConfigurationFiles();
             }
+            System.out.println("Initializing EnsembleCacheUtils");
+            EnsembleCacheUtils.initialize();
         }
     }
 

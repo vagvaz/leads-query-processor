@@ -22,7 +22,7 @@ public class LevelDBIndex {
     private Options options;
     private LevelDBIterator keyIterator;
     private LevelDBDataIterator valuesIterator;
-    private int batchSize = 8000;
+    private int batchSize = 18000;
     private int batchCount =0;
     private WriteBatch batch;
     private WriteBatch keyBatch;
@@ -52,8 +52,8 @@ public class LevelDBIndex {
         //            .getInt("leads.processor.infinispan.leveldb.cachesize", 256)*1024*1024);
         options.blockSize(16*1024 * 1024);
 
-        options.compressionType(CompressionType.SNAPPY);
-        options.cacheSize( 256 * 1024*1024);
+//        options.compressionType(CompressionType.SNAPPY);
+        options.cacheSize( 160 * 1024*1024);
         try {
             keysDB = factory.open(keydbFile,options);
             dataDB = factory.open(datadbFile,options);
@@ -84,9 +84,9 @@ public class LevelDBIndex {
         return keyIterator;
     }
     public Iterator<Object> getKeyIterator(String key , Integer counter){
-        if(valuesIterator == null){
+//        if(valuesIterator == null){
             valuesIterator = new LevelDBDataIterator(dataDB,key,counter);
-        }
+//        }
 
         valuesIterator.initialize(key,counter);
         return valuesIterator;
@@ -152,11 +152,12 @@ public class LevelDBIndex {
         System.out.println("exit---");
     }
 
-    public void flush() {
+    public synchronized void flush() {
         try {
 
             dataDB.write(batch,writeOptions);
             batch.close();
+            batch = dataDB.createWriteBatch();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -265,6 +266,7 @@ public class LevelDBIndex {
         }
         if(dataDB != null){
             try {
+                batch.close();
                 dataDB.close();
             } catch (IOException e) {
                 e.printStackTrace();
