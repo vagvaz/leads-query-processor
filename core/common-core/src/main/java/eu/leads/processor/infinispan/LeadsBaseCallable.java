@@ -128,7 +128,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
     initialize();
     profCallable.end("end_setEnv");
-    executor = new ThreadPoolExecutor(4,8,5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>(8));
+    executor = new ThreadPoolExecutor(4,12,5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
     runnables = new ConcurrentLinkedDeque<>();
     for (int i = 0; i < 100; i++) {
       runnables.add(new ExecuteRunnable(this));
