@@ -133,6 +133,8 @@ public class CreateIndexOperator extends BasicOperator {
       return;
     }
     System.out.println("inputCache Size : " + inputCache.getAdvancedCache());
+    long timeStart = System.currentTimeMillis();
+    int reportRate= 100000;
     for (Object key : inputCache.getAdvancedCache().keySet()) {
       try {
 
@@ -151,8 +153,11 @@ public class CreateIndexOperator extends BasicOperator {
           //sketches.get(c).add(value.getGenericAttribute(column));
           //if(i%10==0)
           //
-           if(i%10000==0)
-           System.out.println(" Put " + i + " " + column + " c: " + c  + " key: " + key);
+           if(i%100000==0) {
+             long time2 = System.currentTimeMillis();
+             System.out.println(" Put " + i + " Time: " + (time2-timeStart)/1000.0 + " Rate t/s" + reportRate/((time2-timeStart)/1000.0) );
+             timeStart=time2;
+           }
         }
         i++;
 
