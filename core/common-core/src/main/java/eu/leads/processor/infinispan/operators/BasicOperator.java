@@ -319,7 +319,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     if(outputSize == 0){
       outputSize =1;
     }
-    System.out.println("In#: " + inputSize + " Out#:" + outputSize + " Execution time: " + (endTime - startTime) / 1000.0 + " s");
+    System.err.println("In#: " + inputSize + " Out#:" + outputSize + " Execution time: " + (endTime - startTime) / 1000.0 + " s");
 //    updateStatisticsCache(inputSize, outputSize, (endTime - startTime));
   }
 

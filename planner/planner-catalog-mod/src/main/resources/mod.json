@@ -5,7 +5,7 @@
 //  "includes" : "gr.tuc.softnet~nqe-processor-mod~1.0-SNAPSHOT",
     "includes":"gr.tuc.softnet~planner-comp-mod~1.0-SNAPSHOT",
   "worker": true,
-  "multi-threaded" : true,
+//  "multi-threaded" : true,
 
   // If your module is going to be registered in the Vert.x module registry you will also need the following
   // mandatory fields
