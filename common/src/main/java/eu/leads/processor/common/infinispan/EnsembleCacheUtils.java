@@ -104,7 +104,7 @@ public class EnsembleCacheUtils {
         while(executor.getActiveCount() > 0)
         try {
 //            executor.awaitTermination(100,TimeUnit.MILLISECONDS);
-            Thread.sleep(10);
+            Thread.sleep(0,100000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

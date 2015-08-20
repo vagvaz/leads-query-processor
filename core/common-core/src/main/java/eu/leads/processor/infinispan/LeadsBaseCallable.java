@@ -146,11 +146,12 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //    synchronized (runableMutex){
       result = runnables.poll();
       while(result == null){
-//        try {
+        try {
 //         Thread.sleep(1);
-//        } catch (InterruptedException e) {
-//          e.printStackTrace();
-//        }
+        Thread.sleep(0,100000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
         result = runnables.poll();
       }
 //    }
