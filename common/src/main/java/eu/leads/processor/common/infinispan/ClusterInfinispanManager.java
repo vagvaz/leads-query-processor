@@ -198,7 +198,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
     {
       host = LQPConfiguration.getConf().getString("node.ip");
-      if(!LQPConfiguration.getConf().getString("node.current.component","test").equals("planner"))
+      if(!LQPConfiguration.getConf().getString("node.current.component").equals("planner"))
         startHotRodServer(manager,host, serverPort);
     }
 
@@ -345,7 +345,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
             false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(
-            EvictionThreadPolicy.PIGGYBACK);
+            EvictionThreadPolicy.DEFAULT);
 
       } else { //Use leveldb
         result = new ConfigurationBuilder();
@@ -368,7 +368,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-            false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.PIGGYBACK)
+            false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
             .build();
       }
     } else { //do not use persistence
@@ -429,7 +429,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
               .proxyPort(Integer.parseInt(portString));
         }
         else{
-          System.err.println("EXPOSED IP = " + externalIP + ":"+server);
+          System.err.println("EXPOSED IP = " + externalIP + ":");
           serverConfigurationBuilder.host(localhost).port(serverPort).proxyHost(externalIP)
               .proxyPort(serverPort);
         }
@@ -755,7 +755,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-                false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.PIGGYBACK)
+                false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
             .build();
 
       } else { //Use leveldb
@@ -779,7 +779,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
                 false).eviction().maxEntries(maxEntries).strategy(
-                EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.PIGGYBACK)
+                EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
             .build();
       }
     } else { //do not use persistence

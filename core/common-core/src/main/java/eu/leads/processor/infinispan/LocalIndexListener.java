@@ -145,27 +145,29 @@ public class LocalIndexListener implements LeadsListener {
     void waitForAllData(){
         System.err.println("get the size of target");
         index.flush();
-        //int size  = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size();
+        int size  = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).getDataContainer().size();
+
 //        boolean isEmpty = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).isEmpty();
         //            int size = targetCache.getAdvancedCache().getDataContainer().size();
         //            System.err.println("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
         //            log.error("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
-//        System.err.println("Size = " + isEmpty+ " index ");
-//        synchronized (mutex){
+        System.err.println("Size = " + size+ " index ");
+        synchronized (mutex){
 //
 //
-//            while( !isEmpty){
+            while( size > 0){
 ////                System.err.println("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
 ////                log.error("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
-//                try {
-//                    mutex.wait(10);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
+                try {
+                    mutex.wait(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                size  = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).getDataContainer().size();
 ////                 size  = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size();
 ////                System.err.println("Size = " + size);
 //                isEmpty = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).isEmpty();
-//            }
-//        }
+            }
+        }
     }
 }
