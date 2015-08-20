@@ -55,6 +55,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   transient protected volatile Object runableMutex;
   transient Logger profilerLog;
   protected ProfileEvent profCallable;
+  transient protected int threadBatch;
   public LeadsBaseCallable(String configString, String output){
     this.configString = configString;
     this.output = output;
@@ -128,34 +129,39 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
     initialize();
     profCallable.end("end_setEnv");
-    executor = new ThreadPoolExecutor(4,12,5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
+    threadBatch = LQPConfiguration.getInstance().getConfiguration().getInt(
+        "node.ensemble.threads",64);
+    long start = System.currentTimeMillis();
+    executor = new ThreadPoolExecutor(threadBatch,5*threadBatch,5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
     runnables = new ConcurrentLinkedDeque<>();
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 50*threadBatch; i++) {
       runnables.add(new ExecuteRunnable(this));
     }
+    long end  = System.currentTimeMillis();
+    System.err.println("runnables created in " + (end-start));
   }
 
   public  ExecuteRunnable getRunnable(){
     ExecuteRunnable result = null;
-    synchronized (runableMutex){
+//    synchronized (runableMutex){
       result = runnables.poll();
       while(result == null){
         try {
-          runableMutex.wait(10);
+         Thread.sleep(1);
         } catch (InterruptedException e) {
           e.printStackTrace();
         }
         result = runnables.poll();
       }
-    }
+//    }
 
     return result;
   }
   public  void addRunnable(ExecuteRunnable runnable){
-    synchronized (runableMutex){
+//    synchronized (runableMutex){
       runnables.add(runnable);
-      runableMutex.notify();
-    }
+//      runableMutex.notify();
+//    }
   }
 
 

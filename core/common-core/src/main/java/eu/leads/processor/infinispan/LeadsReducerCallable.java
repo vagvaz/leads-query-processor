@@ -62,6 +62,7 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
         //      if (!cdl.localNodeIsPrimaryOwner(key))
         //        continue;
         Cache dataCache = inputCache.getCacheManager().getCache(prefix+".data");
+        
         index = null;
 //        EnsembleCacheUtils.waitForAllPuts();
         for(Object listener : dataCache.getListeners()){
