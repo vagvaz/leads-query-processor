@@ -186,8 +186,10 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         (KeyValueFilter<? super K, ? super V>) filter);
 //        .converter((Converter<? super K, ? super V, ?>) filter);
     profExecute.end();
+    profExecute.start("ISPNIter");
     try {
       for (Object object : iterable) {
+        profExecute.end();
         Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
 
         //      V value = inputCache.get(key);
@@ -202,6 +204,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //          executeOn((K) key, value);
 //          profExecute.end();
         }
+        profExecute.start("ISPNIter");
       }
       iterable.close();
     }

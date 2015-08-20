@@ -80,7 +80,7 @@ public class EnsembleCacheUtils {
             while(result == null){
 
                 try {
-                    Thread.sleep(0,600000);
+                    Thread.sleep(0,300000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
