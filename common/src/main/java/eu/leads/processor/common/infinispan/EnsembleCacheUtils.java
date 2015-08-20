@@ -64,7 +64,7 @@ public class EnsembleCacheUtils {
             currentCaches = new ConcurrentHashMap<>();
             mapsToPut = new ConcurrentHashMap<>();
             initialized = true;
-            executor = new ThreadPoolExecutor((int)threadBatch,(int)(1.1*threadBatch),5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
+            executor = new ThreadPoolExecutor((int)threadBatch,(int)(5*threadBatch),5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
             runnables = new ConcurrentLinkedDeque<>();
             for (int i = 0; i < 50 * (threadBatch); i++) {
                 runnables.add(new SyncPutRunnable());
@@ -79,7 +79,7 @@ public class EnsembleCacheUtils {
             result = runnables.poll();
             while(result == null){
                 try {
-                    runnableMutex.wait(20);
+                    runnableMutex.wait(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
