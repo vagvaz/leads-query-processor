@@ -3,6 +3,7 @@ package eu.leads.processor.infinispan;
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.infinispan.SyncPutRunnable;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
@@ -25,6 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by vagvaz on 2/18/15.
@@ -48,7 +53,9 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //  transient protected RemoteCacheManager emanager;
   transient protected EnsembleCacheManager emanager;
   transient protected EnsembleCache ecache;
-
+  transient protected ThreadPoolExecutor executor;
+  transient protected ConcurrentLinkedDeque<ExecuteRunnable> runnables;
+  transient protected volatile Object runableMutex;
   transient Logger profilerLog;
   protected ProfileEvent profCallable;
   public LeadsBaseCallable(String configString, String output){
@@ -82,6 +89,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     }else
       profCallable = new ProfileEvent("setEnvironment Callable " + this.getClass().toString(),profilerLog);
     embeddedCacheManager = cache.getCacheManager();
+    runableMutex = new Object();
     imanager = new ClusterInfinispanManager(embeddedCacheManager);
 //    outputCache = (Cache) imanager.getPersisentCache(output);
     keys = inputKeys;
@@ -123,6 +131,34 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
     initialize();
     profCallable.end("end_setEnv");
+    executor = new ThreadPoolExecutor(4,12,5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
+    runnables = new ConcurrentLinkedDeque<>();
+    for (int i = 0; i < 100; i++) {
+      runnables.add(new ExecuteRunnable(this));
+    }
+  }
+
+  public  ExecuteRunnable getRunnable(){
+    ExecuteRunnable result = null;
+    synchronized (runableMutex){
+      result = runnables.poll();
+      while(result == null){
+        try {
+          runableMutex.wait(10);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        result = runnables.poll();
+      }
+    }
+
+    return result;
+  }
+  public  void addRunnable(ExecuteRunnable runnable){
+    synchronized (runableMutex){
+      runnables.add(runnable);
+      runableMutex.notify();
+    }
   }
 
 
@@ -159,7 +195,10 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
         if (value != null) {
 //          profExecute.start("ExOn" + (++count));
-          executeOn((K) key, value);
+          ExecuteRunnable runable = this.getRunnable();
+          runable.setKeyValue(key, value);
+          executor.submit(runable);
+//          executeOn((K) key, value);
 //          profExecute.end();
 	  }
         }
@@ -212,7 +251,12 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   @Override public void finalizeCallable(){
     try {
       profCallable.start("finalizeBaseCallable");
+
       EnsembleCacheUtils.waitForAllPuts();
+      while(executor.getActiveCount() > 1){
+        Thread.sleep(100);
+      }
+      executor.shutdown();
 //      emanager.stop();
 //
 //      ecache.stop();

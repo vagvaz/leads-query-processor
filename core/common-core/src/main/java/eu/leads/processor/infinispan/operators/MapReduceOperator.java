@@ -78,10 +78,10 @@ public abstract class MapReduceOperator extends BasicOperator{
     inputCache = (Cache) manager.getPersisentCache(inputCacheName);
     super.cleanup();
     if(executeOnlyReduce) {
-      intermediateCache.stop();
-      indexSiteCache.stop();
+//      intermediateCache.stop();
+//      indexSiteCache.stop();
       intermediateDataCache.stop();
-      keysCache.stop();
+//      keysCache.stop();
     }
   }
 
@@ -142,6 +142,7 @@ public abstract class MapReduceOperator extends BasicOperator{
 //    reduceInputCache = (Cache) keysCache;
     collector = new LeadsCollector(0, outputCache.getName());
     inputCache = (Cache) intermediateDataCache;
+    reduceInputCache = inputCache;
 //    inputCache = (Cache) keysCache;
     reducerCallable =  new LeadsReducerCallable(outputCache.getName(), reducer,
                                                                          intermediateCacheName);

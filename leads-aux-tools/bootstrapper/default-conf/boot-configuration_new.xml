@@ -2,9 +2,9 @@
 <leads-processor-bootstrap>
 	<baseDir>/tmp/boot-conf/</baseDir> <!-- here are all the conf files of the available modules-->
 	<hdfs>
-		<uri>obtain</uri>
-		<user>leads</user>
-		<prefix>path</prefix>
+		<uri>hdfs://snf-618466.vm.okeanos.grnet.gr:8020</uri>
+		<user>vagvaz</user>
+		<prefix>/user/vagvaz/</prefix>
 	</hdfs>
 	<scheduler>chedulerip</scheduler>
 	<deploymentType>multicloud</deploymentType>

@@ -70,7 +70,7 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
                 LocalIndexListener localIndexListener = (LocalIndexListener) listener;
                 leadsListener = localIndexListener;
                 System.err.println("WaitForAllData");
-//                localIndexListener.waitForAllData();
+                localIndexListener.waitForAllData();
 
                 System.err.println("getIndex");
                 index = localIndexListener.getIndex();
@@ -98,6 +98,7 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
 //                }
 //            }
 //        }
+        System.err.println("Start processing");
         profCallable.end();
         for(Map.Entry<String,Integer> entry : index.getKeysIterator()){
             Iterator iterator =
