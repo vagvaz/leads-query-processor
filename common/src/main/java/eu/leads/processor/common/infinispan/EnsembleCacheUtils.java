@@ -75,26 +75,26 @@ public class EnsembleCacheUtils {
 
     public  static SyncPutRunnable getRunnable(){
         SyncPutRunnable result = null;
-        synchronized (runnableMutex){
+//        synchronized (runnableMutex){
             result = runnables.poll();
             while(result == null){
-                try {
-                    runnableMutex.wait(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    runnableMutex.wait(1);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
                 result = runnables.poll();
-            }
+//            }
         }
 
         return result;
     }
 
     public static void addRunnable(SyncPutRunnable runnable){
-        synchronized (runnableMutex){
+//        synchronized (runnableMutex){
             runnables.add(runnable);
-            runnableMutex.notify();
-        }
+//            runnableMutex.notify();
+//        }
     }
     public static void waitForAllPuts() {
         //        profExecute.start("waitForAllPuts");
@@ -104,7 +104,7 @@ public class EnsembleCacheUtils {
         while(executor.getActiveCount() > 0)
         try {
 //            executor.awaitTermination(100,TimeUnit.MILLISECONDS);
-            Thread.sleep(100);
+            Thread.sleep(10);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
