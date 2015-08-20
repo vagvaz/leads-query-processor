@@ -66,7 +66,7 @@ public class EnsembleCacheUtils {
             initialized = true;
             executor = new ThreadPoolExecutor((int)threadBatch,(int)(5*threadBatch),5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
             runnables = new ConcurrentLinkedDeque<>();
-            for (int i = 0; i < 50 * (threadBatch); i++) {
+            for (int i = 0; i <= 50 * (threadBatch); i++) {
                 runnables.add(new SyncPutRunnable());
             }
 //            executor.prestartAllCoreThreads();
@@ -78,11 +78,12 @@ public class EnsembleCacheUtils {
 //        synchronized (runnableMutex){
             result = runnables.poll();
             while(result == null){
-//                try {
-//                    runnableMutex.wait(1);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
+
+                try {
+                    runnableMutex.wait(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 result = runnables.poll();
 //            }
         }
@@ -104,7 +105,7 @@ public class EnsembleCacheUtils {
         while(executor.getActiveCount() > 0)
         try {
 //            executor.awaitTermination(100,TimeUnit.MILLISECONDS);
-            Thread.sleep(0,100000);
+            Thread.sleep(0,500000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
