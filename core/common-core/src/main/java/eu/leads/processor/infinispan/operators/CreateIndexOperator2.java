@@ -5,35 +5,27 @@ package eu.leads.processor.infinispan.operators;
  */
 
 import eu.leads.processor.common.StringConstants;
-import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
-import eu.leads.processor.core.index.*;
+import eu.leads.processor.core.index.LeadsIndex;
+import eu.leads.processor.core.index.LeadsIndexHelper;
 import eu.leads.processor.core.net.Node;
-import eu.leads.processor.infinispan.LocalDataFilter;
-import eu.leads.processor.math.MathUtils;
 import org.apache.tajo.algebra.*;
 import org.infinispan.Cache;
-import org.infinispan.commons.util.CloseableIterable;
-import org.infinispan.context.Flag;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
-import org.infinispan.versioning.utils.version.Version;
-import org.infinispan.versioning.utils.version.VersionScalar;
-import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.UUID;
 
 import static eu.leads.processor.common.infinispan.EnsembleCacheUtils.putToCache;
 
 
-public class CreateIndexOperator extends BasicOperator {
+public class CreateIndexOperator2 extends BasicOperator {
 
 
   transient protected EnsembleCacheManager emanager;
@@ -48,7 +40,7 @@ public class CreateIndexOperator extends BasicOperator {
   ArrayList<DistCMSketch> sketches;
 
 
-  public CreateIndexOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
+  public CreateIndexOperator2(Node com, InfinispanManager persistence, LogProxy log, Action action) {
     super(com, persistence, log, action);
     if(this.action.getData().getObject("operator").getString("id")==null){
       System.out.println("Create Index Action: " + this.action.toString());
@@ -58,69 +50,15 @@ public class CreateIndexOperator extends BasicOperator {
 
   @Override
   public void init(JsonObject config) {
-    ensembleHost =  computeEnsembleHost();
-    if (ensembleHost != null && !ensembleHost.equals("")) {
-      emanager = new EnsembleCacheManager(ensembleHost);
-      emanager.start();
-    } else {
-      LQPConfiguration.initialize();
-      emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
-      emanager.start();
-    }
-    System.out.println("Emanager has " + emanager.sites().size() + " sites");
 
 
     String CreateIndexJ = conf.getString("rawquery");
 
     CreateIndex newExpr = JsonHelper.fromJson(CreateIndexJ, CreateIndex.class);
 
-    IndexName = newExpr.getIndexName();
-    if (IndexName.isEmpty())
-      IndexName = "noname"+UUID.randomUUID();
-
     tableName = (((Relation) ((Projection) newExpr.getChild()).getChild())).getName();
-    Sort.SortSpec[] collumns = newExpr.getSortSpecs();
 
-    columnNames = new ArrayList<>();//= conf.getObject("CreateIndex").getArray("SortSpecs");
-    for (Sort.SortSpec sc : collumns)
-      columnNames.add(((ColumnReferenceExpr) sc.getKey()).getName());
-
-    System.out.println(" TableName: " + tableName);
-    tableName = StringConstants.DEFAULT_DATABASE_NAME + "." + tableName;
-
-    System.out.println(" TableName: " + tableName);
-
-    System.out.println(" IndexName: " + IndexName);
-    System.out.println(" columns found: " + columnNames.toString());
-
-    //fix IndexName
-
-    Cache<String, String> allIndexes = (Cache) manager.getPersisentCache("allIndexes");
-    for (String column : columnNames)
-      allIndexes.put(IndexName, tableName + "." + column);
-
-    indexCaches = new ArrayList<>();
-    sketchCaches = new ArrayList<>();
-    sketches = new ArrayList<>();
-    for (int c = 0; c < columnNames.size(); c++) {
-      if(!manager.getCacheManager().cacheExists(tableName + "." + columnNames.get(c))) {
-        log.info("Creating Index Caches, column " + tableName + "." + columnNames.get(c));
-        indexCaches.add((Cache) manager.getIndexedPersistentCache(tableName + "." + columnNames.get(c)));
-        Cache tmp =(Cache) manager.getPersisentCache(tableName + "." + columnNames.get(c) + ".sketch");
-        sketchCaches.add(tmp);
-        log.info("Creating DistCMSketch " + tableName + "." + columnNames.get(c) + ".sketch");
-        sketches.add(new DistCMSketch(tmp,false));
-
-      }else {
-        log.info("Index Already exists on column ... but anyway reindexing" +tableName + "." + columnNames.get(c));
-      }
-    }
-
-    //indexCaches
-    //fix tablename
     inputCache = (Cache) manager.getPersisentCache(tableName);
-
-   // System.out.println(" output cache: " + getOutput() +  " Action " + action.asJsonObject().toString());
   }
 
   @Override
@@ -185,6 +123,7 @@ public class CreateIndexOperator extends BasicOperator {
 
   @Override
   public void setupMapCallable() {
+     mapperCallable = new CreateIndexCallable<>(conf.toString(),getOutput());
 
   }
 
