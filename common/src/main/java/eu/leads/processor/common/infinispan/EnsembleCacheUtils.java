@@ -66,7 +66,7 @@ public class EnsembleCacheUtils {
             initialized = true;
             executor = new ThreadPoolExecutor((int)threadBatch,(int)(5*threadBatch),5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
             runnables = new ConcurrentLinkedDeque<>();
-            for (int i = 0; i <= 50 * (threadBatch); i++) {
+            for (int i = 0; i <= 100 * (threadBatch); i++) {
                 runnables.add(new SyncPutRunnable());
             }
 //            executor.prestartAllCoreThreads();

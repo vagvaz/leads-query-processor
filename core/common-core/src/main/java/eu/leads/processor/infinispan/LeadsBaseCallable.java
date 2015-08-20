@@ -134,7 +134,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     long start = System.currentTimeMillis();
     executor = new ThreadPoolExecutor(threadBatch,5*threadBatch,5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
     runnables = new ConcurrentLinkedDeque<>();
-    for (int i = 0; i <= 100*threadBatch; i++) {
+    for (int i = 0; i <= 5*threadBatch; i++) {
       runnables.add(new ExecuteRunnable(this));
     }
     long end  = System.currentTimeMillis();
