@@ -79,11 +79,12 @@ public class EnsembleCacheUtils {
 //        synchronized (runnableMutex){
             result = runnables.poll();
             while(result == null){
-                try {
-                    Thread.sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    Thread.sleep(1);
+                    Thread.yield();
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
                 result = runnables.poll();
 //            }
         }
