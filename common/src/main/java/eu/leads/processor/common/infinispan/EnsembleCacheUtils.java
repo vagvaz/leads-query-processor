@@ -4,6 +4,7 @@ import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.commons.api.BasicCache;
+import org.infinispan.ensemble.cache.distributed.HashBasedPartitioner;
 import org.jgroups.util.ConcurrentLinkedBlockingQueue2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,9 +65,9 @@ public class EnsembleCacheUtils {
             currentCaches = new ConcurrentHashMap<>();
             mapsToPut = new ConcurrentHashMap<>();
             initialized = true;
-            executor = new ThreadPoolExecutor((int)threadBatch,(int)(5*threadBatch),5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
+            executor = new ThreadPoolExecutor((int)threadBatch,(int)(10*threadBatch),5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
             runnables = new ConcurrentLinkedDeque<>();
-            for (int i = 0; i <= 100 * (threadBatch); i++) {
+            for (int i = 0; i <= 3000 * (threadBatch); i++) {
                 runnables.add(new SyncPutRunnable());
             }
 //            executor.prestartAllCoreThreads();
@@ -78,9 +79,8 @@ public class EnsembleCacheUtils {
 //        synchronized (runnableMutex){
             result = runnables.poll();
             while(result == null){
-
                 try {
-                    Thread.sleep(0,300000);
+                    Thread.sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
