@@ -100,13 +100,13 @@ public class EnsembleCacheUtils {
     }
     public static void waitForAllPuts() {
         //        profExecute.start("waitForAllPuts");
-        synchronized (runnableMutex){
-            runnableMutex.notifyAll();
-        }
+//        synchronized (runnableMutex){
+//            runnableMutex.notifyAll();
+//        }
         while(executor.getActiveCount() > 0)
         try {
 //            executor.awaitTermination(100,TimeUnit.MILLISECONDS);
-            Thread.sleep(0,500000);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
