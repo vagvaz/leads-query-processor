@@ -132,9 +132,9 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     threadBatch = LQPConfiguration.getInstance().getConfiguration().getInt(
         "node.ensemble.threads",64);
     long start = System.currentTimeMillis();
-    executor = new ThreadPoolExecutor(threadBatch,30*threadBatch,5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
+    executor = new ThreadPoolExecutor(threadBatch,5*threadBatch,5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
     runnables = new ConcurrentLinkedDeque<>();
-    for (int i = 0; i <= 30*threadBatch; i++) {
+    for (int i = 0; i <= 50*threadBatch; i++) {
       runnables.add(new ExecuteRunnable(this));
     }
     long end  = System.currentTimeMillis();
