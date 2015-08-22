@@ -110,6 +110,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
     initDefaultCacheConfig();
   }
 
+  @Override
+  public String getUniquePath(){
+    return uniquePath;
+  }
 
   /**
    * {@inheritDoc}

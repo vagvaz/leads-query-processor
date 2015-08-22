@@ -41,10 +41,20 @@ public class PutObjectActionHandler implements ActionHandler {
          }
          else{
             log.error("put object used for creating cache");
-            persistence.getPersisentCache(cacheName);
+            Cache thecache = (Cache) persistence.getPersisentCache(cacheName);
             if(value.containsField("listener")){
-               LocalIndexListener listener = new LocalIndexListener(persistence,cacheName);
-               persistence.addListener(listener,cacheName);
+               boolean toadd = true;
+               for(Object l : thecache.getListeners()){
+                  if(l instanceof  LocalIndexListener){
+                     toadd = false;
+                     break;
+                  }
+               }
+               if(toadd) {
+                  LocalIndexListener listener = new LocalIndexListener(persistence, cacheName);
+
+                  persistence.addListener(listener, cacheName);
+               }
             }
          }
          actionResult.putString("status", "SUCCESS");

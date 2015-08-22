@@ -35,8 +35,12 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
   @Override
   public void map(String key, Tuple t, Collector<String, Tuple> collector) {
 
-    if (!isInitialized)
-      initialize();
+//    if (!isInitialized)
+//      initialize();
+    if(tableName == null)
+    {
+      tableName = resolveTableName(t,tableCols);
+    }
     mapEvent.start("JoinMapMapExecute");
     StringBuilder builder = new StringBuilder();
     //        String tupleId = key.substring(key.indexOf(":"));
@@ -59,6 +63,21 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
     collector.emit(outkey, t);
     profileEvent.end();
     mapEvent.end();
+  }
+
+  private String resolveTableName(Tuple t, Map<String, List<String>> tableCols) {
+    String result = null;
+    for(Map.Entry<String,List<String>> entry: tableCols.entrySet()){
+      String column = entry.getValue().get(0);
+      if(t.hasField(column)){
+        tableName = entry.getKey();
+        result = entry.getKey();
+        break;
+      }
+    }
+
+    System.err.println("Table Name is resolved " + tableName);
+    return result;
   }
 
 

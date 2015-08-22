@@ -15,6 +15,8 @@ import java.util.concurrent.ConcurrentMap;
  */
 
 public interface InfinispanManager {
+    String getUniquePath();
+
     /**
      * Setter for property 'configurationFile'.
      *

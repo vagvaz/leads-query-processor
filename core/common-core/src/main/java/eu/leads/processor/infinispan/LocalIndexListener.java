@@ -95,16 +95,17 @@ public class LocalIndexListener implements LeadsListener {
 
     @CacheEntryModified
     public void modified(CacheEntryModifiedEvent event) {
-        System.err.println("local " + event.isOriginLocal() + " " + event.isCommandRetried() + " " + event.isCreated() + " " + event.isPre());
         if (event.isPre()) {
 //            ComplexIntermediateKey key = (ComplexIntermediateKey) event.getKey();
 //            System.err.println("PREKey modified " + event.getKey() + " key "  + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
             return;
         }
+        System.err.println("local " + event.isOriginLocal() + " " + event.isCommandRetried() + " " + event.isCreated() + " " + event.isPre());
+
         pevent.start("IndexPut");
 //        if(event.getKey() instanceof ComplexIntermediateKey) {
             ComplexIntermediateKey key = (ComplexIntermediateKey) event.getKey();
-//            System.err.println("AFTERValue modified " + event.getKey() + " key " + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
+            System.err.println("AFTERValue modified " + event.getKey() + " key " + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
             index.put(key.getKey(),event.getValue());
         pevent.end();
 //            synchronized (mutex){
@@ -128,8 +129,7 @@ public class LocalIndexListener implements LeadsListener {
         this.keysCache = manager.getLocalCache(cacheName+".index.keys");
         this.dataCache = manager.getLocalCache(cacheName+".index.data");
 //        this.index = new IntermediateKeyIndex(keysCache,dataCache);
-        this.index = new LevelDBIndex( System.getProperties().getProperty("java.io.tmpdir")+"/"+StringConstants.TMPPREFIX+"/interm-index/"+ manager
-            .getCacheManager().getAddress().toString()+cacheName,cacheName+".index");
+        this.index = new LevelDBIndex( System.getProperties().getProperty("java.io.tmpdir")+"/"+StringConstants.TMPPREFIX+"/interm-index/"+manager.getUniquePath()+"/"+cacheName,cacheName+".index");
         log = LoggerFactory.getLogger(LocalIndexListener.class);
         pevent = new ProfileEvent("indexPut",log);
     }
