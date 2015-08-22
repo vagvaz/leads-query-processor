@@ -7,6 +7,8 @@ import eu.leads.processor.common.infinispan.SyncPutRunnable;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.core.EngineUtils;
+import org.eclipse.jdt.internal.codeassist.impl.Engine;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.context.Flag;
@@ -50,12 +52,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //  transient protected RemoteCacheManager emanager;
   transient protected EnsembleCacheManager emanager;
   transient protected EnsembleCache ecache;
-  transient protected ThreadPoolExecutor executor;
-  transient protected ConcurrentLinkedDeque<ExecuteRunnable> runnables;
-  transient protected volatile Object runableMutex;
   transient Logger profilerLog;
   protected ProfileEvent profCallable;
-  transient protected int threadBatch;
   public LeadsBaseCallable(String configString, String output){
     this.configString = configString;
     this.output = output;
@@ -87,7 +85,6 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     }else
       profCallable = new ProfileEvent("setEnvironment Callable " + this.getClass().toString(),profilerLog);
     embeddedCacheManager = cache.getCacheManager();
-    runableMutex = new Object();
     imanager = new ClusterInfinispanManager(embeddedCacheManager);
 //    outputCache = (Cache) imanager.getPersisentCache(output);
     keys = inputKeys;
@@ -129,41 +126,16 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
     initialize();
     profCallable.end("end_setEnv");
-    threadBatch = LQPConfiguration.getInstance().getConfiguration().getInt(
-        "node.ensemble.threads",64);
-    long start = System.currentTimeMillis();
+
+//    long start = System.currentTimeMillis();
 //    executor = new ThreadPoolExecutor(threadBatch,5*threadBatch,5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
 //    runnables = new ConcurrentLinkedDeque<>();
 //    for (int i = 0; i <= 50*threadBatch; i++) {
 //      runnables.add(new ExecuteRunnable(this));
 //    }
-    long end  = System.currentTimeMillis();
-    System.err.println("runnables created in " + (end-start));
-  }
-
-  public  ExecuteRunnable getRunnable(){
-    ExecuteRunnable result = null;
-//    synchronized (runableMutex){
-      result = runnables.poll();
-      while(result == null){
-//        try {
-//         Thread.sleep(1);
-//        Thread.sleep(0,3000);
-//        } catch (InterruptedException e) {
-//          e.printStackTrace();
-//        }
-        Thread.yield();
-        result = runnables.poll();
-      }
-//    }
-
-    return result;
-  }
-  public  void addRunnable(ExecuteRunnable runnable){
-//    synchronized (runableMutex){
-      runnables.add(runnable);
-//      runableMutex.notify();
-//    }
+//    long end  = System.currentTimeMillis();
+//    System.err.println("runnables created in " + (end-start));
+    EngineUtils.initialize();
   }
 
 
@@ -199,10 +171,10 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
         if (value != null) {
 //          profExecute.start("ExOn" + (++count));
-//          ExecuteRunnable runable = this.getRunnable();
-//          runable.setKeyValue(key, value);
-//          executor.submit(runable);
-          executeOn((K) key, value);
+          ExecuteRunnable runable = EngineUtils.getRunnable();
+          runable.setKeyValue(key, value,this);
+          EngineUtils.submit(runable);
+//          executeOn((K) key, value);
 //          profExecute.end();
         }
         profExecute.start("ISPNIter");
@@ -214,6 +186,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
       PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
       }
+
     profCallable.end();
     finalizeCallable();
     return embeddedCacheManager.getAddress().toString();
@@ -230,12 +203,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   @Override public void finalizeCallable(){
     try {
       profCallable.start("finalizeBaseCallable");
-
+      EngineUtils.waitForAllExecute();
       EnsembleCacheUtils.waitForAllPuts();
-      while(executor.getActiveCount() > 1){
-        Thread.sleep(100);
-      }
-      executor.shutdown();
 //      emanager.stop();
 //
 //      ecache.stop();

@@ -7,6 +7,7 @@ import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
+import eu.leads.processor.core.EngineUtils;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
@@ -71,6 +72,7 @@ public abstract class BasicOperator extends Thread implements Operator{
   }
   protected BasicOperator(Node com, InfinispanManager manager,LogProxy log,Action action){
     super(com.getId() + "-operator-thread");
+    EngineUtils.initialize();
     System.err.println(this.getClass().getCanonicalName());
     mcResults = new HashMap<>();
     this.com = com;

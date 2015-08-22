@@ -4,9 +4,12 @@ import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.infinispan.LeadsMapper;
+import eu.leads.processor.math.FilterOperatorTree;
 import org.infinispan.distexec.mapreduce.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vertx.java.core.json.JsonArray;
+import org.vertx.java.core.json.JsonElement;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.*;
@@ -22,6 +25,9 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
   transient ProfileEvent profileEvent;
   transient Logger profilerLog;
   transient ProfileEvent mapEvent;
+  private transient FilterOperatorTree tree;
+  private transient Map<String,List<String>> tableCols;
+
   public JoinMapper(String s) {
     super(s);
   }
@@ -66,6 +72,22 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
 
     //       System.err.println("-------------Initialize");
     super.initialize();
+    JsonElement qual = conf.getObject("body").getElement("joinQual");
+
+    tree = new FilterOperatorTree(qual);
+    tableCols = tree.getJoinColumns();
+    //Infer columns
+    JsonObject ob = new JsonObject();
+    for(Map.Entry<String,List<String>> entry : tableCols.entrySet()){
+      JsonArray array = new JsonArray();
+      for(String col : entry.getValue()){
+        array.add(col);
+      }
+      ob.putArray(entry.getKey(),array);
+    }
+    conf.putObject("joinColumns", ob);
+
+
     JsonObject jCols = conf.getObject("joinColumns");
     System.err.println(jCols.encodePrettily());
     Set<String> tables = new HashSet<>();
