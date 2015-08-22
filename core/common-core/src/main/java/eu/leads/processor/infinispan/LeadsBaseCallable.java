@@ -132,11 +132,11 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     threadBatch = LQPConfiguration.getInstance().getConfiguration().getInt(
         "node.ensemble.threads",64);
     long start = System.currentTimeMillis();
-    executor = new ThreadPoolExecutor(threadBatch,5*threadBatch,5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
-    runnables = new ConcurrentLinkedDeque<>();
-    for (int i = 0; i <= 50*threadBatch; i++) {
-      runnables.add(new ExecuteRunnable(this));
-    }
+//    executor = new ThreadPoolExecutor(threadBatch,5*threadBatch,5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
+//    runnables = new ConcurrentLinkedDeque<>();
+//    for (int i = 0; i <= 50*threadBatch; i++) {
+//      runnables.add(new ExecuteRunnable(this));
+//    }
     long end  = System.currentTimeMillis();
     System.err.println("runnables created in " + (end-start));
   }
@@ -199,10 +199,10 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
         if (value != null) {
 //          profExecute.start("ExOn" + (++count));
-          ExecuteRunnable runable = this.getRunnable();
-          runable.setKeyValue(key, value);
-          executor.submit(runable);
-//          executeOn((K) key, value);
+//          ExecuteRunnable runable = this.getRunnable();
+//          runable.setKeyValue(key, value);
+//          executor.submit(runable);
+          executeOn((K) key, value);
 //          profExecute.end();
         }
         profExecute.start("ISPNIter");
