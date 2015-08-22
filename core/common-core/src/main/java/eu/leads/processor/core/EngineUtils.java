@@ -43,12 +43,13 @@ public class EngineUtils {
         //        synchronized (runnableMutex){
         result = runnables.poll();
         while(result == null){
-                            try {
-            //                    Thread.sleep(1);
-            Thread.sleep(0,10000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
+            Thread.yield();
+//                            try {
+//            //                    Thread.sleep(1);
+//            Thread.sleep(0,10000);
+//                            } catch (InterruptedException e) {
+//                                e.printStackTrace();
+//                            }
             result = runnables.poll();
             //            }
         }
