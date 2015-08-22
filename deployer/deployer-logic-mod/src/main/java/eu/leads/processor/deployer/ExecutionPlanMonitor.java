@@ -265,16 +265,16 @@ public class ExecutionPlanMonitor {
              result.add(node);
           }
        }
-//        for(PlanNode source : result ){
-//            if(source.getNodeType() ==  LeadsNodeType.SCAN){
-//                PlanNode next  = getNextOperator(source);
-//                if(next.getNodeType() == LeadsNodeType.GROUP_BY || next.getNodeType() == LeadsNodeType.JOIN || next.getNodeType() == LeadsNodeType.SORT){
-//                    source.getConfiguration().putObject("next",next.asJsonObject());
-//                    source.getConfiguration().putString("next.type",next.getNodeType().toString());
-//                    next.getConfiguration().putBoolean("skipMap",true);
-//                }
-//            }
-//        }
+        for(PlanNode source : result ){
+            if(source.getNodeType() ==  LeadsNodeType.SCAN){
+                PlanNode next  = getNextOperator(source);
+                if(next.getNodeType() == LeadsNodeType.GROUP_BY || next.getNodeType() == LeadsNodeType.JOIN || next.getNodeType() == LeadsNodeType.SORT){
+                    source.getConfiguration().putObject("next",next.asJsonObject());
+                    source.getConfiguration().putString("next.type",next.getNodeType().toString());
+                    next.getConfiguration().putBoolean("skipMap",true);
+                }
+            }
+        }
         startTime = System.currentTimeMillis();
        return result;
     }
