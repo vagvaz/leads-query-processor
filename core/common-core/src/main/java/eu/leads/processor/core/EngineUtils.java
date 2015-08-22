@@ -16,7 +16,7 @@ public class EngineUtils {
     private static int threadBatch;
     private static ThreadPoolExecutor executor;
     private static ConcurrentLinkedDeque<ExecuteRunnable> runnables;
-    private static volatile Object mutex;
+    private static volatile Object mutex = new Object();
     private static boolean initialized = false;
 
     public static void initialize() {
