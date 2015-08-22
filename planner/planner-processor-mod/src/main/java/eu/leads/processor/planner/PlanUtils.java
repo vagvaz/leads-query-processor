@@ -200,8 +200,14 @@ public class PlanUtils {
     //Hard Coded hacks. //For SCAN,WGS
     JsonObject resulting = new JsonObject();
     JsonObject node = plan.getObject(stage.getString("id"));
-    if(node.getString("nodetype").equals(LeadsNodeType.SCAN.toString()) ||
-         node.getString("nodetype").equals(LeadsNodeType.WGS_URL.toString())){
+    if( (node.getString("nodetype").equals(LeadsNodeType.SCAN.toString()) ) ||
+        ( node.getString("nodetype").equals(LeadsNodeType.WGS_URL.toString()))  ||
+        ( node.getString("nodetype").equals(LeadsNodeType.GROUP_BY.toString()))  ||
+        ( node.getString("nodetype").equals(LeadsNodeType.JOIN.toString()))  ||
+        ( node.getString("nodetype").equals(LeadsNodeType.PROJECTION.toString()))  ||
+        ( node.getString("nodetype").equals(LeadsNodeType.HAVING.toString()))  ||
+        ( node.getString("nodetype").equals(LeadsNodeType.SELECTION.toString()))
+        ){
       Set<String> allSites = new HashSet<>();
       allSites.addAll(info.getObject("microclouds").getFieldNames());
       for(String site : allSites){
@@ -299,7 +305,11 @@ public class PlanUtils {
     JsonObject result = new JsonObject();
     Random random = new Random();
     ArrayList<String> microclods = new ArrayList<>();
-    microclods.addAll(globalInformation.getObject("microclouds").getFieldNames());
+    if(globalInformation.containsField("active_microclouds")){
+      microclods.addAll(globalInformation.getObject("active_microclouds").getFieldNames());
+    }else {
+      microclods.addAll(globalInformation.getObject("microclouds").getFieldNames());
+    }
     String destination = schedulerRep.getString("destination");
     Set<String> ops = new HashSet<>();
     ops.addAll(schedulerRep.getObject("stages").getFieldNames());

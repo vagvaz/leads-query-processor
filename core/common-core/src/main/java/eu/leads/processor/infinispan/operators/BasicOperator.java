@@ -89,6 +89,9 @@ public abstract class BasicOperator extends Thread implements Operator{
     else{
       executeOnlyMap = true;
       executeOnlyReduce =true;
+      if(conf.containsField("skipMap")){
+        executeOnlyMap = !conf.getBoolean("skipMap"); //if true then we do not need to execute the map  phase
+      }
       log.error("IS REMOTE FALSE ");
     }
 
@@ -279,10 +282,10 @@ public abstract class BasicOperator extends Thread implements Operator{
 
   @Override
   public void failCleanup() {
-    if(!isRemote)
-    {
+//    if(!isRemote)
+//    {
       unsubscribeToMapActions("execution." + com.getId() + "." + action.getId());
-    }
+//    }
     action.setStatus(ActionStatus.COMPLETED.toString());
 
     pendingMMC.clear();
@@ -305,17 +308,17 @@ public abstract class BasicOperator extends Thread implements Operator{
 
     long inputSize = 1;
     long outputSize = 1;
-    if(input1 != null)
-      inputSize += input1.size();
-    if(input2 != null)
-      inputSize += input2.size();
-    if(output != null){
-      outputSize = output.size();
-    }
-    else{
-      outputCache = (BasicCache) manager.getPersisentCache(getOutput());
-      outputSize = outputCache.size();
-    }
+//    if(input1 != null)
+//      inputSize += input1.size();
+//    if(input2 != null)
+//      inputSize += input2.size();
+//    if(output != null){
+//      outputSize = output.size();
+//    }
+//    else{
+//      outputCache = (BasicCache) manager.getPersisentCache(getOutput());
+//      outputSize = outputCache.size();
+//    }
     if(outputSize == 0){
       outputSize =1;
     }
@@ -392,9 +395,9 @@ public abstract class BasicOperator extends Thread implements Operator{
       for (String mc : getMicroCloudsFromOpSched()) {
         pendingMMC.add(mc);
       }
-      if(pendingMMC.contains(currentCluster)){
-        pendingMMC.add(currentCluster);
-      }
+//      if(pendingMMC.contains(currentCluster)){
+//        pendingMMC.add(currentCluster);
+//      }
     }
   }
   @Override
@@ -502,7 +505,7 @@ public abstract class BasicOperator extends Thread implements Operator{
   }
 
   @Override
-  public void addResult(String mc, String status){
+  public synchronized void addResult(String mc, String status){
     mcResults.put(mc, status);
     pendingMMC.remove(mc);
   }
@@ -736,7 +739,14 @@ public abstract class BasicOperator extends Thread implements Operator{
 
   public String computeEnsembleHost() {
     String result = "";
-    JsonObject targetEndpoints = action.getData().getObject("operator").getObject("targetEndpoints");
+    JsonObject targetEndpoints = null;
+    if(!conf.containsField("next")) {
+      targetEndpoints =
+          action.getData().getObject("operator").getObject("targetEndpoints");
+    }
+    else{
+      targetEndpoints = conf.getObject("next").getObject("targetEndpoints");
+    }
     List<String> sites = new ArrayList<>();
     for(String targetMC : targetEndpoints.getFieldNames()){
       //         JsonObject mc = targetEndpoints.getObject(targetMC);
@@ -828,7 +838,8 @@ public abstract class BasicOperator extends Thread implements Operator{
     pendingMMC = new HashSet<>();
     mcResults = new HashMap<>();
     pendingMMC.addAll(pendingRMC);
-    //      subscribeToMapActions(pendingMMC);
+    if(!executeOnlyMap)
+          subscribeToMapActions(pendingMMC);
     if(!isRemote) {
       for (String mc : pendingMMC) {
         if (!mc.equals(currentCluster)) {

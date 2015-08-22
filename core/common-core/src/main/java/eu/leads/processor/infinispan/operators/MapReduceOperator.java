@@ -67,6 +67,13 @@ public abstract class MapReduceOperator extends BasicOperator{
     collector = new LeadsCollector(0, intermediateCacheName);
   }
 
+  public String getIntermediateCacheName() {
+    return intermediateCacheName;
+  }
+
+  public void setIntermediateCacheName(String intermediateCacheName) {
+    this.intermediateCacheName = intermediateCacheName;
+  }
 
   @Override /// Example do not use
   public void execute() {
@@ -92,17 +99,22 @@ public abstract class MapReduceOperator extends BasicOperator{
   @Override
   public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
     Set<String> targetMC = getTargetMC();
-    for(String mc : targetMC){
-      createCache(mc,getOutput());
-//      createCache(mc, intermediateCacheName);
-      //create Intermediate cache name for data on the same Sites as outputCache
-      createCache(mc,intermediateCacheName+".data","localIndexListener");
-      //create Intermediate  keys cache name for data on the same Sites as outputCache;
-//      createCache(mc,intermediateCacheName+".keys");
-      //createIndexCache for getting all the nodes that contain values with the same key! in a mc
-//      createCache(mc,intermediateCacheName+".indexed");
-//    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
+    if(!isRemote) {
+      for (String mc : targetMC) {
+        createCache(mc, getOutput());
+        //      createCache(mc, intermediateCacheName);
+        //create Intermediate cache name for data on the same Sites as outputCache
+        if(conf.containsField("skipMap")) {
+          if(!conf.getBoolean("skipMap"))
+            createCache(mc, intermediateCacheName + ".data", "localIndexListener");
+        }
+        //create Intermediate  keys cache name for data on the same Sites as outputCache;
+        //      createCache(mc,intermediateCacheName+".keys");
+        //createIndexCache for getting all the nodes that contain values with the same key! in a mc
+        //      createCache(mc,intermediateCacheName+".indexed");
+        //    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
 
+      }
     }
   }
   @Override

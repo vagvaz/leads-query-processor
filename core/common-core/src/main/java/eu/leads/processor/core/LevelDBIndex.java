@@ -151,7 +151,8 @@ public class LevelDBIndex {
         index.close();
         System.out.println("exit---");
     }
-
+//    80.156.73.113:11222;80.156.73.116:11222;80.156.73.123:11222;80.156.73.128:11222
+//    ;
     public synchronized void flush() {
         try {
 

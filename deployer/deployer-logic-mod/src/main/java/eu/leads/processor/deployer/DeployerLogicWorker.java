@@ -15,6 +15,8 @@ import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.*;
 import eu.leads.processor.nqe.NQEConstants;
 import org.infinispan.Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
@@ -34,15 +36,15 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
    private String imanagerQueue;
    private Set<String> ignoredOperators;
    private Map<String, ExecutionPlanMonitor> runningPlans;
-   private LogProxy log;
+   private Logger log;
    private Node com;
    private String id;
    private String workQueueAddress;
    private InfinispanManager persistence;
    private Cache<String,String> queriesCache;
-   private Map<String,JsonObject> remoteOperators;
-   private Map<String,Set<String>> pendingOperators;
-   private Map<String,String> microclouds;
+//   private Map<String,JsonObject> remoteOperators;
+//   private Map<String,Set<String>> pendingOperators;
+//   private Map<String,String> microclouds;
    private String localMicroCloud;
    private JsonObject globalConfig;
 
@@ -71,16 +73,8 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
       id = config.getString("id");
       com = new DefaultNode();
       com.initialize(id, deployerGroup, null, this, null, vertx);
-      log = new LogProxy(config.getString("log"), com);
-      remoteOperators = new HashMap<>();
-      pendingOperators = new HashMap<>();
-      microclouds = new HashMap<>();
-
-//      if(config.containsField("microclouds")) {
-//         for (Map.Entry<String, Object> entry : config.getObject("microclouds").toMap().entrySet()) {
-//            microclouds.put(entry.getKey(), (String) entry.getValue());
-//         }
-//      }
+//      log = new LogProxy(config.getString("log"), com);
+      log = LoggerFactory.getLogger(id);
    }
 
    @Override
@@ -211,19 +205,12 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                   if (label.equals(NQEConstants.OPERATOR_COMPLETE) || label.equals(NQEConstants.DEPLOY_OPERATOR)) {
 
                      PlanNode node = new PlanNode(action.getData().getObject("operator"));
-                     if(remoteOperators.containsKey(node.getNodeId())){
-                        //GEtReply address
-                        //initialize WebserviceClient
-                        //Send Request
-                        //remove from remoteOperators
-                        //finalizeAction
-                        //return;
-                     }
                      String queryId = action.getData().getString("queryId");
                      ExecutionPlanMonitor plan = runningPlans.get(queryId);
                      plan.complete(node);
                      PlanNode next = plan.getNextOperator(node);
-                     log.info("Deployer " +  node.getNodeType() + " in action that  " + label + " has completed" );
+                     log.error("Deployer " + node.getNodeType() + " in action that  " + label
+                         + " has completed");
                      boolean useNode = true;
                      if (next.getNodeType().equals(LeadsNodeType.ROOT)) {
 
@@ -232,25 +219,26 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                            next = plan.getNextExecutableOperator(next);
                            useNode = false;
                            ;
-                           log.info("next is root  without MR");
+                           log.error("next is root  without MR");
                         }
                         else{
 
                            if(!next.getConfiguration().getObject("mapreduce").containsField("after")) {
                               useNode = true;
-                              log.info("next is root  MR");
+                              log.error("next is root  MR");
                            }
                            else{
                               plan.complete(next);
                               next = plan.getNextExecutableOperator(next);
                               useNode = false;
-                              log.info("next is root without MR");
+                              log.error("next is root without MR");
                            }
                         }
                      }
                      if(next.getNodeType().equals(LeadsNodeType.SCAN)){
 
-                        log.info("First MR executed continuing to the rest of the plan ... ");
+                        log.error("First MR executed continuing to the rest of the plan ... ");
+                        log.error("First MR executed continuing to the rest of the plan ... ");
                         List<PlanNode> sources = plan.getSources();
                         for (PlanNode source : sources) {
                            if (source != null) {
@@ -260,26 +248,26 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                         return;
                      }
                      if (next.getNodeType().equals(LeadsNodeType.OUTPUT_NODE)) {
-                        log.info("next is output");
+                        log.error("next is output");
                         plan.complete(next);
                         next = plan.getNextExecutableOperator(next);
                         useNode = false;
                      }
 
-                     log.info("Continue to deployement");
+                     log.error("Continue to deployement");
                      PlanNode tobeDeployed = null;
                      if (useNode) {
-                        log.info("using node for the deployment of next operator");
+                        log.error("using node for the deployment of next operator");
                         tobeDeployed = plan.getNextExecutableOperator(node);
                      }
                      else {
-                        log.info("next is used");
+                        log.error("next is used");
                         if (next != null) {
                            tobeDeployed = plan.getNextExecutableOperator(next);
-                           log.info("To be depl oyed");
+                           log.error("To be depl oyed");
                         }
                         else{
-                           log.info("Todeployed is null");
+                           log.error("Todeployed is null");
                            tobeDeployed = null;
                         }
                      }
@@ -330,7 +318,8 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
 
    private void deployRemoteOperator(Action action,JsonObject operator, PlanNode mrOperator) {
       Action deployAction = createNewAction(action);
-      log.info("Deploying operator " + mrOperator.getNodeType().toString() + " to micro - cloud" + mrOperator.getSite());
+      log.error("Deploying operator " + mrOperator.getNodeType().toString() + " to micro - cloud"
+          + mrOperator.getSite());
       deployAction.getData().putString("monitor", monitorAddress);
       deployAction.getData().putObject("operator",mrOperator.asJsonObject());
       deployAction.getData().putString("operatorType",mrOperator.getNodeType().toString());
@@ -362,7 +351,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
          query.asJsonObject().putString("output",query.getId());
       }
       query.asJsonObject().putBoolean("isSorted",plan.isSorted());
-      log.info("Query " + query.getId() + " completed");
+      log.error("Query " + query.getId() + " completed");
       queriesCache.put(queryId,query.asJsonObject().toString());
 //      Collection<PlanNode> nodes = ((Plan)plan.getLogicalPlan()).getNodes();
 //      for(PlanNode n : nodes){
@@ -392,7 +381,8 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
 
    private void deployOperator(ExecutionPlanMonitor executionPlan, PlanNode next) {
       Action deployAction = createNewAction(executionPlan.getAction());
-      log.info("Deploying operator " + next.getNodeType().toString() + " to micro - cloud" + next.getSite());
+      log.error("Deploying operator " + next.getNodeType().toString() + " to micro - cloud" + next
+          .getSite());
       deployAction.getData().putString("monitor", monitorAddress);
       deployAction.getData().putObject("operator",next.asJsonObject());
       deployAction.getData().putString("operatorType",next.getNodeType().toString());
