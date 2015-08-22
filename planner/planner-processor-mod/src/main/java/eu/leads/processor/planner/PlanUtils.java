@@ -201,12 +201,12 @@ public class PlanUtils {
     JsonObject resulting = new JsonObject();
     JsonObject node = plan.getObject(stage.getString("id"));
     if( (node.getString("nodetype").equals(LeadsNodeType.SCAN.toString()) ) ||
-        ( node.getString("nodetype").equals(LeadsNodeType.WGS_URL.toString()))  ||
-        ( node.getString("nodetype").equals(LeadsNodeType.GROUP_BY.toString()))  ||
-        ( node.getString("nodetype").equals(LeadsNodeType.JOIN.toString()))  ||
-        ( node.getString("nodetype").equals(LeadsNodeType.PROJECTION.toString()))  ||
-        ( node.getString("nodetype").equals(LeadsNodeType.HAVING.toString()))  ||
-        ( node.getString("nodetype").equals(LeadsNodeType.SELECTION.toString()))
+        ( node.getString("nodetype").equals(LeadsNodeType.WGS_URL.toString()))
+//        || ( node.getString("nodetype").equals(LeadsNodeType.GROUP_BY.toString()))  ||
+//        ( node.getString("nodetype").equals(LeadsNodeType.JOIN.toString()))  ||
+//        ( node.getString("nodetype").equals(LeadsNodeType.PROJECTION.toString()))  ||
+//        ( node.getString("nodetype").equals(LeadsNodeType.HAVING.toString()))  ||
+//        ( node.getString("nodetype").equals(LeadsNodeType.SELECTION.toString()))
         ){
       Set<String> allSites = new HashSet<>();
       allSites.addAll(info.getObject("microclouds").getFieldNames());
