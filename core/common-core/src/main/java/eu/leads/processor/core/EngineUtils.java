@@ -30,9 +30,9 @@ public class EngineUtils {
 
             System.out.println("Executor threads " + threadBatch + "  " );
             initialized = true;
-            executor = new ThreadPoolExecutor((int)threadBatch,(int)(2*threadBatch),2000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
+            executor = new ThreadPoolExecutor((int)threadBatch,(int)(threadBatch),2000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
             runnables = new ConcurrentLinkedDeque<>();
-            for (int i = 0; i <= 2 * (threadBatch); i++) {
+            for (int i = 0; i <= (threadBatch); i++) {
                 runnables.add(new ExecuteRunnable());
             }
         }

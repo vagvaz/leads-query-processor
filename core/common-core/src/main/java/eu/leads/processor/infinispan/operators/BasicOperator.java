@@ -657,7 +657,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       System.err.println("building dist task");
       log.error("building dist task");
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder(mapperCallable);
-      builder.timeout(1, TimeUnit.HOURS);
+      builder.timeout(24, TimeUnit.HOURS);
       DistributedTask task = builder.build();
       System.err.println("submitting to local cluster task");
       log.error("submitting to local cluster task");
@@ -771,7 +771,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       DistributedExecutorService des = new DefaultExecutorService(reduceInputCache);
      setReducerCallableEnsembleHost();
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder(reducerCallable);
-      builder.timeout(10, TimeUnit.HOURS);
+      builder.timeout(24, TimeUnit.HOURS);
       DistributedTask task = builder.build();
       List<Future<String>> res = des.submitEverywhere(task);
       //      Future<String> res = des.submit(callable);

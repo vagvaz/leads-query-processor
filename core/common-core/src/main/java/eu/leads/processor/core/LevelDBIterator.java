@@ -23,8 +23,8 @@ public class LevelDBIterator implements Iterable<Map.Entry<String, Integer>>,
         this.db = keysDB;
         readOptions = new ReadOptions();
         readOptions.fillCache(true);
-        readOptions.verifyChecksums(true);
-        this.iterator = db.iterator(readOptions);
+//        readOptions.verifyChecksums(true);
+        this.iterator = db.iterator();
         this.iterator.seekToFirst();
 //        System.out.println( new String(this.iterator.peekPrev().getKey()));
     }
