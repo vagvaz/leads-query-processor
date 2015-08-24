@@ -70,25 +70,8 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
 //    versionedCache = new VersionedCacheTreeMapImpl(inputCache,new VersionScalarGenerator(),inputCache.getName());
      profilerLog = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
 
-    pageRankCache = (Cache) imanager.getPersisentCache("pagerankCache");
-    log.info("--------------------    get approxSum cache ------------------------");
-    approxSumCache = (Cache) imanager.getPersisentCache("approx_sum_cache");
-    totalSum = -1f;
 
-    if (conf.getObject("body").containsField("versionStart")) {
-      versionStart = conf.getObject("body").getLong("versionStart");
-      if (versionStart > 0) {
-        versioning = true;
-        minVersion = new VersionScalar(versionStart);
-      }
-    }
-    if (conf.getObject("body").containsField("versionFinish")) {
-      versionFinish = conf.getObject("body").getLong("versionFinish");
-      if (versionFinish > 0) {
-        versioning = true;
-        maxVersion = new VersionScalar(versionFinish);
-      }
-    }
+
 
 
     if (conf.getObject("body").containsField("qual")) {
@@ -111,7 +94,7 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
     }
 
     versioning = getVersionPredicate(conf);
-    fullProcessing = new ProfileEvent("FullScanProcessing",profilerLog);
+    fullProcessing = new ProfileEvent("Full Processing",profilerLog);
   }
 
   Object getSubSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
