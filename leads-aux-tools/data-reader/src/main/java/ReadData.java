@@ -1,10 +1,6 @@
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.NutchTransformer;
-import org.apache.avro.generic.GenericData;
-import org.apache.gora.filter.MapFieldValueFilter;
 import org.apache.nutch.storage.WebPage;
-import org.vertx.java.core.json.JsonObject;
 
 import java.util.HashMap;
 import java.util.List;
@@ -88,6 +84,7 @@ public class ReadData {
         }
         NutchTransformer transformer = new NutchTransformer(nutchToLQE);
         int counter =0 ;
+        int cnt = 0;
         int rejected = 0;
         int processed = 0;
         while(inputHandler.hasNext()){
@@ -115,7 +112,10 @@ public class ReadData {
                 //dummy.append(entry.getKey(), entry.getValue());
                 counter++;
                 if(counter % 100 == 0){
+                    cnt++;
                     System.err.println("read " +counter);
+                    if(cnt==Integer.valueOf(args[2]))
+                        break;
                 }
             }else{
 //                System.err.println("reject cause not having content");
