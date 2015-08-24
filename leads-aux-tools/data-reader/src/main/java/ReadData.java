@@ -84,7 +84,6 @@ public class ReadData {
         }
         NutchTransformer transformer = new NutchTransformer(nutchToLQE);
         int counter =0 ;
-        int cnt = 0;
         int rejected = 0;
         int processed = 0;
         while(inputHandler.hasNext()){
@@ -112,10 +111,7 @@ public class ReadData {
                 //dummy.append(entry.getKey(), entry.getValue());
                 counter++;
                 if(counter % 100 == 0){
-                    cnt++;
                     System.err.println("read " +counter);
-                    if(cnt==Integer.valueOf(args[2]))
-                        break;
                 }
             }else{
 //                System.err.println("reject cause not having content");
