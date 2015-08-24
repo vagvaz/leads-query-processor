@@ -21,7 +21,7 @@ import org.vertx.java.core.json.JsonObject;
 /**
  * Created by vagvaz on 16/07/15.
  */
-@Listener(sync = false,primaryOnly = true,clustered = false)
+@Listener(sync = true,primaryOnly = true,clustered = false)
 public class LocalIndexListener implements LeadsListener {
 
     transient private volatile Object mutex ;
@@ -84,8 +84,8 @@ public class LocalIndexListener implements LeadsListener {
 //        }
 
         index.put(key.getKey(), event.getValue());
-        targetCache.remove(event.getKey());
         pevent.end();
+//        targetCache.removeAsync(event.getKey());
 //            synchronized (mutex){
 //                mutex.notifyAll();
 //            }
@@ -95,16 +95,17 @@ public class LocalIndexListener implements LeadsListener {
 
     @CacheEntryModified
     public void modified(CacheEntryModifiedEvent event) {
-        System.err.println("local " + event.isOriginLocal() + " " + event.isCommandRetried() + " " + event.isCreated() + " " + event.isPre());
         if (event.isPre()) {
 //            ComplexIntermediateKey key = (ComplexIntermediateKey) event.getKey();
 //            System.err.println("PREKey modified " + event.getKey() + " key "  + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
             return;
         }
+        System.err.println("local " + event.isOriginLocal() + " " + event.isCommandRetried() + " " + event.isCreated() + " " + event.isPre());
+
         pevent.start("IndexPut");
 //        if(event.getKey() instanceof ComplexIntermediateKey) {
             ComplexIntermediateKey key = (ComplexIntermediateKey) event.getKey();
-//            System.err.println("AFTERValue modified " + event.getKey() + " key " + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
+            System.err.println("AFTERValue modified " + event.getKey() + " key " + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
             index.put(key.getKey(),event.getValue());
         pevent.end();
 //            synchronized (mutex){
@@ -128,8 +129,7 @@ public class LocalIndexListener implements LeadsListener {
         this.keysCache = manager.getLocalCache(cacheName+".index.keys");
         this.dataCache = manager.getLocalCache(cacheName+".index.data");
 //        this.index = new IntermediateKeyIndex(keysCache,dataCache);
-        this.index = new LevelDBIndex( System.getProperties().getProperty("java.io.tmpdir")+"/"+StringConstants.TMPPREFIX+"/interm-index/"+ manager
-            .getCacheManager().getAddress().toString()+cacheName,cacheName+".index");
+        this.index = new LevelDBIndex( System.getProperties().getProperty("java.io.tmpdir")+"/"+StringConstants.TMPPREFIX+"/interm-index/"+manager.getUniquePath()+"/"+cacheName,cacheName+".index");
         log = LoggerFactory.getLogger(LocalIndexListener.class);
         pevent = new ProfileEvent("indexPut",log);
     }
@@ -145,26 +145,29 @@ public class LocalIndexListener implements LeadsListener {
     void waitForAllData(){
         System.err.println("get the size of target");
         index.flush();
-        int size  = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size();
+//        int size  = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).getDataContainer().size();
+
+//        boolean isEmpty = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).isEmpty();
         //            int size = targetCache.getAdvancedCache().getDataContainer().size();
         //            System.err.println("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
         //            log.error("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
-        System.err.println("Size = " + size + " index ");
-        synchronized (mutex){
-
-
-            while( size > 0){
-//                System.err.println("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
-//                log.error("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
-                try {
-                    mutex.wait(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                 size  = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size();
-                System.err.println("Size = " + size);
-
-            }
-        }
+//        System.err.println("Size = " + size+ " index ");
+//        synchronized (mutex){
+//
+//
+//            while( size > 0){
+////                System.err.println("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
+////                log.error("LOCALINDEX: dataCache size " + dataCache.size() + " target Cache size local data " +size  );
+//                try {
+//                    mutex.wait(10);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                size  = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).getDataContainer().size();
+////                 size  = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size();
+////                System.err.println("Size = " + size);
+//                isEmpty = targetCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).isEmpty();
+//            }
+//        }
     }
 }

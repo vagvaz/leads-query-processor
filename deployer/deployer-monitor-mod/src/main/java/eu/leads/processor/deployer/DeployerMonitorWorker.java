@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by vagvaz on 8/27/14.
@@ -26,8 +27,8 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
     String deployerLogic;
     String nqeGroup;
     String deployerMonitor;
-    Map<String, Integer> actionToLevelMap;
-    Map<Integer, Map<String, Action>> monitoredActions;
+    ConcurrentMap<String, Integer> actionToLevelMap;
+    ConcurrentMap<Integer, Map<String, Action>> monitoredActions;
     LogProxy log;
     Node com;
     String id;

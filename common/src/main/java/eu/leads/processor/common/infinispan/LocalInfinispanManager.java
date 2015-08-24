@@ -39,6 +39,10 @@ public class LocalInfinispanManager implements InfinispanManager {
         this.manager = cacheManager;
     }
 
+    @Override public String getUniquePath() {
+        return null;
+    }
+
     /**
      * {@inheritDoc}
      */

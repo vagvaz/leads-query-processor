@@ -1,10 +1,6 @@
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.NutchTransformer;
-import org.apache.avro.generic.GenericData;
-import org.apache.gora.filter.MapFieldValueFilter;
 import org.apache.nutch.storage.WebPage;
-import org.vertx.java.core.json.JsonObject;
 
 import java.util.HashMap;
 import java.util.List;

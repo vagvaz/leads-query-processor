@@ -4,6 +4,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.MD5Hash;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
@@ -226,17 +227,92 @@ public class HDFSStorage implements LeadsStorage {
 
     @Override
     public long download(String hdfs_source, String localfile_destination) {
+        String predeployedPath = "/tmp/cache";
         hdfs_source = "/"+hdfs_source;
         long readBytes = 0;
         try {
-            File destFile = new File(localfile_destination);
-            if (destFile.exists()) {
-                destFile.delete();
-            } else {
-                File parent = destFile.getParentFile();
-                parent.mkdirs();
-                destFile.createNewFile();
+            String[] pluginPath = hdfs_source.split("/");
+            String plugin = pluginPath[2];
+            File destFile = new File(predeployedPath);
+            if (!destFile.exists()) {
+                System.out.println("creating directory: " + destFile);
+                boolean result = false;
+                try{
+                    destFile.mkdir();
+                    result = true;
+                } catch(SecurityException se){
+                    System.out.println("Error occured during the creation of the fodler");
+                }
+                if(result) {
+                    System.out.println("DIR created");
+                }
             }
+
+            File localFile = new File(localfile_destination+"/"+plugin);
+            File cacheFile = new File(predeployedPath+"/"+plugin);
+            if (cacheFile.exists()) {
+                System.out.println("The plugin already exists, just trying to copy from the cache to the local destination");
+                if ( cacheFile.exists( )) {
+                    BufferedInputStream  reader = new BufferedInputStream( new FileInputStream(cacheFile) );
+
+                    File destF = new File(localfile_destination);
+                    if (destF.exists()) {
+                        destF.delete();
+                    } else {
+                        File parent = destFile.getParentFile();
+                        parent.mkdirs();
+                        destF.createNewFile();
+                    }
+
+                    BufferedOutputStream  writer = new BufferedOutputStream( new FileOutputStream(destF, false));
+                    try {
+                        byte[]  buff = new byte[4096];
+                        int numChars;
+                        while ( (numChars = reader.read(  buff, 0, buff.length ) ) != -1) {
+                            writer.write( buff, 0, numChars );
+                        }
+                    } catch( IOException ex ) {
+                        throw new IOException("IOException when transferring " + cacheFile.getPath() + " to " + destF.getPath());
+                    } finally {
+                        try {
+                            if ( reader != null ){
+                                writer.close();
+                                reader.close();
+                            }
+                        } catch( IOException ex ){
+                            System.out.println("Error closing files when transferring " + cacheFile.getPath() + " to " + destF.getPath());
+                        }
+                    }
+                } else {
+                    throw new IOException("Old location does not exist when transferring " + cacheFile.getPath() + " to " + localFile.getPath() );
+                }
+
+                FileInputStream localFileStrm = new FileInputStream(localfile_destination);
+                FileInputStream cacheFileStrm = new FileInputStream(predeployedPath+"/"+plugin);
+                MD5Hash keyLocalFile = MD5Hash.digest(localFileStrm);
+                MD5Hash keyCacheFile = MD5Hash.digest(cacheFileStrm);
+                System.out.println("MD5 key : " + keyLocalFile);
+                System.out.println("MD5 key : " + keyCacheFile);
+                if(keyCacheFile.equals(keyLocalFile)){
+                    System.out.println("Copy completed successfully");
+                } else{
+                    System.out.println("Copy completed unsuccessfully");
+                }
+
+                readBytes = destFile.length();
+                return readBytes;
+            } else {
+                System.out.println("The plugin does not exist, starting the download to the local destination");
+            }
+
+    //            File destFile = new File(localfile_destination);
+    //            if (destFile.exists()) {
+    //                destFile.delete();
+    //            } else {
+    //                File parent = destFile.getParentFile();
+    //                parent.mkdirs();
+    //                destFile.createNewFile();
+    //            }
             FileOutputStream file = new FileOutputStream(localfile_destination);
             String[] pieces = parts(hdfs_source);
             log.info("File splited into " + pieces.length + "pieces ");
@@ -244,7 +320,6 @@ public class HDFSStorage implements LeadsStorage {
             long StartTime = System.currentTimeMillis();
             float currentSpeed;
             long totalUploadTime=0;
-            long filesize=0;
             int count=1;
             for (String piece : pieces) {
                 byte[] pieceBytes = read(piece);
@@ -263,11 +338,10 @@ public class HDFSStorage implements LeadsStorage {
             }
             file.close();
             System.out.println("Download completed Total downloaded " + readBytes + " bytes into file " + localfile_destination + " time " + totalUploadTime/1000f+ " s" );
-//            FileInputStream fileInputStream=new FileInputStream(localfile_destination);
-//            MD5Hash key = MD5Hash.digest(fileInputStream);
-//            fileInputStream.close();
-//            System.out.println("MD5 key : " + key);
-//            log.info("MD5 key : " + key);
+            FileInputStream fileInputStream=new FileInputStream(localfile_destination);
+            MD5Hash key = MD5Hash.digest(fileInputStream);
+            fileInputStream.close();
+            System.out.println("MD5 key : " + key);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

@@ -6,6 +6,8 @@ import eu.leads.processor.core.plan.LeadsNodeType;
 import eu.leads.processor.core.plan.NodeStatus;
 import eu.leads.processor.core.plan.PlanNode;
 import eu.leads.processor.core.plan.SQLPlan;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.*;
@@ -14,6 +16,7 @@ import java.util.*;
  * Created by vagvaz on 9/17/14.
  */
 public class ExecutionPlanMonitor {
+    private static Logger log = LoggerFactory.getLogger(ExecutionPlanMonitor.class);
     private String queryId;
     private SQLPlan plan;
     private ExecutionPlan executionPlan;
@@ -23,7 +26,7 @@ public class ExecutionPlanMonitor {
     private boolean isSpecial;
     private boolean hasFirstMapReduce;
     private boolean isMRFinished = false;
-
+    private long startTime;
 
   public SQLPlan getPlan() {
     return plan;
@@ -87,6 +90,7 @@ public class ExecutionPlanMonitor {
        groupingCandidate.add(LeadsNodeType.SELECTION);
        mergeSortAndLimit();
     }
+
 
    private void mergeSortAndLimit() {
       List<PlanNode> sources = getSources();
@@ -231,6 +235,12 @@ public class ExecutionPlanMonitor {
            break;
         }
       }
+       if(result){
+           long endTime = System.currentTimeMillis();
+           double queryDuration = (endTime - startTime)/1000.0f;
+           System.err.println("Query: " + queryId + " completed in " + queryDuration + " secs");
+           log.error("Query: " + queryId + " completed in " + queryDuration + " secs");
+       }
       return result;
     }
 
@@ -243,7 +253,8 @@ public class ExecutionPlanMonitor {
     }
 
     public void fail(PlanNode node) {
-
+        System.err.println("Node: " + node.getNodeId() + " FAILED (miserably)");
+        log.error("Node: " + node.getNodeId() + " FAILED (miserably)");
     }
     public List<PlanNode> getSources(){
        List<PlanNode> result = new ArrayList<PlanNode>();
@@ -254,6 +265,17 @@ public class ExecutionPlanMonitor {
              result.add(node);
           }
        }
+        for(PlanNode source : result ){
+            if(source.getNodeType() ==  LeadsNodeType.SCAN){
+                PlanNode next  = getNextOperator(source);
+                if(next.getNodeType() == LeadsNodeType.GROUP_BY || next.getNodeType() == LeadsNodeType.JOIN || next.getNodeType() == LeadsNodeType.SORT){
+                    source.getConfiguration().putObject("next",next.asJsonObject());
+                    source.getConfiguration().putString("next.type",next.getNodeType().toString());
+                    next.getConfiguration().putBoolean("skipMap",true);
+                }
+            }
+        }
+        startTime = System.currentTimeMillis();
        return result;
     }
     public DataType getLogicalPlan() {

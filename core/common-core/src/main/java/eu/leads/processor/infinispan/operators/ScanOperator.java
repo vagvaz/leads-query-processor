@@ -5,6 +5,11 @@ import eu.leads.processor.core.Action;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.core.plan.LeadsNodeType;
+import eu.leads.processor.core.plan.PlanNode;
+import eu.leads.processor.infinispan.LeadsCollector;
+import eu.leads.processor.infinispan.LeadsMapperCallable;
+import eu.leads.processor.infinispan.operators.mapreduce.GroupByMapper;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
@@ -24,6 +29,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class ScanOperator extends BasicOperator {
 
+   boolean joinOperator;
+   boolean groupByOperator;
+   boolean sortOperator;
+
    public ScanOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
       super(com,persistence,log,action);
    }
@@ -35,52 +44,28 @@ public class ScanOperator extends BasicOperator {
 
 
 
-//   @Override
-   public void run2() {
-
-      System.err.println("RUNNNING SCAN OPERATOR");
-      inputCache = (Cache) manager.getPersisentCache(getInput());
-
-      outputCache = (Cache)manager.getPersisentCache(getOutput());
-
-      if(inputCache.size() == 0){
-         cleanup();
-         return;
-      }
-      DistributedExecutorService des = new DefaultExecutorService(inputCache);
-      ScanCallableUpdate<String,Tuple> callable = new ScanCallableUpdate<>(conf.toString(),getOutput());
-//      ScanCallable callable = new ScanCallable(conf.toString(),getOutput());
-      DistributedTaskBuilder builder = des.createDistributedTaskBuilder( callable);
-      builder.timeout(1, TimeUnit.HOURS);
-      DistributedTask task = builder.build();
-      List<Future<String>> res = des.submitEverywhere(task);
-//      Future<String> res = des.submit(callable);
-      List<String> addresses = new ArrayList<String>();
-      try {
-         if (res != null) {
-            for (Future<?> result : res) {
-               System.out.println(result.get());
-               addresses.add((String) result.get());
-            }
-            System.out.println("mapper Execution is done");
-         }
-         else
-         {
-            System.out.println("mapper Execution not done");
-         }
-      } catch (InterruptedException e) {
-         e.printStackTrace();
-      } catch (ExecutionException e) {
-         e.printStackTrace();
-      }
-      System.err.println("FINISHED RUNNING SCAN " + outputCache.size());
-      updateStatistics(inputCache,null,outputCache);
-      cleanup();
-   }
-
    @Override
    public void init(JsonObject config) {
       inputCache = (Cache) manager.getPersisentCache(getInput());
+      if(conf.containsField("next")){
+         if(conf.getString("next.type").equals(LeadsNodeType.GROUP_BY.toString())){
+               groupByOperator = true;//new GroupByOperator(this.com,this.manager,this.log,this.action);
+//            PlanNode node = new PlanNode(conf.getObject("next").asObject());
+//            groupByOperator.setIntermediateCacheName(node.getNodeId()+".intermediate");
+//            groupByOperator.init(conf.getObject("next").getObject("configuration"));
+         } else if(conf.getString("next.type").equals(LeadsNodeType.JOIN.toString())){
+            joinOperator = true;// new JoinOperator(this.com,this.manager,this.log,this.action);
+//            PlanNode node = new PlanNode(conf.getObject("next").asObject());
+//            joinOperator.setIntermediateCacheName(node.getNodeId()+".intermediate");
+//            joinOperator.init(conf.getObject("next").getObject("configuration"));
+         } else if (conf.getString("next.type").equals(LeadsNodeType.SORT.toString())){
+            sortOperator = true;//new SortOperator(this.com,this.manager,this.log,this.action);
+//            sortOperator.init(conf.getObject("next").getObject("configuration"));
+            System.err.println("SORT SCAN NOT IMPLEMENTED YET");
+         }else{
+            System.err.println(conf.getString("next.type") + " SCAN NOT IMPLEMENTED YET");
+         }
+      }
    }
 
    @Override
@@ -99,16 +84,36 @@ public class ScanOperator extends BasicOperator {
    public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
       Set<String> targetMC = getTargetMC();
       for(String mc : targetMC){
-         createCache(mc,getOutput());
+         if(!conf.containsField("next")) {
+            createCache(mc,getOutput());
+         }
+         else{
+            createCache(mc, getOutput() + ".data", "localIndexListener");
+         }
       }
    }
 
    @Override
    public void setupMapCallable() {
       inputCache = (Cache) manager.getPersisentCache(getInput());
-      mapperCallable = new ScanCallableUpdate<>(conf.toString(),getOutput());
+      LeadsCollector collector = new LeadsCollector<>(0, getOutput());
+      mapperCallable = new ScanCallableUpdate<>(conf.toString(),getOutput(),collector);
    }
 
+   @Override
+   public String getOutput(){
+      String result  = super.getOutput();
+      if(groupByOperator){
+         result = conf.getObject("next").getString("id")+".intermediate";
+      }
+      if(joinOperator){
+         result = conf.getObject("next").getString("id")+".intermediate";
+      }
+      if(sortOperator){
+
+      }
+      return result;
+   }
    @Override
    public void setupReduceCallable() {
 

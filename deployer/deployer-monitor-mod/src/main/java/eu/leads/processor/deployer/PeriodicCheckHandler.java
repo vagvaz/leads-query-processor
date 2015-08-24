@@ -1,5 +1,6 @@
 package eu.leads.processor.deployer;
 
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LogProxy;
@@ -41,11 +42,15 @@ public class PeriodicCheckHandler implements Handler<Long> {
     @Override
     public void handle(Long event) {
         log.info("Running periodic Monitor check for DeployerMonitor " + ownerId);
-        handleLevel3();
-        handleLevel2();
-        handleLevel1();
-        handleLevel0();
-        handleLevel_1();
+        try {
+            handleLevel3();
+            handleLevel2();
+            handleLevel1();
+            handleLevel0();
+            handleLevel_1();
+        }catch(Exception e){
+            e.printStackTrace();
+         }
     }
 
     private void handleLevel_1() {

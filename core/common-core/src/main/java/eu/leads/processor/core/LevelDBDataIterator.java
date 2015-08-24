@@ -26,8 +26,8 @@ public class LevelDBDataIterator implements Iterator<Object> {
         this.key = key;
         this.total = counter;
         readOptions = new ReadOptions();
-        readOptions.fillCache(true);
-        readOptions.verifyChecksums(false);
+//        readOptions.fillCache(true);
+//        readOptions.verifyChecksums(false);
     }
 
     @Override public boolean hasNext() {
@@ -87,7 +87,7 @@ public class LevelDBDataIterator implements Iterator<Object> {
 //        if(iterator!=null)
 //        reportState(key,tot);
         if(iterator == null){
-            iterator = data.iterator(readOptions);
+            iterator = data.iterator();
             iterator.seekToFirst();
 //            reportState(key,tot);
 //            Map.Entry<byte[],byte[]> entry = iterator.peekNext();

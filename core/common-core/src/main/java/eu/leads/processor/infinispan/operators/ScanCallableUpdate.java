@@ -4,10 +4,12 @@ import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.utils.ProfileEvent;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.index.LeadsIndex;
 import eu.leads.processor.core.index.LeadsIndexString;
 import eu.leads.processor.math.FilterOperatorNode;
+import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.math.FilterOperatorTree;
 import eu.leads.processor.math.MathUtils;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
@@ -45,8 +47,11 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
   protected String qualString;
   transient  boolean versioning;
   boolean onVersionedCache;
-  transient protected long versionStart = -1, versionFinish = -1, range = -1;
-  //  transient protected InfinispanManager manager;
+  transient protected long versionStart=-1,versionFinish=-1,range=-1;
+  protected LeadsCollector collector;
+
+
+    //  transient protected InfinispanManager manager;
   protected Logger log = LoggerFactory.getLogger(ScanCallableUpdate.class.toString());
    private VersionScalar minVersion=null;
     private VersionScalar maxVersion=null;
@@ -56,14 +61,15 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
   transient Logger profilerLog;
   private ProfileEvent fullProcessing;
 
-  public ScanCallableUpdate(String configString, String output) {
-    super(configString, output);
-  }
 
-  public ScanCallableUpdate(String configString, String output, boolean onVersionedCache) {
-    super(configString, output);
-    this.onVersionedCache = onVersionedCache;
+  public ScanCallableUpdate(String configString, String output, LeadsCollector collector) {
+    super(configString, collector.getCacheName());
+    this.collector = collector;
   }
+//  public ScanCallableUpdate(String configString, String output,boolean onVersionedCache) {
+//    super(configString, output);
+//    this.onVersionedCache = onVersionedCache;
+//  }
 
   @Override  public void initialize() {
     super.initialize();
@@ -113,6 +119,22 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 
     versioning = getVersionPredicate(conf);
     fullProcessing = new ProfileEvent("FullScanProcessing",profilerLog);
+
+    collector.setOnMap(getHasNext());
+    collector.setManager(this.embeddedCacheManager);
+    collector.setEmanager(emanager);
+    collector.setSite(LQPConfiguration.getInstance().getMicroClusterName());
+    collector.initializeCache(inputCache.getName(),imanager);
+    if(getHasNext()){
+      collector.setEnsembleHost(ensembleHost);
+      collector.setInputCache(inputCache);
+      collector.initializeNextCallable(conf);
+    }
+  }
+
+  private boolean getHasNext() {
+    boolean result = conf.containsField("next");
+    return result;
   }
 
   Object getSubSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
@@ -431,7 +453,8 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
         //               log.info("--------------------    put into output with filter ------------------------");
         if (key != null && tuple != null) {
 //            profExecute.start("Scan_Put");
-          EnsembleCacheUtils.putToCache(outputCache, key.toString(), tuple);
+              collector.emit(key.toString(),tuple);
+//            EnsembleCacheUtils.putToCache(outputCache,key.toString(), tuple);
 //            profExecute.end();
         }
       }
@@ -442,7 +465,8 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
       //            log.info("--------------------    put into output without tree ------------------------");
       if (key != null && tuple != null) {
 //          profExecute.start("Scan_outputToCache");
-        EnsembleCacheUtils.putToCache(outputCache, key, tuple);
+//          EnsembleCacheUtils.putToCache(outputCache,key, tuple);
+          collector.emit(key.toString(),tuple);
 //          profExecute.end();
       }
 
@@ -591,6 +615,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 
   @Override public void finalizeCallable() {
     fullProcessing.end();
+    collector.finalizeCollector();
     super.finalizeCallable();
   }
 }

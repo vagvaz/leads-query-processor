@@ -89,45 +89,6 @@ public class JoinOperator extends MapReduceOperator {
   }
 
 
-  //    @Override
-    public void run2() {
-        long startTime = System.nanoTime();
-        Cache innerCache = (Cache) manager.getPersisentCache(innerCacheName);
-        Cache outerCache = (Cache) manager.getPersisentCache(outerCacheName);
-        Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
-        DistributedExecutorService des = new DefaultExecutorService(innerCache);
-        JoinCallableUpdated<String,Tuple> callable = new JoinCallableUpdated(conf.toString(),getOutput(),
-                                                                          outerCache
-                                                                                            .getName(),
-                                                       isLeft);
-//        JoinCallable2 callable = new JoinCallable2(conf.toString(),getOutput(),outerCache.getName(),isLeft);
-       DistributedTaskBuilder builder = des.createDistributedTaskBuilder(callable);
-       builder.timeout(1, TimeUnit.HOURS);
-       DistributedTask task = builder.build();
-       List<Future<String>> res = des.submitEverywhere(task);        List<String> addresses = new ArrayList<String>();
-        try{
-            if(res != null){
-                for(Future<String> result : res){
-                    addresses.add(result.get());
-                  log.info(addresses.get(addresses.size()-1));
-                }
-                //TODO log
-                log.info("Join Callable successfully run");
-            }
-            else{
-                //TODO log
-                log.error("Join Callable did not run");
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        cleanup();
-        //Store Values for statistics
-        updateStatistics(innerCache,outerCache,outputCache);
-    }
-
     @Override
     public void init(JsonObject config) {
 //        super.init(config); //fix set correctly caches names

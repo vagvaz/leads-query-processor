@@ -8,6 +8,8 @@ import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.index.LeadsIndex;
+import eu.leads.processor.core.EngineUtils;
+import org.eclipse.jdt.internal.codeassist.impl.Engine;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.context.Flag;
@@ -53,9 +55,6 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //  transient protected RemoteCacheManager emanager;
   transient protected EnsembleCacheManager emanager;
   transient protected EnsembleCache ecache;
-  transient protected ThreadPoolExecutor executor;
-  transient protected ConcurrentLinkedDeque<ExecuteRunnable> runnables;
-  transient protected volatile Object runableMutex;
   transient Logger profilerLog;
   protected ProfileEvent profCallable;
   public LeadsBaseCallable(String configString, String output){
@@ -89,7 +88,6 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     }else
       profCallable = new ProfileEvent("setEnvironment Callable " + this.getClass().toString(),profilerLog);
     embeddedCacheManager = cache.getCacheManager();
-    runableMutex = new Object();
     imanager = new ClusterInfinispanManager(embeddedCacheManager);
 //    outputCache = (Cache) imanager.getPersisentCache(output);
     keys = inputKeys;
@@ -131,34 +129,16 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
     initialize();
     profCallable.end("end_setEnv");
-    executor = new ThreadPoolExecutor(4,12,5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
-    runnables = new ConcurrentLinkedDeque<>();
-    for (int i = 0; i < 100; i++) {
-      runnables.add(new ExecuteRunnable(this));
-    }
-  }
 
-  public  ExecuteRunnable getRunnable(){
-    ExecuteRunnable result = null;
-    synchronized (runableMutex){
-      result = runnables.poll();
-      while(result == null){
-        try {
-          runableMutex.wait(10);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-        result = runnables.poll();
-      }
-    }
-
-    return result;
-  }
-  public  void addRunnable(ExecuteRunnable runnable){
-    synchronized (runableMutex){
-      runnables.add(runnable);
-      runableMutex.notify();
-    }
+//    long start = System.currentTimeMillis();
+//    executor = new ThreadPoolExecutor(threadBatch,5*threadBatch,5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
+//    runnables = new ConcurrentLinkedDeque<>();
+//    for (int i = 0; i <= 50*threadBatch; i++) {
+//      runnables.add(new ExecuteRunnable(this));
+//    }
+//    long end  = System.currentTimeMillis();
+//    System.err.println("runnables created in " + (end-start));
+    EngineUtils.initialize();
   }
 
 
@@ -184,9 +164,11 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         (KeyValueFilter<? super K, ? super V>) filter);
 //        .converter((Converter<? super K, ? super V, ?>) filter);
     profExecute.end();
+    profExecute.start("ISPNIter");
     try {
 
       for (Object object : iterable) {
+        profExecute.end();
         Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
 
         //      V value = inputCache.get(key);
@@ -195,35 +177,33 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
         if (value != null) {
 //          profExecute.start("ExOn" + (++count));
-          ExecuteRunnable runable = this.getRunnable();
-          runable.setKeyValue(key, value);
-          executor.submit(runable);
+          ExecuteRunnable runable = EngineUtils.getRunnable();
+          runable.setKeyValue(key, value,this);
+          EngineUtils.submit(runable);
 //          executeOn((K) key, value);
 //          profExecute.end();
-	  }
-        }
-        iterable.close();
-      }catch(Exception e){
+	}
+         profExecute.start("ISPNIter");
+      }
+      iterable.close();
+      }
+	catch(Exception e){
         iterable.close();
         profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
         PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
       }
-      profCallable.end();
     }else{
       profCallable.start("Search_Over_Indexed_Data");
       System.out.println("Search Over Indexed Data");
       ProfileEvent profExecute = new ProfileEvent("Get list " + this.getClass().toString(), profilerLog);
       List<LeadsIndex> list = lquery.get(0).list(); //TODO fix it
       System.out.println(" Indexed Data Size: " + list.size());
-
-      profExecute.end();
       //to do use sketches to find out what to do
       try {
         for (LeadsIndex lst : list) {
           System.out.println(lst.getAttributeName()+":"+lst.getAttributeValue());
           K key = (K) lst.getKeyName();
           V value = inputCache.get(key);
-
           if (value != null) {
             profExecute.start("ExOn" + (++count));
             executeOn(key, value);
@@ -234,8 +214,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
         PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
       }
-      profCallable.end();
     }
+    profCallable.end();
     finalizeCallable();
     return embeddedCacheManager.getAddress().toString();
   }
@@ -251,12 +231,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   @Override public void finalizeCallable(){
     try {
       profCallable.start("finalizeBaseCallable");
-
+      EngineUtils.waitForAllExecute();
       EnsembleCacheUtils.waitForAllPuts();
-      while(executor.getActiveCount() > 1){
-        Thread.sleep(100);
-      }
-      executor.shutdown();
 //      emanager.stop();
 //
 //      ecache.stop();

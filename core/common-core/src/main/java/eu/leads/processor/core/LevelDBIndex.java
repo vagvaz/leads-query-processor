@@ -22,7 +22,7 @@ public class LevelDBIndex {
     private Options options;
     private LevelDBIterator keyIterator;
     private LevelDBDataIterator valuesIterator;
-    private int batchSize = 18000;
+    private int batchSize = 50000;
     private int batchCount =0;
     private WriteBatch batch;
     private WriteBatch keyBatch;
@@ -42,9 +42,7 @@ public class LevelDBIndex {
         keydbFile = new File(baseDirFile.toString()+"/keydb");
         datadbFile = new File(baseDirFile.toString()+"/datadb");
         options = new Options();
-        options.writeBufferSize( 128*1024*1024);
-        options.paranoidChecks(false);
-
+        options.writeBufferSize( 240*1024*1024);
         options.createIfMissing(true);
         //        options.blockSize(LQPConfiguration.getInstance().getConfiguration()
         //            .getInt("leads.processor.infinispan.leveldb.blocksize", 16)*1024*1024);
@@ -53,12 +51,13 @@ public class LevelDBIndex {
         options.blockSize(16*1024 * 1024);
 
 //        options.compressionType(CompressionType.SNAPPY);
-        options.cacheSize( 160 * 1024*1024);
+        options.cacheSize( 256 * 1024*1024);
         try {
             keysDB = factory.open(keydbFile,options);
             dataDB = factory.open(datadbFile,options);
             writeOptions = new WriteOptions();
-            writeOptions.sync(false);
+//            writeOptions.sync(false);
+
             batch = dataDB.createWriteBatch();
         } catch (IOException e) {
             e.printStackTrace();
@@ -151,7 +150,8 @@ public class LevelDBIndex {
         index.close();
         System.out.println("exit---");
     }
-
+//    80.156.73.113:11222;80.156.73.116:11222;80.156.73.123:11222;80.156.73.128:11222
+//    ;
     public synchronized void flush() {
         try {
 
@@ -225,7 +225,7 @@ public class LevelDBIndex {
             counter += 1;
         }
         byte[] keyvalue = ByteBuffer.allocate(4).putInt(counter).array();
-        keysDB.put(bytes(key+"{}"), keyvalue,writeOptions);
+        keysDB.put(bytes(key+"{}"), keyvalue);
         //        encoder = new BasicBSONEncoder();
         BasicBSONEncoder encoder = new BasicBSONEncoder();
         byte[] b = encoder.encode(value.asBsonObject());
@@ -236,7 +236,7 @@ public class LevelDBIndex {
         batchCount++;
         if(batchCount>= batchSize){
             try {
-                dataDB.write(batch,writeOptions);
+                dataDB.write(batch);
                 batch.close();
             } catch (IOException e) {
                 e.printStackTrace();

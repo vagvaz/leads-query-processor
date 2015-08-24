@@ -16,6 +16,8 @@ import org.vertx.java.core.json.JsonObject;
 
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,8 +30,8 @@ public class DefaultNode implements Node, Handler<Long> {
     private int retries = ComUtils.DEFAULT_RETRIES;
     private long timeout = ComUtils.DEFAULT_TIMEOUT;
     private static long currentId;
-    private Map<Long, MessageWrapper> pending;
-    private Map<Long, AckHandler> pendingHandlers;
+    private ConcurrentMap<Long, MessageWrapper> pending;
+    private ConcurrentMap<Long, AckHandler> pendingHandlers;
     private CommunicationHandler comHandler;
     private LeadsMessageHandler failHandler;
     private Set<Long> requests;
@@ -38,9 +40,8 @@ public class DefaultNode implements Node, Handler<Long> {
     private Vertx vertx;
     public DefaultNode() {
         config = new JsonObject();
-        config.putString("id","Default");
-        pending = new HashMap<Long, MessageWrapper>();
-        pendingHandlers = new HashMap<Long, AckHandler>();
+        pending = new ConcurrentHashMap<>();
+        pendingHandlers = new ConcurrentHashMap<>();
         requests = new HashSet<Long>();
         removalListener = new RemovalListener<String, Long>() {
             @Override

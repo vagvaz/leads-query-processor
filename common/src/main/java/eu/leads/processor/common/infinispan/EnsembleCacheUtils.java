@@ -4,6 +4,7 @@ import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.commons.api.BasicCache;
+import org.infinispan.ensemble.cache.distributed.HashBasedPartitioner;
 import org.jgroups.util.ConcurrentLinkedBlockingQueue2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,9 +65,9 @@ public class EnsembleCacheUtils {
             currentCaches = new ConcurrentHashMap<>();
             mapsToPut = new ConcurrentHashMap<>();
             initialized = true;
-            executor = new ThreadPoolExecutor((int)threadBatch,(int)(1.1*threadBatch),5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
+            executor = new ThreadPoolExecutor((int)threadBatch,(int)(threadBatch),1000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
             runnables = new ConcurrentLinkedDeque<>();
-            for (int i = 0; i < 5 * (threadBatch); i++) {
+            for (int i = 0; i <= 3000 * (threadBatch); i++) {
                 runnables.add(new SyncPutRunnable());
             }
 //            executor.prestartAllCoreThreads();
@@ -75,32 +76,33 @@ public class EnsembleCacheUtils {
 
     public  static SyncPutRunnable getRunnable(){
         SyncPutRunnable result = null;
-        synchronized (runnableMutex){
+//        synchronized (runnableMutex){
             result = runnables.poll();
             while(result == null){
                 try {
-                    runnableMutex.wait(20);
+                    Thread.sleep(0,500000);
+//                    Thread.yield();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 result = runnables.poll();
-            }
+//            }
         }
 
         return result;
     }
 
     public static void addRunnable(SyncPutRunnable runnable){
-        synchronized (runnableMutex){
+//        synchronized (runnableMutex){
             runnables.add(runnable);
-            runnableMutex.notify();
-        }
+//            runnableMutex.notify();
+//        }
     }
     public static void waitForAllPuts() {
         //        profExecute.start("waitForAllPuts");
-        synchronized (runnableMutex){
-            runnableMutex.notifyAll();
-        }
+//        synchronized (runnableMutex){era
+//            runnableMutex.notifyAll();
+//        }
         while(executor.getActiveCount() > 0)
         try {
 //            executor.awaitTermination(100,TimeUnit.MILLISECONDS);

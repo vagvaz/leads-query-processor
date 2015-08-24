@@ -27,6 +27,11 @@ public class EnsembleInfinispanManager implements InfinispanManager {
   private String configurationFile;
   private Configuration defaultConfig = null;
   private String connectionStrings;
+
+  @Override public String getUniquePath() {
+    return null;
+  }
+
   @Override public void setConfigurationFile(String configurationFile) {
     this.configurationFile  = configurationFile;
   }
