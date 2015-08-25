@@ -6,11 +6,13 @@ import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.index.LeadsIndex;
+import eu.leads.processor.core.index.LeadsIndexHelper;
 import eu.leads.processor.core.index.LeadsIndexString;
 import eu.leads.processor.math.FilterOperatorNode;
 import eu.leads.processor.math.FilterOperatorTree;
 import eu.leads.processor.math.MathUtils;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
+import org.apache.tajo.algebra.*;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.query.SearchManager;
@@ -29,6 +31,8 @@ import org.vertx.java.core.json.JsonObject;
 import java.io.Serializable;
 import java.util.*;
 
+import static eu.leads.processor.common.infinispan.EnsembleCacheUtils.putToCache;
+
 
 /**
  * Created by vagvaz on 2/20/15.
@@ -41,327 +45,92 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
   transient protected FilterOperatorTree tree;
   transient protected double totalSum;
   transient protected Cache approxSumCache;
-  protected String qualString;
-  transient  boolean versioning;
+  transient boolean versioning;
   boolean onVersionedCache;
-  transient protected long versionStart = -1, versionFinish = -1, range = -1;
-  //  transient protected InfinispanManager manager;
   protected Logger log = LoggerFactory.getLogger(CreateIndexCallable.class.toString());
-   private VersionScalar minVersion=null;
-    private VersionScalar maxVersion=null;
+
   transient protected boolean renameTableInTree;
-  transient  private String toRename;
-  transient  private String tableName;
+  transient private String tableName;
+  transient String IndexName;
+  transient ArrayList<String> columnNames;
   transient Logger profilerLog;
   private ProfileEvent fullProcessing;
+  transient ArrayList<Cache> indexCaches;
+  transient ArrayList<Cache> sketchCaches;
+  transient ArrayList<DistCMSketch> sketches;
+  transient LeadsIndexHelper lindHelp ;
 
   public CreateIndexCallable(String configString, String output) {
     super(configString, output);
   }
 
-  public CreateIndexCallable(String configString, String output, boolean onVersionedCache) {
-    super(configString, output);
-    this.onVersionedCache = onVersionedCache;
-  }
+//  public CreateIndexCallable(String configString, String output, boolean onVersionedCache) {
+//    super(configString, output);
+//    this.onVersionedCache = onVersionedCache;
+//  }
 
-  @Override  public void initialize() {
+  @Override
+  public void initialize() {
     super.initialize();
-    lquery = null;
-//    versionedCache = new VersionedCacheTreeMapImpl(inputCache,new VersionScalarGenerator(),inputCache.getName());
-     profilerLog = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
+    profilerLog = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
+    System.out.println("Emanager has " + emanager.sites().size() + " sites");
+    String CreateIndexJ = conf.getString("rawquery");
 
+    CreateIndex newExpr = JsonHelper.fromJson(CreateIndexJ, CreateIndex.class);
 
+    IndexName = newExpr.getIndexName();
+    if (IndexName.isEmpty())
+      IndexName = "noname"+UUID.randomUUID();
 
+    tableName = (((Relation) ((Projection) newExpr.getChild()).getChild())).getName();
+    Sort.SortSpec[] collumns = newExpr.getSortSpecs();
 
+    columnNames = new ArrayList<>();//= conf.getObject("CreateIndex").getArray("SortSpecs");
+    for (Sort.SortSpec sc : collumns)
+      columnNames.add(((ColumnReferenceExpr) sc.getKey()).getName());
 
-    if (conf.getObject("body").containsField("qual")) {
-      tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
-      System.out.print("Quaaal : " + conf.getObject("body").getObject("qual").toString());
-      toRename = getRenamingTableFromSchema(inputSchema);
-      tableName = conf.getObject("body").getObject("tableDesc").getString("tableName");
-      tableName = tableName.replace(StringConstants.DEFAULT_DATABASE_NAME + ".", "");
-      if (tableName.equals(toRename)) {
-        renameTableInTree = false;
-      } else {
-        renameTableInTree = true;
+    System.out.println(" TableName: " + tableName);
+    tableName = StringConstants.DEFAULT_DATABASE_NAME + "." + tableName;
+
+    System.out.println(" TableName: " + tableName);
+
+    System.out.println(" IndexName: " + IndexName);
+    System.out.println(" columns found: " + columnNames.toString());
+
+    //fix IndexName
+
+    Cache<String, String> allIndexes = (Cache) imanager.getPersisentCache("allIndexes");
+    for (String column : columnNames)
+      allIndexes.put(IndexName, tableName + "." + column);
+
+    indexCaches = new ArrayList<>();
+    sketchCaches = new ArrayList<>();
+    sketches = new ArrayList<>();
+    for (int c = 0; c < columnNames.size(); c++) {
+      if(!imanager.getCacheManager().cacheExists(tableName + "." + columnNames.get(c))) {
+        log.info("Creating Index Caches, column " + tableName + "." + columnNames.get(c));
+      }else {
+        log.info("Index Already exists on column ... but anyway reindexing" +tableName + "." + columnNames.get(c));
       }
-      if (checkIndex_usage()) {
-        // create query
-        lquery = createLuceneQuerys(indexCaches, tree.getRoot());
-      }
-    } else {
-      tree = null;
+      indexCaches.add((Cache) imanager.getIndexedPersistentCache(tableName + "." + columnNames.get(c)));
+      Cache tmp =(Cache) imanager.getPersisentCache(tableName + "." + columnNames.get(c) + ".sketch");
+      sketchCaches.add(tmp);
+      log.info("Creating DistCMSketch " + tableName + "." + columnNames.get(c) + ".sketch");
+      sketches.add(new DistCMSketch(tmp,false));
     }
 
-    versioning = getVersionPredicate(conf);
-    fullProcessing = new ProfileEvent("Full Processing",profilerLog);
+    inputCache = (Cache) imanager.getPersisentCache(tableName);
+
+    fullProcessing = new ProfileEvent("Full Processing", profilerLog);
+    lindHelp = new LeadsIndexHelper();
+
   }
 
-  Object getSubSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
-    Object result = null;
-    double dleft = -1000;
-    double dright = -1000;
-    String sleft = null;
-    String sright = null;
-    if (root == null)
-      return null;
-    Object oleft = getSubSelectivity(sketchCaches, root.getLeft());
-    Object oright = getSubSelectivity(sketchCaches, root.getRight());
-
-    if (oleft instanceof Double)
-      dleft = (double) oleft;
-    if (oright instanceof Double)
-      dright = (double) oright;
-    if (oleft instanceof String)
-      sleft = (String) oleft;
-    if (oright instanceof String)
-      sright = (String) oright;
-
-    switch (root.getType()) {
-      case EQUAL:
-        if (sleft != null && sright != null) {
-          String collumnName = sleft;
-          return sketchCaches.get(collumnName).get(sright);
-        }
-        break;
-      case FIELD:
-        String collumnName = root.getValueAsJson().getObject("body").getObject("column").getString("name");
-        String type = root.getValueAsJson().getObject("body").getObject("column").getObject("dataType").getString("type");
-        //MathUtils.getTextFrom(root.getValueAsJson());
-
-        if (sketchCaches.containsKey(collumnName)) {
-          if (type.equals("TEXT"))
-            return collumnName;
-          return null;
-        }
-        break;
-
-      case CONST:
-        // result = true;
-        return MathUtils.getTextFrom(root.getValueAsJson());
-     case LTH:
-       return 0.4;
-////        if(left !=null && oright !=null)
-////          return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
-//        return null;
-//        break;
-      case LEQ:
-        return 0.4;
-//        if(left !=null && oright !=null)
-//          return left.and().having("attributeValue").lte(oright);//,right.getValueAsJson());
-//        break;
-      case GTH:
-        return 0.4;
-//        if(left !=null && oright !=null)
-//          return left.and().having("attributeValue").gt(oright);//,right.getValueAsJson());
-//        break;
-      case GEQ:
-        return 0.4;
-//        if(left !=null && oright !=null)
-//          return left.and().having("attributeValue").gte(oright);//,right.getValueAsJson());
-//        break;
-//
-//      case LIKE:
-//        if(left !=null && oright !=null) {
-//          return left.and().having("attributeValue").like((String) oright);//,right.getValueAsJson());
-//        }break;
-//
-//
-//      case ROW_CONSTANT:
-//        //TODO
-//        break;
-      default:
-        return 0.01;
-    }
-    return null;
-  }
-
-
-  Object getSubLucene(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
-    FilterConditionContext result = null;
-    FilterConditionContext left = null;
-    FilterConditionContext right = null;
-    if (root == null)
-      return null;
-    Object oleft = getSubLucene(indexCaches, root.getLeft());
-    Object oright = getSubLucene(indexCaches, root.getRight());
-
-    if (oleft instanceof FilterConditionContext)
-      left = (FilterConditionContext) oleft;
-    if (oright instanceof FilterConditionContext)
-      right = (FilterConditionContext) oright;
-
-    switch (root.getType()) {
-      case EQUAL:
-        if (left != null && oright != null)
-          return left.and().having("attributeValue").eq(oright);//,right.getValueAsJson());
-        break;
-      case IS_NULL:
-        // result = left.isValueNull();
-        break;
-      case NOT_EQUAL:
-        //  result = !(MathUtils.equals(left.getValueAsJson(), right.getValueAsJson()));
-        break;
-      case FIELD:
-        String collumnName = root.getValueAsJson().getObject("body").getObject("column").getString("name");
-        String type = root.getValueAsJson().getObject("body").getObject("column").getObject("dataType").getString("type");
-        //MathUtils.getTextFrom(root.getValueAsJson());
-
-        if (indexCaches.containsKey(collumnName)) {
-
-          SearchManager sm = org.infinispan.query.Search.getSearchManager(indexCaches.get(collumnName));
-          QueryFactory qf = sm.getQueryFactory();
-          QueryBuilder Qb;
-          if (type.equals("TEXT"))
-            Qb = qf.from(LeadsIndexString.class);
-          else if (type.equals("FLOAT"))
-            Qb = qf.from(LeadsIndexString.class);
-          else if (type.equals("DOUBLE"))
-            Qb = qf.from(LeadsIndexString.class);
-          else if (type.equals("INT"))
-            Qb = qf.from(LeadsIndexString.class);
-          else if (type.equals("LONG"))
-            Qb = qf.from(LeadsIndexString.class);
-          else
-            Qb = qf.from(LeadsIndex.class);
-          FilterConditionContext filterC = Qb.having("attributeName").eq(collumnName);
-          return filterC;
-        }
-        break;
-
-      case CONST:
-        // result = true;
-        return MathUtils.getTextFrom(root.getValueAsJson());
-      case LTH:
-        if (left != null && oright != null)
-          return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
-
-        break;
-      case LEQ:
-        if (left != null && oright != null)
-          return left.and().having("attributeValue").lte(oright);//,right.getValueAsJson());
-        break;
-      case GTH:
-        if (left != null && oright != null)
-          return left.and().having("attributeValue").gt(oright);//,right.getValueAsJson());
-        break;
-      case GEQ:
-        if (left != null && oright != null)
-          return left.and().having("attributeValue").gte(oright);//,right.getValueAsJson());
-        break;
-
-      case LIKE:
-        if (left != null && oright != null) {
-          return left.and().having("attributeValue").like((String) oright);//,right.getValueAsJson());
-        }
-        break;
-
-
-      case ROW_CONSTANT:
-        //TODO
-        break;
-    }
-    return null;
-  }
-
-
-  ArrayList<Query> createLuceneQuerys(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
-    ArrayList<Query> result = new ArrayList<>();
-    ArrayList<Query> left = null;
-    ArrayList<Query> right = null;
-    switch (root.getType()) {
-      case AND: {
-        left = createLuceneQuerys(indexCaches, root.getLeft());
-        right = createLuceneQuerys(indexCaches, root.getRight());
-        System.out.println("Fix AND with multiple indexes");
-      }
-      break;
-      case OR: {
-        left = createLuceneQuerys(indexCaches, root.getLeft());
-        right = createLuceneQuerys(indexCaches, root.getRight());
-        //if(left !=null && right !=null){
-        //use sketches to check
-        System.out.println("Fix OR with multiple indexes");
-      }
-      break;
-      default: {
-        System.out.println("SubQual " + root.getType());
-        FilterConditionContext qual = (FilterConditionContext) getSubLucene(indexCaches, root);
-        if (qual != null)
-          result.add(qual.toBuilder().build());
-      }
-      if (left != null)
-        result.addAll(left);
-      if (right != null)
-        result.addAll(right);
-
-    }
-    return (result.isEmpty()) ? null : result;
-  }
-
-  Object getSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
-    if(root==null)
-      return null;
-    Object left = getSelectivity(sketchCaches, root.getLeft());
-    Object right = getSelectivity(sketchCaches, root.getRight());
-
-    switch (root.getType()) {
-      case AND:
-        if (left != null && right != null)
-          return Math.min((double) left, (double) right);
-        break;
-      case OR:
-        if (left != null && right != null)
-          return (double) left + (double) right;
-        break;
-      default:
-        System.out.println("Selectivity SubQual " + root.getType());
-        return getSubSelectivity(sketchCaches, root);
-    }
-    return (left != null) ? left : right;
-  }
-
-
-  private boolean checkIndex_usage() {
-    System.out.println("Check if fields are indexed");
-
-    JsonArray fields = inputSchema.getArray("fields");
-    Iterator<Object> iterator = fields.iterator();
-    String columnName = null;
-    indexCaches = new HashMap<>();
-    sketches = new HashMap<>();
-    while (iterator.hasNext()) {
-      JsonObject tmp = (JsonObject) iterator.next();
-      columnName = tmp.getString("name");
-      System.out.print("Check if exists: " + "." + columnName + " ");
-      if (imanager.getCacheManager().cacheExists(columnName)) {
-        indexCaches.put(columnName, (Cache) imanager.getIndexedPersistentCache(columnName));
-        System.out.println(" exists!");
-      } else
-        System.out.println(" does not exist!");
-
-      if (imanager.getCacheManager().cacheExists(columnName + ".sketch")) {
-        sketches.put(columnName, new DistCMSketch((Cache) imanager.getPersisentCache(columnName + ".sketch"), true));
-        System.out.println(" exists!");
-      } else
-        System.out.println(columnName + ".sketch" +" does not exist!");
-    }
-
-    Object selectvt = getSelectivity(sketches, tree.getRoot());
-    if (selectvt != null) {
-      double selectivity= (double)selectvt/inputCache.size();
-      System.out.println("Selectivity: " + selectivity);
-      if(selectivity < 0.5){
-        System.out.println("Use indexes!!");
-        return indexCaches.size() > 0;
-      }
-    }
-    return false;
-  }
 
   /**
    * This method shoul read the Versions if any , from the configuration of the Scan operator and return true
    * if there are specific versions required, false otherwise
+   *
    * @param conf the configuration of the operator
    * @return returns true if there is a query on specific versions false otherwise
    */
@@ -369,209 +138,37 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
     return false;
   }
 
-  @Override public void executeOn(K key, V ivalue) {
+  @Override
+  public void executeOn(K key, V ivalue) {
 
-    ProfileEvent scanExecute = new ProfileEvent("ScanExecute",profilerLog);
-
-    //         System.err.println(manager.getCacheManager().getAddress().toString() + " "+ entry.getKey() + "       " + entry.getValue());
-    Tuple toRunValue = null;
-    if (onVersionedCache) {
-      String versionedKey = (String) key;
-      String ikey = pruneVersion(versionedKey);
-      Version currentVersion = getVersion(versionedKey);
-      if (versioning) {
-        if (isInVersionRange(currentVersion)) {
-          toRunValue = (Tuple) ivalue;
-        }
-      } else {
-        Version latestVersion = versionedCache.getLatestVersion(ikey);
-        if (latestVersion == null) {
-          scanExecute.end();
-          return;
-        }
-        Object objectValue = versionedCache.get(ikey);
-        toRunValue = (Tuple) objectValue;
-//        toRunValue = (String) objectValue;
-      }
-    } else {
-      toRunValue = (Tuple) ivalue;
-    }
-    Tuple tuple = toRunValue;//new Tuple(toRunValue);
-    if (tree != null) {
-      if (renameTableInTree) {
-        tree.renameTableDatum(tableName, toRename);
-      }
-
-//        profExecute.start("tree.accept");
-      boolean accept = tree.accept(tuple);
-//        profExecute.end();
-      if (accept) {
-//          profExecute.start("prepareOutput");
-
-        tuple = prepareOutput(tuple);
-//          profExecute.end();
-        //               log.info("--------------------    put into output with filter ------------------------");
-        if (key != null && tuple != null) {
-//            profExecute.start("Scan_Put");
-          EnsembleCacheUtils.putToCache(outputCache, key.toString(), tuple);
-//            profExecute.end();
-        }
-      }
-    } else {
-//        profExecute.start("prepareOutput");
-      tuple = prepareOutput(tuple);
-//        profExecute.end();
-      //            log.info("--------------------    put into output without tree ------------------------");
-      if (key != null && tuple != null) {
-//          profExecute.start("Scan_outputToCache");
-        EnsembleCacheUtils.putToCache(outputCache, key, tuple);
-//          profExecute.end();
-      }
-
-    }
-    scanExecute.end();
-  }
-
-  private boolean needsREnaming() {
-    return !outputSchema.toString().equals(inputSchema.toString());
-  }
-
-  private String getRenamingTableFromSchema(JsonObject inputSchema) {
-    if (inputSchema != null) {
-
-      String fieldname = ((JsonObject) (inputSchema.getArray("fields").iterator().next())).getString("name");
-      //fieldname database.table.collumncolumnName = tmp.getString("name");
-      String result = fieldname.substring(fieldname.indexOf(".") + 1, fieldname.lastIndexOf("."));
-      if (result != null && !result.equals(""))
-        return result;
-    }
-    return null;
-  }
-
-  //TODO write checks
-  private String getTableNameFromTuple(Tuple tuple) {
-    if (tuple != null) {
-
-      String fieldname = tuple.getFieldNames().iterator().next();
-      //fieldname database.table.collumn
-      String result = fieldname.substring(fieldname.indexOf(".") + 1, fieldname.lastIndexOf("."));
-      if (result != null && !result.equals(""))
-        return result;
-    }
-
-    return null;
-  }
-
-
-  /**
-   *
-   * @param currentVersion the version of the tuple currently processed by the operator
-   * @return true if it satisfies the version range defined in the operator false otherwise
-   */
-  private boolean isInVersionRange(Version currentVersion) {
-    //SAMPLE CODE NOT NECESSARILY exactly like that
-    if (minVersion != null)
-      if (currentVersion.compareTo(minVersion) < 0) {
-        return false;
-      }
-    if (maxVersion != null)
-      if (currentVersion.compareTo(maxVersion) > 0)
-        return false;
-    return true;
-  }
-
-  private Version getVersion(String versionedKey) {
-    Version result = null;
-    String stringVersion = versionedKey.substring(versionedKey.lastIndexOf(":") + 1);
-    result = new VersionScalar(Long.parseLong(stringVersion));
-    return result;
-  }
-
-  private String pruneVersion(String versionedKey) {
-    String result = versionedKey.substring(0, versionedKey.lastIndexOf(":"));
-    return result;
-  }
-
-
-  private void namesToLowerCase(Tuple tuple) {
-    Set<String> fieldNames = new HashSet<>(tuple.getFieldNames());
-    for (String field : fieldNames) {
-      tuple.renameAttribute(field, field.toLowerCase());
-    }
-  }
-
-//  private void renameAllTupleAttributes(Tuple tuple) {
-//    JsonArray fields = inputSchema.getArray("fields");
-//    Iterator<Object> iterator = fields.iterator();
-//    String columnName = null;
-//    while(iterator.hasNext()){
-//      JsonObject tmp = (JsonObject) iterator.next();
-//      columnName = tmp.getString("name");
-//      int lastPeriod = columnName.lastIndexOf(".");
-//      String attributeName = columnName.substring(lastPeriod+1);
-//      tuple.renameAttribute(attributeName,columnName);
-//    }
-
-//    handlePagerank(columnName.substring(0,columnName.lastIndexOf(".")),tuple);
-//  }
-
-  protected void handlePagerank(String substring, Tuple t) {
-    if (conf.getObject("body").getObject("tableDesc").getString("tableName").equals("default.webpages")) {
-      if (totalSum < 0) {
-        computeTotalSum();
-      }
-      String url = t.getAttribute("default.webpages.url");
-      DSPMNode currentPagerank = (DSPMNode) pageRankCache.get(url);
-      if (currentPagerank == null || totalSum <= 0) {
-//        t.setAttribute("default.webpages.pagerank",0f);
-        t.setAttribute("default.webpages.pagerank", Double.toString((10000 / url.length()) / 10000));
-
+    ProfileEvent createIndexExecute = new ProfileEvent("CreateIndexExecute", profilerLog);
+    String ikey = (String) key;
+    Tuple value = (Tuple) ivalue;
+    try {
+      if (value == null) {
+        log.error("key: " + key + " value null");
         return;
       }
-      //            t.setNumberAttribute("default.webpages.pagerank",0.032342);
-      t.setNumberAttribute("default.webpages.pagerank", currentPagerank.getVisitCount() / totalSum);
+      for (int c = 0; c < columnNames.size(); c++) {
+        String column = tableName + '.' + columnNames.get(c);
+        LeadsIndex lInd = lindHelp.CreateLeadsIndex(value.getGenericAttribute(column), ikey, column, tableName);
+        putToCache(indexCaches.get(c), ikey, lInd);
+        //indexCaches.get(c).put(ikey, lInd);
+        //sketches.get(c).add(value.getGenericAttribute(column));
+        //if(i%10==0)
+        //
 
-      //READ PAGERANK FROM PAGERANK CACHE;
-      //READ TOTAL ONCE
-      //compute value update it to tuple
-
-
-      //      if (t.hasField("default.webpages.pagerank")) {
-      //         if (!t.hasField("url"))
-      //            return;
-      //         String pagerankStr = t.getAttribute("pagerank");
-      //            Double d = Double.parseDouble(pagerankStr);
-      //            if (d < 0.0) {
-      //
-      //                try {
-      ////                    d = LeadsPrGraph.getPageDistr(t.getAttribute("url"));
-      //                    d = (double) LeadsPrGraph.getPageVisitCount(t.getAttribute("url"));
-      //
-      //                } catch (IOException e) {
-      //                    e.printStackTrace();
-      //                }
-      //                t.setAttribute("pagerank", d.toString());
-      //        }
+      }
+    }catch (Exception e){
+      System.err.println(" Exception " + key + " " + e.toString());
     }
+
+    createIndexExecute.end();
   }
 
-  private void computeTotalSum() {
-    log.info(
-            "--------------------   Creating iterable over approx sum entries ------------------------");
-    CloseableIterable<Map.Entry<String, Integer>> iterable =
-            approxSumCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
-    log.info("--------------------    Iterating over approx sum entries cache ------------------------");
-    for (Map.Entry<String, Integer> outerEntry : iterable) {
-      totalSum += outerEntry.getValue();
-    }
-    iterable.close();
-
-    if (totalSum > 0) {
-      totalSum += 1;
-    }
-  }
-
-  @Override public void finalizeCallable() {
+  @Override
+  public void finalizeCallable() {
+    EnsembleCacheUtils.waitForAllPuts();
     fullProcessing.end();
     super.finalizeCallable();
   }

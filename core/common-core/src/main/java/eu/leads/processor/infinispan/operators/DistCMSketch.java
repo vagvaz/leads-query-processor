@@ -32,8 +32,34 @@ class DistArray {
 	}
 }
 
+// NOT thread-safe, but we don't care!
+final class LocalArray {
+//	Cache<Integer,Integer> ArrayCache=null;
+	static int[][] Array=null;
+	static int width=0;
+	static int depth=0;
+	protected LocalArray(int w, int d) {
+		Array = new int[w][d];
+	if(width==0)
+		for(int x=0;x<w;x++)
+			for(int y=0;y<d;y++)
+				Array[x][y]=-1;
+		width=w;
+		depth=d;
+	}
+	static int getValue(int x, int y) {
+		 return Array[x][y];
+	}
+	static void putValue(int x, int y, int newValue) {
+		Array[x][y]= newValue;
+	}
+	static void increase(int x, int y, int inc) {
+		Array[x][y]+=inc;
+	}
+}
+
 public class DistCMSketch {
-	final DistArray darray; // initialize in the constructor!
+	final LocalArray darray; // initialize in the constructor!
 	final Random rn = new Random();
 	final int w, d; // w=mod, d=levels
 	
@@ -47,7 +73,7 @@ public class DistCMSketch {
 
 		w=(int)Math.ceil(Math.E/epsilonEach);
 		d=(int)Math.ceil(Math.log(1d/delta));
-		darray=new DistArray(w,d,ArrayCache, load);
+		darray=new LocalArray(w,d);//new DistArray(w,d,ArrayCache, load);
 		// initialize a and b
 		Random mt = new Random(1234);
 		alphas=new long[d];
@@ -62,7 +88,7 @@ public class DistCMSketch {
 		double epsilonEach=epsilon;
 		w=(int)Math.ceil(Math.E/epsilonEach);
 		d=(int)Math.ceil(Math.log(1d/delta));
-		darray=new DistArray(w,d,ArrayCache, load);
+		darray=new LocalArray(w,d);//=new DistArray(w,d,ArrayCache, load);
 		// initialize a and b
 		Random mt = new Random(1234);
 		alphas=new long[d];

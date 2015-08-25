@@ -41,7 +41,6 @@ public class CreateIndexOperator extends BasicOperator {
   String IndexName;
   String tableName;
   ArrayList<String> columnNames;
-  //JsonArray columnNames;
   private String ensembleHost;
   ArrayList<Cache> indexCaches;
   ArrayList<Cache> sketchCaches;
@@ -105,15 +104,14 @@ public class CreateIndexOperator extends BasicOperator {
     for (int c = 0; c < columnNames.size(); c++) {
       if(!manager.getCacheManager().cacheExists(tableName + "." + columnNames.get(c))) {
         log.info("Creating Index Caches, column " + tableName + "." + columnNames.get(c));
-        indexCaches.add((Cache) manager.getIndexedPersistentCache(tableName + "." + columnNames.get(c)));
-        Cache tmp =(Cache) manager.getPersisentCache(tableName + "." + columnNames.get(c) + ".sketch");
-        sketchCaches.add(tmp);
-        log.info("Creating DistCMSketch " + tableName + "." + columnNames.get(c) + ".sketch");
-        sketches.add(new DistCMSketch(tmp,false));
-
       }else {
         log.info("Index Already exists on column ... but anyway reindexing" +tableName + "." + columnNames.get(c));
       }
+      indexCaches.add((Cache) manager.getIndexedPersistentCache(tableName + "." + columnNames.get(c)));
+      Cache tmp =(Cache) manager.getPersisentCache(tableName + "." + columnNames.get(c) + ".sketch");
+      sketchCaches.add(tmp);
+      log.info("Creating DistCMSketch " + tableName + "." + columnNames.get(c) + ".sketch");
+      sketches.add(new DistCMSketch(tmp,false));
     }
 
     //indexCaches
@@ -168,8 +166,7 @@ public class CreateIndexOperator extends BasicOperator {
 
     }
     log.info("Succesfully completed indexing records, columns:" + columnNames.size() + ", data per column:" + i);
-   // EnsembleCacheUtils.waitForAllPuts();
-
+    EnsembleCacheUtils.waitForAllPuts();
     cleanup();
   }
 

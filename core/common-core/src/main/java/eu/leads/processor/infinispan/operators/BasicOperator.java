@@ -749,6 +749,8 @@ public abstract class BasicOperator extends Thread implements Operator{
     else{
       targetEndpoints = conf.getObject("next").getObject("targetEndpoints");
     }
+    if(targetEndpoints==null)
+      return null;
     List<String> sites = new ArrayList<>();
     for(String targetMC : targetEndpoints.getFieldNames()){
       //         JsonObject mc = targetEndpoints.getObject(targetMC);

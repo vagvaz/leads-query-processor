@@ -124,6 +124,12 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         }
         if(expr.getType().equals(OpType.CreateIndex))
         {
+            JsonObject p = plan.getPlanGraph().copy();
+            JsonObject schedulerRep = PlanUtils.getSchedulerRep(p, currentCluster);
+            JsonObject annotatedPlan = PlanUtils.emulateScheduler(schedulerRep, globalInformation);
+            JsonObject updatedPlan = PlanUtils.updateInformation(plan.getPlanGraph(), annotatedPlan.getObject("stages"), globalInformation);
+            updatedPlan = PlanUtils.updateTargetEndpoints(updatedPlan);
+            plan.setPlanGraph(updatedPlan);
             sqlQuery.setPlan(plan);
         }else {
             Set<SQLPlan> candidatePlans = new HashSet<SQLPlan>();
