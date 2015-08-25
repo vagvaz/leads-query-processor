@@ -118,7 +118,7 @@ public class SQLOperatorFactory {
              action.setId(UUID.randomUUID().toString());
              System.out.print("RECREATE INDEX yeah" + action.getId());
           }
-           result = new CreateIndexOperator(com,persistence,log,action);
+           result = new CreateIndexOperator2(com,persistence,log,action);
        }
        else{
            log.error("Trying to create Unimplemented operator " + opType);
