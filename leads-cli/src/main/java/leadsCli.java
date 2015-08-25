@@ -183,7 +183,7 @@ public class leadsCli {
 //            System.out.print("s: " + currentStatus.toString());
 //            System.out.println(", o: " + currentStatus.toString());
 			//System.out.println("The query with id " + currentStatus.getId() + " is " + currentStatus.getStatus());
-			System.out.printf("\rPlease wait ... elapsed: %d s", (System.currentTimeMillis() - start) / 1000.0);
+			System.out.printf("\rPlease wait ... elapsed: %f s", (System.currentTimeMillis() - start) / 1000.0);
 
 		}
 		Date curr_date = new Date(System.currentTimeMillis());
@@ -203,8 +203,8 @@ public class leadsCli {
 			System.out.print("Submit time: " + (submittime - start) + " ms, ");
 			System.out.print("execution  time: " + (resultCompleted - submittime) + " ms, ");
 			System.out.print("acquisition (delivery) time: " + (resultArrived - resultCompleted) + " ms, ");
-			System.out.print("display time: " + (resultPrinted - resultArrived) + " ms,");
-			System.out.print("Complete time: " + (resultPrinted - start) + " ms.");
+			System.out.print("display time: " + (resultPrinted - resultArrived) + " ms, ");
+			System.out.print("Complete time: " + (resultPrinted - start) + " ms.\n");
 		} else {
 			System.err.println("Execution terminated with error : " + currentStatus.getErrorMessage());
 		}
