@@ -72,7 +72,6 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
        super.initialize();
         emptyTuple = new Tuple();
         isInitialized = true;
-//       System.err.println("-------------Initialize");
         log = LoggerFactory.getLogger(GroupByMapper.class);
        super.initialize();
        JsonArray columnArray = conf.getObject("body").getArray("groupingKeys");
