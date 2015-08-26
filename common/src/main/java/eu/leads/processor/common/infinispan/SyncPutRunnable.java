@@ -20,22 +20,22 @@ public class SyncPutRunnable implements Runnable {
     private Object value;
     private Logger logger;
     private ProfileEvent event;
-    File file = new File("before_put.txt");
-    FileOutputStream fos;
-    PrintStream ps = new PrintStream(fos);
-    File file_after = new File("after_put.txt");
-    FileOutputStream fos_after;
-    PrintStream ps_after = new PrintStream(fos_after);
+//    File file = new File("before_put.txt");
+//    FileOutputStream fos;
+//    PrintStream ps = new PrintStream(fos);
+//    File file_after = new File("after_put.txt");
+//    FileOutputStream fos_after;
+//    PrintStream ps_after = new PrintStream(fos_after);
 
     public SyncPutRunnable(){
         logger = LoggerFactory.getLogger(SyncPutRunnable.class);
         event = new ProfileEvent("SyncPutInit",logger);
-        try {
-            fos = new FileOutputStream(file);
-            fos_after = new FileOutputStream(file_after);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            fos = new FileOutputStream(file);
+//            fos_after = new FileOutputStream(file_after);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
     }
     public SyncPutRunnable(BasicCache cache,Object key,Object value){
         logger = LoggerFactory.getLogger(SyncPutRunnable.class);
@@ -43,12 +43,12 @@ public class SyncPutRunnable implements Runnable {
         this.cache=cache;
         this.key = key;
         this.value = value;
-        try {
-        fos = new FileOutputStream(file);
-        fos_after = new FileOutputStream(file_after);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+//        try {
+//        fos = new FileOutputStream(file);
+//        fos_after = new FileOutputStream(file_after);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
     }
     @Override public void run() {
         event.start("SyncPut");
@@ -56,10 +56,10 @@ public class SyncPutRunnable implements Runnable {
             boolean done = false;
             while (!done) {
                 try {
-                    System.setOut(ps);
+//                    System.setOut(ps);
 //                    System.out.println("BEF PUT-----Key: " + key + "--Size:" + value.toString().length());
                     cache.put(key, value);
-                    System.setOut(ps_after);
+//                    System.setOut(ps_after);
 //                    System.out.println("AFT PUT-----Key: " + key + "--Size:" + value.toString().length());
                     done = true;
                 } catch (Exception e) {
