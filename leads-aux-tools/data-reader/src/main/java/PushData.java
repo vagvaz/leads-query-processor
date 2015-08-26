@@ -113,7 +113,8 @@ public class PushData {
         }
         System.out.println("processed " + processed + " rejected " + rejected + " read " + counter);
         inputHandler.close();
+        System.out.println("-------------------------INPUT HANDLER CLOSED");
         outputHandler.close();
-
+        System.out.println("--------------------------------------------------OUTPUT HANDLER CLOSED");
     }
 }
