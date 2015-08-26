@@ -94,6 +94,10 @@ public class LocalInfinispanManager implements InfinispanManager {
         return manager.getCache(name);
     }
 
+    @Override public ConcurrentMap getInMemoryCache(String name, int inMemSize) {
+        return null;
+    }
+
     /**
      * {@inheritDoc}
      */

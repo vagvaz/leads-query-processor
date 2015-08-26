@@ -37,7 +37,7 @@ public interface InfinispanManager {
 
     //Cache realted methods
     public ConcurrentMap getPersisentCache(String name);
-
+    public ConcurrentMap getInMemoryCache(String name, int inMemSize);
     public ConcurrentMap getPersisentCache(String name, Configuration configuration);
 
     public ConcurrentMap getIndexedPersistentCache(String name);
