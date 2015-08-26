@@ -52,9 +52,11 @@ public class SyncPutRunnable implements Runnable {
             while (!done) {
                 try {
 //                    System.setOut(ps);
+                    System.err.println("BEF PUT-----Key: " + key + "--Size:" + value.toString().length());
                     System.out.println("BEF PUT-----Key: " + key + "--Size:" + value.toString().length());
                     cache.put(key, value);
 //                    System.setOut(ps_after);
+                    System.err.println("AFT PUT-----Key: " + key + "--Size:" + value.toString().length());
                     System.out.println("AFT PUT-----Key: " + key + "--Size:" + value.toString().length());
                     done = true;
                 } catch (Exception e) {
