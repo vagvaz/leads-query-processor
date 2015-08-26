@@ -59,7 +59,7 @@ public class NutchTransformer {
             tuple.setAttribute("default.webpages."+"ts", (long)wp.get(entry.getKey()));
          }
          else if(entry.getValue().equals("url")) {
-            tuple.setAttribute("default.webpages."+"url", (long)wp.get(entry.getValue()));
+            tuple.setAttribute("default.webpages."+"url", wp.get(entry.getValue()));
          }
          else{
             tuple.setAttribute("default.webpages."+entry.getValue(),wp.get(entry.getKey()));
