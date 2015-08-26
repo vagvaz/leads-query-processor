@@ -7,12 +7,12 @@ import jline.console.ConsoleReader;
 import jline.console.completer.CandidateListCompletionHandler;
 import jline.console.completer.Completer;
 import jline.console.completer.StringsCompleter;
+import jline.console.history.FileHistory;
 import jline.console.history.MemoryHistory;
-//import jline.console.ConsoleReader;
+import jline.internal.Configuration;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -29,22 +29,23 @@ public class leadsCli {
 	protected String[] loc = {"a", "b", "c", "d"};
 	private boolean DEBUG = false;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
+
+		System.out.println(" === Leads Command Line Interface === ");
+
 		InitializeWebClient(args);
-		System.out.println("=== Leads Command Line Interface ===");
+		System.out.println("Using username: " + username);
 
 		ArrayList<String> sqlCmds = new ArrayList<>();
 		String nonTerminalString = "";
-		//BufferedReader in = null;
-		// in = new BufferedReader(new InputStreamReader(System.in));
+
 		String line = "";
 
-		System.out.println("Using username: " + username);
 
+		ConsoleReader reader = null;
 		try {
-			ConsoleReader reader = new ConsoleReader();
-			setupHistory(reader);
-			reader.setPrompt("prompt> ");
+			reader = new ConsoleReader();
+			MemoryHistory hist = setupHistory(reader, "leadscli");
 
 			List<Completer> completors = new LinkedList<Completer>();
 			completors.add(new StringsCompleter("select", "from", "create index", "insert", "quit", "where"));
@@ -58,9 +59,6 @@ public class leadsCli {
 			PrintWriter out = new PrintWriter(reader.getOutput());
 			do {
 				if ((line = reader.readLine()) != null) {
-					//out.println("\u001B[33m==>\u001B[0m\"" + line + "\"");
-					// System.out.print("\nPlease enter your SQL query: ");
-					// line = in.readLine();
 					if (line.equalsIgnoreCase("cls")) {
 						reader.clearScreen();
 						continue;
@@ -68,6 +66,7 @@ public class leadsCli {
 					out.flush();
 					if (line.equalsIgnoreCase("quit") || line.equalsIgnoreCase("exit")) {
 						System.out.println("Exiting, Thank you");
+						reader.getTerminal().restore();
 						System.exit(0);
 					}
 
@@ -91,6 +90,7 @@ public class leadsCli {
 								count++;
 								if (sql.toLowerCase().equals("quit")) {
 									System.out.println("Exiting, Thank you");
+									reader.getTerminal().restore();
 									System.exit(0);
 								}
 								System.out.println("#" + count + "/" + sqlCmds.size() + " Executing command: " + sql);
@@ -99,18 +99,23 @@ public class leadsCli {
 							sqlCmds.clear();
 						}
 					}
-
 				}
+				if (hist instanceof FileHistory)
+					((FileHistory) hist).flush();
 			} while (true);
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			if (e instanceof java.net.ConnectException) {
 				System.out.println("Exiting, Thank you");
+
 				System.exit(0);
 			}
+		} finally {
+			if (reader != null)
+				reader.getTerminal().restore();
 		}
-
 	}
 
 	private static void InitializeWebClient(String args[]) {
@@ -120,6 +125,8 @@ public class leadsCli {
 			host = args[0];
 			port = Integer.parseInt(args[1]);
 		}
+		if (!host.contains("http://"))
+			host = "http://" + host;
 
 		try {
 			if (WebServiceClient.initialize(host, port))
@@ -138,36 +145,6 @@ public class leadsCli {
 //            e.printStackTrace();
 //            System.exit(-1);
 //        }
-
-
-	}
-
-	public float nextFloat(float min, float max) {
-		return min + r.nextFloat() * (max - min);
-	}
-
-	protected String getRandomDomain() {
-		int l = 10;
-		String result = "";
-		for (int i = 0; i < l; i++) {
-			result += loc[r.nextInt(loc.length)];
-		}
-		return "www." + result + ".com";
-	}
-
-	private void printDebugData() {
-		int numRows = 0;
-		int numCols = 0;
-
-		System.out.println("Value of data: ");
-		for (int i = 0; i < numRows; i++) {
-			System.out.print("    row " + i + ":");
-			for (int j = 0; j < numCols; j++) {
-				System.out.print("  ");
-			}
-			System.out.println();
-		}
-		System.out.println("--------------------------");
 	}
 
 	static void send_query_and_wait(String sql) throws IOException, InterruptedException {
@@ -208,7 +185,6 @@ public class leadsCli {
 		} else {
 			System.err.println("Execution terminated with error : " + currentStatus.getErrorMessage());
 		}
-
 	}
 
 	private static void print_results(QueryResults data) {
@@ -223,8 +199,6 @@ public class leadsCli {
 			resultSet.add(new Tuple(s));
 		}
 		printResults(resultSet);
-
-
 	}
 
 	//Print the results of the query
@@ -268,17 +242,51 @@ public class leadsCli {
 		PrettyPrinter printer = new PrettyPrinter(System.out);
 		printer.print(outputTable);
 		resultSet.clear();
-		printer = null;
-//        outputTable = null;
-
 	}
 
-	public static MemoryHistory setupHistory(ConsoleReader reader) {
-		MemoryHistory history = new MemoryHistory();
-		history.setMaxSize(20);
+	public static MemoryHistory setupHistory(ConsoleReader reader, String filenamePostfix) {
+		MemoryHistory history = null;
+		System.err.print("open, " + Configuration.getUserHome() + "/" + String.format(".jline-%s.history", filenamePostfix));
+		try {
+			history = new FileHistory(new File(Configuration.getUserHome(), String.format(".jline-%s.history", filenamePostfix)));
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.err.print("Failed to open, " + Configuration.getUserHome() + "/" + String.format(".jline-%s.history", filenamePostfix) + " using only memory history.");
+			history = new MemoryHistory();
+		}
+
+		history.setMaxSize(200);
 		history.add("quit");
 		history.add("select * from entities;");
 		reader.setHistory(history);
 		return history;
+	}
+
+	public float nextFloat(float min, float max) {
+		return min + r.nextFloat() * (max - min);
+	}
+
+	protected String getRandomDomain() {
+		int l = 10;
+		String result = "";
+		for (int i = 0; i < l; i++) {
+			result += loc[r.nextInt(loc.length)];
+		}
+		return "www." + result + ".com";
+	}
+
+	private void printDebugData() {
+		int numRows = 0;
+		int numCols = 0;
+
+		System.out.println("Value of data: ");
+		for (int i = 0; i < numRows; i++) {
+			System.out.print("    row " + i + ":");
+			for (int j = 0; j < numCols; j++) {
+				System.out.print("  ");
+			}
+			System.out.println();
+		}
+		System.out.println("--------------------------");
 	}
 }
