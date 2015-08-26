@@ -37,9 +37,9 @@ public class SyncPutRunnable implements Runnable {
                     PrintStream ps = new PrintStream("before_put.txt");
                     PrintStream orig = System.out;
                     System.setOut(ps);
-                    System.out.println("BEF PUT-----Key: "+key);
+                    System.out.println("BEF PUT-----Key: "+key+"--Size:"+value.toString().length());
                     cache.put(key, value);
-                    System.out.println("AFT PUT-----Key: "+key);
+                    System.out.println("AFT PUT-----Key: "+key+"--Size:"+value.toString().length());
                     System.setOut(orig);
                     ps.close();
                     done = true;
