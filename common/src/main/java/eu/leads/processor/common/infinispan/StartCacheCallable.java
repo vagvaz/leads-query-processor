@@ -13,9 +13,11 @@ import java.util.Set;
 public class StartCacheCallable<K, V> implements DistributedCallable<K, V, Void>, Serializable {
     private static final long serialVersionUID = 8331682008912636780L;
     private final String cacheName;
+    private int entries = 10000;
     //    private final Configuration configuration;
     private transient Cache<K, V> cache;
     private boolean isIndexed = false;
+    private boolean isPersistent = false;
 
     public StartCacheCallable(String cacheName) {
         this.cacheName = cacheName;
@@ -26,7 +28,12 @@ public class StartCacheCallable<K, V> implements DistributedCallable<K, V, Void>
         this.cacheName = cacheName;
         this.isIndexed =isIndexed;
     }
-
+    public StartCacheCallable(String cacheName, boolean isIndexed,boolean isInMemory,int entries){
+        this.cacheName = cacheName;
+        this.isIndexed =isIndexed;
+        this.isPersistent = isInMemory;
+        this.entries = entries;
+    }
     /**
      * {@inheritDoc}
      */
@@ -48,7 +55,12 @@ public class StartCacheCallable<K, V> implements DistributedCallable<K, V, Void>
 //            Cache startedCache = manager.getCacheManager().getCache(cacheName);
         }
         else {
-            configuration = manager.getIndexedCacheDefaultConfiguration(cacheName);
+            if(isPersistent) {
+                configuration = manager.getIndexedCacheDefaultConfiguration(cacheName);
+            }
+            else{
+                configuration = manager.getInMemoryConfiguration(cacheName, entries);
+            }
         }
             manager.getCacheManager().defineConfiguration(cacheName,configuration);
             Cache startedCache = manager.getCacheManager().getCache(cacheName);

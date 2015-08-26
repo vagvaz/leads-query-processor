@@ -77,7 +77,7 @@ public abstract class MapReduceOperator extends BasicOperator{
 
   @Override /// Example do not use
   public void execute() {
-    super.start();
+    super.execute();
   }
 
   @Override
