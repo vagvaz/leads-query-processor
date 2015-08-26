@@ -6,11 +6,6 @@ import org.infinispan.commons.api.BasicCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-
 /**
  * Created by vagvaz on 09/08/15.
  */
@@ -57,10 +52,10 @@ public class SyncPutRunnable implements Runnable {
             while (!done) {
                 try {
 //                    System.setOut(ps);
-//                    System.out.println("BEF PUT-----Key: " + key + "--Size:" + value.toString().length());
+                    System.out.println("BEF PUT-----Key: " + key + "--Size:" + value.toString().length());
                     cache.put(key, value);
 //                    System.setOut(ps_after);
-//                    System.out.println("AFT PUT-----Key: " + key + "--Size:" + value.toString().length());
+                    System.out.println("AFT PUT-----Key: " + key + "--Size:" + value.toString().length());
                     done = true;
                 } catch (Exception e) {
                     done = false;
