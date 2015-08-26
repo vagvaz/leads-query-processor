@@ -6,6 +6,8 @@ import org.infinispan.commons.api.BasicCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 
 /**
@@ -34,14 +36,15 @@ public class SyncPutRunnable implements Runnable {
             boolean done = false;
             while (!done) {
                 try {
-                    PrintStream ps = new PrintStream("before_put.txt");
-                    PrintStream orig = System.out;
+                    PrintStream console = System.out;
+                    File file = new File("before_put.txt");
+                    FileOutputStream fos = new FileOutputStream(file);
+                    PrintStream ps = new PrintStream(fos);
                     System.setOut(ps);
                     System.out.println("BEF PUT-----Key: "+key+"--Size:"+value.toString().length());
                     cache.put(key, value);
                     System.out.println("AFT PUT-----Key: "+key+"--Size:"+value.toString().length());
-                    System.setOut(orig);
-                    ps.close();
+                    System.setOut(console);
                     done = true;
                 } catch (Exception e) {
                     done = false;
