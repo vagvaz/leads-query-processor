@@ -89,8 +89,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
       compressionType = CompressionType.SNAPPY;
     }
 
-//    System.out.println("maximum entries are " + maxEntries);
-//    log.error("maximum entries are " + maxEntries);
+    //    System.out.println("maximum entries are " + maxEntries);
+    //    log.error("maximum entries are " + maxEntries);
     serverPort = 11222;
   }
 
@@ -105,8 +105,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
     else{
       compressionType = CompressionType.SNAPPY;
     }
-//    System.out.println("maximum entries are " + maxEntries);
-//    log.error("maximum entries are " + maxEntries);
+    //    System.out.println("maximum entries are " + maxEntries);
+    //    log.error("maximum entries are " + maxEntries);
     initDefaultCacheConfig();
   }
 
@@ -212,8 +212,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache(StringConstants.OWNERSCACHE);
     getPersisentCache(StringConstants.PLUGIN_ACTIVE_CACHE);
     getPersisentCache(StringConstants.PLUGIN_CACHE);
-    getPersisentCache(StringConstants.QUERIESCACHE);  
-    
+    getPersisentCache(StringConstants.QUERIESCACHE);
+
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".webpages");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".testpages");
 
@@ -521,6 +521,46 @@ public class ClusterInfinispanManager implements InfinispanManager {
     return manager.getCache(name);
   }
 
+  @Override public ConcurrentMap getInMemoryCache(String name, int inMemSize) {
+    if(manager.cacheExists(name)){
+      return manager.getCache(name);
+    }
+    else{
+      createInMemoryCache(name,inMemSize);
+    }
+    return manager.getCache(name);
+  }
+
+  private void createInMemoryCache(String cacheName, int inMemSize) {
+
+    DistributedExecutorService des = new DefaultExecutorService(manager.getCache("clustered"));
+    List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
+    //
+    System.out.println("list " + list.size());
+    for (Future<Void> future : list) {
+      try {
+        future.get(); // wait for task to complete
+      } catch (InterruptedException e) {
+      } catch (ExecutionException e) {
+      }
+    }
+  }
+
+
+  public Configuration getInMemoryConfiguration(String name, int inMemSize) {
+    //do not use persistence
+
+    Configuration config = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
+        .clustering().cacheMode(CacheMode.DIST_SYNC).hash().numOwners(1).indexing()
+        .index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
+        .compatibility().enable()//.marshaller(new TupleMarshaller())
+        .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
+            false).eviction().maxEntries(inMemSize).strategy(EvictionStrategy.LIRS).build();
+    return config;
+  }
+
+
+
   /**
    * {@inheritDoc}
    */
@@ -698,11 +738,11 @@ public class ClusterInfinispanManager implements InfinispanManager {
   }
 
   private void createCache(String cacheName, Configuration cacheConfiguration) {
-//    if (!cacheConfiguration.clustering().cacheMode().isClustered()) {
-//      log.warn("Configuration given for " + cacheName
-//          + " is not clustered so using default cluster configuration");
-//      //            cacheConfiguration = new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_ASYNC).async().l1().lifespan(100000L).hash().numOwners(3).build();
-//    }
+    //    if (!cacheConfiguration.clustering().cacheMode().isClustered()) {
+    //      log.warn("Configuration given for " + cacheName
+    //          + " is not clustered so using default cluster configuration");
+    //      //            cacheConfiguration = new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_ASYNC).async().l1().lifespan(100000L).hash().numOwners(3).build();
+    //    }
     //      if(manager.cacheExists(cacheName))
     //         return;
     if(cacheName.equals("clustered")){
@@ -711,7 +751,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       Cache cache = manager.getCache(cacheName);
     }
     else {
-      manager.defineConfiguration(cacheName,getCacheDefaultConfiguration(cacheName));
+      //      manager.defineConfiguration(cacheName,getCacheDefaultConfiguration(cacheName));
       DistributedExecutorService des = new DefaultExecutorService(manager.getCache("clustered"));
       List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
       //
@@ -727,7 +767,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
   }
 
   private void createIndexedCache(String name, Configuration configuration) {
-    manager.defineConfiguration(name,getIndexedCacheDefaultConfiguration(name));
+    //    manager.defineConfiguration(name,getCacheDefaultConfiguration(name));
     DistributedExecutorService des = new DefaultExecutorService(manager.getCache("clustered"));
     List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(name,true));
     //
@@ -810,7 +850,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
   public Configuration getCacheDefaultConfiguration(String cacheName) {
     Configuration cacheConfig = null;
-    if(cacheName.equals("clustered") || cacheName.equals("default")){
+    if(cacheName.equals("clustered") && cacheName.equals("default")){ //&& intentionally, code fore reference code
 
 
       cacheConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
@@ -838,7 +878,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
   public Configuration getIndexedCacheDefaultConfiguration(String cacheName) {
     Configuration cacheConfig = null;
-    if(cacheName.equals("clustered") || cacheName.equals("default")){
+    if(cacheName.equals("clustered") && cacheName.equals("default")){//&& intentionally, code fore reference code
 
 
       cacheConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())

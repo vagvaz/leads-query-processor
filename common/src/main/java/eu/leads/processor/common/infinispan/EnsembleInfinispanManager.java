@@ -88,6 +88,10 @@ public class EnsembleInfinispanManager implements InfinispanManager {
     return rmanager.getCache(name);
   }
 
+  @Override public ConcurrentMap getInMemoryCache(String name, int inMemSize) {
+    return null;
+  }
+
   @Override public ConcurrentMap getPersisentCache(String name, Configuration configuration) {
     return rmanager.getCache(name);
   }

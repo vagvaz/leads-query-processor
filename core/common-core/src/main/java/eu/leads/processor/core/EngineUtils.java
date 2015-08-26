@@ -32,7 +32,7 @@ public class EngineUtils {
             initialized = true;
             executor = new ThreadPoolExecutor((int)threadBatch,(int)(threadBatch),2000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
             runnables = new ConcurrentLinkedDeque<>();
-            for (int i = 0; i <= (threadBatch); i++) {
+            for (int i = 0; i < (threadBatch); i++) {
                 runnables.add(new ExecuteRunnable());
             }
         }

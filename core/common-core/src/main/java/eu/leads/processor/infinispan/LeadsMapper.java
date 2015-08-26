@@ -110,18 +110,6 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
       if (!t.hasField("url"))
         return;
       String pagerankStr = t.getAttribute("pagerank");
-      //            Double d = Double.parseDouble(pagerankStr);
-      //            if (d < 0.0) {
-      //
-      //                try {
-      ////                    d = LeadsPrGraph.getPageDistr(t.getAttribute("url"));
-      //                    d = (double) LeadsPrGraph.getPageVisitCount(t.getAttribute("url"));
-      //
-      //                } catch (IOException e) {
-      //                    e.printStackTrace();
-      //                }
-      //                t.setAttribute("pagerank", d.toString());
-      //        }
     }
   }
 
