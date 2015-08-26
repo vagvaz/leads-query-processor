@@ -6,6 +6,9 @@ import org.infinispan.commons.api.BasicCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.PrintStream;
+
 /**
  * Created by vagvaz on 09/08/15.
  */
@@ -32,8 +35,9 @@ public class SyncPutRunnable implements Runnable {
             boolean done = false;
             while (!done) {
                 try {
-
+                    System.setOut(new PrintStream(new File("before.txt")));
                     cache.put(key, value);
+                    System.setOut(new PrintStream(new File("after.txt")));
                     done = true;
 
                 } catch (Exception e) {
