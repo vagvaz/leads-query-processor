@@ -47,7 +47,7 @@ public class NutchTransformer {
          else if(entry.getValue().equals("body")){
             ByteBuffer byteBuffer = (ByteBuffer) wp.get(entry.getKey());
             if(byteBuffer != null)
-            tuple.setAttribute("default.webpages."+"body",new String(byteBuffer.array () ));
+               tuple.setAttribute("default.webpages."+"body",new String(byteBuffer.array () ));
             else{
                tuple.setAttribute("default.webpages."+"body",null);
             }
@@ -57,6 +57,9 @@ public class NutchTransformer {
 //            SimpleDateFormat df2 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
 
             tuple.setAttribute("default.webpages."+"ts", (long)wp.get(entry.getKey()));
+         }
+         else if(entry.getValue().equals("url")) {
+            tuple.setAttribute("default.webpages."+"url", (long)wp.get(entry.getValue()));
          }
          else{
             tuple.setAttribute("default.webpages."+entry.getValue(),wp.get(entry.getKey()));
