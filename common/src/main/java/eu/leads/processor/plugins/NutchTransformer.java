@@ -52,7 +52,7 @@ public class NutchTransformer {
                tuple.setAttribute("default.webpages."+"body",null);
             }
          }
-         else if(entry.getValue().equals("published")) {
+         else if(entry.getValue().equals("ts")) {
 //            Date  date = new Date((long)wp.get(entry.getKey()));
 //            SimpleDateFormat df2 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
 
