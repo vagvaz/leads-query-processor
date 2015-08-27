@@ -246,7 +246,7 @@ public class leadsCli {
 
 	public static MemoryHistory setupHistory(ConsoleReader reader, String filenamePostfix) {
 		MemoryHistory history = null;
-		System.err.print("open, " + Configuration.getUserHome() + "/" + String.format(".jline-%s.history", filenamePostfix));
+		//System.err.print("open, " + Configuration.getUserHome() + "/" + String.format(".jline-%s.history", filenamePostfix));
 		try {
 			history = new FileHistory(new File(Configuration.getUserHome(), String.format(".jline-%s.history", filenamePostfix)));
 		} catch (IOException e) {
