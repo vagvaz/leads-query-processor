@@ -2,11 +2,20 @@ package eu.leads.processor.infinispan.operators;
 
 import org.infinispan.Cache;
 
+import java.io.Serializable;
 import java.util.Random;
 
+abstract class sketchArray{
+	abstract int getValue(int x, int y);
+	abstract void putValue(int x, int y, int newValue);
+	abstract void increase(int x, int y, int inc);
+
+}
+
 // NOT thread-safe, but we don't care!
-class DistArray {
+class DistArray extends sketchArray {
 	Cache<Integer,Integer> ArrayCache=null;
+
 	int width=0;
 	int depth=0;
 	public DistArray(int w, int d, Cache<Integer,Integer> ArrayCache, boolean reload  ) {
@@ -16,7 +25,7 @@ class DistArray {
 			depth = ArrayCache.get(-2);
 		}else{
 			this.ArrayCache.put(-1, w);
-			this.ArrayCache.put(-2, w);
+			this.ArrayCache.put(-2, d);
 		}
 	}
 	int getValue(int x, int y) {
@@ -33,8 +42,20 @@ class DistArray {
 }
 
 // NOT thread-safe, but we don't care!
-final class LocalArray {
-//	Cache<Integer,Integer> ArrayCache=null;
+final class LocalArray extends sketchArray{
+	public static int[][] getArray() {
+		return Array;
+	}
+
+	public static int getWidth() {
+		return width;
+	}
+
+	public static int getDepth() {
+		return depth;
+	}
+
+	//	Cache<Integer,Integer> ArrayCache=null;
 	static int[][] Array=null;
 	static int width=0;
 	static int depth=0;
@@ -47,23 +68,23 @@ final class LocalArray {
 		width=w;
 		depth=d;
 	}
-	static int getValue(int x, int y) {
+	int getValue(int x, int y) {
 		 return Array[x][y];
 	}
-	static void putValue(int x, int y, int newValue) {
+	void putValue(int x, int y, int newValue) {
 		Array[x][y]= newValue;
 	}
-	static void increase(int x, int y, int inc) {
+	void increase(int x, int y, int inc) {
 		Array[x][y]+=inc;
 	}
 }
 
 public class DistCMSketch {
-	final LocalArray darray; // initialize in the constructor!
+	final sketchArray darray; // initialize in the constructor!
 	final Random rn = new Random();
 	final int w, d; // w=mod, d=levels
 	
-	// LEFTERIS USE THIS constructor. No parameters required 
+	// LEFTERIS USE THIS constructor. No parameters required
 	public DistCMSketch(Cache<Integer,Integer> ArrayCache, boolean load) {
 		this(0.01,0.001,ArrayCache, load);
 	}
@@ -73,7 +94,10 @@ public class DistCMSketch {
 
 		w=(int)Math.ceil(Math.E/epsilonEach);
 		d=(int)Math.ceil(Math.log(1d/delta));
-		darray=new LocalArray(w,d);//new DistArray(w,d,ArrayCache, load);
+		if(ArrayCache==null)
+			darray=new LocalArray(w,d);
+		else
+			darray= new DistArray(w,d,ArrayCache, load);
 		// initialize a and b
 		Random mt = new Random(1234);
 		alphas=new long[d];
@@ -83,7 +107,16 @@ public class DistCMSketch {
 			betas[i]=Math.abs(mt.nextInt());
 		}
 	}
-	
+
+	public void storeAsObject(Cache<String,Object> sketchCache, String prefix){
+		if(darray instanceof LocalArray) {
+			sketchCache.put(prefix + "w", ((LocalArray) darray).getWidth());
+			sketchCache.put(prefix + "d", ((LocalArray) darray).getDepth());
+			sketchCache.put(prefix + "array",  ((LocalArray) darray).getArray());
+		}
+	}
+
+
 	public DistCMSketch(double delta, double epsilon, int[][]array, Cache<Integer,Integer> ArrayCache, boolean load) {
 		double epsilonEach=epsilon;
 		w=(int)Math.ceil(Math.E/epsilonEach);

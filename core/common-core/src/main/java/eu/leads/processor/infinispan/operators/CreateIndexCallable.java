@@ -56,7 +56,7 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
   transient Logger profilerLog;
   private ProfileEvent fullProcessing;
   transient ArrayList<Cache> indexCaches;
-  transient ArrayList<Cache> sketchCaches;
+
   transient ArrayList<DistCMSketch> sketches;
   transient LeadsIndexHelper lindHelp ;
 
@@ -104,7 +104,7 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
       allIndexes.put(IndexName, tableName + "." + column);
 
     indexCaches = new ArrayList<>();
-    sketchCaches = new ArrayList<>();
+    //sketchCaches = new ArrayList<>();
     sketches = new ArrayList<>();
     for (int c = 0; c < columnNames.size(); c++) {
       if(!imanager.getCacheManager().cacheExists(tableName + "." + columnNames.get(c))) {
@@ -113,10 +113,8 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
         log.info("Index Already exists on column ... but anyway reindexing" +tableName + "." + columnNames.get(c));
       }
       indexCaches.add((Cache) imanager.getIndexedPersistentCache(tableName + "." + columnNames.get(c)));
-      Cache tmp =(Cache) imanager.getPersisentCache(tableName + "." + columnNames.get(c) + ".sketch");
-      sketchCaches.add(tmp);
       log.info("Creating DistCMSketch " + tableName + "." + columnNames.get(c) + ".sketch");
-      sketches.add(new DistCMSketch(tmp,false));
+      sketches.add(new DistCMSketch(null,false));
     }
 
     inputCache = (Cache) imanager.getPersisentCache(tableName);
@@ -153,8 +151,8 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
         String column = tableName + '.' + columnNames.get(c);
         LeadsIndex lInd = lindHelp.CreateLeadsIndex(value.getGenericAttribute(column), ikey, column, tableName);
         putToCache(indexCaches.get(c), ikey, lInd);
-        //indexCaches.get(c).put(ikey, lInd);
-        //sketches.get(c).add(value.getGenericAttribute(column));
+        indexCaches.get(c).put(ikey, lInd);
+        sketches.get(c).add(value.getGenericAttribute(column));
         //if(i%10==0)
         //
 
@@ -168,7 +166,10 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
 
   @Override
   public void finalizeCallable() {
-    EnsembleCacheUtils.waitForAllPuts();
+  Cache<String,Object> sketchesM=  (Cache)imanager.getPersisentCache("sketchMerge");
+  for (int c = 0; c < columnNames.size(); c++) {
+    sketches.get(c).storeAsObject(sketchesM,  embeddedCacheManager.getAddress().toString()+":"+columnNames.get(c)+":");
+  }
     fullProcessing.end();
     super.finalizeCallable();
   }
