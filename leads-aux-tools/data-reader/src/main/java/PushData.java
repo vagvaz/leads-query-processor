@@ -94,18 +94,17 @@ public class PushData {
 //                outputHandler.append(tuple.getAttribute("url"), tuple);
 //                outputHandler2.append(tuple.getAttribute("url"), new JsonObject(tuple.toString()).encodePrettily());
 //                outputHandler3.append(entry.getValue().get(entry.getValue().getSchema().getField("url").pos()).toString(), entry.getValue().toString());
-                String key_url =  tuple.getAttribute("default.webpages.url");
-                String key_ts =  tuple.getAttribute("default.webpages.ts");
-                String key = "default.webpages:"+key_url+","+key_ts;
+                String key_url =  tuple.getAttribute("default.keywords.url");
+                String key_ts =  tuple.getAttribute("default.keywords.ts");
+                String key = "default.keywords:"+key_url+","+key_ts;
                 keys.add(key);
-                outputHandler.append("default.webpages:"+key_url+","+key_ts, tuple);
+                outputHandler.append("default.keywords:"+key_url+","+key_ts, tuple);
 
                 counter++;
                 if (counter % 100 == 0) {
                     System.err.println("read " + counter);
                 }
             } else {
-//                System.err.println("reject cause not having content");
                 rejected++;
                 if (rejected % 100 == 0) {
                     System.err.println("rejected " + rejected);
