@@ -1,11 +1,15 @@
 package eu.leads.processor.deployer;
 
 import eu.leads.processor.core.ManageVerticle;
+import eu.leads.processor.core.PidFileUtil;
 import eu.leads.processor.core.comp.ServiceStatus;
 import eu.leads.processor.core.net.MessageUtils;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonObject;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by vagvaz on 8/27/14.
@@ -16,6 +20,7 @@ public class DeployerProcessorManage extends ManageVerticle {
 
     @Override
     public void start() {
+
         super.start();
         initialize(config);
     }
@@ -41,7 +46,13 @@ public class DeployerProcessorManage extends ManageVerticle {
                             logProxy.info("DeployerProcessorWorker " + config.getString("id")
                                               + " has been deployed");
                             com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id,
-                                                                                          serviceType));
+                                    serviceType));
+                            try {
+                                PidFileUtil.createPidFile(new File("/tmp/deployer.pid"));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
                         } else {
                             logProxy.info("DeployerProcessorWorker " + config.getString("id")
                                               + " failed to deploy");

@@ -180,7 +180,7 @@ public class MathUtils {
         }
         return result;
     }
-    private static String getTextFrom(JsonObject value) {
+    public static String getTextFrom(JsonObject value) {
 
         String result = null;
         if(value.getString("type").equals("FIELD"))

@@ -425,7 +425,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       server = new HotRodServer();
       HotRodServerConfigurationBuilder serverConfigurationBuilder = new HotRodServerConfigurationBuilder();
       if (externalIP != null && !externalIP.equals("")){
-        if(externalIP.contains(":")) {
+	if(externalIP.contains(":")) {
           String external = externalIP.split(":")[0];
           String portString = externalIP.split(":")[1];
           System.err.println("EXPOSED IP = " + external + ":"+portString);
@@ -755,7 +755,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       DistributedExecutorService des = new DefaultExecutorService(manager.getCache("clustered"));
       List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
       //
-      System.out.println("list " + list.size());
+      System.out.println(cacheName+"  " + list.size());
       for (Future<Void> future : list) {
         try {
           future.get(); // wait for task to complete
@@ -771,7 +771,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     DistributedExecutorService des = new DefaultExecutorService(manager.getCache("clustered"));
     List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(name,true));
     //
-    System.out.println("list " + list.size());
+    System.out.println(" i "+ name +" " + list.size());
     for (Future<Void> future : list) {
       try {
         future.get(); // wait for task to complete
@@ -841,16 +841,16 @@ public class ClusterInfinispanManager implements InfinispanManager {
     if(defaultConfig == null){
       initDefaultCacheConfig();
     }
-    defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).clustering()
-        .cacheMode(CacheMode.REPL_SYNC).l1().disable().indexing().index(Index.ALL).compatibility().enable()
-        .build();
+    defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).clustering()
+          .cacheMode(CacheMode.LOCAL).transaction()
+            .transactionMode(TransactionMode.NON_TRANSACTIONAL).clustering().indexing().index(Index.LOCAL).build();
   }
 
 
 
   public Configuration getCacheDefaultConfiguration(String cacheName) {
     Configuration cacheConfig = null;
-    if(cacheName.equals("clustered") && cacheName.equals("default")){
+    if(cacheName.equals("clustered") && cacheName.equals("default")){ //&& intentionally, code fore reference code
 
 
       cacheConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
@@ -878,14 +878,14 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
   public Configuration getIndexedCacheDefaultConfiguration(String cacheName) {
     Configuration cacheConfig = null;
-    if(cacheName.equals("clustered") && cacheName.equals("default")){
+    if(cacheName.equals("clustered") && cacheName.equals("default")){//&& intentionally, code fore reference code
 
 
       cacheConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
           .clustering()
           .cacheMode(CacheMode.DIST_SYNC)
           .hash().numOwners(1)
-          .indexing().setProperty("auto-config", "true") .setProperty("default.directory_provider", "ram").index(Index.ALL).transaction().transactionMode(TransactionMode
+          .indexing().setProperty("auto-config", "true") .setProperty("default.directory_provider", "ram").index(Index.LOCAL).transaction().transactionMode(TransactionMode
               .NON_TRANSACTIONAL)
           .persistence()
               //                            .addStore(LevelDBStoreConfigurationBuilder.class
@@ -899,8 +899,14 @@ public class ClusterInfinispanManager implements InfinispanManager {
       if(defaultIndexConfig == null) {
         initIndexDefaultCacheConfig();
       }
-      cacheConfig =  defaultIndexConfig;
-
+      cacheConfig =  new ConfigurationBuilder().read(defaultIndexConfig).transaction()
+            .transactionMode(TransactionMode.NON_TRANSACTIONAL).clustering().indexing().index(Index.LOCAL).addProperty("default.directory_provider", "filesystem")
+              .addProperty("hibernate.search.default.indexBase","/tmp/leadsprocessor-data/"+uniquePath+"/infinispan/"+cacheName+"/")
+              .addProperty("hibernate.search.default.exclusive_index_use", "true")
+              .addProperty("hibernate.search.default.indexmanager", "near-real-time")
+              .addProperty("hibernate.search.default.indexwriter.ram_buffer_size", "256")
+              .addProperty("lucene_version", "LUCENE_CURRENT").build();
+      System.out.println(" Indexed Cache Configuration for: " + cacheName );
     }
     return cacheConfig;
   }

@@ -1,11 +1,15 @@
 package eu.leads.processor.planner;
 
 import eu.leads.processor.core.ManageVerticle;
+import eu.leads.processor.core.PidFileUtil;
 import eu.leads.processor.core.comp.ServiceStatus;
 import eu.leads.processor.core.net.MessageUtils;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonObject;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by vagvaz on 8/18/14.
@@ -16,9 +20,12 @@ public class PlannerProcessorManage extends ManageVerticle {
 
     @Override
     public void start() {
+
+
         super.start();
         initialize(config);
     }
+
 
     @Override
     public void initialize(JsonObject config) {
@@ -42,6 +49,11 @@ public class PlannerProcessorManage extends ManageVerticle {
                                               + " has been deployed");
                             com.sendTo(parent, MessageUtils.createServiceStatusMessage(status, id,
                                                                                           serviceType));
+                            try {
+                                PidFileUtil.createPidFile(new File("/tmp/planner.pid"));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         } else {
                             logProxy.info("PlannerProcessorWorker " + config.getString("id")
                                               + " failed to deploy");

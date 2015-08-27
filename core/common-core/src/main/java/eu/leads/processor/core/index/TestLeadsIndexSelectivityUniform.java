@@ -22,10 +22,10 @@ public class TestLeadsIndexSelectivityUniform {
 //        InfinispanManager man2 = CacheManagerFactory.createCacheManager();
 //        Cache cachefoo = (Cache) man2.getPersisentCache("queriesfoo");
         InfinispanManager man = InfinispanClusterSingleton.getInstance().getManager();
-        Cache cache = (Cache) man.getPersisentCache("indexedCache");
-
-        int numStrings = 10000;// 10000
-        int numTuples = 150000;// 150000
+        Cache cache = (Cache) man.getIndexedPersistentCache("indexedCache");
+        System.out.println("Creating Tuples");
+        int numStrings = 10;// 10000
+        int numTuples = 150;// 150000
 
         // find number of generated tuples: run until memory exception
         List<String> lstStr = new ArrayList<>();
@@ -43,6 +43,7 @@ public class TestLeadsIndexSelectivityUniform {
             lstFloat.add(rand.nextFloat());
             lstLong.add(rand.nextLong());
         }
+        System.out.println("putting Tuples");
 
         for(int i=0;i<numTuples;i++){
             randomInd = rand.nextInt(numStrings);// uniform
@@ -61,6 +62,7 @@ public class TestLeadsIndexSelectivityUniform {
 
             cache.put("infinispanKey" + i, lInd);
         }
+        System.out.println("putting Tuples finished");
 
         List<Long> listTimes = new ArrayList<>();
 
@@ -76,6 +78,9 @@ public class TestLeadsIndexSelectivityUniform {
                     .having("attributeValue").eq(lstStr.get(randomInd))
                     .toBuilder().build();
             List<LeadsIndex> list = lucenequery.list();
+            for (LeadsIndex lst : list) {
+                System.out.println(lst.getAttributeName()+":"+lst.getAttributeValue()+":"+lst.getKeyName());
+            }
             long stopTime = System.currentTimeMillis();
             listTimes.add(stopTime - startTime);
         }

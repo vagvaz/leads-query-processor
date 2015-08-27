@@ -7,6 +7,7 @@ import eu.leads.processor.common.infinispan.SyncPutRunnable;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.core.index.LeadsIndex;
 import eu.leads.processor.core.EngineUtils;
 import org.eclipse.jdt.internal.codeassist.impl.Engine;
 import org.infinispan.Cache;
@@ -24,6 +25,7 @@ import org.vertx.java.core.json.JsonObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -47,6 +49,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   transient protected  Cache<K,V> inputCache;
   transient protected EnsembleCache outputCache;
   protected String ensembleHost;
+  transient protected ArrayList<org.infinispan.query.dsl.Query> lquery;
 //  transient protected RemoteCache outputCache;
 //  transient protected RemoteCache ecache;
 //  transient protected RemoteCacheManager emanager;
@@ -147,10 +150,12 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     profCallable.start("Call getComponent ()");
     final ClusteringDependentLogic cdl = inputCache.getAdvancedCache().getComponentRegistry().getComponent
                                                                                     (ClusteringDependentLogic.class);
+    int count = 0;
     profCallable.end();
-    profCallable.start("Iterate Over Local Data");
-    ProfileEvent profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(),profilerLog);
-    int count=0;
+    if(lquery==null) {
+      profCallable.start("Iterate Over Local Data");
+      ProfileEvent profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(), profilerLog);
+
 //    for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
 //      if (!cdl.localNodeIsPrimaryOwner(key))
 //        continue;
@@ -161,6 +166,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     profExecute.end();
     profExecute.start("ISPNIter");
     try {
+
       for (Object object : iterable) {
         profExecute.end();
         Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
@@ -176,17 +182,39 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
           EngineUtils.submit(runable);
 //          executeOn((K) key, value);
 //          profExecute.end();
-        }
-        profExecute.start("ISPNIter");
+	}
+         profExecute.start("ISPNIter");
       }
       iterable.close();
-    }
-    catch(Exception e){
-        iterable.close();
-      profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
-      PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
       }
-
+	catch(Exception e){
+        iterable.close();
+        profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
+        PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
+      }
+    }else{
+      profCallable.start("Search_Over_Indexed_Data");
+      System.out.println("Search Over Indexed Data");
+      ProfileEvent profExecute = new ProfileEvent("Get list " + this.getClass().toString(), profilerLog);
+      List<LeadsIndex> list = lquery.get(0).list(); //TODO fix it
+      System.out.println(" Indexed Data Size: " + list.size());
+      //to do use sketches to find out what to do
+      try {
+        for (LeadsIndex lst : list) {
+          System.out.println(lst.getAttributeName()+":"+lst.getAttributeValue());
+          K key = (K) lst.getKeyName();
+          V value = inputCache.get(key);
+          if (value != null) {
+            profExecute.start("ExOn" + (++count));
+            executeOn(key, value);
+            profExecute.end();
+          }
+        }
+      } catch (Exception e) {
+        profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
+        PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
+      }
+    }
     profCallable.end();
     finalizeCallable();
     return embeddedCacheManager.getAddress().toString();

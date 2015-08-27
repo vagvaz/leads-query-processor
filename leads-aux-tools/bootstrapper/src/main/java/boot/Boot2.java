@@ -14,13 +14,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
-//import eu.leads.processor.conf.LQPConfiguration;
-
 /**
  * Created by vagvaz on 8/21/14.
  */
 public class Boot2 {
     static String[] adresses;
+    static JsonArray clusters =null;
     static String[] components;
     static String[] configurationFiles;
     static String filename;
@@ -169,27 +168,54 @@ public class Boot2 {
 
     public static void getClusterAdresses() {
         adresses = conf.getStringArray("adresses");
+
+        JsonObject cluster;
+        JsonObject nodeData;
+        JsonArray nodesList = new JsonArray();
+        JsonArray clusterPublicIPs;
+        JsonArray clusterPrivateIPs;
+
         List<HierarchicalConfiguration> cmplXadresses = ((XMLConfiguration) xmlConfiguration).configurationsAt("adresses.MC");
         if (cmplXadresses == null) { //
-            logger.error("cmplXadresses found");
+            logger.error("Clusters Addresses not found");
+            return;
         }
+        clusters = new JsonArray();
         for (HierarchicalConfiguration c : cmplXadresses) {
-            ConfigurationNode node = c.getRootNode();
-
-
+            ConfigurationNode node = c.getRoot();
             System.out.println("Found Cluster : " + c.getString("[@name]"));
-            System.out.println("Cluster Attributes : " + node.getAttributeCount());
-            String puIP = c.getString("node");
-            String name = c.getString("node[@name]");
-            String prIP = c.getString("node[@privateIp]");
-            System.out.println("puIP: " + puIP + " name " + name + " prIP:" + prIP);
-            Iterator<String> sf = c.getKeys();
-            while (sf.hasNext()) {
-                String key = sf.next();
-                System.out.println("Key: " + key + " value " + c.getString(key));
-            }
-        }
+            System.out.println("Cluster Size : " + node.getChildren().size());
+            cluster = new JsonObject();
+            cluster.putString("name", c.getString("[@name]"));
+            List<HierarchicalConfiguration> nodes = c.configurationsAt("node");
+            nodeData=new JsonObject();
+            clusterPublicIPs  = new JsonArray();
+            clusterPrivateIPs  = new JsonArray();
+            for( HierarchicalConfiguration n :nodes) {
+                String prIP = n.getString("[@privateIp]");
+                String puIP = n.getString("");
+                String name = n.getString("[@name]");
+                if(puIP!=null)
+                {
+                    clusterPublicIPs.addString(puIP);
+                    nodeData.putString("publicIp", puIP);
+                }
+                if(prIP!=null){
+                    nodeData.putString("privateIp", prIP);
+                    clusterPrivateIPs.addString(prIP);
+                }
+                clusterPrivateIPs.addString(prIP);
+                nodeData.putString("name", name);
 
+                System.out.println("puIP: " + puIP + " name: " + name + " prIP: " + prIP);
+                nodesList.add(nodeData);
+            }
+            cluster.putArray("nodes", nodesList);
+            cluster.putArray("allPublicIps",clusterPublicIPs);
+            cluster.putArray("allPrivateIps",clusterPrivateIPs);
+            clusters.add(cluster);
+
+        }
     }
 
     public static void singleCloud(){
@@ -259,18 +285,34 @@ public class Boot2 {
     public static void multiCloud(){
         //multicloud deployment
         System.out.println("Multi-cloud deployment");
-        System.exit(-1);
+       // System.exit(-1);
 
 
-        logger.info("Assuming that all the adresses shall be retrieved from the microclouds.json file.");
         //globalJson.putObject("microclouds", salt_get("leads_query-engine.map", true));
 
         String JsonCloudsEnv = System.getenv("LEADS_QUERY_ENGINE_CLUSTER_TOPOLOGY");//LEADS_CURRENT_CLUSTER");
-        JsonObject JsonClouds;
-        if (JsonCloudsEnv == null)
-            JsonClouds = read_salt(getJsonfile(baseDir + "microclouds.json", false), true);
+        JsonObject JsonClouds=null;
+        if (JsonCloudsEnv == null) {
+            if(clusters!=null) {
+                JsonClouds = new JsonObject();
+                for(int c=0; c<clusters.size();c++){
+                    JsonArray tmp = new JsonArray();
+                    tmp.add(((JsonObject)clusters.get(c)).getArray("allPublicIps").get(0));
+                    JsonClouds.putArray(((JsonObject) clusters.get(c)).getString("name"), tmp);
+                    allmcAddrs.put(((JsonObject)clusters.get(c)).getString("name"),((JsonObject)clusters.get(c)).getArray("allPublicIps"));
+                }
+            }else {
+                logger.info("Check for microclouds.json file.");
+                JsonClouds = read_salt(getJsonfile(baseDir + "microclouds.json", false), true);
+            }
+        }
         else
             JsonClouds = read_salt(new JsonObject(JsonCloudsEnv), true);
+
+        if(JsonClouds==null){
+            logger.error(" Unable to retrieve any micro-cloud configuration! ");
+            System.exit(-1);
+        }
 
         globalJson.putObject("microclouds", JsonClouds);
 
@@ -288,35 +330,55 @@ public class Boot2 {
 
         JsonObject compAlladresses = new JsonObject();
         JsonObject webserviceAlladresses = new JsonObject();
-
         int instancesCnt = 0;
-        for (Map.Entry<String, JsonArray> entry : allmcAddrs.entrySet()) {//TODO fix multicloud only with obtain
+        for (Map.Entry<String, JsonArray> entry : allmcAddrs.entrySet()) {
             JsonArray pAddrs = entry.getValue();
             JsonArray clusterComponentsAddressed = new JsonArray();
             JsonArray clusterWebServiceAddressed = new JsonArray();
             if (pAddrs.size() == 0)
                 continue;
 
+
             for (int i = 0; i < pAddrs.size() && i < componentsInstances.get("webservice"); i++) {
                 clusterWebServiceAddressed.addString((String) pAddrs.get(i));
                 webservicesAddrs.add((String) pAddrs.get(i));
             }
             //for all available ips of current microcloud that are used save them to a set
+            HashMap<String, Integer> instancesPerNode = new HashMap<>();
             for (int s = 0; s < pAddrs.size() && instancesCnt < componentsInstancesNames.size(); s++) {
                 clusterComponentsAddressed.addString((String) pAddrs.get(s));
                 logger.info("Curcomp" + componentsInstancesNames.get(instancesCnt) + " instances " + componentsInstances.get(componentsInstancesNames.get(instancesCnt)));
-
+                if(instancesPerNode.containsKey(pAddrs.get(s)))
+                    instancesPerNode.put((String)pAddrs.get(s), instancesPerNode.get(pAddrs.get(s))+1);
 
                 //Also write the cluster name in a text file into home dir ...
                 remoteExecute((String) pAddrs.get(s), "echo " + entry.getKey() + " > ~/micro_cloud.txt");
                 instancesCnt++;
             }
-            compAlladresses.putArray(entry.getKey(), clusterComponentsAddressed);
+            //compAlladresses.putArray(entry.getKey(), clusterComponentsAddressed);
+            String ensembleString = "";
+            for (String ip:instancesPerNode.keySet()){
+                int in=0;
+                do{
+                    ensembleString+=ip+":"+Integer.toString(11222 + in);
+                    in++;
+                    if(in<instancesPerNode.get(ip))
+                        break;
+                }while(true);
+
+            }
+            for(int ip=0; ip<clusterComponentsAddressed.size();ip++){
+                ensembleString+=clusterComponentsAddressed.get(ip)+":11222;";
+            }
+            JsonArray ensembleStringtmp = new JsonArray();
+            ensembleStringtmp.add(ensembleString.substring(0,ensembleString.length()-1));
+            compAlladresses.putArray(entry.getKey(), ensembleStringtmp);
             webserviceAlladresses.putArray(entry.getKey(), clusterWebServiceAddressed);
             if (instancesCnt >= componentsInstancesNames.size()) {
                 break;
             }
         }
+
         /////////////////
         //set also global variable adresses to
         webserviceJson = set_global_addresses(webserviceJson, webserviceAlladresses, compAlladresses);
@@ -550,7 +612,7 @@ public class Boot2 {
         if (conf.containsKey("processor.vertxArg"))
             command += " -" + conf.getString("processor.vertxArg");
 
-        runRemotely(modJson.getString("id"), ip, command);
+        //runRemotely(modJson.getString("id"), ip, command);
         for (int t = 0; t < sleepTime * 2; t++) {
             System.out.print(".");
             try {

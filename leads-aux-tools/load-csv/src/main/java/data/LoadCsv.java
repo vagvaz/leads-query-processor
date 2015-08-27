@@ -39,7 +39,8 @@ public class LoadCsv {
     static RemoteCacheManager remoteCacheManager = null;
     static InfinispanManager imanager = null;
     static EnsembleCacheManager emanager;
-
+    static long all_bytes=0;
+    static long all_records=0;
     static ConcurrentMap embeddedCache = null;
     static RemoteCache remoteCache = null;
     static EnsembleCache ensembleCache = null;
@@ -321,10 +322,12 @@ public class LoadCsv {
 //      }
         System.out.println("Loading finished.");
         System.out.println("Overall Folder Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - startTime, "HH:mm:ss,SSS"));
+        System.out.println("Imported: " + all_records+ " records, In memory bytes(not raw):" + all_bytes + ", Average: " +((float)all_records/(float)all_bytes));
+
         System.exit(0);
     }
 
-    private static void loadDataFromFile(File csvfile) {
+    private static void loadDataFromFile(File csvfile) throws IOException {
         String filename[] = csvfile.getAbsolutePath().split(".csv");
         //System.out.println("Filename" + csvfile.getAbsolutePath()+" "+filename[0]);
 
@@ -431,6 +434,9 @@ public class LoadCsv {
                 CSVReader reader = new CSVReader(new FileReader(csvfile), ',');
                 String valueLine = "";
                 int numofEntries = 0;
+                int numofBytes = 0;
+                int numofChars = 0;
+
                 int lines = 0;
                 String[] StringData;
                 System.out.println("Importing data ... ");
@@ -450,6 +456,8 @@ public class LoadCsv {
                     }
 
                     for (pos = 0; pos < StringData.length; pos++) {
+                        numofChars+=StringData[pos].length();
+
                         String fullCollumnName =  "default."+tableName+"." + columns.get(pos);
                         if (columnType.get(pos) == String.class)
                             /*if (columns.get(pos).equals("textcontent") || ta  bleName == "page_core")
@@ -480,7 +488,9 @@ public class LoadCsv {
                         }
 
                     }
+
                     put(key, data.toString());
+                    numofBytes += key.getBytes().length+data.toString().getBytes().length;
 
                     try {
                         sizeE+=serialize(data).length;
@@ -489,31 +499,25 @@ public class LoadCsv {
                     }
 
                     numofEntries++;
-
                     if (delay > 50) {
                         System.out.println("Cache put: " + numofEntries);
                     }
                     if (numofEntries % 1000 == 0) {
-                        System.out.println("Imported: " + numofEntries+" -- size: "+sizeE);
-                    }
-
-//                    numofEntries++;
-//                    if (delay > 50) {
-//                        System.out.println("Cache put: " + numofEntries);
-//                    }
-//                    if (numofEntries % 1000 == 0) {
-//                        System.out.println("Imported: " + numofEntries);
+                        System.out.println("Imported: " + numofEntries + ", Charbytes: " + numofChars + ", bytes: " + numofBytes + ", average: " + numofBytes / numofEntries);
+                        System.out.println("Imported: " + numofEntries + " -- size: " + sizeE);
                         //cache.endBatch(true);
+                    }
                    if(numofEntries%300==0){
                                  return;
                     }
                 }
-                System.out.println("Totally Imported: " + numofEntries);
+                all_bytes +=numofBytes;
+                all_records+=numofEntries;
+                System.out.println("Totally Imported: " + numofEntries + ", Charbytes: " + numofChars +", bytes: " + numofBytes + ", average: " + numofBytes/numofEntries);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
-
             }
 
 

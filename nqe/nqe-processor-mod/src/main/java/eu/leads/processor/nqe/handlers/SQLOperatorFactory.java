@@ -10,6 +10,8 @@ import eu.leads.processor.infinispan.operators.mapreduce.IntersectOperator;
 import eu.leads.processor.infinispan.operators.mapreduce.UnionOperator;
 import org.apache.tajo.algebra.OpType;
 
+import java.util.UUID;
+
 /**
  * Created by vagvaz on 9/23/14.
  */
@@ -70,6 +72,9 @@ public class SQLOperatorFactory {
          case INSERT:
              //Is Covered with EXPRS
             break;
+         case CREATE_INDEX:
+            //Is Covered with EXPRS
+            break;
          case DISTINCT_GROUP_BY:
             break;
          case CREATE_DATABASE:
@@ -101,17 +106,24 @@ public class SQLOperatorFactory {
    }
 
    private static Operator getSingleOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
-        Operator result  = null;
-                 String opType = action.getData().getObject("operator").getObject("configuration")
-                                                     .getObject("body").getString("operationType");
-                 if(opType.equals(OpType.Insert.toString())){
-                   result = new InsertOperator(com,persistence,log,action);
-              }
-               else{
-                         log.error("Trying to create Unimplemented operator " + opType);
+       Operator result  = null;
+       String opType = action.getData().getObject("operator").getObject("configuration")
+               .getObject("body").getString("operationType");
+       if(opType.equals(OpType.Insert.toString())){
+           result = new InsertOperator(com,persistence,log,action);
+       }
+       else if(opType.equals(OpType.CreateIndex.toString())){
+            System.out.print("CREATE INDEX yeah" + action.getId());
+          if(action.getId()==null) {
+             action.setId(UUID.randomUUID().toString());
+             System.out.print("RECREATE INDEX yeah" + action.getId());
+          }
+           result = new CreateIndexOperator2(com,persistence,log,action);
+       }
+       else{
+           log.error("Trying to create Unimplemented operator " + opType);
+       }
+       return result;
 
-                     }
-                 return result;
-
-    }
+   }
 }

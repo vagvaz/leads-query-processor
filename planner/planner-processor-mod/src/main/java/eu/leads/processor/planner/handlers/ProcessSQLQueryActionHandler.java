@@ -27,6 +27,7 @@ import org.vertx.java.core.json.JsonObject;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Created by vagvaz on 8/19/14.
@@ -110,6 +111,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         SQLPlan plan = null;
         try {
             plan = getLogicaSQLPlan(expr,sqlQuery);
+            System.out.println("\nPlan:" + plan.toString());
         } catch (Exception e) {
             failQuery(e, sqlQuery);
             result.setResult(createFailResult(e, sqlQuery));
@@ -120,11 +122,22 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             result.setResult(createFailResult(new Exception("Unable to create plan due to internal error"),sqlQuery));
             return result;
         }
-        Set<SQLPlan> candidatePlans = new HashSet<SQLPlan>();
-        candidatePlans.add(plan);
-        Set<SQLPlan> evaluatedPlans = evaluatePlansFromScheduler(candidatePlans);
-        SQLPlan selectedPlan = choosePlan(evaluatedPlans);
-        sqlQuery.setPlan(selectedPlan);
+        if(expr.getType().equals(OpType.CreateIndex))
+        {
+            JsonObject p = plan.getPlanGraph().copy();
+            JsonObject schedulerRep = PlanUtils.getSchedulerRep(p, currentCluster);
+            JsonObject annotatedPlan = PlanUtils.emulateScheduler(schedulerRep, globalInformation);
+            JsonObject updatedPlan = PlanUtils.updateInformation(plan.getPlanGraph(), annotatedPlan.getObject("stages"), globalInformation);
+            updatedPlan = PlanUtils.updateTargetEndpoints(updatedPlan);
+            plan.setPlanGraph(updatedPlan);
+            sqlQuery.setPlan(plan);
+        }else {
+            Set<SQLPlan> candidatePlans = new HashSet<SQLPlan>();
+            candidatePlans.add(plan);
+            Set<SQLPlan> evaluatedPlans = evaluatePlansFromScheduler(candidatePlans);
+            SQLPlan selectedPlan = choosePlan(evaluatedPlans);
+            sqlQuery.setPlan(selectedPlan);
+        }
         //Inform scheduler for the selected plan.
         JsonObject actionResult = new JsonObject();
         actionResult.putString("status", "ok");
@@ -150,14 +163,15 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             if (expr.getType().equals(OpType.Insert)) {
                 result = createInsertSQLPlan(session, expr, sqlQuery);
                 return result;
-
+            }else if (expr.getType().equals(OpType.CreateIndex)) {
+                result = createIndexSQLPlan2(session, expr, sqlQuery);
+                return result;
             }
         }catch (Exception e){
             throw e;
         }
         //Optimize plan
         String planAsString = null;
-
 
         try {
             planAsString = module.Optimize(session, expr);
@@ -181,6 +195,12 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             LogicalRootNode n = CoreGsonHelper.fromJson(prelimPlan, LogicalRootNode.class);
             result = new SQLPlan(sqlQuery.getId(),n);
             PlanNode node = result.getNode(result.getQueryId()+".0");
+            String snode = node.toString();
+            PlanNode node2 = new PlanNode(new JsonObject(snode));
+            if(node.equals(node2))
+                System.out.print("EQQULALL");
+            else
+                System.err.print("notEQQULALL");
             node.getConfiguration().getObject("body").putString("operationType", OpType.Insert.toString());
             if(opInsert.getTableName().startsWith(StringConstants.DEFAULT_DATABASE_NAME))
                 node.getConfiguration().getObject("body").putString("tableName",opInsert.getTableName());
@@ -209,6 +229,173 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         }
         return result;
     }
+
+    private SQLPlan createIndexSQLPlan2(Session session, Expr expr, SQLQuery sqlQuery) throws PlanningException {
+        SQLPlan result = new SQLPlan();
+        LogicalRootNode rootNode = new LogicalRootNode(1);
+
+        String insertExpr = "{\n" +
+                "  \"IsOverwrite\": false,\n" +
+                "  \"TableName\": \"adidas_keywords\",\n" +
+                "  \"TargetColumns\": [\n" +
+                "    \"keywords\"\n" +
+                "  ],\n" +
+                "  \"SubPlan\": {\n" +
+                "    \"IsDistinct\": false,\n" +
+                "    \"Projections\": [\n" +
+                "      {\n" +
+                "        \"Expr\": {\n" +
+                "          \"Value\": \"tetst\",\n" +
+                "          \"ValueType\": \"String\",\n" +
+                "          \"OpType\": \"Literal\"\n" +
+                "        },\n" +
+                "        \"OpType\": \"Target\"\n" +
+                "      }\n" +
+                "    ],\n" +
+                "    \"OpType\": \"Projection\"\n" +
+                "  },\n" +
+                "  \"OpType\": \"Insert\"\n" +
+                "}";
+
+        CreateIndex opIndex = (CreateIndex)expr;
+
+
+        Insert opInsert = (Insert)JsonHelper.fromJson(insertExpr, Expr.class);//
+        Expr subexpr = opInsert.getSubQuery();
+        try {
+            String prelimPlan = TaJoModule.Optimize( session,subexpr);
+            LogicalRootNode n = CoreGsonHelper.fromJson(prelimPlan, LogicalRootNode.class);
+            result = new SQLPlan(sqlQuery.getId(),n);
+            PlanNode node = result.getNode(result.getQueryId() + ".0");
+
+            node.getConfiguration().getObject("body").putString("operationType",OpType.CreateIndex.toString());
+            String tableName = (((Relation) ((Projection) opIndex.getChild()).getChild())).getName();
+
+            if(tableName.startsWith(StringConstants.DEFAULT_DATABASE_NAME))
+            node.getConfiguration().getObject("body").putString("tableName",tableName);
+            else
+                if(tableName.contains("."))
+                    node.getConfiguration().getObject("body").putString("tableName",tableName);
+                else
+                    node.getConfiguration().getObject("body").putString("tableName",StringConstants.DEFAULT_DATABASE_NAME+"."+tableName);
+
+            node.getConfiguration().getObject("body").putArray("primaryColumns",resolvePrimaryColumns(tableName));
+
+            String indexName = opIndex.getIndexName();
+            if (indexName.isEmpty())
+                indexName = "noname"+ UUID.randomUUID();
+
+            node.getConfiguration().getObject("body").putString("indexName", indexName);
+
+            Sort.SortSpec[] collumns = opIndex.getSortSpecs();
+            if(collumns!=null) {
+                JsonArray array = new JsonArray();
+                for (Sort.SortSpec sc : collumns)
+                    array.add(((ColumnReferenceExpr) sc.getKey()).getName());
+                node.getConfiguration().getObject("body").putArray("columnNames", array);
+            }
+            else{
+                JsonArray array = new JsonArray();
+                Schema tableSchema = TaJoModule.getTableSchema(tableName);
+                for(Column c : tableSchema.getColumns()){
+                    array.add(c.getSimpleName());
+                }
+                node.getConfiguration().getObject("body").putArray("columnNames",array);
+            }
+            node.getConfiguration().putString("rawquery", opIndex.toJson());
+            result.updateNode(node);
+        } catch (PlanningException e) {
+            throw e;
+        }
+        return result;
+    }
+
+    private SQLPlan createIndexSQLPlan(Session session, Expr expr, SQLQuery sqlQuery)  {
+        SQLPlan result = null;
+        CreateIndex opIndex = (CreateIndex)expr;
+
+       // LogicalRootNode n = new LogicalRootNode(1);
+
+
+
+        String testNode = "{\n" +
+                "  \"child\": {\n" +
+                "    \"type\": \"EXPRS\",\n" +
+                "    \"body\": {\n" +
+                "      \"exprs\": [\n" +
+                "      ],\n" +
+                "      \"nodeId\": 0,\n" +
+                "      \"type\": \"EXPRS\",\n" +
+                "      \"outputSchema\": {\n" +
+                "      },\n" +
+                "      \"cost\": 0.0\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"nodeId\": 1,\n" +
+                "  \"type\": \"ROOT\",\n" +
+                "  \"inputSchema\": {\n" +
+                "  },\n" +
+                "  \"outputSchema\": {\n" +
+                "  },\n" +
+                "  \"cost\": 0.0\n" +
+                "}";
+
+        LogicalRootNode n = CoreGsonHelper.fromJson(testNode, LogicalRootNode.class);
+
+        result = new SQLPlan(sqlQuery.getId(),n);
+//        JsonObject jnode2 = new JsonObject();
+//        jnode2.putArray("nodes",new JsonArray());
+//        result.copy(jnode2);
+        JsonObject jnode = new JsonObject();
+        jnode.putObject(result.getQueryId()+".0",  new JsonObject());
+        result.setPlanGraph(jnode);
+        PlanNode node = result.getNode(result.getQueryId()+".0");
+        node.setNodeType(LeadsNodeType.EXPRS);
+        JsonObject te=new JsonObject();
+        te.putObject("body",new JsonObject());
+        node.setConfiguration(te);
+
+        node.getConfiguration().getObject("body").putString("operationType", OpType.CreateIndex.toString());
+        String tableName = (((Relation) ((Projection) opIndex.getChild()).getChild())).getName();
+        if(tableName.startsWith(StringConstants.DEFAULT_DATABASE_NAME))
+            node.getConfiguration().getObject("body").putString("tableName",tableName);
+        else
+        if(tableName.contains("."))
+            node.getConfiguration().getObject("body").putString("tableName",tableName);
+        else
+            node.getConfiguration().getObject("body").putString("tableName",StringConstants.DEFAULT_DATABASE_NAME+"."+tableName);
+
+        node.getConfiguration().getObject("body").putArray("primaryColumns",resolvePrimaryColumns(tableName));
+
+        String indexName = opIndex.getIndexName();
+        if (indexName.isEmpty())
+            indexName = "noname"+ UUID.randomUUID();
+
+        node.getConfiguration().getObject("body").putString("indexName", indexName);
+
+        Sort.SortSpec[] collumns = opIndex.getSortSpecs();
+        if(collumns!=null) {
+            JsonArray array = new JsonArray();
+            for (Sort.SortSpec sc : collumns)
+                array.add(((ColumnReferenceExpr) sc.getKey()).getName());
+            node.getConfiguration().getObject("body").putArray("columnNames", array);
+        }
+        else{
+            JsonArray array = new JsonArray();
+            Schema tableSchema = TaJoModule.getTableSchema(tableName);
+            for(Column c : tableSchema.getColumns()){
+                array.add(c.getSimpleName());
+            }
+            node.getConfiguration().getObject("body").putArray("columnNames",array);
+        }
+        node.getConfiguration().putString("rawquery", opIndex.toJson());
+        //JsonArray newNodesArray = new JsonArray();
+
+        //result.updateNode(node);
+        return result;
+    }
+
+    //do it with catalog
     private JsonArray resolvePrimaryColumns(String tableName) {
         String table = tableName;
         Set<String> primaryColumns = null;
