@@ -143,12 +143,12 @@ public class ScanOperator extends BasicOperator {
     while (iterator.hasNext()) {
       JsonObject tmp = (JsonObject) iterator.next();
       columnName = tmp.getString("name");
-      System.out.print("Check if exists: " + "." + columnName + " ");
+      System.out.print("Check if exists: " +  columnName + " ");
       if (manager.getCacheManager().cacheExists(columnName)) {
         indexCaches.put(columnName, (Cache) manager.getIndexedPersistentCache(columnName));
-        System.out.println(" exists!");
+        System.out.print(" exists! ");
       } else
-        System.out.println(" does not exist!");
+        System.out.print(" does not exist! ");
 
       if (manager.getCacheManager().cacheExists(columnName + ".sketch")) {
         sketches.put(columnName, new DistCMSketch((Cache) manager.getPersisentCache(columnName + ".sketch"), true));
@@ -156,6 +156,12 @@ public class ScanOperator extends BasicOperator {
       } else
         System.out.println(columnName + ".sketch" +" does not exist!");
     }
+
+    if(indexCaches.size()==0){
+       System.out.println("Nothing Indexed");
+       return false;
+    }
+
     FilterOperatorTree tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
     Object selectvt = getSelectivity(sketches, tree.getRoot());
     if (selectvt != null) {

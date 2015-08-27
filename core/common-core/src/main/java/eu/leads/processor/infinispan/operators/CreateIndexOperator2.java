@@ -72,10 +72,11 @@ public class CreateIndexOperator2 extends BasicOperator {
 
       int array [][]=null;
       for(String node:nodes){
-        int w =  (int)sketchesM.get(nodes+":"+col+":w");
-        int d =  (int)sketchesM.get(nodes+":"+col+":d");
+        int w =  (int)sketchesM.get(node+":"+col+":w");
+        int d =  (int)sketchesM.get(node+":"+col+":d");
         System.out.println("Found node" + node );
         array= (int[][]) sketchesM.get(node+":"+col+":array");
+
         tmp.put(-1,w);
         tmp.put(-2,d);
 
@@ -86,8 +87,13 @@ public class CreateIndexOperator2 extends BasicOperator {
                 tmp.put(y*w+x,tmp.get(y*w+x)+array[x][y]);
               else
                 tmp.put(y*w+x, array[x][y]);
-       }
+
+      }
       System.out.println(nodes.size()+" Sketches merged");
+      for (String key : sketchesM.getAdvancedCache().keySet()) {
+        sketchesM.remove(key);
+      }
+      System.out.println("Keys removed");
     }
 
     super.cleanup();
