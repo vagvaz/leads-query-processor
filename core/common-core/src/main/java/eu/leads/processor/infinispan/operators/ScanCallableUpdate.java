@@ -100,7 +100,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 
     if (conf.getObject("body").containsField("qual")) {
       tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
-      System.out.print("Quaaal : " + conf.getObject("body").getObject("qual").toString());
+      //System.out.print("Quaaal : " + conf.getObject("body").getObject("qual").toString());
       toRename = getRenamingTableFromSchema(inputSchema);
       tableName = conf.getObject("body").getObject("tableDesc").getString("tableName");
       tableName = tableName.replace(StringConstants.DEFAULT_DATABASE_NAME + ".", "");

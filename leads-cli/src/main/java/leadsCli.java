@@ -45,6 +45,7 @@ public class leadsCli {
 		ConsoleReader reader = null;
 		try {
 			reader = new ConsoleReader();
+
 			MemoryHistory hist = setupHistory(reader, "leadscli");
 
 			List<Completer> completors = new LinkedList<Completer>();
@@ -63,6 +64,7 @@ public class leadsCli {
 						reader.clearScreen();
 						continue;
 					}
+
 					out.flush();
 					if (line.equalsIgnoreCase("quit") || line.equalsIgnoreCase("exit")) {
 						System.out.println("Exiting, Thank you");
@@ -94,7 +96,7 @@ public class leadsCli {
 									System.exit(0);
 								}
 								System.out.println("#" + count + "/" + sqlCmds.size() + " Executing command: " + sql);
-								send_query_and_wait(sql);
+								send_query_and_wait(reader, sql);
 							}
 							sqlCmds.clear();
 						}
@@ -147,7 +149,7 @@ public class leadsCli {
 //        }
 	}
 
-	static void send_query_and_wait(String sql) throws IOException, InterruptedException {
+	static void send_query_and_wait(ConsoleReader reader, String sql) throws IOException, InterruptedException {
 		long start = System.currentTimeMillis();
 		long resultCompleted, resultArrived, resultPrinted;
 		QueryStatus currentStatus = WebServiceClient.submitQuery(username, sql);
@@ -161,6 +163,13 @@ public class leadsCli {
 //            System.out.println(", o: " + currentStatus.toString());
 			//System.out.println("The query with id " + currentStatus.getId() + " is " + currentStatus.getStatus());
 			System.out.printf("\rPlease wait ... elapsed: %f s", (System.currentTimeMillis() - start) / 1000.0);
+			if(reader.getInput().available()>0) {
+				System.out.print(" "+reader.getInput().available());
+				if (reader.readCharacter() == 27) {
+					System.out.println("User terminated.");
+					break;
+				}
+			}
 
 		}
 		Date curr_date = new Date(System.currentTimeMillis());
@@ -173,17 +182,17 @@ public class leadsCli {
 			QueryResults res = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
 			resultArrived = System.currentTimeMillis();
 			System.out.printf("\rResult acquisition (delivery) time: " + (resultArrived - resultCompleted) + " ms.\n");
-			System.out.printf("Please wait ... formatting results. ");
+			System.out.printf(" Please wait ... formatting results. ");
 			print_results(res);
 			resultPrinted = System.currentTimeMillis();
-			System.out.printf("\rFound " + res.getResult().size() + " results.\n");
-			System.out.print("Submit time: " + (submittime - start) + " ms, ");
+			System.out.print("\rFound " + res.getResult().size() + " results.\n");
+			System.out.print("\nSubmit time: " + (submittime - start) + " ms, ");
 			System.out.print("execution  time: " + (resultCompleted - submittime) + " ms, ");
 			System.out.print("acquisition (delivery) time: " + (resultArrived - resultCompleted) + " ms, ");
 			System.out.print("display time: " + (resultPrinted - resultArrived) + " ms, ");
 			System.out.print("Complete time: " + (resultPrinted - start) + " ms.\n");
 		} else {
-			System.err.println("Execution terminated with error : " + currentStatus.getErrorMessage());
+			System.err.println("Execution terminated: " + currentStatus.getErrorMessage());
 		}
 	}
 

@@ -132,46 +132,53 @@ public class ScanOperator extends BasicOperator {
 
 
   private boolean checkIndex_usage() {
-    System.out.println("Check if fields are indexed");
-    JsonObject inputSchema;
-    inputSchema = conf.getObject("body").getObject("inputSchema");
-    JsonArray fields = inputSchema.getArray("fields");
-    Iterator<Object> iterator = fields.iterator();
-    String columnName = null;
-    HashMap indexCaches = new HashMap<>();
-    HashMap sketches = new HashMap<>();
-    while (iterator.hasNext()) {
-      JsonObject tmp = (JsonObject) iterator.next();
-      columnName = tmp.getString("name");
-      System.out.print("Check if exists: " +  columnName + " ");
-      if (manager.getCacheManager().cacheExists(columnName)) {
-        indexCaches.put(columnName, (Cache) manager.getIndexedPersistentCache(columnName));
-        System.out.print(" exists! ");
-      } else
-        System.out.print(" does not exist! ");
+      if (conf.getObject("body").containsField("qual")) {
+        System.out.println("Check if fields are indexed");
+        JsonObject inputSchema;
+        inputSchema = conf.getObject("body").getObject("inputSchema");
+        JsonArray fields = inputSchema.getArray("fields");
+        Iterator<Object> iterator = fields.iterator();
+        String columnName = null;
+        HashMap indexCaches = new HashMap<>();
+        HashMap sketches = new HashMap<>();
+        while (\.hasNext()) {
+          JsonObject tmp = (JsonObject) iterator.next();
+          columnName = tmp.getString("name");
+          System.out.print("Check if exists: " +  columnName + " ");
+          if (manager.getCacheManager().cacheExists(columnName)) {
+            indexCaches.put(columnName, (Cache) manager.getIndexedPersistentCache(columnName));
+            System.out.print(" exists! ");
+          } else
+            System.out.print(" does not exist! ");
 
-      if (manager.getCacheManager().cacheExists(columnName + ".sketch")) {
-        sketches.put(columnName, new DistCMSketch((Cache) manager.getPersisentCache(columnName + ".sketch"), true));
-        System.out.println(" exists!");
-      } else
-        System.out.println(columnName + ".sketch" +" does not exist!");
-    }
+          if (manager.getCacheManager().cacheExists(columnName + ".sketch")) {
+            sketches.put(columnName, new DistCMSketch((Cache) manager.getPersisentCache(columnName + ".sketch"), true));
+            System.out.println(" exists!");
+          } else
+            System.out.println(columnName + ".sketch" +" does not exist!");
+        }
 
-    if(indexCaches.size()==0){
-       System.out.println("Nothing Indexed");
-       return false;
-    }
+        if(indexCaches.size()==0){
+           System.out.println("Nothing Indexed");
+           return false;
+        }
 
-    FilterOperatorTree tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
-    Object selectvt = getSelectivity(sketches, tree.getRoot());
-    if (selectvt != null) {
-      double selectivity= (double)selectvt/inputCache.size();
-      System.out.println("Selectivity: " + selectivity);
-      if(selectivity < 0.5){
-        System.out.println("Use indexes!!");
-        return indexCaches.size() > 0;
+        FilterOperatorTree tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
+        Object selectvt = getSelectivity(sketches, tree.getRoot());
+        if (selectvt != null) {
+            double selectivity = (double) selectvt / inputCache.size();
+            System.out.println("\nSelectivity: " + selectivity);
+            if (selectivity < 0.5) {
+                System.out.println("Use indexes!!");
+                return indexCaches.size() > 0;
+            }
+        }else{
+           System.out.println("No Selectivity!!");
+
+        }
+    }else{
+          System.out.println("No Qual!!");
       }
-    }
     return false;
   }
 
