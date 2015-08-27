@@ -4,10 +4,7 @@ import eu.leads.processor.plugins.NutchTransformer;
 import org.apache.avro.generic.GenericData;
 import org.apache.nutch.storage.WebPage;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Created by vagvaz on 02/08/15.
@@ -75,6 +72,8 @@ public class PushData {
         int counter = 0;
         int rejected = 0;
         int processed = 0;
+        Set<String> keys =  new HashSet<String>();
+
         while (inputHandler.hasNext()) {
             // Map.Entry<String,WebPage> entry;
 //            entry = (Map.Entry<String,WebPage>) inputHandler.next();
@@ -97,11 +96,11 @@ public class PushData {
 //                outputHandler3.append(entry.getValue().get(entry.getValue().getSchema().getField("url").pos()).toString(), entry.getValue().toString());
                 String key_url =  tuple.getAttribute("default.webpages.url");
                 String key_ts =  tuple.getAttribute("default.webpages.ts");
+                String key = "default.webpages:"+key_url+","+key_ts;
+                keys.add(key);
+                outputHandler.append("default.webpages:"+key_url+","+key_ts, tuple);
+
                 counter++;
-                outputHandler.append("default.webpages:"+key_url+","+key_ts+","+counter, tuple);
-
-                //   dummy.append(entry.getKey(), entry.getValue());
-
                 if (counter % 100 == 0) {
                     System.err.println("read " + counter);
                 }
@@ -116,6 +115,7 @@ public class PushData {
         System.out.println("processed " + processed + " rejected " + rejected + " read " + counter);
         inputHandler.close();
         outputHandler.close();
+        System.err.println("Size of keys: "+keys.size());
         System.exit(0);
     }
 }
