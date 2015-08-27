@@ -117,5 +117,6 @@ public class PushData {
         System.out.println("-------------------------INPUT HANDLER CLOSED");
         outputHandler.close();
         System.out.println("--------------------------------------------------OUTPUT HANDLER CLOSED");
+        System.exit(0);
     }
 }
