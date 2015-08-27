@@ -10,16 +10,18 @@ import eu.leads.processor.core.plan.PlanNode;
 import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.infinispan.LeadsMapperCallable;
 import eu.leads.processor.infinispan.operators.mapreduce.GroupByMapper;
+import eu.leads.processor.math.FilterOperatorNode;
+import eu.leads.processor.math.FilterOperatorTree;
+import eu.leads.processor.math.MathUtils;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.distexec.DistributedTask;
 import org.infinispan.distexec.DistributedTaskBuilder;
+import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -66,6 +68,10 @@ public class ScanOperator extends BasicOperator {
             System.err.println(conf.getString("next.type") + " SCAN NOT IMPLEMENTED YET");
          }
       }
+      if(checkIndex_usage())
+         conf.putBoolean("useIndex",true);
+      else
+         conf.putBoolean("useIndex",false);
    }
 
    @Override
@@ -125,4 +131,143 @@ public class ScanOperator extends BasicOperator {
    }
 
 
+  private boolean checkIndex_usage() {
+    System.out.println("Check if fields are indexed");
+    JsonObject inputSchema;
+    inputSchema = conf.getObject("body").getObject("inputSchema");
+    JsonArray fields = inputSchema.getArray("fields");
+    Iterator<Object> iterator = fields.iterator();
+    String columnName = null;
+    HashMap indexCaches = new HashMap<>();
+    HashMap sketches = new HashMap<>();
+    while (iterator.hasNext()) {
+      JsonObject tmp = (JsonObject) iterator.next();
+      columnName = tmp.getString("name");
+      System.out.print("Check if exists: " + "." + columnName + " ");
+      if (manager.getCacheManager().cacheExists(columnName)) {
+        indexCaches.put(columnName, (Cache) manager.getIndexedPersistentCache(columnName));
+        System.out.println(" exists!");
+      } else
+        System.out.println(" does not exist!");
+
+      if (manager.getCacheManager().cacheExists(columnName + ".sketch")) {
+        sketches.put(columnName, new DistCMSketch((Cache) manager.getPersisentCache(columnName + ".sketch"), true));
+        System.out.println(" exists!");
+      } else
+        System.out.println(columnName + ".sketch" +" does not exist!");
+    }
+    FilterOperatorTree tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
+    Object selectvt = getSelectivity(sketches, tree.getRoot());
+    if (selectvt != null) {
+      double selectivity= (double)selectvt/inputCache.size();
+      System.out.println("Selectivity: " + selectivity);
+      if(selectivity < 0.5){
+        System.out.println("Use indexes!!");
+        return indexCaches.size() > 0;
+      }
+    }
+    return false;
+  }
+
+  Object getSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
+    if(root==null)
+      return null;
+    Object left = getSelectivity(sketchCaches, root.getLeft());
+    Object right = getSelectivity(sketchCaches, root.getRight());
+
+    switch (root.getType()) {
+      case AND:
+        if (left != null && right != null)
+          return Math.min((double) left, (double) right);
+        break;
+      case OR:
+        if (left != null && right != null)
+          return (double) left + (double) right;
+        break;
+      default:
+        System.out.println("Selectivity SubQual " + root.getType());
+        return getSubSelectivity(sketchCaches, root);
+    }
+    return (left != null) ? left : right;
+  }
+
+
+  Object getSubSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
+    Object result = null;
+    double dleft = -1000;
+    double dright = -1000;
+    String sleft = null;
+    String sright = null;
+    if (root == null)
+      return null;
+    Object oleft = getSubSelectivity(sketchCaches, root.getLeft());
+    Object oright = getSubSelectivity(sketchCaches, root.getRight());
+
+    if (oleft instanceof Double)
+      dleft = (double) oleft;
+    if (oright instanceof Double)
+      dright = (double) oright;
+    if (oleft instanceof String)
+      sleft = (String) oleft;
+    if (oright instanceof String)
+      sright = (String) oright;
+
+    switch (root.getType()) {
+      case EQUAL:
+        if (sleft != null && sright != null) {
+          String collumnName = sleft;
+          return sketchCaches.get(collumnName).get(sright);
+        }
+        break;
+      case FIELD:
+        String collumnName = root.getValueAsJson().getObject("body").getObject("column").getString("name");
+        String type = root.getValueAsJson().getObject("body").getObject("column").getObject("dataType").getString("type");
+        //MathUtils.getTextFrom(root.getValueAsJson());
+
+        if (sketchCaches.containsKey(collumnName)) {
+          if (type.equals("TEXT"))
+            return collumnName;
+          return null;
+        }
+        break;
+
+      case CONST:
+        // result = true;
+        return MathUtils.getTextFrom(root.getValueAsJson());
+      case LTH:
+        return 0.4;
+////        if(left !=null && oright !=null)
+////          return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
+//        return null;
+//        break;
+      case LEQ:
+        return 0.4;
+//        if(left !=null && oright !=null)
+//          return left.and().having("attributeValue").lte(oright);//,right.getValueAsJson());
+//        break;
+      case GTH:
+        return 0.4;
+//        if(left !=null && oright !=null)
+//          return left.and().having("attributeValue").gt(oright);//,right.getValueAsJson());
+//        break;
+      case GEQ:
+        return 0.4;
+//        if(left !=null && oright !=null)
+//          return left.and().having("attributeValue").gte(oright);//,right.getValueAsJson());
+//        break;
+//
+//      case LIKE:
+//        if(left !=null && oright !=null) {
+//          return left.and().having("attributeValue").like((String) oright);//,right.getValueAsJson());
+//        }break;
+//
+//
+//      case ROW_CONSTANT:
+//        //TODO
+//        break;
+      default:
+        return 0.01;
+    }
+    return null;
+  }
 }

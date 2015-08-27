@@ -137,84 +137,6 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
     return result;
   }
 
-  Object getSubSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
-    Object result = null;
-    double dleft = -1000;
-    double dright = -1000;
-    String sleft = null;
-    String sright = null;
-    if (root == null)
-      return null;
-    Object oleft = getSubSelectivity(sketchCaches, root.getLeft());
-    Object oright = getSubSelectivity(sketchCaches, root.getRight());
-
-    if (oleft instanceof Double)
-      dleft = (double) oleft;
-    if (oright instanceof Double)
-      dright = (double) oright;
-    if (oleft instanceof String)
-      sleft = (String) oleft;
-    if (oright instanceof String)
-      sright = (String) oright;
-
-    switch (root.getType()) {
-      case EQUAL:
-        if (sleft != null && sright != null) {
-          String collumnName = sleft;
-          return sketchCaches.get(collumnName).get(sright);
-        }
-        break;
-      case FIELD:
-        String collumnName = root.getValueAsJson().getObject("body").getObject("column").getString("name");
-        String type = root.getValueAsJson().getObject("body").getObject("column").getObject("dataType").getString("type");
-        //MathUtils.getTextFrom(root.getValueAsJson());
-
-        if (sketchCaches.containsKey(collumnName)) {
-          if (type.equals("TEXT"))
-            return collumnName;
-          return null;
-        }
-        break;
-
-      case CONST:
-        // result = true;
-        return MathUtils.getTextFrom(root.getValueAsJson());
-     case LTH:
-       return 0.4;
-////        if(left !=null && oright !=null)
-////          return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
-//        return null;
-//        break;
-      case LEQ:
-        return 0.4;
-//        if(left !=null && oright !=null)
-//          return left.and().having("attributeValue").lte(oright);//,right.getValueAsJson());
-//        break;
-      case GTH:
-        return 0.4;
-//        if(left !=null && oright !=null)
-//          return left.and().having("attributeValue").gt(oright);//,right.getValueAsJson());
-//        break;
-      case GEQ:
-        return 0.4;
-//        if(left !=null && oright !=null)
-//          return left.and().having("attributeValue").gte(oright);//,right.getValueAsJson());
-//        break;
-//
-//      case LIKE:
-//        if(left !=null && oright !=null) {
-//          return left.and().having("attributeValue").like((String) oright);//,right.getValueAsJson());
-//        }break;
-//
-//
-//      case ROW_CONSTANT:
-//        //TODO
-//        break;
-      default:
-        return 0.01;
-    }
-    return null;
-  }
 
 
   Object getSubLucene(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
@@ -339,62 +261,26 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
     return (result.isEmpty()) ? null : result;
   }
 
-  Object getSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
-    if(root==null)
-      return null;
-    Object left = getSelectivity(sketchCaches, root.getLeft());
-    Object right = getSelectivity(sketchCaches, root.getRight());
-
-    switch (root.getType()) {
-      case AND:
-        if (left != null && right != null)
-          return Math.min((double) left, (double) right);
-        break;
-      case OR:
-        if (left != null && right != null)
-          return (double) left + (double) right;
-        break;
-      default:
-        System.out.println("Selectivity SubQual " + root.getType());
-        return getSubSelectivity(sketchCaches, root);
-    }
-    return (left != null) ? left : right;
-  }
-
 
   private boolean checkIndex_usage() {
     System.out.println("Check if fields are indexed");
-
-    JsonArray fields = inputSchema.getArray("fields");
-    Iterator<Object> iterator = fields.iterator();
-    String columnName = null;
-    indexCaches = new HashMap<>();
-    sketches = new HashMap<>();
-    while (iterator.hasNext()) {
-      JsonObject tmp = (JsonObject) iterator.next();
-      columnName = tmp.getString("name");
-      System.out.print("Check if exists: " + "." + columnName + " ");
-      if (imanager.getCacheManager().cacheExists(columnName)) {
-        indexCaches.put(columnName, (Cache) imanager.getIndexedPersistentCache(columnName));
-        System.out.println(" exists!");
-      } else
-        System.out.println(" does not exist!");
-
-      if (imanager.getCacheManager().cacheExists(columnName + ".sketch")) {
-        sketches.put(columnName, new DistCMSketch((Cache) imanager.getPersisentCache(columnName + ".sketch"), true));
-        System.out.println(" exists!");
-      } else
-        System.out.println(columnName + ".sketch" +" does not exist!");
-    }
-
-    Object selectvt = getSelectivity(sketches, tree.getRoot());
-    if (selectvt != null) {
-      double selectivity= (double)selectvt/inputCache.size();
-      System.out.println("Selectivity: " + selectivity);
-      if(selectivity < 0.5){
-        System.out.println("Use indexes!!");
-        return indexCaches.size() > 0;
+    if(conf.getBoolean("useIndex")){
+      indexCaches = new HashMap<>();
+      String columnName ;
+      JsonArray fields = inputSchema.getArray("fields");
+      Iterator<Object> iterator = fields.iterator();
+      while (iterator.hasNext()) {
+        JsonObject tmp = (JsonObject) iterator.next();
+        columnName = tmp.getString("name");
+        System.out.print("Check if exists: " + "." + columnName + " ");
+        if (imanager.getCacheManager().cacheExists(columnName)) {
+          indexCaches.put(columnName, (Cache) imanager.getIndexedPersistentCache(columnName));
+          System.out.println(" exists!");
+        } else
+          System.out.println(" does not exist!");
       }
+      System.out.println("Use indexes!!");
+      return indexCaches.size() > 0;
     }
     return false;
   }
