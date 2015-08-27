@@ -97,10 +97,11 @@ public class PushData {
 //                outputHandler3.append(entry.getValue().get(entry.getValue().getSchema().getField("url").pos()).toString(), entry.getValue().toString());
                 String key_url =  tuple.getAttribute("default.webpages.url");
                 String key_ts =  tuple.getAttribute("default.webpages.ts");
-                outputHandler.append("default.webpages:"+key_url+","+key_ts, tuple);
+                counter++;
+                outputHandler.append("default.webpages:"+key_url+","+key_ts+","+counter, tuple);
 
                 //   dummy.append(entry.getKey(), entry.getValue());
-                counter++;
+
                 if (counter % 100 == 0) {
                     System.err.println("read " + counter);
                 }
