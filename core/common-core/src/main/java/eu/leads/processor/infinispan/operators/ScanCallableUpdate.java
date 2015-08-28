@@ -143,6 +143,9 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
     FilterConditionContext result = null;
     FilterConditionContext left = null;
     FilterConditionContext right = null;
+    QueryBuilder qleft=null;
+    QueryBuilder qrigth=null;
+
     if (root == null)
       return null;
     Object oleft = getSubLucene(indexCaches, root.getLeft());
@@ -153,8 +156,13 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
     if (oright instanceof FilterConditionContext)
       right = (FilterConditionContext) oright;
 
+    if(oleft instanceof QueryBuilder)
+      qleft = (QueryBuilder) oleft;
+
     switch (root.getType()) {
       case EQUAL:
+        if(qleft!= null && oright != null)
+          return qleft.having("attributeValue").eq(oright);//,right.getValueAsJson());
         if (left != null && oright != null)
           return left.and().having("attributeValue").eq(oright);//,right.getValueAsJson());
         break;
@@ -170,7 +178,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
         //MathUtils.getTextFrom(root.getValueAsJson());
 
         if (indexCaches.containsKey(collumnName)) {
-
+          System.out.println("Found Cache for: " + collumnName);
           SearchManager sm = org.infinispan.query.Search.getSearchManager(indexCaches.get(collumnName));
           QueryFactory qf = sm.getQueryFactory();
           QueryBuilder Qb;
@@ -186,8 +194,8 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
             Qb = qf.from(LeadsIndexString.class);
           else
             Qb = qf.from(LeadsIndex.class);
-          FilterConditionContext filterC = Qb.having("attributeName").eq(collumnName);
-          return filterC;
+          //FilterConditionContext filterC = Qb.having("attributeName").eq(collumnName);
+          return Qb;
         }
         break;
 
@@ -195,24 +203,34 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
         // result = true;
         return MathUtils.getTextFrom(root.getValueAsJson());
       case LTH:
+        if(qleft!= null && oright != null)
+          return qleft.having("attributeValue").lt(oright);
         if (left != null && oright != null)
           return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
 
         break;
       case LEQ:
+        if(qleft!= null && oright != null)
+          return qleft.having("attributeValue").lte(oright);
         if (left != null && oright != null)
           return left.and().having("attributeValue").lte(oright);//,right.getValueAsJson());
         break;
       case GTH:
+        if(qleft!= null && oright != null)
+          return qleft.having("attributeValue").gt(oright);
         if (left != null && oright != null)
           return left.and().having("attributeValue").gt(oright);//,right.getValueAsJson());
         break;
       case GEQ:
+        if(qleft!= null && oright != null)
+          return qleft.having("attributeValue").gte(oright);
         if (left != null && oright != null)
           return left.and().having("attributeValue").gte(oright);//,right.getValueAsJson());
         break;
 
       case LIKE:
+        if(qleft!= null && oright != null)
+          return qleft.having("attributeValue").like((String) oright);
         if (left != null && oright != null) {
           return left.and().having("attributeValue").like((String) oright);//,right.getValueAsJson());
         }

@@ -133,13 +133,13 @@ public class ScanOperator extends BasicOperator {
 
   private boolean checkIndex_usage() {
       if (conf.getObject("body").containsField("qual")) {
-        System.out.println("Check if fields are indexed.");
+        System.out.println("Scan Check if fields are indexed.");
         JsonObject inputSchema;
         inputSchema = conf.getObject("body").getObject("inputSchema");
         JsonArray fields = inputSchema.getArray("fields");
-          System.out.println("Check if fields:"+ fields.toString()+ " are indexed.");
+	    System.out.println("Check if fields:"+ fields.toString()+ " are indexed.");
 
-          Iterator<Object> iterator = fields.iterator();
+        Iterator<Object> iterator = fields.iterator();
         String columnName = null;
         HashMap indexCaches = new HashMap<>();
         HashMap sketches = new HashMap<>();
@@ -163,6 +163,8 @@ public class ScanOperator extends BasicOperator {
         if(indexCaches.size()==0){
            System.out.println("Nothing Indexed");
            return false;
+        }else{
+	        System.out.println("At least some fields are Indexed: " + indexCaches.keySet().toArray().toString());
         }
 
         FilterOperatorTree tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));

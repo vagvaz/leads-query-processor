@@ -39,17 +39,10 @@ import static eu.leads.processor.common.infinispan.EnsembleCacheUtils.putToCache
  */
 public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements Serializable {
 
-  transient protected VersionedCache versionedCache;
-
-  transient protected Cache pageRankCache;
   transient protected FilterOperatorTree tree;
-  transient protected double totalSum;
-  transient protected Cache approxSumCache;
-  transient boolean versioning;
-  boolean onVersionedCache;
+
   protected Logger log = LoggerFactory.getLogger(CreateIndexCallable.class.toString());
 
-  transient protected boolean renameTableInTree;
   transient private String tableName;
   transient String IndexName;
   transient ArrayList<String> columnNames;
@@ -63,11 +56,6 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
   public CreateIndexCallable(String configString, String output) {
     super(configString, output);
   }
-
-//  public CreateIndexCallable(String configString, String output, boolean onVersionedCache) {
-//    super(configString, output);
-//    this.onVersionedCache = onVersionedCache;
-//  }
 
   @Override
   public void initialize() {
@@ -85,7 +73,7 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
     tableName = (((Relation) ((Projection) newExpr.getChild()).getChild())).getName();
     Sort.SortSpec[] collumns = newExpr.getSortSpecs();
 
-    columnNames = new ArrayList<>();//= conf.getObject("CreateIndex").getArray("SortSpecs");
+    columnNames = new ArrayList<>();
     for (Sort.SortSpec sc : collumns)
       columnNames.add(((ColumnReferenceExpr) sc.getKey()).getName());
 
@@ -98,30 +86,36 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
     System.out.println(" columns found: " + columnNames.toString());
 
     //fix IndexName
-
     Cache<String, String> allIndexes = (Cache) imanager.getPersisentCache("allIndexes");
-    for (String column : columnNames)
+    for (String column : columnNames) {
+      System.out.println("Saving Index name: " + IndexName +" for cache " + tableName + "." + column);
       allIndexes.put(IndexName, tableName + "." + column);
-
-    indexCaches = new ArrayList<>();
-    //sketchCaches = new ArrayList<>();
-    sketches = new ArrayList<>();
-    for (int c = 0; c < columnNames.size(); c++) {
-      if(!imanager.getCacheManager().cacheExists(tableName + "." + columnNames.get(c))) {
-        log.info("Creating Index Caches, column " + tableName + "." + columnNames.get(c));
-      }else {
-        log.info("Index Already exists on column ... but anyway reindexing" +tableName + "." + columnNames.get(c));
-      }
-      indexCaches.add((Cache) imanager.getIndexedPersistentCache(tableName + "." + columnNames.get(c)));
-      log.info("Creating DistCMSketch " + tableName + "." + columnNames.get(c) + ".sketch");
-      sketches.add(new DistCMSketch(null,false));
     }
 
+    indexCaches = new ArrayList<>();
+    sketches = new ArrayList<>();
+    for (int c = 0; c < columnNames.size(); c++) {
+      System.out.println("Creating Index Caches, column " + tableName + "." + columnNames.get(c));
+
+      if(!imanager.getCacheManager().cacheExists(tableName + "." + columnNames.get(c))) {
+        System.out.println("Creating Index Caches, column " + tableName + "." + columnNames.get(c));
+      }else {
+        System.out.println("Index Already exists on column ... but anyway reindexing " + tableName + "." + columnNames.get(c));
+      }
+      indexCaches.add((Cache) imanager.getIndexedPersistentCache(tableName + "." + columnNames.get(c)));
+
+      System.out.println("Creating DistCMSketch " + tableName + "." + columnNames.get(c) + ".sketch");
+      sketches.add(new DistCMSketch(null,false));
+    }
+    try {
+      Thread.sleep(100);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
     inputCache = (Cache) imanager.getPersisentCache(tableName);
 
     fullProcessing = new ProfileEvent("Full Processing", profilerLog);
     lindHelp = new LeadsIndexHelper();
-
   }
 
 
@@ -153,9 +147,6 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
         putToCache(indexCaches.get(c), ikey, lInd);
         indexCaches.get(c).put(ikey, lInd);
         sketches.get(c).add(value.getGenericAttribute(column));
-        //if(i%10==0)
-        //
-
       }
     }catch (Exception e){
       System.err.println(" Exception " + key + " " + e.toString());

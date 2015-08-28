@@ -17,7 +17,7 @@ public class StartCacheCallable<K, V> implements DistributedCallable<K, V, Void>
     //    private final Configuration configuration;
     private transient Cache<K, V> cache;
     private boolean isIndexed = false;
-    private boolean isPersistent = false;
+    private boolean isPersistent = true;
 
     public StartCacheCallable(String cacheName) {
         this.cacheName = cacheName;
@@ -62,6 +62,7 @@ public class StartCacheCallable<K, V> implements DistributedCallable<K, V, Void>
                 configuration = manager.getInMemoryConfiguration(cacheName, entries);
             }
         }
+        //System.out.println("StartCache callable, Creating Cache "+ cacheName);
             manager.getCacheManager().defineConfiguration(cacheName,configuration);
             Cache startedCache = manager.getCacheManager().getCache(cacheName);
 

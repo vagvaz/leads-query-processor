@@ -61,10 +61,10 @@ final class LocalArray extends sketchArray{
 	static int depth=0;
 	protected LocalArray(int w, int d) {
 		Array = new int[w][d];
-	if(width==0)
-		for(int x=0;x<w;x++)
-			for(int y=0;y<d;y++)
-				Array[x][y]=-1;
+//	if(width==0)
+//		for(int x=0;x<w;x++)
+//			for(int y=0;y<d;y++)
+//				Array[x][y]=-1;
 		width=w;
 		depth=d;
 	}
