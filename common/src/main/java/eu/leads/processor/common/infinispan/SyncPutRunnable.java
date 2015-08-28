@@ -28,16 +28,16 @@ public class SyncPutRunnable implements Runnable {
         this.value = value;
     }
     @Override public void run() {
-        event.start("SyncPut");
+//        event.start("SyncPut");
         if(key != null && value != null) {
             boolean done = false;
             while (!done) {
                 try {
 //                    System.err.println("BEF PUT-----Key: " + key + "--Size:" + value.toString().length());
-                    System.out.println("BEF PUT-----Key: " + key + "--Size:" + value.toString().length());
+//                    System.out.println("BEF PUT-----Key: " + key + "--Size:" + value.toString().length());
                     cache.put(key, value);
 //                    System.err.println("AFT PUT-----Key: " + key + "--Size:" + value.toString().length());
-                    System.out.println("AFT PUT-----Key: " + key + "--Size:" + value.toString().length());
+//                    System.out.println("AFT PUT-----Key: " + key + "--Size:" + value.toString().length());
                     done = true;
                 } catch (Exception e) {
                     done = false;
@@ -52,7 +52,7 @@ public class SyncPutRunnable implements Runnable {
             }
         }
         EnsembleCacheUtils.addRunnable(this);
-        event.end();
+//        event.end();
     }
 
     public void setParameters(BasicCache cache,Object key, Object value){
