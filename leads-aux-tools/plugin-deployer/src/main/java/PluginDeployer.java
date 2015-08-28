@@ -33,6 +33,8 @@ public class PluginDeployer {
     String webserviceHost = LQPConfiguration.getInstance().getConfiguration().getString("qe.webservice.host");
     String user = LQPConfiguration.getInstance().getConfiguration().getString("plugin.user");
     boolean upload = LQPConfiguration.getInstance().getConfiguration().getBoolean("plugin.upload");
+    boolean uploadJar = LQPConfiguration.getInstance().getConfiguration().getBoolean("plugin.jar.upload");
+
 
     boolean undeploy  = false;
     if(LQPConfiguration.getInstance().getConfiguration().containsKey("plugin.undeploy")){
@@ -62,9 +64,9 @@ public class PluginDeployer {
       System.out.println("Uploading plugin");
         if (upload) {
           if (chunkSize > 0)
-            WebServiceClient.submitPlugin(user, plugin, chunkSize);
+            WebServiceClient.submitPlugin(user, plugin, chunkSize,uploadJar);
           else
-            WebServiceClient.submitPlugin(user, plugin);
+            WebServiceClient.submitPlugin(user, plugin,uploadJar);
       }
       EventType[] e = new EventType[events.size()];
       int c = 0;

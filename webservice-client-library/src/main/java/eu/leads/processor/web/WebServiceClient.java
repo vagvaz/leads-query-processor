@@ -454,6 +454,47 @@ public class WebServiceClient {
     object.putString("user",username);
     object.putString("pluginid",pluginPackage.getId());
     object.putString("pluginclass", pluginPackage.getClassName());
+    object.putBinary("config", pluginPackage.getConfig());
+    object.putString("jar","plugins/"+pluginPackage.getId());
+    object.putString("key",pluginPackage.getKey());
+    setBody(connection, object);
+    String response = getResult(connection);
+    result = mapper.readValue(response, ActionResult.class);
+    return result;
+  }
+
+  public static ActionResult submitPlugin(String username, PluginPackage pluginPackage,boolean uploadJar) throws IOException {
+
+    int chunkSize = 3 * 1024 * 1024;
+    return submitPlugin( username,  pluginPackage,  chunkSize,uploadJar);
+  }
+
+  public static ActionResult submitPlugin(String username, PluginPackage pluginPackage, int chunkSize,boolean uploadJar) throws IOException {
+    ActionResult result = new ActionResult();
+
+    //    pluginPackage.putString("user",username);
+
+    //    byte[] data = SerializationUtils.serialize(pluginPackage);
+    String jarFileName = pluginPackage.getJarFilename();
+    String jarTarget = "plugins/"+pluginPackage.getId()+"/";
+    if(uploadJar) {
+      if (!uploadJar(username, jarFileName, jarTarget, chunkSize)) {
+        result.setMessage("Failed to Upload Jar");
+        result.setStatus("FAILED");
+        return result;
+      }
+      System.out.println("jar uploaded successfully");
+    }
+    else{
+      System.out.println("Upload jar omitted");
+    }
+    address = new URL(host + ":" + port + prefix + "data/submit/plugin");
+    HttpURLConnection connection = (HttpURLConnection) address.openConnection();
+    connection = setUp(connection, "POST", MediaType.APPLICATION_JSON, true, true);
+    JsonObject object = new JsonObject();
+    object.putString("user",username);
+    object.putString("pluginid",pluginPackage.getId());
+    object.putString("pluginclass", pluginPackage.getClassName());
     object.putBinary("config",pluginPackage.getConfig());
     object.putString("jar","plugins/"+pluginPackage.getId());
     object.putString("key",pluginPackage.getKey());
@@ -462,6 +503,7 @@ public class WebServiceClient {
     result = mapper.readValue(response, ActionResult.class);
     return result;
   }
+
 
   public static QueryStatus submitData(String username, JsonObject data) throws IOException {
     QueryStatus result = null;
