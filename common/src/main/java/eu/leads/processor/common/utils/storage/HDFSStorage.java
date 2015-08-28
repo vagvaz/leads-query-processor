@@ -30,6 +30,7 @@ public class HDFSStorage implements LeadsStorage {
     private Properties storageConfiguration;
     private LocalFileStorage cache = new LocalFileStorage();
     UserGroupInformation ugi;
+    private String predeployedPath = "/tmp/cache";
 
     @Override
     public boolean initialize(Properties configuration) {
@@ -77,15 +78,15 @@ public class HDFSStorage implements LeadsStorage {
         Path newFolderPath= new Path(s);
         try {
             if(fileSystem.exists(newFolderPath))
-               if(fileSystem.delete(newFolderPath, true)) {//Delete existing Directory
-                   log.info("Deleted existing folder " + s);
-                   System.out.println("Deleted existing folder " + s);
-                   return true;
-               }
+                if(fileSystem.delete(newFolderPath, true)) {//Delete existing Directory
+                    log.info("Deleted existing folder " + s);
+                    System.out.println("Deleted existing folder " + s);
+                    return true;
+                }
                 else
-                log.error("Unable to delete folder: " + s);
+                    log.error("Unable to delete folder: " + s);
             else
-            log.info("Deleted existing folder "+ s);
+                log.info("Deleted existing folder "+ s);
 
         } catch (IOException e) {
             log.error("Unable to delete folder: " + s);
@@ -182,6 +183,9 @@ public class HDFSStorage implements LeadsStorage {
     @Override
     public long size(String path) {
         Path file = new Path(path);
+        File localFile = new File(this.predeployedPath+"/"+path);
+        if(localFile.exists())
+            return localFile.length();
         try {
             if(path.endsWith("/"))//folder
                 return fileSystem.getContentSummary(file).getSpaceConsumed();
@@ -217,6 +221,9 @@ public class HDFSStorage implements LeadsStorage {
     @Override
     public boolean exists(String path) {
         Path file = new Path(path);
+        File localFile = new File(this.predeployedPath+"/"+path);
+        if(localFile.exists())
+            return true;
         try {
             return fileSystem.exists(file);
         } catch (IOException e) {
@@ -226,95 +233,57 @@ public class HDFSStorage implements LeadsStorage {
     }
 
     @Override
-    public long download(String hdfs_source, String localfile_destination) {
-        String predeployedPath = "/tmp/cache";
-        hdfs_source = "/"+hdfs_source;
+    public long download(String source, String destination) {
+//        hdfs_source = "/"+hdfs_source;
         long readBytes = 0;
         try {
-            String[] pluginPath = hdfs_source.split("/");
-            String plugin = pluginPath[2];
-            File destFile = new File(predeployedPath);
-            if (!destFile.exists()) {
-                System.out.println("creating directory: " + destFile);
-                boolean result = false;
-                try{
-                    destFile.mkdir();
-                    result = true;
-                } catch(SecurityException se){
-                    System.out.println("Error occured during the creation of the fodler");
-                }
-                if(result) {
-                    System.out.println("DIR created");
-                }
-            }
-
-            File localFile = new File(localfile_destination+"/"+plugin);
-            File cacheFile = new File(predeployedPath+"/"+plugin);
-            if (cacheFile.exists()) {
-                System.out.println("The plugin already exists, just trying to copy from the cache to the local destination");
-                if ( cacheFile.exists( )) {
-                    BufferedInputStream  reader = new BufferedInputStream( new FileInputStream(cacheFile) );
-
-                    File destF = new File(localfile_destination);
-                    if (destF.exists()) {
-                        destF.delete();
-                    } else {
-                        File parent = destFile.getParentFile();
-                        parent.mkdirs();
-                        destF.createNewFile();
-                    }
-
-                    BufferedOutputStream  writer = new BufferedOutputStream( new FileOutputStream(destF, false));
-                    try {
-                        byte[]  buff = new byte[4096];
-                        int numChars;
-                        while ( (numChars = reader.read(  buff, 0, buff.length ) ) != -1) {
-                            writer.write( buff, 0, numChars );
-                        }
-                    } catch( IOException ex ) {
-                        throw new IOException("IOException when transferring " + cacheFile.getPath() + " to " + destF.getPath());
-                    } finally {
-                        try {
-                            if ( reader != null ){
-                                writer.close();
-                                reader.close();
-                            }
-                        } catch( IOException ex ){
-                            System.out.println("Error closing files when transferring " + cacheFile.getPath() + " to " + destF.getPath());
-                        }
-                    }
-                } else {
-                    throw new IOException("Old location does not exist when transferring " + cacheFile.getPath() + " to " + localFile.getPath() );
-                }
-
-                FileInputStream localFileStrm = new FileInputStream(localfile_destination);
-                FileInputStream cacheFileStrm = new FileInputStream(predeployedPath+"/"+plugin);
-                MD5Hash keyLocalFile = MD5Hash.digest(localFileStrm);
-                MD5Hash keyCacheFile = MD5Hash.digest(cacheFileStrm);
-                System.out.println("MD5 key : " + keyLocalFile);
-                System.out.println("MD5 key : " + keyCacheFile);
-                if(keyCacheFile.equals(keyLocalFile)){
-                    System.out.println("Copy completed successfully");
-                } else{
-                    System.out.println("Copy completed unsuccessfully");
-                }
-
-                readBytes = destFile.length();
-                return readBytes;
+//            String[] pluginPath = hdfs_source.split("/");
+//            String plugin = pluginPath[2];
+            File destFile = new File(destination);
+            if (destFile.exists()) {
+                destFile.delete();
             } else {
-                System.out.println("The plugin does not exist, starting the download to the local destination");
+                File parent = destFile.getParentFile();
+                parent.mkdirs();
+                destFile.createNewFile();
+            }
+            File cacheFile = new File(predeployedPath+"/"+source);
+            if (cacheFile.exists()) {
+                BufferedInputStream  reader = new BufferedInputStream( new FileInputStream(cacheFile) );
+
+                BufferedOutputStream  writer = new BufferedOutputStream( new FileOutputStream(destFile, false));
+                try {
+                    byte[]  buff = new byte[4096];
+                    int numChars;
+                    while ( (numChars = reader.read(  buff, 0, buff.length ) ) != -1) {
+                        writer.write( buff, 0, numChars );
+                    }
+                } catch( IOException ex ) {
+                    throw new IOException("IOException when transferring " + cacheFile.getPath() + " to " + destFile.getPath());
+                } finally {
+                    try {
+                        if ( reader != null ){
+                            reader.close();
+                        }
+                        if(writer != null)
+                            writer.close();
+
+                    } catch( IOException ex ){
+                        System.out.println("Error closing files when transferring " + cacheFile.getPath() + " to " + destFile.getPath());
+                    }
+                }
+                return cacheFile.length();
             }
 
-    //            File destFile = new File(localfile_destination);
-    //            if (destFile.exists()) {
-    //                destFile.delete();
-    //            } else {
-    //                File parent = destFile.getParentFile();
-    //                parent.mkdirs();
-    //                destFile.createNewFile();
-    //            }
-            FileOutputStream file = new FileOutputStream(localfile_destination);
-            String[] pieces = parts(hdfs_source);
+        }
+        catch (Exception e) {
+            System.err.println("Exception when trying to copy from local cache the file");
+            e.printStackTrace();
+        }
+
+        try{
+            FileOutputStream file = new FileOutputStream(destination);
+            String[] pieces = parts(source);
             log.info("File splited into " + pieces.length + "pieces ");
             System.out.println("File is splited into " + pieces.length + " pieces ");
             long StartTime = System.currentTimeMillis();
@@ -337,8 +306,8 @@ public class HDFSStorage implements LeadsStorage {
                 count++;
             }
             file.close();
-            System.out.println("Download completed Total downloaded " + readBytes + " bytes into file " + localfile_destination + " time " + totalUploadTime/1000f+ " s" );
-            FileInputStream fileInputStream=new FileInputStream(localfile_destination);
+            System.out.println("Download completed Total downloaded " + readBytes + " bytes into file " + destination + " time " + totalUploadTime/1000f+ " s" );
+            FileInputStream fileInputStream=new FileInputStream(destination);
             MD5Hash key = MD5Hash.digest(fileInputStream);
             fileInputStream.close();
             System.out.println("MD5 key : " + key);
@@ -369,7 +338,7 @@ public class HDFSStorage implements LeadsStorage {
             int readBytes = stream.read(bytes);
             if (readBytes != size) {
                 log.error("Could not read all the bytes from the inputStream. Read " + readBytes + " instead of " +
-                        size);
+                    size);
                 return false;
             }
             HDFSByteChunk byteChunk = new HDFSByteChunk(bytes, uri);
@@ -428,7 +397,7 @@ public class HDFSStorage implements LeadsStorage {
                 int readBytes = stream.read(bytes);
                 if (readBytes != size) {
                     log.error("Could not read all the bytes from the inputStream. Read " + readBytes + " instead of " +
-                            size);
+                        size);
                     return false;
                 }
                 outputStream.write(bytes);
