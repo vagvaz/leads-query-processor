@@ -150,8 +150,9 @@ public class ScanOperator extends BasicOperator {
           if (manager.getCacheManager().cacheExists(columnName)) {
             indexCaches.put(columnName, (Cache) manager.getIndexedPersistentCache(columnName));
             System.out.print(" exists! ");
-          } else
-            System.out.print(" does not exist! ");
+          }
+          //else
+         //   System.out.print(" does not exist! ");
 
           if (manager.getCacheManager().cacheExists(columnName + ".sketch")) {
             sketches.put(columnName, new DistCMSketch((Cache) manager.getPersisentCache(columnName + ".sketch"), true));
@@ -171,9 +172,9 @@ public class ScanOperator extends BasicOperator {
         Object selectvt = getSelectivity(sketches, tree.getRoot());
         if (selectvt != null) {
             double selectivity = (double) selectvt / inputCache.size();
-            System.out.println("\nSelectivity: " + selectivity);
+            System.out.println("Scan  Selectivity: " + selectivity);
             if (selectivity < 0.5) {
-                System.out.println("Use indexes!!");
+                System.out.println("Scan Use indexes!! ");
                 return indexCaches.size() > 0;
             }
         }else{

@@ -294,10 +294,11 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
         if (imanager.getCacheManager().cacheExists(columnName)) {
           indexCaches.put(columnName, (Cache) imanager.getIndexedPersistentCache(columnName));
           System.out.println(" exists!");
-        } else
-          System.out.println(" does not exist!");
+        }
+        //else
+        //  System.out.println(" does not exist!");
       }
-      System.out.println("Use indexes!!");
+      System.out.println("Scan Callable Use indexes!!");
       return indexCaches.size() > 0;
     }
     return false;

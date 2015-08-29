@@ -80,11 +80,11 @@ public class CreateIndexOperator2 extends BasicOperator {
       nodes.remove(tmpnode);
       System.out.println("Getting node :" + tmpnode);
       int finalyArray [][]=(int[][]) sketchesM.get(tmpnode+":"+col+":array");
-      System.out.println("Found nodes:" + nodes.size() + " " + Arrays.toString(nodes.toArray()));
+      System.out.println("Found nodes: " + nodes.size() + " " + Arrays.toString(nodes.toArray()));
       w =  (int)sketchesM.get(tmpnode+":"+col+":w");
       d =  (int)sketchesM.get(tmpnode+":"+col+":d");
       for(String node:nodes){
-        System.out.println("Found node" + node);
+        System.out.println("Found node " + node);
         array= (int[][]) sketchesM.get(node+":"+col+":array");
         for(int x=0;x<w;x++)
           for(int y=0;y<d;y++)
@@ -100,7 +100,7 @@ public class CreateIndexOperator2 extends BasicOperator {
             else
               tmp.put(y*w+x, finalyArray[x][y]);
 
-      System.out.println((nodes.size()+1)+" Sketches merged");
+      System.out.println((nodes.size()+1)+" Sketches merged!");
       sketchesM.clear();
       System.out.println("Keys removed");
     }

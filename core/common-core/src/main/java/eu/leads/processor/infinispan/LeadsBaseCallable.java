@@ -197,7 +197,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       System.out.println("Search Over Indexed Data");
       ProfileEvent profExecute = new ProfileEvent("Get list " + this.getClass().toString(), profilerLog);
       List<LeadsIndex> list = lquery.get(0).list(); //TODO fix it
-      System.out.println(" Indexed Data Size: " + list.size());
+      System.out.println(" Callable Found Indexed, results: " + list.size());
       //to do use sketches to find out what to do
       try {
         for (LeadsIndex lst : list) {
