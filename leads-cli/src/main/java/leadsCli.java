@@ -107,13 +107,16 @@ public class leadsCli {
 			} while (true);
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			if (e instanceof java.net.ConnectException) {
-				System.out.println("Exiting, Thank you");
-
+				System.out.println("Unable to connect, try again.");
+				reader.getTerminal().restore();
+				System.exit(0);
+			}else if(e instanceof java.net.SocketException ){
+				System.out.println("Connection reset, try again.");
+				reader.getTerminal().restore();
 				System.exit(0);
 			}
+			e.printStackTrace();
 		} finally {
 			if (reader != null)
 				reader.getTerminal().restore();
