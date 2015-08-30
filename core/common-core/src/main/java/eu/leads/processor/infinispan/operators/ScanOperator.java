@@ -173,8 +173,11 @@ public class ScanOperator extends BasicOperator {
 
         FilterOperatorTree tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
         Object selectvt = getSelectivity(sketches, tree.getRoot());
-        if (selectvt != null) {
-            long inputSize = inputCache.size();
+          System.out.println("selectvt CMS "+selectvt+"  computation time: "+ (System.currentTimeMillis()-start)/1000.0);
+
+          if (selectvt != null) {
+            start=System.currentTimeMillis();
+            double inputSize = 2000000.0;//inputCache.size();
             double selectivity = (double) selectvt / (double)inputSize;
             System.out.println("Scan  Selectivity: " + selectivity);
             System.out.println("Selectivity, inputSize "+inputSize+"  computation time: "+ (System.currentTimeMillis()-start)/1000.0);
