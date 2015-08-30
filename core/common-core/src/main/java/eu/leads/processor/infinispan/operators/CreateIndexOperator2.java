@@ -68,9 +68,17 @@ public class CreateIndexOperator2 extends BasicOperator {
     System.out.println(" TableName: " + tableName);
     if(!tableName.startsWith( StringConstants.DEFAULT_DATABASE_NAME))
      tableName = StringConstants.DEFAULT_DATABASE_NAME + "." + tableName;
-
+    int count=0;
+    for(String col:columns) {
+       for(String node:nodes) {
+         count += (int) sketchesM.get(node + ":" + col + ":size");
+         System.out.println("Tuples count: " + count +" node " + node);
+       }
+      break;
+    }
     for(String col:columns){
       Cache<Integer,Integer> tmp =(Cache) manager.getPersisentCache(tableName + "." + col + ".sketch");
+
       sketchCaches.add(tmp);
       System.out.println("Creating DistCMSketch " + tableName + "." + col + ".sketch");
 
@@ -83,9 +91,14 @@ public class CreateIndexOperator2 extends BasicOperator {
       System.out.println("Found nodes: " + nodes.size() + " " + Arrays.toString(nodes.toArray()));
       w =  (int)sketchesM.get(tmpnode+":"+col+":w");
       d =  (int)sketchesM.get(tmpnode+":"+col+":d");
+      count += (int) sketchesM.get(tmpnode + ":" + col + ":size"); //1 col
+      System.out.println("Tuples count: " + count);
       for(String node:nodes){
         System.out.println("Found node " + node);
         array= (int[][]) sketchesM.get(node+":"+col+":array");
+        count += (int) sketchesM.get(node + ":" + col + ":size");
+        System.out.println("Tuples count: " + count);
+
         for(int x=0;x<w;x++)
           for(int y=0;y<d;y++)
             finalyArray[x][y]+=array[x][y];
@@ -101,9 +114,14 @@ public class CreateIndexOperator2 extends BasicOperator {
               tmp.put(y*w+x, finalyArray[x][y]);
 
       System.out.println((nodes.size()+1)+" Sketches merged!");
-      sketchesM.clear();
-      System.out.println("Keys removed");
     }
+
+
+    sketchesM.clear();
+    System.out.println("Keys removed");
+    System.out.println("Overall Tuples Indexed: " + count);
+    Cache<String,Integer> TableSizeCache= (Cache) manager.getPersisentCache("TablesSize");
+    TableSizeCache.put(tableName, count);
 
     super.cleanup();
   }
