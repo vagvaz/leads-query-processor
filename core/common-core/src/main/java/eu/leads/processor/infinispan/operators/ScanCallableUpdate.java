@@ -73,7 +73,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 
   @Override  public void initialize() {
     super.initialize();
-    lquery = null;
+    lqueries = null;
 //    versionedCache = new VersionedCacheTreeMapImpl(inputCache,new VersionScalarGenerator(),inputCache.getName());
      profilerLog = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
 
@@ -111,7 +111,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
       }
       if (checkIndex_usage()) {
         // create query
-        lquery = createLuceneQuerys(indexCaches, tree.getRoot());
+        lqueries = createLuceneQuerys(indexCaches, tree.getRoot());
       }
     } else {
       tree = null;
@@ -245,10 +245,10 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
   }
 
 
-  ArrayList<Query> createLuceneQuerys(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
-    ArrayList<Query> result = new ArrayList<>();
-    ArrayList<Query> left = null;
-    ArrayList<Query> right = null;
+  ArrayList<FilterConditionContext> createLuceneQuerys(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
+    ArrayList<FilterConditionContext> result = new ArrayList<>();
+    ArrayList<FilterConditionContext> left = null;
+    ArrayList<FilterConditionContext> right = null;
     switch (root.getType()) {
       case AND: {
         left = createLuceneQuerys(indexCaches, root.getLeft());
@@ -267,8 +267,12 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
       default: {
         System.out.println("SubQual " + root.getType());
         FilterConditionContext qual = (FilterConditionContext) getSubLucene(indexCaches, root);
-        if (qual != null)
-          result.add(qual.toBuilder().build());
+        if (qual != null) {
+          System.out.print("Building Lucece query ");
+          long start=System.currentTimeMillis();
+          result.add(qual);
+          System.out.println(" time: "+ (System.currentTimeMillis()-start)/1000.0);
+        }
       }
       if (left != null)
         result.addAll(left);
@@ -281,8 +285,9 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 
 
   private boolean checkIndex_usage() {
-    System.out.println("Check if fields are indexed");
+   // System.out.println("Check if fields are indexed");
     if(conf.getBoolean("useIndex")){
+      System.out.println("Scan Callable Use indexes!!");
       indexCaches = new HashMap<>();
       String columnName ;
       JsonArray fields = inputSchema.getArray("fields");
@@ -290,7 +295,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
       while (iterator.hasNext()) {
         JsonObject tmp = (JsonObject) iterator.next();
         columnName = tmp.getString("name");
-        System.out.print("Check if exists: " + "." + columnName + " ");
+        //System.out.print("Check if exists: " + "." + columnName + " ");
         if (imanager.getCacheManager().cacheExists(columnName)) {
           indexCaches.put(columnName, (Cache) imanager.getIndexedPersistentCache(columnName));
           System.out.println(" exists!");
@@ -298,7 +303,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
         //else
         //  System.out.println(" does not exist!");
       }
-      System.out.println("Scan Callable Use indexes!!");
+
       return indexCaches.size() > 0;
     }
     return false;

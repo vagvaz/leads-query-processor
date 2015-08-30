@@ -19,6 +19,8 @@ import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.filter.KeyValueFilter;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 import org.infinispan.manager.EmbeddedCacheManager;
+import org.infinispan.query.dsl.FilterConditionContext;
+import org.infinispan.query.dsl.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
@@ -49,7 +51,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   transient protected  Cache<K,V> inputCache;
   transient protected EnsembleCache outputCache;
   protected String ensembleHost;
-  transient protected ArrayList<org.infinispan.query.dsl.Query> lquery;
+  transient protected ArrayList<FilterConditionContext> lqueries;
 //  transient protected RemoteCache outputCache;
 //  transient protected RemoteCache ecache;
 //  transient protected RemoteCacheManager emanager;
@@ -152,7 +154,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
                                                                                     (ClusteringDependentLogic.class);
     int count = 0;
     profCallable.end();
-    if(lquery==null) {
+    if(lqueries==null) {
       profCallable.start("Iterate Over Local Data");
       ProfileEvent profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(), profilerLog);
 
@@ -195,9 +197,15 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     }else{
       profCallable.start("Search_Over_Indexed_Data");
       System.out.println("Search Over Indexed Data");
-      ProfileEvent profExecute = new ProfileEvent("Get list " + this.getClass().toString(), profilerLog);
-      List<LeadsIndex> list = lquery.get(0).list(); //TODO fix it
-      System.out.println(" Callable Found Indexed, results: " + list.size());
+      ProfileEvent profExecute = new ProfileEvent("Buildinglucece" + this.getClass().toString(), profilerLog);
+      System.out.print("Building Lucece query ");
+      long start=System.currentTimeMillis();
+      Query fquery = lqueries.get(0).toBuilder().build(); //TODO fix it
+      profExecute.end();
+      System.out.println(" time: " + (System.currentTimeMillis() - start) /1000.0);
+      profExecute.start("Get list ");
+      List<LeadsIndex> list = fquery.list(); //TODO fix it
+      System.out.println(" Callable Found Indexed " + +list.size() + " results: ");
       //to do use sketches to find out what to do
       try {
         for (LeadsIndex lst : list) {

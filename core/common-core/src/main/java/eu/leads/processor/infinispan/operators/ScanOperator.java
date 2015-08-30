@@ -1,6 +1,7 @@
 package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
@@ -68,10 +69,12 @@ public class ScanOperator extends BasicOperator {
             System.err.println(conf.getString("next.type") + " SCAN NOT IMPLEMENTED YET");
          }
       }
+      ProfileEvent scanExecute = new ProfileEvent("OperatorcheckIndex_usage",profilerLog);
       if(checkIndex_usage())
          conf.putBoolean("useIndex",true);
       else
          conf.putBoolean("useIndex",false);
+       scanExecute.end();
    }
 
    @Override
@@ -146,10 +149,10 @@ public class ScanOperator extends BasicOperator {
         while (iterator.hasNext()) {
           JsonObject tmp = (JsonObject) iterator.next();
           columnName = tmp.getString("name");
-          System.out.print("Check if exists: " +  columnName + " ");
+          //System.out.print("Check if exists: " +  columnName + " ");
           if (manager.getCacheManager().cacheExists(columnName)) {
             indexCaches.put(columnName, (Cache) manager.getIndexedPersistentCache(columnName));
-            System.out.print(" exists! ");
+            System.out.print(columnName +" exists! ");
           }
           //else
          //   System.out.print(" does not exist! ");
@@ -157,22 +160,25 @@ public class ScanOperator extends BasicOperator {
           if (manager.getCacheManager().cacheExists(columnName + ".sketch")) {
             sketches.put(columnName, new DistCMSketch((Cache) manager.getPersisentCache(columnName + ".sketch"), true));
             System.out.println(" exists!");
-          } else
-            System.out.println(columnName + ".sketch" +" does not exist!");
+          } //else
+           // System.out.println(columnName + ".sketch" +" does not exist!");
         }
 
         if(indexCaches.size()==0){
            System.out.println("Nothing Indexed");
            return false;
-        }else{
+        }else
 	        System.out.println("At least some fields are Indexed: " + indexCaches.keySet().toArray().toString());
-        }
+        long start=System.currentTimeMillis();
 
         FilterOperatorTree tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
         Object selectvt = getSelectivity(sketches, tree.getRoot());
         if (selectvt != null) {
-            double selectivity = (double) selectvt / inputCache.size();
+            long inputSize = inputCache.size();
+            double selectivity = (double) selectvt / (double)inputSize;
             System.out.println("Scan  Selectivity: " + selectivity);
+            System.out.println("Selectivity, inputSize "+inputSize+"  computation time: "+ (System.currentTimeMillis()-start)/1000.0);
+
             if (selectivity < 0.5) {
                 System.out.println("Scan Use indexes!! ");
                 return indexCaches.size() > 0;
@@ -184,6 +190,7 @@ public class ScanOperator extends BasicOperator {
     }else{
           System.out.println("No Qual!!");
       }
+    System.out.println("Don't Use indexes!! ");
     return false;
   }
 
