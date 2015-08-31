@@ -1,6 +1,9 @@
 package eu.leads.processor;
 
+import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
+import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.TupleBuffer;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.Site;
@@ -26,11 +29,11 @@ public class BatchPutMain {
     static EnsembleCacheManager emanager;
     static Map<String,TupleBuffer> buffers = new HashMap<>();
     static HashBasedPartitioner partitioner;
-    private static int threshold = 500;
-    private static String cacheName = "batchPutTest";
+    private static int threshold = 100;
+    private static String cacheName = "batchputTest";
     private static EnsembleCache ecache;
     private static EnsembleCache ecache2;
-    private static int numberOfvalues = 5;
+    private static int numberOfvalues = 10;
 
     public static void main(String[] args) {
         clouds.put("dresden2",dresden2);
@@ -57,7 +60,8 @@ public class BatchPutMain {
 
         for(Object s : ecache.sites()){
             Site site = (Site)s;
-            buffers.put(site.getName(),new TupleBuffer(threshold,ecache, new EnsembleCacheManager(ecache.getName().substring(1,ecache.getName().length()))));
+            String eString = site.getName();
+            buffers.put(site.getName(),new TupleBuffer(threshold,ecache, new EnsembleCacheManager(eString)));
             System.out.println("cache site: " + site.getName());
         }
 
@@ -71,12 +75,13 @@ public class BatchPutMain {
         }
         partitioner = new HashBasedPartitioner(cachesList);
         Map<String,Tuple> tuples = new HashMap<>();
+        System.out.println("generating");
         for (int key = 0; key < numberOfkeys; key++) {
             String keyString = Integer.toString(key);
             Tuple tuple = getTuple(key);
             tuples.put(keyString,tuple);
         }
-
+        System.out.println("Inserting");
         long start = System.nanoTime();
         for (Map.Entry<String,Tuple> entry : tuples.entrySet()) {
             String keyString = entry.getKey();
@@ -89,15 +94,37 @@ public class BatchPutMain {
             }
             else{
                 try {
-                    ecache.put(keyString, tuple);
+                    EnsembleCacheUtils.putToCache(ecache,keyString, tuple);
                 }catch (Exception e){
 
                 }
             }
         }
+        if(batchPut){
+            for (Map.Entry<String,TupleBuffer> buf : buffers.entrySet()){
+                buf.getValue().flushToMC();
+            }
+        }
+        else{
+            EnsembleCacheUtils.waitForAllPuts();
+        }
         long end = System.nanoTime();
         double dur = (end - start)/1000000f;
         System.out.println("Duration: " + dur + " ms rate: " + (numberOfkeys/dur)+ " per ms");
+
+        int counter = 0;
+        int found = 0;
+        for(int i =0; i < numberOfkeys; i++){
+            Tuple t = (Tuple) ecache.get(Integer.toString(i));
+            counter++;
+            if(t != null){
+                if(!t.toString().equals(tuples.get(Integer.toString(i)))){
+                    found++;
+                }
+            }
+        }
+        System.out.println("Found " + found + " read " + counter);
+        System.exit(0);
 
     }
 
@@ -118,12 +145,14 @@ public class BatchPutMain {
         Tuple t = new Tuple();
         t.setAttribute("key",key);
         for(int i = 0; i < numberOfvalues; i++){
-            t.setAttribute("val"+i,Integer.toString(i)+"-value-"+Integer.toString(key));
+            t.setAttribute("val"+i,i);
         }
         return t;
     }
 
     private static void readArguments(String[] args) {
+        LQPConfiguration.initialize();
+//        InfinispanClusterSingleton.getInstance().getManager();
         switch (args.length){
             case 1:
                 String[] clouds = args[0].split(",");

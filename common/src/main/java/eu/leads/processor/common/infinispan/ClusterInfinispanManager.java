@@ -202,7 +202,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     if(LQPConfiguration.getConf().getBoolean("processor.start.hotrod"))
     {
       host = LQPConfiguration.getConf().getString("node.ip");
-      if(!LQPConfiguration.getConf().getString("node.current.component").equals("planner"))
+//      if(!LQPConfiguration.getConf().getString("node.current.component").equals("planner"))
         startHotRodServer(manager,host, serverPort);
     }
 

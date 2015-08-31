@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * Created by vagvaz on 8/30/15.
  */
-@Listener(sync = false,primaryOnly = true,clustered = false)
+@Listener(sync = true,primaryOnly = true,clustered = false)
 public class BatchPutListener implements LeadsListener {
     private transient InfinispanManager manager;
     private String compressedCache;
@@ -41,9 +41,9 @@ public class BatchPutListener implements LeadsListener {
         if(conf != null) {
             if (conf.containsField("target")) {
                 targetCacheName = conf.getString("target");
-                targetCache = (Cache) manager.getPersisentCache(targetCacheName);
             }
         }
+        targetCache = (Cache) manager.getPersisentCache(targetCacheName);
         oldMap = null;
         future = null;
 
@@ -59,14 +59,15 @@ public class BatchPutListener implements LeadsListener {
 
     @CacheEntryCreated
     public void created(CacheEntryCreatedEvent event){
-        if(!event.isPre()){
+        if(event.isPre()){
             return;
         }
         batchPut(event.getKey(),event.getValue());
     }
 
     private void batchPut(Object key, Object value) {
-        TupleBuffer tupleBuffer = (TupleBuffer) value;
+//        System.out.println("RUN BatchPut");
+        TupleBuffer tupleBuffer =  new TupleBuffer((byte[])value);
         if(future == null) {
             oldMap = tupleBuffer.getBuffer();
             future = targetCache.putAllAsync(oldMap);
@@ -81,7 +82,7 @@ public class BatchPutListener implements LeadsListener {
 
     @CacheEntryModified
     public void modified(CacheEntryModifiedEvent event) {
-        if(!event.isPre()){
+        if(event.isPre()){
             return;
         }
         batchPut(event.getKey(),event.getValue());

@@ -13,6 +13,7 @@ import org.xerial.snappy.Snappy;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +32,29 @@ public class TupleBuffer implements Serializable {
         threshold = 500;
         localCounter = 0;
     }
+    public TupleBuffer(byte[] bytes){
+        BSONDecoder decoder = new BasicBSONDecoder();
+        buffer = new HashMap<>();
+        //        int compressedSize = in.readInt();
+        byte[] compressed = bytes;//new byte[compressedSize];
+        try {
+            byte[] uncompressed = Snappy.uncompress(compressed);
+            ByteArrayInputStream byteStream = new ByteArrayInputStream(uncompressed);
+            ObjectInputStream inputStream = new ObjectInputStream(byteStream);
+            int size = inputStream.readInt();
+            for (int index = 0; index < size; index++) {
+                String key = inputStream.readUTF();
+//                int tupleBytesSize = inputStream.readInt();
+//                byte[] tupleBytes = new byte[tupleBytesSize];
+//                inputStream.read(tupleBytes);
+//                Tuple tuple = new Tuple(decoder.readObject(tupleBytes));
+                Tuple tuple = (Tuple) inputStream.readObject();
+                buffer.put(key, tuple);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
     public TupleBuffer(int threshold){
         buffer = new HashMap<>();
         this.threshold = threshold;
@@ -41,7 +65,8 @@ public class TupleBuffer implements Serializable {
         this.threshold = threshold;
         buffer = new HashMap<>();
         this.emanager = ensembleCacheManager;
-        this.ensembleCache = emanager.getCache(cache.getName()+".compressed");
+        this.ensembleCache = emanager.getCache(cache.getName()+".compressed", new ArrayList<>(ensembleCacheManager.sites()),
+            EnsembleCacheManager.Consistency.DIST);
         localCounter = 0;
     }
 
@@ -69,15 +94,16 @@ public class TupleBuffer implements Serializable {
         outputStream.flush();
         byte[] uncompressed = byteStream.toByteArray();
         byte[] compressed = Snappy.compress(uncompressed);
-        out.writeInt(compressed.length);
-        out.write(compressed);
+//        out.writeInt(compressed.length);
+//        out.write(compressed);
+        out.writeObject(compressed);
     }
     private void readObject(java.io.ObjectInputStream in)
         throws IOException, ClassNotFoundException{
         BSONDecoder decoder = new BasicBSONDecoder();
         buffer = new HashMap<>();
-        int compressedSize = in.readInt();
-        byte[] compressed = new byte[compressedSize];
+//        int compressedSize = in.readInt();
+        byte[] compressed = (byte[]) in.readObject();//new byte[compressedSize];
         in.read(compressed);
         byte[] uncompressed = Snappy.uncompress(compressed);
         ByteArrayInputStream byteStream = new ByteArrayInputStream(uncompressed);
@@ -100,6 +126,33 @@ public class TupleBuffer implements Serializable {
 
     public void flushToMC() {
         localCounter = (localCounter+1)%Long.MAX_VALUE;
-        ensembleCache.put(Long.toString(localCounter),this);
+        byte[] bytes= this.serialize();
+        ensembleCache.put(Long.toString(localCounter),bytes);
+        buffer.clear();
+    }
+
+    private byte[] serialize()  {
+        try {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            ObjectOutputStream outputStream = new ObjectOutputStream(byteStream);
+            BSONEncoder encoder = new BasicBSONEncoder();
+            outputStream.writeInt(buffer.size());
+            for (Map.Entry<String, Tuple> entry : buffer.entrySet()) {
+                outputStream.writeUTF(entry.getKey());
+//                byte[] tupleBytes = encoder.encode(entry.getValue().asBsonObject());
+//                outputStream.writeInt(tupleBytes.length);
+//                outputStream.write(tupleBytes);
+                outputStream.writeObject(entry.getValue());
+            }
+            outputStream.flush();
+            byte[] uncompressed = byteStream.toByteArray();
+            byte[] compressed = Snappy.compress(uncompressed);
+            //        out.writeInt(compressed.length);
+            //        out.write(compressed);
+            return compressed;
+        }catch (IOException ioe){
+            ioe.printStackTrace();
+        }
+        return null;
     }
 }
