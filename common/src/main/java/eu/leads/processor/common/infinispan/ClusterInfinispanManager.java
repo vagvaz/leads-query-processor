@@ -237,7 +237,11 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache("leads.processor.catalog.indexes");
     getPersisentCache("leads.processor.catalog.indexesByColumn");
     getPersisentCache("leads.processor.databases.sub."+StringConstants.DEFAULT_DATABASE_NAME);
+    getPersisentCache("batchputTest");
+    getPersisentCache("batchputTest.compressed");
 
+    BatchPutListener batchPutListener = new BatchPutListener("batchputTest.compressed","batchputTest");
+    addListener(batchPutListener,"batchputTest.compressed");
     getPersisentCache("clustered");
     NutchLocalListener listener = new NutchLocalListener(this,"default.webpages",LQPConfiguration.getInstance().getConfiguration().getString("nutch.listener.prefix"),currentComponent);
 
@@ -433,7 +437,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
               .proxyPort(Integer.parseInt(portString));
         }
         else{
-          System.err.println("EXPOSED IP = " + externalIP + ":");
+          System.err.println("EXPOSED IP = " + externalIP + ":" + serverPort);
           serverConfigurationBuilder.host(localhost).port(serverPort).proxyHost(externalIP)
               .proxyPort(serverPort);
         }
@@ -841,9 +845,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
     if(defaultConfig == null){
       initDefaultCacheConfig();
     }
+
     defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).clustering()
-          .cacheMode(CacheMode.LOCAL).transaction()
-            .transactionMode(TransactionMode.NON_TRANSACTIONAL).clustering().indexing().index(Index.LOCAL).build();
+        .cacheMode(CacheMode.LOCAL).transaction()
+        .transactionMode(TransactionMode.NON_TRANSACTIONAL).clustering().indexing().index(Index.LOCAL).build();
   }
 
 
@@ -899,13 +904,14 @@ public class ClusterInfinispanManager implements InfinispanManager {
       if(defaultIndexConfig == null) {
         initIndexDefaultCacheConfig();
       }
+
       cacheConfig =  new ConfigurationBuilder().read(defaultIndexConfig).transaction()
-            .transactionMode(TransactionMode.NON_TRANSACTIONAL).clustering().indexing().index(Index.LOCAL).addProperty("default.directory_provider", "filesystem")
-              .addProperty("hibernate.search.default.indexBase","/tmp/leadsprocessor-data/"+uniquePath+"/infinispan/"+cacheName+"/")
-              .addProperty("hibernate.search.default.exclusive_index_use", "true")
-              .addProperty("hibernate.search.default.indexmanager", "near-real-time")
-              .addProperty("hibernate.search.default.indexwriter.ram_buffer_size", "256")
-              .addProperty("lucene_version", "LUCENE_CURRENT").build();
+          .transactionMode(TransactionMode.NON_TRANSACTIONAL).clustering().indexing().index(Index.LOCAL).addProperty("default.directory_provider", "filesystem")
+          .addProperty("hibernate.search.default.indexBase","/tmp/leadsprocessor-data/"+uniquePath+"/infinispan/"+cacheName+"/")
+          .addProperty("hibernate.search.default.exclusive_index_use", "true")
+          .addProperty("hibernate.search.default.indexmanager", "near-real-time")
+          .addProperty("hibernate.search.default.indexwriter.ram_buffer_size", "256")
+          .addProperty("lucene_version", "LUCENE_CURRENT").build();
       System.out.println(" Indexed Cache Configuration for: " + cacheName );
     }
     return cacheConfig;

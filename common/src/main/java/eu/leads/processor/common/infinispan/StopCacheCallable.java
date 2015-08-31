@@ -5,6 +5,7 @@ package eu.leads.processor.common.infinispan;
  */
 
 import org.infinispan.Cache;
+import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
 
 import java.io.Serializable;
@@ -28,8 +29,9 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
        System.out.println("Try to remove " + cacheName + " from " +cache.getCacheManager().getAddress().toString());
       if(cache.getCacheManager().cacheExists(cacheName))
       {
-         System.out.println("Removing " + cacheName + " from " +cache.getCacheManager().getAddress().toString());
-           cache.getAdvancedCache().getDataContainer().clear();
+         System.out.println(
+             "Removing " + cacheName + " from " + cache.getCacheManager().getAddress().toString());
+           cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).clear();
 //           cache.getAdvancedCache().withFlags(Flag.)
 
            if(cache.getStatus().stopAllowed()) {
