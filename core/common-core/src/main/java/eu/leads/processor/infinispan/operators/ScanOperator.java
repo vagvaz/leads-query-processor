@@ -171,23 +171,25 @@ public class ScanOperator extends BasicOperator {
 
 			FilterOperatorTree tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
 			Object selectvt = getSelectivity(sketches, tree.getRoot());
-			System.out.println("selectvt CMS " + selectvt + "  computation time: " + (System.currentTimeMillis() - start) / 1000.0);
+			System.out.println("  selectvt CMS " + selectvt + "  computation time: " + (System.currentTimeMillis() - start) / 1000.0);
 			long inputSize;
 			if (selectvt != null) {
 				start = System.currentTimeMillis();
-				System.out.println("Get size of table " + columnName.substring(0, columnName.lastIndexOf(":")) + ".size");
-				Cache<String, Long> size = (Cache) manager.getPersisentCache("TablesSize");
-				if (size.containsKey(columnName.substring(0, columnName.lastIndexOf(":")) + ".size"))
-					inputSize = size.get(columnName.substring(0, columnName.lastIndexOf(":")) + ".size");
+				System.out.println("Get size of table " + columnName.substring(0, columnName.lastIndexOf(".")));
+				Cache<String, Long> sizeC = (Cache) manager.getPersisentCache("TablesSize");
+				if (sizeC.containsKey(columnName.substring(0, columnName.lastIndexOf("."))))
+					inputSize = sizeC.get(columnName.substring(0, columnName.lastIndexOf(".")));
 				else {
-					System.out.println("Size not found, Slow Get size() ");
+					System.out.print("Size not found, Slow Get size() ");
 					inputSize = inputCache.size();
+					System.out.println("... Caching size value.");
+					sizeC.put(columnName.substring(0, columnName.lastIndexOf(".")),inputSize);
 				}
 				System.out.println(" Found size: " + inputSize);
 
 				double selectivity = (double) selectvt / (double) inputSize;
 				System.out.println("Scan  Selectivity: " + selectivity);
-				System.out.println("Selectivity, inputSize " + inputSize + "  computation time: " + (System.currentTimeMillis() - start) / 1000.0);
+				System.out.println("  Selectivity, inputSize " + inputSize + "  computation time: " + (System.currentTimeMillis() - start) / 1000.0);
 
 				if (selectivity < 0.5) {
 					System.out.println("Scan Use indexes!! ");
@@ -219,7 +221,7 @@ public class ScanOperator extends BasicOperator {
 					return (double) left + (double) right;
 				break;
 			default:
-				System.out.println("Selectivity SubQual " + root.getType());
+				System.out.println("SubQual " + root.getType());
 				return getSubSelectivity(sketchCaches, root);
 		}
 		return (left != null) ? left : right;

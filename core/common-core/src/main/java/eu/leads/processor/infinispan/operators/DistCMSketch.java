@@ -85,7 +85,7 @@ public class DistCMSketch {
 	final sketchArray darray; // initialize in the constructor!
 	final Random rn = new Random();
 	final int w, d; // w=mod, d=levels
-	int count;
+	long count;
 
 	public DistCMSketch(Cache<Integer,Integer> ArrayCache, boolean load) {
 		this(0.01,0.001,ArrayCache, load);

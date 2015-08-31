@@ -68,11 +68,12 @@ public class CreateIndexOperator2 extends BasicOperator {
     System.out.println(" TableName: " + tableName);
     if(!tableName.startsWith( StringConstants.DEFAULT_DATABASE_NAME))
      tableName = StringConstants.DEFAULT_DATABASE_NAME + "." + tableName;
-    int count=0;
+    long count=0;
     for(String col:columns) {
        for(String node:nodes) {
-         count += (int) sketchesM.get(node + ":" + col + ":size");
-         System.out.println("Tuples count: " + count +" node " + node);
+         long c= (long) sketchesM.get(node + ":" + col + ":size"); //1 col
+         System.out.println("Tuples on node: " + c);
+         count +=c;
        }
       break;
     }
@@ -82,8 +83,8 @@ public class CreateIndexOperator2 extends BasicOperator {
       sketchCaches.add(tmp);
       System.out.println("Creating DistCMSketch " + tableName + "." + col + ".sketch");
 
-      int array [][]=null;
-      int w=0,d=0;
+      int array [][];
+      int w,d;
       String tmpnode = nodes.iterator().next();
       nodes.remove(tmpnode);
       System.out.println("Getting node :" + tmpnode);
@@ -91,14 +92,10 @@ public class CreateIndexOperator2 extends BasicOperator {
       System.out.println("Found nodes: " + nodes.size() + " " + Arrays.toString(nodes.toArray()));
       w =  (int)sketchesM.get(tmpnode+":"+col+":w");
       d =  (int)sketchesM.get(tmpnode+":"+col+":d");
-      count += (int) sketchesM.get(tmpnode + ":" + col + ":size"); //1 col
-      System.out.println("Tuples count: " + count);
+
       for(String node:nodes){
         System.out.println("Found node " + node);
         array= (int[][]) sketchesM.get(node+":"+col+":array");
-        count += (int) sketchesM.get(node + ":" + col + ":size");
-        System.out.println("Tuples count: " + count);
-
         for(int x=0;x<w;x++)
           for(int y=0;y<d;y++)
             finalyArray[x][y]+=array[x][y];
@@ -119,8 +116,8 @@ public class CreateIndexOperator2 extends BasicOperator {
 
     sketchesM.clear();
     System.out.println("Keys removed");
-    System.out.println("Overall Tuples Indexed: " + count);
-    Cache<String,Integer> TableSizeCache= (Cache) manager.getPersisentCache("TablesSize");
+    System.out.println("Overall Tuples Indexed: " + count + " on table "+ tableName);
+    Cache<String,Long> TableSizeCache= (Cache) manager.getPersisentCache("TablesSize");
     TableSizeCache.put(tableName, count);
 
     super.cleanup();

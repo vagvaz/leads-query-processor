@@ -267,18 +267,13 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
       default: {
         System.out.println("SubQual " + root.getType());
         FilterConditionContext qual = (FilterConditionContext) getSubLucene(indexCaches, root);
-        if (qual != null) {
-          System.out.print("Building Lucece query ");
-          long start=System.currentTimeMillis();
+        if (qual != null)
           result.add(qual);
-          System.out.println(" time: "+ (System.currentTimeMillis()-start)/1000.0);
-        }
       }
       if (left != null)
         result.addAll(left);
       if (right != null)
         result.addAll(right);
-
     }
     return (result.isEmpty()) ? null : result;
   }
@@ -298,12 +293,10 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
         //System.out.print("Check if exists: " + "." + columnName + " ");
         if (imanager.getCacheManager().cacheExists(columnName)) {
           indexCaches.put(columnName, (Cache) imanager.getIndexedPersistentCache(columnName));
-          System.out.println(" exists!");
+          System.out.println(columnName+" indexed!");
         }
-        //else
-        //  System.out.println(" does not exist!");
-      }
 
+      }
       return indexCaches.size() > 0;
     }
     return false;

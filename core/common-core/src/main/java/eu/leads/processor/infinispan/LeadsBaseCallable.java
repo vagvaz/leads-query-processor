@@ -204,8 +204,10 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       profExecute.end();
       System.out.println(" time: " + (System.currentTimeMillis() - start) /1000.0);
       profExecute.start("Get list ");
-      List<LeadsIndex> list = fquery.list(); //TODO fix it
-      System.out.println(" Callable Found Indexed " + +list.size() + " results: ");
+      start=System.currentTimeMillis();
+      List<LeadsIndex> list = fquery.list();
+      profExecute.end();
+      System.out.println(" Callable Found Indexed " + +list.size() + " results, time " + (System.currentTimeMillis() - start) /1000.0);
       //to do use sketches to find out what to do
       try {
         for (LeadsIndex lst : list) {
