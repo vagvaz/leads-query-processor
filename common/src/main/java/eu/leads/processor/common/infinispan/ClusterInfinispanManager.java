@@ -112,6 +112,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
   @Override
   public String getUniquePath(){
+    System.out.println("UNIQUE PATH = " + uniquePath);
     return uniquePath;
   }
 
@@ -311,9 +312,11 @@ public class ClusterInfinispanManager implements InfinispanManager {
           else{
             uniquePath = currentComponent +"-"+UUID.randomUUID().toString();
           }
-          for(int i = 1; i < files.length;i++){
-            files[i].delete();
-          }
+//          for(int i = 1; i < files.length;i++){
+//            files[i].delete();
+//          }
+          System.out.println("UNIQUE PATH = " + uniquePath);
+
 
         }
         else{
