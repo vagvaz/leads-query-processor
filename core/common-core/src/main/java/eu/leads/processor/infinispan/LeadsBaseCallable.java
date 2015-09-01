@@ -213,7 +213,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       //to do use sketches to find out what to do
       try {
         for (LeadsIndex lst : list) {
-          System.out.println(lst.getAttributeName()+":"+lst.getAttributeValue());
+          //System.out.println(lst.getAttributeName()+":"+lst.getAttributeValue());
           K key = (K) lst.getKeyName();
           V value = inputCache.get(key);
           if (value != null) {
