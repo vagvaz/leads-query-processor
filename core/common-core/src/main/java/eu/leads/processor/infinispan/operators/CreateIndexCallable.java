@@ -80,14 +80,7 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
     sketches = new ArrayList<>();
     for (int c = 0; c < columnNames.size(); c++) {
       System.out.println("Creating Index Caches, column " + tableName + "." + columnNames.get(c));
-
-      if(!imanager.getCacheManager().cacheExists(tableName + "." + columnNames.get(c))) {
-        System.out.println("Creating Index Caches, column " + tableName + "." + columnNames.get(c));
-      }else {
-        System.out.println("Index Already exists on column ... but anyway reindexing " + tableName + "." + columnNames.get(c));
-      }
       indexCaches.add((Cache) imanager.getIndexedPersistentCache(tableName + "." + columnNames.get(c)));
-
       System.out.println("Creating DistCMSketch " + tableName + "." + columnNames.get(c) + ".sketch");
       sketches.add(new DistCMSketch(null,false));
     }
