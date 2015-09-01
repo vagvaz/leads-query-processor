@@ -651,7 +651,7 @@ public abstract class BasicOperator extends Thread implements Operator{
 //      }
       setMapperCallableEnsembleHost();
       System.err.println(
-              "EXECUTE " + mapperCallable.getClass().toString() + " ON " + currentCluster);
+              "EXECUTE " + mapperCallable.getClass().toString() + " ON " + currentCluster + Thread.currentThread().toString());
       ProfileEvent distTask = new ProfileEvent("setup map taks " + mapperCallable.getClass().toString(),profilerLog);
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
       System.err.println("building dist task");
@@ -838,7 +838,7 @@ public abstract class BasicOperator extends Thread implements Operator{
   }
   @Override
   public void executeReduce(){
-    System.err.println("RUNNING REDUCE ON CLUSTER " + currentCluster);
+    System.err.println("RUNNING REDUCE ON CLUSTER " + currentCluster + Thread.currentThread().toString());
     pendingMMC = new HashSet<>();
     mcResults = new HashMap<>();
     pendingMMC.addAll(pendingRMC);

@@ -91,10 +91,10 @@ public class ScanOperator extends BasicOperator {
       Set<String> targetMC = getTargetMC();
       for(String mc : targetMC){
          if(!conf.containsField("next")) {
-            createCache(mc,getOutput());
+            createCache(mc,getOutput(),"batchputListener");
          }
          else{
-            createCache(mc, getOutput() + ".data", "localIndexListener");
+            createCache(mc, getOutput() + ".data", "localIndexListener:batchputListener");
          }
       }
    }

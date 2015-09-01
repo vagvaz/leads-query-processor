@@ -1,5 +1,6 @@
 package eu.leads.processor.imanager.handlers;
 
+import eu.leads.processor.common.infinispan.BatchPutListener;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
@@ -42,18 +43,33 @@ public class PutObjectActionHandler implements ActionHandler {
          else{
             log.error("put object used for creating cache");
             if(value.containsField("listener")){
-               Cache thecache = (Cache) persistence.getInMemoryCache(cacheName,1000);
-               boolean toadd = true;
-               for(Object l : thecache.getListeners()){
-                  if(l instanceof  LocalIndexListener){
-                     toadd = false;
-                     break;
+               String listeners = value.getString("listener");
+               if(listeners.contains("localIndexListener")) {
+
+                  Cache thecache = (Cache) persistence.getInMemoryCache(cacheName, 1000);
+                  boolean toadd = true;
+                  for (Object l : thecache.getListeners()) {
+                     if (l instanceof LocalIndexListener) {
+                        toadd = false;
+                        break;
+                     }
+                  }
+                  if (toadd) {
+                     LocalIndexListener listener = new LocalIndexListener(persistence, cacheName);
+
+                     persistence.addListener(listener, cacheName);
+                  }
+                  if(listeners.contains("batchputListener")){
+                     Cache compressedCache = (Cache) persistence.getInMemoryCache(cacheName+".compressed", 1000);
+                     BatchPutListener listener = new BatchPutListener(compressedCache.getName(),cacheName);
+                     persistence.addListener(listener,compressedCache.getName());
                   }
                }
-               if(toadd) {
-                  LocalIndexListener listener = new LocalIndexListener(persistence, cacheName);
-
-                  persistence.addListener(listener, cacheName);
+               else if (listeners.contains("batchputListener")){
+                  Cache compressedCache = (Cache) persistence.getInMemoryCache(cacheName+".compressed", 1000);
+                  BatchPutListener listener = new BatchPutListener(compressedCache.getName(),cacheName);
+                  persistence.addListener(listener,compressedCache.getName());
+                  Cache thecache = (Cache) persistence.getPersisentCache(cacheName);
                }
             }
             else{

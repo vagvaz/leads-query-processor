@@ -31,15 +31,22 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
       {
          System.out.println(
              "Removing " + cacheName + " from " + cache.getCacheManager().getAddress().toString());
-           cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).clear();
+           cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).clearAsync();
 //           cache.getAdvancedCache().withFlags(Flag.)
-
+          if(cache.getCacheManager().cacheExists(cache.getName()+".compressed")){
+              Cache compressed = cache.getCacheManager().getCache(cache.getName()+".compressed");
+              compressed.clearAsync();
+              if(compressed.getStatus().stopAllowed()){
+                  compressed.stop();
+              }
+          }
            if(cache.getStatus().stopAllowed()) {
-              System.out.println("Clear " + cacheName + " from " + cache.getCacheManager().getAddress().toString());
+//              System.out.println("Clear " + cacheName + " from " + cache.getCacheManager().getAddress().toString());
               cache.getAdvancedCache().stop();
-              System.out.println("REmove " + cacheName + " from " + cache.getCacheManager().getAddress().toString());
+              System.out.println("Stop " + cacheName + " from " + cache.getCacheManager().getAddress().toString());
 //              cache.getCacheManager().removeCache(cache.getName());
            }
+
       }
         return null;
     }
