@@ -94,7 +94,7 @@ public class LoadAmplab2 {
                 String ensembleString = args[2];
                 System.out.println("Using ensemble string " + ensembleString);
                 emanager = new EnsembleCacheManager((ensembleString));
-                EnsembleCacheUtils.initialize(emanager);
+//                EnsembleCacheUtils.initialize(emanager);
                 System.out.println("Emanager has " + emanager.sites().size() + " sites");
                 emanager.start();
             }else{
@@ -364,14 +364,14 @@ public class LoadAmplab2 {
         Tuple tuple = new Tuple(value);
         if (remoteCache != null)
 //            remoteCache.put(remoteCache.getName() + ":" + key, tuple);
-            EnsembleCacheUtils.putToCache(remoteCache, remoteCache.getName() + ":" + key, tuple);
+            EnsembleCacheUtils.putToCacheDirect(remoteCache, remoteCache.getName() + ":" + key, tuple);
         else if (embeddedCache != null)
 //            embeddedCache.put(((Cache) embeddedCache).getName() + ":" + key, tuple);
-            EnsembleCacheUtils.putToCache(
+            EnsembleCacheUtils.putToCacheDirect(
                     (BasicCache) embeddedCache, ((Cache) embeddedCache).getName() + ":" + key, tuple);
         else if (ensembleCache!=null)
 //            ensembleCache.put( ensembleCache.getName() + ":" + key, tuple);
-            EnsembleCacheUtils.putToCache(ensembleCache, ensembleCache.getName() + ":" + key, tuple);
+            EnsembleCacheUtils.putToCacheDirect(ensembleCache, ensembleCache.getName() + ":" + key, tuple);
         try {
             Thread.sleep(delay);
         } catch (InterruptedException e) {
