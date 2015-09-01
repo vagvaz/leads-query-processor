@@ -112,6 +112,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
   @Override
   public String getUniquePath(){
+
     System.out.println("UNIQUE PATH = " + uniquePath);
     return uniquePath;
   }

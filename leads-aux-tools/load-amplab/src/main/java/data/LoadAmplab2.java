@@ -94,6 +94,7 @@ public class LoadAmplab2 {
                 String ensembleString = args[2];
                 System.out.println("Using ensemble string " + ensembleString);
                 emanager = new EnsembleCacheManager((ensembleString));
+                EnsembleCacheUtils.initialize(emanager);
                 System.out.println("Emanager has " + emanager.sites().size() + " sites");
                 emanager.start();
             }else{
