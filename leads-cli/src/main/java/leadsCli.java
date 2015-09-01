@@ -60,6 +60,9 @@ public class leadsCli {
 			PrintWriter out = new PrintWriter(reader.getOutput());
 			do {
 				if ((line = reader.readLine()) != null) {
+					if (hist instanceof FileHistory)
+						((FileHistory) hist).flush();
+
 					if (line.equalsIgnoreCase("cls")) {
 						reader.clearScreen();
 						continue;
@@ -102,8 +105,7 @@ public class leadsCli {
 						}
 					}
 				}
-				if (hist instanceof FileHistory)
-					((FileHistory) hist).flush();
+
 			} while (true);
 
 		} catch (Exception e) {
@@ -140,7 +142,7 @@ public class leadsCli {
 				System.exit(-1);
 
 		} catch (Exception e1) {
-			System.err.println("Unable to connect at " + host + ":" + port + " . Exiting");
+			System.err.println(" Unable to connect at " + host + ":" + port + " . Exiting");
 			e1.printStackTrace();
 			System.exit(-1);
 
@@ -169,7 +171,7 @@ public class leadsCli {
 			if(reader.getInput().available()>0) {
 				System.out.print(" "+reader.getInput().available());
 				if (reader.readCharacter() == 27) {
-					System.out.println("User terminated.");
+					System.out.println(" User terminated.");
 					break;
 				}
 			}
@@ -188,14 +190,14 @@ public class leadsCli {
 			System.out.printf(" Please wait ... formatting results. ");
 			print_results(res);
 			resultPrinted = System.currentTimeMillis();
-			System.out.print("\rFound " + res.getResult().size() + " results.\n");
+			System.out.print("\rFound " + res.getResult().size() + " results.                                      \n");
 			System.out.print("\nSubmit time: " + (submittime - start) + " ms, ");
 			System.out.print("execution  time: " + (resultCompleted - submittime) + " ms, ");
 			System.out.print("acquisition (delivery) time: " + (resultArrived - resultCompleted) + " ms, ");
 			System.out.print("display time: " + (resultPrinted - resultArrived) + " ms, ");
 			System.out.print("Complete time: " + (resultPrinted - start) + " ms.\n");
 		} else {
-			System.err.println("Execution terminated: " + currentStatus.getErrorMessage());
+			System.err.println(" Execution terminated: " + currentStatus.getErrorMessage());
 		}
 	}
 
@@ -268,8 +270,8 @@ public class leadsCli {
 		}
 
 		history.setMaxSize(200);
-		history.add("quit");
-		history.add("select * from entities;");
+		//history.add("quit");
+		//history.add("select * from entities;");
 		reader.setHistory(history);
 		return history;
 	}
