@@ -4,6 +4,7 @@ import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.infinispan.commons.api.BasicCache;
+import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.distributed.HashBasedPartitioner;
 import org.jgroups.util.ConcurrentLinkedBlockingQueue2;
 import org.slf4j.Logger;
@@ -64,16 +65,20 @@ public class EnsembleCacheUtils {
             System.out.println("threads " + threadBatch + " batchSize " + batchSize + " async = " + useAsync);
             currentCaches = new ConcurrentHashMap<>();
             mapsToPut = new ConcurrentHashMap<>();
-            initialized = true;
             executor = new ThreadPoolExecutor((int)threadBatch,(int)(threadBatch),1000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
             runnables = new ConcurrentLinkedDeque<>();
-            for (int i = 0; i <= 3000 * (threadBatch); i++) {
+            for (int i = 0; i <= 10 * (threadBatch); i++) {
                 runnables.add(new SyncPutRunnable());
             }
-//            executor.prestartAllCoreThreads();
+            initialized = true;
+
+            //            executor.prestartAllCoreThreads();
         }
     }
 
+    public static void initialize(EnsembleCacheManager manager){
+
+    }
     public  static SyncPutRunnable getRunnable(){
         SyncPutRunnable result = null;
 //        synchronized (runnableMutex){
