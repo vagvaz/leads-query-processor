@@ -1,35 +1,19 @@
 package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.StringConstants;
-import eu.leads.processor.common.infinispan.AcceptAllFilter;
-import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.Tuple;
-import eu.leads.processor.core.index.LeadsIndex;
-import eu.leads.processor.core.index.LeadsIndexHelper;
-import eu.leads.processor.core.index.LeadsIndexString;
-import eu.leads.processor.math.FilterOperatorNode;
+import eu.leads.processor.core.index.*;
 import eu.leads.processor.math.FilterOperatorTree;
-import eu.leads.processor.math.MathUtils;
-import eu.leads.processor.plugins.pagerank.node.DSPMNode;
 import org.apache.tajo.algebra.*;
 import org.infinispan.Cache;
-import org.infinispan.commons.util.CloseableIterable;
-import org.infinispan.query.SearchManager;
-import org.infinispan.query.dsl.FilterConditionContext;
-import org.infinispan.query.dsl.Query;
-import org.infinispan.query.dsl.QueryBuilder;
-import org.infinispan.query.dsl.QueryFactory;
-import org.infinispan.versioning.VersionedCache;
-import org.infinispan.versioning.utils.version.Version;
-import org.infinispan.versioning.utils.version.VersionScalar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.UUID;
 
 import static eu.leads.processor.common.infinispan.EnsembleCacheUtils.putToCache;
 
@@ -107,15 +91,11 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
       System.out.println("Creating DistCMSketch " + tableName + "." + columnNames.get(c) + ".sketch");
       sketches.add(new DistCMSketch(null,false));
     }
-    try {
-      Thread.sleep(100);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
     inputCache = (Cache) imanager.getPersisentCache(tableName);
 
     fullProcessing = new ProfileEvent("Full Processing", profilerLog);
     lindHelp = new LeadsIndexHelper();
+    System.out.println("Init finished ");
   }
 
 

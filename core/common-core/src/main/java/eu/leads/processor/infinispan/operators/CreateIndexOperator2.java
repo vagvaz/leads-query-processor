@@ -45,7 +45,7 @@ public class CreateIndexOperator2 extends BasicOperator {
     CreateIndex newExpr = JsonHelper.fromJson(CreateIndexJ, CreateIndex.class);
     tableName = (((Relation) ((Projection) newExpr.getChild()).getChild())).getName();
     inputCache = (Cache) manager.getPersisentCache(tableName);
-
+    //TODO CHECK CATALOG
   }
 
   @Override
@@ -65,7 +65,7 @@ public class CreateIndexOperator2 extends BasicOperator {
     System.out.println("Found columns:" + columns.size() + " " + Arrays.toString(columns.toArray()) );
     System.out.println("Found value:" + value.size() + " " + Arrays.toString(value.toArray()) );
     ArrayList<Cache> sketchCaches= new ArrayList<>();
-    System.out.println(" TableName: " + tableName);
+    //System.out.println(" TableName: " + tableName);
     if(!tableName.startsWith( StringConstants.DEFAULT_DATABASE_NAME))
      tableName = StringConstants.DEFAULT_DATABASE_NAME + "." + tableName;
     long count=0;
@@ -83,22 +83,27 @@ public class CreateIndexOperator2 extends BasicOperator {
       sketchCaches.add(tmp);
       System.out.println("Creating DistCMSketch " + tableName + "." + col + ".sketch");
 
-      int array [][];
+      int finalyArray [][];
       int w,d;
       String tmpnode = nodes.iterator().next();
-      nodes.remove(tmpnode);
+      //nodes.remove(tmpnode);
       System.out.println("Getting node :" + tmpnode);
-      int finalyArray [][]=(int[][]) sketchesM.get(tmpnode+":"+col+":array");
-      System.out.println("Found nodes: " + nodes.size() + " " + Arrays.toString(nodes.toArray()));
       w =  (int)sketchesM.get(tmpnode+":"+col+":w");
       d =  (int)sketchesM.get(tmpnode+":"+col+":d");
+      finalyArray = new int[w][d];
+     // int finalyArray [][]=(int[][]) sketchesM.get(tmpnode+":"+col+":array");
+      System.out.println("Found nodes: " + nodes.size() + " " + Arrays.toString(nodes.toArray()));
+
 
       for(String node:nodes){
         System.out.println("Found node " + node);
-        array= (int[][]) sketchesM.get(node+":"+col+":array");
+        int [][] array= (int[][]) sketchesM.get(node+":"+col+":array");
+        if(array!=null)
         for(int x=0;x<w;x++)
           for(int y=0;y<d;y++)
             finalyArray[x][y]+=array[x][y];
+        else
+          System.err.println("Unable to find array: " +node+":"+col+":array");
       }
       tmp.put(-1, w);
       tmp.put(-2, d);

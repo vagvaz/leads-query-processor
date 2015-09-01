@@ -156,6 +156,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     profCallable.end();
     if(lqueries==null) {
       profCallable.start("Iterate Over Local Data");
+      System.out.println("Iterate Over Local Data");
+
       ProfileEvent profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(), profilerLog);
 
 //    for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {

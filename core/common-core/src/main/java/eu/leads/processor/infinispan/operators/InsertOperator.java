@@ -38,56 +38,54 @@ import java.util.Set;
 public class InsertOperator extends BasicOperator {
 
 
-  private ArrayList<Cache> indexCaches=null;
+	private ArrayList<Cache> indexCaches = null;
+	private static int indexedSize = 0;
 
+	public InsertOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
+		super(com, persistence, log, action);
+	}
 
-  public InsertOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
-    super(com, persistence, log, action);
-  }
+	Tuple data;
+	String key = "";
+	String tableName;
+	Version version = null;
+	transient protected EnsembleCacheManager emanager;
+	private String ensembleHost;
+	transient protected EnsembleCache ecache;
 
-  Tuple data;
-  String key = "";
-  String tableName;
-  Version version = null;
-  transient protected EnsembleCacheManager emanager;
-  private String ensembleHost;
-  transient protected EnsembleCache ecache;
-
-  @Override
-  public void init(JsonObject config) {
+	@Override
+	public void init(JsonObject config) {
 //                            super.init(config);
-    EnsembleCacheUtils.initialize();
-    ensembleHost = computeEnsembleHost();
-    if (ensembleHost != null && !ensembleHost.equals("")) {
-      emanager = new EnsembleCacheManager(ensembleHost);
-      emanager.start();
-//      emanager = createRemoteCacheManager();
-    } else {
-      LQPConfiguration.initialize();
-      emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
-//            emanager = createRemoteCacheManager();
-      emanager.start();
-    }
-    data = new Tuple();
-    JsonArray columnNames = conf.getObject("body").getArray("columnNames");
-    JsonArray values = conf.getObject("body").getArray("exprs");
-    JsonArray primaryArray = conf.getObject("body").getArray("primaryColumns");
-    Set<String> primaryColumns = new HashSet<String>(primaryArray.toList());
-    Iterator<Object> columnIterator = columnNames.iterator();
-    Iterator<Object> valuesIterator = values.iterator();
-    if (values.size() != columnNames.size()) {
-      log.error("INSERT problem different size between values and columnNames");
-    }
-    tableName = conf.getObject("body").getString("tableName");
-    key = tableName + ":";
-    while (columnIterator.hasNext() && valuesIterator.hasNext()) {
-      String column = (String) columnIterator.next();
-      JsonObject jsonValue = (JsonObject) valuesIterator.next();
-      Object value = MathUtils.getValueFrom(jsonValue);
-      if (column.equalsIgnoreCase("version")) {
-        Object ob = MathUtils.getValueFrom(jsonValue);
-        if (ob instanceof String) {
-          SimpleDateFormat df = new SimpleDateFormat();
+		EnsembleCacheUtils.initialize();
+		ensembleHost = computeEnsembleHost();
+		if (ensembleHost != null && !ensembleHost.equals("")) {
+			emanager = new EnsembleCacheManager(ensembleHost);
+			emanager.start();
+		} else {
+			LQPConfiguration.initialize();
+			emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
+			emanager.start();
+		}
+		data = new Tuple();
+		JsonArray columnNames = conf.getObject("body").getArray("columnNames");
+		JsonArray values = conf.getObject("body").getArray("exprs");
+		JsonArray primaryArray = conf.getObject("body").getArray("primaryColumns");
+		Set<String> primaryColumns = new HashSet<String>(primaryArray.toList());
+		Iterator<Object> columnIterator = columnNames.iterator();
+		Iterator<Object> valuesIterator = values.iterator();
+		if (values.size() != columnNames.size()) {
+			log.error("INSERT problem different size between values and columnNames");
+		}
+		tableName = conf.getObject("body").getString("tableName");
+		key = tableName + ":";
+		while (columnIterator.hasNext() && valuesIterator.hasNext()) {
+			String column = (String) columnIterator.next();
+			JsonObject jsonValue = (JsonObject) valuesIterator.next();
+			Object value = MathUtils.getValueFrom(jsonValue);
+			if (column.equalsIgnoreCase("version")) {
+				Object ob = MathUtils.getValueFrom(jsonValue);
+				if (ob instanceof String) {
+					SimpleDateFormat df = new SimpleDateFormat();
 //                                    try {
 //                                            version = new VersionScalar(df.parse((String) ob).getTime());
 //                                        } catch (ParseException e) {
@@ -97,109 +95,116 @@ public class InsertOperator extends BasicOperator {
 //                                 version  = new VersionScalar ((Long)ob);
 //                                }
 //                        }
-          if (primaryColumns.contains(column)) {
-            key = key + "," + value.toString();
-          }
+					if (primaryColumns.contains(column)) {
+						key = key + "," + value.toString();
+					}
 //                                data.putValue(column, value);
 
-            }
+				}
 
-         }
-         if (primaryColumns.contains(column)) {
-            if(value != null)
-            {
-               key = key + "," + value.toString();
-            }
-            else{
-               key = key +",null";
-            }
-         }
-         data.setAttribute(tableName+"."+column,value);
-      }
-    System.out.println(" output cache: " + getOutput() + " Action " + action.asJsonObject().toString());
-  }
+			}
+			if (primaryColumns.contains(column)) {
+				if (value != null) {
+					key = key + "," + value.toString();
+				} else {
+					key = key + ",null";
+				}
+			}
+			data.setAttribute(tableName + "." + column, value);
+		}
+		System.out.println(" output cache: " + getOutput() + " Action " + action.asJsonObject().toString());
+	}
 
-  @Override
-  public void run() {
+	@Override
+	public void run() {
 //      targetCache = (Cache) manager.getPersisentCache(tableName);
-    ecache = emanager.getCache(tableName, new ArrayList<>(emanager.sites()),
-            EnsembleCacheManager.Consistency.DIST);
-//                VersionedCache versionedCache = new VersionedCacheTreeMapImpl(targetCache, new VersionScalarGenerator(),targetCache.getName());
+		ecache = emanager.getCache(tableName, new ArrayList<>(emanager.sites()),
+				EnsembleCacheManager.Consistency.DIST);
 
-    if (version == null) {
-      version = new VersionScalar(System.currentTimeMillis());
-    }
+		if (version == null) {
+			version = new VersionScalar(System.currentTimeMillis());
+		}
+		boolean inserted = false;
 
-//      long size = targetCache.size();
-    log.info("inserting into " + ecache.getName() + " "
+		log.info("inserting into " + ecache.getName() + " " + key + "   \n" + data.toString());
+		EnsembleCacheUtils.putToCache(ecache, key, data);
+		if (checkIndex_usage())
+			for (String column : data.getFieldNames()) {
+				LeadsIndexHelper lindHelp = new LeadsIndexHelper();
 
-            + key + "     \n" + data.toString());
-    EnsembleCacheUtils.putToCache(ecache, key, data);
-    if(checkIndex_usage())
-    for (String column : data.getFieldNames()) {
-      LeadsIndexHelper lindHelp = new LeadsIndexHelper();
+				if (manager.getCacheManager().cacheExists(tableName + "." + column)) {
+					Cache indexCache = (Cache) manager.getPersisentCache(tableName + "." + column);
+					LeadsIndex lInd = lindHelp.CreateLeadsIndex(data.getGenericAttribute(column), key, column, tableName);
+					indexCache.put(key, lInd);
 
-      if (manager.getCacheManager().cacheExists(tableName + "." + column)) {
-        Cache indexCache = (Cache) manager.getPersisentCache(tableName + "." + column);
-        LeadsIndex lInd = lindHelp.CreateLeadsIndex(data.getGenericAttribute(column), key, column, tableName);
-        indexCache.put(key, lInd);
-      }
-    }
+					if (manager.getCacheManager().cacheExists(tableName + "." + column + ".sketch")) {
+						Cache sketchCache = (Cache) manager.getPersisentCache(tableName + "." + column + ".sketch");
+						DistCMSketch sk = new DistCMSketch(sketchCache, true);
+						sk.add(data.getGenericAttribute(column));
+						inserted = true;
+					}
+				}
+			}
+		if (inserted) {
+			if ((indexedSize++ % 20) == 0) {
+				//Update size
+				Cache<String, Long> TableSizeCache = (Cache) manager.getPersisentCache("TablesSize");
+				TableSizeCache.put(tableName, TableSizeCache.get(tableName));
+			}
+		}
 
-//                targetCache.put(key,data.toString());
-//                        versionedCache.put(key,data.toString(),version);
-    EnsembleCacheUtils.waitForAllPuts();
-    try {
-      if (ecache.get(key) == null) {
-        log.error("Insert Failed " + ecache.size());
-      }
-    }catch (java.lang.IllegalAccessError e){
-      log.error("Insert Failed ??? " + ecache.size() + "\n exception: " + e.getMessage() + "\n ex:" + e.toString());
-    }
+		EnsembleCacheUtils.waitForAllPuts();
+		try {
+			if (ecache.get(key) == null) {
+				log.error("Insert Failed " + ecache.size());
+			}
+		} catch (java.lang.IllegalAccessError e) {
+			log.error("Insert Failed ??? " + ecache.size() + "\n exception: " + e.getMessage() + "\n ex:" + e.toString());
+		}
 
-    cleanup();
-  }
+		cleanup();
+	}
 
-  private boolean checkIndex_usage() {
- 
-    String columnName = null;
-    indexCaches = new ArrayList<>();
-    JsonArray columnNames = conf.getObject("body").getArray("columnNames");
-    Iterator<Object> iterator = columnNames.iterator();
-    while (iterator.hasNext()) {
-      columnName =  (String) iterator.next();
+	private boolean checkIndex_usage() {
 
-      if(manager.getCacheManager().cacheExists(tableName + "." +columnName))
-       indexCaches.add((Cache) manager.getIndexedPersistentCache(tableName + "." +columnName));
-    }
+		String columnName = null;
+		indexCaches = new ArrayList<>();
+		JsonArray columnNames = conf.getObject("body").getArray("columnNames");
+		Iterator<Object> iterator = columnNames.iterator();
+		while (iterator.hasNext()) {
+			columnName = (String) iterator.next();
 
-    return indexCaches.size()>0;
-  }
+			if (manager.getCacheManager().cacheExists(tableName + "." + columnName))
+				indexCaches.add((Cache) manager.getIndexedPersistentCache(tableName + "." + columnName));
+		}
 
-  @Override
-  public void cleanup() {
-    super.cleanup();
-  }
+		return indexCaches.size() > 0;
+	}
 
-  @Override
-  public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
+	@Override
+	public void cleanup() {
+		super.cleanup();
+	}
 
-  }
+	@Override
+	public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
 
-  @Override
-  public void setupMapCallable() {
+	}
 
-  }
+	@Override
+	public void setupMapCallable() {
 
-  @Override
-  public void setupReduceCallable() {
+	}
 
-  }
+	@Override
+	public void setupReduceCallable() {
 
-  @Override
-  public boolean isSingleStage() {
-    return true;
-  }
+	}
+
+	@Override
+	public boolean isSingleStage() {
+		return true;
+	}
 
 
 }

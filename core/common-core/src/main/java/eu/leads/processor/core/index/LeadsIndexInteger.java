@@ -15,12 +15,10 @@ public class LeadsIndexInteger implements Serializable, LeadsIndex {
 //    private String  attributeName;
     @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
     private int attributeValue;
-    //@Field(index= Index.NO, analyze= Analyze.NO, store= Store.YES)
+    @Field(index= Index.NO, analyze= Analyze.NO, store= Store.YES)
     private String keyName;
 
-    public LeadsIndexInteger(){
-
-    }
+    public LeadsIndexInteger(){        }
 
     public void setCacheName(String cacheName) {
         ;//this.cacheName = cacheName;

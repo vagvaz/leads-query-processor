@@ -250,26 +250,42 @@ public class ScanOperator extends BasicOperator {
 
 		switch (root.getType()) {
 			case EQUAL:
-				if (sleft != null && sright != null) {
+				if (sleft != null && oright != null) {
 					String collumnName = sleft;
-					return sketchCaches.get(collumnName).get(sright);
+					return sketchCaches.get(collumnName).get(oright);
 				}
 				break;
 			case FIELD:
 				String collumnName = root.getValueAsJson().getObject("body").getObject("column").getString("name");
-				String type = root.getValueAsJson().getObject("body").getObject("column").getObject("dataType").getString("type");
-				//MathUtils.getTextFrom(root.getValueAsJson());
+				//String type = root.getValueAsJson().getObject("body").getObject("column").getObject("dataType").getString("type");
+
 
 				if (sketchCaches.containsKey(collumnName)) {
-					if (type.equals("TEXT"))
+					//if (type.equals("TEXT"))
 						return collumnName;
-					return null;
+
 				}
-				break;
+				return null;
+				//break;
 
 			case CONST:
-				// result = true;
-				return MathUtils.getTextFrom(root.getValueAsJson());
+				JsonObject datum = root.getValueAsJson().getObject("body").getObject("datum");
+				String type = datum.getObject("body").getString("type");
+				Number ret=0;// = MathUtils.getTextFrom(root.getValueAsJson());
+				System.out.println("Operator Found datum: " + ret);
+
+				try {
+					if (type.equals("TEXT"))
+						return  MathUtils.getTextFrom(root.getValueAsJson());
+					else {
+						Number a = datum.getObject("body").getNumber("val");
+						if (a != null)
+							return a;
+					}
+				} catch (Exception e) {
+					System.err.print("Error " + ret + " to type " + type +"" + e.getMessage());
+				}
+				return null;
 			case LTH:
 				return 0.4;
 ////        if(left !=null && oright !=null)
