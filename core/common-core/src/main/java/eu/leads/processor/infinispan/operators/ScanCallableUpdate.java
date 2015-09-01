@@ -112,6 +112,9 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 			if (checkIndex_usage()) {
 				// create query
 				lqueries = createLuceneQuerys(indexCaches, tree.getRoot());
+				if(lqueries==null){
+					System.err.println("Unable to create lucene queries");
+				}
 			}
 		} else {
 			tree = null;
@@ -183,13 +186,13 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 					QueryBuilder Qb;
 					if (type.equals("TEXT"))
 						Qb = qf.from(LeadsIndexString.class);
-					else if (type.startsWith("FLOAT"))
+					else if (type.startsWith("FLOAT4"))
 						Qb = qf.from(LeadsIndexFloat.class);
-					else if (type.startsWith("DOUBLE"))
+					else if (type.startsWith("FLOAT8"))
 						Qb = qf.from(LeadsIndexDouble.class);
-					else if (type.startsWith("INT"))
+					else if (type.startsWith("INT4"))
 						Qb = qf.from(LeadsIndexInteger.class);
-					else if (type.startsWith("LONG"))
+					else if (type.startsWith("INT8"))
 						Qb = qf.from(LeadsIndexLong.class);
 					else
 						Qb = qf.from(LeadsIndex.class);
@@ -202,38 +205,29 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 				JsonObject datum = root.getValueAsJson().getObject("body").getObject("datum");
 				type = datum.getObject("body").getString("type");
 				String ret ="";
-				System.out.println("Fount Const: " + datum.getObject("body").toString());
+				System.out.println("Callable Found Const: " + datum.getObject("body").toString());
 
 
 				try {
 					if (type.equals("TEXT"))
 						return  MathUtils.getTextFrom(root.getValueAsJson());
 					else {
-						//ret=datum.getObject("body").getNumber("val");
-						if (type.startsWith("FLOAT"))
-							return (float)datum.getObject("body").getNumber("val");
 
-						else if (type.startsWith("DOUBLE"))
-							return (double)datum.getObject("body").getNumber("val");
-
-						else if (type.startsWith("INT"))
-							return  datum.getObject("body").getInteger("val");
-
-						else if (type.startsWith("LONG"))
-							return  datum.getObject("body").getLong("val");
+						Number a = datum.getObject("body").getNumber("val");
+						if (a != null)
+							return a;
 					}
+//
 				} catch (Exception e) {
-					System.err.print("Unable to parse " + ret + " to type " + type);
+					System.err.print("Error " + ret + " to type " + type +"" + e.getMessage());
 				}
 				return null;
 
 			case LTH:
 				if (qleft != null && oright != null)
-
 					return qleft.having("attributeValue").lt(oright);
 				if (left != null && oright != null)
 					return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
-
 				break;
 			case LEQ:
 				if (qleft != null && oright != null)
@@ -266,6 +260,9 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 			case ROW_CONSTANT:
 				//TODO
 				break;
+			default:
+				System.out.println("Unable to Handle: " + root.getValueAsJson());
+
 		}
 		return null;
 	}
