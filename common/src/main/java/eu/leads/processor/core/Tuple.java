@@ -6,6 +6,7 @@ import org.bson.BasicBSONDecoder;
 import org.bson.BasicBSONEncoder;
 import org.bson.BasicBSONObject;
 import org.infinispan.commons.marshall.AdvancedExternalizer;
+import org.xerial.snappy.Snappy;
 
 import java.io.*;
 import java.util.*;
@@ -56,7 +57,8 @@ public class Tuple extends DataType_bson implements Serializable,Externalizable{
         // Serialize it
         BasicBSONEncoder encoder = new BasicBSONEncoder();
         byte[] array = encoder.encode(data);
-        out.writeObject(array);
+        byte[] compressed = Snappy.compress(array);
+        out.writeObject(compressed);
 //      out.writeInt(data.toString().length());
 //      out.writeBytes(data.toString());
     }
@@ -64,8 +66,9 @@ public class Tuple extends DataType_bson implements Serializable,Externalizable{
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException{
         // Deserialize it
         byte[] array = (byte[]) in.readObject();
+        byte[] uncompressed = Snappy.uncompress(array);
         BasicBSONDecoder decoder = new BasicBSONDecoder();
-        data = decoder.readObject(array);
+        data = decoder.readObject(uncompressed);
 //         int size = in.readInt();
 //         byte[] bb =  new byte[size];
 //         in.readFully(bb);
