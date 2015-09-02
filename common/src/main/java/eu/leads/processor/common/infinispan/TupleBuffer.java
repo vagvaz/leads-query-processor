@@ -7,27 +7,26 @@ import org.bson.BSONEncoder;
 import org.bson.BasicBSONDecoder;
 import org.bson.BasicBSONEncoder;
 import org.infinispan.Cache;
-import org.infinispan.client.hotrod.RemoteCache;
-import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.concurrent.NotifyingFuture;
+import org.infinispan.context.Flag;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.xerial.snappy.Snappy;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by vagvaz on 8/30/15.
  */
 public class TupleBuffer {
-    ConcurrentMap<Object,Tuple> buffer;
+    HashMap<Object, Tuple> buffer;
     private  transient int threshold;
     private transient EnsembleCacheManager emanager;
     private transient EnsembleCache ensembleCache;
@@ -35,15 +34,15 @@ public class TupleBuffer {
     private transient volatile Object mutex = new Object();
     private transient String mc;
     private String cacheName;
-
+    private transient String uuid;
     public TupleBuffer(){
-        buffer = new ConcurrentHashMap<>();
+        buffer = new HashMap<>();
         threshold = 500;
         localCounter = 0;
     }
     public TupleBuffer(byte[] bytes){
         BSONDecoder decoder = new BasicBSONDecoder();
-        buffer = new ConcurrentHashMap<>();
+        buffer = new HashMap<>();
         //        int compressedSize = in.readInt();
         byte[] compressed = bytes;//new byte[compressedSize];
         try {
@@ -60,35 +59,43 @@ public class TupleBuffer {
                 Tuple tuple = (Tuple) inputStream.readObject();
                 buffer.put(key, tuple);
             }
+            inputStream.close();
+            byteStream.close();
+
+            inputStream = null;
+            byteStream =null;
         }catch (Exception e){
             e.printStackTrace();
         }
     }
     public TupleBuffer(int threshold){
-        buffer = new ConcurrentHashMap<>();
+        buffer = new HashMap<>();
         this.threshold = threshold;
         localCounter = 0;
+        uuid = UUID.randomUUID().toString();
     }
 
     public TupleBuffer(int threshold, BasicCache cache, EnsembleCacheManager ensembleCacheManager) {
         this.threshold = threshold;
-        buffer = new ConcurrentHashMap<>();
+        buffer = new HashMap<>();
         this.emanager = ensembleCacheManager;
 //        this.ensembleCache = emanager.getCache(cache.getName()+".compressed", new ArrayList<>(ensembleCacheManager.sites()),
 //            EnsembleCacheManager.Consistency.DIST);
         localCounter = 0;
         this.cacheName = cache.getName();
+        uuid = UUID.randomUUID().toString();
     }
 
     public TupleBuffer(int threshold, String cacheName, EnsembleCacheManager ensembleCacheManager,String mc) {
         this.threshold = threshold;
-        buffer = new ConcurrentHashMap<>();
+        buffer = new HashMap<>();
         this.emanager = ensembleCacheManager;
 //        this.ensembleCache = emanager.getCache(cacheName+".compressed", new ArrayList<>(ensembleCacheManager.sites()),
 //            EnsembleCacheManager.Consistency.DIST);
         this.mc = mc;
         localCounter = 0;
         this.cacheName = cacheName;
+        uuid = UUID.randomUUID().toString();
     }
     public String getMC(){return mc;}
     public Map getBuffer(){
@@ -96,8 +103,9 @@ public class TupleBuffer {
     }
 
     public boolean add(Object key, Tuple value){
-        synchronized (mutex){}
-        buffer.put(key, value);
+        synchronized (mutex) {
+            buffer.put(key, value);
+        }
         return (buffer.size() >= threshold);
     }
 
@@ -155,8 +163,40 @@ public class TupleBuffer {
                 EnsembleCacheManager.Consistency.DIST);
 
         }
-        localCounter = (localCounter+1)%Long.MAX_VALUE;
+        synchronized (mutex) {
+            if(buffer.size() == 0)
+                return;
+            localCounter = (localCounter + 1) % Long.MAX_VALUE;
+        }
         byte[] bytes= this.serialize();
+        boolean isok = false;
+        try{
+        while(!isok) {
+            ensembleCache.put(uuid + ":" + Long.toString(localCounter), bytes);
+            isok = true;
+        }}catch(Exception e ){
+            if(e instanceof TimeoutException){
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+                System.err.println("Timeout Exxcception in slushToMC " + e.getMessage());
+
+            }
+            e.printStackTrace();
+
+        }
+    }
+    public void flushEndToMC(){
+        if(ensembleCache == null){
+            this.ensembleCache = emanager.getCache(cacheName+".compressed", new ArrayList<>(emanager.sites()),
+                EnsembleCacheManager.Consistency.DIST);
+
+        }
+        localCounter = (localCounter+1)%Long.MAX_VALUE;
+        byte[] bytes= new byte[1];
+        bytes[0] = -1;
         ensembleCache.put(Long.toString(localCounter),bytes);
         buffer.clear();
     }
@@ -180,7 +220,10 @@ public class TupleBuffer {
                     //                outputStream.write(tupleBytes);
                     outputStream.writeObject(entry.getValue());
                 }
+                buffer.clear();
                 outputStream.flush();
+                outputStream.close();
+                byteStream.close();
                 byte[] uncompressed = byteStream.toByteArray();
                 byte[] compressed = Snappy.compress(uncompressed);
                 //        out.writeInt(compressed.length);
@@ -199,10 +242,13 @@ public class TupleBuffer {
 
     public NotifyingFuture flushToCache(Cache localCache) {
         NotifyingFuture result =null;
+
         synchronized (mutex){
+            if(buffer == null || buffer.size() == 0)
+                return null;
             Map tmp = buffer;
-            buffer = new ConcurrentHashMap<>();
-            result = ensembleCache.putAllAsync(tmp);
+            buffer = new HashMap<>();
+            localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).putAll(tmp);
         }
         return result;
     }

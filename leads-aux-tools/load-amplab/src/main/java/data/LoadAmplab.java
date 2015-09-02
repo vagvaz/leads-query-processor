@@ -91,7 +91,7 @@ public class LoadAmplab {
                 String ensembleString = args[2];
                 System.out.println("Using ensemble sring " + ensembleString);
                 emanager = new EnsembleCacheManager(ensembleString);
-//                EnsembleCacheUtils.initialize(emanager);
+                EnsembleCacheUtils.initialize(emanager,false);
                 System.out.println("Emanager has " + emanager.sites().size() + " sites");
                 emanager.start();
             }else{
@@ -545,7 +545,7 @@ public class LoadAmplab {
             EnsembleCacheUtils.putToCacheDirect(embeddedCache,
                     ((Cache) embeddedCache).getName() + ":" + key, tuple);
         else if (ensembleCache!=null)
-            EnsembleCacheUtils.putToCacheDirect(ensembleCache, ensembleCache.getName() + ":" + key, tuple);
+            EnsembleCacheUtils.putToCache(ensembleCache, ensembleCache.getName() + ":" + key, tuple);
         try {
             Thread.sleep(delay);
         } catch (InterruptedException e) {

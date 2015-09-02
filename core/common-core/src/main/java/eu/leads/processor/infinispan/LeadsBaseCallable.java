@@ -1,9 +1,6 @@
 package eu.leads.processor.infinispan;
 
-import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
-import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
-import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.common.infinispan.SyncPutRunnable;
+import eu.leads.processor.common.infinispan.*;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
@@ -152,6 +149,17 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     profCallable.start("Call getComponent ()");
     final ClusteringDependentLogic cdl = inputCache.getAdvancedCache().getComponentRegistry().getComponent
                                                                                     (ClusteringDependentLogic.class);
+    String compressedCacheName = inputCache.getName() +".compressed";
+    if(inputCache.getCacheManager().cacheExists(compressedCacheName))
+    {
+      Cache compressedCache = inputCache.getCacheManager().getCache(compressedCacheName);
+      for(Object l : compressedCache.getListeners()){
+        if(l instanceof BatchPutListener){
+          BatchPutListener listener = (BatchPutListener) l;
+          listener.waitForPendingPuts();
+        }
+      }
+    }
     int count = 0;
     profCallable.end();
     if(lquery==null) {
@@ -179,10 +187,10 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
         if (value != null) {
 //          profExecute.start("ExOn" + (++count));
-          ExecuteRunnable runable = EngineUtils.getRunnable();
-          runable.setKeyValue(key, value,this);
-          EngineUtils.submit(runable);
-//          executeOn((K) key, value);
+//          ExecuteRunnable runable = EngineUtils.getRunnable();
+//          runable.setKeyValue(key, value,this);
+//          EngineUtils.submit(runable);
+          executeOn((K) key, value);
 //          profExecute.end();
 	}
          profExecute.start("ISPNIter");
@@ -214,6 +222,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         }
       } catch (Exception e) {
         profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
+        e.printStackTrace();
         PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
       }
     }

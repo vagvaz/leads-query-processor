@@ -34,7 +34,8 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
 
 
 
-  protected transient  Cache counterCache;
+//  protected transient  Cache counterCache;
+  private transient Integer counter = 0;
   private transient InfinispanManager imanager;
   private transient EmbeddedCacheManager manager;
   private transient EnsembleCacheManager emanager;
@@ -44,7 +45,7 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
   private String node;
   private String cacheName;
   private ComplexIntermediateKey baseIntermKey;
-  private ComplexIntermediateKey currentKey;
+//  private ComplexIntermediateKey currentKey;
   private transient volatile Object mutex;
   private transient LeadsBaseCallable nextCallable;
   private String ensembleHost;
@@ -62,7 +63,8 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
   }
 
   public LeadsCollector(LeadsCollector other){
-    this.counterCache = other.counterCache;
+//    this.counterCache = other.counterCache;
+//    this.counter = other.counter;
     this.imanager = other.imanager;
     this.manager = other.manager;
     this.emanager = other.emanager;
@@ -72,7 +74,7 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
     this.node = other.node;
     this.cacheName = other.cacheName;
     this.baseIntermKey = other.baseIntermKey;
-    this.currentKey = other.currentKey;
+//    this.currentKey = other.currentKey;
     this.mutex = new Object();
     this.nextCallable = null;
   }
@@ -86,13 +88,13 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
         EnsembleCacheManager.Consistency.DIST);
 //    storeCache = (BasicCache) this.imanager.getPersisentCache(cacheName);
   }
-  public Cache getCounterCache() {
-    return counterCache;
-  }
+//  public Cache getCounterCache() {
+//    return counterCache;
+//  }
 
-  public void setCounterCache(Cache counterCache) {
-    this.counterCache = counterCache;
-  }
+//  public void setCounterCache(Cache counterCache) {
+//    this.counterCache = counterCache;
+//  }
 
   public BasicCache getIntermediateDataCache() {
     return intermediateDataCache;
@@ -174,10 +176,9 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
   public void initializeCache(String inputCacheName,InfinispanManager imanager){
     this.imanager = imanager;
     log = LoggerFactory.getLogger(LeadsCollector.class);
-    storeCache = emanager.getCache(cacheName,new ArrayList<>(emanager.sites()),
-        EnsembleCacheManager.Consistency.DIST);
+
     if(onMap) {
-      intermediateDataCache = (BasicCache) emanager.getCache(storeCache.getName() + ".data",new ArrayList<>(emanager.sites()),
+      intermediateDataCache = (BasicCache) emanager.getCache(cacheName + ".data",new ArrayList<>(emanager.sites()),
           EnsembleCacheManager.Consistency.DIST);
       //create Intermediate  keys cache name for data on the same Sites as outputCache;
 //      keysCache = (BasicCache) emanager.getCache(storeCache.getName() + ".keys",new ArrayList<>(emanager.sites()),
@@ -185,11 +186,15 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
       //createIndexCache for getting all the nodes that contain values with the same key! in a mc
 //      indexSiteCache = (BasicCache) emanager.getCache(storeCache.getName() + ".indexed",new ArrayList<>(emanager.sites()),
 //          EnsembleCacheManager.Consistency.DIST);
-      counterCache = imanager.getLocalCache(storeCache.getName()+"."+inputCacheName+"."+manager.getAddress().toString()
-                                        + ".counters");
+//      counterCache = imanager.getLocalCache(storeCache.getName()+"."+inputCacheName+"."+manager.getAddress().toString()
+//                                        + ".counters");
 //      baseIndexedKey = new IndexedComplexIntermediateKey(site, manager.getAddress().toString(),inputCacheName);
       baseIntermKey = new ComplexIntermediateKey(site, manager.getAddress().toString(),inputCacheName);
       mutex = new Object();
+    }
+    else{
+      storeCache = emanager.getCache(cacheName, new ArrayList<>(emanager.sites()),
+          EnsembleCacheManager.Consistency.DIST);
     }
   }
   public void emit(KOut key, VOut value) {
@@ -198,26 +203,28 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
       return;
     }
     if(onMap) {
-      Integer currentCount = -1;
+//      Integer currentCount = -1;
       synchronized (mutex) {
-         currentCount = (Integer) counterCache.get(key);
-        if (currentCount == null) {
-          currentCount = new Integer(0);
+//         currentCount = (Integer) counterCache.get(key);
+//        if (currentCount == null) {
+//          currentCount = new Integer(0);
           //        baseIndexedKey.setKey(key.toString());
           //        if(LQPConfiguration.getInstance().getConfiguration().getBoolean("processor.validate.intermediate")){
           //          IndexedComplexIntermediateKey ik = new IndexedComplexIntermediateKey(baseIndexedKey.getSite(),baseIndexedKey.getNode(),baseIndexedKey.getCache(),key.toString());
           //          Object o = indexSiteCache.get(ik.getUniqueKey());
           //          assert (o.equals(baseIndexedKey));
           //        }
-        } else {
-          currentCount = currentCount + 1;
+//        } else {
+//          currentCount = currentCount + 1;
+          counter++;
+//          currentCount = counter;
         }
-        counterCache.put(key, currentCount);
-      }
+//        counterCache.put(key, currentCount);
+//      }
 //      baseIntermKey.setKey(key.toString());
 //      baseIntermKey.setCounter(currentCount);
 //      baseIntermKey.setCounter(currentCount);
-      ComplexIntermediateKey newKey = new ComplexIntermediateKey(baseIntermKey.getSite(),baseIntermKey.getNode(),key.toString(),baseIntermKey.getCache(),currentCount);
+      ComplexIntermediateKey newKey = new ComplexIntermediateKey(baseIntermKey.getSite(),baseIntermKey.getNode(),key.toString(),baseIntermKey.getCache(),counter);
 //      System.err.println("WRITING " + baseIntermKey + " " + baseIntermKey.asString());
       EnsembleCacheUtils.putToCache(intermediateDataCache,newKey,value);
 //      if(LQPConfiguration.getInstance().getConfiguration().getBoolean("processor.validate.intermediate")){
@@ -250,15 +257,15 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
   public void initializeNextCallable(JsonObject conf) {
     if(conf.getString("next.type").equals(LeadsNodeType.GROUP_BY.toString())){
 
-      nextCallable = new LeadsMapperCallable(null,new LeadsCollector(0,storeCache.getName()), new GroupByMapper(conf.getObject("next").getObject("configuration").toString()),site);
+      nextCallable = new LeadsMapperCallable(null,new LeadsCollector(0,cacheName), new GroupByMapper(conf.getObject("next").getObject("configuration").toString()),site);
       nextCallable.setEnsembleHost(ensembleHost);
-      nextCallable.setEnvironment(inputCache,null);
-      nextCallable.initialize();
+      nextCallable.setEnvironment(inputCache, null);
+//      nextCallable.initialize();
     } else if(conf.getString("next.type").equals(LeadsNodeType.JOIN.toString())){
-      nextCallable = new LeadsMapperCallable(null,new LeadsCollector(0,storeCache.getName()), new JoinMapper(conf.getObject("next").getObject("configuration").toString()),site);
+      nextCallable = new LeadsMapperCallable(null,new LeadsCollector(0,cacheName), new JoinMapper(conf.getObject("next").getObject("configuration").toString()),site);
       nextCallable.setEnsembleHost(ensembleHost);
-      nextCallable.setEnvironment(inputCache,null);
-      nextCallable.initialize();
+      nextCallable.setEnvironment(inputCache, null);
+//      nextCallable.initialize();
     } else if (conf.getString("next.type").equals(LeadsNodeType.SORT.toString())){
        nextCallable = null;
       System.err.println("SORT SCAN NOT IMPLEMENTED YET");

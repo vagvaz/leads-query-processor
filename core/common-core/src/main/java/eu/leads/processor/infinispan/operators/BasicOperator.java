@@ -29,10 +29,7 @@ import org.vertx.java.core.json.JsonObject;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Created by tr on 30/8/2014.
@@ -654,13 +651,13 @@ public abstract class BasicOperator extends Thread implements Operator{
               "EXECUTE " + mapperCallable.getClass().toString() + " ON " + currentCluster + Thread.currentThread().toString());
       ProfileEvent distTask = new ProfileEvent("setup map taks " + mapperCallable.getClass().toString(),profilerLog);
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
-      System.err.println("building dist task");
-      log.error("building dist task");
+      System.err.println("serrbuilding dist task");
+      log.error("logbuilding dist task");
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder(mapperCallable);
       builder.timeout(24, TimeUnit.HOURS);
       DistributedTask task = builder.build();
-      System.err.println("submitting to local cluster task");
-      log.error("submitting to local cluster task");
+      System.err.println("serrsubmitting to local cluster task");
+      log.error("log submitting to local cluster task");
 
       List<Future<String>> res = des.submitEverywhere(task);//new ArrayList<>();
       List<Address> taskNodes =  inputCache.getAdvancedCache().getRpcManager().getMembers();
@@ -671,7 +668,7 @@ public abstract class BasicOperator extends Thread implements Operator{
 //      }
       distTask.end();
       //      Future<String> res = des.submit(callable);
-      List<String> addresses = new ArrayList<String>();
+//      List<String> addresses = new ArrayList<String>();
       try {
         if (res != null) {
           while(res.size() > 0 ){
@@ -681,8 +678,10 @@ public abstract class BasicOperator extends Thread implements Operator{
               Future<String> future = resultIterator.next();
 //              System.err.println("Checking whether " + future.toString() + " is Done " + future.isDone() );
 //              if(future.isDone()){
-              System.err.println(mapperCallable.getClass().toString() + " completed on " + future.get());
-              resultIterator.remove();
+                System.err.println(mapperCallable.getClass().toString() + " completed on " + future
+                    .get());
+                resultIterator.remove();
+
 //              }
             }
           }
@@ -703,7 +702,7 @@ public abstract class BasicOperator extends Thread implements Operator{
           replyForFailExecution(action);
         }
       } catch (InterruptedException e) {
-        log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+        log.error("Interrupted Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
                     e.getClass().toString());
         log.error(e.getMessage());
         System.err.println(
@@ -715,7 +714,7 @@ public abstract class BasicOperator extends Thread implements Operator{
         e.printStackTrace();
         replyForFailExecution(action);
       } catch (ExecutionException e) {
-        log.error("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+        log.error("Execution Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
                     e.getClass().toString());
         log.error(e.getMessage());
         System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString()

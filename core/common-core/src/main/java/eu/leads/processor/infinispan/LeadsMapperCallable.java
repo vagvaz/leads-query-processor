@@ -80,6 +80,6 @@ public class LeadsMapperCallable<K, V, kOut, vOut> extends LeadsBaseCallable<K,V
     mapper.finalizeTask();
 //    EnsembleCacheUtils.waitForAllPuts();
     super.finalizeCallable();
-    collector.getCounterCache().stop();
+//    collector.getCounterCache().stop();
   }
 }

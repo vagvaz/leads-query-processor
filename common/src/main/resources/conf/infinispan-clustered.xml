@@ -22,7 +22,7 @@
    </threads>
 
    <cache-container name="defaultContainer" statistics="false" default-cache="defaultCache"
-                    start="true"   >
+                    start="true"  >
       <transport stack="tcp"/>
       <!--<serialization version="70"/>-->
       <jmx domain="eu.leads.processor" duplicate-domains="true"></jmx>

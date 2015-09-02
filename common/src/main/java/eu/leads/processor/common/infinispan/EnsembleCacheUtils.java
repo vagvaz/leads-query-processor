@@ -58,7 +58,7 @@ public class EnsembleCacheUtils {
             log.info("Using asynchronous put " + useAsync);
             //            concurrentQuue = new ConcurrentLinkedQueue<>();
             batchSize = LQPConfiguration.getInstance().getConfiguration()
-                .getInt("node.ensemble.batchsize", 1000);
+                .getInt("node.ensemble.batchsize", 100);
             threadBatch = LQPConfiguration.getInstance().getConfiguration().getInt(
                 "node.ensemble.threads", 3);
 
@@ -70,7 +70,7 @@ public class EnsembleCacheUtils {
             initialized = true;
 
             //Initialize BatchPut Structures
-            totalBatchPutThreads = LQPConfiguration.getInstance().getConfiguration().getInt("node.ensemble.batchput.threads",16);
+            totalBatchPutThreads = LQPConfiguration.getInstance().getConfiguration().getInt("node.ensemble.batchput.threads",1);
             System.err.println("threads " + threadBatch + " batchSize " + batchSize + " async = " + useAsync +" batchPutThreads " + totalBatchPutThreads);
             batchPutExecutor = new ThreadPoolExecutor(totalBatchPutThreads,totalBatchPutThreads,2000,TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
             microclouds = new ConcurrentHashMap<>();
@@ -88,6 +88,10 @@ public class EnsembleCacheUtils {
     }
 
     public static void initialize(EnsembleCacheManager manager){
+       initialize(manager,true);
+    }
+
+    public static void initialize(EnsembleCacheManager manager, boolean isEmbedded) {
         synchronized (mutex) {
 
             ensembleString = "";
@@ -105,14 +109,17 @@ public class EnsembleCacheUtils {
                     microclouds.putIfAbsent(site.getName(), newMap);
                 }
             }
-            if(localManager == null){
+            if(localManager == null && isEmbedded){
                 localManager = InfinispanClusterSingleton.getInstance().getManager();
                 if(localMC == null)
                     localMC = resolveMCName();
             }
+
             partitioner = new HashBasedPartitioner(cachesList);
         }
     }
+
+
 
     private static String resolveMCName() {
         String result = "";
@@ -139,11 +146,8 @@ public class EnsembleCacheUtils {
         String result = "";
         for(Object s : cache.sites()){
             Site site = (Site)s;
-            //            System.out.println("site: " + site.getName());
             result = site.getName();
         }
-
-        //        return result.substring(1,result.length());
         return result;
     }
 
@@ -197,6 +201,30 @@ public class EnsembleCacheUtils {
 //        synchronized (runnableMutex){era
 //            runnableMutex.notifyAll();
 //        }
+        //Flush tuple buffers
+        for(Map.Entry<String,Map<String,TupleBuffer>> mc : microclouds.entrySet()) {
+            for (Map.Entry<String, TupleBuffer> cache : mc.getValue().entrySet()) {
+                if(!mc.getKey().equals(localMC) ) {
+                    cache.getValue().flushToMC();
+                }
+                else{
+                       Cache localCache =
+                            (Cache) localManager.getPersisentCache(cache.getValue().getCacheName());
+                    localFutures.add(cache.getValue().flushToCache(localCache));
+                }
+            }
+        }
+        //flush remotely batchputlisteners
+        for(Map.Entry<String,Map<String,TupleBuffer>> mc : microclouds.entrySet()){
+            for(Map.Entry<String,TupleBuffer> cache : mc.getValue().entrySet()){
+//                if(!mc.getKey().equals(localMC)) {
+                    cache.getValue().flushEndToMC();
+//                    cache.getValue().flushEndToMC();
+//                    cache.getValue().flushEndToMC();
+//                }
+            }
+        }
+
         while(auxExecutor.getActiveCount() > 0) {
             try {
                 //            auxExecutor.awaitTermination(100,TimeUnit.MILLISECONDS);
@@ -216,7 +244,8 @@ public class EnsembleCacheUtils {
         for(NotifyingFuture future : localFutures)
         {
             try {
-                future.get();
+                if(future != null)
+                    future.get();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
@@ -224,12 +253,6 @@ public class EnsembleCacheUtils {
             }
         }
         localFutures.clear();
-        for(Map.Entry<String,Map<String,TupleBuffer>> mc : microclouds.entrySet()){
-            for(Map.Entry<String,TupleBuffer> cache : mc.getValue().entrySet()){
-                cache.getValue().flushToMC();
-            }
-            mc.getValue().clear();
-        }
     }
 
     public static void putToCache(BasicCache cache, Object key, Object value) {
@@ -288,13 +311,13 @@ public class EnsembleCacheUtils {
             putToCacheDirect(cache,key,value);
             return;
         }
-        Map<String,TupleBuffer> buffer = microclouds.get(localMC);
+        Map<String,TupleBuffer> mcBufferMap = microclouds.get(localMC);
 
-        if(buffer == null) {
+        if(mcBufferMap == null) { // create buffer map for localMC
             microclouds.put(localMC, new ConcurrentHashMap<String, TupleBuffer>());
         }
-        TupleBuffer tupleBuffer = buffer.get(cache.getName());
-        if(tupleBuffer == null){
+        TupleBuffer tupleBuffer = mcBufferMap.get(cache.getName());
+        if(tupleBuffer == null){ // create tuple buffer for cache
             tupleBuffer= new TupleBuffer(batchSize,cache.getName(),ensembleManagers.get(localMC),localMC);
             microclouds.get(localMC).put(cache.getName(),tupleBuffer);
         }
@@ -304,9 +327,18 @@ public class EnsembleCacheUtils {
                     (Cache) localManager.getPersisentCache(  tupleBuffer.getCacheName());
                 localFutures.add(tupleBuffer.flushToCache(localCache));
                 while(localFutures.size() > threadBatch){
-                    for(NotifyingFuture future : localFutures){
+                    Iterator<NotifyingFuture> iterator = localFutures.iterator();
+                    while(iterator.hasNext()){
+                        NotifyingFuture future = iterator.next();
                         try {
-                            future.get(10,TimeUnit.MILLISECONDS);
+                            if(future != null)
+                            {
+                                future.get(10,TimeUnit.MILLISECONDS);
+                                iterator.remove();
+                            }
+                            else{
+                                iterator.remove();
+                            }
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         } catch (ExecutionException e) {
@@ -400,8 +432,8 @@ public class EnsembleCacheUtils {
                     auxExecutor.submit(putRunnable);
                     isok = true;
                 } else {
-                    log.error("CACHE IS NULL IN PUT TO CACHE for " + key.toString() + " " + value
-                        .toString());
+                   log.error("CACHE IS NULL IN PUT TO CACHE for " + key.toString() + " " + value
+                       .toString());
                     isok = true;
                 }
             } catch (Exception e) {
