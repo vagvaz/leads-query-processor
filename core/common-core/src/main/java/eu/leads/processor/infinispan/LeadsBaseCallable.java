@@ -153,11 +153,21 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
                                                                                     (ClusteringDependentLogic.class);
     int count = 0;
     profCallable.end();
+    ProfileEvent profExecute = new ProfileEvent("Buildinglucece" + this.getClass().toString(), profilerLog);
+
+    if(inputCache.size()>0) {
+      System.out.print("Building Lucece query or leaf ");
+      long start=System.currentTimeMillis();
+      luceneKeys = createLuceneQuerys(indexCaches, tree.getRoot());
+      System.out.println(" time: " + (System.currentTimeMillis() - start) / 1000.0);
+      profExecute.end();
+    }
+
     if(luceneKeys ==null) {
       profCallable.start("Iterate Over Local Data");
       System.out.println("Iterate Over Local Data");
 
-      ProfileEvent profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(), profilerLog);
+      profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(), profilerLog);
 
 //    for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
 //      if (!cdl.localNodeIsPrimaryOwner(key))
@@ -194,30 +204,27 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         iterable.close();
         profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
         PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
-      }
+    }
     }else{
       profCallable.start("Search_Over_Indexed_Data");
       System.out.println("Search Over Indexed Data");
-      ProfileEvent profExecute = new ProfileEvent("Buildinglucece" + this.getClass().toString(), profilerLog);
-      System.out.print("Building Lucece query ");
-      long start=System.currentTimeMillis();
 
-  luceneKeys = createLuceneQuerys(indexCaches, tree.getRoot());
+
       HashSet<LeadsIndex> keys=null;
-      if(luceneKeys instanceof ScanCallableUpdate.leaf)
+      if(luceneKeys instanceof LeadsBaseCallable.leaf)
       {
+
+
+        System.out.print("Building Lucece query ");
         System.out.println("Single leaf building query");
+        long start=System.currentTimeMillis();
         leaf l=(leaf)luceneKeys;
         keys=getLuceneSet(l);
-
+        System.out.println(" time: " + (System.currentTimeMillis() - start) / 1000.0);
+        profExecute.end();
       } else if(luceneKeys instanceof HashSet)
         keys=(HashSet<LeadsIndex>)luceneKeys;
 
-      profExecute.end();
-      System.out.println(" time: " + (System.currentTimeMillis() - start) / 1000.0);
-
-
-      profExecute.end();
       System.out.println(" Callable Found Indexed " + +keys.size() + " results");
       //to do use sketches to find out what to do
       try {
