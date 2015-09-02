@@ -262,6 +262,7 @@ public class TupleBuffer {
             if(tmpb.size() > 0){
                 localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
                     .putAll(tmpb);
+                tmpb.clear();
             }
 
         }

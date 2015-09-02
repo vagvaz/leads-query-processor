@@ -87,11 +87,14 @@ public class BatchPutListener implements LeadsListener {
             if(tmpb.size() > 10) {
                 targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
                     .putAll(tmpb);//entry.getKey(), entry.getValue());
+                tmpb.clear();
             }
+
         }
         if(tmpb.size() > 0){
             targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
                 .putAll(tmpb);
+            tmpb.clear();
         }
 
         tupleBuffer.getBuffer().clear();
