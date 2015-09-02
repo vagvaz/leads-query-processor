@@ -155,13 +155,14 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     profCallable.end();
     ProfileEvent profExecute = new ProfileEvent("Buildinglucece" + this.getClass().toString(), profilerLog);
 
-    if(inputCache.size()>0) {
-      System.out.print("Building Lucece query or leaf ");
-      long start=System.currentTimeMillis();
-      luceneKeys = createLuceneQuerys(indexCaches, tree.getRoot());
-      System.out.println(" time: " + (System.currentTimeMillis() - start) / 1000.0);
-      profExecute.end();
-    }
+    if(indexCaches!=null)
+      if(indexCaches.size()>0) {
+        System.out.print("Building Lucene query or qualinfo ");
+        long start=System.currentTimeMillis();
+        luceneKeys = createLuceneQuerys(indexCaches, tree.getRoot());
+        System.out.println(" time: " + (System.currentTimeMillis() - start) / 1000.0);
+        profExecute.end();
+      }
 
     if(luceneKeys ==null) {
       profCallable.start("Iterate Over Local Data");
@@ -211,14 +212,14 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
 
       HashSet<LeadsIndex> keys=null;
-      if(luceneKeys instanceof LeadsBaseCallable.leaf)
+      if(luceneKeys instanceof LeadsBaseCallable.qualinfo)
       {
 
 
         System.out.print("Building Lucece query ");
-        System.out.println("Single leaf building query");
+        System.out.println("Single qualinfo building query");
         long start=System.currentTimeMillis();
-        leaf l=(leaf)luceneKeys;
+        qualinfo l=(qualinfo)luceneKeys;
         keys=getLuceneSet(l);
         System.out.println(" time: " + (System.currentTimeMillis() - start) / 1000.0);
         profExecute.end();
@@ -280,32 +281,32 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
 
 
-  public class leaf
+  public class qualinfo
   {
     String attributeName="";
     String attributeType="";
     FilterOpType opType;
     Object compValue=null;
-    public leaf(String attributeName, String attributeType) {
+    public qualinfo(String attributeName, String attributeType) {
       this.attributeName = attributeName;
       this.attributeType = attributeType;
       this.opType = opType;
       this.compValue = compValue;
     }
 
-    public leaf( FilterOpType opType, leaf left, leaf right) throws Exception {
+    public qualinfo( FilterOpType opType, qualinfo left, qualinfo right) throws Exception {
       this(left.attributeName, left.attributeType);
       complete(right);
       this.opType = opType;
     }
-    public leaf(String attributeType, Object compValue) {
+    public qualinfo(String attributeType, Object compValue) {
       this.attributeName = attributeName;
       this.attributeType = attributeType;
       this.opType = opType;
       this.compValue = compValue;
     }
 
-    public leaf complete(leaf other) throws Exception {
+    public qualinfo complete(qualinfo other) throws Exception {
       if(!this.attributeType.equals(other.attributeType)){
         throw new Exception("Different Types " + this.attributeType + " " +other.attributeType);
       }
@@ -328,7 +329,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
 
 
-  HashSet<LeadsIndex> getLuceneSet(leaf l){
+  HashSet<LeadsIndex> getLuceneSet(qualinfo l){
     FilterConditionEndContext f = getFilter(l);
     FilterConditionContext fc = addFilter(f, l);
     return buildLucene(fc);
@@ -340,7 +341,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   }
 
 
-  FilterConditionContext addFilter(FilterConditionEndContext f, leaf l){
+  FilterConditionContext addFilter(FilterConditionEndContext f, qualinfo l){
     FilterConditionContext fc;
     switch (l.opType) {
       case EQUAL:
@@ -368,7 +369,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   }
 
 
-  FilterConditionEndContext getFilter(leaf l){
+  FilterConditionEndContext getFilter(qualinfo l){
     SearchManager sm = org.infinispan.query.Search.getSearchManager(indexCaches.get(l.attributeName));
     QueryFactory qf = sm.getQueryFactory();
     org.infinispan.query.dsl.QueryBuilder Qb;
@@ -392,8 +393,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   //
 
   Object getSubLucene(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
-    leaf left = null;
-    leaf right = null;
+    qualinfo left = null;
+    qualinfo right = null;
 
     if (root == null)
       return null;
@@ -401,10 +402,10 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     Object oright = getSubLucene(indexCaches, root.getRight());
 
 
-    if (oleft instanceof ScanCallableUpdate.leaf)
-      left = (leaf) oleft;
-    if (oright instanceof ScanCallableUpdate.leaf)
-      right = (leaf) oright;
+    if (oleft instanceof ScanCallableUpdate.qualinfo)
+      left = (qualinfo) oleft;
+    if (oright instanceof ScanCallableUpdate.qualinfo)
+      right = (qualinfo) oright;
 
     try {
       switch (root.getType()) {
@@ -413,7 +414,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
           String type = root.getValueAsJson().getObject("body").getObject("column").getObject("dataType").getString("type");
           if (indexCaches.containsKey(collumnName)) {
             System.out.println("Found Cache for: " + collumnName);
-            return new leaf(collumnName,type);
+            return new qualinfo(collumnName,type);
           }
           break;
 
@@ -425,13 +426,13 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
           try {
             if (type.equals("TEXT"))
-              return  new leaf(type, MathUtils.getTextFrom(root.getValueAsJson()));
+              return  new qualinfo(type, MathUtils.getTextFrom(root.getValueAsJson()));
             else if (type.equals("DATE"))
               System.err.print("Unable to Handle: " + root.getValueAsJson());
             else {
               Number a = datum.getObject("body").getNumber("val");
               if (a != null)
-                return new leaf(type,a);
+                return new qualinfo(type,a);
             }
 
           } catch (Exception e) {
@@ -443,7 +444,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
           if (t == FilterOpType.EQUAL || t == FilterOpType.LIKE || t == FilterOpType.GEQ || t == FilterOpType.GTH
                   || t == FilterOpType.LEQ || t == FilterOpType.LTH) {
             if (left != null && right != null)
-              return new leaf(t,left,right);
+              return new qualinfo(t,left,right);
 
           }
           System.out.println("Unable to Handle: " + root.getValueAsJson());
@@ -463,21 +464,21 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     HashSet hleft = null;
     HashSet hright = null;
 
-    leaf lleft = null;
-    leaf lright = null;
+    qualinfo lleft = null;
+    qualinfo lright = null;
 
     oleft = createLuceneQuerys(indexCaches, root.getLeft());
     oright = createLuceneQuerys(indexCaches, root.getRight());
 
     if(oleft != null){
-      if (oleft instanceof ScanCallableUpdate.leaf)
-        lleft = (leaf) oleft;
+      if (oleft instanceof ScanCallableUpdate.qualinfo)
+        lleft = (qualinfo) oleft;
       if (oleft instanceof HashSet)
         hleft = (HashSet) oleft;
     }
     if(oright != null){
-      if (oright instanceof ScanCallableUpdate.leaf)
-        lright = (leaf) oright;
+      if (oright instanceof ScanCallableUpdate.qualinfo)
+        lright = (qualinfo) oright;
       if (oright instanceof HashSet)
         hright = (HashSet) oright;
     }
