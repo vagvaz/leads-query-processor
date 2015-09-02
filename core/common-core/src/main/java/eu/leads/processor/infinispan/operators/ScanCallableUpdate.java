@@ -2,23 +2,18 @@ package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
-import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
-import eu.leads.processor.core.index.*;
+import eu.leads.processor.math.FilterOpType;
 import eu.leads.processor.math.FilterOperatorNode;
 import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.math.FilterOperatorTree;
 import eu.leads.processor.math.MathUtils;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
-import org.infinispan.query.dsl.Query;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
-import org.infinispan.query.SearchManager;
 import org.infinispan.query.dsl.FilterConditionContext;
-import org.infinispan.query.dsl.QueryBuilder;
-import org.infinispan.query.dsl.QueryFactory;
 import org.infinispan.versioning.VersionedCache;
 import org.infinispan.versioning.utils.version.Version;
 import org.infinispan.versioning.utils.version.VersionScalar;
@@ -40,17 +35,13 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 	transient protected VersionedCache versionedCache;
 
 	transient protected Cache pageRankCache;
-	transient protected FilterOperatorTree tree;
 	transient protected double totalSum;
 	transient protected Cache approxSumCache;
-	protected String qualString;
-	transient boolean versioning;
+ 	transient boolean versioning;
 	boolean onVersionedCache;
 	transient protected long versionStart = -1, versionFinish = -1, range = -1;
 	protected LeadsCollector collector;
 
-
-	//  transient protected InfinispanManager manager;
 	protected Logger log = LoggerFactory.getLogger(ScanCallableUpdate.class.toString());
 	private VersionScalar minVersion = null;
 	private VersionScalar maxVersion = null;
@@ -65,16 +56,13 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 		super(configString, collector.getCacheName());
 		this.collector = collector;
 	}
-//  public ScanCallableUpdate(String configString, String output,boolean onVersionedCache) {
-//    super(configString, output);
-//    this.onVersionedCache = onVersionedCache;
-//  }
+
 
 	@Override
 	public void initialize() {
 		super.initialize();
-		lqueries = null;
-//    versionedCache = new VersionedCacheTreeMapImpl(inputCache,new VersionScalarGenerator(),inputCache.getName());
+		luceneKeys = null;
+
 		profilerLog = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
 
 		pageRankCache = (Cache) imanager.getPersisentCache("pagerankCache");
@@ -109,13 +97,11 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 			} else {
 				renameTableInTree = true;
 			}
-			if (checkIndex_usage()) {
-				// create query
-				lqueries = createLuceneQuerys(indexCaches, tree.getRoot());
-				if(lqueries==null){
-					System.err.println("Unable to create lucene queries");
-				}
-			}
+			if (checkIndex_usage())
+				System.out.println("Will try to use Indexes");
+			else
+				System.err.println("No indexes");
+
 		} else {
 			tree = null;
 		}
@@ -139,188 +125,6 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 		boolean result = conf.containsField("next");
 		return result;
 	}
-
-
-	Object getSubLucene(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
-		FilterConditionContext result = null;
-		FilterConditionContext left = null;
-		FilterConditionContext right = null;
-		QueryBuilder qleft = null;
-		QueryBuilder qrigth = null;
-
-		if (root == null)
-			return null;
-		Object oleft = getSubLucene(indexCaches, root.getLeft());
-		Object oright = getSubLucene(indexCaches, root.getRight());
-
-		if (oleft instanceof FilterConditionContext)
-			left = (FilterConditionContext) oleft;
-		if (oright instanceof FilterConditionContext)
-			right = (FilterConditionContext) oright;
-
-		if (oleft instanceof QueryBuilder)
-			qleft = (QueryBuilder) oleft;
-
-		switch (root.getType()) {
-			case EQUAL:
-				if (qleft != null && oright != null)
-					return qleft.having("attributeValue").eq(oright);//,right.getValueAsJson());
-				if (left != null && oright != null)
-					return left.and().having("attributeValue").eq(oright);//,right.getValueAsJson());
-				break;
-			case IS_NULL:
-				if (qleft != null && oright != null)
-					return qleft.having("attributeValue").isNull();//,right.getValueAsJson());
-				if (left != null && oright != null)
-					return left.and().having("attributeValue").isNull();//,right.getValueAsJson());
-				break;
-
-			case NOT_EQUAL:
-				if (qleft != null && oright != null)
-					return qleft.having("attributeValue").eq(oright);//,right.getValueAsJson());
-				if (qleft != null && oright != null)
-					return qleft.having("attributeValue").eq(oright);//,right.getValueAsJson());
-
-				break;
-			case FIELD:
-				String collumnName = root.getValueAsJson().getObject("body").getObject("column").getString("name");
-				String type = root.getValueAsJson().getObject("body").getObject("column").getObject("dataType").getString("type");
-				//MathUtils.getTextFrom(root.getValueAsJson());
-
-				if (indexCaches.containsKey(collumnName)) {
-					System.out.println("Found Cache for: " + collumnName);
-					SearchManager sm = org.infinispan.query.Search.getSearchManager(indexCaches.get(collumnName));
-					QueryFactory qf = sm.getQueryFactory();
-					QueryBuilder Qb;
-					if (type.equals("TEXT"))
-						Qb = qf.from(LeadsIndexString.class);
-					else if (type.startsWith("FLOAT4"))
-						Qb = qf.from(LeadsIndexFloat.class);
-					else if (type.startsWith("FLOAT8"))
-						Qb = qf.from(LeadsIndexDouble.class);
-					else if (type.startsWith("INT4"))
-						Qb = qf.from(LeadsIndexInteger.class);
-					else if (type.startsWith("INT8"))
-						Qb = qf.from(LeadsIndexLong.class);
-					else
-						Qb = qf.from(LeadsIndex.class);
-
-					return Qb;
-				}
-				break;
-
-			case CONST:
-				JsonObject datum = root.getValueAsJson().getObject("body").getObject("datum");
-				type = datum.getObject("body").getString("type");
-				String ret ="";
-				System.out.println("Callable Found Const: " + datum.getObject("body").toString());
-
-				try {
-					if (type.equals("TEXT"))
-						return  MathUtils.getTextFrom(root.getValueAsJson());
-					else {
-
-						Number a = datum.getObject("body").getNumber("val");
-						if (a != null)
-							return a;
-					}
-//
-				} catch (Exception e) {
-					System.err.print("Error " + ret + " to type " + type +"" + e.getMessage());
-				}
-				return null;
-
-			case LTH:
-				if (qleft != null && oright != null)
-					return qleft.having("attributeValue").lt(oright);
-				if (left != null && oright != null)
-					return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
-				break;
-			case LEQ:
-				if (qleft != null && oright != null)
-					return qleft.having("attributeValue").lte(oright);
-				if (left != null && oright != null)
-					return left.and().having("attributeValue").lte(oright);//,right.getValueAsJson());
-				break;
-			case GTH:
-				if (qleft != null && oright != null)
-					return qleft.having("attributeValue").gt(oright);
-				if (left != null && oright != null)
-					return left.and().having("attributeValue").gt(oright);//,right.getValueAsJson());
-				break;
-			case GEQ:
-				if (qleft != null && oright != null)
-					return qleft.having("attributeValue").gte(oright);
-				if (left != null && oright != null)
-					return left.and().having("attributeValue").gte(oright);//,right.getValueAsJson());
-				break;
-
-			case LIKE:
-				if (qleft != null && oright != null)
-					return qleft.having("attributeValue").like((String) oright);
-				if (left != null && oright != null) {
-					return left.and().having("attributeValue").like((String) oright);//,right.getValueAsJson());
-				}
-				break;
-
-
-			case ROW_CONSTANT:
-				//TODO
-				break;
-			default:
-				System.out.println("Unable to Handle: " + root.getValueAsJson());
-
-		}
-		return null;
-	}
-
-
-	ArrayList<FilterConditionContext> createLuceneQuerys(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
-		ArrayList<FilterConditionContext> result = new ArrayList<>();
-		ArrayList<FilterConditionContext> left = null;
-		ArrayList<FilterConditionContext> right = null;
-		switch (root.getType()) {
-			case AND: {
-				//left = createLuceneQuerys(indexCaches, root.getLeft());
-				//right = createLuceneQuerys(indexCaches, root.getRight());
-				FilterConditionContext lqual = (FilterConditionContext) getSubLucene(indexCaches, root.getLeft());
-				FilterConditionContext rqual = (FilterConditionContext) getSubLucene(indexCaches, root.getRight());
-				if(lqual !=null && rqual !=null) {
-					System.out.println("AND SubQual " + root.getType());
-					FilterConditionContext qual = lqual.and(rqual);
-					if (qual != null)
-						result.add(qual);
-				}
-				//System.out.println("Fix AND with multiple indexes");
-			}
-			break;
-			case OR: {
-				FilterConditionContext lqual = (FilterConditionContext) getSubLucene(indexCaches, root.getLeft());
-				FilterConditionContext rqual = (FilterConditionContext) getSubLucene(indexCaches, root.getRight());
-
-				if(lqual !=null && rqual !=null) {
-					System.out.println("OR SubQual " + root.getType());
-					FilterConditionContext qual = lqual.or(rqual);
-					if (qual != null)
-						result.add(qual);
-				}
-
-			}
-			break;
-			default: {
-				System.out.println("SubQual " + root.getType());
-				FilterConditionContext qual = (FilterConditionContext) getSubLucene(indexCaches, root);
-				if (qual != null)
-					result.add(qual);
-			}
-			if (left != null)
-				result.addAll(left);
-			if (right != null)
-				result.addAll(right);
-		}
-		return (result.isEmpty()) ? null : result;
-	}
-
 
 	private boolean checkIndex_usage() {
 		// System.out.println("Check if fields are indexed");

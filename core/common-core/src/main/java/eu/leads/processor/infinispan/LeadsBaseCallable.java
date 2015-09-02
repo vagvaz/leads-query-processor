@@ -3,13 +3,16 @@ package eu.leads.processor.infinispan;
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.common.infinispan.SyncPutRunnable;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.core.index.LeadsIndex;
+import eu.leads.processor.core.index.*;
 import eu.leads.processor.core.EngineUtils;
-import org.eclipse.jdt.internal.codeassist.impl.Engine;
+import eu.leads.processor.infinispan.operators.ScanCallableUpdate;
+import eu.leads.processor.math.FilterOpType;
+import eu.leads.processor.math.FilterOperatorNode;
+import eu.leads.processor.math.FilterOperatorTree;
+import eu.leads.processor.math.MathUtils;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.context.Flag;
@@ -19,21 +22,14 @@ import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.filter.KeyValueFilter;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 import org.infinispan.manager.EmbeddedCacheManager;
-import org.infinispan.query.dsl.FilterConditionContext;
-import org.infinispan.query.dsl.Query;
+import org.infinispan.query.SearchManager;
+import org.infinispan.query.dsl.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 
 /**
  * Created by vagvaz on 2/18/15.
@@ -51,8 +47,11 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   transient protected  Cache<K,V> inputCache;
   transient protected EnsembleCache outputCache;
   protected String ensembleHost;
-  transient protected ArrayList<FilterConditionContext> lqueries;
-//  transient protected RemoteCache outputCache;
+  transient protected Object luceneKeys;
+  transient protected HashMap<String,Cache> indexCaches=null;
+  transient protected FilterOperatorTree tree;
+
+  //  transient protected RemoteCache outputCache;
 //  transient protected RemoteCache ecache;
 //  transient protected RemoteCacheManager emanager;
   transient protected EnsembleCacheManager emanager;
@@ -154,7 +153,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
                                                                                     (ClusteringDependentLogic.class);
     int count = 0;
     profCallable.end();
-    if(lqueries==null) {
+    if(luceneKeys ==null) {
       profCallable.start("Iterate Over Local Data");
       System.out.println("Iterate Over Local Data");
 
@@ -202,17 +201,27 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       ProfileEvent profExecute = new ProfileEvent("Buildinglucece" + this.getClass().toString(), profilerLog);
       System.out.print("Building Lucece query ");
       long start=System.currentTimeMillis();
-      Query fquery = lqueries.get(0).toBuilder().build(); //TODO fix it
+
+  luceneKeys = createLuceneQuerys(indexCaches, tree.getRoot());
+      HashSet<LeadsIndex> keys=null;
+      if(luceneKeys instanceof ScanCallableUpdate.leaf)
+      {
+        System.out.println("Single leaf building query");
+        leaf l=(leaf)luceneKeys;
+        keys=getLuceneSet(l);
+
+      } else if(luceneKeys instanceof HashSet)
+        keys=(HashSet<LeadsIndex>)luceneKeys;
+
       profExecute.end();
-      System.out.println(" time: " + (System.currentTimeMillis() - start) /1000.0);
-      profExecute.start("Get list ");
-      start=System.currentTimeMillis();
-      List<LeadsIndex> list = fquery.list();
+      System.out.println(" time: " + (System.currentTimeMillis() - start) / 1000.0);
+
+
       profExecute.end();
-      System.out.println(" Callable Found Indexed " + +list.size() + " results, time " + (System.currentTimeMillis() - start) /1000.0);
+      System.out.println(" Callable Found Indexed " + +keys.size() + " results");
       //to do use sketches to find out what to do
       try {
-        for (LeadsIndex lst : list) {
+        for (LeadsIndex lst : keys) {
           //System.out.println(lst.getAttributeName()+":"+lst.getAttributeValue());
           K key = (K) lst.getKeyName();
           V value = inputCache.get(key);
@@ -260,4 +269,277 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   public void outputToCache(Object key, Object value){
     EnsembleCacheUtils.putToCache(outputCache,key.toString(),value  );
   }
+
+
+
+
+  public class leaf
+  {
+    String attributeName="";
+    String attributeType="";
+    FilterOpType opType;
+    Object compValue=null;
+    public leaf(String attributeName, String attributeType) {
+      this.attributeName = attributeName;
+      this.attributeType = attributeType;
+      this.opType = opType;
+      this.compValue = compValue;
+    }
+
+    public leaf( FilterOpType opType, leaf left, leaf right) throws Exception {
+      this(left.attributeName, left.attributeType);
+      complete(right);
+      this.opType = opType;
+    }
+    public leaf(String attributeType, Object compValue) {
+      this.attributeName = attributeName;
+      this.attributeType = attributeType;
+      this.opType = opType;
+      this.compValue = compValue;
+    }
+
+    public leaf complete(leaf other) throws Exception {
+      if(!this.attributeType.equals(other.attributeType)){
+        throw new Exception("Different Types " + this.attributeType + " " +other.attributeType);
+      }
+
+
+      if(attributeName.isEmpty()) {
+        if (!other.attributeName.isEmpty()) {
+          this.attributeName = other.attributeName;
+        }
+      }
+      else{
+        if (other.compValue!=null) {
+          this.compValue = other.compValue;
+        }
+      }
+
+      return this;
+    }
+  }
+
+
+
+  HashSet<LeadsIndex> getLuceneSet(leaf l){
+    FilterConditionEndContext f = getFilter(l);
+    FilterConditionContext fc = addFilter(f, l);
+    return buildLucene(fc);
+  }
+
+  HashSet<LeadsIndex> buildLucene(FilterConditionContext fc){
+    List<LeadsIndex> list = fc.toBuilder().build().list();
+    return new HashSet<LeadsIndex>(list);
+  }
+
+
+  FilterConditionContext addFilter(FilterConditionEndContext f, leaf l){
+    FilterConditionContext fc;
+    switch (l.opType) {
+      case EQUAL:
+        fc= f.eq(l.compValue);
+        break;
+      case LIKE:
+        fc= f.like((String)l.compValue);
+        break;
+      case GEQ:
+        fc= f.gte(l.compValue);
+        break;
+      case GTH :
+        fc= f.gt(l.compValue);
+        break;
+      case LEQ :
+        fc= f.lte(l.compValue);
+        break;
+      case LTH:
+        fc= f.lt(l.compValue);
+        break;
+      default:
+        return null;
+    }
+    return fc;
+  }
+
+
+  FilterConditionEndContext getFilter(leaf l){
+    SearchManager sm = org.infinispan.query.Search.getSearchManager(indexCaches.get(l.attributeName));
+    QueryFactory qf = sm.getQueryFactory();
+    org.infinispan.query.dsl.QueryBuilder Qb;
+    if (l.attributeType.equals("TEXT"))
+      Qb = qf.from(LeadsIndexString.class);
+    else if (l.attributeType.startsWith("FLOAT4"))
+      Qb = qf.from(LeadsIndexFloat.class);
+    else if (l.attributeType.startsWith("FLOAT8"))
+      Qb = qf.from(LeadsIndexDouble.class);
+    else if (l.attributeType.startsWith("INT4"))
+      Qb = qf.from(LeadsIndexInteger.class);
+    else if (l.attributeType.startsWith("INT8"))
+      Qb = qf.from(LeadsIndexLong.class);
+    else
+      Qb = qf.from(LeadsIndex.class);
+    FilterConditionEndContext f = Qb.having("attributeValue");
+
+    return f;
+  }
+
+  //
+
+  Object getSubLucene(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
+    leaf left = null;
+    leaf right = null;
+
+    if (root == null)
+      return null;
+    Object oleft = getSubLucene(indexCaches, root.getLeft());
+    Object oright = getSubLucene(indexCaches, root.getRight());
+
+
+    if (oleft instanceof ScanCallableUpdate.leaf)
+      left = (leaf) oleft;
+    if (oright instanceof ScanCallableUpdate.leaf)
+      right = (leaf) oright;
+
+    try {
+      switch (root.getType()) {
+        case FIELD:
+          String collumnName = root.getValueAsJson().getObject("body").getObject("column").getString("name");
+          String type = root.getValueAsJson().getObject("body").getObject("column").getObject("dataType").getString("type");
+          if (indexCaches.containsKey(collumnName)) {
+            System.out.println("Found Cache for: " + collumnName);
+            return new leaf(collumnName,type);
+          }
+          break;
+
+        case CONST:
+          JsonObject datum = root.getValueAsJson().getObject("body").getObject("datum");
+          type = datum.getObject("body").getString("type");
+          String ret ="";
+          System.out.println("Callable Found Const: " + datum.getObject("body").toString());
+
+          try {
+            if (type.equals("TEXT"))
+              return  new leaf(type, MathUtils.getTextFrom(root.getValueAsJson()));
+            else if (type.equals("DATE"))
+              System.err.print("Unable to Handle: " + root.getValueAsJson());
+            else {
+              Number a = datum.getObject("body").getNumber("val");
+              if (a != null)
+                return new leaf(type,a);
+            }
+
+          } catch (Exception e) {
+            System.err.print("Error " + ret + " to type " + type +"" + e.getMessage());
+          }
+          return null;
+        default:
+          FilterOpType t = root.getType();
+          if (t == FilterOpType.EQUAL || t == FilterOpType.LIKE || t == FilterOpType.GEQ || t == FilterOpType.GTH
+                  || t == FilterOpType.LEQ || t == FilterOpType.LTH) {
+            if (left != null && right != null)
+              return new leaf(t,left,right);
+
+          }
+          System.out.println("Unable to Handle: " + root.getValueAsJson());
+
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+
+  Object createLuceneQuerys(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
+    Object result = new HashSet();
+    Object oleft = null;
+    Object oright = null;
+    HashSet hleft = null;
+    HashSet hright = null;
+
+    leaf lleft = null;
+    leaf lright = null;
+
+    oleft = createLuceneQuerys(indexCaches, root.getLeft());
+    oright = createLuceneQuerys(indexCaches, root.getRight());
+
+    if(oleft != null){
+      if (oleft instanceof ScanCallableUpdate.leaf)
+        lleft = (leaf) oleft;
+      if (oleft instanceof HashSet)
+        hleft = (HashSet) oleft;
+    }
+    if(oright != null){
+      if (oright instanceof ScanCallableUpdate.leaf)
+        lright = (leaf) oright;
+      if (oright instanceof HashSet)
+        hright = (HashSet) oright;
+    }
+
+
+    switch (root.getType()) {
+      case AND: {
+        if(lleft !=null && lright !=null) {
+          System.out.println("AND SubQual " + root.getType());
+          if(lleft.attributeName.equals(lright.attributeName))
+          {
+            FilterConditionEndContext f = getFilter(lleft);
+            FilterConditionContext fc = addFilter(f,lleft);
+            fc.and().having("attributeValue");
+            FilterConditionContext fc2 = addFilter(fc.and().having("attributeValue"),lright);
+            return buildLucene(fc2);
+          }
+        }
+        //create sets
+        if(lleft!=null)
+          hleft=getLuceneSet(lleft);
+        if(lright!=null)
+          hright=getLuceneSet(lright);
+
+        if(hleft !=null && hright!=null) {
+          System.out.println("Find Intersection");
+          return hleft.retainAll(hright);
+        }
+        //System.out.println("Fix AND with multiple indexes");
+      }
+      break;
+      case OR: {
+        if(lleft !=null && lright !=null) {
+          System.out.println("OR SubQual " + root.getType());
+          if(lleft.attributeName.equals(lright.attributeName))
+          {
+            FilterConditionEndContext f = getFilter(lleft);
+            FilterConditionContext fc = addFilter(f,lleft);
+            fc.and().having("attributeValue");
+            FilterConditionContext fc2 = addFilter(fc.or().having("attributeValue"),lright);
+            return buildLucene(fc2);
+          }
+        }
+        //create sets
+        if(lleft!=null)
+          hleft=getLuceneSet(lleft);
+        if(lright!=null)
+          hright=getLuceneSet(lright);
+
+        if(hleft !=null && hright!=null) {
+          System.out.println("Put all results together");
+          return hleft.addAll(hright);
+        }
+      }
+      break;
+      default: {
+        System.out.println("SubQual " + root.getType());
+        return  getSubLucene(indexCaches, root);
+
+      }
+//			if (left != null)
+//				result.addAll(left);
+//			if (right != null)
+//				result.addAll(right);
+    }
+    return (((HashSet)result).isEmpty()) ? null : result;
+  }
+
+
+
+
 }
