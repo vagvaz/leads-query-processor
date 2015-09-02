@@ -1,6 +1,7 @@
 package eu.leads.processor.common.infinispan;
 
 import eu.leads.processor.common.LeadsListener;
+import eu.leads.processor.core.Tuple;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.concurrent.FutureListener;
 import org.infinispan.commons.util.concurrent.NotifyingFuture;
@@ -80,7 +81,19 @@ public class BatchPutListener implements LeadsListener {
             return;
         }
         TupleBuffer tupleBuffer =  new TupleBuffer((byte[])value);
-        targetCache.putAll(tupleBuffer.getBuffer());
+        Map tmpb = tupleBuffer.getBuffer();
+        for(Map.Entry<Object,Tuple> entry : tupleBuffer.getBuffer().entrySet()){
+            tmpb.put(entry.getKey(), entry.getValue());
+            if(tmpb.size() > 10) {
+                targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
+                    .putAll(tmpb);//entry.getKey(), entry.getValue());
+            }
+        }
+        if(tmpb.size() > 0){
+            targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
+                .putAll(tmpb);
+        }
+
         tupleBuffer.getBuffer().clear();
         tupleBuffer=null;
 //            oldMap = tupleBuffer.getBuffer();

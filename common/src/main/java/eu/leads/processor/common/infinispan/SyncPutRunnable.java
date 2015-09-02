@@ -2,7 +2,10 @@ package eu.leads.processor.common.infinispan;
 
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
+import org.infinispan.Cache;
 import org.infinispan.commons.api.BasicCache;
+import org.infinispan.context.Flag;
+import org.infinispan.ensemble.cache.EnsembleCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +18,7 @@ public class SyncPutRunnable implements Runnable {
     private Object value;
     private Logger logger;
     private ProfileEvent event;
+    private boolean remote = true;
 
     public SyncPutRunnable(){
         logger = LoggerFactory.getLogger(SyncPutRunnable.class);
@@ -35,7 +39,12 @@ public class SyncPutRunnable implements Runnable {
                 try {
 //                    System.err.println("BEF PUT-----Key: " + key + "--Size:" + value.toString().length());
 //                    System.out.println("BEF PUT-----Key: " + key + "--Size:" + value.toString().length());
-                    cache.put(key, value);
+                    if(remote) {
+                        cache.put(key, value);
+                    }
+                    else{
+                        ((Cache)cache).getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).put(key,value);
+                    }
 //                    System.err.println("AFT PUT-----Key: " + key + "--Size:" + value.toString().length());
 //                    System.out.println("AFT PUT-----Key: " + key + "--Size:" + value.toString().length());
                     done = true;
@@ -59,6 +68,7 @@ public class SyncPutRunnable implements Runnable {
         this.cache=cache;
         this.key = key;
         this.value = value;
+        remote = (cache instanceof EnsembleCache);
     }
 
 

@@ -77,7 +77,7 @@ public class EnsembleCacheUtils {
 //            microcloudThreads  = new ConcurrentHashMap<>();
             microcloudRunnables = new ConcurrentLinkedDeque<>();
             for (int index = 0; index < totalBatchPutThreads; index++){
-                microcloudRunnables.add(new BatchPutRunnable(10));
+                microcloudRunnables.add(new BatchPutRunnable(1000));
             }
             ensembleManagers = new ConcurrentHashMap<>();
             partitioner = null;

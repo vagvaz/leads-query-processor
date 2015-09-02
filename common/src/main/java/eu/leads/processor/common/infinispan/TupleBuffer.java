@@ -98,7 +98,7 @@ public class TupleBuffer {
         uuid = UUID.randomUUID().toString();
     }
     public String getMC(){return mc;}
-    public Map getBuffer(){
+    public Map<Object,Tuple> getBuffer(){
         return buffer;
     }
 
@@ -246,9 +246,24 @@ public class TupleBuffer {
         synchronized (mutex){
             if(buffer == null || buffer.size() == 0)
                 return null;
-            Map tmp = buffer;
+            Map<Object,Tuple> tmp = buffer;
             buffer = new HashMap<>();
-            localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).putAll(tmp);
+            Map<Object,Tuple> tmpb = new HashMap<>();
+
+            for(Map.Entry<Object,Tuple> entry : tmp.entrySet()){
+
+                tmpb.put(entry.getKey(), entry.getValue());
+                if(tmpb.size() > 10) {
+                    localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
+                        .putAll(tmpb);//entry.getKey(), entry.getValue());
+                    tmpb.clear();
+                }
+            }
+            if(tmpb.size() > 0){
+                localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
+                    .putAll(tmpb);
+            }
+
         }
         return result;
     }

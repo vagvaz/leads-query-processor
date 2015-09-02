@@ -46,8 +46,8 @@ public class PutObjectActionHandler implements ActionHandler {
                String listeners = value.getString("listener");
                if(listeners.contains("localIndexListener")) {
 
-                  Cache thecache = (Cache) persistence.getPersisentCache(cacheName);//, 1000);
-//                  Cache thecache = (Cache) persistence.getInMemoryCache(cacheName, 1000);
+//                  Cache thecache = (Cache) persistence.getPersisentCache(cacheName);//, 1000);
+                  Cache thecache = (Cache) persistence.getInMemoryCache(cacheName, 1000);
                   boolean toadd = true;
                   for (Object l : thecache.getListeners()) {
                      if (l instanceof LocalIndexListener) {
@@ -61,13 +61,13 @@ public class PutObjectActionHandler implements ActionHandler {
                      persistence.addListener(listener, cacheName);
                   }
                   if(listeners.contains("batchputListener")){
-                     Cache compressedCache = (Cache) persistence.getPersisentCache(cacheName+".compressed");
+                     Cache compressedCache = (Cache) persistence.getInMemoryCache(cacheName+".compressed",4000);
                      BatchPutListener listener = new BatchPutListener(compressedCache.getName(),cacheName);
                      persistence.addListener(listener,compressedCache.getName());
                   }
                }
                else if (listeners.contains("batchputListener")){
-                  Cache compressedCache = (Cache) persistence.getPersisentCache(cacheName+".compressed");
+                  Cache compressedCache = (Cache) persistence.getInMemoryCache(cacheName+".compressed",4000);
                   BatchPutListener listener = new BatchPutListener(compressedCache.getName(),cacheName);
                   persistence.addListener(listener,compressedCache.getName());
                   Cache thecache = (Cache) persistence.getPersisentCache(cacheName);
