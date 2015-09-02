@@ -13,6 +13,7 @@ import org.infinispan.notifications.cachelistener.event.CacheEntryCreatedEvent;
 import org.infinispan.notifications.cachelistener.event.CacheEntryModifiedEvent;
 import org.vertx.java.core.json.JsonObject;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -74,43 +75,46 @@ public class BatchPutListener implements LeadsListener {
     }
 
     private void batchPut(Object key, Object value) {
-//        System.out.println("RUN BatchPut");
-        byte[] b = (byte[]) value;
-        if(b.length == 1 && b[0]==-1){
-            waitForPendingPuts();
-            return;
-        }
-        TupleBuffer tupleBuffer =  new TupleBuffer((byte[])value);
-        Map tmpb = tupleBuffer.getBuffer();
-        for(Map.Entry<Object,Tuple> entry : tupleBuffer.getBuffer().entrySet()){
-            tmpb.put(entry.getKey(), entry.getValue());
-            if(tmpb.size() > 10) {
-                targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
-                    .putAll(tmpb);//entry.getKey(), entry.getValue());
+        //        System.out.println("RUN BatchPut");
+        try {
+            byte[] b = (byte[]) value;
+            if (b.length == 1 && b[0] == -1) {
+                waitForPendingPuts();
+                return;
+            }
+            TupleBuffer tupleBuffer = new TupleBuffer((byte[]) value);
+            Map tmpb = new HashMap();
+            for (Map.Entry<Object, Tuple> entry : tupleBuffer.getBuffer().entrySet()) {
+                tmpb.put(entry.getKey(), entry.getValue());
+                if (tmpb.size() > 10) {
+                    targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).putAll(tmpb);//entry.getKey(), entry.getValue());
+                    tmpb.clear();
+                }
+
+            }
+            if (tmpb.size() > 0) {
+                targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).putAll(tmpb);
                 tmpb.clear();
             }
 
-        }
-        if(tmpb.size() > 0){
-            targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
-                .putAll(tmpb);
-            tmpb.clear();
-        }
+            tupleBuffer.getBuffer().clear();
+            tupleBuffer = null;
+            //            oldMap = tupleBuffer.getBuffer();
+            ////            synchronized (mutex) {
+            //                NotifyingFuture f = targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
+            //                    .putAllAsync(oldMap).attachListener(new FutureListener() {
+            //                        @Override public void futureDone(Future future) {
+            ////                            synchronized (mutex) {
+            //                                futures.remove(future);
+            ////                            }
+            //                        }
+            //                    });
+            //                futures.put(f, f);
+            //            }
 
-        tupleBuffer.getBuffer().clear();
-        tupleBuffer=null;
-//            oldMap = tupleBuffer.getBuffer();
-////            synchronized (mutex) {
-//                NotifyingFuture f = targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
-//                    .putAllAsync(oldMap).attachListener(new FutureListener() {
-//                        @Override public void futureDone(Future future) {
-////                            synchronized (mutex) {
-//                                futures.remove(future);
-////                            }
-//                        }
-//                    });
-//                futures.put(f, f);
-//            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @CacheEntryModified

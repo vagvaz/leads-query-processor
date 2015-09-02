@@ -134,7 +134,7 @@ public class InsertOperator extends BasicOperator {
     log.info("inserting into " + ecache.getName() + " "
 
             + key + "     \n" + data.toString());
-    EnsembleCacheUtils.putToCache(ecache, key, data);
+    EnsembleCacheUtils.putToCacheDirect(ecache, key, data);
     if(checkIndex_usage())
     for (String column : data.getFieldNames()) {
       LeadsIndexHelper lindHelp = new LeadsIndexHelper();
