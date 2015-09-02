@@ -1,5 +1,6 @@
 package eu.leads.processor.core.index;
 
+import eu.leads.processor.common.infinispan.CacheManagerFactory;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
@@ -19,10 +20,10 @@ public class TestLeadsIndex {
 
     public static void main(String[] args){
         LQPConfiguration.initialize();
-//        InfinispanManager man2 = CacheManagerFactory.createCacheManager();
+       //InfinispanManager man = CacheManagerFactory.createCacheManager();
 //        Cache cachefoo = (Cache) man2.getPersisentCache("queriesfoo");
         InfinispanManager man = InfinispanClusterSingleton.getInstance().getManager();
-        Cache cache = (Cache) man.getPersisentCache("defaultCache");
+        Cache cache = (Cache) man.getIndexedPersistentCache("IIdefaultCache");
 
         int numStrings = 1000;// 10000
         int numTuples = 500;// 15000000
@@ -73,7 +74,7 @@ public class TestLeadsIndex {
         SearchManager sm = org.infinispan.query.Search.getSearchManager(cache);
         QueryFactory qf = sm.getQueryFactory();
         org.infinispan.query.dsl.Query lucenequery = qf.from(LeadsIndexString.class)
-                .having("attributeName").eq("attributeName")
+                .having("attributeValue").eq("asdfasd")
                 .toBuilder().build();
         List<LeadsIndex> list = lucenequery.list();
 

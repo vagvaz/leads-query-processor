@@ -169,10 +169,18 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 					return left.and().having("attributeValue").eq(oright);//,right.getValueAsJson());
 				break;
 			case IS_NULL:
-				// result = left.isValueNull();
+				if (qleft != null && oright != null)
+					return qleft.having("attributeValue").isNull();//,right.getValueAsJson());
+				if (left != null && oright != null)
+					return left.and().having("attributeValue").isNull();//,right.getValueAsJson());
 				break;
+
 			case NOT_EQUAL:
-				//  result = !(MathUtils.equals(left.getValueAsJson(), right.getValueAsJson()));
+				if (qleft != null && oright != null)
+					return qleft.having("attributeValue").eq(oright);//,right.getValueAsJson());
+				if (qleft != null && oright != null)
+					return qleft.having("attributeValue").eq(oright);//,right.getValueAsJson());
+
 				break;
 			case FIELD:
 				String collumnName = root.getValueAsJson().getObject("body").getObject("column").getString("name");
@@ -206,7 +214,6 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 				type = datum.getObject("body").getString("type");
 				String ret ="";
 				System.out.println("Callable Found Const: " + datum.getObject("body").toString());
-
 
 				try {
 					if (type.equals("TEXT"))
@@ -274,17 +281,30 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 		ArrayList<FilterConditionContext> right = null;
 		switch (root.getType()) {
 			case AND: {
-				left = createLuceneQuerys(indexCaches, root.getLeft());
-				right = createLuceneQuerys(indexCaches, root.getRight());
-				System.out.println("Fix AND with multiple indexes");
+				//left = createLuceneQuerys(indexCaches, root.getLeft());
+				//right = createLuceneQuerys(indexCaches, root.getRight());
+				FilterConditionContext lqual = (FilterConditionContext) getSubLucene(indexCaches, root.getLeft());
+				FilterConditionContext rqual = (FilterConditionContext) getSubLucene(indexCaches, root.getRight());
+				if(lqual !=null && rqual !=null) {
+					System.out.println("AND SubQual " + root.getType());
+					FilterConditionContext qual = lqual.and(rqual);
+					if (qual != null)
+						result.add(qual);
+				}
+				//System.out.println("Fix AND with multiple indexes");
 			}
 			break;
 			case OR: {
-				left = createLuceneQuerys(indexCaches, root.getLeft());
-				right = createLuceneQuerys(indexCaches, root.getRight());
-				//if(left !=null && right !=null){
-				//use sketches to check
-				System.out.println("Fix OR with multiple indexes");
+				FilterConditionContext lqual = (FilterConditionContext) getSubLucene(indexCaches, root.getLeft());
+				FilterConditionContext rqual = (FilterConditionContext) getSubLucene(indexCaches, root.getRight());
+
+				if(lqual !=null && rqual !=null) {
+					System.out.println("OR SubQual " + root.getType());
+					FilterConditionContext qual = lqual.or(rqual);
+					if (qual != null)
+						result.add(qual);
+				}
+
 			}
 			break;
 			default: {
