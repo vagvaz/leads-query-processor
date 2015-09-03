@@ -158,6 +158,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         if(l instanceof BatchPutListener){
           BatchPutListener listener = (BatchPutListener) l;
           listener.waitForPendingPuts();
+          break;
         }
       }
     }

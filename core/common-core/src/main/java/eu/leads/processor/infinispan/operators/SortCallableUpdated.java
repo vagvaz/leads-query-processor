@@ -103,7 +103,7 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
 //                         +"."+imanager.getMemberName(),
 //                        prefix+"."+LQPConfiguration.getInstance().getMicroClusterName()
 //                          +"."+imanager.getMemberName());
-    EnsembleCacheUtils.putToCache(addressesCache,outputCache.getName(),outputCache.getName());
+    EnsembleCacheUtils.putToCacheDirect(addressesCache,outputCache.getName(),outputCache.getName());
     tuples.clear();
     super.finalizeCallable();
   }

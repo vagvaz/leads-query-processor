@@ -1,5 +1,6 @@
 package eu.leads.processor.common.infinispan;
 
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.infinispan.ComplexIntermediateKey;
 import org.bson.BSONDecoder;
@@ -35,10 +36,13 @@ public class TupleBuffer {
     private transient String mc;
     private String cacheName;
     private transient String uuid;
+    private int batchThreshold = 10;
+
     public TupleBuffer(){
         buffer = new HashMap<>();
         threshold = 500;
         localCounter = 0;
+        batchThreshold = LQPConfiguration.getInstance().getConfiguration().getInt("node.ensemble.batchput.batchsize",batchThreshold);
     }
     public TupleBuffer(byte[] bytes){
         BSONDecoder decoder = new BasicBSONDecoder();
@@ -73,6 +77,8 @@ public class TupleBuffer {
         this.threshold = threshold;
         localCounter = 0;
         uuid = UUID.randomUUID().toString();
+        batchThreshold = LQPConfiguration.getInstance().getConfiguration().getInt(
+            "node.ensemble.batchput.batchsize", batchThreshold);
     }
 
     public TupleBuffer(int threshold, BasicCache cache, EnsembleCacheManager ensembleCacheManager) {
@@ -84,6 +90,8 @@ public class TupleBuffer {
         localCounter = 0;
         this.cacheName = cache.getName();
         uuid = UUID.randomUUID().toString();
+        batchThreshold = LQPConfiguration.getInstance().getConfiguration().getInt(
+            "node.ensemble.batchput.batchsize", batchThreshold);
     }
 
     public TupleBuffer(int threshold, String cacheName, EnsembleCacheManager ensembleCacheManager,String mc) {
@@ -96,6 +104,8 @@ public class TupleBuffer {
         localCounter = 0;
         this.cacheName = cacheName;
         uuid = UUID.randomUUID().toString();
+        batchThreshold = LQPConfiguration.getInstance().getConfiguration().getInt(
+            "node.ensemble.batchput.batchsize", batchThreshold);
     }
     public String getMC(){return mc;}
     public Map<Object,Tuple> getBuffer(){
@@ -253,7 +263,7 @@ public class TupleBuffer {
             for(Map.Entry<Object,Tuple> entry : tmp.entrySet()){
 
                 tmpb.put(entry.getKey(), entry.getValue());
-                if(tmpb.size() > 10) {
+                if(tmpb.size() > batchThreshold) {
                     localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
                         .putAll(tmpb);//entry.getKey(), entry.getValue());
                     tmpb.clear();

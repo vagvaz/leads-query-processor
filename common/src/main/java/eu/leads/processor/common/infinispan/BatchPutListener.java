@@ -86,7 +86,7 @@ public class BatchPutListener implements LeadsListener {
             Map tmpb = new HashMap();
             for (Map.Entry<Object, Tuple> entry : tupleBuffer.getBuffer().entrySet()) {
                 tmpb.put(entry.getKey(), entry.getValue());
-                if (tmpb.size() > 10) {
+                if (tmpb.size() > 20) {
                     targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).putAll(tmpb);//entry.getKey(), entry.getValue());
                     tmpb.clear();
                 }

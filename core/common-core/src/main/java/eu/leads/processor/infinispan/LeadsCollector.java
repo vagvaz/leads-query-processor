@@ -174,6 +174,7 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
   }
 
   public void initializeCache(String inputCacheName,InfinispanManager imanager){
+    counter = 0;
     this.imanager = imanager;
     log = LoggerFactory.getLogger(LeadsCollector.class);
 
