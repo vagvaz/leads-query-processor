@@ -6,7 +6,7 @@
 		<user>vagvaz</user>
 		<prefix>/user/vagvaz/</prefix>
 	</hdfs>
-	<scheduler>chedulerip</scheduler>
+	<scheduler>http://localhost:5001</scheduler>
 	<deploymentType>multicloud</deploymentType>
 	<adresses>
 		<MC name='hamm5'>

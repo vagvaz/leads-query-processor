@@ -383,8 +383,9 @@ public class Boot2 {
         //set also global variable adresses to
         webserviceJson = set_global_addresses(webserviceJson, webserviceAlladresses, compAlladresses);
         log_sinkJson = set_global_addresses(log_sinkJson, webserviceAlladresses, compAlladresses);
-        instancesCnt = 0;
+
         for (Map.Entry<String, JsonArray> entry : allmcAddrs.entrySet()) {
+            instancesCnt=0;
             JsonArray pAddrs = entry.getValue();
             if (pAddrs.size() == 0)
                 continue;
@@ -402,11 +403,11 @@ public class Boot2 {
             //TODO Check if successfull deployment ...
 
             //deploy all other components
-            for (int s = 0; s < pAddrs.size() && instancesCnt < componentsInstancesNames.size(); s++) {
+            for (int s = 0; /*s < pAddrs.size() &&*/ instancesCnt < componentsInstancesNames.size(); s++) {
                 JsonObject modJson = componentsJson.get(componentsInstancesNames.get(instancesCnt));
                 modJson = set_global_addresses(modJson, webserviceAlladresses, compAlladresses);
                 deployComponent(componentsInstancesNames.get(instancesCnt).toString(), modJson, pAddrs.get(s).toString());
-                System.out.println("\nStarted : " + componentsInstancesNames.get(instancesCnt) + " At: " + pAddrs.get(s).toString() + "Waiting for " + sleepTime + " seconds to start the next module.");
+                System.out.println(" \n\nStarted : " + componentsInstancesNames.get(instancesCnt) + " At: " + pAddrs.get(instancesCnt%pAddrs.size()).toString() + " Waiting for " + sleepTime + " seconds to start the next module.");
                 instancesCnt++;
             }
         }
@@ -612,7 +613,7 @@ public class Boot2 {
         if (conf.containsKey("processor.vertxArg"))
             command += " -" + conf.getString("processor.vertxArg");
 
-        //runRemotely(modJson.getString("id"), ip, command);
+        runRemotely(modJson.getString("id"), ip, command);
         for (int t = 0; t < sleepTime * 2; t++) {
             System.out.print(".");
             try {
@@ -636,19 +637,19 @@ public class Boot2 {
                 // run top within that bash session
                 String command0 = "cd ~/.vertx_mods && screen -S " + session_name;
                 // run top within that bash session
-                command1 = command0 + " screen -S  " + session_name + " -p " + (pagecounter++) + " -X stuff $\"" + " bash -l &&" + command + "\\r\"";//ping 147.27.18.1";
+                command1 = command0 + " screen -S  " + session_name + " -p " + (pagecounter++) + " -X stuff $\"" + " bash -l &&" + command /*+ "\\r\""*/;//ping 147.27.18.1";
             } else {
                 session_name = "shell_" + ip;
                 screensIPmap.put(ip, session_name);
                 String command0 = "cd ~/.vertx_mods && screen -AmdS " + session_name + " bash -l";
                 // run top within that bash session
-                command1 = command0 + " && " + "screen -S  " + session_name + " -p \" + (pagecounter++) +\" -X stuff $\"" + command + "\\r\"";//ping 147.27.18.1";
+                command1 = command0 + " && " + "screen -S  " + session_name + " -p \" + (pagecounter++) +\" -X stuff $\"" + command /*+ "\\r\""*/;//ping 147.27.18.1";
             }
 
         } else {
             String command0 = "cd ~/.vertx_mods &&  screen -AmdS shell_" + id + " bash -l";
             // run top within that bash session
-            command1 = command0 + " && " + "screen -S shell_" + id + " -p 0 -X stuff $\"" + command + "\\r\"";//ping 147.27.18.1";
+            command1 = command0 + " && " + "screen -S shell_" + id + " -p 0 -X stuff $\"" + command/* + "\\r\""*/;//ping 147.27.18.1";
         }
 
         System.out.print("Cmd: " + command1);
