@@ -1,5 +1,6 @@
 package eu.leads.processor.infinispan;
 
+import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.BerkeleyDBIndex;
 import eu.leads.processor.common.LeadsListener;
@@ -76,7 +77,7 @@ public class LocalIndexListener implements LeadsListener {
         }
 
         //        if(event.getKey() instanceof ComplexIntermediateKey) {
-        pevent.start("IndexPut");
+//        pevent.start("IndexPut");
             ComplexIntermediateKey key = (ComplexIntermediateKey) event.getKey();
 //        System.err.println("PREKey created " + event.getKey() + " key " + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
 //        if(index instanceof BerkeleyDBIndex) {
@@ -84,7 +85,7 @@ public class LocalIndexListener implements LeadsListener {
 //        }
 
         index.put(key.getKey(), event.getValue());
-        pevent.end();
+//        pevent.end();
 //        targetCache.removeAsync(event.getKey());
 //            synchronized (mutex){
 //                mutex.notifyAll();
@@ -100,14 +101,15 @@ public class LocalIndexListener implements LeadsListener {
 //            System.err.println("PREKey modified " + event.getKey() + " key "  + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
             return;
         }
-        System.err.println("local " + event.isOriginLocal() + " " + event.isCommandRetried() + " " + event.isCreated() + " " + event.isPre());
+//        System.err.println("local " + event.isOriginLocal() + " " + event.isCommandRetried() + " " + event.isCreated() + " " + event.isPre());
+        log.error("orig " + event.isOriginLocal() + " ret " + event.isCommandRetried() + " crea " + event.isCreated() + " pre  " + event.isPre());
 
-        pevent.start("IndexPut");
+//        pevent.start("IndexPut");
 //        if(event.getKey() instanceof ComplexIntermediateKey) {
             ComplexIntermediateKey key = (ComplexIntermediateKey) event.getKey();
-            System.err.println("AFTERValue modified " + event.getKey() + " key " + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
+//            System.err.println("AFTERValue modified " + event.getKey() + " key " + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
             index.put(key.getKey(),event.getValue());
-        pevent.end();
+//        pevent.end();
 //            synchronized (mutex){
 //                mutex.notifyAll();
 //            }
@@ -129,7 +131,7 @@ public class LocalIndexListener implements LeadsListener {
         this.keysCache = manager.getLocalCache(cacheName+".index.keys");
         this.dataCache = manager.getLocalCache(cacheName+".index.data");
 //        this.index = new IntermediateKeyIndex(keysCache,dataCache);
-        this.index = new LevelDBIndex( System.getProperties().getProperty("java.io.tmpdir")+"/"+StringConstants.TMPPREFIX+"/interm-index/"+manager.getUniquePath()+"/"+cacheName,cacheName+".index");
+        this.index = new LevelDBIndex( System.getProperties().getProperty("java.io.tmpdir")+"/"+StringConstants.TMPPREFIX+"/interm-index/"+ InfinispanClusterSingleton.getInstance().getManager().getUniquePath()+"/"+cacheName,cacheName+".index");
         log = LoggerFactory.getLogger(LocalIndexListener.class);
         pevent = new ProfileEvent("indexPut",log);
     }

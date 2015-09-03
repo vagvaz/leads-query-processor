@@ -116,7 +116,7 @@ public class FilterOperator extends BasicOperator {
    public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
       Set<String> targetMC = getTargetMC();
       for(String mc : targetMC){
-         createCache(mc,getOutput());
+         createCache(mc,getOutput(),"batchputListener");
       }
    }
 

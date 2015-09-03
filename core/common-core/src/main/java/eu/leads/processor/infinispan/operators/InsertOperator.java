@@ -38,20 +38,18 @@ import java.util.Set;
 public class InsertOperator extends BasicOperator {
 
 
-	private ArrayList<Cache> indexCaches = null;
 	private static int indexedSize = 0;
-
-	public InsertOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
-		super(com, persistence, log, action);
-	}
-
+	transient protected EnsembleCacheManager emanager;
+	transient protected EnsembleCache ecache;
 	Tuple data;
 	String key = "";
 	String tableName;
 	Version version = null;
-	transient protected EnsembleCacheManager emanager;
+	private ArrayList<Cache> indexCaches = null;
 	private String ensembleHost;
-	transient protected EnsembleCache ecache;
+	public InsertOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
+		super(com, persistence, log, action);
+	}
 
 	@Override
 	public void init(JsonObject config) {
@@ -126,8 +124,9 @@ public class InsertOperator extends BasicOperator {
 		}
 		boolean inserted = false;
 
-		log.info("inserting into " + ecache.getName() + " " + key + "   \n" + data.toString());
-		EnsembleCacheUtils.putToCache(ecache, key, data);
+//      long size = targetCache.size();
+		log.info("inserting into " + ecache.getName() + " "	+ key + "     \n" + data.toString());
+		EnsembleCacheUtils.putToCacheDirect(ecache, key, data);
 		if (checkIndex_usage())
 			for (String column : data.getFieldNames()) {
 				LeadsIndexHelper lindHelp = new LeadsIndexHelper();

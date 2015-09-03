@@ -28,7 +28,6 @@ public class HDFSStorage implements LeadsStorage {
     private Logger log = LoggerFactory.getLogger(HDFSStorage.class);
     private Path basePath;
     private Properties storageConfiguration;
-    private LocalFileStorage cache = new LocalFileStorage();
     UserGroupInformation ugi;
     private String predeployedPath = "/tmp/cache";
 
@@ -46,10 +45,8 @@ public class HDFSStorage implements LeadsStorage {
         if(configuration.containsKey("local_prefix")){
             Properties properties = new Properties();
             properties.setProperty("prefix",configuration.getProperty("local_prefix"));
-            cache.initialize(properties);
         }
         else{
-            cache.initialize(new Properties());
         }
 
         if (!result)
@@ -205,11 +202,11 @@ public class HDFSStorage implements LeadsStorage {
     public String[] parts(String uri) {
         String[] result = null;
         try {
-            FileStatus[] subPaths = fileSystem.listStatus(new Path(basePath.toUri().toString() + uri));
+            FileStatus[] subPaths = fileSystem.listStatus(new Path(basePath.toUri().toString()+"/" + uri));
             result = new String[subPaths.length];
             for (int index = 0; index < subPaths.length; index++) {
                 //System.out.println("path :" + subPaths[index].getPath().toString());
-                result[index] = basePath.toUri().toString() + uri+"/"+index;//subPaths[index].getPath().toString();
+                result[index] = basePath.toUri().toString()+"/" + uri+"/"+index;//subPaths[index].getPath().toString();
                 //System.out.println("path :" + result[index]);
             }
         } catch (IOException e) {

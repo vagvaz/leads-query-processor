@@ -180,10 +180,10 @@ public class SortOperator extends BasicOperator {
 //         String prefix = action.getData().getObject("data").getString("prefix");
          for (Address cacheNodes : inputCache.getAdvancedCache().getRpcManager().getMembers()) {
             String tmpCacheName = prefix + "." + currentCluster + "." + cacheNodes.toString();
-            createCache(coordinator, tmpCacheName);
+            createCache(coordinator, tmpCacheName,"batchputListener");
          }
 //         manager.getPersisentCache();
-         createCache(coordinator,prefix+"."+currentCluster+"."+manager.getMemberName().toString());
+         createCache(coordinator,prefix+"."+currentCluster+"."+manager.getMemberName().toString(),"batchputListener");
       } else {
          if (executeOnlyMap) {
             if(pendingMMC.contains(currentCluster)) {
@@ -197,7 +197,7 @@ public class SortOperator extends BasicOperator {
             Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
             Set<String> targetMC = getTargetMC();
             for (String mc : targetMC) {
-               createCache(mc, getOutput());
+               createCache(mc, getOutput(),"batchputListener");
             }
          }
 

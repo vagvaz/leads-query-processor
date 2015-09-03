@@ -30,10 +30,10 @@ public class PluginDeployer {
     String pluginClass = LQPConfiguration.getInstance().getConfiguration().getString("plugin.class");
     List<String> events = LQPConfiguration.getInstance().getConfiguration().getList("plugin.events");
     String cache = LQPConfiguration.getInstance().getConfiguration().getString("plugin.cache");
-    String webserviceHost = LQPConfiguration.getInstance().getConfiguration().getString("qe.webservice.host");
-    String user = LQPConfiguration.getInstance().getConfiguration().getString("plugin.user");
-    boolean upload = LQPConfiguration.getInstance().getConfiguration().getBoolean("plugin.upload");
-    boolean uploadJar = LQPConfiguration.getInstance().getConfiguration().getBoolean("plugin.jar.upload");
+    String webserviceHost = LQPConfiguration.getInstance().getConfiguration().getString("qe.webservice.host","http://127.0.0.1");
+    String user = LQPConfiguration.getInstance().getConfiguration().getString("plugin.user","test");
+    boolean upload = LQPConfiguration.getInstance().getConfiguration().getBoolean("plugin.upload",true);
+    boolean uploadJar = LQPConfiguration.getInstance().getConfiguration().getBoolean("plugin.jar.upload",true);
 
 
     boolean undeploy  = false;

@@ -101,12 +101,12 @@ public abstract class MapReduceOperator extends BasicOperator{
     Set<String> targetMC = getTargetMC();
     if(!isRemote) {
       for (String mc : targetMC) {
-        createCache(mc, getOutput());
+        createCache(mc, getOutput(),"batchputListener");
         //      createCache(mc, intermediateCacheName);
         //create Intermediate cache name for data on the same Sites as outputCache
         if(conf.containsField("skipMap")) {
           if(!conf.getBoolean("skipMap"))
-            createCache(mc, intermediateCacheName + ".data", "localIndexListener");
+            createCache(mc, intermediateCacheName + ".data", "localIndexListener:batchputListener");
         }
         //create Intermediate  keys cache name for data on the same Sites as outputCache;
         //      createCache(mc,intermediateCacheName+".keys");

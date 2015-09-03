@@ -1,14 +1,11 @@
 package eu.leads.processor.infinispan;
 
-import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
-import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
-import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.infinispan.*;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.index.*;
 import eu.leads.processor.core.EngineUtils;
-import eu.leads.processor.infinispan.operators.ScanCallableUpdate;
 import eu.leads.processor.math.FilterOpType;
 import eu.leads.processor.math.FilterOperatorNode;
 import eu.leads.processor.math.FilterOperatorTree;
@@ -104,6 +101,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       profilerLog.error("EnsembleHost EXIST " + ensembleHost);
       System.err.println("EnsembleHost EXIST " + ensembleHost);
       emanager = new EnsembleCacheManager(ensembleHost);
+      EnsembleCacheUtils.initialize(emanager);
 //      emanager.start();
 //      emanager = createRemoteCacheManager();
 //      ecache = emanager.getCache(output,new ArrayList<>(emanager.sites()),
@@ -114,6 +112,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       System.err.println("EnsembleHost NULL");
       tmpprofCallable.start("Start EnsemlbeCacheManager");
       emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
+      EnsembleCacheUtils.initialize(emanager);
 //      emanager.start();
 //            emanager = createRemoteCacheManager();
     }
@@ -151,6 +150,17 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     profCallable.start("Call getComponent ()");
     final ClusteringDependentLogic cdl = inputCache.getAdvancedCache().getComponentRegistry().getComponent
                                                                                     (ClusteringDependentLogic.class);
+    String compressedCacheName = inputCache.getName() +".compressed";
+    if(inputCache.getCacheManager().cacheExists(compressedCacheName))
+    {
+      Cache compressedCache = inputCache.getCacheManager().getCache(compressedCacheName);
+      for(Object l : compressedCache.getListeners()){
+        if(l instanceof BatchPutListener){
+          BatchPutListener listener = (BatchPutListener) l;
+          listener.waitForPendingPuts();
+        }
+      }
+    }
     int count = 0;
     profCallable.end();
     ProfileEvent profExecute = new ProfileEvent("Buildinglucece" + this.getClass().toString(), profilerLog);
@@ -191,10 +201,10 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
         if (value != null) {
 //          profExecute.start("ExOn" + (++count));
-          ExecuteRunnable runable = EngineUtils.getRunnable();
-          runable.setKeyValue(key, value,this);
-          EngineUtils.submit(runable);
-//          executeOn((K) key, value);
+//          ExecuteRunnable runable = EngineUtils.getRunnable();
+//          runable.setKeyValue(key, value,this);
+//          EngineUtils.submit(runable);
+          executeOn((K) key, value);
 //          profExecute.end();
 	}
          profExecute.start("ISPNIter");
@@ -240,6 +250,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         }
       } catch (Exception e) {
         profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
+        e.printStackTrace();
         PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
       }
     }

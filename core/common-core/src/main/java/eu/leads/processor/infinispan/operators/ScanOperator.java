@@ -92,9 +92,10 @@ public class ScanOperator extends BasicOperator {
 		Set<String> targetMC = getTargetMC();
 		for (String mc : targetMC) {
 			if (!conf.containsField("next")) {
-				createCache(mc, getOutput());
-			} else {
-				createCache(mc, getOutput() + ".data", "localIndexListener");
+			   createCache(mc,getOutput(),"batchputListener");
+                         }
+                         else{
+                            createCache(mc, getOutput() + ".data", "localIndexListener:batchputListener");
 			}
 		}
 	}
@@ -288,6 +289,7 @@ public class ScanOperator extends BasicOperator {
 				return null;
 			case LTH:
 				return 0.4;
+
 ////        if(left !=null && oright !=null)
 ////          return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
 //        return null;

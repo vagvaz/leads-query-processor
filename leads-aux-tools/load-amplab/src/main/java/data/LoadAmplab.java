@@ -91,6 +91,7 @@ public class LoadAmplab {
                 String ensembleString = args[2];
                 System.out.println("Using ensemble sring " + ensembleString);
                 emanager = new EnsembleCacheManager(ensembleString);
+                EnsembleCacheUtils.initialize(emanager,false);
                 System.out.println("Emanager has " + emanager.sites().size() + " sites");
                 emanager.start();
             }else{
@@ -539,9 +540,9 @@ public class LoadAmplab {
     private static void put(String key, BSONObject value) {
         Tuple tuple = new Tuple(value);
         if (remoteCache != null)
-            EnsembleCacheUtils.putToCache(remoteCache, remoteCache.getName() + ":" + key, tuple);
+            EnsembleCacheUtils.putToCacheDirect(remoteCache, remoteCache.getName() + ":" + key, tuple);
         else if (embeddedCache != null)
-            EnsembleCacheUtils.putToCache(embeddedCache,
+            EnsembleCacheUtils.putToCacheDirect(embeddedCache,
                     ((Cache) embeddedCache).getName() + ":" + key, tuple);
         else if (ensembleCache!=null)
             EnsembleCacheUtils.putToCache(ensembleCache, ensembleCache.getName() + ":" + key, tuple);

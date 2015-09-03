@@ -353,12 +353,12 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
       query.asJsonObject().putBoolean("isSorted",plan.isSorted());
       log.error("Query " + query.getId() + " completed");
       queriesCache.put(queryId,query.asJsonObject().toString());
-//      Collection<PlanNode> nodes = ((Plan)plan.getLogicalPlan()).getNodes();
-//      for(PlanNode n : nodes){
-//         if(!n.getNodeId().equals(outputCacheName)){
-//            persistence.removePersistentCache(n.getNodeId());
-//         }
-//      }
+      Collection<PlanNode> nodes = ((Plan)plan.getLogicalPlan()).getNodes();
+      for(PlanNode n : nodes){
+         if(!n.getNodeId().equals(outputCacheName)){
+            persistence.removePersistentCache(n.getNodeId());
+         }
+      }
       //LATER TODO we could inform Interface Manager about the query completion to inform UIs
    }
 
