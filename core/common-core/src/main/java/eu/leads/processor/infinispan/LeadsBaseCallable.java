@@ -348,7 +348,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   HashSet<LeadsIndex> buildLucene(FilterConditionContext fc){
     if(fc == null)
       return null;
-    System.out.print("Lucene Filter: "+ fc.toString());
+    System.out.println("Lucene Filter: " + fc.toString());
     List<LeadsIndex> list = fc.toBuilder().build().list();
     return new HashSet<LeadsIndex>(list);
   }
@@ -518,7 +518,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
           hright=getLuceneSet(lright);
 
         if(hleft !=null && hright!=null) {
-          System.out.println("Find Intersection");
+          System.out.println("Find Intersection #1: "+ hleft.size()+ " #2: "+ hright.size());
           hleft.retainAll(hright);
           return hleft;
         }
@@ -546,7 +546,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
           hright=getLuceneSet(lright);
 
         if(hleft !=null && hright!=null) {
-          System.out.println("Put all results together");
+          System.out.println("Put all results together #1: "+ hleft.size()+ " #2: "+ hright.size());
           hleft.addAll(hright);
           return hleft;
         }

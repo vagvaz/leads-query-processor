@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import static eu.leads.processor.common.infinispan.EnsembleCacheUtils.putToCache;
+import static eu.leads.processor.common.infinispan.EnsembleCacheUtils.putToCacheDirect;
 
 
 /**
@@ -117,12 +118,13 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
       for (int c = 0; c < columnNames.size(); c++) {
         String column = tableName + '.' + columnNames.get(c);
         LeadsIndex lInd = lindHelp.CreateLeadsIndex(value.getGenericAttribute(column), ikey, column, tableName);
-        putToCache(indexCaches.get(c), ikey, lInd);
-        indexCaches.get(c).put(ikey, lInd);
+        putToCacheDirect(indexCaches.get(c), ikey, lInd);
+        //indexCaches.get(c).put(ikey, lInd);
         sketches.get(c).add(value.getGenericAttribute(column));
       }
     }catch (Exception e){
       System.err.println(" Exception " + key + " " + e.toString());
+      e.printStackTrace();
     }
 
     createIndexExecute.end();
