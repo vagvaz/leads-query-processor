@@ -214,8 +214,6 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       HashSet<LeadsIndex> keys=null;
       if(luceneKeys instanceof LeadsBaseCallable.qualinfo)
       {
-
-
         System.out.print("Building Lucece query ");
         System.out.println("Single qualinfo building query");
         long start=System.currentTimeMillis();
@@ -226,9 +224,10 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       } else if(luceneKeys instanceof HashSet)
         keys=(HashSet<LeadsIndex>)luceneKeys;
 
-      System.out.println(" Callable Found Indexed " + +keys.size() + " results");
       //to do use sketches to find out what to do
       try {
+        System.out.println(" Callable Found Indexed "  +keys.size() + " results");
+
         for (LeadsIndex lst : keys) {
           //System.out.println(lst.getAttributeName()+":"+lst.getAttributeValue());
           K key = (K) lst.getKeyName();
@@ -330,18 +329,21 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
 
   HashSet<LeadsIndex> getLuceneSet(qualinfo l){
-    FilterConditionEndContext f = getFilter(l);
-    FilterConditionContext fc = addFilter(f, l);
+    FilterConditionEndContext f = getHaving(l);
+    FilterConditionContext fc = addCondition(f, l);
     return buildLucene(fc);
   }
 
   HashSet<LeadsIndex> buildLucene(FilterConditionContext fc){
+    if(fc == null)
+      return null;
+    System.out.print("Lucene Filter: "+ fc.toString());
     List<LeadsIndex> list = fc.toBuilder().build().list();
     return new HashSet<LeadsIndex>(list);
   }
 
 
-  FilterConditionContext addFilter(FilterConditionEndContext f, qualinfo l){
+  FilterConditionContext addCondition(FilterConditionEndContext f, qualinfo l){
     FilterConditionContext fc;
     switch (l.opType) {
       case EQUAL:
@@ -368,8 +370,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     return fc;
   }
 
-
-  FilterConditionEndContext getFilter(qualinfo l){
+  FilterConditionEndContext getHaving(qualinfo l){
     SearchManager sm = org.infinispan.query.Search.getSearchManager(indexCaches.get(l.attributeName));
     QueryFactory qf = sm.getQueryFactory();
     org.infinispan.query.dsl.QueryBuilder Qb;
@@ -390,8 +391,6 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     return f;
   }
 
-  //
-
   Object getSubLucene(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
     qualinfo left = null;
     qualinfo right = null;
@@ -402,9 +401,9 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     Object oright = getSubLucene(indexCaches, root.getRight());
 
 
-    if (oleft instanceof ScanCallableUpdate.qualinfo)
+    if (oleft instanceof LeadsBaseCallable.qualinfo)
       left = (qualinfo) oleft;
-    if (oright instanceof ScanCallableUpdate.qualinfo)
+    if (oright instanceof LeadsBaseCallable.qualinfo)
       right = (qualinfo) oright;
 
     try {
@@ -466,18 +465,20 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
     qualinfo lleft = null;
     qualinfo lright = null;
+    if (root==null)
+      return null;
 
     oleft = createLuceneQuerys(indexCaches, root.getLeft());
     oright = createLuceneQuerys(indexCaches, root.getRight());
 
     if(oleft != null){
-      if (oleft instanceof ScanCallableUpdate.qualinfo)
+      if (oleft instanceof LeadsBaseCallable.qualinfo)
         lleft = (qualinfo) oleft;
       if (oleft instanceof HashSet)
         hleft = (HashSet) oleft;
     }
     if(oright != null){
-      if (oright instanceof ScanCallableUpdate.qualinfo)
+      if (oright instanceof LeadsBaseCallable.qualinfo)
         lright = (qualinfo) oright;
       if (oright instanceof HashSet)
         hright = (HashSet) oright;
@@ -487,14 +488,16 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     switch (root.getType()) {
       case AND: {
         if(lleft !=null && lright !=null) {
-          System.out.println("AND SubQual " + root.getType());
+          System.out.println("SubQual " + root.getType());
           if(lleft.attributeName.equals(lright.attributeName))
           {
-            FilterConditionEndContext f = getFilter(lleft);
-            FilterConditionContext fc = addFilter(f,lleft);
-            fc.and().having("attributeValue");
-            FilterConditionContext fc2 = addFilter(fc.and().having("attributeValue"),lright);
-            return buildLucene(fc2);
+            FilterConditionEndContext f = getHaving(lleft);
+            FilterConditionContext fc = addCondition(f, lleft);
+
+            f = fc.and().having("attributeValue");
+
+            fc = addCondition(f, lright);
+            return buildLucene(fc);
           }
         }
         //create sets
@@ -505,7 +508,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
         if(hleft !=null && hright!=null) {
           System.out.println("Find Intersection");
-          return hleft.retainAll(hright);
+          hleft.retainAll(hright);
+          return hleft;
         }
         //System.out.println("Fix AND with multiple indexes");
       }
@@ -515,11 +519,13 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
           System.out.println("OR SubQual " + root.getType());
           if(lleft.attributeName.equals(lright.attributeName))
           {
-            FilterConditionEndContext f = getFilter(lleft);
-            FilterConditionContext fc = addFilter(f,lleft);
-            fc.and().having("attributeValue");
-            FilterConditionContext fc2 = addFilter(fc.or().having("attributeValue"),lright);
-            return buildLucene(fc2);
+            FilterConditionEndContext f = getHaving(lleft);
+            FilterConditionContext fc = addCondition(f, lleft);
+
+            f = fc.or().having("attributeValue");
+
+            fc = addCondition(f, lright);
+            return buildLucene(fc);
           }
         }
         //create sets
@@ -530,7 +536,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
         if(hleft !=null && hright!=null) {
           System.out.println("Put all results together");
-          return hleft.addAll(hright);
+          hleft.addAll(hright);
+          return hleft;
         }
       }
       break;

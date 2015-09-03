@@ -272,7 +272,7 @@ public class ScanOperator extends BasicOperator {
 				JsonObject datum = root.getValueAsJson().getObject("body").getObject("datum");
 				String type = datum.getObject("body").getString("type");
 				Number ret=0;// = MathUtils.getTextFrom(root.getValueAsJson());
-				System.out.println("Operator Found datum: " + ret);
+				//System.out.println("Operator Found datum: " + datum.toString());
 
 				try {
 					if (type.equals("TEXT"))
