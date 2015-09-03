@@ -219,11 +219,11 @@ public class EnsembleCacheUtils {
         //flush remotely batchputlisteners
         for(Map.Entry<String,Map<String,TupleBuffer>> mc : microclouds.entrySet()){
             for(Map.Entry<String,TupleBuffer> cache : mc.getValue().entrySet()){
-//                if(!mc.getKey().equals(localMC)) {
+                if(!mc.getKey().equals(localMC)) {
                     cache.getValue().flushEndToMC();
 //                    cache.getValue().flushEndToMC();
 //                    cache.getValue().flushEndToMC();
-//                }
+                }
             }
         }
 
@@ -262,7 +262,7 @@ public class EnsembleCacheUtils {
     }
 
     private static void batchPutToCache(BasicCache cache, Object key, Object value, boolean b) {
-        if( !((key instanceof String )|| (key instanceof ComplexIntermediateKey)) && !(value instanceof Tuple)){
+        if( !((key instanceof String )|| (key instanceof ComplexIntermediateKey)) || !(value instanceof Tuple)){
             putToCacheDirect(cache,key,value);
         }
         if(b){
