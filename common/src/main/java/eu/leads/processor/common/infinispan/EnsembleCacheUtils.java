@@ -44,6 +44,7 @@ public class EnsembleCacheUtils {
     private static int totalBatchPutThreads =16;
     private static String ensembleString ="";
     private static List<NotifyingFuture> localFutures;
+    private static int localBatchSize =10;
 
 
     public static void initialize() {
@@ -70,8 +71,9 @@ public class EnsembleCacheUtils {
             initialized = true;
 
             //Initialize BatchPut Structures
-            totalBatchPutThreads = LQPConfiguration.getInstance().getConfiguration().getInt("node.ensemble.batchput.threads",1);
-            System.err.println("threads " + threadBatch + " batchSize " + batchSize + " async = " + useAsync +" batchPutThreads " + totalBatchPutThreads);
+            totalBatchPutThreads = LQPConfiguration.getInstance().getConfiguration().getInt("node.ensemble.batchput.threads",4);
+            localBatchSize = LQPConfiguration.getInstance().getConfiguration().getInt("node.ensemble.batchput.batchsize",localBatchSize);
+            System.err.println("threads " + threadBatch + " batchSize " + batchSize + " async = " + useAsync +" batchPutThreads " + totalBatchPutThreads + " localBatch " + localBatchSize);
             batchPutExecutor = new ThreadPoolExecutor(totalBatchPutThreads,totalBatchPutThreads,2000,TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
             microclouds = new ConcurrentHashMap<>();
 //            microcloudThreads  = new ConcurrentHashMap<>();
@@ -318,7 +320,7 @@ public class EnsembleCacheUtils {
         }
         TupleBuffer tupleBuffer = mcBufferMap.get(cache.getName());
         if(tupleBuffer == null){ // create tuple buffer for cache
-            tupleBuffer= new TupleBuffer(batchSize,cache.getName(),ensembleManagers.get(localMC),localMC);
+            tupleBuffer= new TupleBuffer(localBatchSize,cache.getName(),ensembleManagers.get(localMC),localMC);
             microclouds.get(localMC).put(cache.getName(),tupleBuffer);
         }
         if(tupleBuffer.add(key, (Tuple) value)){

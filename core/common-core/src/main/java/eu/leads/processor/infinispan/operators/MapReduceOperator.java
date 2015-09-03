@@ -104,8 +104,8 @@ public abstract class MapReduceOperator extends BasicOperator{
         createCache(mc, getOutput(),"batchputListener");
         //      createCache(mc, intermediateCacheName);
         //create Intermediate cache name for data on the same Sites as outputCache
-        if(conf.containsField("skipMap")) {
-          if(!conf.getBoolean("skipMap"))
+//        if(conf.containsField("skipMap")) {
+          if(!conf.getBoolean("skipMap")){
             createCache(mc, intermediateCacheName + ".data", "localIndexListener:batchputListener");
         }
         //create Intermediate  keys cache name for data on the same Sites as outputCache;
