@@ -49,6 +49,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
   boolean onVersionedCache;
   transient protected long versionStart=-1,versionFinish=-1,range=-1;
   protected LeadsCollector collector;
+  protected int counter = 0;
 
 
     //  transient protected InfinispanManager manager;
@@ -298,7 +299,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
   @Override public void executeOn(K key, V ivalue) {
 
 //    ProfileEvent scanExecute = new ProfileEvent("ScanExecute",profilerLog);
-
+    counter++;
     //         System.err.println(manager.getCacheManager().getAddress().toString() + " "+ entry.getKey() + "       " + entry.getValue());
     Tuple toRunValue = null;
     if (onVersionedCache) {
@@ -500,6 +501,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
   }
 
   @Override public void finalizeCallable() {
+    System.out.println("\n\n\n\nSCC: " + counter);
     fullProcessing.end();
     collector.finalizeCollector();
     super.finalizeCallable();

@@ -43,7 +43,7 @@ public class EnsembleCacheUtils {
     private static ConcurrentLinkedDeque<BatchPutRunnable> microcloudRunnables;
     private static int totalBatchPutThreads =16;
     private static String ensembleString ="";
-    private static List<NotifyingFuture> localFutures;
+    private static ConcurrentLinkedQueue<NotifyingFuture> localFutures;
     private static int localBatchSize =10;
     private static boolean isSetup=false;
 
@@ -86,7 +86,7 @@ public class EnsembleCacheUtils {
             partitioner = null;
             localManager = null;
             localMC =null;
-            localFutures = new ArrayList<>();
+            localFutures = new ConcurrentLinkedQueue<NotifyingFuture>();
         }
     }
 
@@ -96,15 +96,15 @@ public class EnsembleCacheUtils {
 
     public static void initialize(EnsembleCacheManager manager, boolean isEmbedded) {
         synchronized (mutex) {
-            if(isSetup)
-            {
-                if(check(manager)){
-                    return;
-                }else{
-                    System.err.println("Serious ERROR init with different managers");
-                }
-            }
-            isSetup =true;
+//            if(isSetup)
+//            {
+//                if(check(manager)){
+//                    return;
+//                }else{
+//                    System.err.println("Serious ERROR init with different managers");
+//                }
+//            }
+//            isSetup =true;
 
             ensembleString = "";
             ArrayList<EnsembleCache> cachesList = new ArrayList<>();
@@ -347,7 +347,8 @@ public class EnsembleCacheUtils {
             if(tupleBuffer.getMC().equals(localMC)){
                 Cache localCache =
                     (Cache) localManager.getPersisentCache(  tupleBuffer.getCacheName());
-                localFutures.add(tupleBuffer.flushToCache(localCache));
+//                localFutures.add(tupleBuffer.flushToCache(localCache));
+                tupleBuffer.flushToCache(localCache);
                 while(localFutures.size() > threadBatch){
                     Iterator<NotifyingFuture> iterator = localFutures.iterator();
                     while(iterator.hasNext()){

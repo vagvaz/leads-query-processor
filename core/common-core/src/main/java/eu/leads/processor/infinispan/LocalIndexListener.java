@@ -147,6 +147,17 @@ public class LocalIndexListener implements LeadsListener {
     @Override public void close() {
         index.flush();
         index.close();
+        index =null;
+        if(keysCache != null){
+            keysCache.clear();;
+            keysCache.stop();
+        }
+        if(dataCache != null){
+            keysCache.clear();
+            keysCache.stop();
+        }
+        keysCache = null;
+        dataCache = null;
     }
 
     void waitForAllData(){

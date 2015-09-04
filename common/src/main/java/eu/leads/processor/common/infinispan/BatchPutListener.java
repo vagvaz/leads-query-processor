@@ -66,6 +66,8 @@ public class BatchPutListener implements LeadsListener {
 
     @Override public void close() {
         futures.clear();
+        targetCache = null;
+        manager = null;
     }
 
     @CacheEntryCreated
