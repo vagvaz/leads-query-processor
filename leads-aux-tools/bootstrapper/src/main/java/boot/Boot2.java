@@ -637,19 +637,19 @@ public class Boot2 {
                 // run top within that bash session
                 String command0 = "cd ~/.vertx_mods && screen -S " + session_name;
                 // run top within that bash session
-                command1 = command0 + " screen -S  " + session_name + " -p " + (pagecounter++) + " -X stuff $\"" + " bash -l &&" + command+ "\\r\"";//ping 147.27.18.1";
+                command1 = command0 + " screen -S  " + session_name + " -p " + (pagecounter++) + " -X stuff $\'" + " bash -l &&" + command+ "\r\'";//ping 147.27.18.1";
             } else {
                 session_name = "shell_" + ip;
                 screensIPmap.put(ip, session_name);
                 String command0 = "cd ~/.vertx_mods && screen -AmdS " + session_name + " bash -l";
                 // run top within that bash session
-                command1 = command0 + " && " + "screen -S  " + session_name + " -p \" + (pagecounter++) +\" -X stuff $\"" + command + "\\r\"";//ping 147.27.18.1";
+                command1 = command0 + " && " + "screen -S  " + session_name + " -p \" + (pagecounter++) +\" -X stuff $\'" + command + "\r\'";//ping 147.27.18.1";
             }
 
         } else {
             String command0 = "cd ~/.vertx_mods &&  screen -AmdS shell_" + id + " bash -l";
             // run top within that bash session
-            command1 = command0 + " && " + "screen -S shell_" + id + " -p 0 -X stuff $\"" + command + "\\r\"";//ping 147.27.18.1";
+            command1 = command0 + " && " + "screen -S shell_" + id + " -p 0 -X stuff $\'" + command + "\r\'";//ping 147.27.18.1";
         }
 
         System.out.print("Cmd: " + command1);
@@ -745,6 +745,8 @@ public class Boot2 {
             return true;
         }
         JSch jsch = new JSch();
+
+
         Session session;
         try {
             session = createSession(jsch, ip);
@@ -791,10 +793,10 @@ public class Boot2 {
             System.exit(-1);
         }
         session.setConfig("StrictHostKeyChecking", "no");
-
+        jsch.setKnownHosts("~/.ssh/known_hosts");
         session.connect();
         logger.info("Securely connected to " + ip);
-//        System.out.println("Connected");
+        System.out.println("Connected");
         return session;
 
     }
