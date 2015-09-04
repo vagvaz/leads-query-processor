@@ -204,9 +204,9 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
       }
     }else{
-      profCallable.start("Search_Over_Indexed_Data");
+//      profCallable.start("Search_Over_Indexed_Data");
       System.out.println("Search Over Indexed Data");
-      ProfileEvent profExecute = new ProfileEvent("Get list " + this.getClass().toString(), profilerLog);
+//      ProfileEvent profExecute = new ProfileEvent("Get list " + this.getClass().toString(), profilerLog);
       List<LeadsIndex> list = lquery.get(0).list(); //TODO fix it
       System.out.println(" Indexed Data Size: " + list.size());
       //to do use sketches to find out what to do
@@ -216,9 +216,9 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
           K key = (K) lst.getKeyName();
           V value = inputCache.get(key);
           if (value != null) {
-            profExecute.start("ExOn" + (++count));
+//            profExecute.start("ExOn" + (++count));
             executeOn(key, value);
-            profExecute.end();
+//            profExecute.end();
           }
         }
       } catch (Exception e) {
@@ -227,7 +227,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
       }
     }
-    profCallable.end();
+//    profCallable.end();
     finalizeCallable();
     return embeddedCacheManager.getAddress().toString();
   }

@@ -62,11 +62,13 @@ public class PutObjectActionHandler implements ActionHandler {
                   }
                   if(listeners.contains("batchputListener")){
                      Cache compressedCache = (Cache) persistence.getInMemoryCache(cacheName+".compressed",4000);
+//                     Cache compressedCache = (Cache) persistence.getPersisentCache(cacheName+".compressed");
                      BatchPutListener listener = new BatchPutListener(compressedCache.getName(),cacheName);
                      persistence.addListener(listener,compressedCache.getName());
                   }
                }
                else if (listeners.contains("batchputListener")){
+//                  Cache compressedCache = (Cache) persistence.getPersisentCache(cacheName+".compressed");//,4000);
                   Cache compressedCache = (Cache) persistence.getInMemoryCache(cacheName+".compressed",4000);
                   BatchPutListener listener = new BatchPutListener(compressedCache.getName(),cacheName);
                   persistence.addListener(listener,compressedCache.getName());

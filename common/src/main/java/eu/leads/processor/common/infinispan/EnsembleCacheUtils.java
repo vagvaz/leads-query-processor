@@ -45,6 +45,7 @@ public class EnsembleCacheUtils {
     private static String ensembleString ="";
     private static List<NotifyingFuture> localFutures;
     private static int localBatchSize =10;
+    private static boolean isSetup=false;
 
 
     public static void initialize() {
@@ -95,6 +96,15 @@ public class EnsembleCacheUtils {
 
     public static void initialize(EnsembleCacheManager manager, boolean isEmbedded) {
         synchronized (mutex) {
+            if(isSetup)
+            {
+                if(check(manager)){
+                    return;
+                }else{
+                    System.err.println("Serious ERROR init with different managers");
+                }
+            }
+            isSetup =true;
 
             ensembleString = "";
             ArrayList<EnsembleCache> cachesList = new ArrayList<>();
@@ -119,6 +129,16 @@ public class EnsembleCacheUtils {
 
             partitioner = new HashBasedPartitioner(cachesList);
         }
+    }
+
+    private static boolean check(EnsembleCacheManager manager) {
+//        ArrayList<EnsembleCache> cachesList = new ArrayList<>();
+        String str ="";
+        for (Object s : new ArrayList<>(manager.sites())) {
+            Site site = (Site) s;
+            str += site.getName();
+        }
+        return  ensembleString.equals(str);
     }
 
 
@@ -254,7 +274,7 @@ public class EnsembleCacheUtils {
                 e.printStackTrace();
             }
         }
-        localFutures.clear();
+//        localFutures.clear();
     }
 
     public static void putToCache(BasicCache cache, Object key, Object value) {

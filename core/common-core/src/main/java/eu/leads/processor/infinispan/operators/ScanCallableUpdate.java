@@ -297,7 +297,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 
   @Override public void executeOn(K key, V ivalue) {
 
-    ProfileEvent scanExecute = new ProfileEvent("ScanExecute",profilerLog);
+//    ProfileEvent scanExecute = new ProfileEvent("ScanExecute",profilerLog);
 
     //         System.err.println(manager.getCacheManager().getAddress().toString() + " "+ entry.getKey() + "       " + entry.getValue());
     Tuple toRunValue = null;
@@ -312,7 +312,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
       } else {
         Version latestVersion = versionedCache.getLatestVersion(ikey);
         if (latestVersion == null) {
-          scanExecute.end();
+//          scanExecute.end();
           return;
         }
         Object objectValue = versionedCache.get(ikey);
@@ -357,7 +357,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
       }
 
     }
-    scanExecute.end();
+//    scanExecute.end();
   }
 
   private boolean needsREnaming() {

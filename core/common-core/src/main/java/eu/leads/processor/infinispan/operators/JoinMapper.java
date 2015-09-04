@@ -27,7 +27,7 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
   transient ProfileEvent mapEvent;
   private transient FilterOperatorTree tree;
   private transient Map<String,List<String>> tableCols;
-
+  private int counter = 0;
   public JoinMapper(String s) {
     super(s);
   }
@@ -41,28 +41,29 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
     {
       tableName = resolveTableName(t,tableCols);
     }
-    mapEvent.start("JoinMapMapExecute");
+//    mapEvent.start("JoinMapMapExecute");
     StringBuilder builder = new StringBuilder();
     //        String tupleId = key.substring(key.indexOf(":"));
     //Tuple t = new Tuple(value);
     //        Tuple t = new Tuple(value);
     //progress();
-    profileEvent.start("JoinMapReadJoinAttributes");
+//    profileEvent.start("JoinMapReadJoinAttributes");
     for (String c : joinColumns.get(tableName)) {
       builder.append(t.getGenericAttribute(c).toString() + ",");
     }
-    profileEvent.end();
-    profileEvent.start("JoinMapPrepareOutput");
+//    profileEvent.end();
+//    profileEvent.start("JoinMapPrepareOutput");
     String outkey = builder.toString();
     outkey.substring(0, outkey.length() - 1);
     //           collector.emit(outkey, t.asString());
     t.setAttribute("__table", tableName);
-    t.setAttribute("__tupleKey",key);
-    profileEvent.end();
-    profileEvent.start("JoinMapEMitIntermediateResult");
+    t.setAttribute("__tupleKey", key);
+//    profileEvent.end();
+//    profileEvent.start("JoinMapEMitIntermediateResult");
+    counter++;
     collector.emit(outkey, t);
-    profileEvent.end();
-    mapEvent.end();
+//    profileEvent.end();
+//    mapEvent.end();
   }
 
   private String resolveTableName(Tuple t, Map<String, List<String>> tableCols) {
@@ -128,5 +129,10 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
     tableName = conf.getString("inputCache");
     System.err.println("tablename " + tableName);
     profileEvent.end();
+  }
+
+  @Override protected void finalizeTask() {
+    super.finalizeTask();
+    System.err.println("\n\n\nC: " + counter);
   }
 }

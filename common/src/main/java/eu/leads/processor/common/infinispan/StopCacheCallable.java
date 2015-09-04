@@ -4,6 +4,7 @@ package eu.leads.processor.common.infinispan;
  * Created by vagvaz on 5/23/14.
  */
 
+import eu.leads.processor.common.LeadsListener;
 import org.infinispan.Cache;
 import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
@@ -36,6 +37,14 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
           if(cache.getCacheManager().cacheExists(cache.getName()+".compressed")){
               Cache compressed = cache.getCacheManager().getCache(cache.getName()+".compressed");
               compressed.clearAsync();
+              for(Object l : compressed.getListeners()){
+//                  if(l instanceof PluginHandlerListener){
+//                      compressed.removeListener(l);
+//                  }
+                  if(l instanceof LeadsListener){
+                      ((LeadsListener)l).close();
+                  }
+              }
               if(compressed.getStatus().stopAllowed()){
                   compressed.stop();
               }
@@ -43,7 +52,8 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
            if(cache.getStatus().stopAllowed()) {
 //              System.out.println("Clear " + cacheName + " from " + cache.getCacheManager().getAddress().toString());
               cache.getAdvancedCache().stop();
-              System.out.println("Stop " + cacheName + " from " + cache.getCacheManager().getAddress().toString());
+              System.out.println(
+                  "Stop " + cacheName + " from " + cache.getCacheManager().getAddress().toString());
 //              cache.getCacheManager().removeCache(cache.getName());
            }
 

@@ -144,6 +144,11 @@ public class LocalIndexListener implements LeadsListener {
         return this.getClass().toString();
     }
 
+    @Override public void close() {
+        index.flush();
+        index.close();
+    }
+
     void waitForAllData(){
         System.err.println("get the size of target");
         index.flush();

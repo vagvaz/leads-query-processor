@@ -22,7 +22,7 @@ public class LevelDBIterator implements Iterable<Map.Entry<String, Integer>>,
     public LevelDBIterator(DB keysDB) {
         this.db = keysDB;
         readOptions = new ReadOptions();
-        readOptions.fillCache(true);
+        readOptions.fillCache(false);
 //        readOptions.verifyChecksums(true);
         this.iterator = db.iterator();
         this.iterator.seekToFirst();

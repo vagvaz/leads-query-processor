@@ -182,9 +182,6 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
 
     @Override
     public void finalizeCallable() {
-//        System.err.println("FINALIZEREPEATLeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache().size() + " input: " + inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size() );
-//        profilerLog.error("MRLOGREPEAT: LeadsIndex size " + index.getKeysCache().size() + " data " + index
-//                .getDataCache());
             System.err.println("reduce finalize reducer");
         reducer.finalizeTask();
         index.close();

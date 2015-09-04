@@ -288,6 +288,10 @@ public class
         return SimplePluginRunner.class.getCanonicalName();
     }
 
+    @Override public void close() {
+
+    }
+
     public void addPlugin(PluginInterface plugin, XMLConfiguration config, int eventmask) {
         plugin.initialize(config, manager);
         addToEvents(plugin, eventmask);

@@ -144,7 +144,8 @@ public class PluginManager {
 
     return true;
   }
-  private static String check_exist_download(String pluginFn,  PluginPackage plugin, boolean forcedownload) {
+  public static String check_exist_download(String pluginFn, PluginPackage plugin,
+      boolean forcedownload) {
     String pluginTmpJar=null;
     System.out.println("Plugin md5: " + plugin.getKey() );
     if(forcedownload)
