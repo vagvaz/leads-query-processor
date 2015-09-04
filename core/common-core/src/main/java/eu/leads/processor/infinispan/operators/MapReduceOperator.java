@@ -87,7 +87,8 @@ public abstract class MapReduceOperator extends BasicOperator{
     if(executeOnlyReduce) {
 //      intermediateCache.stop();
 //      indexSiteCache.stop();
-      intermediateDataCache.stop();
+//      intermediateDataCache.stop();
+      manager.removePersistentCache(intermediateDataCache.getName());
 //      keysCache.stop();
     }
   }
