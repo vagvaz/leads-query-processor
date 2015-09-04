@@ -56,7 +56,7 @@ public class LevelDBIndex {
 
         options.compressionType(CompressionType.SNAPPY);
         options.cacheSize(128 * 1024 * 1024);
-        dbfactory = Util.getInstance(JNI_DB_FACTORY_CLASS_NAME, LevelDBIndex.class.getClassLoader());
+        dbfactory = Util.getInstance(JAVA_DB_FACTORY_CLASS_NAME, LevelDBIndex.class.getClassLoader());
 //        JniDBFactory.pushMemoryPool(128*1024*1024);
         try {
             keysDB = dbfactory.open(keydbFile,options.verifyChecksums(false));
