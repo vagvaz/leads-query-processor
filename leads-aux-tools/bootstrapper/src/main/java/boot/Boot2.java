@@ -162,6 +162,7 @@ public class Boot2 {
                     log_sinkJson = modjson;
                 else
                     componentsJson.put(c.getString("name"), modjson);
+
             }
         }
     }
@@ -346,13 +347,15 @@ public class Boot2 {
             //for all available ips of current microcloud that are used save them to a set
             HashMap<String, Integer> instancesPerNode = new HashMap<>();
             for (int s = 0; s < pAddrs.size() && instancesCnt < componentsInstancesNames.size(); s++) {
-                clusterComponentsAddressed.addString((String) pAddrs.get(s));
+                String address = pAddrs.get(instancesCnt % pAddrs.size());
+                clusterComponentsAddressed.addString(address);
                 logger.info("Curcomp" + componentsInstancesNames.get(instancesCnt) + " instances " + componentsInstances.get(componentsInstancesNames.get(instancesCnt)));
-                if(instancesPerNode.containsKey(pAddrs.get(s)))
-                    instancesPerNode.put((String)pAddrs.get(s), instancesPerNode.get(pAddrs.get(s))+1);
+                //
+                if(instancesPerNode.containsKey(address))
+                    instancesPerNode.put(address, instancesPerNode.get(address)+1);
 
                 //Also write the cluster name in a text file into home dir ...
-                remoteExecute((String) pAddrs.get(s), "echo " + entry.getKey() + " > ~/micro_cloud.txt");
+                //remoteExecute((String) pAddrs.get(s), "echo " + entry.getKey() + " > ~/micro_cloud.txt");
                 instancesCnt++;
             }
             //compAlladresses.putArray(entry.getKey(), clusterComponentsAddressed);
@@ -405,9 +408,12 @@ public class Boot2 {
             //deploy all other components
             for (int s = 0; /*s < pAddrs.size() &&*/ instancesCnt < componentsInstancesNames.size(); s++) {
                 JsonObject modJson = componentsJson.get(componentsInstancesNames.get(instancesCnt));
+                //Fixed ?
+                modJson.putString("id", componentsInstancesNames.get(instancesCnt) + "-default-" + UUID.randomUUID().toString());
+                String address = pAddrs.get(instancesCnt % pAddrs.size()).toString();
                 modJson = set_global_addresses(modJson, webserviceAlladresses, compAlladresses);
-                deployComponent(componentsInstancesNames.get(instancesCnt).toString(), modJson, pAddrs.get(s).toString());
-                System.out.println(" \n\nStarted : " + componentsInstancesNames.get(instancesCnt) + " At: " + pAddrs.get(instancesCnt%pAddrs.size()).toString() + " Waiting for " + sleepTime + " seconds to start the next module.");
+                deployComponent(componentsInstancesNames.get(instancesCnt).toString(), modJson, address);
+                System.out.println(" \n\nStarted : " + componentsInstancesNames.get(instancesCnt) + " At: " + address + " Waiting for " + sleepTime + " seconds to start the next module.");
                 instancesCnt++;
             }
         }
