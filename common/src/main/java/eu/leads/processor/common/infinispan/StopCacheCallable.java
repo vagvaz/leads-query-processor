@@ -5,9 +5,11 @@ package eu.leads.processor.common.infinispan;
  */
 
 import eu.leads.processor.common.LeadsListener;
+import eu.leads.processor.common.utils.PrintUtilities;
 import org.infinispan.Cache;
 import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
+import org.infinispan.lifecycle.ComponentStatus;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -27,37 +29,65 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
      */
     @Override
     public Void call() throws Exception {
-       System.out.println("Try to remove " + cacheName + " from " +cache.getCacheManager().getAddress().toString());
-      if(cache.getCacheManager().cacheExists(cacheName))
-      {
-         System.out.println(
-             "Removing " + cacheName + " from " + cache.getCacheManager().getAddress().toString());
-           cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).clearAsync();
-//           cache.getAdvancedCache().withFlags(Flag.)
-          if(cache.getCacheManager().cacheExists(cache.getName()+".compressed")){
-              Cache compressed = cache.getCacheManager().getCache(cache.getName()+".compressed");
-              compressed.clearAsync();
-              for(Object l : compressed.getListeners()){
-//                  if(l instanceof PluginHandlerListener){
-//                      compressed.removeListener(l);
-//                  }
-                  if(l instanceof LeadsListener){
-                      ((LeadsListener)l).close();
-                  }
-              }
-              if(compressed.getStatus().stopAllowed()){
-                  compressed.stop();
-              }
-          }
-           if(cache.getStatus().stopAllowed()) {
-//              System.out.println("Clear " + cacheName + " from " + cache.getCacheManager().getAddress().toString());
-              cache.getAdvancedCache().stop();
-              System.out.println(
-                  "Stop " + cacheName + " from " + cache.getCacheManager().getAddress().toString());
-//              cache.getCacheManager().removeCache(cache.getName());
-           }
+        System.err.println("\n\n\n\n\n\nTry to remove " + cacheName + " from " +cache.getCacheManager().getAddress().toString());
+        if(cache.getCacheManager().cacheExists(cacheName))
+        {
+            System.err.println(
+                "Removing " + cacheName + " from " + cache.getCacheManager().getAddress().toString());
+            cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).clear();
+            //           cache.getAdvancedCache().withFlags(Flag.)
+            if(cache.getCacheManager().cacheExists(cache.getName()+".compressed")){
+                System.err.println("Stopping " + cache.getName()+".compressed");
+                Cache compressed = cache.getCacheManager().getCache(cache.getName()+".compressed");
+                compressed.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).clear();
+                for(Object l : compressed.getListeners()){
+                    //                  if(l instanceof PluginHandlerListener){
+                    //                      compressed.removeListener(l);
+                    //                  }
+                    if(l instanceof LeadsListener){
+                        ((LeadsListener)l).close();
+                        l = null;
+                    }
+                }
+//                ComponentStatus status = compressed.getStatus();
+//                if(!status.isTerminated()){
 
-      }
+                    try {
+                        if(cache.getCacheManager().isRunning(compressed.getName())) {
+                            compressed.getAdvancedCache().stop();
+                            cache.getCacheManager().removeCache(compressed.getName());
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+            }else{
+                System.err.println("Cache " + cache.getName() +".compressed EXISTS?=" + cache
+                    .getCacheManager().cacheExists(cache.getName() + ".compressed"));
+            }
+//            ComponentStatus status = cache.getStatus();
+//            if(!status.isTerminated()){
+                //              System.err.println("Clear " + cacheName + " from " + cache.getCacheManager().getAddress().toString());
+
+                System.err
+                    .println("Stopped " + cacheName + " from " + cache.getCacheManager().getAddress()
+                        .toString() + "\n\n\n\n\n\n");
+                //              cache.getCacheManager().removeCache(cache.getName());
+                try{
+                    if(cache.getCacheManager().isRunning(cacheName)) {
+                        cache.getAdvancedCache().stop();
+                        cache.getCacheManager().removeCache(cacheName);
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+//            else{
+//                System.err.println("Stopping " + cacheName + " was not allowed in " + cache.getCacheManager().getAddress().toString()+"\n\n\n\n\n\n");
+//            }
+
+
+        //        PrintUtilities.printCaches(cache.getCacheManager());
         return null;
     }
 
@@ -66,7 +96,7 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
      */
     @Override
     public void setEnvironment(Cache<K, V> cache, Set<K> inputKeys) {
-        this.cache = cache;
+        this.cache = cache.getCacheManager().getCache(cacheName);
     }
 
 }

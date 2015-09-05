@@ -90,6 +90,15 @@ public class EnsembleCacheUtils {
         }
     }
 
+    public static void clean(){
+        waitForAllPuts();
+        localFutures.clear();
+        for(Map.Entry<String,Map<String,TupleBuffer>> mc : microclouds.entrySet()) {
+            mc.getValue().clear();
+            partitioner = null;
+        }
+
+    }
     public static void initialize(EnsembleCacheManager manager){
        initialize(manager,true);
     }
@@ -105,7 +114,6 @@ public class EnsembleCacheUtils {
 //                }
 //            }
 //            isSetup =true;
-
             ensembleString = "";
             ArrayList<EnsembleCache> cachesList = new ArrayList<>();
 
@@ -232,7 +240,7 @@ public class EnsembleCacheUtils {
                 else{
                        Cache localCache =
                             (Cache) localManager.getPersisentCache(cache.getValue().getCacheName());
-                    localFutures.add(cache.getValue().flushToCache(localCache));
+                    cache.getValue().flushToCache(localCache);
                 }
             }
         }

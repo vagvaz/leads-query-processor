@@ -1,4 +1,5 @@
 package eu.leads.processor.core;
+import com.sun.tools.javah.JNI;
 import org.bson.BasicBSONEncoder;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.infinispan.commons.util.Util;
@@ -46,20 +47,20 @@ public class LevelDBIndex {
         keydbFile = new File(baseDirFile.toString()+"/keydb");
         datadbFile = new File(baseDirFile.toString()+"/datadb");
         options = new Options();
-        options.writeBufferSize( 100*1024*1024);
+        options.writeBufferSize( 50*1024*1024);
         options.createIfMissing(true);
         //        options.blockSize(LQPConfiguration.getInstance().getConfiguration()
         //            .getInt("leads.processor.infinispan.leveldb.blocksize", 16)*1024*1024);
         //        options.cacheSize(LQPConfiguration.getInstance().getConfiguration()
         //            .getInt("leads.processor.infinispan.leveldb.cachesize", 256)*1024*1024);
-//        options.blockSize(1*1024 * 1024);
+        options.blockSize(4 * 1024);
 
         options.compressionType(CompressionType.SNAPPY);
         options.cacheSize(128 * 1024 * 1024);
-        dbfactory = Util.getInstance(JAVA_DB_FACTORY_CLASS_NAME, LevelDBIndex.class.getClassLoader());
+        dbfactory = Util.getInstance(JNI_DB_FACTORY_CLASS_NAME, LevelDBIndex.class.getClassLoader());
 //        JniDBFactory.pushMemoryPool(128*1024*1024);
         try {
-            keysDB = dbfactory.open(keydbFile,options.verifyChecksums(false));
+            keysDB = dbfactory.open(keydbFile,options.verifyChecksums(true));
             dataDB = dbfactory.open(datadbFile,options);
             writeOptions = new WriteOptions();
             writeOptions.sync(false);
@@ -226,11 +227,11 @@ public class LevelDBIndex {
             counter = 0;
         }
         else{
-            ByteBuffer bytebuf = ByteBuffer.wrap(count);
-            counter = bytebuf.getInt();
+//            ByteBuffer bytebuf = ByteBuffer.wrap(count);
+            counter = Integer.parseInt(new String(count));
             counter += 1;
         }
-        byte[] keyvalue = ByteBuffer.allocate(4).putInt(counter).array();
+        byte[] keyvalue = bytes(counter.toString());
         keysDB.put(bytes(key+"{}"), keyvalue,writeOptions);
         //        encoder = new BasicBSONEncoder();
         BasicBSONEncoder encoder = new BasicBSONEncoder();

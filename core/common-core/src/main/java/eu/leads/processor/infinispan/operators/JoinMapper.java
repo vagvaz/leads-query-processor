@@ -27,7 +27,7 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
   transient ProfileEvent mapEvent;
   private transient FilterOperatorTree tree;
   private transient Map<String,List<String>> tableCols;
-  private int counter = 0;
+//  private int counter = 0;
   public JoinMapper(String s) {
     super(s);
   }
@@ -60,7 +60,7 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
     t.setAttribute("__tupleKey", key);
 //    profileEvent.end();
 //    profileEvent.start("JoinMapEMitIntermediateResult");
-    counter++;
+//    counter++;
     collector.emit(outkey, t);
 //    profileEvent.end();
 //    mapEvent.end();
@@ -133,6 +133,6 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
 
   @Override protected void finalizeTask() {
     super.finalizeTask();
-    System.err.println("\n\n\nC: " + counter);
+//    System.err.println("\n\n\nC: " + counter);
   }
 }

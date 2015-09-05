@@ -178,20 +178,21 @@ public class PluginManager {
     FileInputStream fileInputStream = null;
       try {
         fileInputStream = new FileInputStream(jarFilname);
-        MD5Hash key = MD5Hash.digest(fileInputStream);
-        fileInputStream.close();
-        System.out.println("checkMD5  key : " + key);
-        if (!plugin.check_MD5(key))
-          return false;
-        else
-          return true;
+//        MD5Hash key = MD5Hash.digest(fileInputStream);
+//        fileInputStream.close();
+//        System.out.println("checkMD5  key : " + key);
+//        if (!plugin.check_MD5(key))
+//          return false;
+//        else
+//          return true;
 
       } catch (FileNotFoundException e) {
         e.printStackTrace();
       } catch (IOException e) {
         e.printStackTrace();
       }
-    return false;
+    return true;
+//    return false;
   }
 
   private static String downloadPlugin(String jarFilename) {

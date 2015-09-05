@@ -278,4 +278,8 @@ public class TupleBuffer {
         }
         return result;
     }
+
+    public void release() {
+        ensembleCache =  null;
+    }
 }
