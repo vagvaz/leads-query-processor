@@ -14,6 +14,7 @@ import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.QueryState;
 import eu.leads.processor.core.plan.QueryStatus;
+import eu.leads.processor.imanager.IManagerConstants;
 import eu.leads.processor.nqe.handlers.DeployRemoteOpActionHandler;
 import eu.leads.processor.nqe.handlers.ExecuteMapReduceJobActionHandler;
 import eu.leads.processor.nqe.handlers.OperatorActionHandler;
@@ -225,16 +226,24 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
       if (body.containsField("type")) {
         if (body.getString("type").equals("action")) {
           Action action = new Action(body);
-          action.setGlobalConf(globalConfig);
-          ActionHandler ac = handlers.get(action.getLabel());
-          Action result = ac.process(action);
-          if(result.getLabel().equals(NQEConstants.EXECUTE_MAP_REDUCE_JOB)) {
-            result.setStatus(ActionStatus.COMPLETED.toString());
-            if(result.getData().getObject("operator").containsField("direct")) {
-              com.sendTo(logic, result.asJsonObject());
+          if(!action.getLabel().equals(IManagerConstants.QUIT)) {
+            action.setGlobalConf(globalConfig);
+            ActionHandler ac = handlers.get(action.getLabel());
+            Action result = ac.process(action);
+            if (result.getLabel().equals(NQEConstants.EXECUTE_MAP_REDUCE_JOB)) {
+              result.setStatus(ActionStatus.COMPLETED.toString());
+              if (result.getData().getObject("operator").containsField("direct")) {
+                com.sendTo(logic, result.asJsonObject());
+              }
             }
+            message.reply();
+          }else
+          {
+            persistence.stopManager();
+            log.error("Stopped Manager Exiting");
+            Thread.sleep(1000);
+            System.exit(0);
           }
-          message.reply();
         }
       } else {
         log.error(id + " received message from eventbus that does not contain type field  \n" + message.toString());

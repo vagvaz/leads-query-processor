@@ -101,6 +101,7 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
       handlers.put(IManagerConstants.COMPLETED_MAPREDUCE, new CompletedMRActionHandler(com,log,persistence,id));
 
 
+
       bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {
          @Override
          public void handle(Message<JsonObject> event) {
@@ -118,13 +119,22 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
          if (body.containsField("type")) {
             if (body.getString("type").equals("action")) {
                Action action = new Action(body);
-               ActionHandler ac = handlers.get(action.getLabel());
-               Action result = ac.process(action);
+
+               if(!action.getLabel().equals(IManagerConstants.QUIT)) {
+                  ActionHandler ac = handlers.get(action.getLabel());
+                  Action result = ac.process(action);
 //                  log.info("processed");
-               result.setStatus(ActionStatus.COMPLETED.toString());
+                  result.setStatus(ActionStatus.COMPLETED.toString());
 //                  log.info("reply to logic");
-               com.sendTo(logic, result.asJsonObject());
-               message.reply();
+                  com.sendTo(logic, result.asJsonObject());
+                  message.reply();
+               }else{
+                  persistence.stopManager();
+                  log.error("Stopped Manager Exiting");
+                  Thread.sleep(1000);
+                  System.exit(0);
+               }
+
             }
          } else {
             log.error(id

@@ -8,11 +8,11 @@ import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
-import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.*;
+import eu.leads.processor.imanager.IManagerConstants;
 import eu.leads.processor.nqe.NQEConstants;
 import org.infinispan.Cache;
 import org.slf4j.Logger;
@@ -153,6 +153,15 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                   specialNode.getConfiguration().putString("realOutput",executionPlan.getQueryId());
                   specialNode.getInputs().set(0,input);
                   deployOperator(executionPlan,specialNode);
+               }else if (label.equals(IManagerConstants.QUIT)){
+                  persistence.stopManager();
+                  log.error("Stopped Manager Exiting");
+                  try {
+                     Thread.sleep(1000);
+                  } catch (InterruptedException e) {
+                     e.printStackTrace();
+                  }
+                  System.exit(0);
                }
                //               else if (label.equals(DeployerConstants.OPERATOR_COMPLETED)) {
                //

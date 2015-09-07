@@ -192,6 +192,11 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             action.getData().putString("replyTo", msg.getString("from"));
             com.sendWithEventBus(workQueueAddress, action.asJsonObject());
           }
+          else if (label.equals(IManagerConstants.QUIT)){
+            action.getData().putString("replyTo", msg.getString("from"));
+            action.setDestination(StringConstants.PLANNERQUEUE);
+            com.sendWithEventBus(workQueueAddress, action.asJsonObject());
+          }
           else {
             log.error("Unknown PENDING Action received " + action.toString());
             return;

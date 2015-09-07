@@ -1,5 +1,6 @@
 package eu.leads.processor.nqe;
 
+import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
@@ -8,6 +9,7 @@ import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.imanager.IManagerConstants;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
@@ -83,6 +85,10 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
                         //            String actionId = UUID.randomUUID().toString();
                         //            action.setId(actionId);
                         action.getData().putString("replyTo", from);
+                        com.sendWithEventBus(workQueueAddress, action.asJsonObject());
+                    }else if (label.equals(IManagerConstants.QUIT)){
+                        action.getData().putString("replyTo", msg.getString("from"));
+                        action.setDestination(StringConstants.PLANNERQUEUE);
                         com.sendWithEventBus(workQueueAddress, action.asJsonObject());
                     }else {
                         log.error("Unknown PENDING Action received " + action.toString());

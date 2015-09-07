@@ -9,6 +9,7 @@ import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.deployer.DeployerConstants;
+import eu.leads.processor.imanager.IManagerConstants;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
@@ -76,7 +77,11 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
                     }else if(label.equals(QueryPlannerConstants.PROCESS_WORKFLOW_QUERY)){
                       action.getData().putString("replyTo",msg.getString("from"));
                       com.sendWithEventBus(workQueueAddress,action.asJsonObject());
-                    }else {
+                    }else if (label.equals(IManagerConstants.QUIT)){
+                        action.getData().putString("replyTo", msg.getString("from"));
+                        com.sendWithEventBus(workQueueAddress, action.asJsonObject());
+                    }
+                    else {
                         log.error("Unknown PENDING Action received " + action.toString());
                         return;
                     }
@@ -122,7 +127,11 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
                             deployAction.setLabel(DeployerConstants.DEPLOY_CUSTOM_PLAN);
                             com.sendTo(deployer, deployAction.asJsonObject());
                         }
-                    } else {
+                    } else if (label.equals(QueryPlannerConstants.QUIT)) {
+                        Action deployAction = createNewAction(action);
+                         com.sendTo(deployer, deployAction.asJsonObject());
+                    }
+                    else {
                         log.error("Unknown COMPLETED OR INPROCESS Action received " + action
                                                                                           .toString());
                         return;
