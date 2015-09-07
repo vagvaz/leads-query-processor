@@ -132,7 +132,7 @@ public class MathUtils {
             Number rightValue = right.getObject("body").getObject("datum").getObject("body").getNumber("val");
             return leftValue.doubleValue() < rightValue.doubleValue();
          } else {
-            System.out.println("Unknonw type " + type);
+            System.out.println("Unknonw type 2" + type);
             Object leftValue = left.getObject("body").getObject("datum").getObject("body").getValue("val");
             Object rightValue = right.getObject("body").getObject("datum").getObject("body").getValue("val");
             return leftValue.toString().compareTo(rightValue.toString()) < 0;
@@ -140,6 +140,9 @@ public class MathUtils {
       }
       else
       {
+          if(type.equals("left type = CAST"))
+              System.out.println("Unknonw  CAST");
+
          if(type.equals("NULL_TYPE")){
             return false;
          }
@@ -147,7 +150,7 @@ public class MathUtils {
             return false;
          }
          else {
-            System.out.println("Unknonw type " + type);
+            System.out.println("Unknonw type 3 " + type);
             Object leftValue = left.getObject("body").getObject("datum").getObject("body").getValue("val");
             Object rightValue = right.getObject("body").getObject("datum").getObject("body").getValue("val");
             return leftValue.toString().compareTo(rightValue.toString()) < 0;
@@ -177,7 +180,7 @@ public class MathUtils {
         }
         else
         {
-            System.err.println("Unknown type");
+            System.err.println("Unknown type 4");
         }
         return result;
     }
@@ -250,7 +253,7 @@ public class MathUtils {
              return false;
           }
           else {
-             System.out.println("Unknonw type " + type);
+             System.out.println("Unknonw type 1 " + type);
              Object leftValue = left.getObject("body").getObject("datum").getObject("body").getValue("val");
              Object rightValue = right.getObject("body").getObject("datum").getObject("body").getValue("val");
              return leftValue.toString().compareTo(rightValue.toString()) < 0;

@@ -2,24 +2,18 @@ package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
-import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
-import eu.leads.processor.core.index.LeadsIndex;
-import eu.leads.processor.core.index.LeadsIndexString;
+import eu.leads.processor.math.FilterOpType;
 import eu.leads.processor.math.FilterOperatorNode;
 import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.math.FilterOperatorTree;
 import eu.leads.processor.math.MathUtils;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
-import org.infinispan.query.dsl.Query;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
-import org.infinispan.query.SearchManager;
 import org.infinispan.query.dsl.FilterConditionContext;
-import org.infinispan.query.dsl.QueryBuilder;
-import org.infinispan.query.dsl.QueryFactory;
 import org.infinispan.versioning.VersionedCache;
 import org.infinispan.versioning.utils.version.Version;
 import org.infinispan.versioning.utils.version.VersionScalar;
@@ -38,286 +32,158 @@ import java.util.*;
  */
 public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements Serializable {
 
-  transient protected VersionedCache versionedCache;
+	transient protected VersionedCache versionedCache;
 
-  transient protected Cache pageRankCache;
-  transient protected FilterOperatorTree tree;
-  transient protected double totalSum;
-  transient protected Cache approxSumCache;
-  protected String qualString;
-  transient  boolean versioning;
-  boolean onVersionedCache;
-  transient protected long versionStart=-1,versionFinish=-1,range=-1;
-  protected LeadsCollector collector;
-//  protected int counter = 0;
+	transient protected Cache pageRankCache;
+	transient protected double totalSum;
+	transient protected Cache approxSumCache;
+ 	transient boolean versioning;
+	boolean onVersionedCache;
+	transient protected long versionStart = -1, versionFinish = -1, range = -1;
+	protected LeadsCollector collector;
 
-
-    //  transient protected InfinispanManager manager;
-  protected Logger log = LoggerFactory.getLogger(ScanCallableUpdate.class.toString());
-   private VersionScalar minVersion=null;
-    private VersionScalar maxVersion=null;
-  transient protected boolean renameTableInTree;
-  transient  private String toRename;
-  transient  private String tableName;
-  transient Logger profilerLog;
-  private ProfileEvent fullProcessing;
+	protected Logger log = LoggerFactory.getLogger(ScanCallableUpdate.class.toString());
+	private VersionScalar minVersion = null;
+	private VersionScalar maxVersion = null;
+	transient protected boolean renameTableInTree;
+	transient private String toRename;
+	transient private String tableName;
+	transient Logger profilerLog;
+	private ProfileEvent fullProcessing;
 
 
-  public ScanCallableUpdate(String configString, String output, LeadsCollector collector) {
-    super(configString, collector.getCacheName());
-    this.collector = collector;
-  }
-//  public ScanCallableUpdate(String configString, String output,boolean onVersionedCache) {
-//    super(configString, output);
-//    this.onVersionedCache = onVersionedCache;
-//  }
-
-  @Override  public void initialize() {
-    super.initialize();
-    lquery = null;
-//    versionedCache = new VersionedCacheTreeMapImpl(inputCache,new VersionScalarGenerator(),inputCache.getName());
-     profilerLog = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
-
-    pageRankCache = (Cache) imanager.getPersisentCache("pagerankCache");
-    log.info("--------------------    get approxSum cache ------------------------");
-    approxSumCache = (Cache) imanager.getPersisentCache("approx_sum_cache");
-    totalSum = -1f;
-
-    if (conf.getObject("body").containsField("versionStart")) {
-      versionStart = conf.getObject("body").getLong("versionStart");
-      if (versionStart > 0) {
-        versioning = true;
-        minVersion = new VersionScalar(versionStart);
-      }
-    }
-    if (conf.getObject("body").containsField("versionFinish")) {
-      versionFinish = conf.getObject("body").getLong("versionFinish");
-      if (versionFinish > 0) {
-        versioning = true;
-        maxVersion = new VersionScalar(versionFinish);
-      }
-    }
+	public ScanCallableUpdate(String configString, String output, LeadsCollector collector) {
+		super(configString, collector.getCacheName());
+		this.collector = collector;
+	}
 
 
-    if (conf.getObject("body").containsField("qual")) {
-      tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
-      //System.out.print("Quaaal : " + conf.getObject("body").getObject("qual").toString());
-      toRename = getRenamingTableFromSchema(inputSchema);
-      tableName = conf.getObject("body").getObject("tableDesc").getString("tableName");
-      tableName = tableName.replace(StringConstants.DEFAULT_DATABASE_NAME + ".", "");
-      if (tableName.equals(toRename)) {
-        renameTableInTree = false;
-      } else {
-        renameTableInTree = true;
-      }
-      if (checkIndex_usage()) {
-        // create query
-        lquery = createLuceneQuerys(indexCaches, tree.getRoot());
-      }
-    } else {
-      tree = null;
-    }
+	@Override
+	public void initialize() {
+		super.initialize();
+		luceneKeys = null;
 
-    versioning = getVersionPredicate(conf);
-    fullProcessing = new ProfileEvent("FullScanProcessing",profilerLog);
+		profilerLog = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
 
-    collector.setOnMap(getHasNext());
-    collector.setManager(this.embeddedCacheManager);
-    collector.setEmanager(emanager);
-    collector.setSite(LQPConfiguration.getInstance().getMicroClusterName());
-    collector.initializeCache(inputCache.getName(),imanager);
-    if(getHasNext()){
-      collector.setEnsembleHost(ensembleHost);
-      collector.setInputCache(inputCache);
-      collector.initializeNextCallable(conf);
-    }
-  }
+		pageRankCache = (Cache) imanager.getPersisentCache("pagerankCache");
+		log.info("--------------------    get approxSum cache ------------------------");
+		approxSumCache = (Cache) imanager.getPersisentCache("approx_sum_cache");
+		totalSum = -1f;
 
-  private boolean getHasNext() {
-    boolean result = conf.containsField("next");
-    return result;
-  }
+		if (conf.getObject("body").containsField("versionStart")) {
+			versionStart = conf.getObject("body").getLong("versionStart");
+			if (versionStart > 0) {
+				versioning = true;
+				minVersion = new VersionScalar(versionStart);
+			}
+		}
+		if (conf.getObject("body").containsField("versionFinish")) {
+			versionFinish = conf.getObject("body").getLong("versionFinish");
+			if (versionFinish > 0) {
+				versioning = true;
+				maxVersion = new VersionScalar(versionFinish);
+			}
+		}
 
 
+		if (conf.getObject("body").containsField("qual")) {
+			tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
+			//System.out.print("Quaaal : " + conf.getObject("body").getObject("qual").toString());
+			toRename = getRenamingTableFromSchema(inputSchema);
+			tableName = conf.getObject("body").getObject("tableDesc").getString("tableName");
+			tableName = tableName.replace(StringConstants.DEFAULT_DATABASE_NAME + ".", "");
+			if (tableName.equals(toRename)) {
+				renameTableInTree = false;
+			} else {
+				renameTableInTree = true;
+			}
+			if (checkIndex_usage())
+				System.out.println("Will try to use Indexes");
+			else
+				System.err.println("No indexes");
 
-  Object getSubLucene(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
-    FilterConditionContext result = null;
-    FilterConditionContext left = null;
-    FilterConditionContext right = null;
-    if (root == null)
-      return null;
-    Object oleft = getSubLucene(indexCaches, root.getLeft());
-    Object oright = getSubLucene(indexCaches, root.getRight());
+		} else {
+			tree = null;
+		}
 
-    if (oleft instanceof FilterConditionContext)
-      left = (FilterConditionContext) oleft;
-    if (oright instanceof FilterConditionContext)
-      right = (FilterConditionContext) oright;
+		versioning = getVersionPredicate(conf);
+		fullProcessing = new ProfileEvent("FullScanProcessing", profilerLog);
 
-    switch (root.getType()) {
-      case EQUAL:
-        if (left != null && oright != null)
-          return left.and().having("attributeValue").eq(oright);//,right.getValueAsJson());
-        break;
-      case IS_NULL:
-        // result = left.isValueNull();
-        break;
-      case NOT_EQUAL:
-        //  result = !(MathUtils.equals(left.getValueAsJson(), right.getValueAsJson()));
-        break;
-      case FIELD:
-        String collumnName = root.getValueAsJson().getObject("body").getObject("column").getString("name");
-        String type = root.getValueAsJson().getObject("body").getObject("column").getObject("dataType").getString("type");
-        //MathUtils.getTextFrom(root.getValueAsJson());
+		collector.setOnMap(getHasNext());
+		collector.setManager(this.embeddedCacheManager);
+		collector.setEmanager(emanager);
+		collector.setSite(LQPConfiguration.getInstance().getMicroClusterName());
+		collector.initializeCache(inputCache.getName(), imanager);
+		if (getHasNext()) {
+			collector.setEnsembleHost(ensembleHost);
+			collector.setInputCache(inputCache);
+			collector.initializeNextCallable(conf);
+		}
+	}
 
-        if (indexCaches.containsKey(collumnName)) {
+	private boolean getHasNext() {
+		boolean result = conf.containsField("next");
+		return result;
+	}
 
-          SearchManager sm = org.infinispan.query.Search.getSearchManager(indexCaches.get(collumnName));
-          QueryFactory qf = sm.getQueryFactory();
-          QueryBuilder Qb;
-          if (type.equals("TEXT"))
-            Qb = qf.from(LeadsIndexString.class);
-          else if (type.equals("FLOAT"))
-            Qb = qf.from(LeadsIndexString.class);
-          else if (type.equals("DOUBLE"))
-            Qb = qf.from(LeadsIndexString.class);
-          else if (type.equals("INT"))
-            Qb = qf.from(LeadsIndexString.class);
-          else if (type.equals("LONG"))
-            Qb = qf.from(LeadsIndexString.class);
-          else
-            Qb = qf.from(LeadsIndex.class);
-          FilterConditionContext filterC = Qb.having("attributeName").eq(collumnName);
-          return filterC;
-        }
-        break;
+	private boolean checkIndex_usage() {
+		// System.out.println("Check if fields are indexed");
+		if (conf.getBoolean("useIndex")) {
+			System.out.println("Scan Callable Use indexes!!");
+			indexCaches = new HashMap<>();
+			String columnName;
+			JsonArray fields = inputSchema.getArray("fields");
+			Iterator<Object> iterator = fields.iterator();
+			while (iterator.hasNext()) {
+				JsonObject tmp = (JsonObject) iterator.next();
+				columnName = tmp.getString("name");
+				//System.out.print("Check if exists: " + "." + columnName + " ");
+				if (imanager.getCacheManager().cacheExists(columnName)) {
+					indexCaches.put(columnName, (Cache) imanager.getIndexedPersistentCache(columnName));
+					System.out.println(columnName + " indexed!");
+				}
 
-      case CONST:
-        // result = true;
-        return MathUtils.getTextFrom(root.getValueAsJson());
-      case LTH:
-        if (left != null && oright != null)
-          return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
+			}
+			return indexCaches.size() > 0;
+		}
+		return false;
+	}
 
-        break;
-      case LEQ:
-        if (left != null && oright != null)
-          return left.and().having("attributeValue").lte(oright);//,right.getValueAsJson());
-        break;
-      case GTH:
-        if (left != null && oright != null)
-          return left.and().having("attributeValue").gt(oright);//,right.getValueAsJson());
-        break;
-      case GEQ:
-        if (left != null && oright != null)
-          return left.and().having("attributeValue").gte(oright);//,right.getValueAsJson());
-        break;
+	/**
+	 * This method shoul read the Versions if any , from the configuration of the Scan operator and return true
+	 * if there are specific versions required, false otherwise
+	 *
+	 * @param conf the configuration of the operator
+	 * @return returns true if there is a query on specific versions false otherwise
+	 */
+	private boolean getVersionPredicate(JsonObject conf) {
+		return false;
+	}
 
-      case LIKE:
-        if (left != null && oright != null) {
-          return left.and().having("attributeValue").like((String) oright);//,right.getValueAsJson());
-        }
-        break;
+	@Override
+	public void executeOn(K key, V ivalue) {
 
+		ProfileEvent scanExecute = new ProfileEvent("ScanExecute", profilerLog);
 
-      case ROW_CONSTANT:
-        //TODO
-        break;
-    }
-    return null;
-  }
+		//         System.err.println(manager.getCacheManager().getAddress().toString() + " "+ entry.getKey() + "       " + entry.getValue());
+		Tuple toRunValue = null;
+		if (onVersionedCache) {
+			String versionedKey = (String) key;
+			String ikey = pruneVersion(versionedKey);
+			Version currentVersion = getVersion(versionedKey);
+			if (versioning) {
+				if (isInVersionRange(currentVersion)) {
+					toRunValue = (Tuple) ivalue;
+				}
+			} else {
+				Version latestVersion = versionedCache.getLatestVersion(ikey);
+				if (latestVersion == null) {
+//					scanExecute.end();
+					return;
+				}
+				Object objectValue = versionedCache.get(ikey);
+				toRunValue = (Tuple) objectValue;
 
-
-  ArrayList<Query> createLuceneQuerys(HashMap<String, Cache> indexCaches, FilterOperatorNode root) {
-    ArrayList<Query> result = new ArrayList<>();
-    ArrayList<Query> left = null;
-    ArrayList<Query> right = null;
-    switch (root.getType()) {
-      case AND: {
-        left = createLuceneQuerys(indexCaches, root.getLeft());
-        right = createLuceneQuerys(indexCaches, root.getRight());
-        System.out.println("Fix AND with multiple indexes");
-      }
-      break;
-      case OR: {
-        left = createLuceneQuerys(indexCaches, root.getLeft());
-        right = createLuceneQuerys(indexCaches, root.getRight());
-        //if(left !=null && right !=null){
-        //use sketches to check
-        System.out.println("Fix OR with multiple indexes");
-      }
-      break;
-      default: {
-        System.out.println("SubQual " + root.getType());
-        FilterConditionContext qual = (FilterConditionContext) getSubLucene(indexCaches, root);
-        if (qual != null)
-          result.add(qual.toBuilder().build());
-      }
-      if (left != null)
-        result.addAll(left);
-      if (right != null)
-        result.addAll(right);
-
-    }
-    return (result.isEmpty()) ? null : result;
-  }
-
-
-  private boolean checkIndex_usage() {
-    System.out.println("Check if fields are indexed");
-    if(conf.getBoolean("useIndex")){
-      indexCaches = new HashMap<>();
-      String columnName ;
-      JsonArray fields = inputSchema.getArray("fields");
-      Iterator<Object> iterator = fields.iterator();
-      while (iterator.hasNext()) {
-        JsonObject tmp = (JsonObject) iterator.next();
-        columnName = tmp.getString("name");
-        System.out.print("Check if exists: " + "." + columnName + " ");
-        if (imanager.getCacheManager().cacheExists(columnName)) {
-          indexCaches.put(columnName, (Cache) imanager.getIndexedPersistentCache(columnName));
-          System.out.println(" exists!");
-        } else
-          System.out.println(" does not exist!");
-      }
-      System.out.println("Use indexes!!");
-      return indexCaches.size() > 0;
-    }
-    return false;
-  }
-
-  /**
-   * This method shoul read the Versions if any , from the configuration of the Scan operator and return true
-   * if there are specific versions required, false otherwise
-   * @param conf the configuration of the operator
-   * @return returns true if there is a query on specific versions false otherwise
-   */
-  private boolean getVersionPredicate(JsonObject conf) {
-    return false;
-  }
-
-  @Override public void executeOn(K key, V ivalue) {
-
-//    ProfileEvent scanExecute = new ProfileEvent("ScanExecute",profilerLog);
-//    counter++;
-    //         System.err.println(manager.getCacheManager().getAddress().toString() + " "+ entry.getKey() + "       " + entry.getValue());
-    Tuple toRunValue = null;
-    if (onVersionedCache) {
-      String versionedKey = (String) key;
-      String ikey = pruneVersion(versionedKey);
-      Version currentVersion = getVersion(versionedKey);
-      if (versioning) {
-        if (isInVersionRange(currentVersion)) {
-          toRunValue = (Tuple) ivalue;
-        }
-      } else {
-        Version latestVersion = versionedCache.getLatestVersion(ikey);
-        if (latestVersion == null) {
-//          scanExecute.end();
-          return;
-        }
-        Object objectValue = versionedCache.get(ikey);
-        toRunValue = (Tuple) objectValue;
 //        toRunValue = (String) objectValue;
       }
     } else {
@@ -333,30 +199,30 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
       }
 
 //        profExecute.start("tree.accept");
-      boolean accept = tree.accept(tuple);
+			boolean accept = tree.accept(tuple);
 //        profExecute.end();
-      if (accept) {
+			if (accept) {
 //          profExecute.start("prepareOutput");
 
-        tuple = prepareOutput(tuple);
+				tuple = prepareOutput(tuple);
 //          profExecute.end();
-        //               log.info("--------------------    put into output with filter ------------------------");
-        if (key != null && tuple != null) {
+				//               log.info("--------------------    put into output with filter ------------------------");
+				if (key != null && tuple != null) {
 //            profExecute.start("Scan_Put");
-              collector.emit(key.toString(),tuple);
+					collector.emit(key.toString(), tuple);
 //            EnsembleCacheUtils.putToCache(outputCache,key.toString(), tuple);
 //            profExecute.end();
-        }
-      }
-    } else {
+				}
+			}
+		} else {
 //        profExecute.start("prepareOutput");
-      tuple = prepareOutput(tuple);
+			tuple = prepareOutput(tuple);
 //        profExecute.end();
-      //            log.info("--------------------    put into output without tree ------------------------");
-      if (key != null && tuple != null) {
+			//            log.info("--------------------    put into output without tree ------------------------");
+			if (key != null && tuple != null) {
 //          profExecute.start("Scan_outputToCache");
 //          EnsembleCacheUtils.putToCache(outputCache,key, tuple);
-          collector.emit(key.toString(),tuple);
+				collector.emit(key.toString(), tuple);
 //          profExecute.end();
       }
 
@@ -449,66 +315,67 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 //    handlePagerank(columnName.substring(0,columnName.lastIndexOf(".")),tuple);
 //  }
 
-  protected void handlePagerank(String substring, Tuple t) {
-    if (conf.getObject("body").getObject("tableDesc").getString("tableName").equals("default.webpages")) {
-      if (totalSum < 0) {
-        computeTotalSum();
-      }
-      String url = t.getAttribute("default.webpages.url");
-      DSPMNode currentPagerank = (DSPMNode) pageRankCache.get(url);
-      if (currentPagerank == null || totalSum <= 0) {
+	protected void handlePagerank(String substring, Tuple t) {
+		if (conf.getObject("body").getObject("tableDesc").getString("tableName").equals("default.webpages")) {
+			if (totalSum < 0) {
+				computeTotalSum();
+			}
+			String url = t.getAttribute("default.webpages.url");
+			DSPMNode currentPagerank = (DSPMNode) pageRankCache.get(url);
+			if (currentPagerank == null || totalSum <= 0) {
 //        t.setAttribute("default.webpages.pagerank",0f);
-        t.setAttribute("default.webpages.pagerank", Double.toString((10000 / url.length()) / 10000));
 
-        return;
-      }
-      //            t.setNumberAttribute("default.webpages.pagerank",0.032342);
-      t.setNumberAttribute("default.webpages.pagerank", currentPagerank.getVisitCount() / totalSum);
+				t.setAttribute("default.webpages.pagerank", Double.toString((10000 / url.length()) / 10000));
 
-      //READ PAGERANK FROM PAGERANK CACHE;
-      //READ TOTAL ONCE
-      //compute value update it to tuple
+				return;
+			}
+			//            t.setNumberAttribute("default.webpages.pagerank",0.032342);
+			t.setNumberAttribute("default.webpages.pagerank", currentPagerank.getVisitCount() / totalSum);
+
+			//READ PAGERANK FROM PAGERANK CACHE;
+			//READ TOTAL ONCE
+			//compute value update it to tuple
 
 
-      //      if (t.hasField("default.webpages.pagerank")) {
-      //         if (!t.hasField("url"))
-      //            return;
-      //         String pagerankStr = t.getAttribute("pagerank");
-      //            Double d = Double.parseDouble(pagerankStr);
-      //            if (d < 0.0) {
-      //
-      //                try {
-      ////                    d = LeadsPrGraph.getPageDistr(t.getAttribute("url"));
-      //                    d = (double) LeadsPrGraph.getPageVisitCount(t.getAttribute("url"));
-      //
-      //                } catch (IOException e) {
-      //                    e.printStackTrace();
-      //                }
-      //                t.setAttribute("pagerank", d.toString());
-      //        }
-    }
-  }
+			//      if (t.hasField("default.webpages.pagerank")) {
+			//         if (!t.hasField("url"))
+			//            return;
+			//         String pagerankStr = t.getAttribute("pagerank");
+			//            Double d = Double.parseDouble(pagerankStr);
+			//            if (d < 0.0) {
+			//
+			//                try {
+			////                    d = LeadsPrGraph.getPageDistr(t.getAttribute("url"));
+			//                    d = (double) LeadsPrGraph.getPageVisitCount(t.getAttribute("url"));
+			//
+			//                } catch (IOException e) {
+			//                    e.printStackTrace();
+			//                }
+			//                t.setAttribute("pagerank", d.toString());
+			//        }
+		}
+	}
 
-  private void computeTotalSum() {
-    log.info(
-            "--------------------   Creating iterable over approx sum entries ------------------------");
-    CloseableIterable<Map.Entry<String, Integer>> iterable =
-            approxSumCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
-    log.info("--------------------    Iterating over approx sum entries cache ------------------------");
-    for (Map.Entry<String, Integer> outerEntry : iterable) {
-      totalSum += outerEntry.getValue();
-    }
-    iterable.close();
+	private void computeTotalSum() {
+		log.info(
+				"--------------------   Creating iterable over approx sum entries ------------------------");
+		CloseableIterable<Map.Entry<String, Integer>> iterable =
+				approxSumCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
+		log.info("--------------------    Iterating over approx sum entries cache ------------------------");
+		for (Map.Entry<String, Integer> outerEntry : iterable) {
+			totalSum += outerEntry.getValue();
+		}
+		iterable.close();
 
-    if (totalSum > 0) {
-      totalSum += 1;
-    }
-  }
+		if (totalSum > 0) {
+			totalSum += 1;
+		}
+	}
 
-  @Override public void finalizeCallable() {
-//    System.out.println("\n\n\n\nSCC: " + counter);
-    fullProcessing.end();
-    collector.finalizeCollector();
-    super.finalizeCallable();
-  }
+	@Override public void finalizeCallable() {
+		fullProcessing.end();
+		collector.finalizeCollector();
+		super.finalizeCallable();
+	}
+
 }

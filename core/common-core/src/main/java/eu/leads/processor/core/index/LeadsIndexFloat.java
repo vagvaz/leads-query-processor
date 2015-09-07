@@ -15,12 +15,10 @@ public class LeadsIndexFloat implements Serializable, LeadsIndex {
    // private String  attributeName;
     @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
     private Float attributeValue;
-    //@Field(index= Index.NO, analyze= Analyze.NO, store= Store.YES)
+    @Field(index= Index.NO, analyze= Analyze.NO, store= Store.YES)
     private String keyName;
 
-    public LeadsIndexFloat(){
-
-    }
+    public LeadsIndexFloat(){    }
 
     public void setCacheName(String cacheName) {
         ;//this.cacheName = cacheName;

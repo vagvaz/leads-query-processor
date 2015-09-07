@@ -215,7 +215,7 @@ public class LoadAmplab2 {
                                 else if (pair[1].toLowerCase().equals("bigint"))
                                     columnType.add(Long.class);
                                 else if (pair[1].toLowerCase().equals("int"))
-                                    columnType.add(Long.class);
+                                    columnType.add(Integer.class);
                                 else if (pair[1].toLowerCase().equals("float"))
                                     columnType.add(Float.class);
                                 else {

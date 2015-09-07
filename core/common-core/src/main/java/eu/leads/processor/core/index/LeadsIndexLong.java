@@ -15,12 +15,10 @@ public class LeadsIndexLong implements Serializable, LeadsIndex {
 //    private String  attributeName;
     @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
     private Long attributeValue;
-   // @Field(index= Index.NO, analyze= Analyze.NO, store= Store.YES)
+    @Field(index= Index.NO, analyze= Analyze.NO, store= Store.YES)
     private String keyName;
 
-    public LeadsIndexLong(){
-
-    }
+    public LeadsIndexLong(){           }
 
     public void setCacheName(String cacheName) {
         ;//this.cacheName = cacheName;

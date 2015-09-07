@@ -144,10 +144,10 @@ public class PlannerCatalogWorker extends Verticle {
     webPagesSchema.addColumn("url",Type.TEXT);
     webPagesSchema.addColumn("domainname",Type.TEXT);
     webPagesSchema.addColumn("body",Type.TEXT);
-    webPagesSchema.addColumn("responsecode",Type.INT4);
+    webPagesSchema.addColumn("responsecode",Type.INT8);
     webPagesSchema.addColumn("language",Type.TEXT);
     webPagesSchema.addColumn("charset",Type.TEXT);
-    webPagesSchema.addColumn("responsetime",Type.INT4);
+    webPagesSchema.addColumn("responsetime",Type.INT8);
     webPagesSchema.addColumn("links",Type.TEXT);
     webPagesSchema.addColumn("title",Type.TEXT);
     webPagesSchema.addColumn("ts",Type.INT8);
@@ -178,7 +178,7 @@ public class PlannerCatalogWorker extends Verticle {
     Schema testwebPagesSchema = new Schema();
     testwebPagesSchema.addColumn("url",Type.TEXT);
     testwebPagesSchema.addColumn("domainname",Type.TEXT);
-    testwebPagesSchema.addColumn("responsecode", Type.INT4);
+    testwebPagesSchema.addColumn("responsecode", Type.INT8);
     TableDesc TESTwebpages = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME, "testpages"), testwebPagesSchema, meta, getTestDir("testpages").toUri());
     //catalog.createTable(TESTwebpages);
     createTable(catalog, TESTwebpages);
@@ -265,7 +265,7 @@ public class PlannerCatalogWorker extends Verticle {
     schema.addColumn("partid", Type.TEXT);
     schema.addColumn("keywords", Type.TEXT);
     schema.addColumn("relevance", Type.TEXT);
-    schema.addColumn("sentiment", Type.FLOAT4);
+    schema.addColumn("sentiment", Type.FLOAT8);
     //	PRIMARY KEY (uri,ts,partid,keywords)
     //databaseName = "leads";
     tableName = "keywords";
@@ -284,8 +284,8 @@ public class PlannerCatalogWorker extends Verticle {
     schema.addColumn("oldsentiment", Type.TEXT);
     schema.addColumn("textcontent", Type.TEXT);
     schema.addColumn("type", Type.TEXT);
-    schema.addColumn("sentiment", Type.FLOAT4);
-    schema.addColumn("pagerank", Type.FLOAT4);
+    schema.addColumn("sentiment", Type.FLOAT8);
+    schema.addColumn("pagerank", Type.FLOAT8);
 
     //	PRIMARY KEY (uri,ts)
     //databaseName = "leads";
@@ -368,7 +368,7 @@ public class PlannerCatalogWorker extends Verticle {
     schema.addColumn("sourceip", Type.TEXT);
     schema.addColumn("desturl", Type.TEXT);
     schema.addColumn("visitdate", Type.TEXT);
-    schema.addColumn("adrevenue", Type.FLOAT4);
+    schema.addColumn("adrevenue", Type.FLOAT8);
     schema.addColumn("useragent", Type.TEXT);
     schema.addColumn("countrycode", Type.TEXT);
     schema.addColumn("languagecode", Type.TEXT);

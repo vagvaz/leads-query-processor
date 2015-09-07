@@ -1,11 +1,13 @@
 package eu.leads.processor.core.index;
 
+import eu.leads.processor.common.infinispan.CacheManagerFactory;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import org.apache.commons.lang.RandomStringUtils;
 import org.infinispan.Cache;
 import org.infinispan.query.SearchManager;
+import org.infinispan.query.dsl.FilterConditionContext;
 import org.infinispan.query.dsl.QueryFactory;
 
 import java.util.ArrayList;
@@ -19,10 +21,10 @@ public class TestLeadsIndex {
 
     public static void main(String[] args){
         LQPConfiguration.initialize();
-//        InfinispanManager man2 = CacheManagerFactory.createCacheManager();
+       //InfinispanManager man = CacheManagerFactory.createCacheManager();
 //        Cache cachefoo = (Cache) man2.getPersisentCache("queriesfoo");
         InfinispanManager man = InfinispanClusterSingleton.getInstance().getManager();
-        Cache cache = (Cache) man.getPersisentCache("defaultCache");
+        Cache cache = (Cache) man.getIndexedPersistentCache("IIdefaultCache");
 
         int numStrings = 1000;// 10000
         int numTuples = 500;// 15000000
@@ -62,7 +64,13 @@ public class TestLeadsIndex {
 
             cache.put("infinispanKey" + i, lInd);
         }
+ LeadsIndex lInd = new LeadsIndexString();
+            lInd.setCacheName("indexedCache");
+            lInd.setAttributeName("attributeName");
+            lInd.setAttributeValue("teeest1");
+            lInd.setKeyName("infinispanKey" + 788);
 
+            cache.put("infinispanKey" + 8, lInd);
         stopTime = System.currentTimeMillis();
         System.out.println("Runtime Tuples: " + (stopTime-startTime) + " ms\n");
 
@@ -72,13 +80,14 @@ public class TestLeadsIndex {
         // create query
         SearchManager sm = org.infinispan.query.Search.getSearchManager(cache);
         QueryFactory qf = sm.getQueryFactory();
-        org.infinispan.query.dsl.Query lucenequery = qf.from(LeadsIndexString.class)
-                .having("attributeName").eq("attributeName")
-                .toBuilder().build();
-        List<LeadsIndex> list = lucenequery.list();
+        FilterConditionContext lucenequery = qf.from(LeadsIndexString.class)
+                .having("attributeValue").eq("teeest1").and().having("attributeValue").eq("teeest1");
+        System.out.print(lucenequery.toString());
+        lucenequery.toBuilder().build();
+        List<LeadsIndex> list = lucenequery.toBuilder().build().list();
 
         stopTime = System.currentTimeMillis();
-        System.out.println("Runtime Query: " + (stopTime-startTime) + " ms\n");
+        System.out.println("Runtime Query: " + (stopTime-startTime) + " ms \n" + list.size());
 
         System.exit(0);
     }
