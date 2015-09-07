@@ -28,7 +28,7 @@ public class leadsCli {
   protected long rowsC = 60;
   protected String[] loc = {"a", "b", "c", "d"};
   private boolean DEBUG = false;
-
+  private static boolean noResults = false;
   public static void main(String[] args) throws Exception {
 
     System.out.println(" === Leads Command Line Interface === ");
@@ -62,9 +62,18 @@ public class leadsCli {
         if ((line = reader.readLine()) != null) {
           if (hist instanceof FileHistory)
             ((FileHistory) hist).flush();
-
+          out.flush();
           if (line.equalsIgnoreCase("cls")) {
             reader.clearScreen();
+            continue;
+          }
+          if (line.equalsIgnoreCase("noresults")) {
+            noResults=true;
+            continue;
+          }
+          if (line.equalsIgnoreCase("printresults")) {
+            noResults=false;
+
             continue;
           }
 
@@ -156,7 +165,7 @@ public class leadsCli {
 
   static void send_query_and_wait(ConsoleReader reader, String sql) throws IOException, InterruptedException {
     long start = System.currentTimeMillis();
-    long resultCompleted, resultArrived, resultPrinted;
+    long resultCompleted, resultArrived = 0, resultPrinted = 0;
     QueryStatus currentStatus = WebServiceClient.submitQuery(username, sql);
     long submittime = System.currentTimeMillis();
 
@@ -183,14 +192,20 @@ public class leadsCli {
     if (currentStatus.getStatus().equals("COMPLETED")) {
       resultCompleted = System.currentTimeMillis();
       System.out.println("Execution  time: " + (resultCompleted - submittime) + " ms.");
-      System.out.printf("Please wait ... getting results. ");
-      QueryResults res = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
-      resultArrived = System.currentTimeMillis();
-      System.out.printf("\rResult acquisition (delivery) time: " + (resultArrived - resultCompleted) + " ms.\n");
-      System.out.printf(" Please wait ... formatting results. ");
-      print_results(res);
-      resultPrinted = System.currentTimeMillis();
-      System.out.print("\rFound " + res.getResult().size() + " results.                                      \n");
+      if(noResults)
+        System.out.printf("Disabled results acquisition. Use \"printresults\" command to enable.");
+      else{
+        System.out.printf("Please wait ... getting results. ");
+        QueryResults res = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
+        resultArrived = System.currentTimeMillis();
+        System.out.printf("\rResult acquisition (delivery) time: " + (resultArrived - resultCompleted) + " ms.\n");
+
+        System.out.printf(" Please wait ... formatting results. ");
+        print_results(res);
+
+        resultPrinted = System.currentTimeMillis();
+        System.out.print("\rFound " + res.getResult().size() + " results.                                      \n");
+      }
       System.out.print("\nSubmit time: " + (submittime - start) + " ms, ");
       System.out.print("execution  time: " + (resultCompleted - submittime) + " ms, ");
       System.out.print("acquisition (delivery) time: " + (resultArrived - resultCompleted) + " ms, ");
