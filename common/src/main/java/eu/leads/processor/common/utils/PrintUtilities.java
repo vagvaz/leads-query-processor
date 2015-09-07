@@ -1,6 +1,8 @@
 package eu.leads.processor.common.utils;
 
 import org.infinispan.commons.api.BasicCache;
+import org.infinispan.context.Flag;
+import org.infinispan.manager.EmbeddedCacheManager;
 import org.slf4j.Logger;
 import org.vertx.java.core.json.JsonObject;
 
@@ -68,7 +70,7 @@ public class PrintUtilities {
         System.err.println("end of list}");
     }
 
-    public static void printIterable(Iterator<Object> testCache) {
+    public static void printIterable(Iterator testCache) {
         System.out.println("Iterable{");
         Iterator<?> it = testCache;
         while (it.hasNext()) {
@@ -95,5 +97,14 @@ public class PrintUtilities {
         for(Map.Entry<String,Map<Object, Object>> entry : objects.entrySet()){
             log.error(entry.getKey() + " --> " + entry.getValue().size()) ;
         }
+    }
+
+    public static void printCaches(EmbeddedCacheManager manager) {
+        String s = ("\n\n--- Remaining ----\n");
+
+        for(String c : manager.getCacheNames()) {
+            s+=("name: " + c + "\n");
+        }
+        System.err.println(s+"\n\n---END Remaining ---- " + manager.getCacheNames().size());
     }
 }

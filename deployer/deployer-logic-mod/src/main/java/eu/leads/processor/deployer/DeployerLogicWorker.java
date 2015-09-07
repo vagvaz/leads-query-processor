@@ -356,6 +356,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
       Collection<PlanNode> nodes = ((Plan)plan.getLogicalPlan()).getNodes();
       for(PlanNode n : nodes){
          if(!n.getNodeId().equals(outputCacheName)){
+            System.err.println("Clearing... " + n.getNodeId());
             persistence.removePersistentCache(n.getNodeId());
          }
       }

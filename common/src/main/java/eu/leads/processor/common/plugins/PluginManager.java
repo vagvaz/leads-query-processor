@@ -144,7 +144,8 @@ public class PluginManager {
 
     return true;
   }
-  private static String check_exist_download(String pluginFn,  PluginPackage plugin, boolean forcedownload) {
+  public static String check_exist_download(String pluginFn, PluginPackage plugin,
+      boolean forcedownload) {
     String pluginTmpJar=null;
     System.out.println("Plugin md5: " + plugin.getKey() );
     if(forcedownload)
@@ -177,20 +178,21 @@ public class PluginManager {
     FileInputStream fileInputStream = null;
       try {
         fileInputStream = new FileInputStream(jarFilname);
-        MD5Hash key = MD5Hash.digest(fileInputStream);
-        fileInputStream.close();
-        System.out.println("checkMD5  key : " + key);
-        if (!plugin.check_MD5(key))
-          return false;
-        else
-          return true;
+//        MD5Hash key = MD5Hash.digest(fileInputStream);
+//        fileInputStream.close();
+//        System.out.println("checkMD5  key : " + key);
+//        if (!plugin.check_MD5(key))
+//          return false;
+//        else
+//          return true;
 
       } catch (FileNotFoundException e) {
         e.printStackTrace();
       } catch (IOException e) {
         e.printStackTrace();
       }
-    return false;
+    return true;
+//    return false;
   }
 
   private static String downloadPlugin(String jarFilename) {

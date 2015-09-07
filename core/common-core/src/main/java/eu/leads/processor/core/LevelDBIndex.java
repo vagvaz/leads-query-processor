@@ -1,5 +1,8 @@
 package eu.leads.processor.core;
+import com.sun.tools.javah.JNI;
 import org.bson.BasicBSONEncoder;
+import org.fusesource.leveldbjni.JniDBFactory;
+import org.infinispan.commons.util.Util;
 import org.iq80.leveldb.*;
 import static org.fusesource.leveldbjni.JniDBFactory.*;
 import java.io.File;
@@ -11,7 +14,8 @@ import java.util.*;
  * Created by vagvaz on 8/17/15.
  */
 public class LevelDBIndex {
-
+    private static final String JNI_DB_FACTORY_CLASS_NAME = "org.fusesource.leveldbjni.JniDBFactory";
+    private static final String JAVA_DB_FACTORY_CLASS_NAME = "org.iq80.leveldb.impl.Iq80DBFactory";
     private static Tuple t;
     private WriteOptions writeOptions;
     private DB keysDB;
@@ -26,6 +30,7 @@ public class LevelDBIndex {
     private int batchCount =0;
     private WriteBatch batch;
     private WriteBatch keyBatch;
+    private DBFactory dbfactory;
     //    private BasicBSONEncoder encoder = new BasicBSONEncoder();
 
     public LevelDBIndex(String baseDir, String name){
@@ -42,21 +47,23 @@ public class LevelDBIndex {
         keydbFile = new File(baseDirFile.toString()+"/keydb");
         datadbFile = new File(baseDirFile.toString()+"/datadb");
         options = new Options();
-        options.writeBufferSize( 240*1024*1024);
+        options.writeBufferSize( 50*1024*1024);
         options.createIfMissing(true);
         //        options.blockSize(LQPConfiguration.getInstance().getConfiguration()
         //            .getInt("leads.processor.infinispan.leveldb.blocksize", 16)*1024*1024);
         //        options.cacheSize(LQPConfiguration.getInstance().getConfiguration()
         //            .getInt("leads.processor.infinispan.leveldb.cachesize", 256)*1024*1024);
-        options.blockSize(16*1024 * 1024);
+        options.blockSize(4 * 1024);
 
-//        options.compressionType(CompressionType.SNAPPY);
-        options.cacheSize( 256 * 1024*1024);
+        options.compressionType(CompressionType.SNAPPY);
+        options.cacheSize(128 * 1024 * 1024);
+        dbfactory = Util.getInstance(JNI_DB_FACTORY_CLASS_NAME, LevelDBIndex.class.getClassLoader());
+//        JniDBFactory.pushMemoryPool(128*1024*1024);
         try {
-            keysDB = factory.open(keydbFile,options);
-            dataDB = factory.open(datadbFile,options);
+            keysDB = dbfactory.open(keydbFile,options.verifyChecksums(true));
+            dataDB = dbfactory.open(datadbFile,options);
             writeOptions = new WriteOptions();
-//            writeOptions.sync(false);
+            writeOptions.sync(false);
 
             batch = dataDB.createWriteBatch();
         } catch (IOException e) {
@@ -93,9 +100,9 @@ public class LevelDBIndex {
     }
 
     public static void main(String[] args) {
-        LevelDBIndex index = new LevelDBIndex("/tmp/testdb/","mydb");
+        LevelDBIndex index = new LevelDBIndex("/media/storage/vagvaz/testdb/","mydb");
         initTuple();
-        int numberofkeys = 200000;
+        int numberofkeys = 500000;
         int numberofvalues = 2;
         String baseKey= "baseKeyString";
 
@@ -155,7 +162,7 @@ public class LevelDBIndex {
     public synchronized void flush() {
         try {
 
-            dataDB.write(batch,writeOptions);
+            dataDB.write(batch);
             batch.close();
             batch = dataDB.createWriteBatch();
         } catch (IOException e) {
@@ -220,12 +227,12 @@ public class LevelDBIndex {
             counter = 0;
         }
         else{
-            ByteBuffer bytebuf = ByteBuffer.wrap(count);
-            counter = bytebuf.getInt();
+//            ByteBuffer bytebuf = ByteBuffer.wrap(count);
+            counter = Integer.parseInt(new String(count));
             counter += 1;
         }
-        byte[] keyvalue = ByteBuffer.allocate(4).putInt(counter).array();
-        keysDB.put(bytes(key+"{}"), keyvalue);
+        byte[] keyvalue = bytes(counter.toString());
+        keysDB.put(bytes(key+"{}"), keyvalue,writeOptions);
         //        encoder = new BasicBSONEncoder();
         BasicBSONEncoder encoder = new BasicBSONEncoder();
         byte[] b = encoder.encode(value.asBsonObject());
@@ -234,16 +241,16 @@ public class LevelDBIndex {
         //        dataDB.put(bytes(key+"{}"+counter),b,writeOptions);
         batch.put(bytes(key+"{}"+counter),b);
         batchCount++;
-        if(batchCount>= batchSize){
-            try {
-                dataDB.write(batch);
-                batch.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            if(batchCount>= batchSize){
+                try {
+                    dataDB.write(batch,writeOptions);
+                    batch.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                batch = dataDB.createWriteBatch();
+                batchCount = 0;
             }
-            batch = dataDB.createWriteBatch();
-            batchCount = 0;
-        }
 
     }
 
@@ -260,6 +267,7 @@ public class LevelDBIndex {
         if(keysDB != null){
             try {
                 keysDB.close();
+                dbfactory.destroy(keydbFile,new Options());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -267,30 +275,38 @@ public class LevelDBIndex {
         if(dataDB != null){
             try {
                 batch.close();
+
                 dataDB.close();
+                dbfactory.destroy(datadbFile, new Options());
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        for(File f : keydbFile.listFiles())
-        {
-            f.delete();
-        }
-        keydbFile.delete();
-
-        for(File f : datadbFile.listFiles())
-        {
-            f.delete();
-        }
-        datadbFile.delete();
-
-        baseDirFile = new File(baseDirFile.toString()+"/");
-        for(File f : baseDirFile.listFiles())
-        {
-            f.delete();
-        }
+//        for(File f : keydbFile.listFiles())
+//        {
+//            f.delete();
+//        }
+//        keydbFile.delete();
+//
+//        for(File f : datadbFile.listFiles())
+//        {
+//            f.delete();
+//        }
+//        datadbFile.delete();
+//
+//        baseDirFile = new File(baseDirFile.toString()+"/");
+//        for(File f : baseDirFile.listFiles())
+//        {
+//            f.delete();
+//        }
         baseDirFile.delete();
-
+//        System.out.println("press");
+//        try {
+//            System.in.read();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        JniDBFactory.popMemoryPool();
     }
 }

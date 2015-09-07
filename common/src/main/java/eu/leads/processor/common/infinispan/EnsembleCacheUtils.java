@@ -43,8 +43,9 @@ public class EnsembleCacheUtils {
     private static ConcurrentLinkedDeque<BatchPutRunnable> microcloudRunnables;
     private static int totalBatchPutThreads =16;
     private static String ensembleString ="";
-    private static List<NotifyingFuture> localFutures;
+    private static ConcurrentLinkedQueue<NotifyingFuture> localFutures;
     private static int localBatchSize =10;
+    private static boolean isSetup=false;
 
 
     public static void initialize() {
@@ -85,17 +86,34 @@ public class EnsembleCacheUtils {
             partitioner = null;
             localManager = null;
             localMC =null;
-            localFutures = new ArrayList<>();
+            localFutures = new ConcurrentLinkedQueue<NotifyingFuture>();
         }
     }
 
+    public static void clean(){
+        waitForAllPuts();
+        localFutures.clear();
+        for(Map.Entry<String,Map<String,TupleBuffer>> mc : microclouds.entrySet()) {
+            mc.getValue().clear();
+            partitioner = null;
+        }
+
+    }
     public static void initialize(EnsembleCacheManager manager){
        initialize(manager,true);
     }
 
     public static void initialize(EnsembleCacheManager manager, boolean isEmbedded) {
         synchronized (mutex) {
-
+//            if(isSetup)
+//            {
+//                if(check(manager)){
+//                    return;
+//                }else{
+//                    System.err.println("Serious ERROR init with different managers");
+//                }
+//            }
+//            isSetup =true;
             ensembleString = "";
             ArrayList<EnsembleCache> cachesList = new ArrayList<>();
 
@@ -119,6 +137,16 @@ public class EnsembleCacheUtils {
 
             partitioner = new HashBasedPartitioner(cachesList);
         }
+    }
+
+    private static boolean check(EnsembleCacheManager manager) {
+//        ArrayList<EnsembleCache> cachesList = new ArrayList<>();
+        String str ="";
+        for (Object s : new ArrayList<>(manager.sites())) {
+            Site site = (Site) s;
+            str += site.getName();
+        }
+        return  ensembleString.equals(str);
     }
 
 
@@ -212,7 +240,7 @@ public class EnsembleCacheUtils {
                 else{
                        Cache localCache =
                             (Cache) localManager.getPersisentCache(cache.getValue().getCacheName());
-                    localFutures.add(cache.getValue().flushToCache(localCache));
+                    cache.getValue().flushToCache(localCache);
                 }
             }
         }
@@ -254,7 +282,7 @@ public class EnsembleCacheUtils {
                 e.printStackTrace();
             }
         }
-        localFutures.clear();
+//        localFutures.clear();
     }
 
     public static void putToCache(BasicCache cache, Object key, Object value) {
@@ -327,7 +355,8 @@ public class EnsembleCacheUtils {
             if(tupleBuffer.getMC().equals(localMC)){
                 Cache localCache =
                     (Cache) localManager.getPersisentCache(  tupleBuffer.getCacheName());
-                localFutures.add(tupleBuffer.flushToCache(localCache));
+//                localFutures.add(tupleBuffer.flushToCache(localCache));
+                tupleBuffer.flushToCache(localCache);
                 while(localFutures.size() > threadBatch){
                     Iterator<NotifyingFuture> iterator = localFutures.iterator();
                     while(iterator.hasNext()){

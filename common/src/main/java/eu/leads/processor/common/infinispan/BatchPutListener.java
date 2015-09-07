@@ -28,7 +28,6 @@ public class BatchPutListener implements LeadsListener {
     private String compressedCache;
     private String targetCacheName;
     private transient Cache targetCache;
-    private transient Map oldMap;
     private transient ConcurrentMap<NotifyingFuture<Void>,NotifyingFuture<Void>> futures;
     private transient Object mutex = null;
 
@@ -53,7 +52,6 @@ public class BatchPutListener implements LeadsListener {
             }
         }
         targetCache = (Cache) manager.getPersisentCache(targetCacheName);
-        oldMap = null;
         futures = new ConcurrentHashMap<>();
 
     }
@@ -64,6 +62,12 @@ public class BatchPutListener implements LeadsListener {
 
     @Override public String getId() {
         return BatchPutListener.class.toString();
+    }
+
+    @Override public void close() {
+        futures.clear();
+        targetCache = null;
+        manager = null;
     }
 
     @CacheEntryCreated
@@ -84,7 +88,7 @@ public class BatchPutListener implements LeadsListener {
             }
             TupleBuffer tupleBuffer = new TupleBuffer((byte[]) value);
             Map tmpb = new HashMap();
-            for (Map.Entry<Object, Tuple> entry : tupleBuffer.getBuffer().entrySet()) {
+            for (Map.Entry<Object, Object> entry : tupleBuffer.getBuffer().entrySet()) {
                 tmpb.put(entry.getKey(), entry.getValue());
                 if (tmpb.size() > 20) {
                     targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).putAll(tmpb);//entry.getKey(), entry.getValue());

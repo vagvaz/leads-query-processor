@@ -34,5 +34,7 @@ public interface LeadsListener extends Serializable {
      */
     public String getId();
 
+    public void close();
+
 
 }

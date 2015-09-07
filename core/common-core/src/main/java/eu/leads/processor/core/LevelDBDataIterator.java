@@ -87,7 +87,7 @@ public class LevelDBDataIterator implements Iterator<Object> {
 //        if(iterator!=null)
 //        reportState(key,tot);
         if(iterator == null){
-            iterator = data.iterator();
+            iterator = data.iterator(readOptions.fillCache(true));
             iterator.seekToFirst();
 //            reportState(key,tot);
 //            Map.Entry<byte[],byte[]> entry = iterator.peekNext();

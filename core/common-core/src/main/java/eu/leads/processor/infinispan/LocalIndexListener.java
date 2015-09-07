@@ -128,8 +128,8 @@ public class LocalIndexListener implements LeadsListener {
         mutex = new Object();
         this.targetCache = (Cache) manager.getPersisentCache(cacheName);
         System.err.println("Listener target Cache = " + targetCache.getName());
-        this.keysCache = manager.getLocalCache(cacheName+".index.keys");
-        this.dataCache = manager.getLocalCache(cacheName+".index.data");
+//        this.keysCache = manager.getLocalCache(cacheName+".index.keys");
+//        this.dataCache = manager.getLocalCache(cacheName+".index.data");
 //        this.index = new IntermediateKeyIndex(keysCache,dataCache);
         this.index = new LevelDBIndex( System.getProperties().getProperty("java.io.tmpdir")+"/"+StringConstants.TMPPREFIX+"/interm-index/"+ InfinispanClusterSingleton.getInstance().getManager().getUniquePath()+"/"+cacheName,cacheName+".index");
         log = LoggerFactory.getLogger(LocalIndexListener.class);
@@ -142,6 +142,24 @@ public class LocalIndexListener implements LeadsListener {
 
     @Override public String getId() {
         return this.getClass().toString();
+    }
+
+    @Override public void close() {
+        index.flush();
+        index.close();
+        index =null;
+        if(keysCache != null){
+            keysCache.clear();;
+            keysCache.stop();
+            keysCache.getCacheManager().removeCache(keysCache.getName());
+        }
+        if(dataCache != null){
+            dataCache.clear();
+            dataCache.stop();
+            dataCache.getCacheManager().removeCache(dataCache.getName());
+        }
+        keysCache = null;
+        dataCache = null;
     }
 
     void waitForAllData(){

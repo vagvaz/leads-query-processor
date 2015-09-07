@@ -18,12 +18,14 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
     //   String configString;
     private transient String prefix;
     private transient Logger profilerLog;
-    protected ProfileEvent profCallable;
-    private transient ProfileEvent reduceEvent;
+//    protected ProfileEvent profCallable;
+//    private transient ProfileEvent reduceEvent;
     private transient Map<String,List<Tuple>> relations;
     private transient ArrayList<List<Tuple>> arrays;
-    private transient ProfileEvent tmpprofCallable;
-    private transient ProfileEvent tmpProfileEvent;
+//    private int counter = 0;
+
+    //    private transient ProfileEvent tmpprofCallable;
+//    private transient ProfileEvent tmpProfileEvent;
 
     public JoinReducer(String s) {
         super(s);
@@ -44,11 +46,11 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
 //        profCallable.start("reduce init ");
         super.initialize();
         profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
-        profCallable = new ProfileEvent("JoinReducer profCallable",profilerLog);
-        reduceEvent = new ProfileEvent("JoinReducer ReduceExecute",profilerLog);
-        tmpprofCallable = new ProfileEvent("JoinReducer Manager " + this.getClass().toString(),
-            profilerLog);
-        tmpProfileEvent = new ProfileEvent("tmp profile event",profilerLog);
+//        profCallable = new ProfileEvent("JoinReducer profCallable",profilerLog);
+//        reduceEvent = new ProfileEvent("JoinReducer ReduceExecute",profilerLog);
+//        tmpprofCallable = new ProfileEvent("JoinReducer Manager " + this.getClass().toString(),
+//            profilerLog);
+//        tmpProfileEvent = new ProfileEvent("tmp profile event",profilerLog);
         isInitialized = true;
         conf = new JsonObject(configString);
         prefix = outputCacheName+":";
@@ -73,36 +75,36 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
 
         if(!isInitialized)
             initialize();
-        reduceEvent.start("JoinReducerReduceExecute");
+//        reduceEvent.start("JoinReducerReduceExecute");
 
 
 
-        profCallable.start("JoinReducerReduceProcessing");
-        tmpprofCallable.start("JoinReducerClearPreviousTuples");
+//        profCallable.start("JoinReducerReduceProcessing");
+//        tmpprofCallable.start("JoinReducerClearPreviousTuples");
         for(Map.Entry<String,List<Tuple>> entry : relations.entrySet()){
             entry.getValue().clear();
         }
-        tmpprofCallable.end();
-
-        tmpprofCallable.start("JoinReducerManualCallingProfLog");
-        profilerLog.error("Sample log");
-        tmpprofCallable.end();
-        while(true){
+//        tmpprofCallable.end();
+//        tmpprofCallable.start("JoinReducerManualCallingProfLog");
+//        profilerLog.error("Sample log");
+//        tmpprofCallable.end();
+        while(iter.hasNext()){
+//            counter++;
             //         String jsonTuple = iter.next();
             //         Tuple t = new Tuple(jsonTuple);
             try {
 
 
 
-                tmpprofCallable.start("reduce next");
+//                tmpprofCallable.start("reduce next");
                 t = (Tuple) iter.next();
-                tmpprofCallable.end("reduce next");
+//                tmpprofCallable.end("reduce next");
                 //            if(c instanceof Tuple )
                 //            else{
                 //                continue;
                 //            }
 
-                tmpprofCallable.start("JoinReducerGetTable");
+//                tmpprofCallable.start("JoinReducerGetTable");
                 String table = t.getAttribute("__table");
 //                tmpprofCallable.end();
 //                tmpprofCallable.start("JoinReducerRemoveAttributeTable");
@@ -118,12 +120,12 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
 //                tmpprofCallable.end();
 //                tmpprofCallable.start("reduce add");
                 tuples.add(t);
-                tmpprofCallable.end("reduce add");
+//                tmpprofCallable.end("reduce add");
             }catch (Exception e){
-                tmpprofCallable.start("JoinReducerException");
+//                tmpprofCallable.start("JoinReducerException");
                 if(e instanceof NoSuchElementException){
                     profilerLog.info("End of LeadsIntermediateIterator");
-                    tmpprofCallable.end("JoinReducerExceptionIterationEnd");
+//                    tmpprofCallable.end("JoinReducerExceptionIterationEnd");
                     break;
                 }
                 else{
@@ -131,11 +133,11 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
                     profilerLog.error("EXCEPTION WHILE updating agg value");
                     profilerLog.error(e.getClass() + " " + e.getMessage());
                     profilerLog.error(iter.toString());
-                    tmpprofCallable.end("JoinReducerExceptionExceptionEnd");
+//                    tmpprofCallable.end("JoinReducerExceptionExceptionEnd");
                 }
             }
         }
-        profCallable.end();
+//        profCallable.end();
 
 //        profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
 //        profCallable.setProfileLogger(profilerLog);
@@ -145,24 +147,25 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
 //            profCallable = new ProfileEvent("reduce reduce " + this.getClass().toString(), profilerLog);
 //        }
 
-        profCallable.start("JoinReducerReduceRestProc ");
+//        profCallable.start("JoinReducerReduceRestProc ");
         if(relations.size() < 2)
         {
-            profCallable.end("JoinReducerReduceRestProc ");
-            reduceEvent.end();
+//            profCallable.end("JoinReducerReduceRestProc ");
+//            reduceEvent.end();
+            profilerLog.error("Could not found match relations for " + reducedKey + " " + relations.size());
             return;
         }
 //         arrays = new ArrayList<>(2);
-        tmpprofCallable.start("JoinReducerToArrays");
+//        tmpprofCallable.start("JoinReducerToArrays");
         arrays.clear();
         for(List<Tuple> a : relations.values()){
             arrays.add(a);
         }
-        tmpprofCallable.end();
+//        tmpprofCallable.end();
 
         try {
             for (int i = 0; i < arrays.get(0).size(); i++) {
-                tmpProfileEvent.start("JoinReducerReadOuterTuple");
+//                tmpProfileEvent.start("JoinReducerReadOuterTuple");
                 Tuple outerTuple = arrays.get(0).get(i);
                 //            assert(outerTuple.hasField("__tupleKey"));
                 //            System.err.println("outer " + outerTuple.toString());
@@ -185,22 +188,28 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
                     Tuple resultTuple = new Tuple(innerTuple, outerTuple, null);
                     //                resultTuple.removeAttribute("__tupleKey");
                     String combinedKey = outerKey + "-" + outerKey2;
-                    tmpProfileEvent.end();
+//                    tmpProfileEvent.end();
 //                    tmpProfileEvent.start("JoinReducerPrepareOutput");
                     resultTuple = prepareOutput(resultTuple);
-                    tmpProfileEvent.end();
+//                    tmpProfileEvent.end();
                     //                resultTuple = prepareOutput(resultTuple);
                     //            outputCache.put(combinedKey, resultTuple.asJsonObject().toString());
-                    tmpProfileEvent.start("JoinReducerEmitResult");
+//                    tmpProfileEvent.start("JoinReducerEmitResult");
                     collector.emit(prefix + combinedKey, resultTuple);
-                    tmpProfileEvent.end();
+//                    tmpProfileEvent.end();
                 }
             }
         }catch(Exception e){
 //            profCallable.end("JoinReducerRest Exception");
         }
-        profCallable.end();
-        reduceEvent.end();
+//        profCallable.end();
+//        reduceEvent.end();
         return ;
+    }
+
+    @Override protected void finalizeTask() {
+        super.finalizeTask();
+//        System.err.println("\n\n\nITERATED: " + counter);
+
     }
 }

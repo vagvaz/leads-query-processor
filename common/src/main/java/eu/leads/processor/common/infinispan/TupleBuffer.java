@@ -27,7 +27,7 @@ import java.util.concurrent.TimeoutException;
  * Created by vagvaz on 8/30/15.
  */
 public class TupleBuffer {
-    HashMap<Object, Tuple> buffer;
+    HashMap<Object, Object> buffer;
     private  transient int threshold;
     private transient EnsembleCacheManager emanager;
     private transient EnsembleCache ensembleCache;
@@ -60,7 +60,7 @@ public class TupleBuffer {
 //                byte[] tupleBytes = new byte[tupleBytesSize];
 //                inputStream.read(tupleBytes);
 //                Tuple tuple = new Tuple(decoder.readObject(tupleBytes));
-                Tuple tuple = (Tuple) inputStream.readObject();
+                Object tuple =  inputStream.readObject();
                 buffer.put(key, tuple);
             }
             inputStream.close();
@@ -108,11 +108,11 @@ public class TupleBuffer {
             "node.ensemble.batchput.batchsize", batchThreshold);
     }
     public String getMC(){return mc;}
-    public Map<Object,Tuple> getBuffer(){
+    public Map<Object,Object> getBuffer(){
         return buffer;
     }
 
-    public boolean add(Object key, Tuple value){
+    public boolean add(Object key, Object value){
         synchronized (mutex) {
             buffer.put(key, value);
         }
@@ -218,7 +218,7 @@ public class TupleBuffer {
                 ObjectOutputStream outputStream = new ObjectOutputStream(byteStream);
                 BSONEncoder encoder = new BasicBSONEncoder();
                 outputStream.writeInt(buffer.size());
-                for (Map.Entry<Object, Tuple> entry : buffer.entrySet()) {
+                for (Map.Entry<Object, Object> entry : buffer.entrySet()) {
                     if(entry.getKey() instanceof String || entry.getKey() instanceof ComplexIntermediateKey) {
                         outputStream.writeObject(entry.getKey());
                     }
@@ -256,11 +256,11 @@ public class TupleBuffer {
         synchronized (mutex){
             if(buffer == null || buffer.size() == 0)
                 return null;
-            Map<Object,Tuple> tmp = buffer;
+            Map<Object,Object> tmp = buffer;
             buffer = new HashMap<>();
-            Map<Object,Tuple> tmpb = new HashMap<>();
+            Map<Object,Object> tmpb = new HashMap<>();
 
-            for(Map.Entry<Object,Tuple> entry : tmp.entrySet()){
+            for(Map.Entry<Object,Object> entry : tmp.entrySet()){
 
                 tmpb.put(entry.getKey(), entry.getValue());
                 if(tmpb.size() > batchThreshold) {
@@ -277,5 +277,9 @@ public class TupleBuffer {
 
         }
         return result;
+    }
+
+    public void release() {
+        ensembleCache =  null;
     }
 }

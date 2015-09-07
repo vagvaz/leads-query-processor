@@ -178,11 +178,12 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 			} else {
 				Version latestVersion = versionedCache.getLatestVersion(ikey);
 				if (latestVersion == null) {
-					scanExecute.end();
+//					scanExecute.end();
 					return;
 				}
 				Object objectValue = versionedCache.get(ikey);
 				toRunValue = (Tuple) objectValue;
+
 //        toRunValue = (String) objectValue;
 			}
 		} else {
@@ -293,6 +294,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 		}
 	}
 
+
 //  private void renameAllTupleAttributes(Tuple tuple) {
 //    JsonArray fields = inputSchema.getArray("fields");
 //    Iterator<Object> iterator = fields.iterator();
@@ -317,6 +319,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 			DSPMNode currentPagerank = (DSPMNode) pageRankCache.get(url);
 			if (currentPagerank == null || totalSum <= 0) {
 //        t.setAttribute("default.webpages.pagerank",0f);
+
 				t.setAttribute("default.webpages.pagerank", Double.toString((10000 / url.length()) / 10000));
 
 				return;
@@ -364,10 +367,10 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 		}
 	}
 
-	@Override
-	public void finalizeCallable() {
+	@Override public void finalizeCallable() {
 		fullProcessing.end();
 		collector.finalizeCollector();
 		super.finalizeCallable();
 	}
+
 }
