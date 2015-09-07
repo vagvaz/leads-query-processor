@@ -309,4 +309,8 @@ public class LevelDBIndex {
 //        }
 //        JniDBFactory.popMemoryPool();
     }
+    @Override
+    public void finalize(){
+        System.err.println("Finalize leveldb Index " + this.baseDirFile.toString());
+    }
 }

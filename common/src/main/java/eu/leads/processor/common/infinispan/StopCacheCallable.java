@@ -49,9 +49,9 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
                     }
                 }
                     try {
-                        compressed.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).clear();
-
-                        compressed.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).stop();
+//                        compressed.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).clear();
+                        InfinispanClusterSingleton.getInstance().getManager().removePersistentCache(compressed.getName());
+//                        compressed.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).stop();
                     }catch (Exception e){
                         e.printStackTrace();
                     }
@@ -65,8 +65,9 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
                         "Stopped " + cacheName + " from " + cache.getCacheManager().getAddress()
                             .toString() + "\n");
                 try{
-                    cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).clear();
-                    cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).stop();
+//                    cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).clear();
+                    InfinispanClusterSingleton.getInstance().getManager().removePersistentCache(cache.getName());
+//                    cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).stop();
                 }catch (Exception e){
                     e.printStackTrace();
                 }
