@@ -26,58 +26,57 @@ public class WebServiceClientTestPlugins {
         }
 
         try {
-            if(WebServiceClient.initialize(host, port))
+            if (WebServiceClient.initialize(host, port))
                 System.out.println("Server is Up");
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
 
-      PluginPackage plugin = new PluginPackage("eu.leads.processor.plugins.transform.TransformPlugin",
-                                                "eu.leads.processor.plugins.transform.TransformPlugin",
-                                                "/home/vagvaz/Projects/idea/transform-plugin/target/transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar",
-                                                "/home/vagvaz/Projects/idea/transform-plugin/transform-plugin-conf.xml");
+        PluginPackage plugin = new PluginPackage("eu.leads.processor.plugins.transform.TransformPlugin",
+            "eu.leads.processor.plugins.transform.TransformPlugin",
+            "/home/vagvaz/Projects/idea/transform-plugin/target/transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar",
+            "/home/vagvaz/Projects/idea/transform-plugin/transform-plugin-conf.xml");
 
 
-      //upload plugin
-      WebServiceClient.submitPlugin("vagvaz",plugin);
-      System.out.println("Uploaded plugin");
-      //distributed deployment  ( plugin id, cache to install, events)
-      //PluginManager.deployPlugin();
-//      PluginManager.deployPlugin("eu.leads.processor.plugins.transform.TranformPlugin", "webpages",
-//                                  EventType.CREATEANDMODIFY,"vagvaz");
+        //upload plugin
+        WebServiceClient.submitPlugin("vagvaz", plugin);
+        System.out.println("Uploaded plugin");
+        //distributed deployment  ( plugin id, cache to install, events)
+        //PluginManager.deployPlugin();
+        //      PluginManager.deployPlugin("eu.leads.processor.plugins.transform.TranformPlugin", "webpages",
+        //                                  EventType.CREATEANDMODIFY,"vagvaz");
 
         /*Start putting values to the cache */
-      WebServiceClient.deployPlugin("vagvaz","eu.leads.processor.plugins.transform.TransformPlugin",null,
-                                     "default.webpages", EventType.CREATEANDMODIFY);
-      LQPConfiguration.initialize();
-      //Put some configuration properties for crawler
-      LQPConfiguration.getConf().setProperty("crawler.seed",
-                                              "http://www.bbc.co.uk"); //For some reason it is ignored news.yahoo.com is used by default
-      LQPConfiguration.getConf().setProperty("crawler.depth", 3);
-      //Set desired target cache
-      LQPConfiguration.getConf().setProperty(StringConstants.CRAWLER_DEFAULT_CACHE, "default.webpages");
-      //start crawler
+        WebServiceClient
+            .deployPlugin("vagvaz", "eu.leads.processor.plugins.transform.TransformPlugin", null, "default.webpages",
+                EventType.CREATEANDMODIFY);
+        LQPConfiguration.initialize();
+        //Put some configuration properties for crawler
+        LQPConfiguration.getConf().setProperty("crawler.seed",
+            "http://www.bbc.co.uk"); //For some reason it is ignored news.yahoo.com is used by default
+        LQPConfiguration.getConf().setProperty("crawler.depth", 3);
+        //Set desired target cache
+        LQPConfiguration.getConf().setProperty(StringConstants.CRAWLER_DEFAULT_CACHE, "default.webpages");
+        //start crawler
 
-      //Sleep for an amount of time to test if everything is working fine
-      try {
-        int sleepingPeriod = 30;
-        Thread.sleep(sleepingPeriod * 1000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
+        //Sleep for an amount of time to test if everything is working fine
+        try {
+            int sleepingPeriod = 30;
+            Thread.sleep(sleepingPeriod * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-      //Iterate through local cache entries to ensure things went as planned
-      Cache cache = (Cache) InfinispanClusterSingleton.getInstance().getManager()
-                              .getPersisentCache("mycache");
-      PrintUtilities.printMap(cache);
+        //Iterate through local cache entries to ensure things went as planned
+        Cache cache = (Cache) InfinispanClusterSingleton.getInstance().getManager().getPersisentCache("mycache");
+        PrintUtilities.printMap(cache);
 
 	    /*Cleanup and close....*/
-//      PersistentCrawl.stop();
-      System.out
-        .println("Local cache " + cache.entrySet().size() + " --- global --- " + cache.size());
-      InfinispanClusterSingleton.getInstance().getManager().stopManager();
-      System.exit(0);
+        //      PersistentCrawl.stop();
+        System.out.println("Local cache " + cache.entrySet().size() + " --- global --- " + cache.size());
+        InfinispanClusterSingleton.getInstance().getManager().stopManager();
+        System.exit(0);
     }
 
 }

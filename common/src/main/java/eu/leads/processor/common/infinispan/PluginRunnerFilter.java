@@ -4,6 +4,7 @@ import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.plugins.PluginManager;
 import eu.leads.processor.common.plugins.PluginPackage;
 import eu.leads.processor.common.utils.FSUtilities;
+import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.common.utils.storage.LeadsStorage;
 import eu.leads.processor.common.utils.storage.LeadsStorageFactory;
 import eu.leads.processor.core.Tuple;
@@ -52,6 +53,9 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
   transient private boolean isInitialized =false ;
   transient private LeadsStorage storageLayer;// = null;
   transient private String user;
+  private transient volatile Object mutex = new Object();
+  private transient ProfileEvent profEvent;
+
   public PluginRunnerFilter(EmbeddedCacheManager manager,String confString){
     log = LoggerFactory.getLogger(manager.getAddress().toString()+":"+PluginRunnerFilter.class.toString());
     log.error("Manager init");
@@ -85,80 +89,88 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
     configString =  i.readUTF();
     isInitialized = false;
     UUIDname = UUID.randomUUID().toString();
+    mutex = new Object();
     System.err.println(UUIDname+" DeSerialize " + configString);
     initialize();
   }
 
   private void initialize() {
-    try {
-      if (isInitialized) {
-        System.err.println("Already initialized !!!! not again  " + UUIDname);
-        return;
-      }
-      System.err.println("Initilize " + UUIDname);
-      log = LoggerFactory.getLogger(PluginRunnerFilter.class);
-      log = LoggerFactory
-          .getLogger(UUIDname + " PluginRunner." + pluginName + ":" + pluginsCacheName);
-      this.manager = InfinispanClusterSingleton.getInstance().getManager().getCacheManager();
-      this.conf = new JsonObject(configString);
-      imanager = (ClusterInfinispanManager) InfinispanClusterSingleton.getInstance().getManager();
-
-      log.error("get activePluginCache");
-      pluginsCacheName = conf.getString("activePluginCache");//StringConstants.PLUGIN_ACTIVE_CACHE);
-
-      log.error("get pluginName");
-      pluginName = conf.getString("pluginName");
-      log.error("get user");
-      user = conf.getString("user");
-      log.error("get types");
-      JsonArray types = conf.getArray("types");
-      //InferTypes
-
-      type = new ArrayList<EventType>(3);
-      if (types != null) {
-        Iterator<Object> iterator = types.iterator();
-        if (iterator.hasNext()) {
-          log.error("READ EVent type ");
-          type.add(EventType.valueOf(iterator.next().toString()));
-        }
-      }
-
-      if (type.size() == 0) {
-        type.add(CREATED);
-        type.add(REMOVED);
-        type.add(MODIFIED);
-      }
-
-      log.error("init pluginscache " + UUIDname);
-      pluginsCache = (Cache) imanager.getPersisentCache(pluginsCacheName);
-      log.error("init logger");
-      //    log = LoggerFactory.getLogger(managerAddress+ " PluginRunner."+pluginName+":"+
-      //                                    pluginsCacheName);
-      log.error("init storage");
-      String storagetype = this.conf.getString("storageType");
-      Properties storageConfiguration = new Properties();
-      byte[] storageConfBytes = this.conf.getBinary("storageConfiguration");
-      ByteArrayInputStream bais = new ByteArrayInputStream(storageConfBytes);
       try {
-        storageConfiguration.load(bais);
-        storageLayer = LeadsStorageFactory.getInitializedStorage(storagetype, storageConfiguration);
-      } catch (IOException e) {
+        if (isInitialized) {
+          System.err.println("Already initialized !!!! not again  " + UUIDname);
+          return;
+        }
+        System.err.println("Initilize " + UUIDname);
+        log = LoggerFactory.getLogger(PluginRunnerFilter.class);
+        log = LoggerFactory
+            .getLogger(UUIDname + " PluginRunner." + pluginName + ":" + pluginsCacheName);
+        profEvent = new ProfileEvent("InitialLog",log);
+        this.manager = InfinispanClusterSingleton.getInstance().getManager().getCacheManager();
+        this.conf = new JsonObject(configString);
+        imanager = (ClusterInfinispanManager) InfinispanClusterSingleton.getInstance().getManager();
+
+        log.error("get activePluginCache");
+        pluginsCacheName = conf.getString("activePluginCache");//StringConstants.PLUGIN_ACTIVE_CACHE);
+
+        log.error("get pluginName");
+        pluginName = conf.getString("pluginName");
+        log.error("get user");
+        user = conf.getString("user");
+        log.error("get types");
+        JsonArray types = conf.getArray("types");
+        //InferTypes
+
+        type = new ArrayList<EventType>(3);
+        if (types != null) {
+          Iterator<Object> iterator = types.iterator();
+          if (iterator.hasNext()) {
+            log.error("READ EVent type ");
+            type.add(EventType.valueOf(iterator.next().toString()));
+          }
+        }
+
+        if (type.size() == 0) {
+          type.add(CREATED);
+          type.add(REMOVED);
+          type.add(MODIFIED);
+        }
+
+        log.error("init pluginscache " + UUIDname);
+        pluginsCache = (Cache) imanager.getPersisentCache(pluginsCacheName);
+        log.error("init logger");
+        //    log = LoggerFactory.getLogger(managerAddress+ " PluginRunner."+pluginName+":"+
+        //                                    pluginsCacheName);
+        log.error("init storage");
+        String storagetype = this.conf.getString("storageType");
+        Properties storageConfiguration = new Properties();
+        byte[] storageConfBytes = this.conf.getBinary("storageConfiguration");
+        ByteArrayInputStream bais = new ByteArrayInputStream(storageConfBytes);
+        try {
+          storageConfiguration.load(bais);
+          storageLayer = LeadsStorageFactory.getInitializedStorage(storagetype, storageConfiguration);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+        log.error("init targetCacheName");
+        targetCacheName = conf.getString("targetCache");
+        log.error("init Targetcache");
+        targetCache = (Cache) imanager.getPersisentCache(targetCacheName);
+        log.error("init plugin");
+        Thread t = new Thread(new Runnable() {
+          @Override public void run() {
+            initializePlugin(pluginsCache, pluginName, user);
+            System.err.println("Plugin " + plugin.getClassName().toString() + " Loaded from jar and initialized");
+          }
+        });
+        t.start();
+//            initializePlugin(pluginsCache, pluginName, user);
+        isInitialized = true;
+        log.error("Initialized plugin " + pluginName + " on " + targetCacheName);
+        System.err.println("Initialized plugin " + pluginName + " on " + targetCacheName);
+
+      } catch (Exception e) {
         e.printStackTrace();
       }
-      log.error("init targetCacheName");
-      targetCacheName = conf.getString("targetCache");
-      log.error("init Targetcache");
-      targetCache = (Cache) imanager.getPersisentCache(targetCacheName);
-      log.error("init plugin");
-      initializePlugin(pluginsCache, pluginName, user);
-      log.error("Initialized plugin " + pluginName + " on " + targetCacheName);
-      System.err.println("Initialized plugin " + pluginName + " on " + targetCacheName);
-
-      isInitialized = true;
-    }
-    catch(Exception e) {
-      e.printStackTrace();
-    }
   }
 
 
@@ -299,72 +311,79 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
                          org.infinispan.notifications.cachelistener.filter.EventType eventType) {
     try {
 
-      if (!isInitialized)
-        initialize();
-      System.err.println(UUIDname + " Accept: Manager Address " + manager.getAddress());
-      log.error(UUIDname + "Accept: Manager Address " + manager.getAddress());
 
-      if (key == null) {
-        log.error("null key:");
-        return false;
-      }
+        if (!isInitialized) {
+          initialize();
+        }
 
-      if (newValue == null) {
-        System.out.println("newValue is null key:" + (String) key);
-        log.error("Accept newValue is null key:" + (String) key);
-        return false;
-      }
-      //    else{
-      //      System.out.println("key:" + (String)key+", newValue is " + newValue);
-      //      log.info("Accept, key:" + (String)key+", newValue is " + newValue);
-      //    }
-      String o1 = (String) key;
-      //    Object value = newValue;
-      Object value = null;
-      switch (eventType.getType()) {
-        case CACHE_ENTRY_CREATED:
-          value = newValue;
-          break;
-        case CACHE_ENTRY_REMOVED:
-          value = oldValue;
-          break;
-        case CACHE_ENTRY_MODIFIED:
-          value = newValue;
-          break;
-        default:
-          break;
-      }
+        profEvent.end("");
+        profEvent.start("Plugin: " + plugin.getClassName().toString() + " key " + key.toString());
+        System.err.println(UUIDname + " Accept: Manager Address " + manager.getAddress());
+        log.error(UUIDname + "Accept: Manager Address " + manager.getAddress());
 
-      if (value instanceof Tuple) {
-        value = value.toString();
-      }
-      switch (eventType.getType()) {
-        case CACHE_ENTRY_CREATED:
-          if (type.contains(CREATED))
-            plugin.created(key, value, targetCache);
-          break;
-        case CACHE_ENTRY_REMOVED:
-          if (type.contains(REMOVED)) {
-            if (oldValue == null) {
-              log.error("Accept old value is null");
-              return false;
+        if (key == null) {
+          log.error("null key:");
+          return false;
+        }
+
+        if (newValue == null) {
+          System.out.println("newValue is null key:" + (String) key);
+          log.error("Accept newValue is null key:" + (String) key);
+          return false;
+        }
+        //    else{
+        //      System.out.println("key:" + (String)key+", newValue is " + newValue);
+        //      log.info("Accept, key:" + (String)key+", newValue is " + newValue);
+        //    }
+        String o1 = (String) key;
+        //    Object value = newValue;
+        Object value = null;
+        switch (eventType.getType()) {
+          case CACHE_ENTRY_CREATED:
+            value = newValue;
+            break;
+          case CACHE_ENTRY_REMOVED:
+            value = oldValue;
+            break;
+          case CACHE_ENTRY_MODIFIED:
+            value = newValue;
+            break;
+          default:
+            break;
+        }
+
+        if (value instanceof Tuple) {
+          value = value.toString();
+        }
+        switch (eventType.getType()) {
+          case CACHE_ENTRY_CREATED:
+            if (type.contains(CREATED))
+              plugin.created(key, value, targetCache);
+            break;
+          case CACHE_ENTRY_REMOVED:
+            if (type.contains(REMOVED)) {
+              if (oldValue == null) {
+                log.error("Accept old value is null");
+                return false;
+              }
+              //          value = (String) oldValue;
+              plugin.removed(key, value, targetCache);
             }
-            //          value = (String) oldValue;
-            plugin.removed(key, value, targetCache);
-          }
-          break;
-        case CACHE_ENTRY_MODIFIED:
-          if (type.contains(MODIFIED))
-            plugin.modified(key, value, targetCache);
-          break;
-        default:
-          break;
+            break;
+          case CACHE_ENTRY_MODIFIED:
+            if (type.contains(MODIFIED))
+              plugin.modified(key, value, targetCache);
+            break;
+          default:
+            break;
+        }
+      profEvent.end();
+        return false;
+      }catch(Exception e){
+        e.printStackTrace();
       }
+
       return false;
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return false;
   }
 
 

@@ -49,6 +49,7 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
   private transient volatile Object mutex;
   private transient LeadsBaseCallable nextCallable;
   private String ensembleHost;
+  private boolean isReduceLocal;
   //  private IndexedComplexIntermediateKey  baseIndexedKey;
 
 
@@ -289,5 +290,17 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
 
   public String getEnsembleHost() {
     return ensembleHost;
+  }
+
+  public void setIsReduceLocal(boolean isReduceLocal) {
+    this.isReduceLocal = isReduceLocal;
+  }
+
+  public boolean isReduceLocal() {
+    return isReduceLocal;
+  }
+
+  public void setReduceLocal(boolean isReduceLocal) {
+    this.isReduceLocal = isReduceLocal;
   }
 }

@@ -631,22 +631,6 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
   private void removeCache(String name) {
     try {
-      //         if (manager.cacheExists(name)) {
-      //            if(manager.getCache(name).getStatus().stopAllowed())
-      //               manager.getCache(name).stop();
-      //         }
-      DistributedExecutorService des = new DefaultExecutorService(manager.getCache("clustered"));
-      List<Future<Void>> list = des.submitEverywhere(new StopCacheCallable(name));
-      for (Future<Void> future : list) {
-        try {
-          future.get(); // wait for task to complete
-        } catch (InterruptedException e) {
-          log.error(e.getClass().toString() + " while removing " + name + " " + e.getMessage());
-        } catch (ExecutionException e) {
-          log.error(e.getClass().toString() + " while removing " + name +" " + e.getMessage());
-        }
-      }
-
       System.err.println("------REMOVE " + name );
 
       manager.removeCache(name);
@@ -654,6 +638,19 @@ public class ClusterInfinispanManager implements InfinispanManager {
         System.err.println("---------REMOVE " + name + " and " + name+".compressed");
         manager.removeCache(name+".compressed");
       }
+
+      //      DistributedExecutorService des = new DefaultExecutorService(manager.getCache());
+      //      List<Future<Void>> list = des.submitEverywhere(new StopCacheCallable(name));
+      //      for (Future<Void> future : list) {
+      //        try {
+      //          future.get();
+      //        } catch (InterruptedException e) {
+      //          log.error(e.getClass().toString() + " while removing " + name + " " + e.getMessage());
+      //        } catch (ExecutionException e) {
+      //          log.error(e.getClass().toString() + " while removing " + name +" " + e.getMessage());
+      //        }
+      //      }
+
 //      PrintUtilities.printCaches(manager);
     }catch (Exception e){
       log.error("Exception while remove " + name + " " + e.getClass().toString() + " " + e.getMessage());
@@ -779,7 +776,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     }
     else {
       //      manager.defineConfiguration(cacheName,getCacheDefaultConfiguration(cacheName));
-      DistributedExecutorService des = new DefaultExecutorService(manager.getCache("clustered"));
+      DistributedExecutorService des = new DefaultExecutorService(manager.getCache());
       List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
       //
       System.out.println(cacheName+"  " + list.size());

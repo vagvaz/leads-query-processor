@@ -26,6 +26,17 @@ public class PrintUtilities {
         System.out.println("end of map }");
     }
 
+  public static void printMap(Map<?, ?> map, int numOfItems) {
+    System.out.println("Map{\n");
+    int counter = 0;
+    for (Object e : map.keySet()) {
+      System.out.println("\t " + e.toString() + "--->" + map.get(e).toString() + "\n");
+      counter++;
+      if(counter > numOfItems)
+        break;
+    }
+    System.out.println("end of map }");
+  }
     public static void saveMapToFile(Map<?, ?> map,String filename) {
        RandomAccessFile raf = null;
        try {
@@ -99,12 +110,12 @@ public class PrintUtilities {
         }
     }
 
-    public static void printCaches(EmbeddedCacheManager manager) {
+        public static void printCaches(EmbeddedCacheManager manager) {
         String s = ("\n\n--- Remaining ----\n");
 
         for(String c : manager.getCacheNames()) {
             s+=("name: " + c + "\n");
         }
-        System.err.println(s+"\n\n---END Remaining ---- " + manager.getCacheNames().size());
+        System.err.println(s + "\n\n---END Remaining ---- " + manager.getCacheNames().size());
     }
 }

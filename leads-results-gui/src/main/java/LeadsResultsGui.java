@@ -84,47 +84,26 @@ public class LeadsResultsGui extends JPanel {
     static Vector<Vector> TestData() {
 
 
-        String[] domainnames = {"www.twitter.com",
-                "www.bbc.co.uk",
-                "www.amazon.com",
-                "www.ebay.com",
-                "www.adidas-group.com",
-                "www.sportsdirect.com/adidas",
-                "www.jdsports.co.uk",
-                "www.size.co.uk",
-                "www.endclothing.co.uk",
+        String[] domainnames =
+            {"www.twitter.com", "www.bbc.co.uk", "www.amazon.com", "www.ebay.com", "www.adidas-group.com",
+                "www.sportsdirect.com/adidas", "www.jdsports.co.uk", "www.size.co.uk", "www.endclothing.co.uk",
 
-        };
+            };
         double[] avgPageRank;
-        avgPageRank = new double[]{0.000010,
-                0.000009f,
-                0.000008f,
-                0.000008,
-                0.000006f,
-                0.000005,
-                0.000005f,
-                0.000004,
-                0.000004f};
+        avgPageRank = new double[] {0.000010, 0.000009f, 0.000008f, 0.000008, 0.000006f, 0.000005, 0.000005f, 0.000004,
+            0.000004f};
         double[] avgSentimentScore;
-        avgSentimentScore = new double[]{0.693,
-                0.725,
-                0.589,
-                0.658,
-                0.902,
-                0.962,
-                0.754,
-                0.854,
-                0.654};
+        avgSentimentScore = new double[] {0.693, 0.725, 0.589, 0.658, 0.902, 0.962, 0.754, 0.854, 0.654};
 
         Vector<Object> row;// = new Vector<Object>();
 
-//        for(int i=0;i<rowsC;i++){
-//            row = new Vector<Object>();
-//            row.addElement(getRandomDomain());
-//            row.addElement(new Float(nextFloat(0,0.01f)));
-//            row.addElement(new Float(nextFloat(-1f,1f)));
-//            data.add(row);
-//        }
+        //        for(int i=0;i<rowsC;i++){
+        //            row = new Vector<Object>();
+        //            row.addElement(getRandomDomain());
+        //            row.addElement(new Float(nextFloat(0,0.01f)));
+        //            row.addElement(new Float(nextFloat(-1f,1f)));
+        //            data.add(row);
+        //        }
         Vector<Vector> data = new Vector<Vector>();
         for (int i = 0; i < domainnames.length; i++) {
             row = new Vector<Object>();
@@ -248,7 +227,8 @@ public class LeadsResultsGui extends JPanel {
             System.out.println("Connected at " + host + ":" + port + " Successful");
         } catch (MalformedURLException e) {
             System.err.println("Unable to connect at " + host + ":" + port + " . Exiting");
-            JOptionPane.showMessageDialog(null, "Unable to connect at " + host + ":" + port, "Leads Results", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Unable to connect at " + host + ":" + port, "Leads Results",
+                JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
             System.exit(-1);
         }
@@ -277,7 +257,6 @@ public class LeadsResultsGui extends JPanel {
 
 
 
-
         Container content = f.getContentPane();
         JProgressBar progressBar = new JProgressBar();
         progressBar.setValue(0);
@@ -290,7 +269,7 @@ public class LeadsResultsGui extends JPanel {
         f.setSize(300, 100);
         f.setVisible(true);
         progressBar.setValue(1);
-        InitializeWebClient(new String[]{});
+        InitializeWebClient(new String[] {});
         Thread.sleep(200);
 
 
@@ -303,7 +282,7 @@ public class LeadsResultsGui extends JPanel {
         progressBar.setBorder(BorderFactory.createTitledBorder("Waiting for results ... "));
         while (!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")) {
             try {
-                value = (int)Math.round((double)(87 - value) / 5.5 + value);
+                value = (int) Math.round((double) (87 - value) / 5.5 + value);
                 progressBar.setValue(value);
                 Thread.sleep(2000);
                 System.out.print(" - ");
@@ -326,7 +305,9 @@ public class LeadsResultsGui extends JPanel {
             f.dispose();
             return results;
         } else {
-            JOptionPane.showMessageDialog(null, "Workflow query " + currentStatus.getStatus().toString(), "Leads Results", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane
+                .showMessageDialog(null, "Workflow query " + currentStatus.getStatus().toString(), "Leads Results",
+                    JOptionPane.INFORMATION_MESSAGE);
             System.out.println("Workflow query " + currentStatus.getStatus().toString());
         }
         return null;
@@ -334,10 +315,11 @@ public class LeadsResultsGui extends JPanel {
 
     private static void convert_results(QueryResults data) {
         if (data == null) {
-            JOptionPane.showMessageDialog(null, "Error no data received, Failed", "Leads Results", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Error no data received, Failed", "Leads Results",
+                JOptionPane.WARNING_MESSAGE);
             System.out.println("Error no data received, Failed");
             System.exit(0);
-//            return;
+            //            return;
         }
         ArrayList<Tuple> resultSet = new ArrayList<Tuple>();
         for (String s : data.getResult()) {
@@ -423,16 +405,16 @@ public class LeadsResultsGui extends JPanel {
     static class DecimalFormatRenderer extends DefaultTableCellRenderer {
         private static final DecimalFormat formatter = new DecimalFormat("0.000000");
 
-        public Component getTableCellRendererComponent(
-                JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+            int row, int column) {
             // First format the cell value as required
             value = formatter.format((Number) value);
             // And pass it on to parent class
-            return super.getTableCellRendererComponent(
-                    table, value, isSelected, hasFocus, row, column);
+            return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         }
     }
 }
+
 
 class ButtonListener implements ActionListener {
     public void actionPerformed(ActionEvent evt) {

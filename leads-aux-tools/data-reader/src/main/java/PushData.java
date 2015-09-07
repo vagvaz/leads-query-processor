@@ -13,12 +13,12 @@ public class PushData {
     public static void main(String[] args) {
         OutputHandler dummy = new DummyOutputHandler();
 
-//        InputHandler inputHandler = new GoraInputHandler();
-//        Properties inputConfig = new Properties();
-//        inputConfig.setProperty("limit",Integer.toString(200000));
-//        inputConfig.setProperty("batchSize",Integer.toString(1000));
-//        inputConfig.setProperty("connectionString", "clusterinfo.unineuchatel.ch:11225");
-//        inputConfig.setProperty("offset", Integer.toString(55000));
+        //        InputHandler inputHandler = new GoraInputHandler();
+        //        Properties inputConfig = new Properties();
+        //        inputConfig.setProperty("limit",Integer.toString(200000));
+        //        inputConfig.setProperty("batchSize",Integer.toString(1000));
+        //        inputConfig.setProperty("connectionString", "clusterinfo.unineuchatel.ch:11225");
+        //        inputConfig.setProperty("offset", Integer.toString(55000));
 
         String baseDir = "/tmp/leads/nutchRaw";
         if (args.length > 0) {
@@ -33,9 +33,9 @@ public class PushData {
         inputConfig.setProperty("limit", "2000000");
         inputConfig.put("valueClass", (new GenericData.Record(WebPage.SCHEMA$)));
         inputConfig.put("keyClass", String.class);
-//
-//
-//
+        //
+        //
+        //
         inputHandler.initialize(inputConfig);
 
         Properties outputConfig = new Properties();
@@ -72,33 +72,33 @@ public class PushData {
         int counter = 0;
         int rejected = 0;
         int processed = 0;
-        Set<String> keys =  new HashSet<String>();
+        Set<String> keys = new HashSet<String>();
 
         while (inputHandler.hasNext()) {
             // Map.Entry<String,WebPage> entry;
-//            entry = (Map.Entry<String,WebPage>) inputHandler.next();
+            //            entry = (Map.Entry<String,WebPage>) inputHandler.next();
             Map.Entry<String, GenericData.Record> entry = inputHandler.next();
             processed++;
             if (processed % 100 == 0) {
                 System.err.println("processed " + processed);
             }
-//            Map.Entry<String,GenericData.Record> entry = (Map.Entry<String, GenericData.Record>) inputHandler.next();
-//            if(entry != null)
-//           System.err.println("key: " + entry.getKey() + " value " + entry.getValue().toString() +"\ncontent ==" + );
-//            dummy.append(tuple.getAttribute("url"), tuple);
+            //            Map.Entry<String,GenericData.Record> entry = (Map.Entry<String, GenericData.Record>) inputHandler.next();
+            //            if(entry != null)
+            //           System.err.println("key: " + entry.getKey() + " value " + entry.getValue().toString() +"\ncontent ==" + );
+            //            dummy.append(tuple.getAttribute("url"), tuple);
             if (entry == null) {
                 continue;
             }
             if ((entry.getValue().get(entry.getValue().getSchema().getField("content").pos()) != null)) {
                 Tuple tuple = transformer.transform(entry.getValue());
-//                outputHandler.append(tuple.getAttribute("url"), tuple);
-//                outputHandler2.append(tuple.getAttribute("url"), new JsonObject(tuple.toString()).encodePrettily());
-//                outputHandler3.append(entry.getValue().get(entry.getValue().getSchema().getField("url").pos()).toString(), entry.getValue().toString());
-                String key_url =  tuple.getAttribute("default.keywords.url");
-                String key_ts =  tuple.getAttribute("default.keywords.ts");
-                String key = "default.keywords:"+key_url+","+key_ts;
+                //                outputHandler.append(tuple.getAttribute("url"), tuple);
+                //                outputHandler2.append(tuple.getAttribute("url"), new JsonObject(tuple.toString()).encodePrettily());
+                //                outputHandler3.append(entry.getValue().get(entry.getValue().getSchema().getField("url").pos()).toString(), entry.getValue().toString());
+                String key_url = tuple.getAttribute("default.keywords.url");
+                String key_ts = tuple.getAttribute("default.keywords.ts");
+                String key = "default.keywords:" + key_url + "," + key_ts;
                 keys.add(key);
-                outputHandler.append("default.keywords:"+key_url+","+key_ts, tuple);
+                outputHandler.append("default.keywords:" + key_url + "," + key_ts, tuple);
 
                 counter++;
                 if (counter % 100 == 0) {
@@ -114,7 +114,7 @@ public class PushData {
         System.out.println("processed " + processed + " rejected " + rejected + " read " + counter);
         inputHandler.close();
         outputHandler.close();
-        System.err.println("Size of keys: "+keys.size());
+        System.err.println("Size of keys: " + keys.size());
         System.exit(0);
     }
 }

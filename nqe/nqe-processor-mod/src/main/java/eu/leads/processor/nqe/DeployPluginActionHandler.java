@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by vagvaz on 9/23/14.
@@ -52,6 +53,7 @@ public class DeployPluginActionHandler implements ActionHandler {
 //     ownersPlugins = (BasicCache) persistence.getPersisentCache(StringConstants.OWNERSCACHE);
 //     activePlugins = (BasicCache) persistence.getPersisentCache(StringConstants.PLUGIN_ACTIVE_CACHE);
 //     pluginRepository = (BasicCache) persistence.getPersisentCache(StringConstants.PLUGIN_CACHE);
+     activeListeners = new ConcurrentHashMap<>();
      Properties storageConf = new Properties();
      storageConf.setProperty("prefix","/tmp/leads/");
      if(globalConfig!=null){
@@ -71,9 +73,9 @@ public class DeployPluginActionHandler implements ActionHandler {
          log.info("No defined all hdfs parameters using local storage ");
          storage = LeadsStorageFactory.getInitializedStorage(LeadsStorageFactory.LOCAL, storageConf);
        }
-     }else
-       storage = LeadsStorageFactory.getInitializedStorage(LeadsStorageFactory.LOCAL,storageConf);
-
+     }else {
+       storage = LeadsStorageFactory.getInitializedStorage(LeadsStorageFactory.LOCAL, storageConf);
+     }
 
 
 
@@ -93,9 +95,9 @@ public class DeployPluginActionHandler implements ActionHandler {
      JsonObject reply = new JsonObject();
      if(action.getLabel().equals(NQEConstants.DEPLOY_PLUGIN)){
        JsonObject deployPlugin = action.getData();
-       String user = deployPlugin.getString("user");
-       String pluginId = deployPlugin.getString("pluginid");
-       String targetCache = deployPlugin.getString("cachename");
+       final String user = deployPlugin.getString("user");
+       final String pluginId = deployPlugin.getString("pluginid");
+       final String targetCache = deployPlugin.getString("cachename");
        XMLConfiguration config = null;
        if(deployPlugin.containsField("config")) {
          config = (XMLConfiguration) SerializationUtils.deserialize(deployPlugin.getBinary("config"));
@@ -104,7 +106,7 @@ public class DeployPluginActionHandler implements ActionHandler {
        for (int index = 0; index < deployPlugin.getArray("events").size(); index++) {
          eventList.add(EventType.valueOf(deployPlugin.getArray("events").get(index).toString()));
        }
-       EventType[] events =  new EventType[eventList.size()];
+       final EventType[] events =  new EventType[eventList.size()];
        int counter = 0;
        for(EventType event : eventList){
          events[counter++] = event;
@@ -123,17 +125,31 @@ public class DeployPluginActionHandler implements ActionHandler {
 
        plugin.setUser(user);
        activePlugins.put(targetCache+":"+plugin.getId()+plugin.getUser(),plugin);
-       PluginHandlerListener listener = PluginManager.deployPluginListenerWithEvents(pluginId,targetCache,
-                                                                                      user,events,
-                                                                            persistence,storage);
+       final PluginHandlerListener[] listener = {null};
+       Thread t = new Thread(new Runnable() {
+         @Override public void run() {
+           try {
+             listener[0] = PluginManager
+                 .deployPluginListenerWithEvents(pluginId, targetCache, user, events, persistence,
+                     storage);
+             activeListeners.put(targetCache + ":" + pluginId + user, listener[0]);
+           }
+           catch(Exception e){
+             System.err.println("Trying to deploy pawels plugin...");
+             e.printStackTrace();
+           }
+         }
+       });
+    t.start();
 //       PluginHandlerListener listener = PluginManager.deployPluginListenerWithEvents(pluginId,targetCache,
 //           user,events,
 //           emanager,storage);
 
        reply.putString("status","SUCCESS");
-       reply.putString("message","");
+       reply.putString("message", "");
        action.setResult(reply);
        ownersPlugins.put(plugin.getId() + plugin.getUser(), id);
+
 
      }
      else if(action.getLabel().equals(NQEConstants.UNDEPLOY_PLUGIN)){
@@ -174,6 +190,7 @@ public class DeployPluginActionHandler implements ActionHandler {
 //       ownerAction.setLabel(NQEConstants.OPERATOR_FAILED);
 //       com.sendTo(action.getData().getString("monitor"),ownerAction.asJsonObject());
 //     }
+     System.err.println("DEPLOYYYEEEEEEEEEEEEEEDDDDDD ACTJION RETURN!");
      return result;
 
    }

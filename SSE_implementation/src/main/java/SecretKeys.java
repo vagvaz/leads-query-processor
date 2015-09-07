@@ -23,6 +23,7 @@ public class SecretKeys {
         this.sk_DB = sk_DB;
         storeToFile(fileName);
     }
+
     public SecretKeys(String FileName) {
         retrieveFromFile(FileName);
     }
@@ -37,7 +38,7 @@ public class SecretKeys {
             byte[] kb = new byte[kb1.length + kb2.length];
             System.arraycopy(kb1, 0, kb, 0, kb1.length);
             System.arraycopy(kb2, 0, kb, kb1.length, kb2.length);
-            
+
             fos.write(kb);
             fos.close();
 
@@ -51,22 +52,22 @@ public class SecretKeys {
     public void retrieveFromFile(String fileName) {
         try {
             String fl = fileName + ".key";
-            
+
             FileInputStream fis = new FileInputStream(fl);
             int kl = fis.available();
             byte[] kb = new byte[kl];
             fis.read(kb);
-            
+
             this.sk_Index = new SecretKeySpec(Arrays.copyOfRange(kb, 0, 16), "AES");
-            this.sk_DB = new SecretKeySpec(Arrays.copyOfRange(kb, 16, 32), "AES"); 
+            this.sk_DB = new SecretKeySpec(Arrays.copyOfRange(kb, 16, 32), "AES");
         } catch (FileNotFoundException ex) {
             Logger.getLogger(SecretKeys.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(SecretKeys.class.getName()).log(Level.SEVERE, null, ex);
-        } 
+        }
     }
 
-    
+
 
     public SecretKey getSk_Index() {
         return this.sk_Index;

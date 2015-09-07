@@ -322,6 +322,9 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
       }
     } else {
       toRunValue = (Tuple) ivalue;
+      if(attributeFunctions.size() > 0){
+        executeFunctions(toRunValue);
+      }
     }
     Tuple tuple = toRunValue;//new Tuple(toRunValue);
     if (tree != null) {
@@ -360,6 +363,8 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
     }
 //    scanExecute.end();
   }
+
+
 
   private boolean needsREnaming() {
     return !outputSchema.toString().equals(inputSchema.toString());

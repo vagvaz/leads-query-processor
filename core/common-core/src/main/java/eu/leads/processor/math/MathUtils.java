@@ -1,5 +1,6 @@
 package eu.leads.processor.math;
 
+import eu.leads.processor.core.Tuple;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
@@ -219,7 +220,7 @@ public class MathUtils {
     public static boolean lessEqualThan(JsonObject left, JsonObject right) {
       String type = left.getObject("body").getObject("datum").getString("type");
        String rightType = right.getObject("body").getObject("datum").getString("type");
-       if(type.startsWith(rightType.substring(0,3))) {
+       if(type.startsWith(rightType.substring(0, 3))) {
           if (type.startsWith("TEXT")) {
              String leftValue = getTextFrom(left);
 
@@ -300,7 +301,7 @@ public class MathUtils {
    }
 
    public static boolean greaterEqualThan(JsonObject left, JsonObject right) {
-      return lessEqualThan(right,left);
+      return lessEqualThan(right, left);
    }
 
    public static boolean like(JsonObject leftValue, JsonObject rightValue, JsonObject value) {
@@ -632,4 +633,20 @@ public class MathUtils {
     return result;
   }
 
+    public static Object executeFunction(Tuple tuple, JsonObject function) {
+        String type = function.getObject("instance").getString("class");
+        type = type.substring(type.lastIndexOf(".")+1);
+        if(type.startsWith("Substr")){
+            JsonArray arguments = function.getArray("argEvals");
+            JsonObject attributeNameObject  = arguments.get(0);
+            JsonObject minIndexObject = arguments.get(1);
+            JsonObject maxIndexObject = arguments.get(2);
+            String attributeName = attributeNameObject.getObject("body").getObject("column").getString("name");
+            String attribute = tuple.getGenericAttribute(attributeName).toString();
+            int minIndex = Math.min(minIndexObject.getObject("body").getObject("datum").getObject("body").getInteger("val"),0);
+            int maxIndex = Math.min(maxIndexObject.getObject("body").getObject("datum").getObject("body").getInteger("val"),attribute.length());
+            return attribute.substring(minIndex,maxIndex);
+        }
+        return "";
+    }
 }

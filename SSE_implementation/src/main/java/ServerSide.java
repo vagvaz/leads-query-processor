@@ -22,17 +22,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 /**
- *
  * @author John Demertzis
  */
 public class ServerSide {
 
     private int Bvalue;
     private int Svalue;
-    
 
-    public ServerSide(int Svalue,int Bvalue) {
-        this.Svalue=Svalue;
+
+    public ServerSide(int Svalue, int Bvalue) {
+        this.Svalue = Svalue;
         this.Bvalue = Bvalue;
     }
 
@@ -52,10 +51,11 @@ public class ServerSide {
         return retVal;
     }
 
-    public HashMap<String, ArrayList<Etuple>> TSetRetrieve(CStore cs, String token) throws UnsupportedEncodingException, InvalidAlgorithmParameterException {
+    public HashMap<String, ArrayList<Etuple>> TSetRetrieve(CStore cs, String token)
+        throws UnsupportedEncodingException, InvalidAlgorithmParameterException {
         HashMap<String, Etuple> EDB = cs.getEDB(); //The encrypted Database
         HashMap<Integer, Record[]> TSet = cs.getTSet(); //the inverted index
-        
+
         ArrayList<Etuple> result_list = new ArrayList<Etuple>();
         byte[] iv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         IvParameterSpec ivspec = new IvParameterSpec(iv);
@@ -101,7 +101,7 @@ public class ServerSide {
                         flag = true;
                     }
                 }
-                if(flag == false){
+                if (flag == false) {
                     return null;
                 }
             } catch (NoSuchAlgorithmException noSuchAlgo) {

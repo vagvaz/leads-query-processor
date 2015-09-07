@@ -1,5 +1,3 @@
-import java.util.*;
-
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.NutchTransformer;
@@ -17,13 +15,16 @@ import org.apache.nutch.storage.Mark;
 import org.apache.nutch.storage.StorageUtils;
 import org.apache.nutch.storage.WebPage;
 import org.apache.nutch.util.NutchConfiguration;
+
+import java.util.*;
+
 /**
  * Created by vagvaz on 01/08/15.
  */
-public class GoraInputHandler implements InputHandler<String,WebPage> {
+public class GoraInputHandler implements InputHandler<String, WebPage> {
 
     Configuration configuration = NutchConfiguration.create();
-    DataStore<String,WebPage> store;
+    DataStore<String, WebPage> store;
     long offset;
     long batchSize;
     boolean useParallel;
@@ -41,17 +42,15 @@ public class GoraInputHandler implements InputHandler<String,WebPage> {
 
         LQPConfiguration.initialize();
 
-        if(conf.containsKey("connectionString")){
+        if (conf.containsKey("connectionString")) {
             connectionString = conf.getProperty("connectionString");
-        }
-        else{
+        } else {
             connectionString = "127.0.0.1:11222";
         }
-        configuration.set("gora.datastore.connectionstring",connectionString);
-        configuration.set("gora.datastore.default",
-            "org.apache.gora.infinipan.store.InfinispanStoreer");
+        configuration.set("gora.datastore.connectionstring", connectionString);
+        configuration.set("gora.datastore.default", "org.apache.gora.infinipan.store.InfinispanStoreer");
         try {
-            store = StorageUtils.createStore(configuration,String.class,WebPage.class);
+            store = StorageUtils.createStore(configuration, String.class, WebPage.class);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (GoraException e) {
@@ -70,32 +69,29 @@ public class GoraInputHandler implements InputHandler<String,WebPage> {
         query.setLimit(1);
         query.setFilter(filter);
         query.execute();
-        totalResults = ((InfinispanQuery)query).getResultSize();
+        totalResults = ((InfinispanQuery) query).getResultSize();
         System.out.println("Total amount of pages (in the store): " + totalResults);
 
-        if(conf.containsKey("offset")){
+        if (conf.containsKey("offset")) {
             offset = Long.parseLong(conf.getProperty("offset"));
-        }
-        else {
+        } else {
             offset = 0;
         }
 
-        if(conf.containsKey("limit")){
+        if (conf.containsKey("limit")) {
             limit = Long.parseLong(conf.getProperty("limit"));
-        }
-        else{
+        } else {
             limit = totalResults;
         }
 
-        if(conf.containsKey("batchSize")){
+        if (conf.containsKey("batchSize")) {
             batchSize = Long.parseLong(conf.getProperty("batchSize"));
-        }else{
+        } else {
             batchSize = 10000;
         }
-        if(conf.containsKey("useParallel")){
+        if (conf.containsKey("useParallel")) {
             useParallel = Boolean.parseBoolean(conf.getProperty("useParallel"));
-        }
-        else{
+        } else {
             useParallel = true;
         }
         readNextBatch();
@@ -103,8 +99,8 @@ public class GoraInputHandler implements InputHandler<String,WebPage> {
 
     @Override public Map getAll() {
         Map result = new HashMap();
-        currentResult = issueQuery(offset,limit);
-        if(result != null) {
+        currentResult = issueQuery(offset, limit);
+        if (result != null) {
             result = readTuplesFromResult(currentResult);
         }
         return result;
@@ -113,9 +109,9 @@ public class GoraInputHandler implements InputHandler<String,WebPage> {
     private Map readTuplesFromResult(Result result) {
         Map tuples = new HashMap();
         try {
-            while(result.next()){
+            while (result.next()) {
                 WebPage page = (WebPage) result.get();
-                tuples.put(page.getKey(),page);
+                tuples.put(page.getKey(), page);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -125,38 +121,35 @@ public class GoraInputHandler implements InputHandler<String,WebPage> {
 
     private Tuple getTupleFromPage(GenericData.Record record, WebPage page) {
 
-        for(int i = 0; i < WebPage.SCHEMA$.getFields().size();i++){
-            record.put(i,page.get(i));
+        for (int i = 0; i < WebPage.SCHEMA$.getFields().size(); i++) {
+            record.put(i, page.get(i));
         }
         Tuple result = transformer.transform(record);
         return result;
     }
 
-    @Override public Map getNextBatch(long offset)
-    {
-//       currentResult = issueQuery(offset,batchSize);
+    @Override public Map getNextBatch(long offset) {
+        //       currentResult = issueQuery(offset,batchSize);
         currentResult = readNextBatch();
         Map result = readTuplesFromResult(currentResult);
         return result;
     }
 
     private Result readNextBatch() {
-        if(offset + batchSize < totalResults) {
+        if (offset + batchSize < totalResults) {
             currentResult = issueQuery(offset, batchSize);
-        }
-        else{
+        } else {
             currentResult = issueQuery(offset, totalResults - offset);
         }
         return currentResult;
     }
 
     private Result issueQuery(long offset, long batchSize) {
-        if(numberOfValues >= limit)
-        {
+        if (numberOfValues >= limit) {
             currentResult = null;
             return null;
         }
-        if(batchSize <= 0 ){
+        if (batchSize <= 0) {
             currentResult = null;
             return null;
         }
@@ -166,9 +159,9 @@ public class GoraInputHandler implements InputHandler<String,WebPage> {
         query.setLimit(batchSize);
         query.setSortingOrder(true);
         query.setSortingField("fetchTime");
-        List<PartitionQuery> queries = ((InfinispanQuery)query).split();
+        List<PartitionQuery> queries = ((InfinispanQuery) query).split();
         listOfResults = new LinkedList<>();
-        for(PartitionQuery partitionQuery : queries) {
+        for (PartitionQuery partitionQuery : queries) {
             listOfResults.add(partitionQuery.execute());
         }
         currentResult = listOfResults.remove(0);
@@ -190,34 +183,29 @@ public class GoraInputHandler implements InputHandler<String,WebPage> {
 
     @Override public boolean hasNext() {
         boolean result = false;
-        if(numberOfValues < limit){
-            if(totalResults > offset){
+        if (numberOfValues < limit) {
+            if (totalResults > offset) {
                 result = true;
             }
-        }
-        else{
+        } else {
             result = false;
         }
         return result;
     }
 
-    @Override public Map.Entry<String, WebPage> next()
-    {
+    @Override public Map.Entry<String, WebPage> next() {
 
-        if(currentResult != null){
+        if (currentResult != null) {
             try {
-                if(currentResult.next())
-                {
+                if (currentResult.next()) {
                     WebPage page = (WebPage) currentResult.get();
-                        numberOfValues++;
-                        return new AbstractMap.SimpleEntry<String, WebPage>(page.getUrl(), page);
-                }
-                else if(listOfResults.size() > 0){
+                    numberOfValues++;
+                    return new AbstractMap.SimpleEntry<String, WebPage>(page.getUrl(), page);
+                } else if (listOfResults.size() > 0) {
                     currentResult = listOfResults.remove(0);
                     return next();
-                }
-                else{
-                    if(hasNext()){
+                } else {
+                    if (hasNext()) {
                         readNextBatch();
                         return next();
                     }
@@ -225,9 +213,8 @@ public class GoraInputHandler implements InputHandler<String,WebPage> {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-        else{
-            if(hasNext()){
+        } else {
+            if (hasNext()) {
                 readNextBatch();
                 return next();
             }

@@ -46,11 +46,13 @@
         <delete dir="${build.all}" failonerror="false"/>
     </target>
     <target name="prepareWindowsFiles" depends="build">
-        <move file="${dist}/${plugins}/core/core/lib/jdic_stub_win.jar" tofile="${dist}/${plugins}/core/core/lib/jdic_stub.jar"/>
+        <move file="${dist}/${plugins}/core/core/lib/jdic_stub_win.jar"
+              tofile="${dist}/${plugins}/core/core/lib/jdic_stub.jar"/>
         <delete file="${dist}/${plugins}/core/core/lib/jdic_stub_linux.jar"/>
     </target>
     <target name="prepareLinuxFiles" depends="build">
-        <move file="${dist}/${plugins}/core/core/lib/jdic_stub_linux.jar" tofile="${dist}/${plugins}/core/core/lib/jdic_stub.jar"/>
+        <move file="${dist}/${plugins}/core/core/lib/jdic_stub_linux.jar"
+              tofile="${dist}/${plugins}/core/core/lib/jdic_stub.jar"/>
         <delete file="${dist}/${plugins}/core/core/lib/jdic_stub_win.jar"/>
         <delete file="${dist}/boot1.properties"/>
         <delete file="${dist}/boot1noApex.properties"/>

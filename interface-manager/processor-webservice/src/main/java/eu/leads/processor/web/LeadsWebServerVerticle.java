@@ -57,6 +57,8 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         Handler<HttpServerRequest> privacyPointQueryHandler = new PrivacyPointQueryHandler(com,log);
         Handler<HttpServerRequest> executeMRHandler = new ExecuteMRHandler(com,log);
         Handler<HttpServerRequest> completedMRHandler = new CompletedMRHandler(com,log);
+        Handler<HttpServerRequest> executeMapReduceJobHandler = new ExecuteMapReduceJobHandler(com,
+            log);
         //object
         failHandler = new Handler<HttpServerRequest>() {
             @Override
@@ -85,6 +87,7 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         matcher.post("//rest/internal/completedmr",completedMRHandler);
         matcher.post("//rest/internal/completedmr/",completedMRHandler);
         matcher.post("/rest/internal/completedmr/",completedMRHandler);
+        matcher.post("/rest/mrjob/submit/", executeMapReduceJobHandler);
         //
         //      //query   [a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+
         matcher.get("/rest/query/status/:id", getQueryStatusHandler);

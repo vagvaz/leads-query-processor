@@ -43,7 +43,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
    transient Logger log = null;
    transient ProfileEvent groupReducerEvent;
    transient ProfileEvent reducerEvent;
-
+   transient boolean isCountStar = false;
    public GroupByReducer(JsonObject configuration) {
       super(configuration);
    }
@@ -76,7 +76,8 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
          JsonObject columnObject = (JsonObject) columnIterator.next();
          groupByColumns.add(columnObject.getString("name"));
       }
-
+      if(groupByColumns.size() == 0)
+         isCountStar = true;
       JsonArray functions = conf.getObject("body").getArray("aggrFunctions");
       Iterator<Object> funcIterator = functions.iterator();
       while(funcIterator.hasNext()){
@@ -196,9 +197,12 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
                String columnType = columnTypesIterator.next();
                String column = columnNameiterator.next();
                //set new aggvalue according to function type, columnt Type, old agg value, currentValue
+               if(funcType.equals("count") && isCountStar){
+                  aggregateValues.set(counter, ((Number)aggregateValues.get(counter)).longValue() + ((Number)t.getGenericAttribute("__count")).longValue());
+               }else{
                aggregateValues.set(counter, MathUtils.updateFunctionValue(funcType, columnType,
-                                                                                 aggregateValues.get(counter),
-                                                                                 t.getGenericAttribute(column)));
+                                                                                 aggregateValues.get(counter),t.getGenericAttribute(column)));
+               }
                counter++; //inc counter for the next agg value
             }
 

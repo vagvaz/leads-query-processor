@@ -15,10 +15,10 @@
 
     <dependencies>
         <!--<dependency>-->
-            <!--<groupId>gr.tuc.softnet</groupId>-->
-            <!--<artifactId>common-core</artifactId>-->
-            <!--<version>${processor.version}</version>-->
-            <!--<scope>provided</scope>-->
+        <!--<groupId>gr.tuc.softnet</groupId>-->
+        <!--<artifactId>common-core</artifactId>-->
+        <!--<version>${processor.version}</version>-->
+        <!--<scope>provided</scope>-->
         <!--</dependency>-->
     </dependencies>
 

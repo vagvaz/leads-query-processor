@@ -11,7 +11,6 @@ import java.sql.*;
 
 
 /**
- *
  * @author John Demertzis
  */
 
@@ -64,7 +63,8 @@ public class DB {
         int id = 0;
         try {
             dropTable();
-            stmt.execute("create table EmployeeRecords(fname varchar(40), lname varchar(40), job varchar(40), salary int, yearOfBirth varchar(40), birthCity varchar(40), currentCity varchar(40),stateAb varchar(10), postCode varchar(40))");
+            stmt.execute(
+                "create table EmployeeRecords(fname varchar(40), lname varchar(40), job varchar(40), salary int, yearOfBirth varchar(40), birthCity varchar(40), currentCity varchar(40),stateAb varchar(10), postCode varchar(40))");
 
             String fileName = "/home/john/Dropbox/master/LEADS/Implementations/SSE/Dataset.txt";
             String lineArray[];
@@ -75,16 +75,10 @@ public class DB {
             while ((line = bufferedReader.readLine()) != null) {
                 line = line.replace("'", " ");
                 lineArray = line.split(",");
-                stmt.execute("insert into " + tableName + " values ("
-                        + "'" + lineArray[0] + "','"
-                        + lineArray[1] + "','"
-                        + lineArray[2] + "',"
-                        + Integer.parseInt(lineArray[3]) + ",'"
-                        + lineArray[4] + "','"
-                        + lineArray[5] + "','"
-                        + lineArray[6] + "','"
-                        + lineArray[7] + "','"
-                        + lineArray[8] + "')");
+                stmt.execute(
+                    "insert into " + tableName + " values (" + "'" + lineArray[0] + "','" + lineArray[1] + "','"
+                        + lineArray[2] + "'," + Integer.parseInt(lineArray[3]) + ",'" + lineArray[4] + "','"
+                        + lineArray[5] + "','" + lineArray[6] + "','" + lineArray[7] + "','" + lineArray[8] + "')");
                 id++;
 
             }
@@ -107,7 +101,8 @@ public class DB {
                 System.out.print(rsmd.getColumnLabel(i) + "\t");
             }
 
-            System.out.println("\n-------------------------------------------------------------------------------------------------------");
+            System.out.println(
+                "\n-------------------------------------------------------------------------------------------------------");
             int id;
             while (results.next()) {
                 for (int i = 1; i <= numberCols; i++) {

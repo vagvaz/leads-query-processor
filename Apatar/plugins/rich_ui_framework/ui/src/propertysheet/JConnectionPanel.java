@@ -25,12 +25,6 @@ ________________________
 
 package propertysheet;
 
-import java.beans.BeanInfo;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import javax.swing.JPanel;
-
 import com.apatar.core.ApplicationData;
 import com.l2fprod.common.model.DefaultBeanInfoResolver;
 import com.l2fprod.common.propertysheet.Property;
@@ -38,41 +32,46 @@ import com.l2fprod.common.propertysheet.PropertySheet;
 import com.l2fprod.common.propertysheet.PropertySheetPanel;
 import com.l2fprod.common.swing.LookAndFeelTweaks;
 
-public class JConnectionPanel extends JPanel {
-	private static final long serialVersionUID = 1L;
-	
-	Object bean;
-	PropertySheetPanel sheet;
-	DefaultBeanInfoResolver resolver;
+import javax.swing.*;
+import java.beans.BeanInfo;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
-	public JConnectionPanel() {
-		super();
-		setLayout(LookAndFeelTweaks.createVerticalPercentLayout());
-		
-		resolver = new DefaultBeanInfoResolver();
-		
-		sheet = new PropertySheetPanel();
-	    sheet.setMode(PropertySheet.VIEW_AS_CATEGORIES);
-	    sheet.setDescriptionVisible(true);
-	    sheet.setSortingCategories(true);
-	    sheet.setSortingProperties(false);
-	    add(sheet, "*");
-	    
-	    PropertyChangeListener listener = new PropertyChangeListener() {
-	        public void propertyChange(PropertyChangeEvent evt) {
-	          Property prop = (Property)evt.getSource();
-	          prop.writeToObject(bean);
-	        }
-	      };
-	      sheet.addPropertySheetChangeListener(listener);
-	}
-	
-	public void updateBean(Object bean) {
-		this.bean = bean;
-		BeanInfo beanInfo = (BeanInfo)ApplicationData.CreateBinInfoObject(bean.getClass().getName() + "BeanInfo",
-				bean.getClass());
-		sheet.setProperties(beanInfo.getPropertyDescriptors());
-	    sheet.readFromObject(bean);
-	}
-	
+public class JConnectionPanel extends JPanel {
+    private static final long serialVersionUID = 1L;
+
+    Object bean;
+    PropertySheetPanel sheet;
+    DefaultBeanInfoResolver resolver;
+
+    public JConnectionPanel() {
+        super();
+        setLayout(LookAndFeelTweaks.createVerticalPercentLayout());
+
+        resolver = new DefaultBeanInfoResolver();
+
+        sheet = new PropertySheetPanel();
+        sheet.setMode(PropertySheet.VIEW_AS_CATEGORIES);
+        sheet.setDescriptionVisible(true);
+        sheet.setSortingCategories(true);
+        sheet.setSortingProperties(false);
+        add(sheet, "*");
+
+        PropertyChangeListener listener = new PropertyChangeListener() {
+            public void propertyChange(PropertyChangeEvent evt) {
+                Property prop = (Property) evt.getSource();
+                prop.writeToObject(bean);
+            }
+        };
+        sheet.addPropertySheetChangeListener(listener);
+    }
+
+    public void updateBean(Object bean) {
+        this.bean = bean;
+        BeanInfo beanInfo =
+            (BeanInfo) ApplicationData.CreateBinInfoObject(bean.getClass().getName() + "BeanInfo", bean.getClass());
+        sheet.setProperties(beanInfo.getPropertyDescriptors());
+        sheet.readFromObject(bean);
+    }
+
 }

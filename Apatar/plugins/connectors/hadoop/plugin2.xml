@@ -1,21 +1,21 @@
 <?xml version="1.0" ?>
 <!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
 <plugin id="com.apatar.hadoop" version="0.0.1">
-	<requires>
-		<import plugin-id="com.apatar.core"/>
-		<import plugin-id="com.apatar.ui"/>
-		<import plugin-id="com.apatar.thirdparty"/>
-	</requires>
-	<runtime>
-	    <library id="hadoop" path="bin/" type="code">
-	        <export prefix="*"/>
-	    </library>
-	    <library id="HDFSConnector" path="lib/HDFSConnector.jar" type="code">
-	        <export prefix="*"/>
-	    </library>
-	</runtime>
-	<extension plugin-id="com.apatar.core" point-id="Node" id="HDFSNode">
-		<parameter id="class" value="com.apatar.hadoop.HDFSNodeFactory"/>
-	</extension> 
-	
+    <requires>
+        <import plugin-id="com.apatar.core"/>
+        <import plugin-id="com.apatar.ui"/>
+        <import plugin-id="com.apatar.thirdparty"/>
+    </requires>
+    <runtime>
+        <library id="hadoop" path="bin/" type="code">
+            <export prefix="*"/>
+        </library>
+        <library id="HDFSConnector" path="lib/HDFSConnector.jar" type="code">
+            <export prefix="*"/>
+        </library>
+    </runtime>
+    <extension plugin-id="com.apatar.core" point-id="Node" id="HDFSNode">
+        <parameter id="class" value="com.apatar.hadoop.HDFSNodeFactory"/>
+    </extension>
+
 </plugin>

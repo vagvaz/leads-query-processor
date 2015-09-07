@@ -141,6 +141,15 @@ public class WebServiceClient {
     os.close();
   }
 
+  public static QueryStatus executeMapReduceJob(JsonObject job, String uri) throws IOException {
+    address = new URL(uri + "/rest/mrjob/submit/");
+    HttpURLConnection connection = (HttpURLConnection) address.openConnection();
+    connection = setUp(connection, "POST", MediaType.APPLICATION_JSON, true, true);
+    setBody(connection, job);
+    String response = getResult(connection);
+    QueryStatus result = mapper.readValue(response, QueryStatus.class);
+    return result;
+  }
 
   public static ActionResult executeMapReduce(JsonObject newAction, String uri) throws IOException {
     address = new URL(uri+"/rest/internal/executemr");

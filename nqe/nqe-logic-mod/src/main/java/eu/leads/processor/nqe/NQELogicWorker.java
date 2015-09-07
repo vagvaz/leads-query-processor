@@ -30,8 +30,8 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
     String id;
     String workQueueAddress;
     String currentCluster;
-    @Override
-    public void start() {
+
+    @Override public void start() {
         super.start();
         LQPConfiguration.initialize();
         config = container.config();
@@ -46,14 +46,12 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
 
     }
 
-    @Override
-    public void stop() {
+    @Override public void stop() {
         super.stop();
         com.unsubscribeFromAll();
     }
 
-    @Override
-    public void handle(JsonObject msg) {
+    @Override public void handle(JsonObject msg) {
         String type = msg.getString("type");
         String from = msg.getString(MessageUtils.FROM);
         String to = msg.getString(MessageUtils.TO);
@@ -64,7 +62,7 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
             String label = action.getLabel();
             Action newAction = null;
             action.setProcessedBy(id);
-//         action.setStatus(ActionStatus.INPROCESS.toString());
+            //         action.setStatus(ActionStatus.INPROCESS.toString());
 
             switch (ActionStatus.valueOf(action.getStatus())) {
                 case PENDING: //probably received an action from an external source
@@ -73,16 +71,20 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
 
                         action.setStatus(ActionStatus.INPROCESS.toString());
                         com.sendWithEventBus(workQueueAddress, action.asJsonObject());
-                    }else if( (label.equals(NQEConstants.DEPLOY_PLUGIN)) || (label.equals(NQEConstants.UNDEPLOY_PLUGIN))){
-                      action.setStatus(ActionStatus.INPROCESS.toString());
-                      com.sendWithEventBus(workQueueAddress, action.asJsonObject());
-                    }else if(label.equals(NQEConstants.DEPLOY_REMOTE_OPERATOR)){
-                      System.err.println("RECEVEIVED REMOTE DEPLOY!!!!!!!!!!");
-                      action.setStatus(ActionStatus.INPROCESS.toString());
-                      com.sendWithEventBus(workQueueAddress,action.asJsonObject());
-                    }
-
-                    else {
+                    } else if ((label.equals(NQEConstants.DEPLOY_PLUGIN)) || (label
+                        .equals(NQEConstants.UNDEPLOY_PLUGIN))) {
+                        action.setStatus(ActionStatus.INPROCESS.toString());
+                        com.sendWithEventBus(workQueueAddress, action.asJsonObject());
+                    } else if (label.equals(NQEConstants.DEPLOY_REMOTE_OPERATOR)) {
+                        System.err.println("RECEVEIVED REMOTE DEPLOY!!!!!!!!!!");
+                        action.setStatus(ActionStatus.INPROCESS.toString());
+                        com.sendWithEventBus(workQueueAddress, action.asJsonObject());
+                    }else if (label.equals(NQEConstants.EXECUTE_MAP_REDUCE_JOB)) {
+                        //            String actionId = UUID.randomUUID().toString();
+                        //            action.setId(actionId);
+                        action.getData().putString("replyTo", from);
+                        com.sendWithEventBus(workQueueAddress, action.asJsonObject());
+                    }else {
                         log.error("Unknown PENDING Action received " + action.toString());
                         return;
                     }
@@ -97,17 +99,19 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
                 case COMPLETED: // the action either a part of a multistep workflow (INPROCESSING) or it could be processed.
                     if (label.equals(NQEConstants.DEPLOY_OPERATOR)) {
                         com.sendTo(action.getData().getString("replyTo"), action.getResult());
-                    }else if( (label.equals(NQEConstants.DEPLOY_PLUGIN)) || (label.equals(NQEConstants.UNDEPLOY_PLUGIN))){
-//                      action.setStatus(ActionStatus.INPROCESS.toString());
-//                      com.sendWithEventBus((workQueueAddress,action.asJsonObject());
-                    }else if(label.equals(NQEConstants.DEPLOY_REMOTE_OPERATOR)){
-                      newAction = new Action(action);
-                      newAction.setData(action.getData());
-                      newAction.getData().putString("microcloud", currentCluster);
-                      newAction.getData().putString("STATUS","SUCCESS");
-                    }
-
-                    else {
+                    } else if ((label.equals(NQEConstants.DEPLOY_PLUGIN)) || (label
+                        .equals(NQEConstants.UNDEPLOY_PLUGIN))) {
+                        //                      action.setStatus(ActionStatus.INPROCESS.toString());
+                        //                      com.sendWithEventBus((workQueueAddress,action.asJsonObject());
+                    } else if (label.equals(NQEConstants.DEPLOY_REMOTE_OPERATOR)) {
+                        newAction = new Action(action);
+                        newAction.setData(action.getData());
+                        newAction.getData().putString("microcloud", currentCluster);
+                        newAction.getData().putString("STATUS", "SUCCESS");
+                    }else if (label.equals(NQEConstants.EXECUTE_MAP_REDUCE_JOB)) {
+                        //here reply to the webservice with the ID of the job
+                        com.sendTo(action.getData().getString("replyTo"), action.getResult());
+                    }else {
                         log.error("Unknown COMPLETED OR INPROCESS Action received " + action.toString());
                         return;
                     }
