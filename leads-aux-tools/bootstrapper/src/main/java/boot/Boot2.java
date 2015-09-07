@@ -33,6 +33,10 @@ public class Boot2 {
     static JsonObject log_sinkJson = null;
 
     static Map<String, String> screensIPmap;
+    static Map<String, JsonObject> IPsshmap;
+    static Map<String, JsonObject> sshmap;
+
+
     static Configuration xmlConfiguration = null;
     static CompositeConfiguration conf = null;
     static JsonObject globalJson;
@@ -165,6 +169,29 @@ public class Boot2 {
 
             }
         }
+        components = ((XMLConfiguration) xmlConfiguration).configurationsAt("ssh.credentials");
+        if (components == null) { //Maybe components is jsut empty...
+            logger.error("No ssh credentials found exiting");
+            System.exit(-1);
+        }
+        sshmap=new HashMap<>();
+        for (HierarchicalConfiguration c : components) {
+            ConfigurationNode node = c.getRootNode();
+            JsonObject ssh = new JsonObject();
+            String id = c.getString("id");
+            if (id == null) {
+                System.out.println("Bad formatted ssh credentials");
+                continue;
+            }
+            ssh.putString("id", id);
+            Iterator<String> ks = c.getKeys();
+            while (ks.hasNext()) {
+                String key = ks.next();
+                ssh.putString( key, c.getString(key));
+            }
+            sshmap.put(id,ssh);
+        }
+
     }
 
     public static void getClusterAdresses() {
@@ -182,12 +209,14 @@ public class Boot2 {
             return;
         }
         clusters = new JsonArray();
+        IPsshmap = new HashMap<>();
         for (HierarchicalConfiguration c : cmplXadresses) {
             ConfigurationNode node = c.getRoot();
             System.out.println("Found Cluster : " + c.getString("[@name]"));
             System.out.println("Cluster Size : " + node.getChildren().size());
             cluster = new JsonObject();
             cluster.putString("name", c.getString("[@name]"));
+            cluster.putString("credentials",c.getString("[@credentials]"));
             List<HierarchicalConfiguration> nodes = c.configurationsAt("node");
             nodeData=new JsonObject();
             clusterPublicIPs  = new JsonArray();
@@ -200,11 +229,14 @@ public class Boot2 {
                 {
                     clusterPublicIPs.addString(puIP);
                     nodeData.putString("publicIp", puIP);
+                    IPsshmap.put(puIP, sshmap.get(c.getString("[@credentials]")));
                 }
                 if(prIP!=null){
                     nodeData.putString("privateIp", prIP);
                     clusterPrivateIPs.addString(prIP);
+                    IPsshmap.put(prIP,sshmap.get(c.getString("[@credentials]")));
                 }
+                
                 clusterPrivateIPs.addString(prIP);
                 nodeData.putString("name", name);
 
@@ -349,7 +381,7 @@ public class Boot2 {
             for (int s = 0; /*s < pAddrs.size() &&*/ instancesCnt < componentsInstancesNames.size(); s++) {
                 String address = pAddrs.get(instancesCnt % pAddrs.size());
                 clusterComponentsAddressed.addString(address);
-                logger.info("Curcomp" + componentsInstancesNames.get(instancesCnt) + " instances " + componentsInstances.get(componentsInstancesNames.get(instancesCnt)));
+                logger.info("Cur comp " + componentsInstancesNames.get(instancesCnt) + " instances " + componentsInstances.get(componentsInstancesNames.get(instancesCnt)));
                 //
 
                 if(instancesPerNode.containsKey(address))
@@ -617,7 +649,11 @@ public class Boot2 {
         else
             vertxComponent = group + "~" + component + "-comp-mod~" + version;
 
-        String command = "vertx runMod " + vertxComponent + " -conf " + remotedir + "R" + modJson.getString("id") + ".json";
+        String command;
+        if(vertxComponent.contains("web")||vertxComponent.contains("log"))//run vertx with lower memory usage (vertxb)
+            command = "vertxb runMod " + vertxComponent + " -conf " + remotedir + "R" + modJson.getString("id") + ".json";
+        else
+            command = "vertx runMod " + vertxComponent + " -conf " + remotedir + "R" + modJson.getString("id") + ".json";
         if (conf.containsKey("processor.vertxArg"))
             command += " -" + conf.getString("processor.vertxArg");
 
@@ -667,9 +703,10 @@ public class Boot2 {
 
     }
 
-    private static String remoteExecute(String ip, String command1) {
+    private static String remoteExecute(String ip, String command_) {
+        JsonObject sshconf = IPsshmap.get(ip);
         String ret = "";
-        if (norun && !command1.contains("salt")) {
+        if (norun && !command_.contains("salt")) {
             System.out.print("Just local test, no remote execution");
             return ret;
         }
@@ -679,10 +716,10 @@ public class Boot2 {
             Session session = createSession(jsch, ip);
             Channel channel = session.openChannel("exec");
 
-            if (command1.contains("sudo") && conf.containsKey("ssh.password"))
-                command1 = command1.replace("sudo", "sudo -S -p '' "); //check if works always
+            if (command_.contains("sudo") && sshconf.containsField("password"))
+                command_ = command_.replace("sudo", "sudo -S -p '' "); //check if works always
 
-            ((ChannelExec) channel).setCommand(command1);
+            ((ChannelExec) channel).setCommand(command_);
             OutputStream out = channel.getOutputStream();
             channel.setInputStream(null);
             ((ChannelExec) channel).setErrStream(System.err);
@@ -690,8 +727,8 @@ public class Boot2 {
 
             InputStream in = channel.getInputStream();
             channel.connect();
-            if (command1.contains("sudo") && conf.containsKey("ssh.password")) {
-                out.write((conf.getString("ssh.password") + "\n").getBytes());
+            if (command_.contains("sudo") && sshconf.containsField("password")) {
+                out.write((sshconf.getString("password") + "\n").getBytes());
                 out.flush();
             }
             byte[] tmp = new byte[1024];
@@ -731,7 +768,7 @@ public class Boot2 {
 
 
     private static boolean sendConfigurationTo(JsonObject config, String ip) {
-        String remoteDir = getStringValue(conf, "ssh.remoteDir", null, true);
+        String remoteDir = getStringValue(conf, "remoteDir", null, true);
         String tmpFile = remoteDir + config.getString("id") + ".json";
         try {
             RandomAccessFile file = new RandomAccessFile(tmpFile, "rw");
@@ -784,17 +821,21 @@ public class Boot2 {
     }
 
     private static Session createSession(JSch jsch, String ip) throws JSchException {
-
-        String username = getStringValue(conf, "ssh.username", null, true);
+        JsonObject sshconf = IPsshmap.get(ip);
+        if(sshconf==null){
+            System.err.println("No ssh configuration for ip: "+ ip);
+            System.exit(-1);
+        }
+        String username = sshconf.getString("username");//getStringValue(conf, "ssh.username", null, true);
         Session session = jsch.getSession(username, ip, 22);
 
-        if (xmlConfiguration.containsKey("ssh.rsa")) {
-            String privateKey = conf.getString("ssh.rsa");
+        if (sshconf.containsField("rsa")/*xmlConfiguration.containsKey("ssh.rsa")*/) {
+            String privateKey = sshconf.getString("rsa"); //conf.getString("ssh.rsa");
             logger.info("ssh identity added: " + privateKey);
             jsch.addIdentity(privateKey);
             session = jsch.getSession(username, ip, 22);
-        } else if (xmlConfiguration.containsKey("ssh.password"))
-            session.setPassword(conf.getString("ssh.password"));
+        } else if (sshconf.containsField("password")/*xmlConfiguration.containsKey("ssh.password")*/)
+                session.setPassword(sshconf.getString("password")/*conf.getString("ssh.password")*/);
         else {
             logger.error("No ssh credentials, no password either key ");
             System.out.println("No ssh credentials, no password either key ");
