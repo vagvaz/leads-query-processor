@@ -632,30 +632,27 @@ public class ClusterInfinispanManager implements InfinispanManager {
   }
 
   private void removeCache(String name) {
-    try {
-      System.err.println("------REMOVE " + name);
-      DistributedExecutorService des = new DefaultExecutorService(manager.getCache());
-      List<Future<Void>> list = des.submitEverywhere(new StopCacheCallable(name));
-      for (Future<Void> future : list) {
         try {
-          future.get();
-        } catch (InterruptedException e) {
-          log.error(e.getClass().toString() + " while removing " + name + " " + e.getMessage());
-        } catch (ExecutionException e) {
-          log.error(e.getClass().toString() + " while removing " + name +" " + e.getMessage());
-        }
-      }
+          manager.removeCache(name);
+          if(manager.cacheExists(name+".compressed")){
+            System.err.println("---------REMOVE " + name + " and " + name+".compressed");
+            manager.removeCache(name+".compressed");
+          }
 
+//    System.err.println("------REMOVE " + name);
+//    DistributedExecutorService des = new DefaultExecutorService(manager.getCache());
+//    List<Future<Void>> list = des.submitEverywhere(new StopCacheCallable(name));
+//    for (Future<Void> future : list) {
+//      try {
+//        future.get();
+//      } catch (InterruptedException e) {
+//        log.error(e.getClass().toString() + " while removing " + name + " " + e.getMessage());
+//      } catch (ExecutionException e) {
+//        log.error(e.getClass().toString() + " while removing " + name + " " + e.getMessage());
+//      }
+//    }
 
-
-      manager.removeCache(name);
-      if(manager.cacheExists(name+".compressed")){
-        System.err.println("---------REMOVE " + name + " and " + name+".compressed");
-        manager.removeCache(name+".compressed");
-      }
-
-
-      PrintUtilities.printCaches(manager);
+//      PrintUtilities.printCaches(manager);
     }catch (Exception e){
       log.error("Exception while remove " + name + " " + e.getClass().toString() + " " + e.getMessage());
     }

@@ -38,6 +38,7 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
             if(cache.getCacheManager().cacheExists(cache.getName()+".compressed")){
                 System.err.println("Stopping " + cache.getName() + ".compressed");
                 Cache compressed = cache.getCacheManager().getCache(cache.getName()+".compressed");
+
                 for(Object l : compressed.getListeners()){
                     //                  if(l instanceof PluginHandlerListener){
                     //                      compressed.removeListener(l);
@@ -50,8 +51,10 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
                 }
                     try {
 //                        compressed.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).clear();
-                        InfinispanClusterSingleton.getInstance().getManager().removePersistentCache(compressed.getName());
-//                        compressed.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).stop();
+                        //InfinispanClusterSingleton.getInstance().getManager().getCacheManager().removeCache(compressed.getName());
+                        if(compressed.getCacheManager().isCoordinator())
+                            compressed.getCacheManager().removeCache(compressed.getName());
+                        //                        compressed.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).stop();
                     }catch (Exception e){
                         e.printStackTrace();
                     }
@@ -66,7 +69,10 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
                             .toString() + "\n");
                 try{
 //                    cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).clear();
-                    InfinispanClusterSingleton.getInstance().getManager().removePersistentCache(cache.getName());
+//                    InfinispanClusterSingleton.getInstance().getManager().getCacheManager().removeCache(cache.getName());
+                        if(cache.getCacheManager().isCoordinator()){
+                            cache.getCacheManager().removeCache(cache.getName());
+                        }
 //                    cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).stop();
                 }catch (Exception e){
                     e.printStackTrace();
