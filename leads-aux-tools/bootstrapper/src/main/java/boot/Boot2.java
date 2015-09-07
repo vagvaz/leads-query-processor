@@ -346,14 +346,16 @@ public class Boot2 {
             }
             //for all available ips of current microcloud that are used save them to a set
             HashMap<String, Integer> instancesPerNode = new HashMap<>();
-            for (int s = 0; s < pAddrs.size() && instancesCnt < componentsInstancesNames.size(); s++) {
+            for (int s = 0; /*s < pAddrs.size() &&*/ instancesCnt < componentsInstancesNames.size(); s++) {
                 String address = pAddrs.get(instancesCnt % pAddrs.size());
                 clusterComponentsAddressed.addString(address);
                 logger.info("Curcomp" + componentsInstancesNames.get(instancesCnt) + " instances " + componentsInstances.get(componentsInstancesNames.get(instancesCnt)));
                 //
+
                 if(instancesPerNode.containsKey(address))
                     instancesPerNode.put(address, instancesPerNode.get(address)+1);
-
+                else
+                    instancesPerNode.put(address, 1);
                 //Also write the cluster name in a text file into home dir ...
                 //remoteExecute((String) pAddrs.get(s), "echo " + entry.getKey() + " > ~/micro_cloud.txt");
                 instancesCnt++;
@@ -363,16 +365,16 @@ public class Boot2 {
             for (String ip:instancesPerNode.keySet()){
                 int in=0;
                 do{
-                    ensembleString+=ip+":"+Integer.toString(11222 + in);
+                    ensembleString+=ip+":"+Integer.toString(11222 + in) + ";";
                     in++;
-                    if(in<instancesPerNode.get(ip))
+                    if(in>=instancesPerNode.get(ip))
                         break;
                 }while(true);
 
             }
-            for(int ip=0; ip<clusterComponentsAddressed.size();ip++){
-                ensembleString+=clusterComponentsAddressed.get(ip)+":11222;";
-            }
+//            for(int ip=0; ip<clusterComponentsAddressed.size();ip++){
+//                ensembleString+=clusterComponentsAddressed.get(ip)+":11222;";
+//            }
             JsonArray ensembleStringtmp = new JsonArray();
             ensembleStringtmp.add(ensembleString.substring(0,ensembleString.length()-1));
             compAlladresses.putArray(entry.getKey(), ensembleStringtmp);
@@ -608,7 +610,7 @@ public class Boot2 {
         String version = getStringValue(conf, "processor.version", null, true);
         ;
         //      String command = "vertx runMod " + group +"~"+ component + "-mod~" + version + " -conf /tmp/"+config.getString("id")+".json";
-        String remotedir = getStringValue(conf, "ssh.remoteDir", null, true);
+        String remotedir = getStringValue(conf, "remoteDir", null, true);
         String vertxComponent;
         if (modJson.containsField("modName"))
             vertxComponent = group + "~" + modJson.getString("modName") + "~" + version;

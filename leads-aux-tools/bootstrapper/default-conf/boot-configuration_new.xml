@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <leads-processor-bootstrap>
 	<baseDir>/tmp/boot-conf/</baseDir> <!-- here are all the conf files of the available modules-->
+	<remoteDir>/tmp/</remoteDir>
 	<hdfs>
 		<uri>hdfs://snf-618466.vm.okeanos.grnet.gr:8020</uri>
 		<user>vagvaz</user>
@@ -79,9 +80,17 @@
 		</component>	
 	</processor>
 	<ssh>
-	    <username>ubuntu</username>
-	    <remoteDir>/tmp/</remoteDir>
-	    <!--<password>testpass</password> -->
-            <rsa>/home/ubuntu/key.rsa</rsa> <!-- a filename -->
+		<credentials>
+			<id>cloudandheat</id>
+			<username>ubuntu</username>
+			<!--<password>testpass</password> -->
+			<rsa>/home/ubuntu/key.rsa</rsa> <!-- a filename -->
+		</credentials>
+		<credential>
+			<id>softnet</id>
+			<username>USERNAME</username>
+			<password>PASSWORD</password>
+		<!--    <rsa>/home/ubuntu/key.rsa</rsa>  a filename -->
+		</credentials>
 	</ssh>
 </leads-processor-bootstrap>
