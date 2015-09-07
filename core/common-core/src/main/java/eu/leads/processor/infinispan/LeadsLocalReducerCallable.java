@@ -78,9 +78,27 @@ public class LeadsLocalReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOu
             profilerLog.error("\n\n\n\n\n\nIndex was not installed serious...\n\n\n\n\n\n");
             return embeddedCacheManager.getAddress().toString();
         }
+        //        System.err.println(
+        //            "LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache()
+        //                .size() + " input: " + inputCache.getAdvancedCache()
+        //                .withFlags(Flag.CACHE_MODE_LOCAL).size());
+        //        profilerLog.error("MRLOG: LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache()
+        //                .size() );
+        //        if(index.getKeysCache().size() != index.getDataCache().size()/2) {
+        //            for (Map.Entry<String, Integer> entry : index.getKeysIterator()) {
+        //                if (entry.getValue() != 1) {
+        //                    System.err.println("THE KEY IS " + entry.getKey() + " " + entry.getValue());
+        //                    profilerLog
+        //                        .error("MRLOG: " + "THE KEY IS " + entry.getKey() + " " + entry.getValue());
+        //
+        //                }
+        //            }
+        //        }
+        System.err.println("Start processing");
+        profCallable.end();
         for(Map.Entry<String,Integer> entry : index.getKeysIterator()){
-            LocalIndexKeyIterator iterator =
-                (LocalIndexKeyIterator) index.getKeyIterator(entry.getKey(),entry.getValue());
+            Iterator iterator =
+                index.getKeyIterator(entry.getKey(),entry.getValue());
             executeOn((kOut)entry.getKey(),iterator);
         }
         //            CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(new LocalDataFilter<K,V>(cdl));
