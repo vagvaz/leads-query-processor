@@ -73,12 +73,10 @@ public class leadsCli {
           }
           if (line.equalsIgnoreCase("printresults")) {
             noResults=false;
-
             continue;
           }
-
           out.flush();
-          if (line.startsWith("quit") || line.startsWith("exit")) {
+          if (  line.startsWith("exit")) {
             System.out.println("Exiting, Thank you");
             reader.getTerminal().restore();
             System.exit(0);
@@ -102,7 +100,7 @@ public class leadsCli {
 
               for (String sql : sqlCmds) {
                 count++;
-                if (sql.toLowerCase().startsWith("quit")) {
+                if (sql.toLowerCase().startsWith("exit")) {
                   System.out.println("Exiting, Thank you");
                   reader.getTerminal().restore();
                   System.exit(0);
