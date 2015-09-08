@@ -11,7 +11,6 @@ import org.apache.commons.lang.StringUtils;
 import eu.leads.PropertiesSingleton;
 import eu.leads.processor.sentiment.Sentiment;
 import eu.leads.processor.sentiment.SentimentAnalysisModule;
-import eu.leads.processor.sentiment.SentimentAnalysisModuleOpt;
 
 public class DocumentSentimentScore {
 	
