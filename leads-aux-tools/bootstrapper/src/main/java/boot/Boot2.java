@@ -363,8 +363,9 @@ public class Boot2 {
 
         JsonObject compAlladresses = new JsonObject();
         JsonObject webserviceAlladresses = new JsonObject();
-        int instancesCnt = 0;
+        int instancesCnt;
         for (Map.Entry<String, JsonArray> entry : allmcAddrs.entrySet()) {
+             instancesCnt = 0;
             JsonArray pAddrs = entry.getValue();
             JsonArray clusterComponentsAddressed = new JsonArray();
             JsonArray clusterWebServiceAddressed = new JsonArray();
@@ -411,9 +412,9 @@ public class Boot2 {
             ensembleStringtmp.add(ensembleString.substring(0,ensembleString.length()-1));
             compAlladresses.putArray(entry.getKey(), ensembleStringtmp);
             webserviceAlladresses.putArray(entry.getKey(), clusterWebServiceAddressed);
-            if (instancesCnt >= componentsInstancesNames.size()) {
-                break;
-            }
+//            if (instancesCnt >= componentsInstancesNames.size()) {
+//                break;
+//            }
         }
 
         /////////////////
