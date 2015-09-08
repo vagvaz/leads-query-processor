@@ -352,7 +352,7 @@ public class EnsembleCacheUtils {
         {
             tupleBuffer.setCacheName(cache.getName());
         }
-        if(tupleBuffer.add(key, (Tuple) value)){
+        if(tupleBuffer.add(key, value)){
             BatchPutRunnable runnable = getBatchPutRunnable();
             runnable.setBuffer(tupleBuffer);
             batchPutExecutor.submit(runnable);

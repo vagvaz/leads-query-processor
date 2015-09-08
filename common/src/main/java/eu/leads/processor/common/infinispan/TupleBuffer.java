@@ -168,25 +168,28 @@ public class TupleBuffer {
 //    }
 //
     public void flushToMC() {
+        byte[] bytes = null;
         synchronized (mutex) {
             if (ensembleCache == null) {
                 this.ensembleCache = emanager.getCache(cacheName + ".compressed", new ArrayList<>(emanager.sites()),
                     EnsembleCacheManager.Consistency.DIST);
 
             }
-//            System.out.println("FLusht to mc " + ensembleCache.getName() + " " + buffer.size());
+            //            System.out.println("FLusht to mc " + ensembleCache.getName() + " " + buffer.size());
 
             if (buffer.size() == 0)
                 return;
             localCounter = (localCounter + 1) % Long.MAX_VALUE;
 
-            byte[] bytes = this.serialize();
+            bytes = this.serialize();
+            buffer.clear();
+            }
             boolean isok = false;
             try {
                 while (!isok) {
                     ensembleCache.put(uuid + ":" + Long.toString(localCounter), bytes);
                     isok = true;
-                    buffer.clear();
+
                 }
             } catch (Exception e) {
                 if (e instanceof TimeoutException) {
@@ -201,7 +204,7 @@ public class TupleBuffer {
                 e.printStackTrace();
 
             }
-        }
+
     }
     public void flushEndToMC() {
         System.out.println("FLush END to mc " + buffer.size() + " " + (ensembleCache == null ? "null" : ensembleCache.getName()));
