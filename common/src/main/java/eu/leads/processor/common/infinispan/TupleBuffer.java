@@ -115,8 +115,8 @@ public class TupleBuffer {
     public boolean add(Object key, Object value){
         synchronized (mutex) {
             buffer.put(key, value);
+            return (buffer.size() >= threshold);
         }
-        return (buffer.size() >= threshold);
     }
 
 //    private void writeObject(java.io.ObjectOutputStream out)
@@ -168,51 +168,71 @@ public class TupleBuffer {
 //    }
 //
     public void flushToMC() {
-        if(ensembleCache == null){
-            this.ensembleCache = emanager.getCache(cacheName+".compressed", new ArrayList<>(emanager.sites()),
-                EnsembleCacheManager.Consistency.DIST);
-
-        }
         synchronized (mutex) {
-            if(buffer.size() == 0)
-                return;
-            localCounter = (localCounter + 1) % Long.MAX_VALUE;
-        }
-        byte[] bytes= this.serialize();
-        boolean isok = false;
-        try{
-        while(!isok) {
-            ensembleCache.put(uuid + ":" + Long.toString(localCounter), bytes);
-            isok = true;
-        }}catch(Exception e ){
-            if(e instanceof TimeoutException){
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
-                }
-                System.err.println("Timeout Exxcception in slushToMC " + e.getMessage());
+            if (ensembleCache == null) {
+                this.ensembleCache = emanager.getCache(cacheName + ".compressed", new ArrayList<>(emanager.sites()),
+                    EnsembleCacheManager.Consistency.DIST);
 
             }
-            e.printStackTrace();
+//            System.out.println("FLusht to mc " + ensembleCache.getName() + " " + buffer.size());
 
+            if (buffer.size() == 0)
+                return;
+            localCounter = (localCounter + 1) % Long.MAX_VALUE;
+
+            byte[] bytes = this.serialize();
+            boolean isok = false;
+            try {
+                while (!isok) {
+                    ensembleCache.put(uuid + ":" + Long.toString(localCounter), bytes);
+                    isok = true;
+                    buffer.clear();
+                }
+            } catch (Exception e) {
+                if (e instanceof TimeoutException) {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                    System.err.println("Timeout Exxcception in slushToMC " + e.getMessage());
+
+                }
+                e.printStackTrace();
+
+            }
         }
     }
-    public void flushEndToMC(){
-        if(ensembleCache == null){
-            this.ensembleCache = emanager.getCache(cacheName+".compressed", new ArrayList<>(emanager.sites()),
-                EnsembleCacheManager.Consistency.DIST);
+    public void flushEndToMC() {
+        System.out.println("FLush END to mc " + buffer.size() + " " + (ensembleCache == null ? "null" : ensembleCache.getName()));
+        synchronized (mutex) {
+            if (buffer.size() == 0) {
+                ensembleCache = null;
+                return;
+            }
+            if (ensembleCache == null) {
+                this.ensembleCache = emanager.getCache(cacheName + ".compressed", new ArrayList<>(emanager.sites()),
+                    EnsembleCacheManager.Consistency.DIST);
+
+            }
+
+            if (buffer.size() > 0) {
+                System.err.println("FLUSH END called but more tuples were added for " + cacheName);
+                flushToMC();
+            }
+            localCounter = (localCounter + 1) % Long.MAX_VALUE;
+            byte[] bytes = new byte[1];
+            bytes[0] = -1;
+            ensembleCache.put(Long.toString(localCounter), bytes);
+            ensembleCache = null;
+            cacheName = null;
+            buffer.clear();
 
         }
-        localCounter = (localCounter+1)%Long.MAX_VALUE;
-        byte[] bytes= new byte[1];
-        bytes[0] = -1;
-        ensembleCache.put(Long.toString(localCounter),bytes);
-        buffer.clear();
     }
 
     private byte[] serialize()  {
-        synchronized (mutex) {
+//        synchronized (mutex) {
             try {
                 ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
                 ObjectOutputStream outputStream = new ObjectOutputStream(byteStream);
@@ -242,7 +262,7 @@ public class TupleBuffer {
             } catch (IOException ioe) {
                 ioe.printStackTrace();
             }
-        }
+//        }
         return null;
     }
 
@@ -281,5 +301,10 @@ public class TupleBuffer {
 
     public void release() {
         ensembleCache =  null;
+        cacheName = null;
+    }
+
+    public void setCacheName(String cacheName) {
+        this.cacheName = cacheName;
     }
 }

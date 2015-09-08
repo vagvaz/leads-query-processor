@@ -335,6 +335,10 @@ public class SQLPlan extends DataType implements Plan {
         return data.getBoolean("planIsSpecial",false);
     }
 
+    public void updatePlanNode(PlanNode node)
+    {
+      data.getObject("plan").putObject(node.getNodeId(),node.asJsonObject());
+    }
     public void updateNode(PlanNode node) {
         getPlanGraph().putObject(node.getNodeId(),node.asJsonObject());
         JsonArray oldNodesArray = data.getArray("nodes");
