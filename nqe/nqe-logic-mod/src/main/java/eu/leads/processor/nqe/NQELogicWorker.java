@@ -87,6 +87,7 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
                         action.getData().putString("replyTo", from);
                         com.sendWithEventBus(workQueueAddress, action.asJsonObject());
                     }else if (label.equals(IManagerConstants.QUIT)){
+                        System.out.println(" QUIIITTTT ");
                         action.getData().putString("replyTo", msg.getString("from"));
                         action.setDestination(StringConstants.PLANNERQUEUE);
                         com.sendWithEventBus(workQueueAddress, action.asJsonObject());

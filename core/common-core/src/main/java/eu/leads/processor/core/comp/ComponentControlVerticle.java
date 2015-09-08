@@ -2,10 +2,13 @@ package eu.leads.processor.core.comp;
 
 
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.core.Action;
+import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.ServiceCommand;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.imanager.IManagerConstants;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonArray;
@@ -86,6 +89,9 @@ public class ComponentControlVerticle extends Verticle implements Component {
             services = new JsonArray();
         com = new DefaultNode();
         secondaryGroups = new HashSet<>();
+        if(config.containsField("otherGroups"))
+            secondaryGroups.addAll(config.getArray("otherGroups").toList());
+
 
         this.state = ComponentState.IDLE;
     }
@@ -357,6 +363,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
         }
         //subscribe to componentType control
         com.subscribe(componentType + ".control", componentHandler);
+        com.subscribe("leads.processor.control", componentHandler);
     }
 
     @Override
@@ -402,17 +409,28 @@ public class ComponentControlVerticle extends Verticle implements Component {
     @Override
     public void cleanup() {
 
+
     }
 
     @Override
     public void kill() {
-        if (mode.equals(ComponentMode.TESTING)) {
-            log.info(componentType + "." + id + " is being killed ");
-            System.exit(-1);
-        } else {
-            log.error(componentType + "." + id + " received kill command but mode is  "
-                          + mode.toString());
-        }
+        Action action = new Action();
+        action.setLabel(IManagerConstants.QUIT);
+        action.setId("-3");
+        action.setStatus(ActionStatus.PENDING.toString());
+        com.sendRequestTo(workQueueAddress, action.asJsonObject(),  failHandler);
+        if(mode!=null) {
+            if (mode.equals(ComponentMode.TESTING)) {
+                log.info(componentType + "." + id + " is being killed ");
+                System.exit(-1);
+            } else {
+                log.error(componentType + "." + id + " received kill command but mode is  "
+                        + mode.toString());
+            }
+        }else{
+           log.error(componentType + "." + id + " received kill command but mode is null ");
+          }
+
     }
 
     @Override

@@ -5,6 +5,8 @@ import com.google.protobuf.ServiceException;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.conf.ConfigurationUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.core.Action;
+import eu.leads.processor.imanager.IManagerConstants;
 import leads.tajo.catalog.LeadsCatalog;
 import org.apache.hadoop.fs.Path;
 import org.apache.tajo.catalog.*;
@@ -16,6 +18,9 @@ import org.apache.tajo.engine.function.annotation.ParamOptionTypes;
 import org.apache.tajo.engine.function.annotation.ParamTypes;
 import org.apache.tajo.function.Function;
 import org.apache.tajo.master.rm.TajoWorkerResourceManager;
+import org.vertx.java.core.Handler;
+import org.vertx.java.core.eventbus.EventBus;
+import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
 
@@ -32,13 +37,47 @@ public class PlannerCatalogWorker extends Verticle {
   LeadsCatalog catalogServer = null;
   TajoConf conf = new TajoConf();
   JsonObject globalConfig;
+  private EventBus bus;
+
   @Override
   public void start() {
     super.start();
+    bus= vertx.eventBus();
+
+    bus.registerHandler("leads.processor.control", new Handler<Message>() {
+            @Override
+            public void handle(Message message) {
+              System.err.println("  " + message.toString());
+
+              JsonObject body = (JsonObject)message.body();
+              if (body.containsField("type")) {
+                if (body.getString("type").equals("action")) {
+                  Action action = new Action(body);
+                  if(!action.getLabel().equals(IManagerConstants.QUIT)) {
+
+                    System.err.println("Continue");
+                  }else{
+                    //persistence.stopManager();
+                    System.err.println("planner Stopping Manager Exiting");
+                    catalogServer.StopServer();
+                    System.err.println("planner Exiting");
+
+                    try{
+                      Thread.sleep(1000);
+                    }catch (Exception e){
+                      ;
+                    }
+                    System.exit(0);
+                  }
+                }
+
+              }
+            }
+          });
+
     LQPConfiguration.initialize();
     LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component",
         "catalog-worker");
-    globalConfig = container.config().getObject("global");
     globalConfig = container.config().getObject("global");
     String publicIP = ConfigurationUtilities
         .getPublicIPFromGlobal(LQPConfiguration.getInstance().getMicroClusterName(), globalConfig);
@@ -106,6 +145,7 @@ public class PlannerCatalogWorker extends Verticle {
         container.logger().error("\n\n\n\n\n\n\n SIZE 0 \n\n\n\n\n");
        container.logger().error("neither the tables nor the functions have been created...");
         }
+
     }
 
   private void createInitialTables() {

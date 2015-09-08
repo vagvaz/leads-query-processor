@@ -74,6 +74,10 @@ public class LeadsComponentHandler implements LeadsMessageHandler {
                                   + " received an unknown command \n" + message.toString());
                     break;
             }
+        }else{
+            log.error(owner.getComponentType() + ":" + owner.getId()
+                                  + " received other\n" + message.toString());
+            owner.kill();
         }
     }
 }

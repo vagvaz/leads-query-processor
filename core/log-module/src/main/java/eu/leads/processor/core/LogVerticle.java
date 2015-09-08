@@ -58,6 +58,7 @@ public class LogVerticle extends Verticle {
                 }
             };
             bus.initialize(id, id + ".group", null, logHandler, logHandler, this.getVertx());
+
         } catch (Exception e) {
             e.printStackTrace();
         }

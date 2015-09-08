@@ -122,19 +122,26 @@ public class SubmitQueryHandler implements Handler<HttpServerRequest> {
             action.setCategory(StringConstants.ACTION);
             if(query.contains("quit")) {
                 action.setLabel(IManagerConstants.QUIT);
-                com.sendToAllGroup("leads.processor.control",action.asJsonObject());
+                action.setComponentType("webservice");
+                com.sendToAllGroup("leads.processor.control", action.asJsonObject());
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-            else
+            else {
                 action.setLabel(IManagerConstants.SUBMIT_QUERY);
-            action.setOwnerId(com.getId());
-            action.setComponentType("webservice");
-            action.setTriggered("");
-            action.setTriggers(new JsonArray());
-            JsonObject queryRequest = new JsonObject(query);
-            action.setData(queryRequest);
-            action.setDestination(IMANAGERQUEUE);
-            action.setStatus(ActionStatus.PENDING.toString());
-            com.sendRequestTo(IMANAGERQUEUE, action.asJsonObject(), replyHandler);
+                action.setOwnerId(com.getId());
+                action.setComponentType("webservice");
+                action.setTriggered("");
+                action.setTriggers(new JsonArray());
+                JsonObject queryRequest = new JsonObject(query);
+                action.setData(queryRequest);
+                action.setDestination(IMANAGERQUEUE);
+                action.setStatus(ActionStatus.PENDING.toString());
+                com.sendRequestTo(IMANAGERQUEUE, action.asJsonObject(), replyHandler);
+            }
         }
     }
 }

@@ -20,7 +20,6 @@ import org.apache.tajo.engine.json.CoreGsonHelper;
 import org.apache.tajo.plan.PlanningException;
 import org.apache.tajo.plan.logical.LogicalRootNode;
 import org.apache.tajo.session.Session;
-import org.infinispan.Cache;
 import org.infinispan.commons.api.BasicCache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -111,7 +110,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         SQLPlan plan = null;
         try {
             plan = getLogicaSQLPlan(expr,sqlQuery);
-            System.out.println("\nPlan:" + plan.toString());
+            //System.out.println("\nPlan:" + plan.toString());
         } catch (Exception e) {
             failQuery(e, sqlQuery);
             result.setResult(createFailResult(e, sqlQuery));
@@ -197,10 +196,10 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             PlanNode node = result.getNode(result.getQueryId()+".0");
             String snode = node.toString();
             PlanNode node2 = new PlanNode(new JsonObject(snode));
-            if(node.equals(node2))
-                System.out.print("EQQULALL");
-            else
-                System.err.print("notEQQULALL");
+//            if(node.equals(node2))
+//                System.out.print("EQQULALL");
+//            else
+//                System.err.print("notEQQULALL");
             node.getConfiguration().getObject("body").putString("operationType", OpType.Insert.toString());
             if(opInsert.getTableName().startsWith(StringConstants.DEFAULT_DATABASE_NAME))
                 node.getConfiguration().getObject("body").putString("tableName",opInsert.getTableName());
@@ -442,7 +441,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
             JsonObject annotatedPlan = null;
 //            try {
                 JsonObject schedulerRep = PlanUtils.getSchedulerRep(p,currentCluster);
-                System.err.println("$$$$$$$$$$$$$$$$$$$$\n"+schedulerRep.encodePrettily());
+                //System.err.println("$$$$$$$$$$$$$$$$$$$$\n"+schedulerRep.encodePrettily());
                 annotatedPlan = PlanUtils.emulateScheduler(schedulerRep,globalInformation);
 //                annotatedPlan = WP4Client.evaluatePlan(schedulerRep,schedHost,schedPort);
 //            } catch (IOException e) {
@@ -456,7 +455,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
 //            }
             JsonObject updatedPlan = PlanUtils.updateInformation(plan.getPlanGraph(),annotatedPlan.getObject("stages"),globalInformation);
             updatedPlan = PlanUtils.updateTargetEndpoints(updatedPlan);
-            System.err.println(updatedPlan.encodePrettily());
+            //System.err.println(updatedPlan.encodePrettily());
             plan.setPlanGraph(updatedPlan);
             result.add(plan);
         }

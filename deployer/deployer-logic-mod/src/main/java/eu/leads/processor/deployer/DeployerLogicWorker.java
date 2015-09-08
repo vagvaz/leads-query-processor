@@ -155,7 +155,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                   deployOperator(executionPlan,specialNode);
                }else if (label.equals(IManagerConstants.QUIT)){
                   persistence.stopManager();
-                  log.error("Stopped Manager Exiting");
+                  log.error("\n\nStopped Manager Exiting");
                   try {
                      Thread.sleep(1000);
                   } catch (InterruptedException e) {

@@ -89,7 +89,7 @@ public class LeadsCatalog {
 
     public static File getTestDir() {
         return new File(System.getProperty("j",
-                                              "test-data"));
+                "test-data"));
     }
 
     public static File getTestDir(final String subdirName) {
@@ -124,4 +124,9 @@ public class LeadsCatalog {
         return true;
     }
 
+    public void StopServer() {
+        catalogServer.shutdown();
+        System.err.println("Server stopped");
+
+    }
 }

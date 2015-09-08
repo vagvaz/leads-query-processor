@@ -240,8 +240,11 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
           }else
           {
             persistence.stopManager();
+            log.error("Stopped Compoment");
+
+            this.getVertx().stop();
             log.error("Stopped Manager Exiting");
-            Thread.sleep(1000);
+            Thread.sleep(2000);
             System.exit(0);
           }
         }
