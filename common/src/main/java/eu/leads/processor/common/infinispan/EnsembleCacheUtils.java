@@ -114,6 +114,17 @@ public class EnsembleCacheUtils {
 //                }
 //            }
 //            isSetup =true;
+            for(Map.Entry<String,Map<String,TupleBuffer>> entry : microclouds.entrySet()){
+                Iterator iterator = entry.getValue().entrySet().iterator();
+                while(iterator.hasNext()){
+                    Map.Entry<String,TupleBuffer> buffer = (Map.Entry<String, TupleBuffer>) iterator.next();
+                    if(buffer.getValue().getCacheName()==null)
+                    {
+                        iterator.remove();
+                    }
+                }
+
+            }
             ensembleString = "";
             ArrayList<EnsembleCache> cachesList = new ArrayList<>();
 
@@ -237,10 +248,15 @@ public class EnsembleCacheUtils {
                 if(!mc.getKey().equals(localMC) ) {
                     cache.getValue().flushToMC();
                 }
+//                else{
+//                    cache.getValue().flushToMC();
+//     vagvaz           }
                 else{
-                       Cache localCache =
-                            (Cache) localManager.getPersisentCache(cache.getValue().getCacheName());
-                    cache.getValue().flushToCache(localCache);
+                    if(cache.getValue().getBuffer().size() > 0) {
+                        Cache localCache = (Cache) localManager.getPersisentCache(cache.getKey());
+                        cache.getValue().flushToCache(localCache);
+                        cache.getValue().release();
+                    }
                 }
             }
         }
@@ -252,6 +268,9 @@ public class EnsembleCacheUtils {
 //                    cache.getValue().flushEndToMC();
 //                    cache.getValue().flushEndToMC();
                 }
+//                else{//vagvaz
+//                    cache.getValue().flushEndToMC();
+//                }
             }
         }
 
@@ -291,12 +310,13 @@ public class EnsembleCacheUtils {
 
     private static void batchPutToCache(BasicCache cache, Object key, Object value, boolean b) {
         if( !((key instanceof String )|| (key instanceof ComplexIntermediateKey)) || !(value instanceof Tuple)){
-            putToCacheDirect(cache,key,value);
+            putToCacheDirect(cache, key, value);
         }
         if(b){
             if(cache instanceof EnsembleCache){
                 String mc = EnsembleCacheUtils.decideMC(key.toString());
                 if(mc.equals(localMC)){
+//vagvaz                    putToMC(cache,key,value,localMC);
                     putToLocalMC(cache,key,value);
                 }
                 else{
@@ -304,7 +324,8 @@ public class EnsembleCacheUtils {
                 }
             }
             else{
-                putToLocalMC(cache,key,value);
+                 putToLocalMC(cache,key,value);
+//                putToMC(cache,key,value,localMC);
             }
         }
         else{
@@ -328,7 +349,11 @@ public class EnsembleCacheUtils {
             tupleBuffer= new TupleBuffer(batchSize,cache.getName(),ensembleManagers.get(mc),mc);
             microclouds.get(mc).put(cache.getName(),tupleBuffer);
         }
-        if(tupleBuffer.add(key, (Tuple) value)){
+        if(tupleBuffer.getCacheName()==null)
+        {
+            tupleBuffer.setCacheName(cache.getName());
+        }
+        if(tupleBuffer.add(key, value)){
             BatchPutRunnable runnable = getBatchPutRunnable();
             runnable.setBuffer(tupleBuffer);
             batchPutExecutor.submit(runnable);
@@ -350,6 +375,10 @@ public class EnsembleCacheUtils {
         if(tupleBuffer == null){ // create tuple buffer for cache
             tupleBuffer= new TupleBuffer(localBatchSize,cache.getName(),ensembleManagers.get(localMC),localMC);
             microclouds.get(localMC).put(cache.getName(),tupleBuffer);
+        }
+        if(tupleBuffer.getCacheName()==null)
+        {
+            tupleBuffer.setCacheName(cache.getName());
         }
         if(tupleBuffer.add(key, (Tuple) value)){
             if(tupleBuffer.getMC().equals(localMC)){

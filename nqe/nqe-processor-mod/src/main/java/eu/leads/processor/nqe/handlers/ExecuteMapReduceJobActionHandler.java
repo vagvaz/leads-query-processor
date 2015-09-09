@@ -75,7 +75,8 @@ public class ExecuteMapReduceJobActionHandler implements ActionHandler {
       QueryStatus queryStatus = new QueryStatus();
       queryStatus.setId(jobId);
       queryStatus.setStatus(QueryState.PENDING);
-      jobsCache.put(jobId, queryStatus.toString());
+      JsonObject wrapper = new JsonObject().putObject("status",queryStatus.asJsonObject());
+      jobsCache.put(jobId, wrapper.toString());
       result.setResult(queryStatus.asJsonObject());
       result.setStatus(ActionStatus.COMPLETED.toString());
       System.out.println("Direct MR Execution");

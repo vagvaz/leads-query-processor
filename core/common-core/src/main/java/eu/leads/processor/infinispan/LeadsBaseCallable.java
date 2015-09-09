@@ -273,7 +273,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       profCallable.start("finalizeBaseCallable");
       EngineUtils.waitForAllExecute();
       EnsembleCacheUtils.waitForAllPuts();
-//      emanager.stop();
+      emanager.stop();
+      ecache = null;
 //
 //      ecache.stop();
 //      outputCache.stop();

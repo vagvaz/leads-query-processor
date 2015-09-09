@@ -38,6 +38,7 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
             if(cache.getCacheManager().cacheExists(cache.getName()+".compressed")){
                 System.err.println("Stopping " + cache.getName() + ".compressed");
                 Cache compressed = cache.getCacheManager().getCache(cache.getName()+".compressed");
+
                 for(Object l : compressed.getListeners()){
                     //                  if(l instanceof PluginHandlerListener){
                     //                      compressed.removeListener(l);
@@ -47,30 +48,44 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
                         compressed.removeListener(l);
                         l = null;
                     }
-                }
-                    try {
-                        compressed.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).clear();
 
-                        compressed.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).stop();
-                    }catch (Exception e){
-                        e.printStackTrace();
-                    }
+                }
+                try {
+                    compressed.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).clear();
+                    //InfinispanClusterSingleton.getInstance().getManager().getCacheManager().removeCache(compressed.getName());
+                    //                        if(compressed.getCacheManager().isCoordinator())
+                    //                            compressed.getCacheManager().removeCache(compressed.getName());
+                    //                        compressed.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).stop();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
 
             }else{
                 System.err.println("Cache " + cache.getName() +".compressed EXISTS?=" + cache
                     .getCacheManager().cacheExists(cache.getName() + ".compressed"));
             }
-                System.err
-                    .println(
-                        "Stopped " + cacheName + " from " + cache.getCacheManager().getAddress()
-                            .toString() + "\n");
-                try{
-                    cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).clear();
-                    cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).stop();
-                }catch (Exception e){
-                    e.printStackTrace();
+            System.err
+                .println(
+                    "Stopped " + cacheName + " from " + cache.getCacheManager().getAddress()
+                        .toString() + "\n");
+            try{
+
+                //                    InfinispanClusterSingleton.getInstance().getManager().getCacheManager().removeCache(cache.getName());
+                for(Object l : cache.getListeners()){
+                    //                  if(l instanceof PluginHandlerListener){
+                    //                      compressed.removeListener(l);
+                    //                  }
+                    if(l instanceof LeadsListener){
+                        ((LeadsListener)l).close();
+                        cache.removeListener(l);
+                    }
                 }
+                cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).clear();
+                //                    cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).stop();
+            }catch (Exception e){
+                e.printStackTrace();
             }
+        }
         return null;
     }
 
