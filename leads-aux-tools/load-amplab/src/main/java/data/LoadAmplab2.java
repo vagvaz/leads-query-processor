@@ -78,7 +78,10 @@ public class LoadAmplab2 {
                     System.err.println("wrong number of arguments for load $prog load dir/ $prog load dir host port (delay per put)");
                     System.exit(-1);
                 }
-                remoteCacheManager = createRemoteCacheManager(args[2], args[3]);
+                String[] parts = args[2].split(":");
+                String host = parts[0];
+                String port = parts[1];
+                remoteCacheManager = createRemoteCacheManager(host, port);
             }  else if(args[0].startsWith("loadEnsemble")){
                 if ( args.length < 3) {
                     System.err.println("or  \t\t$prog loadEnsemble(Multi) dir host:port(|host:port)+ (delay per put)\n ");
@@ -100,13 +103,13 @@ public class LoadAmplab2 {
             }else{
                 System.exit(0);
             }
-            loadData(args[1],args[5], args[6]);
+            loadData(args[1],args[5]);
         }
     }
 
 
 
-    private static void loadData(String path, String arg5, String arg6) throws IOException, ClassNotFoundException {
+    private static void loadData(String path, String arg5) throws IOException, ClassNotFoundException {
         Long startTime = System.currentTimeMillis();
         AllstartTime = System.currentTimeMillis();
         Path dir = Paths.get(path);
@@ -138,7 +141,7 @@ public class LoadAmplab2 {
                 for (File csvfile : files) {
                     System.out.print("Loading file: " + csvfile.getName());
                     Long filestartTime = System.currentTimeMillis();
-                    loadDataFromFile(csvfile,arg5,arg6);
+                    loadDataFromFile(csvfile,arg5);
                     System.out.println("Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - filestartTime, "HH:mm:ss,SSS"));
                 }
             }
@@ -155,7 +158,7 @@ public class LoadAmplab2 {
 
     }
 
-    private static void loadDataFromFile(File csvfile, String arg5, String arg6) throws IOException {
+    private static void loadDataFromFile(File csvfile, String arg5) throws IOException {
         String tableName = csvfile.getParentFile().getName();
         String keysFilename = csvfile.getAbsoluteFile().getParent() + "/" + tableName + ".keys";
         Path path = Paths.get(keysFilename);
