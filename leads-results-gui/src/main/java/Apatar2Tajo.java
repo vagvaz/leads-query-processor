@@ -24,7 +24,7 @@ public class Apatar2Tajo {
     private static HashMap<String, Sort.SortSpec> ApatarTajoSortFunctMap = new HashMap<String, Sort.SortSpec>();
 
     private static HashMap<String, Expr> GroupByOther = new HashMap<String, Expr>();
-    private static HashMap<String, String> MRTableName= new HashMap<>();
+    private static HashMap<String, String> MRTableName = new HashMap<>();
     private static boolean foundHaving;
     private int funtionsCount = 0;
 
@@ -64,33 +64,51 @@ public class Apatar2Tajo {
     static void init_string_maps() {
         Expr nullArg = new NullLiteral();
         Expr nullArgs[] = new NullLiteral[0];
-        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.AndValidateFunction", new BinaryOperator(OpType.And, nullArg, nullArg));
-        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.ContainValidateFunction", new PatternMatchPredicate(OpType.SimilarToPredicate, false, nullArg, nullArg));
-        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.EqualToValidateFunction", new BinaryOperator(OpType.Equals, nullArg, nullArg));
-        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.GreaterOrEqualValidateFunction", new BinaryOperator(OpType.GreaterThanOrEquals, nullArg, nullArg));
-        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.GreaterThanValidateFunction", new BinaryOperator(OpType.GreaterThan, nullArg, nullArg));
-        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.IsNotNullValidateFunction", new IsNullPredicate(true, nullArg));
+        ApatarTajoFilterFunctMap
+            .put("com.apatar.functions.Logic.AndValidateFunction", new BinaryOperator(OpType.And, nullArg, nullArg));
+        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.ContainValidateFunction",
+            new PatternMatchPredicate(OpType.SimilarToPredicate, false, nullArg, nullArg));
+        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.EqualToValidateFunction",
+            new BinaryOperator(OpType.Equals, nullArg, nullArg));
+        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.GreaterOrEqualValidateFunction",
+            new BinaryOperator(OpType.GreaterThanOrEquals, nullArg, nullArg));
+        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.GreaterThanValidateFunction",
+            new BinaryOperator(OpType.GreaterThan, nullArg, nullArg));
+        ApatarTajoFilterFunctMap
+            .put("com.apatar.functions.Logic.IsNotNullValidateFunction", new IsNullPredicate(true, nullArg));
 
-        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.IsNullValidateFunction", new IsNullPredicate(false, nullArg));
-        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.LessOrEqualValidateFunction", new BinaryOperator(OpType.LessThanOrEquals, nullArg, nullArg));
-        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.LikeValidateFunction", new PatternMatchPredicate(OpType.LikePredicate, false, nullArg, nullArg));
-        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.FindRegExpFunction", new PatternMatchPredicate(OpType.Regexp, false, nullArg, nullArg));
+        ApatarTajoFilterFunctMap
+            .put("com.apatar.functions.Logic.IsNullValidateFunction", new IsNullPredicate(false, nullArg));
+        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.LessOrEqualValidateFunction",
+            new BinaryOperator(OpType.LessThanOrEquals, nullArg, nullArg));
+        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.LikeValidateFunction",
+            new PatternMatchPredicate(OpType.LikePredicate, false, nullArg, nullArg));
+        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.FindRegExpFunction",
+            new PatternMatchPredicate(OpType.Regexp, false, nullArg, nullArg));
         ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.NotValidateFunction", new NotExpr(nullArg));
-        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.LessThanValidateFunction", new BinaryOperator(OpType.LessThan, nullArg, nullArg));
+        ApatarTajoFilterFunctMap.put("com.apatar.functions.Logic.LessThanValidateFunction",
+            new BinaryOperator(OpType.LessThan, nullArg, nullArg));
 
 
-        ApatarTajoAgregateFunctMap.put("com.apatar.functions.String.AvgFunction", new GeneralSetFunctionExpr("avg", false, nullArgs));
-        ApatarTajoAgregateFunctMap.put("com.apatar.functions.String.CountFunction", new GeneralSetFunctionExpr("count", false, nullArgs));//new GeneralSetFunctionExpr("avg", false, nullArgs));
+        ApatarTajoAgregateFunctMap
+            .put("com.apatar.functions.String.AvgFunction", new GeneralSetFunctionExpr("avg", false, nullArgs));
+        ApatarTajoAgregateFunctMap.put("com.apatar.functions.String.CountFunction",
+            new GeneralSetFunctionExpr("count", false, nullArgs));//new GeneralSetFunctionExpr("avg", false, nullArgs));
         ApatarTajoAgregateFunctMap.put("com.apatar.functions.String.CountStarFunction", new CountRowsFunctionExpr());
-        ApatarTajoAgregateFunctMap.put("com.apatar.functions.String.CountDistinctFunction", new GeneralSetFunctionExpr("count", true, nullArgs));
+        ApatarTajoAgregateFunctMap.put("com.apatar.functions.String.CountDistinctFunction",
+            new GeneralSetFunctionExpr("count", true, nullArgs));
 
-        ApatarTajoAgregateFunctMap.put("com.apatar.functions.String.MaxFunction", new GeneralSetFunctionExpr("max", false, nullArgs));
-        ApatarTajoAgregateFunctMap.put("com.apatar.functions.String.MinFunction", new GeneralSetFunctionExpr("min", false, nullArgs));
+        ApatarTajoAgregateFunctMap
+            .put("com.apatar.functions.String.MaxFunction", new GeneralSetFunctionExpr("max", false, nullArgs));
+        ApatarTajoAgregateFunctMap
+            .put("com.apatar.functions.String.MinFunction", new GeneralSetFunctionExpr("min", false, nullArgs));
 
 
         ColumnReferenceExpr nullColumn = CreateColumnReference("null");
-        ApatarTajoSortFunctMap.put("com.apatar.functions.String.DescFunction", new Sort.SortSpec(nullColumn, false, false));//; new GeneralSetFunctionExpr("min", false, nullArgs));
-        ApatarTajoSortFunctMap.put("com.apatar.functions.String.AscFunction", new Sort.SortSpec(nullColumn, true, false));
+        ApatarTajoSortFunctMap.put("com.apatar.functions.String.DescFunction",
+            new Sort.SortSpec(nullColumn, false, false));//; new GeneralSetFunctionExpr("min", false, nullArgs));
+        ApatarTajoSortFunctMap
+            .put("com.apatar.functions.String.AscFunction", new Sort.SortSpec(nullColumn, true, false));
         System.out.println("Initializing  ApatarTajoFilterFunctMap " + ApatarTajoFilterFunctMap.size());
 
 
@@ -122,12 +140,12 @@ public class Apatar2Tajo {
                 String from, to;
                 from = node.getAttributeValue("begin_id");
                 to = node.getAttributeValue("end_id");
-                System.out.println("Arrow "
-                        + from + " -> " + to + " @ " + node.getAttributeValue("end_conn_name"));
+                System.out.println("Arrow " + from + " -> " + to + " @ " + node.getAttributeValue("end_conn_name"));
                 ArrowMap.put(from, to);
 
                 //Store the connection name information
-                ArrowConnections[Integer.parseInt(from)][Integer.parseInt(to)] = node.getAttributeValue("end_conn_name");
+                ArrowConnections[Integer.parseInt(from)][Integer.parseInt(to)] =
+                    node.getAttributeValue("end_conn_name");
                 //Store the reversed tree connections
                 ReverseArrowMap.put(to, from);
                 if (!ReverseArrowTree.containsKey(to)) {
@@ -154,7 +172,9 @@ public class Apatar2Tajo {
             for (int j = 0; j < list.size(); j++) {
 
                 node = (Element) list.get(j);
-                System.out.println("SubNode id: " + node.getAttributeValue("id") + " " + node.getAttributeValue("nodeClass") + " , " + node.getAttributeValue("title"));
+                System.out.println(
+                    "SubNode id: " + node.getAttributeValue("id") + " " + node.getAttributeValue("nodeClass") + " , "
+                        + node.getAttributeValue("title"));
                 String cId = node.getAttributeValue("id");
 
                 nodesMap.put(cId, node);
@@ -176,29 +196,30 @@ public class Apatar2Tajo {
                 //Check End node => output node !
                 System.out.println("Search for Projection node result:  ");
                 String projecID = FindnRaiseNode(id, ReverseArrowTree, nodesMap, "com.apatar.project.ProjectNode");
-//                if(projecID!=null)
-//                    id = projecID;
+                //                if(projecID!=null)
+                //                    id = projecID;
                 print("", true, id, ReverseArrowTree, nodesMap);
                 String MR = id;
 
-                while(MR!=null){
+                while (MR != null) {
 
-                    System.out.println("Search for MapReduceNode node starting from node: "+ MR + " result: ");
+                    System.out.println("Search for MapReduceNode node starting from node: " + MR + " result: ");
 
                     MR = FindnRaiseNode(MR, ReverseArrowTree, nodesMap, "com.apatar.mapReduce.MapReduceNode");
                     print("", true, id, ReverseArrowTree, nodesMap);
-//                    List<String> children = ReverseArrowTree.get(MR);
-//                    if(children!=null) {
-//                        MR = children.get(0);
-//                    }else
-//                        break;
+                    //                    List<String> children = ReverseArrowTree.get(MR);
+                    //                    if(children!=null) {
+                    //                        MR = children.get(0);
+                    //                    }else
+                    //                        break;
 
                 }
 
                 //print("", true, id, ReverseArrowTree, nodesMap);
 
                 //Recursive nodes traversing
-                Expr ret = recursiveTree(id, ReverseArrowTree, nodesMap, ArrowConnections, InitialReverseArrowTree,ArrowMap);
+                Expr ret =
+                    recursiveTree(id, ReverseArrowTree, nodesMap, ArrowConnections, InitialReverseArrowTree, ArrowMap);
 
                 //Select everything
                 if (projecID == null && ret != null && ret.getType() != OpType.Projection) {
@@ -235,7 +256,8 @@ public class Apatar2Tajo {
     }
 
     //Use only in Unary operators
-    private static String FindnRaiseNode(String head, HashMap<String, List<String>> nodesTree, HashMap<String, Element> nodesMap, String SearchClass) {
+    private static String FindnRaiseNode(String head, HashMap<String, List<String>> nodesTree,
+        HashMap<String, Element> nodesMap, String SearchClass) {
 
         //Traverse the tree
         //Search for projection node
@@ -279,7 +301,8 @@ public class Apatar2Tajo {
             }
         }
 
-        if ((nodeType.equals("com.apatar.output.OutputNode")|| nodeType.equals(SearchClass))&& searchNodeId != null && !alreadyPushed) {
+        if ((nodeType.equals("com.apatar.output.OutputNode") || nodeType.equals(SearchClass)) && searchNodeId != null
+            && !alreadyPushed) {
             nodesTree.remove(head);
             List<String> childrenNew = new ArrayList<>();
             childrenNew.add(searchNodeId);
@@ -293,7 +316,9 @@ public class Apatar2Tajo {
 
     }
 
-    private static Expr recursiveTree(String head, HashMap<String, List<String>> nodesTree, HashMap<String, Element> nodesMap, String[][] arrowConnections, HashMap<String,List<String>> InitNodesTree, HashMap<String, String> ArrowMap) {
+    private static Expr recursiveTree(String head, HashMap<String, List<String>> nodesTree,
+        HashMap<String, Element> nodesMap, String[][] arrowConnections, HashMap<String, List<String>> InitNodesTree,
+        HashMap<String, String> ArrowMap) {
         Element cur = nodesMap.get(head);
         System.out.print(" ID " + head + " " + cur.getAttributeValue("title"));
         int currentID = Integer.parseInt(head);
@@ -308,7 +333,7 @@ public class Apatar2Tajo {
         Expr ChildExpr = null;
         if (children != null)
             for (String child : children) {
-                ChildExpr = recursiveTree(child, nodesTree, nodesMap, arrowConnections,InitNodesTree,ArrowMap);
+                ChildExpr = recursiveTree(child, nodesTree, nodesMap, arrowConnections, InitNodesTree, ArrowMap);
                 if (ChildExpr != null)
                     childrenExpr.add(ChildExpr);
             }
@@ -316,13 +341,12 @@ public class Apatar2Tajo {
         Expr ret = null;
         if (cur.getAttribute("subProject") != null) {
             System.out.println("\nSubproject found  Reparsing");
-            String xmlWithSpecial = StringEscapeUtils
-                    .unescapeXml(StringEscapeUtils.unescapeXml(cur
-                            .getAttributeValue("subProject")));
+            String xmlWithSpecial =
+                StringEscapeUtils.unescapeXml(StringEscapeUtils.unescapeXml(cur.getAttributeValue("subProject")));
             subExpr = visit_subproject(xmlWithSpecial, cur.getAttributeValue("title"));
 
-//            if(sub !=null)
-//                System.out.println("Visited subproject: " + sub.toJson().toString());
+            //            if(sub !=null)
+            //                System.out.println("Visited subproject: " + sub.toJson().toString());
 
         }
 
@@ -426,7 +450,8 @@ public class Apatar2Tajo {
                     if (ChildExpr.getType() == OpType.Aggregation)
                         if (((Having) subExpr).hasChild()) { //There is Filter node
                             Selection s = (Selection) ((Having) subExpr).getChild(); //get the filter node
-                            s.setChild(((Aggregation) ChildExpr).getChild()); // set Filters node's child Agregation's child
+                            s.setChild(
+                                ((Aggregation) ChildExpr).getChild()); // set Filters node's child Agregation's child
                             ((Aggregation) ChildExpr).setChild(s);
                             ((Having) subExpr).setChild(ChildExpr);
                         } else {
@@ -483,13 +508,12 @@ public class Apatar2Tajo {
             System.out.print(" Prev " + prev + " " + prevE.getAttributeValue("title"));
             String prevNodeType = prevE.getAttributeValue("nodeClass");
             System.out.println(" prevNodeType: " + prevNodeType);
-            if(prevNodeType.equals("com.apatar.mapReduce.MapReduceNode"))
-            {
-                String oldTableName=cur.getAttributeValue("title");
-                String newTableName = oldTableName+":"+UUID.randomUUID().toString();
-                MRTableName.put(oldTableName,newTableName);
+            if (prevNodeType.equals("com.apatar.mapReduce.MapReduceNode")) {
+                String oldTableName = cur.getAttributeValue("title");
+                String newTableName = oldTableName + ":" + UUID.randomUUID().toString();
+                MRTableName.put(oldTableName, newTableName);
                 relations[0] = new Relation(newTableName);
-            }else{
+            } else {
                 relations[0] = new Relation(cur.getAttributeValue("title"));
             }
 
@@ -516,18 +540,19 @@ public class Apatar2Tajo {
 
                 String nextNodeType = nextE.getAttributeValue("nodeClass");
                 System.out.println(" nextNodeType: " + nextNodeType);
-                if(nextNodeType.equals("com.apatar.read.READNode")) {
-                    NamedExpr[] oldVLE = (NamedExpr[])((ValueListExpr)subExpr).getValues();
+                if (nextNodeType.equals("com.apatar.read.READNode")) {
+                    NamedExpr[] oldVLE = (NamedExpr[]) ((ValueListExpr) subExpr).getValues();
 
                     NamedExpr[] exprs = new NamedExpr[oldVLE.length];
-                    for(int ex=0; ex<oldVLE.length;ex++)
-                        exprs[ex]=oldVLE[ex];
+                    for (int ex = 0; ex < oldVLE.length; ex++)
+                        exprs[ex] = oldVLE[ex];
 
                     Element node = cur.getChild("OutputConnectionPoints");
                     node = node.getChild("ConnectionPoint");
                     node = node.getChild("tableInfo");
                     node = node.getChild("records");
-                    System.out.println("ProjectNode  " + ((List<Element>) node.getChildren("com.apatar.core.Record")).size());
+                    System.out
+                        .println("ProjectNode  " + ((List<Element>) node.getChildren("com.apatar.core.Record")).size());
                     List<Element> recordslist;
 
                     String columnName, columnType;
@@ -541,15 +566,16 @@ public class Apatar2Tajo {
                             columnType = temp.getAttributeValue("type");
                             isPrimary = temp.getAttributeValue("primaryKey").equals("true");
                             System.out.println("Record  " + columnName);
-                            columns[count] = new ColumnReferenceExpr(columnType,columnName);
+                            columns[count] = new ColumnReferenceExpr(columnType, columnName);
                             count++;
                         }
 
 
                     }
 
-                    exprs[exprs.length-1] = new NamedExpr(new ValueListExpr(columns),"AfterTable:"+MRTableName.get(nextE.getAttributeValue("title")));
-                    subExpr= new ValueListExpr(exprs);
+                    exprs[exprs.length - 1] = new NamedExpr(new ValueListExpr(columns),
+                        "AfterTable:" + MRTableName.get(nextE.getAttributeValue("title")));
+                    subExpr = new ValueListExpr(exprs);
                 }
 
 
@@ -598,12 +624,12 @@ public class Apatar2Tajo {
                 String from, to;
                 from = subnode.getAttributeValue("begin_id");
                 to = subnode.getAttributeValue("end_id");
-                System.out.println("Arrow "
-                        + from + " -> " + to + " @ " + subnode.getAttributeValue("end_conn_name"));
+                System.out.println("Arrow " + from + " -> " + to + " @ " + subnode.getAttributeValue("end_conn_name"));
                 subArrowMap.put(from, to);
 
                 //Store the connection name information
-                ArrowConnections[Integer.parseInt(from)][Integer.parseInt(to)] = subnode.getAttributeValue("end_conn_name");
+                ArrowConnections[Integer.parseInt(from)][Integer.parseInt(to)] =
+                    subnode.getAttributeValue("end_conn_name");
                 //Store the reversed tree connections
                 SubReverseArrowMap.put(to, from);
                 if (!SubReverseArrowTree.containsKey(to)) {
@@ -629,7 +655,9 @@ public class Apatar2Tajo {
             for (int j = 0; j < sublist.size(); j++) {
 
                 subnode = (Element) sublist.get(j);
-                System.out.println("SubNode id: " + subnode.getAttributeValue("id") + " " + subnode.getAttributeValue("nodeClass") + " , " + subnode.getAttributeValue("title"));
+                System.out.println(
+                    "SubNode id: " + subnode.getAttributeValue("id") + " " + subnode.getAttributeValue("nodeClass")
+                        + " , " + subnode.getAttributeValue("title"));
                 String cId = subnode.getAttributeValue("id");
 
                 subnodesMap.put(cId, subnode);
@@ -669,7 +697,8 @@ public class Apatar2Tajo {
                                 ret = new Having(rec);
                             } else
                                 ret = new Selection(rec);
-                            System.out.println(" Found rec:" + ret.toJson().toString() + " returning only this result ");
+                            System.out
+                                .println(" Found rec:" + ret.toJson().toString() + " returning only this result ");
 
                         } else {
                             System.out.println(" null child");
@@ -690,12 +719,13 @@ public class Apatar2Tajo {
                         System.out.println("Found Tree #" + treenum++ + " starting node: " + id);
                         print("", true, id, SubReverseArrowTree, subnodesMap);
 
-                        Expr rec = recursiveGroupByFunction(id, SubReverseArrowTree, subnodesMap, ArrowConnections, subArrowMap, GroupByCollumns);
+                        Expr rec = recursiveGroupByFunction(id, SubReverseArrowTree, subnodesMap, ArrowConnections,
+                            subArrowMap, GroupByCollumns);
                         if (rec != null) {
-                            if (rec.getType() == OpType.Target){
+                            if (rec.getType() == OpType.Target) {
                                 String qualifier = ((NamedExpr) rec).getAlias();
-                                if(MRTableName.containsKey(qualifier))
-                                    qualifier=MRTableName.get(qualifier);
+                                if (MRTableName.containsKey(qualifier))
+                                    qualifier = MRTableName.get(qualifier);
                                 GroupByOther.put(qualifier, ((NamedExpr) rec).getExpr());
                             }
 
@@ -714,7 +744,8 @@ public class Apatar2Tajo {
                 if (GroupByCollumns.size() > 0) {
                     Aggregation clause = new Aggregation();
                     ArrayList<Aggregation.GroupElement> groups = new ArrayList<Aggregation.GroupElement>(1);
-                    groups.add(new Aggregation.GroupElement(Aggregation.GroupType.OrdinaryGroup, GroupByCollumns.toArray(new Expr[GroupByCollumns.size()])));
+                    groups.add(new Aggregation.GroupElement(Aggregation.GroupType.OrdinaryGroup,
+                        GroupByCollumns.toArray(new Expr[GroupByCollumns.size()])));
                     int groupSize = 1;
                     clause.setGroups(groups.subList(0, groupSize).toArray(new Aggregation.GroupElement[groupSize]));
 
@@ -726,16 +757,18 @@ public class Apatar2Tajo {
                 try {
                     ArrayList<Sort.SortSpec> sortList = null;
                     //Fix recursive read of operator if more than 1
-                    if(endNodes.size()>1){
-                        System.err.print("Found multiple end nodes, use multisort to connect the nodes, using just the first node, ignoring later");
+                    if (endNodes.size() > 1) {
+                        System.err.print(
+                            "Found multiple end nodes, use multisort to connect the nodes, using just the first node, ignoring later");
                     }
                     for (String id : endNodes) {
-                        sortList = recursiveSortFunction(id,SubReverseArrowTree,subnodesMap,ArrowConnections);//GetSortSpec(id, SubReverseArrowTree, subnodesMap);
+                        sortList = recursiveSortFunction(id, SubReverseArrowTree, subnodesMap,
+                            ArrowConnections);//GetSortSpec(id, SubReverseArrowTree, subnodesMap);
                         if (sortList != null)
                             break;
 
                     }
-                    if(sortList!=null)
+                    if (sortList != null)
                         if (sortList.size() > 0) {
                             Sort.SortSpec[] sortArray = new Sort.SortSpec[sortList.size()];
                             return new Sort((Sort.SortSpec[]) sortList.toArray(sortArray));
@@ -799,10 +832,11 @@ public class Apatar2Tajo {
         return (Expr) ErrorMessageNullReturn("Error parsing subroot Node, ParentNode:" + ParentNode);
     }
 
-    static private void print(String prefix, boolean isTail, String head, HashMap<String, List<String>> nodesTree, HashMap<String, Element> nodesMap) {
+    static private void print(String prefix, boolean isTail, String head, HashMap<String, List<String>> nodesTree,
+        HashMap<String, Element> nodesMap) {
         Element cur = nodesMap.get(head);
         //System.out.print(cur.toString() + " " + cur.getAttributeValue("title"));
-        String name = head+": "+ cur.getAttributeValue("title");
+        String name = head + ": " + cur.getAttributeValue("title");
         List<String> children = nodesTree.get(head);
 
         System.out.println(prefix + (isTail ? "└── " : "├── ") + name);
@@ -818,7 +852,8 @@ public class Apatar2Tajo {
         }
     }
 
-    static Sort.SortSpec GetSortSpec(String head, HashMap<String, List<String>> nodesTree, HashMap<String, Element> nodesMap) throws CloneNotSupportedException {
+    static Sort.SortSpec GetSortSpec(String head, HashMap<String, List<String>> nodesTree,
+        HashMap<String, Element> nodesMap) throws CloneNotSupportedException {
         Element cur = nodesMap.get(head);
         System.out.print(" ID " + head + " " + cur.getAttributeValue("title"));
         List<String> next = nodesTree.get(head);
@@ -829,7 +864,8 @@ public class Apatar2Tajo {
         if (nodeType.equals("com.apatar.functions.FunctionNode")) {
             String functionType = cur.getAttributeValue("classFunction").trim();
             if (children == null) //Unconnected function node ... problem
-                return (Sort.SortSpec) ErrorMessageNullReturn("Zero children Function node at function node " + functionType );
+                return (Sort.SortSpec) ErrorMessageNullReturn(
+                    "Zero children Function node at function node " + functionType);
 
             if (ApatarTajoSortFunctMap.containsKey(functionType)) {
                 Sort.SortSpec Spec = (Sort.SortSpec) ApatarTajoSortFunctMap.get(functionType).clone();
@@ -850,10 +886,11 @@ public class Apatar2Tajo {
 
     }
 
-    static ArrayList<Sort.SortSpec>  recursiveSortFunction(String head, HashMap<String, List<String>> nodesTree, HashMap<String, Element> nodesMap, String[][] ArrowConnections) throws CloneNotSupportedException {
+    static ArrayList<Sort.SortSpec> recursiveSortFunction(String head, HashMap<String, List<String>> nodesTree,
+        HashMap<String, Element> nodesMap, String[][] ArrowConnections) throws CloneNotSupportedException {
         //Get node
-        ArrayList<Sort.SortSpec>  ChildList=null;
-        ArrayList<Sort.SortSpec>  SortList=new ArrayList<Sort.SortSpec>();
+        ArrayList<Sort.SortSpec> ChildList = null;
+        ArrayList<Sort.SortSpec> SortList = new ArrayList<Sort.SortSpec>();
 
         Element cur = nodesMap.get(head);
         System.out.print(" ID " + head + " " + cur.getAttributeValue("title"));
@@ -864,30 +901,33 @@ public class Apatar2Tajo {
         if (nodeType.equals("com.apatar.functions.FunctionNode")) {
             String functionType = cur.getAttributeValue("classFunction").trim();
             if (children == null) //Unconnected function node ... problem
-                return (ArrayList<Sort.SortSpec>) ErrorMessageNullReturn("Zero children Function node at function node " + functionType );
+                return (ArrayList<Sort.SortSpec>) ErrorMessageNullReturn(
+                    "Zero children Function node at function node " + functionType);
 
 
             if (ApatarTajoSortFunctMap.containsKey(functionType)) {
-                Sort.SortSpec childSpec = GetSortSpec(head,nodesTree,nodesMap);
-                if(childSpec!=null)
+                Sort.SortSpec childSpec = GetSortSpec(head, nodesTree, nodesMap);
+                if (childSpec != null)
                     SortList.add(childSpec);
                 else
                     return (ArrayList<Sort.SortSpec>) ErrorMessageNullReturn("Error in sort node. ");
 
-            }else if(functionType.equals("com.apatar.functions.math.MultipleSortFunction")){
+            } else if (functionType.equals("com.apatar.functions.math.MultipleSortFunction")) {
                 if (children.size() == 2)
                     for (int i = 0; i < children.size(); i++) {
                         ChildList = recursiveSortFunction(children.get(i), nodesTree, nodesMap, ArrowConnections);
                         if (ChildList == null)
-                            return (ArrayList<Sort.SortSpec>) ErrorMessageNullReturn("Wrong multisort input, connection " + (i+1));
+                            return (ArrayList<Sort.SortSpec>) ErrorMessageNullReturn(
+                                "Wrong multisort input, connection " + (i + 1));
 
                         SortList.addAll(ChildList);
                     }
                 else
-                    return (ArrayList<Sort.SortSpec>) ErrorMessageNullReturn("Found wrong child size: " + children.size() + " must have 2 inputs exactly");
-            }
-            else
-                return (ArrayList<Sort.SortSpec>) ErrorMessageNullReturn("class Function unknown field name: \'" + functionType + '\'');
+                    return (ArrayList<Sort.SortSpec>) ErrorMessageNullReturn(
+                        "Found wrong child size: " + children.size() + " must have 2 inputs exactly");
+            } else
+                return (ArrayList<Sort.SortSpec>) ErrorMessageNullReturn(
+                    "class Function unknown field name: \'" + functionType + '\'');
 
 
             return SortList;
@@ -897,12 +937,13 @@ public class Apatar2Tajo {
         return (ArrayList<Sort.SortSpec>) ErrorMessageNullReturn("Error in sort node. ");
     }
 
-    static Object ErrorMessageNullReturn(String message){
+    static Object ErrorMessageNullReturn(String message) {
         System.err.println(message);
         return null;
     }
 
-    static Expr recursiveFilterFunction(String head, HashMap<String, List<String>> nodesTree, HashMap<String, Element> nodesMap, String[][] ArrowConnections) throws CloneNotSupportedException {
+    static Expr recursiveFilterFunction(String head, HashMap<String, List<String>> nodesTree,
+        HashMap<String, Element> nodesMap, String[][] ArrowConnections) throws CloneNotSupportedException {
         //Get node
 
         Element cur = nodesMap.get(head);
@@ -916,13 +957,13 @@ public class Apatar2Tajo {
             String functionType = cur.getAttributeValue("classFunction").trim();
 
             if (children == null) //Unconnected function node ... problem
-                return (Expr) ErrorMessageNullReturn("Zero children Function node at function node " + functionType );
+                return (Expr) ErrorMessageNullReturn("Zero children Function node at function node " + functionType);
 
             if (ApatarTajoFilterFunctMap.containsKey(functionType)) {
                 Expr FuncExpr = (Expr) ApatarTajoFilterFunctMap.get(functionType).clone();
 
                 if (FuncExpr.getType().getBaseClass() == BinaryOperator.class && children.size() != 2)
-                    return (Expr) ErrorMessageNullReturn("childernd Function node at function node " );
+                    return (Expr) ErrorMessageNullReturn("childernd Function node at function node ");
 
                 Expr[] childrExprArray = new Expr[children.size()];
 
@@ -951,7 +992,8 @@ public class Apatar2Tajo {
                         String patternValue = cur.getChild(functionType).getAttributeValue("Value");
                         if (patternValue == null)
                             return null;
-                        ((PatternMatchPredicate) FuncExpr).setRight(new LiteralValue(patternValue, LiteralValue.LiteralType.String));
+                        ((PatternMatchPredicate) FuncExpr)
+                            .setRight(new LiteralValue(patternValue, LiteralValue.LiteralType.String));
                     } else//other simple operators NOT null etc
                         ((UnaryOperator) FuncExpr).setChild(childrExprArray[0]);
                 else
@@ -992,7 +1034,7 @@ public class Apatar2Tajo {
         String attrNames[] = fullColumnName.split("\\.");
         if (attrNames.length >= 2) {
             String qualifier = attrNames[0];
-            if(MRTableName.containsKey(qualifier))
+            if (MRTableName.containsKey(qualifier))
                 qualifier = MRTableName.get(qualifier);
             String col = attrNames[1];
             return new ColumnReferenceExpr(qualifier, col);
@@ -1013,7 +1055,9 @@ public class Apatar2Tajo {
     }
 
 
-    static Expr recursiveGroupByFunction(String head, HashMap<String, List<String>> nodesTree, HashMap<String, Element> nodesMap, String[][] ArrowConnections, HashMap<String, String> subArrowMap, ArrayList<Expr> groupByCollumns) throws CloneNotSupportedException {
+    static Expr recursiveGroupByFunction(String head, HashMap<String, List<String>> nodesTree,
+        HashMap<String, Element> nodesMap, String[][] ArrowConnections, HashMap<String, String> subArrowMap,
+        ArrayList<Expr> groupByCollumns) throws CloneNotSupportedException {
         //Get node
 
         Element cur = nodesMap.get(head);
@@ -1042,7 +1086,9 @@ public class Apatar2Tajo {
 
                 for (int i = 0; i < children.size(); i++) {
 
-                    Expr childExpr = recursiveGroupByFunction(children.get(i), nodesTree, nodesMap, ArrowConnections, subArrowMap, groupByCollumns);
+                    Expr childExpr =
+                        recursiveGroupByFunction(children.get(i), nodesTree, nodesMap, ArrowConnections, subArrowMap,
+                            groupByCollumns);
                     if (childExpr == null)
                         return null;
                     int from = Integer.parseInt(children.get(i));
@@ -1065,7 +1111,8 @@ public class Apatar2Tajo {
                         String patternValue = cur.getChild(functionType).getAttributeValue("Value");
                         if (patternValue == null)
                             return null;
-                        ((PatternMatchPredicate) FuncExpr).setRight(new LiteralValue(patternValue, LiteralValue.LiteralType.String));
+                        ((PatternMatchPredicate) FuncExpr)
+                            .setRight(new LiteralValue(patternValue, LiteralValue.LiteralType.String));
                     } else//other simple operators NOT null etc
                         ((UnaryOperator) FuncExpr).setChild(childrExprArray[0]);
                 else {
@@ -1082,7 +1129,9 @@ public class Apatar2Tajo {
                 if (children == null) //Unconnected function node ... problem
                     return null;
                 if (children.size() == 1) {
-                    Expr childExpr = recursiveGroupByFunction(children.get(0), nodesTree, nodesMap, ArrowConnections, subArrowMap, groupByCollumns);
+                    Expr childExpr =
+                        recursiveGroupByFunction(children.get(0), nodesTree, nodesMap, ArrowConnections, subArrowMap,
+                            groupByCollumns);
 
                     if (childExpr != null) {
                         Expr[] params = new Expr[1];
@@ -1124,7 +1173,9 @@ public class Apatar2Tajo {
             if (children != null && cur.getAttributeValue("connectionName").equals("output"))
 
                 if (children.size() == 1) {
-                    Expr childExpr = recursiveGroupByFunction(children.get(0), nodesTree, nodesMap, ArrowConnections, subArrowMap, groupByCollumns);
+                    Expr childExpr =
+                        recursiveGroupByFunction(children.get(0), nodesTree, nodesMap, ArrowConnections, subArrowMap,
+                            groupByCollumns);
                     if (childExpr != null)
                         return new NamedExpr(childExpr, collumnName);//cur.getAttributeValue("title"));
                 }
@@ -1140,8 +1191,7 @@ public class Apatar2Tajo {
 
     static Element get_root(String xml) {
         Element rootNode = null;
-        InputStream inputStream = new ByteArrayInputStream(
-                xml.getBytes(Charset.forName("UTF-8")));
+        InputStream inputStream = new ByteArrayInputStream(xml.getBytes(Charset.forName("UTF-8")));
         SAXBuilder testbuilder = new SAXBuilder();
         Document document;
         try {

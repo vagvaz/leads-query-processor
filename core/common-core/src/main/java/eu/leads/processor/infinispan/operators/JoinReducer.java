@@ -22,7 +22,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
 //    private transient ProfileEvent reduceEvent;
     private transient Map<String,List<Tuple>> relations;
     private transient ArrayList<List<Tuple>> arrays;
-    private int counter = 0;
+//    private int counter = 0;
 
     //    private transient ProfileEvent tmpprofCallable;
 //    private transient ProfileEvent tmpProfileEvent;
@@ -89,7 +89,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
 //        profilerLog.error("Sample log");
 //        tmpprofCallable.end();
         while(iter.hasNext()){
-            counter++;
+//            counter++;
             //         String jsonTuple = iter.next();
             //         Tuple t = new Tuple(jsonTuple);
             try {
@@ -209,7 +209,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
 
     @Override protected void finalizeTask() {
         super.finalizeTask();
-        System.err.println("\n\n\nITERATED: " + counter);
+//        System.err.println("\n\n\nITERATED: " + counter);
 
     }
 }

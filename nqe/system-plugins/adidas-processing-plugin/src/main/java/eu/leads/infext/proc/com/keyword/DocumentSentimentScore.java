@@ -11,7 +11,6 @@ import org.apache.commons.lang.StringUtils;
 import eu.leads.PropertiesSingleton;
 import eu.leads.processor.sentiment.Sentiment;
 import eu.leads.processor.sentiment.SentimentAnalysisModule;
-//import eu.leads.processor.sentiment.SentimentAnalysisModule;
 
 public class DocumentSentimentScore {
 	
@@ -43,7 +42,7 @@ public class DocumentSentimentScore {
 	/**
 	 * Provides with sentiment for phrase assuming that some words might have been mentions with mispellings
 	 * 
-	 * @param matchedKeywords list of keywords and their misspelled versions that were found in the text
+	 * @param foundKeywords list of keywords and their misspelled versions that were found in the text
 	 * @param fuzziness what fuzziness was allowed for these keywords
 	 * @return
 	 */

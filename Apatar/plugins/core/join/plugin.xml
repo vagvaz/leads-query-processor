@@ -1,18 +1,18 @@
 <?xml version="1.0" ?>
 <!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
 <plugin id="com.apatar.join" version="0.0.1">
-	<requires>
-		<import plugin-id="com.apatar.core"/>
-		<import plugin-id="com.apatar.ui"/>
-	</requires>
-	<runtime>
-	    <library id="join" path="bin/" type="code">
-	        <export prefix="*"/>
-	    </library>
+    <requires>
+        <import plugin-id="com.apatar.core"/>
+        <import plugin-id="com.apatar.ui"/>
+    </requires>
+    <runtime>
+        <library id="join" path="bin/" type="code">
+            <export prefix="*"/>
+        </library>
 
-	</runtime>
-	<extension plugin-id="com.apatar.core" point-id="Node" id="JoinNode">
-		<parameter id="class" value="com.apatar.join.JoinNodeFactory"/>
-	</extension>
+    </runtime>
+    <extension plugin-id="com.apatar.core" point-id="Node" id="JoinNode">
+        <parameter id="class" value="com.apatar.join.JoinNodeFactory"/>
+    </extension>
 
 </plugin>

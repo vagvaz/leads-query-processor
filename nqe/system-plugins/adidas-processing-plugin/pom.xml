@@ -31,7 +31,7 @@
           <groupId>gr.tuc.softnet</groupId>
           <artifactId>leads-query-processor-common</artifactId>
           <version>${processor.version}</version>
-           <scope>provided</scope>
+<!--           <scope>provided</scope> -->
           <exclusions>
              <exclusion>
                 <groupId>log4j</groupId>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
-  <cache>pagerankCache</cache>
-  <vc_cache>approx_sum_cache</vc_cache>
-  <attributes>links</attributes>
-  <R>5</R>
-  <rseed>11</rseed>
+    <cache>pagerankCache</cache>
+    <vc_cache>approx_sum_cache</vc_cache>
+    <attributes>links</attributes>
+    <R>5</R>
+    <rseed>11</rseed>
 </config>

@@ -4,10 +4,10 @@
 
 <configuration>
 
-     <property>
-         <name>mapreduce.framework.name</name>
-         <value>yarn</value>
-     </property>
+    <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+    </property>
 
     <property>
         <name>parser.skip.truncated</name>
@@ -21,7 +21,9 @@
 
     <property>
         <name>plugin.includes</name>
-        <value>protocol-httpclient|urlfilter-regex|parse-(text|html|tika)|index-(basic|anchor)|query-(basic|site|url)|response-(json|xml)|summary-basic|scoring-opic|urlnormalizer-(pass|regex|basic)</value>
+        <value>
+            protocol-httpclient|urlfilter-regex|parse-(text|html|tika)|index-(basic|anchor)|query-(basic|site|url)|response-(json|xml)|summary-basic|scoring-opic|urlnormalizer-(pass|regex|basic)
+        </value>
         <description>Enable required plugins.</description>
     </property>
 
@@ -35,7 +37,8 @@
         <name>fetcher.server.delay</name>
         <value>0.2</value>
         <description>The number of seconds the fetcher will delay between
-            successive requests to the same server.</description>
+            successive requests to the same server.
+        </description>
     </property>
 
     <property>
@@ -75,7 +78,9 @@
 
     <property>
         <name>io.serializations</name>
-        <value>org.apache.gora.mapreduce.PersistentSerialization,org.apache.hadoop.io.serializer.WritableSerialization,org.apache.hadoop.io.serializer.avro.AvroReflectSerialization</value>
+        <value>
+            org.apache.gora.mapreduce.PersistentSerialization,org.apache.hadoop.io.serializer.WritableSerialization,org.apache.hadoop.io.serializer.avro.AvroReflectSerialization
+        </value>
     </property>
 
 </configuration>

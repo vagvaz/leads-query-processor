@@ -1,29 +1,29 @@
 <?xml version="1.0" ?>
 <!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
 <plugin id="com.apatar.sliding_window" version="0.0.1">
-	<requires>
-		<import plugin-id="com.apatar.core"/>
-		<import plugin-id="com.apatar.ui"/>
-		<import plugin-id="com.apatar.functions"/>
-	</requires>
-	<runtime>
-	    <library id="sliding_window" path="bin/" type="code">
-	        <export prefix="*"/>
-	    </library>	
-	</runtime>
-	<extension plugin-id="com.apatar.core" point-id="Node" id="Sliding_windowNode">
-		<parameter id="class" value="com.apatar.sliding_window.Sliding_windowNodeFactory"/>
-	</extension> 
-	<!--
-	<extension plugin-id="com.apatar.core" point-id="Node" id="ValidateNode">
-		<parameter id="class" value="com.apatar.validate.ValidateNodeFactory"/>
-	</extension> 
-	-->
-	
-	<!--
-	<extension plugin-id="com.apatar.core" point-id="Node" id="FilterNode">
-		<parameter id="class" value="com.apatar.validate.FilterNodeFactory"/>
-	</extension>
-	-->
-	
+    <requires>
+        <import plugin-id="com.apatar.core"/>
+        <import plugin-id="com.apatar.ui"/>
+        <import plugin-id="com.apatar.functions"/>
+    </requires>
+    <runtime>
+        <library id="sliding_window" path="bin/" type="code">
+            <export prefix="*"/>
+        </library>
+    </runtime>
+    <extension plugin-id="com.apatar.core" point-id="Node" id="Sliding_windowNode">
+        <parameter id="class" value="com.apatar.sliding_window.Sliding_windowNodeFactory"/>
+    </extension>
+    <!--
+    <extension plugin-id="com.apatar.core" point-id="Node" id="ValidateNode">
+        <parameter id="class" value="com.apatar.validate.ValidateNodeFactory"/>
+    </extension>
+    -->
+
+    <!--
+    <extension plugin-id="com.apatar.core" point-id="Node" id="FilterNode">
+        <parameter id="class" value="com.apatar.validate.FilterNodeFactory"/>
+    </extension>
+    -->
+
 </plugin>

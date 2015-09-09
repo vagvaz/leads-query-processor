@@ -1,6 +1,7 @@
 package eu.leads.processor.common.infinispan;
 
 import eu.leads.processor.common.LeadsListener;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.concurrent.FutureListener;
@@ -90,7 +91,7 @@ public class BatchPutListener implements LeadsListener {
             Map tmpb = new HashMap();
             for (Map.Entry<Object, Object> entry : tupleBuffer.getBuffer().entrySet()) {
                 tmpb.put(entry.getKey(), entry.getValue());
-                if (tmpb.size() > 20) {
+                if (tmpb.size() > LQPConfiguration.getInstance().getConfiguration().getInt("node.ensemble.batchput.batchsize")) {
                     targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).putAll(tmpb);//entry.getKey(), entry.getValue());
                     tmpb.clear();
                 }
@@ -103,18 +104,6 @@ public class BatchPutListener implements LeadsListener {
 
             tupleBuffer.getBuffer().clear();
             tupleBuffer = null;
-            //            oldMap = tupleBuffer.getBuffer();
-            ////            synchronized (mutex) {
-            //                NotifyingFuture f = targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
-            //                    .putAllAsync(oldMap).attachListener(new FutureListener() {
-            //                        @Override public void futureDone(Future future) {
-            ////                            synchronized (mutex) {
-            //                                futures.remove(future);
-            ////                            }
-            //                        }
-            //                    });
-            //                futures.put(f, f);
-            //            }
 
         }catch (Exception e){
             e.printStackTrace();

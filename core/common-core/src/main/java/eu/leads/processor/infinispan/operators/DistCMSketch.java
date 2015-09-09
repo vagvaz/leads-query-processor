@@ -15,9 +15,10 @@ abstract class sketchArray{
 // NOT thread-safe, but we don't care!
 class DistArray extends sketchArray {
 	Cache<Integer,Integer> ArrayCache=null;
-
+	int size =0;
 	int width=0;
 	int depth=0;
+
 	public DistArray(int w, int d, Cache<Integer,Integer> ArrayCache, boolean reload  ) {
 		this.ArrayCache = ArrayCache;
 		if(reload) {
@@ -59,12 +60,13 @@ final class LocalArray extends sketchArray{
 	static int[][] Array=null;
 	static int width=0;
 	static int depth=0;
+
 	protected LocalArray(int w, int d) {
 		Array = new int[w][d];
-	if(width==0)
-		for(int x=0;x<w;x++)
-			for(int y=0;y<d;y++)
-				Array[x][y]=-1;
+//	if(width==0)
+//		for(int x=0;x<w;x++)
+//			for(int y=0;y<d;y++)
+//				Array[x][y]=-1;
 		width=w;
 		depth=d;
 	}
@@ -83,8 +85,8 @@ public class DistCMSketch {
 	final sketchArray darray; // initialize in the constructor!
 	final Random rn = new Random();
 	final int w, d; // w=mod, d=levels
-	
-	// LEFTERIS USE THIS constructor. No parameters required
+	long count;
+
 	public DistCMSketch(Cache<Integer,Integer> ArrayCache, boolean load) {
 		this(0.01,0.001,ArrayCache, load);
 	}
@@ -113,6 +115,7 @@ public class DistCMSketch {
 			sketchCache.put(prefix + "w", ((LocalArray) darray).getWidth());
 			sketchCache.put(prefix + "d", ((LocalArray) darray).getDepth());
 			sketchCache.put(prefix + "array",  ((LocalArray) darray).getArray());
+			sketchCache.put(prefix + "size",  count);
 		}
 	}
 
@@ -165,6 +168,7 @@ public class DistCMSketch {
 			int w = hashes[depth];
 			darray.increase(w, depth, +1);
 		}
+		count++;
 	}
 	
 	public void add(Object type, int freq) {
@@ -173,6 +177,7 @@ public class DistCMSketch {
 			int w = hashes[depth];
 			darray.increase(w, depth, freq);
 		}
+		count++;
 	}
 
 	public double get(Object type) {

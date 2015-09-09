@@ -2,6 +2,7 @@ package eu.leads.processor.infinispan.operators.mapreduce;
 
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.Tuple;
+import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.infinispan.LeadsMapper;
 import org.infinispan.distexec.mapreduce.Collector;
 import org.slf4j.Logger;
@@ -30,6 +31,8 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
     transient private ProfileEvent mapEvent;
     transient  private Tuple emptyTuple;
     transient private StringBuilder builder;
+    transient private Collector<String, Tuple> lc = null;
+    int counter = 0;
     public GroupByMapper(JsonObject configuration) {
         super(configuration);
         columns = new ArrayList<String>();
@@ -43,8 +46,10 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
    @Override
     public void map(String key, Tuple value, Collector<String, Tuple> collector) {
 //      System.out.println("Called for " + key + "     " + value);
-       mapEvent.start("mapEvent");
-
+//       mapEvent.start("mapEvent");
+        if(lc == null){
+            lc =  collector;
+        }
        builder.delete(0,builder.length());
 //        String tupleId = key.substring(key.indexOf(":"));
         Tuple t = (value);
@@ -61,7 +66,8 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
            collector.emit(outkey, t);
         }else {
 //           System.out.println("**************" + t.asString() + " emit");
-           collector.emit("***" ,  emptyTuple);
+//           collector.emit("***" ,  emptyTuple);
+            counter++;
 //           collector.emit("***" ,  t.asString());
         }
        mapEvent.end();
@@ -88,6 +94,12 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
 
     @Override protected void finalizeTask() {
         groupEvent.end();
+        if(columns.size() == 0){
+            Tuple t = new Tuple();
+            t.setNumberAttribute("__count",counter);
+            lc.emit("***",t);
+            lc = null;
+        }
         super.finalizeTask();
     }
 }

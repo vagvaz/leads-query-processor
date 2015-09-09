@@ -3,6 +3,7 @@ package eu.leads.processor.infinispan.operators;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.infinispan.LeadsBaseCallable;
+import eu.leads.processor.math.MathUtils;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -21,6 +22,7 @@ public abstract  class LeadsSQLCallable<K,V> extends LeadsBaseCallable<K,V> impl
   transient protected Map<String,List<JsonObject>> targetsMap;
   transient HashMap<String,Cache> indexCaches=null;
   transient HashMap<String,DistCMSketch> sketches=null;
+  transient  List<String> attributeFunctions;
 
   public LeadsSQLCallable(String configString, String output) {
     super(configString, output);
@@ -33,19 +35,38 @@ public abstract  class LeadsSQLCallable<K,V> extends LeadsBaseCallable<K,V> impl
     inputSchema = conf.getObject("body").getObject("inputSchema");
     targetsMap = new HashMap();
     outputMap = new HashMap<>();
+    attributeFunctions = new ArrayList<>();
     JsonArray targets = conf.getObject("body").getArray("targets");
     if(conf.containsField("body") && conf.getObject("body").containsField("targets")) {
       Iterator<Object> targetIterator = targets.iterator();
       while (targetIterator.hasNext()) {
         JsonObject target = (JsonObject) targetIterator.next();
-        List<JsonObject> tars = targetsMap.get(target.getObject("expr").getObject("body").getObject("column").getString("name"));
-        if (tars == null) {
-          tars = new ArrayList<>();
+        if (target.getObject("expr").getString("type").equalsIgnoreCase("field")) {
+          List<JsonObject> tars = targetsMap.get(
+              target.getObject("expr").getObject("body").getObject("column").getString("name"));
+          if (tars == null) {
+            tars = new ArrayList<>();
+          }
+          tars.add(target);
+          targetsMap
+              .put(target.getObject("expr").getObject("body").getObject("column").getString("name"),
+                  tars);
         }
-        tars.add(target);
-        targetsMap.put(target.getObject("expr").getObject("body").getObject("column").getString
-                                                                                              ("name"), tars);
+        else{
+            List<JsonObject> tars = new ArrayList<>();
+            tars.add(target);
+            targetsMap.put(target.getObject("column").getString("name"), tars);
+            attributeFunctions.add(target.getObject("column").getString("name"));
+        }
       }
+    }
+  }
+
+  protected void executeFunctions(Tuple tuple) {
+    for(String func : attributeFunctions){
+      JsonObject function = targetsMap.get(func).get(0);
+      Object functionResult = MathUtils.executeFunction(tuple,function.getObject("expr").getObject("body"));
+      tuple.setAttribute(func,functionResult);
     }
   }
   protected void renameAllTupleAttributes(Tuple tuple) {

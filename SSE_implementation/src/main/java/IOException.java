@@ -7,9 +7,8 @@
 package sse_implementation_trial1;
 
 /**
- *
  * @author john
  */
 class IOException {
-    
+
 }

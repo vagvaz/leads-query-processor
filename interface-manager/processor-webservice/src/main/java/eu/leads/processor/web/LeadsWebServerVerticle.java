@@ -1,16 +1,19 @@
 package eu.leads.processor.web;
 
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.core.Action;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.imanager.IManagerConstants;
 import org.vertx.java.core.Handler;
+import org.vertx.java.core.eventbus.EventBus;
+import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.http.RouteMatcher;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Verticle;
-
 /**
  * Created by vagvaz on 8/3/14.
  */
@@ -57,6 +60,8 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         Handler<HttpServerRequest> privacyPointQueryHandler = new PrivacyPointQueryHandler(com,log);
         Handler<HttpServerRequest> executeMRHandler = new ExecuteMRHandler(com,log);
         Handler<HttpServerRequest> completedMRHandler = new CompletedMRHandler(com,log);
+        Handler<HttpServerRequest> executeMapReduceJobHandler = new ExecuteMapReduceJobHandler(com,
+            log);
         //object
         failHandler = new Handler<HttpServerRequest>() {
             @Override
@@ -85,6 +90,7 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         matcher.post("//rest/internal/completedmr",completedMRHandler);
         matcher.post("//rest/internal/completedmr/",completedMRHandler);
         matcher.post("/rest/internal/completedmr/",completedMRHandler);
+        matcher.post("/rest/mrjob/submit/", executeMapReduceJobHandler);
         //
         //      //query   [a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+
         matcher.get("/rest/query/status/:id", getQueryStatusHandler);
@@ -107,17 +113,48 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
             public void handle(HttpServerRequest httpServerRequest) {
                 httpServerRequest.response().setStatusCode(200);
                 httpServerRequest.response()
-                    .putHeader(WebStrings.CONTENT_TYPE, WebStrings.TEXT_HTML);
+                        .putHeader(WebStrings.CONTENT_TYPE, WebStrings.TEXT_HTML);
                 httpServerRequest.response()
-                    .end("<html><h1>Leads Query Processor REST Service</h1> <p>Yes I am online</p></html>");
+                        .end("<html><h1>Leads Query Processor REST Service</h1> <p>Yes I am online</p></html>");
 
             }
         });
-       matcher.post("/rest/upload/encData",uploadEncryptedData);
+       matcher.post("/rest/upload/encData", uploadEncryptedData);
        matcher.post("/rest/query/encrypted/ppq",privacyPointQueryHandler);
         vertx.createHttpServer().requestHandler(matcher)
             .listen((Integer) config.getNumber("port", 8080));
 
+        EventBus bus = vertx.eventBus();
+
+        bus.registerHandler("leads.processor.control", new Handler<Message>() {
+            @Override
+            public void handle(Message message) {
+                //System.err.println("  " + message.toString());
+
+                JsonObject body = (JsonObject) message.body();
+                if (body.containsField("type")) {
+                    if (body.getString("type").equals("action")) {
+                        Action action = new Action(body);
+                        if (!action.getLabel().equals(IManagerConstants.QUIT)) {
+
+                            System.err.println("Continue");
+                        } else {
+                            System.err.println("Exit webprocessor");
+
+                            try {
+                                Thread.sleep(1000);
+                            } catch (Exception e) {
+                                ;
+                            }
+                            System.err.println("Exit webprocessor2");
+                            stop();
+                            System.exit(0);
+                        }
+                    }
+
+                }
+            }
+        });
         container.logger().info("Webserver started");
     }
 

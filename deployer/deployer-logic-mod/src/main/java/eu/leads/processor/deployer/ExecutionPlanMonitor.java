@@ -322,4 +322,8 @@ public class ExecutionPlanMonitor {
       }
       return result;
    }
+
+  public void updateNode(PlanNode node1) {
+    plan.updateNode(node1);
+  }
 }

@@ -67,9 +67,9 @@ public class WGSOperator extends MapReduceOperator {
     //create Intermediate cache name for data on the same Sites as outputCache
     intermediateDataCache = (BasicCache) manager.getPersisentCache(intermediateCacheName1+".data");
     //create Intermediate  keys cache name for data on the same Sites as outputCache;
-    keysCache = (BasicCache)manager.getPersisentCache(intermediateCacheName1+".keys");
+//    keysCache = (BasicCache)manager.getPersisentCache(intermediateCacheName1+".keys");
     //createIndexCache for getting all the nodes that contain values with the same key! in a mc
-    indexSiteCache = (BasicCache)manager.getPersisentCache(intermediateCacheName1+".indexed");
+//    indexSiteCache = (BasicCache)manager.getPersisentCache(intermediateCacheName1+".indexed");
     //    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
     outputCache = (BasicCache) manager.getPersisentCache(outputCacheName);
     collector = new LeadsCollector(0, intermediateCacheName1);
@@ -385,13 +385,11 @@ public class WGSOperator extends MapReduceOperator {
     } catch (ExecutionException e) {
       e.printStackTrace();
     }
-    System.err.println("keysCache " + keysCache.size());
-    System.err.println("dataCache " + intermediateDataCache.size());
-    System.err.println("indexedCache " + indexSiteCache.size());
+
     ////    //Reduce
     ////
     LeadsReducerCallable reducerCacllable = new LeadsReducerCallable(outputCache.getName(), new WGSReducer(jobConfig.toString()),intermediateCache.getName());
-    DistributedExecutorService des_inter = new DefaultExecutorService((Cache<?, ?>) keysCache);
+    DistributedExecutorService des_inter = new DefaultExecutorService((Cache<?, ?>) intermediateDataCache);
     DistributedTaskBuilder reduceTaskBuilder = des_inter.createDistributedTaskBuilder(reducerCacllable);
     reduceTaskBuilder.timeout(1,TimeUnit.HOURS);
     DistributedTask reduceTask = reduceTaskBuilder.build();

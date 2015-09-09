@@ -60,6 +60,9 @@ public class SyncPutRunnable implements Runnable {
 
             }
         }
+        this.cache = null;
+        this.key= null;
+        this.value = null;
         EnsembleCacheUtils.addRunnable(this);
 //        event.end();
     }

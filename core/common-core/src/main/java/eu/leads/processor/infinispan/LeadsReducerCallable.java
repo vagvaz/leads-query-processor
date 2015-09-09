@@ -80,8 +80,9 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
             }
         }
         if(index == null){
-            System.err.println("Index was not installed serious error exit...");
-            System.exit(-1);
+            System.err.println("\n\n\n\n\n\nIndex was not installed serious...\n\n\n\n\n\n");
+            profilerLog.error("\n\n\n\n\n\nIndex was not installed serious...\n\n\n\n\n\n");
+            return embeddedCacheManager.getAddress().toString();
         }
 //        System.err.println(
 //            "LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache()

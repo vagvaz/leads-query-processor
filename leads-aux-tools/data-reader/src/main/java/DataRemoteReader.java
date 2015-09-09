@@ -27,206 +27,203 @@ import java.util.Map;
  * Created by vagvaz on 4/20/15.
  */
 public class DataRemoteReader {
-  NutchTransformer transformer;
-  DataStore<String,WebPage> store;
-  public DataRemoteReader(String connectionString){
+    NutchTransformer transformer;
+    DataStore<String, WebPage> store;
 
-    LQPConfiguration.initialize();
-    List<String> mappings = LQPConfiguration.getInstance().getConfiguration().getList("nutch.mappings");
-    Map<String,String> nutchToLQE = new HashMap<String,String>();
+    public DataRemoteReader(String connectionString) {
 
-    for(String mapping : mappings ){
-      String[] keyValue = mapping.split(":");
-      nutchToLQE.put(keyValue[0].trim(),keyValue[1].trim());
-    }
-    transformer = new NutchTransformer(nutchToLQE);
-    Configuration configuration = NutchConfiguration.create();
-    configuration.set("gora.datastore.connectionstring",connectionString);
-    configuration.set("gora.datastore.default","org.apache.gora.infinipan.store.InfinispanStoreer");
-    try {
-      store =  StorageUtils.createStore(
-          configuration, String.class, WebPage.class);
-      store.createSchema();
-//      query.setLimit(100);
-//      query.setOffset(0);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+        LQPConfiguration.initialize();
+        List<String> mappings = LQPConfiguration.getInstance().getConfiguration().getList("nutch.mappings");
+        Map<String, String> nutchToLQE = new HashMap<String, String>();
 
-  }
-
-
-  public long storeToRemoteCache(String ensembleString,boolean distributed, long delay ) {
-    EnsembleCacheManager manager = new EnsembleCacheManager(ensembleString);
-    EnsembleCache cache = null;
-    if (distributed) {
-      cache = manager.getCache("default.webpages", new ArrayList<Site>(manager.sites()),
-              EnsembleCacheManager.Consistency.DIST);
-    } else {
-      cache = manager.getCache("default.webpages");
-    }
-
-    Query query = store.newQuery();
-//    query.setLimit(1);
-    query.setOffset(0);
-//    query.setFields("content");
-    Result<String,WebPage> result = query.execute();
-    long counter = 0;
-
-    try {
-      while(result.next()){
-        WebPage page = result.get();
-        GenericData.Record record = new GenericData.Record(page.getSchema());
-        for(int i = 0; i < page.getFieldsCount();i++){
-          record.put(i,page.get(i));
-
+        for (String mapping : mappings) {
+            String[] keyValue = mapping.split(":");
+            nutchToLQE.put(keyValue[0].trim(), keyValue[1].trim());
         }
-        Tuple tuple = transformer.transform(record);
-        cache.put(cache.getName()+":"+tuple.getAttribute("url"),tuple);
-        System.out.println("t " + tuple.getAttribute("url"));
-        Thread.sleep(delay);
-        counter++;
-        if(counter % 100 == 0){
-          System.out.println("Loaded " + counter + " tuples");
+        transformer = new NutchTransformer(nutchToLQE);
+        Configuration configuration = NutchConfiguration.create();
+        configuration.set("gora.datastore.connectionstring", connectionString);
+        configuration.set("gora.datastore.default", "org.apache.gora.infinipan.store.InfinispanStoreer");
+        try {
+            store = StorageUtils.createStore(configuration, String.class, WebPage.class);
+            store.createSchema();
+            //      query.setLimit(100);
+            //      query.setOffset(0);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-     }
 
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return counter;
-  }
-
-  public long storeToFile(String path, String baseName){
-    int  counter = 0;
-    int small_count=0;
-    FileOutputStream nutchData = null;
-    FileOutputStream nutchKeys = null;
-    ObjectOutputStream nutchKeysWriter = null;
-    ObjectOutputStream nutchDataWriter = null;
-    File file = getOrCreate(path + "/" + baseName + "-"+ "nutchWebBackup-0.keys");
-
-    try {
-      nutchKeys = new FileOutputStream(file);
-      nutchKeysWriter = new ObjectOutputStream((nutchKeys));
-      file = getOrCreate(path + "/" + baseName + "-"+ "nutchWebBackup-0.data");
-      nutchData = new FileOutputStream(file);
-      nutchDataWriter = new ObjectOutputStream( (nutchData));
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
     }
 
-//    store.createSchema();
 
-    long nullContentCounter = 0;
-    int batchRead=100;
-    try {
-      Result<String,WebPage> result ;
-//      query.setLimit(batchRead);
-      do {
-        small_count= 0;
+    public long storeToRemoteCache(String ensembleString, boolean distributed, long delay) {
+        EnsembleCacheManager manager = new EnsembleCacheManager(ensembleString);
+        EnsembleCache cache = null;
+        if (distributed) {
+            cache = manager.getCache("default.webpages", new ArrayList<Site>(manager.sites()),
+                EnsembleCacheManager.Consistency.DIST);
+        } else {
+            cache = manager.getCache("default.webpages");
+        }
+
         Query query = store.newQuery();
+        //    query.setLimit(1);
+        query.setOffset(0);
+        //    query.setFields("content");
+        Result<String, WebPage> result = query.execute();
+        long counter = 0;
 
-//        query.setFields("content");
-        query.setOffset(counter);
-//        query.setLimit(batchRead);
-//        query.setFields();
-        query.setLimit(1);
-        query.execute();
-        int total = ((InfinispanQuery)query).getResultSize();
-        System.out.println("Total amount of pages (in the store): " + total);
-        result = query.execute();
-        while (result.next()) {
-          WebPage page = result.get();
-          GenericData.Record record = new GenericData.Record(page.getSchema());
-          for (int i = 0; i < page.getFieldsCount(); i++) {
-//          if(page.get(i)!= null)
-            {
-              record.put(i, page.get(i));
+        try {
+            while (result.next()) {
+                WebPage page = result.get();
+                GenericData.Record record = new GenericData.Record(page.getSchema());
+                for (int i = 0; i < page.getFieldsCount(); i++) {
+                    record.put(i, page.get(i));
+
+                }
+                Tuple tuple = transformer.transform(record);
+                cache.put(cache.getName() + ":" + tuple.getAttribute("url"), tuple);
+                System.out.println("t " + tuple.getAttribute("url"));
+                Thread.sleep(delay);
+                counter++;
+                if (counter % 100 == 0) {
+                    System.out.println("Loaded " + counter + " tuples");
+                }
             }
-//          for(Schema.Field f : page.getUnmanagedFields()){
-//            record.put(f.pos(),f.defaultValue());
-//          }
 
-          }
-          if(page.getContent() == null)
-          {
-            nullContentCounter++;
-//            System.out.println("read page with null content "+ nullContentCounter + " " + page.getKey());
-          }
-
-
-          if (record.get("content") != null) {
-            System.out.println("content not null " + record.get("key"));
-            outputToFile(record.get(0).toString().getBytes(), record, nutchKeysWriter, nutchDataWriter);
-          }
-
-          small_count++;
-          if ((counter+small_count) % batchRead == 0)
-            System.out.println("Stored " + counter + " tuples into files");
-
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        counter+=small_count;
-        System.out.println("read " + nullContentCounter + " with null content");
-      }while(small_count>=batchRead);
-      System.out.println("Totally Stored " + counter + " tuples into files");
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    try {
-      nutchDataWriter.close();
-      nutchKeysWriter.close();
-    } catch (IOException e) {
-      e.printStackTrace();
+        return counter;
     }
 
-    return counter;
-  }
+    public long storeToFile(String path, String baseName) {
+        int counter = 0;
+        int small_count = 0;
+        FileOutputStream nutchData = null;
+        FileOutputStream nutchKeys = null;
+        ObjectOutputStream nutchKeysWriter = null;
+        ObjectOutputStream nutchDataWriter = null;
+        File file = getOrCreate(path + "/" + baseName + "-" + "nutchWebBackup-0.keys");
 
-  public void outputToFile(byte[] key, GenericData.Record page, ObjectOutputStream nutchKeysWriter,
-                           ObjectOutputStream nutchDataWriter) {
-    try {
-      nutchKeysWriter.writeInt(key.length);
-      nutchKeysWriter.write(key);
-      byte[] schemaBytes = page.getSchema().toString().getBytes();
+        try {
+            nutchKeys = new FileOutputStream(file);
+            nutchKeysWriter = new ObjectOutputStream((nutchKeys));
+            file = getOrCreate(path + "/" + baseName + "-" + "nutchWebBackup-0.data");
+            nutchData = new FileOutputStream(file);
+            nutchDataWriter = new ObjectOutputStream((nutchData));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-      nutchDataWriter.writeInt(schemaBytes.length);
-      nutchDataWriter.write(schemaBytes);
-      Encoder encoder = EncoderFactory.get().directBinaryEncoder(nutchDataWriter, null);
-      GenericDatumWriter<Object> writer = new GenericDatumWriter<>(WebPage.SCHEMA$);
-      writer.write(page, encoder);
-      encoder.flush();
+        //    store.createSchema();
 
-    } catch (IOException e) {
-      System.err.println("Exception " + e.getClass().toString() + " " + e.getMessage());
+        long nullContentCounter = 0;
+        int batchRead = 100;
+        try {
+            Result<String, WebPage> result;
+            //      query.setLimit(batchRead);
+            do {
+                small_count = 0;
+                Query query = store.newQuery();
+
+                //        query.setFields("content");
+                query.setOffset(counter);
+                //        query.setLimit(batchRead);
+                //        query.setFields();
+                query.setLimit(1);
+                query.execute();
+                int total = ((InfinispanQuery) query).getResultSize();
+                System.out.println("Total amount of pages (in the store): " + total);
+                result = query.execute();
+                while (result.next()) {
+                    WebPage page = result.get();
+                    GenericData.Record record = new GenericData.Record(page.getSchema());
+                    for (int i = 0; i < page.getFieldsCount(); i++) {
+                        //          if(page.get(i)!= null)
+                        {
+                            record.put(i, page.get(i));
+                        }
+                        //          for(Schema.Field f : page.getUnmanagedFields()){
+                        //            record.put(f.pos(),f.defaultValue());
+                        //          }
+
+                    }
+                    if (page.getContent() == null) {
+                        nullContentCounter++;
+                        //            System.out.println("read page with null content "+ nullContentCounter + " " + page.getKey());
+                    }
+
+
+                    if (record.get("content") != null) {
+                        System.out.println("content not null " + record.get("key"));
+                        outputToFile(record.get(0).toString().getBytes(), record, nutchKeysWriter, nutchDataWriter);
+                    }
+
+                    small_count++;
+                    if ((counter + small_count) % batchRead == 0)
+                        System.out.println("Stored " + counter + " tuples into files");
+
+                }
+                counter += small_count;
+                System.out.println("read " + nullContentCounter + " with null content");
+            } while (small_count >= batchRead);
+            System.out.println("Totally Stored " + counter + " tuples into files");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            nutchDataWriter.close();
+            nutchKeysWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return counter;
     }
-  }
 
+    public void outputToFile(byte[] key, GenericData.Record page, ObjectOutputStream nutchKeysWriter,
+        ObjectOutputStream nutchDataWriter) {
+        try {
+            nutchKeysWriter.writeInt(key.length);
+            nutchKeysWriter.write(key);
+            byte[] schemaBytes = page.getSchema().toString().getBytes();
 
-  private File getOrCreate(String s) {
-    File result = new File(s);
-    if(result.exists())
-    {
-      result.delete();
-      try {
-        result.getParentFile().mkdir();
-        result.createNewFile();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-    else{
-      try {
-        result.getParentFile().mkdir();
-        result.createNewFile();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+            nutchDataWriter.writeInt(schemaBytes.length);
+            nutchDataWriter.write(schemaBytes);
+            Encoder encoder = EncoderFactory.get().directBinaryEncoder(nutchDataWriter, null);
+            GenericDatumWriter<Object> writer = new GenericDatumWriter<>(WebPage.SCHEMA$);
+            writer.write(page, encoder);
+            encoder.flush();
+
+        } catch (IOException e) {
+            System.err.println("Exception " + e.getClass().toString() + " " + e.getMessage());
+        }
     }
 
-    return  result;
-  }
+
+    private File getOrCreate(String s) {
+        File result = new File(s);
+        if (result.exists()) {
+            result.delete();
+            try {
+                result.getParentFile().mkdir();
+                result.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                result.getParentFile().mkdir();
+                result.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return result;
+    }
 }

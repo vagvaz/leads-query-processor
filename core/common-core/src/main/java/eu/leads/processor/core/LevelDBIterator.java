@@ -22,7 +22,7 @@ public class LevelDBIterator implements Iterable<Map.Entry<String, Integer>>,
     public LevelDBIterator(DB keysDB) {
         this.db = keysDB;
         readOptions = new ReadOptions();
-        readOptions.fillCache(false);
+        readOptions.fillCache(true);
 //        readOptions.verifyChecksums(true);
         this.iterator = db.iterator();
         this.iterator.seekToFirst();
@@ -43,8 +43,8 @@ public class LevelDBIterator implements Iterable<Map.Entry<String, Integer>>,
 //        if(iterator.hasNext()) {
             Map.Entry<byte[],byte[]> entry = iterator.next();
             key = new String(entry.getKey());
-            ByteBuffer buf =  ByteBuffer.wrap(entry.getValue());
-            value = buf.getInt();
+            value =  Integer.parseInt(new String(entry.getValue()));
+
             return new AbstractMap.SimpleEntry<String, Integer>(key.substring(0,key.length()-2), value);
 //        }
 

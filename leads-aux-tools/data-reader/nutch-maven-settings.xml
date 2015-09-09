@@ -2,7 +2,7 @@
 
 <settings xmlns="http://maven.apache.org/settings/1.0.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+        >
     <pluginGroups>
         <pluginGroup>org.jboss.maven.plugins</pluginGroup>
     </pluginGroups>
@@ -63,17 +63,17 @@
                 </repository>
             </repositories>
         </profile>
-        
-        <profile> 
-		  <id>restlet</id>
-		  <repositories>
-			<repository>
-			  <id>maven-restlet</id>
-			  <name>Public online Restlet repository</name>
-			  <url>http://maven.restlet.com</url>
-			</repository>
-		  </repositories>
-		</profile>
+
+        <profile>
+            <id>restlet</id>
+            <repositories>
+                <repository>
+                    <id>maven-restlet</id>
+                    <name>Public online Restlet repository</name>
+                    <url>http://maven.restlet.com</url>
+                </repository>
+            </repositories>
+        </profile>
 
     </profiles>
 

@@ -21,8 +21,8 @@ import java.util.Iterator;
 
 //import java.util.Set;
 
+
 /**
- *
  * @author John Demertzis
  */
 public class ClientSide {
@@ -34,24 +34,26 @@ public class ClientSide {
     //private int lambda = 128;
     private SecretKey sk_T;
     private SecretKey secretKey_tuple;
-    private int maximum_tuple_size=120;
-    private String SK_fileName="";
-    
+    private int maximum_tuple_size = 120;
+    private String SK_fileName = "";
+
     public ClientSide(int Svalue, double k, String SK_fileName) {
         this.Svalue = Svalue;
         this.k = k;
         this.SK_fileName = SK_fileName;
     }
+
     public ClientSide(String SK_fileName) {
         this.SK_fileName = SK_fileName;
     }
-    
-    
 
-    public int getBvalue(){
+
+
+    public int getBvalue() {
         return Bvalue;
     }
-    public int getSvalue(){
+
+    public int getSvalue() {
         return Svalue;
     }
 
@@ -70,7 +72,9 @@ public class ClientSide {
         }
         return retVal;
     }
-    public CStore Setup(Connection conn, String tableName ,String column ) throws IOException, InvalidAlgorithmParameterException {
+
+    public CStore Setup(Connection conn, String tableName, String column)
+        throws IOException, InvalidAlgorithmParameterException {
         HashMap<String, ArrayList<String>> index = new HashMap<String, ArrayList<String>>();
         HashMap<String, Etuple> db = new HashMap<String, Etuple>();
         //String line = null;
@@ -78,59 +82,59 @@ public class ClientSide {
         String strDataToEncrypt = new String();
         String strCipherText = new String();
         String strDecryptedText = new String();
-        
+
         Statement stmt = null;
-        
+
         try {
             stmt = conn.createStatement();
-            ResultSet resultsCount = stmt.executeQuery("select * from " + tableName); 
+            ResultSet resultsCount = stmt.executeQuery("select * from " + tableName);
             ResultSetMetaData rsmdCount = resultsCount.getMetaData();
-            int counter =0;
-            int max=0;
+            int counter = 0;
+            int max = 0;
             int numberColsCount = rsmdCount.getColumnCount();
-            String strline_max="";
+            String strline_max = "";
             while (resultsCount.next()) {
                 counter++;
-                strline_max="";
+                strline_max = "";
                 strline_max = resultsCount.getString(1);//@@
                 for (int i = 2; i <= numberColsCount; i++) {//@@
-                    strline_max = strline_max.concat(","+resultsCount.getString(i)); 
+                    strline_max = strline_max.concat("," + resultsCount.getString(i));
                 }
-                if(strline_max.length() > max){
+                if (strline_max.length() > max) {
                     max = strline_max.length();
                 }
             }
-            max = max +3;
-            
+            max = max + 3;
+
             resultsCount.close();
             stmt.close();
             this.N = counter;
             this.maximum_tuple_size = max;
-            
+
             this.Bvalue = (int) Math.ceil(k * N / Svalue);
             //System.out.println("N = "+counter);
             //System.out.println("max= "+max);
-            
+
             KeyGenerator keyGen = KeyGenerator.getInstance("AES");
             keyGen.init(128);
             secretKey_tuple = keyGen.generateKey();
-            
+
             int padding = (int) Math.pow(10, (this.N + "").length());
             stmt = conn.createStatement();
             //ResultSet results = stmt.executeQuery("select * from " + tableName + " T0 order by "+column);
-            ResultSet results = stmt.executeQuery("select * from " + tableName); 
+            ResultSet results = stmt.executeQuery("select * from " + tableName);
             ResultSetMetaData rsmd = results.getMetaData();
             int numberCols = rsmd.getColumnCount();
             int id = 0;
-            String strline="";
+            String strline = "";
             while (results.next()) {
-                strline="";
+                strline = "";
                 strline = results.getString(1);//@@
                 for (int i = 2; i <= numberCols; i++) {//@@
-                    strline = strline.concat(","+results.getString(i)); 
+                    strline = strline.concat("," + results.getString(i));
                 }
                 int icolumn = results.findColumn(column);
-                
+
                 if (index.containsKey(results.getString(icolumn))) {
                     ArrayList<String> arrayList_index = new ArrayList<String>();
                     arrayList_index = index.get(results.getString(icolumn));
@@ -141,18 +145,18 @@ public class ClientSide {
                     arrayList_index.add(Integer.toString(id + padding));
                     index.put(results.getString(icolumn), arrayList_index);
                 }
-                
+
                 //line-tuple padding
                 StringBuilder sb = new StringBuilder(strline);
                 String ret;
                 int len = strline.length();
-                
+
                 char[] ch = new char[maximum_tuple_size - len];
                 Arrays.fill(ch, ' ');
                 sb.append(ch);
                 ret = sb.toString();
                 strline = ret;
-                
+
                 int AES_KEYLENGTH = 128;
                 byte[] iv = new byte[AES_KEYLENGTH / 8];
                 SecureRandom prng = new SecureRandom();
@@ -170,7 +174,7 @@ public class ClientSide {
             }
             results.close();
             stmt.close();
-            
+
             N = id;
         } catch (SQLException sqlExcept) {
             sqlExcept.printStackTrace();
@@ -184,18 +188,18 @@ public class ClientSide {
             System.out.println(" Bad Padding " + badPadding);
         } catch (IllegalBlockSizeException illegalBlockSize) {
             System.out.println(" Illegal Block Size " + illegalBlockSize);
-        }            
-        
+        }
+
         CStore cs = new CStore(db, TSetSetup(index), this.Bvalue, this.Svalue);
         SecretKeys sk = new SecretKeys(this.sk_T, this.secretKey_tuple, SK_fileName);
-        
+
         this.secretKey_tuple = null;
         this.sk_T = null;
-        
+
         return cs;
-        
+
     }
-    
+
     public CStore Setup(String fileName, int columnNumber) throws IOException, InvalidAlgorithmParameterException {
         HashMap<String, ArrayList<String>> index = new HashMap<String, ArrayList<String>>();
         HashMap<String, Etuple> db = new HashMap<String, Etuple>();
@@ -204,41 +208,41 @@ public class ClientSide {
         String strDataToEncrypt = new String();
         String strCipherText = new String();
         String strDecryptedText = new String();
-       
+
         try {
             FileReader fileReaderCount = new FileReader(fileName);
             BufferedReader bufferedReaderCount = new BufferedReader(fileReaderCount);
-            
-            
-            int counter =0;
-            int max=0;
-            
+
+
+            int counter = 0;
+            int max = 0;
+
             while ((line = bufferedReaderCount.readLine()) != null) {
-                if(max<line.length()){
+                if (max < line.length()) {
                     max = line.length();
                 }
                 counter++;
             }
-            max = max +3;
+            max = max + 3;
             this.N = counter;
             this.maximum_tuple_size = max;
-            
+
             this.Bvalue = (int) Math.ceil(k * N / Svalue);
             //System.out.println("N = "+counter);
             //System.out.println("max= "+max);
-            
+
             bufferedReaderCount.close();
             fileReaderCount.close();
-            
+
             KeyGenerator keyGen = KeyGenerator.getInstance("AES");
             keyGen.init(128);
             secretKey_tuple = keyGen.generateKey();
-            
+
             int padding = (int) Math.pow(10, (this.N + "").length());
-            
+
             FileReader fileReader = new FileReader(fileName);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
-            
+
             int id = 0;
             while ((line = bufferedReader.readLine()) != null) {
                 lineArray = line.split(",");
@@ -261,199 +265,7 @@ public class ClientSide {
                 sb.append(ch);
                 ret = sb.toString();
                 line = ret;
-                
-                int AES_KEYLENGTH = 128;
-                byte[] iv = new byte[AES_KEYLENGTH / 8];
-                SecureRandom prng = new SecureRandom();
-                prng.nextBytes(iv);
 
-                Cipher aesCipherForEncryption = Cipher.getInstance("AES/CBC/PKCS5Padding");
-                aesCipherForEncryption.init(Cipher.ENCRYPT_MODE, secretKey_tuple, new IvParameterSpec(iv));
-                strDataToEncrypt = line;
-                byte[] byteDataToEncrypt = strDataToEncrypt.getBytes();
-                byte[] byteCipherText = aesCipherForEncryption.doFinal(byteDataToEncrypt);
-                strCipherText = new BASE64Encoder().encode(byteCipherText);
-                Etuple etuple = new Etuple(byteCipherText, iv);
-                db.put(Integer.toString(id + padding), etuple);
-                id++;
-            }
-            N = id;
-            bufferedReader.close();
-        } catch (FileNotFoundException ex) {
-            System.out.println("Unable to open file '" + fileName + "'");
-        } catch (IOException ex) {
-            System.out.println("Error reading file '" + fileName + "'");
-        } catch (NoSuchAlgorithmException noSuchAlgo) {
-            System.out.println(" No Such Algorithm exists " + noSuchAlgo);
-        } catch (NoSuchPaddingException noSuchPad) {
-            System.out.println(" No Such Padding exists " + noSuchPad);
-        } catch (InvalidKeyException invalidKey) {
-            System.out.println(" Invalid Key " + invalidKey);
-        } catch (BadPaddingException badPadding) {
-            System.out.println(" Bad Padding " + badPadding);
-        } catch (IllegalBlockSizeException illegalBlockSize) {
-            System.out.println(" Illegal Block Size " + illegalBlockSize);
-        }
-
-        CStore cs = new CStore(db, TSetSetup(index),this.Bvalue,this.Svalue);
-        SecretKeys sk = new SecretKeys(this.sk_T, this.secretKey_tuple, SK_fileName);
-        
-        this.secretKey_tuple = null;
-        this.sk_T = null;
-        return cs;
-    }
-    public CStore Setup(Connection conn, String tableName ,String column, int N, int maxtuplesize) throws IOException, InvalidAlgorithmParameterException {
-        HashMap<String, ArrayList<String>> index = new HashMap<String, ArrayList<String>>();
-        HashMap<String, Etuple> db = new HashMap<String, Etuple>();
-        //String line = null;
-        //String lineArray[];
-        String strDataToEncrypt = new String();
-        String strCipherText = new String();
-        String strDecryptedText = new String();
-        
-        Statement stmt = null;
-        
-        try {
-            this.N = N;
-            this.maximum_tuple_size = maxtuplesize;
-            
-            this.Bvalue = (int) Math.ceil(k * N / Svalue);
-            //System.out.println("N = "+counter);
-            //System.out.println("max= "+max);
-            
-            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-            keyGen.init(128);
-            secretKey_tuple = keyGen.generateKey();
-            
-            int padding = (int) Math.pow(10, (this.N + "").length());
-            stmt = conn.createStatement();
-            //ResultSet results = stmt.executeQuery("select * from " + tableName + " T0 order by "+column);
-            ResultSet results = stmt.executeQuery("select * from " + tableName); 
-            ResultSetMetaData rsmd = results.getMetaData();
-            int numberCols = rsmd.getColumnCount();
-            int id = 0;
-            String strline="";
-            while (results.next()) {
-                strline="";
-                strline = results.getString(1);//@@
-                for (int i = 2; i <= numberCols; i++) {//@@
-                    strline = strline.concat(","+results.getString(i)); 
-                }
-                int icolumn = results.findColumn(column);
-                
-                if (index.containsKey(results.getString(icolumn))) {
-                    ArrayList<String> arrayList_index = new ArrayList<String>();
-                    arrayList_index = index.get(results.getString(icolumn));
-                    arrayList_index.add(Integer.toString(id + padding));
-                    index.put(results.getString(icolumn), arrayList_index);
-                } else {
-                    ArrayList<String> arrayList_index = new ArrayList<String>();
-                    arrayList_index.add(Integer.toString(id + padding));
-                    index.put(results.getString(icolumn), arrayList_index);
-                }
-                
-                //line-tuple padding
-                StringBuilder sb = new StringBuilder(strline);
-                String ret;
-                int len = strline.length();
-                
-                char[] ch = new char[maximum_tuple_size - len];
-                Arrays.fill(ch, ' ');
-                sb.append(ch);
-                ret = sb.toString();
-                strline = ret;
-                
-                int AES_KEYLENGTH = 128;
-                byte[] iv = new byte[AES_KEYLENGTH / 8];
-                SecureRandom prng = new SecureRandom();
-                prng.nextBytes(iv);
-
-                Cipher aesCipherForEncryption = Cipher.getInstance("AES/CBC/PKCS5Padding");
-                aesCipherForEncryption.init(Cipher.ENCRYPT_MODE, secretKey_tuple, new IvParameterSpec(iv));
-                strDataToEncrypt = strline;
-                byte[] byteDataToEncrypt = strDataToEncrypt.getBytes();
-                byte[] byteCipherText = aesCipherForEncryption.doFinal(byteDataToEncrypt);
-                strCipherText = new BASE64Encoder().encode(byteCipherText);
-                Etuple etuple = new Etuple(byteCipherText, iv);
-                db.put(Integer.toString(id + padding), etuple);
-                id++;
-            }
-            results.close();
-            stmt.close();
-            
-            N = id;
-        } catch (SQLException sqlExcept) {
-            sqlExcept.printStackTrace();
-        } catch (NoSuchAlgorithmException noSuchAlgo) {
-            System.out.println(" No Such Algorithm exists " + noSuchAlgo);
-        } catch (NoSuchPaddingException noSuchPad) {
-            System.out.println(" No Such Padding exists " + noSuchPad);
-        } catch (InvalidKeyException invalidKey) {
-            System.out.println(" Invalid Key " + invalidKey);
-        } catch (BadPaddingException badPadding) {
-            System.out.println(" Bad Padding " + badPadding);
-        } catch (IllegalBlockSizeException illegalBlockSize) {
-            System.out.println(" Illegal Block Size " + illegalBlockSize);
-        }            
-        
-        CStore cs = new CStore(db, TSetSetup(index),this.Bvalue, this.Svalue);
-        SecretKeys sk = new SecretKeys(this.sk_T, this.secretKey_tuple, SK_fileName);
-        
-        this.secretKey_tuple = null;
-        this.sk_T = null;
-        
-        return cs;
-        
-    }
-    
-    public CStore Setup(String fileName, int columnNumber, int N , int maxtuplesize) throws IOException, InvalidAlgorithmParameterException {
-        HashMap<String, ArrayList<String>> index = new HashMap<String, ArrayList<String>>();
-        HashMap<String, Etuple> db = new HashMap<String, Etuple>();
-        String line = null;
-        String lineArray[];
-        String strDataToEncrypt = new String();
-        String strCipherText = new String();
-        String strDecryptedText = new String();
-        
-        try {
-            
-            this.N = N;
-            this.maximum_tuple_size = maxtuplesize;
-            
-            this.Bvalue = (int) Math.ceil(k * N / Svalue);
-            
-            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-            keyGen.init(128);
-            secretKey_tuple = keyGen.generateKey();
-            
-            int padding = (int) Math.pow(10, (this.N + "").length());
-            
-            FileReader fileReader = new FileReader(fileName);
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-            
-            int id = 0;
-            while ((line = bufferedReader.readLine()) != null) {
-                lineArray = line.split(",");
-                if (index.containsKey(lineArray[columnNumber])) {
-                    ArrayList<String> arrayList_index = new ArrayList<String>();
-                    arrayList_index = index.get(lineArray[columnNumber]);
-                    arrayList_index.add(Integer.toString(id + padding));
-                    index.put(lineArray[columnNumber], arrayList_index);
-                } else {
-                    ArrayList<String> arrayList_index = new ArrayList<String>();
-                    arrayList_index.add(Integer.toString(id + padding));
-                    index.put(lineArray[columnNumber], arrayList_index);
-                }
-                //line-tuple padding
-                StringBuilder sb = new StringBuilder(line);
-                String ret;
-                int len = line.length();
-                char[] ch = new char[maximum_tuple_size - len];
-                Arrays.fill(ch, ' ');
-                sb.append(ch);
-                ret = sb.toString();
-                line = ret;
-             
                 int AES_KEYLENGTH = 128;
                 byte[] iv = new byte[AES_KEYLENGTH / 8];
                 SecureRandom prng = new SecureRandom();
@@ -489,15 +301,211 @@ public class ClientSide {
 
         CStore cs = new CStore(db, TSetSetup(index), this.Bvalue, this.Svalue);
         SecretKeys sk = new SecretKeys(this.sk_T, this.secretKey_tuple, SK_fileName);
-        
+
         this.secretKey_tuple = null;
         this.sk_T = null;
         return cs;
     }
 
-    public HashMap<Integer, Record[]> TSetSetup(HashMap<String, ArrayList<String>> index) throws InvalidAlgorithmParameterException, UnsupportedEncodingException {
+    public CStore Setup(Connection conn, String tableName, String column, int N, int maxtuplesize)
+        throws IOException, InvalidAlgorithmParameterException {
+        HashMap<String, ArrayList<String>> index = new HashMap<String, ArrayList<String>>();
+        HashMap<String, Etuple> db = new HashMap<String, Etuple>();
+        //String line = null;
+        //String lineArray[];
+        String strDataToEncrypt = new String();
+        String strCipherText = new String();
+        String strDecryptedText = new String();
+
+        Statement stmt = null;
+
+        try {
+            this.N = N;
+            this.maximum_tuple_size = maxtuplesize;
+
+            this.Bvalue = (int) Math.ceil(k * N / Svalue);
+            //System.out.println("N = "+counter);
+            //System.out.println("max= "+max);
+
+            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+            keyGen.init(128);
+            secretKey_tuple = keyGen.generateKey();
+
+            int padding = (int) Math.pow(10, (this.N + "").length());
+            stmt = conn.createStatement();
+            //ResultSet results = stmt.executeQuery("select * from " + tableName + " T0 order by "+column);
+            ResultSet results = stmt.executeQuery("select * from " + tableName);
+            ResultSetMetaData rsmd = results.getMetaData();
+            int numberCols = rsmd.getColumnCount();
+            int id = 0;
+            String strline = "";
+            while (results.next()) {
+                strline = "";
+                strline = results.getString(1);//@@
+                for (int i = 2; i <= numberCols; i++) {//@@
+                    strline = strline.concat("," + results.getString(i));
+                }
+                int icolumn = results.findColumn(column);
+
+                if (index.containsKey(results.getString(icolumn))) {
+                    ArrayList<String> arrayList_index = new ArrayList<String>();
+                    arrayList_index = index.get(results.getString(icolumn));
+                    arrayList_index.add(Integer.toString(id + padding));
+                    index.put(results.getString(icolumn), arrayList_index);
+                } else {
+                    ArrayList<String> arrayList_index = new ArrayList<String>();
+                    arrayList_index.add(Integer.toString(id + padding));
+                    index.put(results.getString(icolumn), arrayList_index);
+                }
+
+                //line-tuple padding
+                StringBuilder sb = new StringBuilder(strline);
+                String ret;
+                int len = strline.length();
+
+                char[] ch = new char[maximum_tuple_size - len];
+                Arrays.fill(ch, ' ');
+                sb.append(ch);
+                ret = sb.toString();
+                strline = ret;
+
+                int AES_KEYLENGTH = 128;
+                byte[] iv = new byte[AES_KEYLENGTH / 8];
+                SecureRandom prng = new SecureRandom();
+                prng.nextBytes(iv);
+
+                Cipher aesCipherForEncryption = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                aesCipherForEncryption.init(Cipher.ENCRYPT_MODE, secretKey_tuple, new IvParameterSpec(iv));
+                strDataToEncrypt = strline;
+                byte[] byteDataToEncrypt = strDataToEncrypt.getBytes();
+                byte[] byteCipherText = aesCipherForEncryption.doFinal(byteDataToEncrypt);
+                strCipherText = new BASE64Encoder().encode(byteCipherText);
+                Etuple etuple = new Etuple(byteCipherText, iv);
+                db.put(Integer.toString(id + padding), etuple);
+                id++;
+            }
+            results.close();
+            stmt.close();
+
+            N = id;
+        } catch (SQLException sqlExcept) {
+            sqlExcept.printStackTrace();
+        } catch (NoSuchAlgorithmException noSuchAlgo) {
+            System.out.println(" No Such Algorithm exists " + noSuchAlgo);
+        } catch (NoSuchPaddingException noSuchPad) {
+            System.out.println(" No Such Padding exists " + noSuchPad);
+        } catch (InvalidKeyException invalidKey) {
+            System.out.println(" Invalid Key " + invalidKey);
+        } catch (BadPaddingException badPadding) {
+            System.out.println(" Bad Padding " + badPadding);
+        } catch (IllegalBlockSizeException illegalBlockSize) {
+            System.out.println(" Illegal Block Size " + illegalBlockSize);
+        }
+
+        CStore cs = new CStore(db, TSetSetup(index), this.Bvalue, this.Svalue);
+        SecretKeys sk = new SecretKeys(this.sk_T, this.secretKey_tuple, SK_fileName);
+
+        this.secretKey_tuple = null;
+        this.sk_T = null;
+
+        return cs;
+
+    }
+
+    public CStore Setup(String fileName, int columnNumber, int N, int maxtuplesize)
+        throws IOException, InvalidAlgorithmParameterException {
+        HashMap<String, ArrayList<String>> index = new HashMap<String, ArrayList<String>>();
+        HashMap<String, Etuple> db = new HashMap<String, Etuple>();
+        String line = null;
+        String lineArray[];
+        String strDataToEncrypt = new String();
+        String strCipherText = new String();
+        String strDecryptedText = new String();
+
+        try {
+
+            this.N = N;
+            this.maximum_tuple_size = maxtuplesize;
+
+            this.Bvalue = (int) Math.ceil(k * N / Svalue);
+
+            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+            keyGen.init(128);
+            secretKey_tuple = keyGen.generateKey();
+
+            int padding = (int) Math.pow(10, (this.N + "").length());
+
+            FileReader fileReader = new FileReader(fileName);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+            int id = 0;
+            while ((line = bufferedReader.readLine()) != null) {
+                lineArray = line.split(",");
+                if (index.containsKey(lineArray[columnNumber])) {
+                    ArrayList<String> arrayList_index = new ArrayList<String>();
+                    arrayList_index = index.get(lineArray[columnNumber]);
+                    arrayList_index.add(Integer.toString(id + padding));
+                    index.put(lineArray[columnNumber], arrayList_index);
+                } else {
+                    ArrayList<String> arrayList_index = new ArrayList<String>();
+                    arrayList_index.add(Integer.toString(id + padding));
+                    index.put(lineArray[columnNumber], arrayList_index);
+                }
+                //line-tuple padding
+                StringBuilder sb = new StringBuilder(line);
+                String ret;
+                int len = line.length();
+                char[] ch = new char[maximum_tuple_size - len];
+                Arrays.fill(ch, ' ');
+                sb.append(ch);
+                ret = sb.toString();
+                line = ret;
+
+                int AES_KEYLENGTH = 128;
+                byte[] iv = new byte[AES_KEYLENGTH / 8];
+                SecureRandom prng = new SecureRandom();
+                prng.nextBytes(iv);
+
+                Cipher aesCipherForEncryption = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                aesCipherForEncryption.init(Cipher.ENCRYPT_MODE, secretKey_tuple, new IvParameterSpec(iv));
+                strDataToEncrypt = line;
+                byte[] byteDataToEncrypt = strDataToEncrypt.getBytes();
+                byte[] byteCipherText = aesCipherForEncryption.doFinal(byteDataToEncrypt);
+                strCipherText = new BASE64Encoder().encode(byteCipherText);
+                Etuple etuple = new Etuple(byteCipherText, iv);
+                db.put(Integer.toString(id + padding), etuple);
+                id++;
+            }
+            N = id;
+            bufferedReader.close();
+        } catch (FileNotFoundException ex) {
+            System.out.println("Unable to open file '" + fileName + "'");
+        } catch (IOException ex) {
+            System.out.println("Error reading file '" + fileName + "'");
+        } catch (NoSuchAlgorithmException noSuchAlgo) {
+            System.out.println(" No Such Algorithm exists " + noSuchAlgo);
+        } catch (NoSuchPaddingException noSuchPad) {
+            System.out.println(" No Such Padding exists " + noSuchPad);
+        } catch (InvalidKeyException invalidKey) {
+            System.out.println(" Invalid Key " + invalidKey);
+        } catch (BadPaddingException badPadding) {
+            System.out.println(" Bad Padding " + badPadding);
+        } catch (IllegalBlockSizeException illegalBlockSize) {
+            System.out.println(" Illegal Block Size " + illegalBlockSize);
+        }
+
+        CStore cs = new CStore(db, TSetSetup(index), this.Bvalue, this.Svalue);
+        SecretKeys sk = new SecretKeys(this.sk_T, this.secretKey_tuple, SK_fileName);
+
+        this.secretKey_tuple = null;
+        this.sk_T = null;
+        return cs;
+    }
+
+    public HashMap<Integer, Record[]> TSetSetup(HashMap<String, ArrayList<String>> index)
+        throws InvalidAlgorithmParameterException, UnsupportedEncodingException {
         //HashMap<String, ArrayList<String>> index = cs.getTSet();
-      
+
         Bvalue = (int) Math.ceil(k * N / Svalue);
         int total = Svalue * Bvalue;
         int i = 0;
@@ -529,7 +537,7 @@ public class ClientSide {
             keyGen.init(128);
             SecretKey secretKey = keyGen.generateKey();
             sk_T = secretKey;
-            
+
             Cipher aesCipherForEncryption = Cipher.getInstance("AES/CBC/PKCS5Padding");
             aesCipherForEncryption.init(Cipher.ENCRYPT_MODE, secretKey, ivspec);
             int metrima = 0;
@@ -579,7 +587,8 @@ public class ClientSide {
                         return TSetSetup(index);
                     }
                     //Unifrom from free[b]
-                    RandomEngine generator = new cern.jet.random.engine.MersenneTwister64(java.nio.ByteBuffer.wrap(Arrays.copyOfRange(PRFBytes, 0, 32)).getInt());
+                    RandomEngine generator = new cern.jet.random.engine.MersenneTwister64(
+                        java.nio.ByteBuffer.wrap(Arrays.copyOfRange(PRFBytes, 0, 32)).getInt());
 
                     Uniform unif = new Uniform(generator);
                     int coin = unif.nextIntFromTo(0, Free[bint].size() - 1);
@@ -627,7 +636,7 @@ public class ClientSide {
         SecretKeys sk = new SecretKeys(this.SK_fileName);
         this.secretKey_tuple = sk.getSk_DB();
         this.sk_T = sk.getSk_Index();
-        
+
 
         try {
             Cipher aesCipherForEncryption = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -658,8 +667,8 @@ public class ClientSide {
         SecretKeys sk = new SecretKeys(this.SK_fileName);
         this.secretKey_tuple = sk.getSk_DB();
         this.sk_T = sk.getSk_Index();
-        
-        if(encResult == null){
+
+        if (encResult == null) {
             System.out.println("No results");
             return null;
         }
@@ -670,7 +679,8 @@ public class ClientSide {
             String strDecryptedText = new String();
             for (int i = 0; i < result.size(); i++) {
 
-                aesCipherForDecryption.init(Cipher.DECRYPT_MODE, secretKey_tuple, new IvParameterSpec(result.get(i).getIV()));
+                aesCipherForDecryption
+                    .init(Cipher.DECRYPT_MODE, secretKey_tuple, new IvParameterSpec(result.get(i).getIV()));
                 byte[] byteDecryptedText;
                 byteDecryptedText = aesCipherForDecryption.doFinal(result.get(i).getCiphertext());
                 strDecryptedText = new String(byteDecryptedText);
