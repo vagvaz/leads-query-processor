@@ -201,7 +201,7 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
         classLoader = new URLClassLoader(new URL[] {file.toURI().toURL()}, PluginRunnerFilter.class.getClassLoader());
       }
       else{
-        classLoader = new URLClassLoader(new URL[] {file.toURI().toURL()});
+        classLoader = new URLClassLoader(new URL[] {file.toURI().toURL()}, PluginRunnerFilter.class.getClassLoader());
       }
 
     } catch (MalformedURLException e) {
