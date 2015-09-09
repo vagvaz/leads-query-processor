@@ -252,10 +252,11 @@ public class EnsembleCacheUtils {
 //                    cache.getValue().flushToMC();
 //     vagvaz           }
                 else{
-                       Cache localCache =
-                            (Cache) localManager.getPersisentCache(cache.getValue().getCacheName());
-                    cache.getValue().flushToCache(localCache);
-                    cache.getValue().release();
+                    if(cache.getValue().getBuffer().size() > 0) {
+                        Cache localCache = (Cache) localManager.getPersisentCache(cache.getKey());
+                        cache.getValue().flushToCache(localCache);
+                        cache.getValue().release();
+                    }
                 }
             }
         }
