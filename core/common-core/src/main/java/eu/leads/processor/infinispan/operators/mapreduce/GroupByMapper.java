@@ -96,9 +96,11 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
         groupEvent.end();
         if(columns.size() == 0){
             Tuple t = new Tuple();
-            t.setNumberAttribute("__count",counter);
-            lc.emit("***",t);
-            lc = null;
+            t.setNumberAttribute("__count", counter);
+            if(lc != null) {
+              lc.emit("***", t);
+              lc = null;
+            }
         }
         super.finalizeTask();
     }
