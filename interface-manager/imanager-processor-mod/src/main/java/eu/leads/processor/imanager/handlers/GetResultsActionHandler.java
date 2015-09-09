@@ -71,19 +71,26 @@ public class GetResultsActionHandler implements ActionHandler {
                     result.setResult(actionResult);
                     return result;
                 }
+                if(max==-1 && min==-1){
+                    log.info("Not getting any results just clean caches ");
+                    actionResult.putString("result", new JsonArray().toString());
+	                log.info("removing cache " + cacheName);
+	                persistence.removePersistentCache(cacheName);
+	                log.info("Cache Removed ");
+                }else {
               log.info("GetResults before batchGet ");
                   if (max < 0) {
                     tuples = batchGet(cacheName, isSorted, min);
                   } else {
                     tuples = batchGet(cacheName, isSorted, min);
                   }
-
+                    actionResult.putString("result", tuples.getArray("result").toString());
+                }
 
 //                updateQueryReadStatus(queryId, queryStatus, min, max);
                 actionResult.putString("id", queryId);
                 actionResult.putString("min", String.valueOf(min));
                 actionResult.putString("max", String.valueOf(max));
-                actionResult.putString("result", tuples.getArray("result").toString());
                 actionResult.putString("size", String.valueOf(tuples.size()));
 
             }
