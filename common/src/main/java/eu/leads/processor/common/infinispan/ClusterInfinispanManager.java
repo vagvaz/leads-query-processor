@@ -3,6 +3,7 @@ package eu.leads.processor.common.infinispan;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.NutchLocalListener;
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.CacheMode;
@@ -227,7 +228,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".page");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".urldirectory");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".urldirectory_ecom");
-    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".page_core");
+    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".page_core");
     getInMemoryCache(StringConstants.DEFAULT_DATABASE_NAME + ".page_core.compressed", 4000);
     BatchPutListener listener = new BatchPutListener(StringConstants.DEFAULT_DATABASE_NAME+".page_core.compressed",StringConstants.DEFAULT_DATABASE_NAME+".page_core");
     addListener(listener, StringConstants.DEFAULT_DATABASE_NAME + ".page_core.compressed");
@@ -237,14 +238,14 @@ public class ClusterInfinispanManager implements InfinispanManager {
     addListener(listener, StringConstants.DEFAULT_DATABASE_NAME + ".keywords.compressed");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".resourcepart");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".site");
-    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".adidas_keywords");
+    Cache adidasKeywords = (Cache) getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".adidas_keywords");
 
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".rankings");
-    getInMemoryCache(StringConstants.DEFAULT_DATABASE_NAME + ".rankings.compressed",4000);
+    getInMemoryCache(StringConstants.DEFAULT_DATABASE_NAME + ".rankings.compressed", 4000);
     listener = new BatchPutListener(StringConstants.DEFAULT_DATABASE_NAME+".rankings.compressed",StringConstants.DEFAULT_DATABASE_NAME+".rankings");
     addListener(listener, StringConstants.DEFAULT_DATABASE_NAME + ".rankings.compressed");
-    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".uservisits");
-    getInMemoryCache(StringConstants.DEFAULT_DATABASE_NAME + ".uservisits.compressed",4000);
+    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".uservisits");
+    getInMemoryCache(StringConstants.DEFAULT_DATABASE_NAME + ".uservisits.compressed", 4000);
     listener = new BatchPutListener(StringConstants.DEFAULT_DATABASE_NAME+".uservisits.compressed",StringConstants.DEFAULT_DATABASE_NAME+".uservisits");
     addListener(listener, StringConstants.DEFAULT_DATABASE_NAME + ".uservisits.compressed");
     getPersisentCache("leads.processor.catalog.tablespaces");
@@ -253,6 +254,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache("leads.processor.catalog.indexes");
     getPersisentCache("leads.processor.catalog.indexesByColumn");
     getPersisentCache("leads.processor.databases.sub."+StringConstants.DEFAULT_DATABASE_NAME);
+    putAdidasKeyWords(adidasKeywords);
 //    getPersisentCache("batchputTest");
 //    getPersisentCache("batchputTest.compressed");
 
@@ -297,6 +299,22 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     System.out.println("We have started host:" + host);
 
+  }
+
+  private void putAdidasKeyWords(Cache adidasKeywords) {
+    String[] testKeywords = {"adidas","Nike","Puma","Asics"};
+    String prefix = "default.adidas_keywords.";
+    int counter = 0;
+    for(String k : testKeywords){
+      Tuple t = new Tuple();
+      t.setAttribute(prefix+"id",Integer.toString(counter));
+      t.setAttribute(prefix+"inorder",new Boolean(false));
+      t.setAttribute(prefix+"distancebetweenwords",3);
+      t.setAttribute(prefix+"nonmatchingchars",1);
+      t.setAttribute(prefix+"nonmatchingwords",0);
+      t.setAttribute(prefix+"keywords",k);
+      adidasKeywords.putIfAbsent(prefix+Integer.toString(counter++),t);
+    }
   }
 
   private String resolveUniquePath() {
