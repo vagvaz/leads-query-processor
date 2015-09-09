@@ -134,7 +134,7 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
                     }else{
                         persistence.stopManager();
                         log.error("Stopped Manager Exiting");
-                        Thread.sleep(1000);
+                        Thread.sleep(10);
                         System.exit(0);
                     }
                 }

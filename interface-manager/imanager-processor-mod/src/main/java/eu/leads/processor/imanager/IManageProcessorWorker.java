@@ -136,7 +136,7 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
                   log.error("Stopped Manager Exiting");
                   this.getVertx().stop();
                   log.error("Stopped component");
-                  Thread.sleep(2000);
+                  Thread.sleep(20);
                   System.exit(0);
                }
             }
