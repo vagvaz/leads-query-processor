@@ -100,7 +100,7 @@ public class EnsembleCacheUtils {
 
     }
     public static void initialize(EnsembleCacheManager manager){
-       initialize(manager,true);
+       initialize(manager, true);
     }
 
     public static void initialize(EnsembleCacheManager manager, boolean isEmbedded) {
@@ -236,6 +236,18 @@ public class EnsembleCacheUtils {
 
     public static void addBatchPutRunnable(BatchPutRunnable runnable){
         microcloudRunnables.add(runnable);
+    }
+
+
+    public static void waitForAuxPuts() {
+        while(auxExecutor.getActiveCount() > 0) {
+            try {
+                //            auxExecutor.awaitTermination(100,TimeUnit.MILLISECONDS);
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
     public static void waitForAllPuts() {
         //        profExecute.start("waitForAllPuts");
@@ -534,4 +546,5 @@ public class EnsembleCacheUtils {
         //      }
         //    }
     }
+
 }

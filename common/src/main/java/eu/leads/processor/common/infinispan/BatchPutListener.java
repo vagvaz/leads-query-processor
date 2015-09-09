@@ -90,18 +90,19 @@ public class BatchPutListener implements LeadsListener {
             TupleBuffer tupleBuffer = new TupleBuffer((byte[]) value);
             Map tmpb = new HashMap();
             for (Map.Entry<Object, Object> entry : tupleBuffer.getBuffer().entrySet()) {
-                tmpb.put(entry.getKey(), entry.getValue());
-                if (tmpb.size() > LQPConfiguration.getInstance().getConfiguration().getInt("node.ensemble.batchput.batchsize")) {
-                    targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).putAll(tmpb);//entry.getKey(), entry.getValue());
-                    tmpb.clear();
-                }
-
+                //                tmpb.put(entry.getKey(), entry.getValue());
+                //                if (tmpb.size() > LQPConfiguration.getInstance().getConfiguration().getInt("node.ensemble.batchput.batchsize")) {
+                //                    targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).putAll(tmpb);//entry.getKey(), entry.getValue());
+                //                    tmpb.clear();
+                //                }
+                //
+                //            }
+                //            if (tmpb.size() > 0) {
+                //                targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).putAll(tmpb);
+                //                tmpb.clear();
+                //            }
+                EnsembleCacheUtils.putToCacheDirect(targetCache,entry.getKey(),entry.getValue());
             }
-            if (tmpb.size() > 0) {
-                targetCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).putAll(tmpb);
-                tmpb.clear();
-            }
-
             tupleBuffer.getBuffer().clear();
             tupleBuffer = null;
 
@@ -125,6 +126,8 @@ public class BatchPutListener implements LeadsListener {
         boolean isok = false;
         boolean retry = false;
         while(!isok){
+
+            EnsembleCacheUtils.waitForAuxPuts();
             try{
                 for(Map.Entry<NotifyingFuture<Void>,NotifyingFuture<Void>> entry : futures.entrySet()){
                     entry.getKey().get();

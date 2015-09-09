@@ -283,20 +283,22 @@ public class TupleBuffer {
             buffer = new HashMap<>();
             Map<Object,Object> tmpb = new HashMap<>();
 
-            for(Map.Entry<Object,Object> entry : tmp.entrySet()){
+            for(Map.Entry<Object,Object> entry : tmp.entrySet()) {
 
-                tmpb.put(entry.getKey(), entry.getValue());
-                if(tmpb.size() > batchThreshold) {
-                    localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
-                        .putAll(tmpb);//entry.getKey(), entry.getValue());
-                    tmpb.clear();
-                }
+                EnsembleCacheUtils.putToCacheDirect(localCache,entry.getKey(),entry.getValue());
             }
-            if(tmpb.size() > 0){
-                localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
-                    .putAll(tmpb);
-                tmpb.clear();
-            }
+//                tmpb.put(entry.getKey(), entry.getValue());
+//                if(tmpb.size() > batchThreshold) {
+//                    localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
+//                        .putAll(tmpb);//entry.getKey(), entry.getValue());
+//                    tmpb.clear();
+//                }
+//            }
+//            if(tmpb.size() > 0){
+//                localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
+//                    .putAll(tmpb);
+//                tmpb.clear();
+//            }
 
         }
         return result;

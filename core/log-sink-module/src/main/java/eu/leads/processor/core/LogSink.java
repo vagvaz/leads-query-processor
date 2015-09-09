@@ -51,21 +51,21 @@ public class LogSink extends Verticle implements LeadsMessageHandler {
         String message = msg.getString("message");
         String component = msg.getString("component");
         if (type.equals("info")) {
-            logger.info(component + ": " + message);
+//            logger.info(component + ": " + message);
 
 
         } else if (type.equals("warn")) {
-            logger.warn(component + ": " + message);
+//            logger.warn(component + ": " + message);
             //         bus.sendToAllGroup("eu.leads.processor.log.warn", msg);
         } else if (type.equals("error")) {
-            logger.error(component + ": " + message);
+//            logger.error(component + ": " + message);
 
             //         bus.sendToAllGroup("eu.leads.processor.log.error", msg);
         } else if (type.equals("fatal")) {
-            logger.error(component + ": FATAL " + message);
+//            logger.error(component + ": FATAL " + message);
             //         bus.sendToAllGroup("eu.leads.processor.log.fatal", msg);
         } else {
-            logger.debug(component + ": " + message);
+//            logger.debug(component + ": " + message);
 
             //         bus.sendToAllGroup("eu.leads.processor.log.debug", msg);
         }
