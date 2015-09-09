@@ -198,10 +198,10 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
     File file = new File(jarFileName);
     try {
       if(!pluginName.toLowerCase().contains("adidas")) {
-        classLoader = new URLClassLoader(new URL[] {file.toURI().toURL()}, PluginRunnerFilter.class.getClassLoader());
+        classLoader = new URLClassLoader(new URL[] {file.toURI().toURL()}, InfinispanClusterSingleton.class.getClassLoader());
       }
       else{
-        classLoader = new URLClassLoader(new URL[] {file.toURI().toURL()}, PluginRunnerFilter.class.getClassLoader());
+        classLoader = new URLClassLoader(new URL[] {file.toURI().toURL()}, InfinispanClusterSingleton.class.getClassLoader());
       }
 
     } catch (MalformedURLException e) {
