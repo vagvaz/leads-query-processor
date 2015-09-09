@@ -73,7 +73,10 @@ public class LoadCsv {
                     System.err.println("wrong number of arguments for load $prog load dir/ $prog load dir host port (delay per put)");
                     System.exit(-1);
                 }
-                remoteCacheManager = createRemoteCacheManager(args[2], args[3]);
+                String[] parts = args[2].split(":");
+                String host = parts[0];
+                String port = parts[1];
+                remoteCacheManager = createRemoteCacheManager(host, port);
             }  else if(args[0].startsWith("loadEnsemble")){
                 if ( args.length < 3) {
                     System.err.println("or  \t\t$prog loadEnsemble(Multi) dir host:port(|host:port)+ (delay per put)\n ");
