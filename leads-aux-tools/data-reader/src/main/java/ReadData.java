@@ -19,12 +19,12 @@ public class ReadData {
         //  OutputHandler dummy = new DummyOutputHandler();
         InputHandler inputHandler = new GoraInputHandler();
         Properties inputConfig = new Properties();
-        int limit = 1000000;
+        int limit = 10;
         if (args.length > 1)
             limit = Integer.parseInt(args[1]);
         System.out.println("Limit :" + limit);
         inputConfig.setProperty("limit", Integer.toString(limit));
-        inputConfig.setProperty("batchSize", Integer.toString(1000));
+        inputConfig.setProperty("batchSize", Integer.toString(10));
         //inputConfig.setProperty("connectionString", "clusterinfo.unineuchatel.ch:11225");
         String ensembleString = "clusterinfo.unineuchatel.ch:11225";
         ensembleString =
@@ -33,7 +33,7 @@ public class ReadData {
             ensembleString = args[0];
         System.out.println("Using  connection String: " + ensembleString);
         inputConfig.setProperty("connectionString", ensembleString);
-        inputConfig.setProperty("offset", Integer.toString(55000));
+        inputConfig.setProperty("offset", Integer.toString(0));
 
         //        InputHandler<String,GenericData.Record> inputHandler = new FileInputHandler();
         //        Properties inputConfig = new Properties();
