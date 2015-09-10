@@ -12,6 +12,10 @@ import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.*;
+import eu.leads.processor.infinispan.operators.DistCMSketch;
+import eu.leads.processor.math.FilterOperatorNode;
+import eu.leads.processor.math.FilterOperatorTree;
+import eu.leads.processor.math.MathUtils;
 import eu.leads.processor.nqe.NQEConstants;
 import org.infinispan.Cache;
 import org.slf4j.Logger;
@@ -246,6 +250,24 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                         }
                         return;
                      }
+                     if(next != null && next.getNodeType().equals(LeadsNodeType.JOIN)){
+                        if(node.getConfiguration().containsField("buildBloomFilter")){
+                           List<String> inputs = next.getInputs();
+                           String otherScanNode = "";
+                           for(String input : inputs){
+                              if(!input.equals(node.getNodeId())){
+                                 otherScanNode = input;
+                              }
+                           }
+                           List<PlanNode> sources = plan.getSources();
+                           for(PlanNode s : sources){ // hijcak deployment and run 2nd run
+                              if(s.getNodeId().equals(otherScanNode)){
+                                 next = s;
+                                 deployOperator(plan,next);
+                              }
+                           }
+                        }
+                     }
                      if (next.getNodeType().equals(LeadsNodeType.OUTPUT_NODE)) {
                         log.error("next is output");
                         plan.complete(next);
@@ -317,12 +339,12 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
 
    private void deployRemoteOperator(Action action,JsonObject operator, PlanNode mrOperator) {
       Action deployAction = createNewAction(action);
-      log.error("Deploying operator " + mrOperator.getNodeType().toString() + " to micro - cloud"
-          + mrOperator.getSite());
+      log.error(
+          "Deploying operator " + mrOperator.getNodeType().toString() + " to micro - cloud" + mrOperator.getSite());
       deployAction.getData().putString("monitor", monitorAddress);
       deployAction.getData().putObject("operator",mrOperator.asJsonObject());
-      deployAction.getData().putString("operatorType",mrOperator.getNodeType().toString());
-      deployAction.getData().putString("queryId",operator.getString("queryId"));
+      deployAction.getData().putString("operatorType", mrOperator.getNodeType().toString());
+      deployAction.getData().putString("queryId", operator.getString("queryId"));
       deployAction.setLabel(NQEConstants.DEPLOY_OPERATOR);
       com.sendTo(nqeGroup, deployAction.asJsonObject());
       com.sendTo(monitorAddress,deployAction.asJsonObject());
@@ -363,20 +385,304 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
    }
 
    private void startExecution(ExecutionPlanMonitor executionPlan) {
-      if(!executionPlan.shouldRunMapReduceFirst()) {
+      if (!executionPlan.shouldRunMapReduceFirst()) {
          List<PlanNode> sources = executionPlan.getSources();
-         for (PlanNode source : sources) {
-            if (source != null) {
-               deployOperator(executionPlan, source);
+         if (sources.size() == 1) {
+            for (PlanNode source : sources) {
+               if (source != null) {
+                  deployOperator(executionPlan, source);
+               }
             }
+         } else if (sources.size() == 2 && (sources.get(0).getNodeType().toString().equals(LeadsNodeType.SCAN.toString())) && (sources.get(1).getNodeType().toString().equals(LeadsNodeType.SCAN.toString()))) {
+            PlanNode node1 = sources.get(0);
+            PlanNode node2 = sources.get(1);
+            JsonObject bloomFilter = new JsonObject();
+            bloomFilter.putString("bloomCache", node1.getOutput() + ".bloom");
+
+            if (executionPlan.getNextOperator(node1).getNodeType().toString().equals(LeadsNodeType.JOIN.toString())) {
+               if (hasPredicate(node1) && hasPredicate(node2)) {
+                  if(hasIndexedPredicate(node1) && hasIndexedPredicate(node2) || !(hasIndexedPredicate(node1) && hasIndexedPredicate(node2)) ){
+                     Long node1Size = getSize(node1);
+                     Long node2Size = getSize(node2);
+                     if(node1Size < node2Size){
+                        //Choose node2
+                        bloomFilter.putNumber("bloomSize",getSize(node2));
+                        node2.getConfiguration().getObject("next").getObject("configuration").putObject("buildBloom",
+                            bloomFilter);
+                        node2.getConfiguration().putString("buildBloomFilter", "buildBloomFilter");
+                        executionPlan.updateNode(node2);
+                        deployOperator(executionPlan, node2);
+                     }
+                     else{
+                        //choose node1
+                        bloomFilter.putNumber("bloomSize",getSize(node1));
+                        node1.getConfiguration().getObject("next").getObject("configuration").putObject("buildBloom",
+                            bloomFilter);
+                        node1.getConfiguration().putString("buildBloomFilter", "buildBloomFilter");
+                        executionPlan.updateNode(node1);
+                        deployOperator(executionPlan, node1);
+                     }
+                  }
+                  else if(hasIndexedPredicate(node1)){
+                     //choose node1
+                     bloomFilter.putNumber("bloomSize",getSize(node1));
+                     node1.getConfiguration().getObject("next").getObject("configuration").putObject("buildBloom",
+                         bloomFilter);
+                     node1.getConfiguration().putString("buildBloomFilter", "buildBloomFilter");
+                     executionPlan.updateNode(node1);
+                     deployOperator(executionPlan,node1);
+                  }
+                  else if(hasIndexedPredicate(node2)) {
+                     //choose node2
+                     bloomFilter.putNumber("bloomSize", getSize(node2));
+                     node2.getConfiguration().getObject("next").getObject("configuration")
+                         .putObject("buildBloom", bloomFilter);
+                     node2.getConfiguration().putString("buildBloomFilter", "buildBloomFilter");
+                     executionPlan.updateNode(node2);
+                     deployOperator(executionPlan, node2);
+                  }
+               } else if (hasPredicate(node1)) {
+                  //choose node 1
+                  bloomFilter.putNumber("bloomSize",getSize(node1));
+                  node1.getConfiguration().getObject("next").getObject("configuration").putObject("buildBloom",
+                      bloomFilter);
+                  node1.getConfiguration().putString("buildBloomFilter", "buildBloomFilter");
+                  executionPlan.updateNode(node1);
+                  deployOperator(executionPlan,node1);
+               }else if (hasPredicate(node2)) {
+                  //choose node2
+                  bloomFilter.putNumber("bloomSize",getSize(node2));
+                  node2.getConfiguration().getObject("next").getObject("configuration").putObject("buildBloom",
+                      bloomFilter);
+                  node2.getConfiguration().putString("buildBloomFilter","buildBloomFilter");
+                  executionPlan.updateNode(node2);
+                  deployOperator(executionPlan,node2);
+               } else {
+                  for (PlanNode source : sources) {
+                     if (source != null) {
+                        deployOperator(executionPlan, source);
+                     }
+                  }
+
+               }
+            }
+         } else {
+            PlanNode mapreduceNode = executionPlan.getMROperator();
+            deployOperator(executionPlan, mapreduceNode);
+
          }
       }
-      else
-      {
-         PlanNode mapreduceNode = executionPlan.getMROperator();
-         deployOperator(executionPlan,mapreduceNode);
+   }
 
+   private Long getSize(PlanNode node) {
+      String tableName = node.getConfiguration().getObject("body").getObject("tableDesc").getString("tableName");
+      if(LQPConfiguration.getInstance().getConfiguration().containsKey(tableName+".size")){
+         return LQPConfiguration.getInstance().getConfiguration().getLong(tableName+".size",5000000L);
       }
+      else{
+         return 5000000L;
+      }
+   }
+
+   private boolean hasIndexedPredicate(PlanNode node) {
+      return checkIndex_usage(node);
+   }
+
+   private boolean checkIndex_usage(PlanNode node) {
+      JsonObject conf = node.getConfiguration();
+      if (conf.getObject("body").containsField("qual")) {
+         System.out.println("Scan Check if fields are indexed.");
+         JsonObject inputSchema;
+         inputSchema = conf.getObject("body").getObject("inputSchema");
+         JsonArray fields = inputSchema.getArray("fields");
+         System.out.println("Check if fields: " + fields.toArray().toString() + " are indexed.");
+
+         Iterator<Object> iterator = fields.iterator();
+         String columnName = null;
+         HashMap indexCaches = new HashMap<>();
+         HashMap sketches = new HashMap<>();
+         while (iterator.hasNext()) {
+            JsonObject tmp = (JsonObject) iterator.next();
+            columnName = tmp.getString("name");
+            //System.out.print("Check if exists: " +  columnName + " ");
+            if (persistence.getCacheManager().cacheExists(columnName)) {
+               indexCaches.put(columnName, (Cache) persistence.getIndexedPersistentCache(columnName));
+               System.out.print(columnName + " exists! ");
+            }
+
+            if (persistence.getCacheManager().cacheExists(columnName + ".sketch")) {
+               sketches.put(columnName, new DistCMSketch((Cache) persistence.getPersisentCache(columnName + ".sketch"), true));
+               System.out.println(" exists!");
+            }
+         }
+
+         if (indexCaches.size() == 0) {
+            System.out.println("Nothing Indexed");
+            return false;
+         } else {
+            System.out.print("At least some fields are Indexed: ");
+            for (Object s : indexCaches.keySet())
+               System.out.println((String) s);
+         }
+         long start = System.currentTimeMillis();
+
+         FilterOperatorTree tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
+         Object selectvt = getSelectivity(sketches, tree.getRoot());
+         System.out.println("  selectvt CMS " + selectvt + "  computation time: " + (System.currentTimeMillis() - start) / 1000.0);
+         long inputSize;
+         if (selectvt != null) {
+            start = System.currentTimeMillis();
+            System.out.println("Get size of table " + columnName.substring(0, columnName.lastIndexOf(".")));
+            Cache<String, Long> sizeC = (Cache) persistence.getPersisentCache("TablesSize");
+            if (sizeC.containsKey(columnName.substring(0, columnName.lastIndexOf("."))))
+               inputSize = sizeC.get(columnName.substring(0, columnName.lastIndexOf(".")));
+            else {
+               System.out.print("Size not found, Slow Get size() ");
+               inputSize = getSize(node);
+               System.out.println("... Caching size value.");
+               sizeC.put(columnName.substring(0, columnName.lastIndexOf(".")),inputSize);
+            }
+            System.out.println(" Found size: " + inputSize);
+
+            double selectivity = (double) selectvt / (double) inputSize;
+            System.out.println("Scan  Selectivity: " + selectivity);
+            System.out.println("  Selectivity, inputSize " + inputSize + "  computation time: " + (System.currentTimeMillis() - start) / 1000.0);
+
+            if (selectivity < 0.5) {
+               System.out.println("Scan Use indexes!! ");
+               return indexCaches.size() > 0;
+            }
+         } else
+            System.out.println("No Selectivity!!");
+
+      } else
+         System.out.println("No Qual!!");
+
+      System.out.println("Don't Use indexes!! ");
+      return false;
+   }
+
+   Object getSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
+      if (root == null)
+         return null;
+      Object left = getSelectivity(sketchCaches, root.getLeft());
+      Object right = getSelectivity(sketchCaches, root.getRight());
+
+      switch (root.getType()) {
+         case AND:
+            if (left != null && right != null)
+               return Math.min((double) left, (double) right);
+            break;
+         case OR:
+            if (left != null && right != null)
+               return (double) left + (double) right;
+            break;
+         default:
+            System.out.println("SubQual " + root.getType());
+            return getSubSelectivity(sketchCaches, root);
+      }
+      return (left != null) ? left : right;
+   }
+
+
+   Object getSubSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
+      Object result = null;
+      double dleft = -1000;
+      double dright = -1000;
+      String sleft = null;
+      String sright = null;
+      if (root == null)
+         return null;
+      Object oleft = getSubSelectivity(sketchCaches, root.getLeft());
+      Object oright = getSubSelectivity(sketchCaches, root.getRight());
+
+      if (oleft instanceof Double)
+         dleft = (double) oleft;
+      if (oright instanceof Double)
+         dright = (double) oright;
+      if (oleft instanceof String)
+         sleft = (String) oleft;
+      if (oright instanceof String)
+         sright = (String) oright;
+
+      switch (root.getType()) {
+         case EQUAL:
+            if (sleft != null && oright != null) {
+               String collumnName = sleft;
+               return sketchCaches.get(collumnName).get(oright);
+            }
+            break;
+         case FIELD:
+            String collumnName = root.getValueAsJson().getObject("body").getObject("column").getString("name");
+            //String type = root.getValueAsJson().getObject("body").getObject("column").getObject("dataType").getString("type");
+
+
+            if (sketchCaches.containsKey(collumnName)) {
+               //if (type.equals("TEXT"))
+               return collumnName;
+
+            }
+            return null;
+         //break;
+
+         case CONST:
+            JsonObject datum = root.getValueAsJson().getObject("body").getObject("datum");
+            String type = datum.getObject("body").getString("type");
+            Number ret=0;// = MathUtils.getTextFrom(root.getValueAsJson());
+            //System.out.println("Operator Found datum: " + datum.toString());
+
+            try {
+               if (type.equals("TEXT"))
+                  return  MathUtils.getTextFrom(root.getValueAsJson());
+               else {
+                  Number a = datum.getObject("body").getNumber("val");
+                  if (a != null)
+                     return a;
+               }
+            } catch (Exception e) {
+               System.err.print("Error " + ret + " to type " + type +"" + e.getMessage());
+            }
+            return null;
+         case LTH:
+            return 0.4;
+
+         ////        if(left !=null && oright !=null)
+         ////          return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
+         //        return null;
+         //        break;
+         case LEQ:
+            return 0.4;
+         //        if(left !=null && oright !=null)
+         //          return left.and().having("attributeValue").lte(oright);//,right.getValueAsJson());
+         //        break;
+         case GTH:
+            return 0.4;
+         //        if(left !=null && oright !=null)
+         //          return left.and().having("attributeValue").gt(oright);//,right.getValueAsJson());
+         //        break;
+         case GEQ:
+            return 0.4;
+         //        if(left !=null && oright !=null)
+         //          return left.and().having("attributeValue").gte(oright);//,right.getValueAsJson());
+         //        break;
+         //
+         //      case LIKE:
+         //        if(left !=null && oright !=null) {
+         //          return left.and().having("attributeValue").like((String) oright);//,right.getValueAsJson());
+         //        }break;
+         //
+         //
+         //      case ROW_CONSTANT:
+         //        //TODO
+         //        break;
+         default:
+            return 0.01;
+      }
+      return null;
+   }
+
+   private boolean hasPredicate(PlanNode node) {
+      return node.getConfiguration().getObject("body").containsField("qual");
    }
 
    private void deployOperator(ExecutionPlanMonitor executionPlan, PlanNode next) {

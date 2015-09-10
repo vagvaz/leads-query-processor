@@ -1,20 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
 
-    <technology>leads</technology>
-    <host>http://5.147.254.199</host>
-    <port>8080</port>
-
-    <loggingDir>${env:LEADS_ADIDAS_LOGS}</loggingDir>
-    <resources_path>${env:LEADS_ADIDAS_RESOURCES}</resources_path>
-    <storagePropertiesDir>${env:LEADS_ADIDAS_PROPERTIES}</storagePropertiesDir>
-
-    <!-- 	<pythonPath>/home/nonlinear/.local/lib/python2.7/site-packages:/local/lib/python2.7/dist-packages:/home/nonlinear/workspace/leads-query-processor-plugins/plugin-examples/adidas-processing-plugin/src/main/python</pythonPath> -->
-    <pythonPath>${env:LEADS_ADIDAS_PYTHON}</pythonPath>
-    <pythonCLIPackage>eu.leads.infext.python.CLAPI</pythonCLIPackage>
-    <pythonFileDirectory>/tmp/</pythonFileDirectory>
-    <pythonFileBasename>leadsjavapy-</pythonFileBasename>
-    <pzsEndpoints>tcp://127.0.0.1:5559</pzsEndpoints>
-    <pzsEndpoints>tcp://127.0.0.1:5560</pzsEndpoints>
-    <lliEndpoints>tcp://127.0.0.1:5569</lliEndpoints>
+	<technology>leads</technology>
+	<host>http://5.147.254.199</host>
+	<port>8080</port>
+	
+	<loggingDir>${env:LEADS_ADIDAS_LOGS}</loggingDir>
+	<resources_path>${env:LEADS_ADIDAS_RESOURCES}</resources_path>
+	<storagePropertiesDir>${env:LEADS_ADIDAS_PROPERTIES}</storagePropertiesDir>
+	
+	<pythonPath>${env:LEADS_ADIDAS_PYTHON}</pythonPath>
+	<pythonCLIPackage>eu.leads.infext.python.CLAPI</pythonCLIPackage>
+	<pythonFileDirectory>/tmp/</pythonFileDirectory>
+	<pythonFileBasename>leadsjavapy-</pythonFileBasename>
+	<pzsEndpoints>tcp://127.0.0.1:5559</pzsEndpoints>
+	<pzsEndpoints>tcp://127.0.0.1:5560</pzsEndpoints>
+	
+	<lliEndpoints>tcp://127.0.0.1:5569</lliEndpoints>
+	
+	<!-- *** Separate processing stages for Ecom processing -->
+	<!-- <processingStage>1</processingStage> -->	
+    <!-- <processingStage>2</processingStage> -->
+    
+	<!-- *** Batch job - MapReduce or local version? -->
+	<mapreduce>true</mapreduce>
+	
+	<!-- *** Filter for the news sites -->
+	<filter>com.runnersworld;com.runblogger;com.solereview;uk.co.bbc;com.footwearnews;com.runningshoesguru;com.competitor</filter>
+	<!-- *** Filter for the Ecommerce sites -->
+	<!-- <filter>com.backcountry;com.holabirdsports;com.roadrunnersports</filter> -->
 </config>

@@ -59,16 +59,16 @@ public class StdLoggerRedirect {
 	        stderr = System.err;                                        
 	
 	        // now rebind stdout/stderr to logger                                   
-//	        Logger logger;
-//	        LoggingOutputStream los;
-//
-//	        logger = Logger.getLogger("stdout");
-//	        los = new LoggingOutputStream(logger, StdOutErrLevel.STDOUT);
-//	        System.setOut(new PrintStream(los, true));
-//
-//	        logger = Logger.getLogger("stderr");
-//	        los= new LoggingOutputStream(logger, StdOutErrLevel.STDERR);
-//	        System.setErr(new PrintStream(los, true));
+	        Logger logger;                                                          
+	        LoggingOutputStream los;                                                
+	
+	        logger = Logger.getLogger("stdout");                                    
+	        los = new LoggingOutputStream(logger, StdOutErrLevel.STDOUT);           
+	        System.setOut(new PrintStream(los, true));                              
+	
+	        logger = Logger.getLogger("stderr");                                    
+	        los= new LoggingOutputStream(logger, StdOutErrLevel.STDERR);            
+	        System.setErr(new PrintStream(los, true)); 
 
 			isExecuted = true;
 		}

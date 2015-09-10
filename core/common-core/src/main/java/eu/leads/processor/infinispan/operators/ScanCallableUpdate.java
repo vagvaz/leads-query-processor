@@ -300,21 +300,6 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
     }
   }
 
-//  private void renameAllTupleAttributes(Tuple tuple) {
-//    JsonArray fields = inputSchema.getArray("fields");
-//    Iterator<Object> iterator = fields.iterator();
-//    String columnName = null;
-//    while(iterator.hasNext()){
-//      JsonObject tmp = (JsonObject) iterator.next();
-//      columnName = tmp.getString("name");
-//      int lastPeriod = columnName.lastIndexOf(".");
-//      String attributeName = columnName.substring(lastPeriod+1);
-//      tuple.renameAttribute(attributeName,columnName);
-//    }
-
-//    handlePagerank(columnName.substring(0,columnName.lastIndexOf(".")),tuple);
-//  }
-
 	protected void handlePagerank(String substring, Tuple t) {
 		if (conf.getObject("body").getObject("tableDesc").getString("tableName").equals("default.webpages")) {
 			if (totalSum < 0) {

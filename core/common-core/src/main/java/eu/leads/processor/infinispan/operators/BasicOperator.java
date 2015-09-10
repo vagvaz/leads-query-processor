@@ -1028,7 +1028,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder(reducerLocalCallable);
       builder.timeout(24, TimeUnit.HOURS);
       DistributedTask task = builder.build();
-      System.out.println("EXECUTE reduceLocal " + reducerLocalCallable.getClass().toString() +
+      System.out.println("EXECUTE reduceLocal " + reduceLocalInputCache.getName() + " "+ reducerLocalCallable.getClass().toString() +
           " ON " + currentCluster + " with " + inputCache.size() + " keys");
       log.error("EXECUTE reduceLocal " + reducerLocalCallable.getClass().toString() +
           " ON " + currentCluster + " with " + inputCache.size() + " keys");

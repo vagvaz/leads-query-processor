@@ -114,7 +114,11 @@ public class PrintUtilities {
         String s = ("\n\n--- Remaining ----\n");
 
         for(String c : manager.getCacheNames()) {
-            s+=("name: " + c + "\n");
+          if(manager.cacheExists(c))
+           s+=("Exist name: " + c + "\n");
+          if(manager.isRunning(c)){
+            s+="Running name: " + c + "\n";
+          }
         }
         System.err.println(s + "\n\n---END Remaining ---- " + manager.getCacheNames().size());
     }

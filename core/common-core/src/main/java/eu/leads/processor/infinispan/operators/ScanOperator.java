@@ -1,7 +1,9 @@
 package eu.leads.processor.infinispan.operators;
 
+import com.google.common.hash.BloomFilter;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.utils.ProfileEvent;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
@@ -19,6 +21,9 @@ import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.distexec.DistributedTask;
 import org.infinispan.distexec.DistributedTaskBuilder;
+import org.infinispan.ensemble.EnsembleCacheManager;
+import org.infinispan.ensemble.Site;
+import org.infinispan.ensemble.cache.EnsembleCache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
@@ -51,17 +56,17 @@ public class ScanOperator extends BasicOperator {
 		if (conf.containsField("next")) {
 			if (conf.getString("next.type").equals(LeadsNodeType.GROUP_BY.toString())) {
 				groupByOperator = true;//new GroupByOperator(this.com,this.manager,this.log,this.action);
-//            PlanNode node = new PlanNode(conf.getObject("next").asObject());
-//            groupByOperator.setIntermediateCacheName(node.getNodeId()+".intermediate");
-//            groupByOperator.init(conf.getObject("next").getObject("configuration"));
+				//            PlanNode node = new PlanNode(conf.getObject("next").asObject());
+				//            groupByOperator.setIntermediateCacheName(node.getNodeId()+".intermediate");
+				//            groupByOperator.init(conf.getObject("next").getObject("configuration"));
 			} else if (conf.getString("next.type").equals(LeadsNodeType.JOIN.toString())) {
 				joinOperator = true;// new JoinOperator(this.com,this.manager,this.log,this.action);
-//            PlanNode node = new PlanNode(conf.getObject("next").asObject());
-//            joinOperator.setIntermediateCacheName(node.getNodeId()+".intermediate");
-//            joinOperator.init(conf.getObject("next").getObject("configuration"));
+				//            PlanNode node = new PlanNode(conf.getObject("next").asObject());
+				//            joinOperator.setIntermediateCacheName(node.getNodeId()+".intermediate");
+				//            joinOperator.init(conf.getObject("next").getObject("configuration"));
 			} else if (conf.getString("next.type").equals(LeadsNodeType.SORT.toString())) {
 				sortOperator = true;//new SortOperator(this.com,this.manager,this.log,this.action);
-//            sortOperator.init(conf.getObject("next").getObject("configuration"));
+				//            sortOperator.init(conf.getObject("next").getObject("configuration"));
 				System.err.println("SORT SCAN NOT IMPLEMENTED YET");
 			} else {
 				System.err.println(conf.getString("next.type") + " SCAN NOT IMPLEMENTED YET");
@@ -75,14 +80,34 @@ public class ScanOperator extends BasicOperator {
 		scanExecute.end();
 	}
 
-	@Override
-	public void execute() {
-		super.execute();
-	}
 
 	@Override
 	public void cleanup() {
+		if(conf.containsField("next")){
+			if(conf.getObject("next").containsField("buildBloom")){
+				JsonObject bloomFilter = conf.getObject("next").getObject("buildBloom");
+				Cache<String,BloomFilter<String>> bloomCache = (Cache) manager.getPersisentCache(bloomFilter.getString("bloomCache"));
+				BloomFilter<String> centralized = null;
+				for(String key : bloomCache.keySet()){
+					if(centralized == null){
+						centralized = bloomCache.get(key);
+					}
+					else{
+						centralized.putAll(bloomCache.get(key));
+					}
+					bloomCache.remove(key);
+				}
 
+				String e = computeEnsembleHost();
+				EnsembleCacheManager tmpmanager = new EnsembleCacheManager(e);
+				EnsembleCache ensembleBloomCache = tmpmanager.getCache(bloomFilter.getString("bloomCache"));
+				for(Object s : ensembleBloomCache.sites()){
+					Site site = (Site)s;
+					site.getCache().put(LQPConfiguration.getInstance().getMicroClusterName(),centralized);
+				}
+			}
+
+		}
 		System.err.println("CLEANING UP ");
 		super.cleanup();
 	}
@@ -92,11 +117,19 @@ public class ScanOperator extends BasicOperator {
 		Set<String> targetMC = getTargetMC();
 		for (String mc : targetMC) {
 			if (!conf.containsField("next")) {
-			   createCache(mc,getOutput(),"batchputListener");
-                         }
-                         else{
-                            createCache(mc, getOutput() + ".data", "localIndexListener:batchputListener");
+				createCache(mc,getOutput(),"batchputListener");
 			}
+			else {
+				createCache(mc, getOutput() + ".data", "localIndexListener:batchputListener");
+				if (conf.containsField("next")) {
+					if (conf.getObject("next").containsField("buildBloom")) {
+						JsonObject bloomFilter = conf.getObject("next").getObject("buildBloom");
+						createCache(mc, bloomFilter.getString("bloomCache"));
+
+					}
+				}
+			}
+
 		}
 	}
 
@@ -263,11 +296,11 @@ public class ScanOperator extends BasicOperator {
 
 				if (sketchCaches.containsKey(collumnName)) {
 					//if (type.equals("TEXT"))
-						return collumnName;
+					return collumnName;
 
 				}
 				return null;
-				//break;
+			//break;
 
 			case CONST:
 				JsonObject datum = root.getValueAsJson().getObject("body").getObject("datum");
@@ -290,35 +323,35 @@ public class ScanOperator extends BasicOperator {
 			case LTH:
 				return 0.4;
 
-////        if(left !=null && oright !=null)
-////          return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
-//        return null;
-//        break;
+			////        if(left !=null && oright !=null)
+			////          return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
+			//        return null;
+			//        break;
 			case LEQ:
 				return 0.4;
-//        if(left !=null && oright !=null)
-//          return left.and().having("attributeValue").lte(oright);//,right.getValueAsJson());
-//        break;
+			//        if(left !=null && oright !=null)
+			//          return left.and().having("attributeValue").lte(oright);//,right.getValueAsJson());
+			//        break;
 			case GTH:
 				return 0.4;
-//        if(left !=null && oright !=null)
-//          return left.and().having("attributeValue").gt(oright);//,right.getValueAsJson());
-//        break;
+			//        if(left !=null && oright !=null)
+			//          return left.and().having("attributeValue").gt(oright);//,right.getValueAsJson());
+			//        break;
 			case GEQ:
 				return 0.4;
-//        if(left !=null && oright !=null)
-//          return left.and().having("attributeValue").gte(oright);//,right.getValueAsJson());
-//        break;
-//
-//      case LIKE:
-//        if(left !=null && oright !=null) {
-//          return left.and().having("attributeValue").like((String) oright);//,right.getValueAsJson());
-//        }break;
-//
-//
-//      case ROW_CONSTANT:
-//        //TODO
-//        break;
+			//        if(left !=null && oright !=null)
+			//          return left.and().having("attributeValue").gte(oright);//,right.getValueAsJson());
+			//        break;
+			//
+			//      case LIKE:
+			//        if(left !=null && oright !=null) {
+			//          return left.and().having("attributeValue").like((String) oright);//,right.getValueAsJson());
+			//        }break;
+			//
+			//
+			//      case ROW_CONSTANT:
+			//        //TODO
+			//        break;
 			default:
 				return 0.01;
 		}

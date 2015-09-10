@@ -93,9 +93,11 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
                 if (action.getData().getObject("operator").containsField("direct")) {
                   String id = action.getData().getObject("operator").getString("id");
                   String s = (String) jobsCache.get(id);
-                  QueryStatus queryStatus = new QueryStatus(new JsonObject(s));
+                  JsonObject wrapper = new JsonObject(s);
+                  QueryStatus queryStatus = new QueryStatus(wrapper.getObject("status"));
                   queryStatus.setStatus(QueryState.COMPLETED);
-                  jobsCache.put(id, queryStatus.toString());
+                  wrapper.putObject("status",queryStatus.asJsonObject());
+                  jobsCache.put(id, wrapper.toString());
                 } else {
                   log.info("Operator: " + action.getData().getString("operatorType") + " is completed");
                   com.sendTo(action.getData().getString("monitor"), action.asJsonObject());
