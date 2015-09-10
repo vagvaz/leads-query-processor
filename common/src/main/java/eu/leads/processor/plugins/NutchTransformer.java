@@ -3,6 +3,8 @@ package eu.leads.processor.plugins;
 import eu.leads.processor.core.Tuple;
 import org.apache.avro.generic.GenericData;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,7 +61,13 @@ public class NutchTransformer {
             tuple.setAttribute("default.webpages."+"ts", (long)wp.get(entry.getKey()));
          }
          else if(entry.getValue().equals("url")) {
-            tuple.setAttribute("default.webpages."+"url", wp.get(entry.getValue()));
+//            tuple.setAttribute("default.webpages."+"url", wp.get(entry.getKey()));
+            String url = (String) wp.get("url");
+            if(url.startsWith("http")){
+               url = transformUri(url);
+            }
+            tuple.setAttribute("default.webpages."+"url", url);
+
          }
          else{
             tuple.setAttribute("default.webpages."+entry.getValue(),wp.get(entry.getKey()));
@@ -85,5 +93,30 @@ public class NutchTransformer {
 //      tuple.setAttribute("default.webpages."+"published", df2.format(date));
 //      tuple.setAttribute("default.webpages."+"sentiment", -1.0);
       return tuple;
+   }
+
+   private String transformUri(String standardUrl) {
+      String nutchUrl = "";
+      URL url_;
+      try {
+         url_ = new URL(standardUrl);
+
+         String authority = url_.getAuthority();
+         String protocol  = url_.getProtocol();
+         String file      = url_.getFile();
+
+         String [] authorityParts = authority.split("\\.");
+         for(int i=authorityParts.length-1; i>=0; i--)
+            nutchUrl += authorityParts[i] + ".";
+         nutchUrl = nutchUrl.substring(0, nutchUrl.length()-1);
+         nutchUrl += ":" + protocol;
+         nutchUrl += file;
+
+      } catch (MalformedURLException e) {
+         e.printStackTrace();
+         return null;
+      }
+
+      return nutchUrl;
    }
 }

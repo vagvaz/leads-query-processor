@@ -374,7 +374,7 @@ public class LoadAmplab2 {
                     (BasicCache) embeddedCache, ((Cache) embeddedCache).getName() + ":" + key, tuple);
         else if (ensembleCache!=null)
 //            ensembleCache.put( ensembleCache.getName() + ":" + key, tuple);
-            EnsembleCacheUtils.putToCache(ensembleCache, ensembleCache.getName() + ":" + key, tuple);
+            EnsembleCacheUtils.putToCacheDirect(ensembleCache, ensembleCache.getName() + ":" + key, tuple);
         try {
             Thread.sleep(delay);
         } catch (InterruptedException e) {

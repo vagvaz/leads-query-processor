@@ -165,7 +165,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
          log.error("reduce called with null key? " + (key == null));
          return;
       }
-      log.error("Computing values for group " + key + " .");
+//      log.error("Computing values for group " + key + " .");
 //      if (!isInitialized) initialize();
       resetValues();
       Tuple t = null;
@@ -208,7 +208,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
 
          } catch (Exception e) {
             if(e instanceof NoSuchElementException){
-               log.info("End of leadsIntermidateIterator " + e.getMessage());
+//               log.info("End of leadsIntermidateIterator " + e.getMessage());
                break;
             }
             log.error("EXCEPTION WHILE updating agg value");
@@ -223,7 +223,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
          Iterator<String> nameIterator = aggregateInferred.iterator();
          Iterator<Object> aggValuesIterator = aggregateValues.iterator();
          Iterator<String> funcTypeIterator = functionType.iterator();
-      log.error("Computing final agg values for group " + key + " after " + tuplecounter + " tuples");
+//      log.error("Computing final agg values for group " + key + " after " + tuplecounter + " tuples");
          //compute final values and put agg values to tuple
          try {
             while (nameIterator.hasNext()) {
