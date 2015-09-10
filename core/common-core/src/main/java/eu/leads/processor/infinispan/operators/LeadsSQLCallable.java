@@ -4,7 +4,6 @@ import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.infinispan.LeadsBaseCallable;
 import eu.leads.processor.math.MathUtils;
-import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
@@ -20,8 +19,7 @@ public abstract  class LeadsSQLCallable<K,V> extends LeadsBaseCallable<K,V> impl
   transient protected JsonObject outputSchema;
   transient protected Map<String,String> outputMap;
   transient protected Map<String,List<JsonObject>> targetsMap;
-  transient HashMap<String,Cache> indexCaches=null;
-  transient HashMap<String,DistCMSketch> sketches=null;
+   transient HashMap<String,DistCMSketch> sketches=null;
   transient  List<String> attributeFunctions;
 
   public LeadsSQLCallable(String configString, String output) {

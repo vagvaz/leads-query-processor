@@ -5,15 +5,11 @@ import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
-import eu.leads.processor.math.FilterOpType;
-import eu.leads.processor.math.FilterOperatorNode;
 import eu.leads.processor.infinispan.LeadsCollector;
 import eu.leads.processor.math.FilterOperatorTree;
-import eu.leads.processor.math.MathUtils;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterable;
-import org.infinispan.query.dsl.FilterConditionContext;
 import org.infinispan.versioning.VersionedCache;
 import org.infinispan.versioning.utils.version.Version;
 import org.infinispan.versioning.utils.version.VersionScalar;
@@ -23,7 +19,6 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.Serializable;
-
 import java.util.*;
 
 
@@ -129,7 +124,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 	private boolean checkIndex_usage() {
 		// System.out.println("Check if fields are indexed");
 		if (conf.getBoolean("useIndex")) {
-			System.out.println("Scan Callable Use indexes!!");
+			System.out.println("Check Callable Use indexes!!");
 			indexCaches = new HashMap<>();
 			String columnName;
 			JsonArray fields = inputSchema.getArray("fields");
