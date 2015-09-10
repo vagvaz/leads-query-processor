@@ -20,9 +20,12 @@ public class ProcessingFilterSingleton {
 	public static boolean shouldProcess(String uri) {
 		if(filter==null)
 			return true;
-		if(StringUtils.startsWithAny(uri, filter))
-			return true;
-		
+		for(String f : filter){
+			if(uri.startsWith(f)){
+				return true;
+			}
+		}
+
 		return false;
 	}
 
