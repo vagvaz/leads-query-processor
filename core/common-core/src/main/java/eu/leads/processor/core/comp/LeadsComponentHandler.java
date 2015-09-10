@@ -3,6 +3,7 @@ package eu.leads.processor.core.comp;
 import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.imanager.IManagerConstants;
 import org.vertx.java.core.json.JsonObject;
 
 /**
@@ -75,6 +76,14 @@ public class LeadsComponentHandler implements LeadsMessageHandler {
                     break;
             }
         }else{
+
+            if (message.getString("type").equals("action")){
+                System.out.println(" Quit leads Component ");
+                if(message.getString("label").equals(IManagerConstants.QUIT))
+                {
+                    owner.kill();
+                }
+            }
             log.error(owner.getComponentType() + ":" + owner.getId()
                                   + " received other\n" + message.toString());
             owner.kill();

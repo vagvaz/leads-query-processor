@@ -422,14 +422,17 @@ public class ComponentControlVerticle extends Verticle implements Component {
         if(mode!=null) {
             if (mode.equals(ComponentMode.TESTING)) {
                 log.info(componentType + "." + id + " is being killed ");
-                System.exit(-1);
+                stop();
+                //System.exit(0);
             } else {
                 log.error(componentType + "." + id + " received kill command but mode is  "
                         + mode.toString());
             }
         }else{
-           log.error(componentType + "." + id + " received kill command but mode is null ");
-          }
+           log.error(componentType + "." + id + " received kill command but mode is null, stopping anyway ");
+           com.unsubscribeFromAll();
+           stop();
+        }
 
     }
 

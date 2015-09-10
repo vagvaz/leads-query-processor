@@ -283,7 +283,7 @@ public class DefaultNode implements Node, Handler<Long> {
             }
         }
         conf.putArray("groups", array);
-        System.out.println("id: "+ id + "Groups: "+array.toString());
+        //System.out.println("id: "+ id + "Groups: "+array.toString());
         initialize(conf, defaultHandler, failHandler, vertx);
     }
 
@@ -291,10 +291,10 @@ public class DefaultNode implements Node, Handler<Long> {
         bus.registerHandler(getId(), comHandler);
         bus.registerHandler(getGroup(), comHandler);
         Iterator<Object> it = this.config.getArray("groups").iterator();
-        System.out.println("registerToEventBusAddresses " +this.config.getArray("groups") );
+        //System.out.println("registerToEventBusAddresses " +this.config.getArray("groups") );
         while (it.hasNext()) {
             String id= (String)it.next();
-            System.out.println("Subscribed " +id +" " + comHandler.toString() );
+            //System.out.println("Subscribed " +id +" " + comHandler.toString() );
             bus.registerHandler((String) id, comHandler);
         }
     }

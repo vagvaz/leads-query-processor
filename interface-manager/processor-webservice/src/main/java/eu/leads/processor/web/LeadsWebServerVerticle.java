@@ -23,7 +23,7 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
     Node com;
     Logger log;
     String id;
-
+    static int shutdown_messages =0;
     public void start() {
 
         LQPConfiguration.initialize(true);
@@ -139,16 +139,19 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
 
                             System.err.println("Continue");
                         } else {
-                            System.err.println("Exit webprocessor");
+                            System.err.println("Exit webprocessor try: "+shutdown_messages);
+                            shutdown_messages++;
 
                             try {
-                                Thread.sleep(1000);
+                                Thread.sleep(100);
+                                com.sendToGroup("leads.processor.control", action.asJsonObject());
                             } catch (Exception e) {
                                 ;
                             }
-                            System.err.println("Exit webprocessor2");
-                            stop();
-                            System.exit(0);
+                            if(shutdown_messages==6) {
+                              System.err.println("Exit webprocessor at last");
+                                System.exit(0);
+                            }
                         }
                     }
 

@@ -129,10 +129,11 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
                   com.sendTo(logic, result.asJsonObject());
                   message.reply();
                }else{
-                  System.out.println(" QUIIITTTT222 ");
+                  System.out.println(" Quit Imanager ");
                   action.setStatus(ActionStatus.COMPLETED.toString());
                   com.sendTo(logic, action.asJsonObject());
                   persistence.stopManager();
+
                   log.error("Stopped Manager Exiting");
                   this.getVertx().stop();
                   log.error("Stopped component");

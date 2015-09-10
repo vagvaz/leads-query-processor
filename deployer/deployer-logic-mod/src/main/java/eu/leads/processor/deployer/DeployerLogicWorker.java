@@ -12,6 +12,7 @@ import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.*;
+import eu.leads.processor.imanager.IManagerConstants;
 import eu.leads.processor.infinispan.operators.DistCMSketch;
 import eu.leads.processor.math.FilterOperatorNode;
 import eu.leads.processor.math.FilterOperatorTree;
@@ -98,6 +99,18 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
          Action newAction = null;
          action.setProcessedBy(id);
          //         action.setStatus(ActionStatus.INPROCESS.toString());
+         if(action.getLabel().equals(IManagerConstants.QUIT)) {
+            System.out.println(" Quit Dep ");
+            persistence.stopManager();
+            log.error("Stopped Manager Exiting");
+            try {
+               Thread.sleep(10);
+            } catch (InterruptedException e) {
+               e.printStackTrace();
+            }
+            System.exit(0);
+         }
+
 
          switch (ActionStatus.valueOf(action.getStatus())) {
             case PENDING: //probably received an action from an external source

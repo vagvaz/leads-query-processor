@@ -132,8 +132,10 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
                         com.sendTo(logic, result.asJsonObject());
                         message.reply();
                     }else{
-                        persistence.stopManager();
-                        log.error("Stopped Manager Exiting");
+                        System.out.println(" Quit Planner ");
+
+//                        persistence.stopManager();
+//                        log.error("Stopped Manager Exiting");
                         Thread.sleep(10);
                         System.exit(0);
                     }

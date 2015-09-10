@@ -96,7 +96,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
                   JsonObject wrapper = new JsonObject(s);
                   QueryStatus queryStatus = new QueryStatus(wrapper.getObject("status"));
                   queryStatus.setStatus(QueryState.COMPLETED);
-                  wrapper.putObject("status",queryStatus.asJsonObject());
+                  wrapper.putObject("status", queryStatus.asJsonObject());
                   jobsCache.put(id, wrapper.toString());
                 } else {
                   log.info("Operator: " + action.getData().getString("operatorType") + " is completed");
@@ -241,6 +241,8 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
             message.reply();
           }else
           {
+            System.out.println(" Quit NQE ");
+
             persistence.stopManager();
             log.error("Stopped Compoment");
 

@@ -13,6 +13,7 @@ import org.infinispan.configuration.cache.Index;
 import org.infinispan.configuration.global.GlobalConfiguration;
 import org.infinispan.configuration.parsing.ConfigurationBuilderHolder;
 import org.infinispan.configuration.parsing.ParserRegistry;
+import org.infinispan.context.Flag;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.eviction.EvictionStrategy;
@@ -26,7 +27,6 @@ import org.infinispan.persistence.leveldb.configuration.LevelDBStoreConfiguratio
 import org.infinispan.remoting.transport.Address;
 import org.infinispan.server.hotrod.HotRodServer;
 import org.infinispan.server.hotrod.configuration.HotRodServerConfigurationBuilder;
-//import org.infinispan.server.hotrod.test.HotRodTestingUtil;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
 import org.infinispan.transaction.TransactionMode;
 import org.infinispan.transaction.lookup.JBossStandaloneJTAManagerLookup;
@@ -44,6 +44,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static org.infinispan.test.AbstractCacheTest.getDefaultClusteredCacheConfig;
+
+//import org.infinispan.server.hotrod.test.HotRodTestingUtil;
 
 /**
  * Created by vagvaz on 5/23/14.
@@ -537,13 +539,13 @@ public class ClusterInfinispanManager implements InfinispanManager {
    */
   @Override
   public void stopManager() {
-    // for(String cacheName : this.manager.getCacheNames())
-    //{
-    //    Cache cache= this.manager.getCache(cacheName,false);
-    //    if(cache != null && cache.getAdvancedCache().getStatus().equals(ComponentStatus.RUNNING))
-    //         cache.stop();
-    // }
-    this.manager.stop();
+
+     for(String cacheName : this.manager.getCacheNames())
+        if(manager.isRunning(cacheName)) {
+          manager.getCache(cacheName).getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).stop();
+          System.out.println("local Cache closed: " + cacheName);
+        }
+     this.manager.stop();
   }
 
   /**
