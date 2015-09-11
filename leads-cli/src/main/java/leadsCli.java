@@ -203,6 +203,8 @@ public class leadsCli {
 
         resultPrinted = System.currentTimeMillis();
         System.out.print("\rFound " + res.getResult().size() + " results.                                      \n");
+
+
       }
       System.out.print("\nSubmit time: " + (submittime - start) + " ms, ");
       System.out.print("execution  time: " + (resultCompleted - submittime) + " ms, ");
@@ -212,6 +214,7 @@ public class leadsCli {
     } else {
       System.err.println(" Execution terminated: " + currentStatus.getErrorMessage());
     }
+    System.gc();
   }
 
   private static void print_results(QueryResults data) {
@@ -226,6 +229,8 @@ public class leadsCli {
       resultSet.add(new Tuple(s));
     }
     printResults(resultSet);
+    resultSet.clear();
+    resultSet=null;
   }
 
   //Print the results of the query

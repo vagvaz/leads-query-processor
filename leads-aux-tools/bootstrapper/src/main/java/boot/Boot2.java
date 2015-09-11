@@ -199,7 +199,7 @@ public class Boot2 {
 
     JsonObject cluster;
     JsonObject nodeData;
-    JsonArray nodesList = new JsonArray();
+
     JsonArray clusterPublicIPs;
     JsonArray clusterPrivateIPs;
 
@@ -211,6 +211,7 @@ public class Boot2 {
     clusters = new JsonArray();
     IPsshmap = new HashMap<>();
     for (HierarchicalConfiguration c : cmplXadresses) {
+      JsonArray nodesList = new JsonArray();
       ConfigurationNode node = c.getRoot();
       System.out.println("Found Cluster : " + c.getString("[@name]"));
       System.out.println("Cluster Size : " + node.getChildren().size());
