@@ -102,7 +102,7 @@ public class LocalIndexListener implements LeadsListener {
             return;
         }
 //        System.err.println("local " + event.isOriginLocal() + " " + event.isCommandRetried() + " " + event.isCreated() + " " + event.isPre());
-        log.error("orig " + event.isOriginLocal() + " ret " + event.isCommandRetried() + " crea " + event.isCreated() + " pre  " + event.isPre());
+//        log.error("orig " + event.isOriginLocal() + " ret " + event.isCommandRetried() + " crea " + event.isCreated() + " pre  " + event.isPre());
 
 //        pevent.start("IndexPut");
 //        if(event.getKey() instanceof ComplexIntermediateKey) {
