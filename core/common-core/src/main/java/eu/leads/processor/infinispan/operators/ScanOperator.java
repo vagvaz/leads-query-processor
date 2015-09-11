@@ -5,32 +5,23 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
-import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.LeadsNodeType;
-import eu.leads.processor.core.plan.PlanNode;
 import eu.leads.processor.infinispan.LeadsCollector;
-import eu.leads.processor.infinispan.LeadsMapperCallable;
-import eu.leads.processor.infinispan.operators.mapreduce.GroupByMapper;
 import eu.leads.processor.math.FilterOperatorNode;
 import eu.leads.processor.math.FilterOperatorTree;
 import eu.leads.processor.math.MathUtils;
 import org.infinispan.Cache;
-import org.infinispan.distexec.DefaultExecutorService;
-import org.infinispan.distexec.DistributedExecutorService;
-import org.infinispan.distexec.DistributedTask;
-import org.infinispan.distexec.DistributedTaskBuilder;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.Site;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Created by vagvaz on 9/22/14.
@@ -172,7 +163,7 @@ public class ScanOperator extends BasicOperator {
 			JsonObject inputSchema;
 			inputSchema = conf.getObject("body").getObject("inputSchema");
 			JsonArray fields = inputSchema.getArray("fields");
-			System.out.println("Check if fields: " + fields.toArray().toString() + " are indexed.");
+			System.out.println("Check if inputSchema fields: " + fields.toArray().toString() + " are indexed.");
 
 			Iterator<Object> iterator = fields.iterator();
 			String columnName = null;
@@ -292,13 +283,15 @@ public class ScanOperator extends BasicOperator {
 			case FIELD:
 				String collumnName = root.getValueAsJson().getObject("body").getObject("column").getString("name");
 				//String type = root.getValueAsJson().getObject("body").getObject("column").getObject("dataType").getString("type");
-
+				System.out.print("Field name:" + collumnName);
 
 				if (sketchCaches.containsKey(collumnName)) {
-					//if (type.equals("TEXT"))
+					System.out.println(" Found sketch:" + collumnName);
+
 					return collumnName;
 
 				}
+				System.out.println(" no sketch " );
 				return null;
 			//break;
 
