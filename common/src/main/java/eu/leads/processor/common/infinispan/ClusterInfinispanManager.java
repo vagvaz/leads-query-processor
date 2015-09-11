@@ -72,6 +72,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
   private int maxEntries;
   private int blockSize = 1;
   private int cacheSize = 64;
+  private int indexwriter_ram_buffer_size =64;
   private CompressionType compressionType = CompressionType.NONE;
   //  private static final EquivalentConcurrentHashMapV8<String, TestResources> testResources = new EquivalentConcurrentHashMapV8<>(AnyEquivalence.getInstance(), AnyEquivalence.getInstance());
 
@@ -81,6 +82,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
   public ClusterInfinispanManager() {
     host = "0.0.0.0";
     maxEntries = LQPConfiguration.getInstance().getConfiguration().getInt("node.infinispan.maxentries",5000);
+    indexwriter_ram_buffer_size =  LQPConfiguration.getInstance().getConfiguration().getInt("hibernate.search.default.indexwriter.ram_buffer_size",64);
     blockSize = LQPConfiguration.getInstance().getConfiguration().getInt("leads.processor.infinispan.leveldb.blocksize",blockSize);
     cacheSize = LQPConfiguration.getInstance().getConfiguration().getInt("leads.processor.infinispan.leveldb.cachesize",cacheSize);
     if(LQPConfiguration.getInstance().getConfiguration().getBoolean("leads.processor.infinispan.leveldb.compression",false)){
@@ -112,7 +114,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
   }
 
   @Override
-  public String getUniquePath(){
+  public String getUniquePath() {
 
     System.out.println("UNIQUE PATH = " + uniquePath);
     return uniquePath;
@@ -947,10 +949,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
       cacheConfig =  new ConfigurationBuilder().read(defaultIndexConfig).transaction()
           .transactionMode(TransactionMode.NON_TRANSACTIONAL).clustering().indexing().index(Index.LOCAL).addProperty("default.directory_provider", "filesystem")
-          .addProperty("hibernate.search.default.indexBase","/tmp/leadsprocessor-data/"+uniquePath+"/infinispan/"+cacheName+"/")
+          .addProperty("hibernate.search.default.indexBase", "/tmp/leadsprocessor-data/" + uniquePath + "/infinispan/" + cacheName + "/")
           .addProperty("hibernate.search.default.exclusive_index_use", "true")
           .addProperty("hibernate.search.default.indexmanager", "near-real-time")
-          .addProperty("hibernate.search.default.indexwriter.ram_buffer_size", "256")
+          .addProperty("hibernate.search.default.indexwriter.ram_buffer_size",Integer.toString(indexwriter_ram_buffer_size))
           .addProperty("lucene_version", "LUCENE_CURRENT").build();
       System.out.println(" Indexed Cache Configuration for: " + cacheName );
     }
