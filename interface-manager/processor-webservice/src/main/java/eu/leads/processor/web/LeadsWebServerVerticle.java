@@ -143,13 +143,14 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
                             shutdown_messages++;
 
                             try {
-                                Thread.sleep(100);
-                                com.sendToGroup("leads.processor.control", action.asJsonObject());
+                                Thread.sleep(10);
+                                com.sendToAllGroup("leads.processor.control", action.asJsonObject());
                             } catch (Exception e) {
                                 ;
                             }
-                            if(shutdown_messages==6) {
+                            if(shutdown_messages==2) {
                               System.err.println("Exit webprocessor at last");
+                                vertx.stop();
                                 System.exit(0);
                             }
                         }

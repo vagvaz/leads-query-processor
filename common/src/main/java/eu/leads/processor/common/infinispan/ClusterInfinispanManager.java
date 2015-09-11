@@ -855,7 +855,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .hash().numOwners(1)
             .indexing().index(Index.NONE).transaction().transactionMode(
                 TransactionMode.NON_TRANSACTIONAL)
-            .persistence().passivation(true)
+            .persistence().passivation(false)
             .addStore(LevelDBStoreConfigurationBuilder.class)
             .location("/tmp/leadsprocessor-data/leveldb/data-" + uniquePath + "/")
                 //                                 .location("/tmp/leveldb/data-foo/" + "/")
@@ -890,7 +890,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).clustering()
         .cacheMode(CacheMode.LOCAL).transaction()
-        .transactionMode(TransactionMode.NON_TRANSACTIONAL).clustering().indexing().index(Index.LOCAL).build();
+        .transactionMode(TransactionMode.NON_TRANSACTIONAL)
+            .clustering().persistence().passivation(false).indexing().index(Index.LOCAL).build();
   }
 
 
@@ -948,7 +949,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       }
 
       cacheConfig =  new ConfigurationBuilder().read(defaultIndexConfig).transaction()
-          .transactionMode(TransactionMode.NON_TRANSACTIONAL).clustering().indexing().index(Index.LOCAL).addProperty("default.directory_provider", "filesystem")
+          .transactionMode(TransactionMode.NON_TRANSACTIONAL).persistence().passivation(false).clustering().indexing().index(Index.LOCAL).addProperty("default.directory_provider", "filesystem")
           .addProperty("hibernate.search.default.indexBase","/tmp/leadsprocessor-data/"+uniquePath+"/infinispan/"+cacheName+"/")
           .addProperty("hibernate.search.default.exclusive_index_use", "true")
           .addProperty("hibernate.search.default.indexmanager", "near-real-time")

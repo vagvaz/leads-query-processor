@@ -3,7 +3,8 @@ package eu.leads.processor.infinispan.operators;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.Tuple;
-import eu.leads.processor.core.index.*;
+import eu.leads.processor.core.index.LeadsIndex;
+import eu.leads.processor.core.index.LeadsIndexHelper;
 import eu.leads.processor.math.FilterOperatorTree;
 import org.apache.tajo.algebra.*;
 import org.infinispan.Cache;
@@ -14,9 +15,6 @@ import org.vertx.java.core.json.JsonObject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
-
-import static eu.leads.processor.common.infinispan.EnsembleCacheUtils.putToCache;
-import static eu.leads.processor.common.infinispan.EnsembleCacheUtils.putToCacheDirect;
 
 
 /**
@@ -118,8 +116,8 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
       for (int c = 0; c < columnNames.size(); c++) {
         String column = tableName + '.' + columnNames.get(c);
         LeadsIndex lInd = lindHelp.CreateLeadsIndex(value.getGenericAttribute(column), ikey, column, tableName);
-        putToCacheDirect(indexCaches.get(c), ikey, lInd);
-        //indexCaches.get(c).put(ikey, lInd);
+        //putToCacheDirect(indexCaches.get(c), ikey, lInd);
+        indexCaches.get(c).put(ikey, lInd);
         sketches.get(c).add(value.getGenericAttribute(column));
       }
     }catch (Exception e){

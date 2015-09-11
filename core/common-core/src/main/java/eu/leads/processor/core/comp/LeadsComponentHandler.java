@@ -81,12 +81,15 @@ public class LeadsComponentHandler implements LeadsMessageHandler {
                 System.out.println(" Quit leads Component ");
                 if(message.getString("label").equals(IManagerConstants.QUIT))
                 {
+                    System.out.println(" Shutdown "+ owner.getId());
+                    owner.shutdown();
                     owner.kill();
                 }
+            }else {
+                log.error(owner.getComponentType() + ":" + owner.getId()
+                        + " received other\n" + message.toString());
+                owner.kill();
             }
-            log.error(owner.getComponentType() + ":" + owner.getId()
-                                  + " received other\n" + message.toString());
-            owner.kill();
         }
     }
 }

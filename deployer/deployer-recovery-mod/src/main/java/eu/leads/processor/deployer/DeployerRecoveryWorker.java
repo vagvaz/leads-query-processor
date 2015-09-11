@@ -9,6 +9,7 @@ import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.imanager.IManagerConstants;
 import eu.leads.processor.planner.QueryPlannerConstants;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -91,9 +92,13 @@ public class DeployerRecoveryWorker extends Verticle implements LeadsMessageHand
                         com.sendTo(action.getData().getString("replyTo"), action.getResult());
                     } else if (label.equals(QueryPlannerConstants.PROCESS_SPECIAL_QUERY)) {
                         com.sendTo(action.getData().getString("replyTo"), action.getResult());
-                    } else {
+                    } else if(label.equals(IManagerConstants.QUIT)){
+                        System.out.println(" Quit Deploy recovery ");
+                        stop();
+                    }
+                    else{
                         log.error("Unknown COMPLETED OR INPROCESS Action received " + action
-                                                                                          .toString());
+                                .toString());
                         return;
                     }
                     finalizeAction(action);

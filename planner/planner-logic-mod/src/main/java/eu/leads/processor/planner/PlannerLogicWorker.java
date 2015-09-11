@@ -9,6 +9,7 @@ import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.deployer.DeployerConstants;
+import eu.leads.processor.imanager.IManagerConstants;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
@@ -122,6 +123,9 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
                             deployAction.setLabel(DeployerConstants.DEPLOY_CUSTOM_PLAN);
                             com.sendTo(deployer, deployAction.asJsonObject());
                         }
+                    } else if(label.equals(IManagerConstants.QUIT)){
+                        System.out.println(" Quit Planner logicgit  ");
+                        stop();
                     } else {
                         log.error("Unknown COMPLETED OR INPROCESS Action received " + action
                                                                                           .toString());

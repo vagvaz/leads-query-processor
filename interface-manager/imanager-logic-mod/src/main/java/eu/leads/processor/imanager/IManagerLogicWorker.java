@@ -333,6 +333,10 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             newAction.setStatus(ActionStatus.COMPLETED.toString());
             com.sendTo(newAction.getDestination(),newAction.asJsonObject());
           }
+          else if(label.equals(IManagerConstants.QUIT)){
+            System.out.println(" Imanager logic worker recovery ");
+            stop();
+          }
           else {
             log.error("Unknown COMPLETED OR INPROCESS Action received " + action
                                                                             .toString());
