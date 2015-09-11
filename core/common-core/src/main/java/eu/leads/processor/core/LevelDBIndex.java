@@ -56,9 +56,9 @@ public class LevelDBIndex {
         options.blockSize(4 * 1024);
 
         options.compressionType(CompressionType.SNAPPY);
-        options.cacheSize(128 * 1024 * 1024);
+        options.cacheSize(64 * 1024 * 1024);
         dbfactory = Util.getInstance(JNI_DB_FACTORY_CLASS_NAME, LevelDBIndex.class.getClassLoader());
-//        JniDBFactory.pushMemoryPool(128*1024*1024);
+        //        JniDBFactory.pushMemoryPool(128*1024*1024);
         try {
             keysDB = dbfactory.open(keydbFile,options.verifyChecksums(true));
             dataDB = dbfactory.open(datadbFile,options);
@@ -90,7 +90,10 @@ public class LevelDBIndex {
         return keyIterator;
     }
     public Iterator<Object> getKeyIterator(String key , Integer counter){
-//        if(valuesIterator == null){
+//        if(valuesIterator != null){
+//            valuesIterator.close();
+//        }
+        if(valuesIterator == null)
             valuesIterator = new LevelDBDataIterator(dataDB,key,counter);
 //        }
 
@@ -100,62 +103,68 @@ public class LevelDBIndex {
     }
 
     public static void main(String[] args) {
-        LevelDBIndex index = new LevelDBIndex("/media/storage/vagvaz/testdb/","mydb");
-        initTuple();
-        int numberofkeys = 500000;
-        int numberofvalues = 2;
-        String baseKey= "baseKeyString";
+        for (int i = 0; i <100; i++) {
 
-        long start = System.nanoTime();
-        ArrayList<String> tuples = generate(numberofkeys,numberofvalues);
-        System.out.println("insert");
-        for(String k : tuples){
-            //            System.out.println("key " + key);
-            //            for(int value =0; value < numberofvalues; value++){
-            index.add(k,t);
-            //            }
-        }
-        index.flush();
-        long end = System.nanoTime();
-        long dur = end - start;
-        dur /= 1000000;
-        int total = numberofkeys*numberofvalues;
-        double avg = total/(double)dur;
 
-        System.out.println("Put " + (total) + " in " + (dur) + " avg " + avg);
-        int counter  =0;
+            LevelDBIndex index = new LevelDBIndex("/media/storage/vagvaz/testdb/", "mydb");
+            if(t==null)
+            initTuple();
+            int numberofkeys = 500000;
+            int numberofvalues = 2;
+            String baseKey = "baseKeyString";
 
-//               index.printKeys();
+            long start = System.nanoTime();
+            ArrayList<String> tuples = generate(numberofkeys, numberofvalues);
+            System.out.println("insert");
+            for (String k : tuples) {
+                //            System.out.println("key " + key);
+                //            for(int value =0; value < numberofvalues; value++){
+                index.add(k, t);
+                //            }
+            }
+            index.flush();
+            long end = System.nanoTime();
+            long dur = end - start;
+            dur /= 1000000;
+            int total = numberofkeys * numberofvalues;
+            double avg = total / (double) dur;
 
-        start = System.nanoTime();
-        //        for(int key = 0; key < numberofkeys; key++) {
-        int totalcounter= 0;
-        for(Map.Entry<String,Integer> entry : index.getKeysIterator()){
-            counter = 0;
-            //            System.out.println("iter key "+entry.getKey());
-            Iterator<Object> iterator = index.getKeyIterator(entry.getKey(),entry.getValue());
-            while(true){
-                try {
-                    Tuple t = (Tuple) iterator.next();
-                    //                    String t = (String)iterator.next();
-                    //                System.out.println(t.getAttribute("key")+" --- " + t.getAttribute("value"));
-                    counter++;
-                    totalcounter++;
-                }catch(NoSuchElementException e){
-                    break;
+            System.out.println("Put " + (total) + " in " + (dur) + " avg " + avg);
+            int counter = 0;
+
+            //               index.printKeys();
+
+            start = System.nanoTime();
+            //        for(int key = 0; key < numberofkeys; key++) {
+            int totalcounter = 0;
+            for (Map.Entry<String, Integer> entry : index.getKeysIterator()) {
+                counter = 0;
+                //            System.out.println("iter key "+entry.getKey());
+                Iterator<Object> iterator = index.getKeyIterator(entry.getKey(), entry.getValue());
+                while (iterator.hasNext()) {
+                    try {
+                        Tuple t = (Tuple) iterator.next();
+                        //                    String t = (String)iterator.next();
+                        //                System.out.println(t.getAttribute("key")+" --- " + t.getAttribute("value"));
+                        counter++;
+                        totalcounter++;
+                    } catch (NoSuchElementException e) {
+                        break;
+                    }
+                }
+//                ((LevelDBDataIterator)iterator).close();
+                if (counter != numberofvalues) {
+                    System.err.println("Iteration failed for key " + entry.getKey() + " c " + counter);
                 }
             }
-            if(counter != numberofvalues){
-                System.err.println("Iteration failed for key " + entry.getKey() + " c " + counter);
-            }
+            end = System.nanoTime();
+            dur = end - start;
+            dur /= 1000000;
+            avg = total / (double) dur;
+            System.out.println("Iterate " + (totalcounter) + " in " + (dur) + " avg " + avg);
+            index.close();
+            System.out.println("exit---");
         }
-        end = System.nanoTime();
-        dur = end - start;
-        dur /= 1000000;
-        avg = total/(double)dur;
-        System.out.println("Iterate " + (totalcounter) + " in " + (dur) + " avg " + avg);
-        index.close();
-        System.out.println("exit---");
     }
 //    80.156.73.113:11222;80.156.73.116:11222;80.156.73.123:11222;80.156.73.128:11222
 //    ;
@@ -190,7 +199,7 @@ public class LevelDBIndex {
         t = new Tuple();
         int key = 4;
         int value = 5;
-        for(int i = 0 ; i < 10; i++){
+        for(int i = 0 ; i < 4; i++){
             t.setAttribute("key-"+key+"-"+i,key);
             t.setAttribute("value-"+value+"-"+i,value);
             t.setAttribute("keyvalue-"+key+"."+value+"-"+i,key*value);
