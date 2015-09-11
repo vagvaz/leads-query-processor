@@ -501,7 +501,7 @@ public class LeadsDataStore extends AbstractDataStore {
 		if(rs != null) {
 			for(String row : rs.getResult()) {
 				JSONObject jsonRow 	= new JSONObject(row);
-				Long key = jsonRow.getLong(mapping.getProperty(mapping.getProperty("leads_input_keywords-id")));
+				Long key = jsonRow.getLong(mapping.getProperty("leads_input_keywords-id"));
 				Map<String, Object> value = new HashMap<String, Object>();
 				for(Object o : jsonRow.keySet()) {
 					String column = (String)o;
