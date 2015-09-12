@@ -249,6 +249,9 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //            profExecute.end();
           }
         }
+        System.out.println(" Clear keys");
+
+        keys.clear();
       } catch (Exception e) {
         profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
         e.printStackTrace();
@@ -520,9 +523,17 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
           hright=getLuceneSet(lright);
 
         if(hleft !=null && hright!=null) {
-          System.out.println("Find Intersection #1: "+ hleft.size()+ " #2: "+ hright.size());
-          hleft.retainAll(hright);
-          return hleft;
+          System.out.println("Find Intersection #1: " + hleft.size() + " #2: " + hright.size());
+          if(hleft.size()<hright.size()) {
+            hleft.retainAll(hright);
+            hright.clear();
+            return hleft;
+          }else
+          {
+            hright.retainAll(hleft);
+            hleft.clear();
+            return hright;
+          }
         }
         //System.out.println("Fix AND with multiple indexes");
       }
@@ -536,7 +547,6 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
             FilterConditionContext fc = addCondition(f, lleft);
 
             f = fc.or().having("attributeValue");
-
             fc = addCondition(f, lright);
             return buildLucene(fc);
           }
@@ -549,8 +559,15 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
         if(hleft !=null && hright!=null) {
           System.out.println("Put all results together #1: "+ hleft.size()+ " #2: "+ hright.size());
-          hleft.addAll(hright);
-          return hleft;
+          if(hleft.size()>hright.size()){
+            hleft.addAll(hright);
+            hright.clear();
+            return hleft;
+          }else{
+            hright.addAll(hleft);
+            hleft.clear();
+            return hright;
+          }
         }
       }
       break;

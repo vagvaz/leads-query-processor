@@ -51,4 +51,8 @@ public class LeadsIndexInteger implements Serializable, LeadsIndex {
     public Object getAttributeValue() {
         return attributeValue;
     }
+    @Override
+    public boolean equals(LeadsIndex anObject) {
+        return keyName.equals(anObject.getKeyName());
+    }
 }
