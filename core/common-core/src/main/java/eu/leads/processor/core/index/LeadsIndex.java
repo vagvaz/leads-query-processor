@@ -13,4 +13,6 @@ public interface LeadsIndex {
     public String getAttributeName();
     public Object getAttributeValue();
     public boolean equals(LeadsIndex anObject);
+
+    public int hashCode() ;
 }
