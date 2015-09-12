@@ -182,7 +182,10 @@ public class SortOperator extends BasicOperator {
         String tmpCacheName = prefix + "." + currentCluster + "." + cacheNodes.toString();
         createCache(coordinator, tmpCacheName,"batchputListener");
       }
-      createCache(currentCluster,getOutput()+".addresses","batchputlistener");
+      Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
+      System.err.println("creating " + getOutput() + ".addresses to "+ currentCluster);
+      createCache(currentCluster, getOutput() + ".addresses", "batchputlistener");
+      System.err.println("creating " + getOutput() + ".addresses to " + coordinator);
       createCache(coordinator,getOutput()+".addresses","batchputlistener");
       //         manager.getPersisentCache();
       createCache(coordinator,prefix+"."+currentCluster+"."+manager.getMemberName().toString(),"batchputListener");
@@ -194,6 +197,7 @@ public class SortOperator extends BasicOperator {
         //                  manager.getPersisentCache(tmpCacheName);
         createCache(currentCluster,tmpCacheName,"batchputListener");
       }
+
       createCache(currentCluster, prefix + "." + currentCluster+"."+manager.getMemberName().toString(),"batchputListener");
       //               manager.getPersisentCache(prefix+"."+currentCluster+"."+manager.getMemberName().toString());
       //            }
@@ -202,7 +206,10 @@ public class SortOperator extends BasicOperator {
       Set<String> targetMC = getTargetMC();
       for (String mc : targetMC) {
         createCache(mc, getOutput(),"batchputListener");
+        System.err.println("in local creating ---" + getOutput() + ".addresses to " + mc);
+        createCache(mc,getOutput()+".addresses","batchputlistener");
       }
+      System.err.println("in local creating " + getOutput() + ".addresses to "+ currentCluster);
       Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
       createCache(currentCluster,getOutput()+".addresses","batchputlistener");
 
