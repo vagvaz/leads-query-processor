@@ -670,7 +670,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       setMapperCallableEnsembleHost();
       System.err.println(
           "EXECUTE " + mapperCallable.getClass().toString() + " ON " + currentCluster + Thread.currentThread().toString());
-      ProfileEvent distTask = new ProfileEvent("setup map taks " + mapperCallable.getClass().toString(),profilerLog);
+//      ProfileEvent distTask = new ProfileEvent("setup map taks " + mapperCallable.getClass().toString(),profilerLog);
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
       System.err.println("serrbuilding dist task");
       log.error("logbuilding dist task");
@@ -680,14 +680,14 @@ public abstract class BasicOperator extends Thread implements Operator{
       System.err.println("serrsubmitting to local cluster task");
       log.error("log submitting to local cluster task");
 
-      List<Future<String>> res = des.submitEverywhere(task);//new ArrayList<>();
-      List<Address> taskNodes =  inputCache.getAdvancedCache().getRpcManager().getMembers();
+      List<Future<String>> res = des.submitEverywhere(task);//new Arr?ayList<>();
+//      List<Address> taskNodes =  inputCache.getAdvancedCache().getRpcManager().getMembers();
       //      taskNodes.add(inputCache.getCacheManager().getAddress());
       //      for(Address node : taskNodes){
       //        Future<String> ft = des.submit(node,task);
       //        res.add(ft);
       //      }
-      distTask.end();
+//      distTask.end();
       //      Future<String> res = des.submit(callable);
       //      List<String> addresses = new ArrayList<String>();
       try {
@@ -697,7 +697,7 @@ public abstract class BasicOperator extends Thread implements Operator{
 
             while(resultIterator.hasNext()){
               Future<String> future = resultIterator.next();
-              //              System.err.println("Checking whether " + future.toString() + " is Done " + future.isDone() );
+                            System.err.println("Checking whether " + future.toString() + " is Done " );
               //              if(future.isDone()){
               System.err.println(mapperCallable.getClass().toString() + " completed on " + future
                   .get());
