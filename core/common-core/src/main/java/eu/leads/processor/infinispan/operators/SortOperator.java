@@ -194,12 +194,13 @@ public class SortOperator extends BasicOperator {
                manager.getPersisentCache(prefix+"."+currentCluster+"."+manager.getMemberName().toString());
             }
 
-            Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
+
             Set<String> targetMC = getTargetMC();
             for (String mc : targetMC) {
                createCache(mc, getOutput(),"batchputListener");
                createCache(mc,getOutput()+".addresses","batchputlistener");
             }
+           Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
          }
 
 
