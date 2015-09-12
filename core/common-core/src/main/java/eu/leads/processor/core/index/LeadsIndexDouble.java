@@ -57,4 +57,9 @@ public class LeadsIndexDouble implements Serializable, LeadsIndex {
     public boolean equals(LeadsIndex anObject) {
         return keyName.equals(anObject.getKeyName());
     }
+
+    @Override
+    public int hashCode() {
+        return keyName.hashCode();
+    }
 }

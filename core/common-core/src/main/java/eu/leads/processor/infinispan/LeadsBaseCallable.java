@@ -355,7 +355,9 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       return null;
     System.out.println("Lucene Filter: " + fc.toString());
     List<LeadsIndex> list = fc.toBuilder().build().list();
-    return new HashSet<LeadsIndex>(list);
+    HashSet<LeadsIndex> ret =new HashSet<LeadsIndex>(list);
+    list.clear();
+    return ret;
   }
 
 
@@ -476,8 +478,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     Object result = new HashSet();
     Object oleft = null;
     Object oright = null;
-    HashSet hleft = null;
-    HashSet hright = null;
+    HashSet<LeadsIndex> hleft = null;
+    HashSet<LeadsIndex> hright = null;
 
     qualinfo lleft = null;
     qualinfo lright = null;
@@ -491,13 +493,13 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       if (oleft instanceof LeadsBaseCallable.qualinfo)
         lleft = (qualinfo) oleft;
       if (oleft instanceof HashSet)
-        hleft = (HashSet) oleft;
+        hleft = (HashSet<LeadsIndex>) oleft;
     }
     if(oright != null){
       if (oright instanceof LeadsBaseCallable.qualinfo)
         lright = (qualinfo) oright;
       if (oright instanceof HashSet)
-        hright = (HashSet) oright;
+        hright = (HashSet<LeadsIndex>) oright;
     }
 
 
@@ -524,16 +526,32 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
         if(hleft !=null && hright!=null) {
           System.out.println("Find Intersection #1: " + hleft.size() + " #2: " + hright.size());
-          if(hleft.size()<hright.size()) {
-            hleft.retainAll(hright);
-            hright.clear();
-            return hleft;
-          }else
-          {
-            hright.retainAll(hleft);
+          if(true){
+            System.out.println("Slow Intersection");
+            HashSet<LeadsIndex> ret = new HashSet<>();
+            for(LeadsIndex k : hleft)
+              for(LeadsIndex l: hright){
+                if(k.equals(l))
+                {
+                  ret.add(k);
+                  break;
+                }
+              }
             hleft.clear();
-            return hright;
+            hright.clear();
+            return  ret;
           }
+          else
+            if(hleft.size()<hright.size()) {
+              hleft.retainAll(hright);
+              hright.clear();
+              return hleft;
+            }else
+            {
+              hright.retainAll(hleft);
+              hleft.clear();
+              return hright;
+            }
         }
         //System.out.println("Fix AND with multiple indexes");
       }
