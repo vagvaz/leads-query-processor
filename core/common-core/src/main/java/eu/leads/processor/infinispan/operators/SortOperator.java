@@ -182,6 +182,8 @@ public class SortOperator extends BasicOperator {
             String tmpCacheName = prefix + "." + currentCluster + "." + cacheNodes.toString();
             createCache(coordinator, tmpCacheName,"batchputListener");
          }
+        createCache(currentCluster,getOutput()+".addresses","batchputlistener");
+        createCache(coordinator,getOutput()+".addresses","batchputlistener");
 //         manager.getPersisentCache();
          createCache(coordinator,prefix+"."+currentCluster+"."+manager.getMemberName().toString(),"batchputListener");
       } else {
@@ -189,9 +191,11 @@ public class SortOperator extends BasicOperator {
             if(pendingMMC.contains(currentCluster)) {
                for (Address cacheNodes : inputCache.getAdvancedCache().getRpcManager().getMembers()) {
                   String tmpCacheName = prefix + "." + currentCluster + "." + cacheNodes.toString();
-                  manager.getPersisentCache(tmpCacheName);
+//                  manager.getPersisentCache(tmpCacheName);
+                 createCache(currentCluster,tmpCacheName,"batchputListener");
                }
-               manager.getPersisentCache(prefix+"."+currentCluster+"."+manager.getMemberName().toString());
+              createCache(currentCluster, prefix + "." + currentCluster+"."+manager.getMemberName().toString(),"batchputListener");
+//               manager.getPersisentCache(prefix+"."+currentCluster+"."+manager.getMemberName().toString());
             }
 
 

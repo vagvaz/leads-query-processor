@@ -1,19 +1,21 @@
 package eu.leads.processor.infinispan.operators;
 
+import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.TupleComparator;
 import eu.leads.processor.infinispan.LeadsBaseCallable;
+import eu.leads.processor.infinispan.LocalDataFilter;
 import org.infinispan.commons.api.BasicCache;
+import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.context.Flag;
 import org.infinispan.ensemble.EnsembleCacheManager;
+import org.infinispan.filter.KeyValueFilter;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by vagvaz on 2/20/15.
@@ -61,14 +63,29 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
     }
     final ClusteringDependentLogic cdl = inputCache.getAdvancedCache().getComponentRegistry().getComponent
                                                                                                       (ClusteringDependentLogic.class);
-    for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
-      if (!cdl.localNodeIsPrimaryOwner(key))
-        continue;
-      V value = inputCache.get(key);
+    Object filter = new LocalDataFilter<K,V>(cdl);
+    CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(
+        (KeyValueFilter<? super K, ? super V>) filter);
+    //        .converter((Converter<? super K, ? super V, ?>) filter);
 
-      if (value != null) {
-        executeOn((K)key, value);
+    try {
+
+      for (Object object : iterable) {
+        Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
+
+        //      V value = inputCache.get(key);
+        K key = (K) entry.getKey();
+        V value = (V) entry.getValue();
+        if (value != null) {
+          executeOn((K) key, value);
+        }
       }
+      iterable.close();
+    }catch(Exception e){
+        iterable.close();
+        System.err.println("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
+//        PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
+      e.printStackTrace();
     }
     finalizeCallable();
     return outputCache.getName();
