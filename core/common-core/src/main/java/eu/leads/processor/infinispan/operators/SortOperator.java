@@ -174,6 +174,7 @@ public class SortOperator extends BasicOperator {
   public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
     //need to get the input Cache here because we need to get the nodes addresses in order to create the
     // necessary caches for the merge
+    log.error("LGSORT: CREATE CACHES");
     inputCache = (Cache) manager.getPersisentCache(getInput());
     if (isRemote) {
       String coordinator = action.asJsonObject().getString("coordinator");
@@ -182,13 +183,15 @@ public class SortOperator extends BasicOperator {
         String tmpCacheName = prefix + "." + currentCluster + "." + cacheNodes.toString();
         createCache(coordinator, tmpCacheName,"batchputListener");
       }
+      log.error("LGSORT: "+ getOutput() + ".addresses");
       Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
       System.err.println("creating " + getOutput() + ".addresses to "+ currentCluster);
       createCache(currentCluster, getOutput() + ".addresses", "batchputlistener");
       System.err.println("creating " + getOutput() + ".addresses to " + coordinator);
       createCache(coordinator,getOutput()+".addresses","batchputlistener");
       //         manager.getPersisentCache();
-      createCache(coordinator,prefix+"."+currentCluster+"."+manager.getMemberName().toString(),"batchputListener");
+      createCache(coordinator, prefix + "." + currentCluster + "." + manager.getMemberName().toString(),
+          "batchputListener");
     } else {
       //         if (executeOnlyMap) {
       //            if(pendingMMC.contains(currentCluster)) {
@@ -210,19 +213,17 @@ public class SortOperator extends BasicOperator {
         createCache(mc,getOutput()+".addresses","batchputlistener");
       }
       System.err.println("in local creating " + getOutput() + ".addresses to "+ currentCluster);
+      log.error("LGSORT: COORD"+ getOutput() + ".addresses");
       Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
-      createCache(currentCluster,getOutput()+".addresses","batchputlistener");
-
-      //         }
-
-
+      createCache(currentCluster, getOutput() + ".addresses", "batchputlistener");
     }
   }
 
   @Override
   public void setMapperCallableEnsembleHost(){
     if(isRemote) {
-      String ensembleHost = globalConfig.getObject("componentsAddrs").getArray(action.asJsonObject().getString("coordinator")).get(0).toString();
+      String ensembleHost = globalConfig.getObject("componentsAddrs").getArray(action.asJsonObject().getString("coordinator")).get(
+          0).toString();
       mapperCallable.setEnsembleHost(ensembleHost);
     }
     else{
@@ -230,6 +231,7 @@ public class SortOperator extends BasicOperator {
       mapperCallable.setEnsembleHost(ensembleHost);
     }
   }
+
 
   @Override
   public void setupMapCallable() {

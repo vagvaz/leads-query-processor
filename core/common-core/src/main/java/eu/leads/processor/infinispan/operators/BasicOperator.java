@@ -670,6 +670,9 @@ public abstract class BasicOperator extends Thread implements Operator{
       setMapperCallableEnsembleHost();
       System.err.println(
           "EXECUTE " + mapperCallable.getClass().toString() + " ON " + currentCluster + Thread.currentThread().toString());
+      log.error(
+          "EXECUTE " + mapperCallable.getClass().toString() + " ON " + currentCluster + Thread.currentThread().toString());
+      log.error("LEM: " + mapperCallable.getClass().toString()+ " " +  mapperCallable.getEnsembleHost());
 //      ProfileEvent distTask = new ProfileEvent("setup map taks " + mapperCallable.getClass().toString(),profilerLog);
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
       System.err.println("serrbuilding dist task");

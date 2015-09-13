@@ -802,6 +802,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
       //
       System.out.println(cacheName+"  " + list.size());
+      log.error("LGCREATE "+cacheName+"  " + list.size());
       for (Future<Void> future : list) {
         try {
           future.get(); // wait for task to complete
