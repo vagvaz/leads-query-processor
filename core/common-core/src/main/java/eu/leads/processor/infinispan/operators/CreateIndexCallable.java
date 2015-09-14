@@ -32,7 +32,7 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
   transient Logger profilerLog;
   private ProfileEvent fullProcessing;
   transient ArrayList<Cache> indexCaches;
-
+  transient int printStackTraceCnt=0;
   transient ArrayList<DistCMSketch> sketches;
   transient LeadsIndexHelper lindHelp ;
 
@@ -121,8 +121,11 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
         sketches.get(c).add(value.getGenericAttribute(column));
       }
     }catch (Exception e){
-      System.err.println(" Exception " + key + " " + e.toString());
-      e.printStackTrace();
+      System.err.println(" Ex " + key + " " + e.toString());
+      if((printStackTraceCnt++%1000)==0) {
+        System.err.println("StackTraces "+printStackTraceCnt);
+        e.printStackTrace();
+      }
     }
 
     createIndexExecute.end();
@@ -130,11 +133,20 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
 
   @Override
   public void finalizeCallable() {
-  Cache<String,Object> sketchesM=  (Cache)imanager.getPersisentCache("sketchMerge");
-  for (int c = 0; c < columnNames.size(); c++) {
-    sketches.get(c).storeAsObject(sketchesM,  embeddedCacheManager.getAddress().toString()+":"+columnNames.get(c)+":");
+    try {
+      Cache<String,Object> sketchesM=  (Cache)imanager.getPersisentCache("sketchMerge");
+      for (int c = 0; c < columnNames.size(); c++) {
+        sketches.get(c).storeAsObject(sketchesM,  embeddedCacheManager.getAddress().toString()+":"+columnNames.get(c)+":");
+      }
+      fullProcessing.end();
+      super.finalizeCallable();
+    }catch (Exception e){
+      System.err.println(" Ex "+ e.toString());
+      if((printStackTraceCnt++%1000)==0) {
+        System.err.println("StackTraces "+printStackTraceCnt);
+        e.printStackTrace();
+      }
+    }
   }
-    fullProcessing.end();
-    super.finalizeCallable();
-  }
+
 }
