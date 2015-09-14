@@ -140,14 +140,13 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
        try {
          addressesCache = emanager.getCache(addressesCacheName,new ArrayList<>(emanager.sites()),
              EnsembleCacheManager.Consistency.DIST);
-         try {
            addressesCache.put(outputCache.getName(), outputCache.getName());
          }
          catch(Exception ee){
            ee.printStackTrace();
          }
        }
-     }
+     
     tuples.clear();
   }
 }
