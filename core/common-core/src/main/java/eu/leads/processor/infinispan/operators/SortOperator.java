@@ -65,9 +65,12 @@ public class SortOperator extends BasicOperator {
     if(conf.containsField("limit")){
       rowcount = conf.getObject("limit").getObject("body").getLong("fetchFirstNum");
     }
+    else{
+      rowcount = -1;
+    }
 
     if(isRemote){
-      action.getData().getString("prefix");
+      prefix = action.getData().getString("prefix");
     }
     else{
       prefix = UUID.randomUUID().toString();
@@ -91,7 +94,7 @@ public class SortOperator extends BasicOperator {
     Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
     DistributedExecutorService des = new DefaultExecutorService(inputCache);
     //     String prefix = UUID.randomUUID().toString();
-    SortCallableUpdated<String,Tuple> callable = new SortCallableUpdated(sortColumns,asceding,types,getOutput()+".merge",prefix);
+    SortCallableUpdated<String,Tuple> callable = new SortCallableUpdated(sortColumns,asceding,types,getOutput()+".merge",prefix,rowcount);
     //      SortCallable callable = new SortCallable(sortColumns,asceding,types,getOutput()+".merge",UUID.randomUUID().toString());
     DistributedTaskBuilder builder = des.createDistributedTaskBuilder( callable);
     builder.timeout(1, TimeUnit.HOURS);
@@ -157,11 +160,6 @@ public class SortOperator extends BasicOperator {
     //Store Values for statistics
     //      updateStatistics(inputCache.size(), manager.getPersisentCache(getOutput()).size(), System.nanoTime() - startTime);
     updateStatistics(inputCache,null,outputCache);
-  }
-
-  @Override
-  public void execute() {  //Need Heavy testing
-    super.execute();
   }
 
   @Override
@@ -237,7 +235,7 @@ public class SortOperator extends BasicOperator {
   public void setupMapCallable() {
     //      String prefix = UUID.randomUUID().toString();
     inputCache = (Cache) this.manager.getPersisentCache(getInput());
-    mapperCallable =  new SortCallableUpdated(sortColumns,asceding,types,getOutput()+".merge",prefix);
+    mapperCallable =  new SortCallableUpdated(sortColumns,asceding,types,getOutput()+".merge",prefix, rowcount);
   }
 
   @Override

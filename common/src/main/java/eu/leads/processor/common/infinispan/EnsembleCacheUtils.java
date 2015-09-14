@@ -286,14 +286,6 @@ public class EnsembleCacheUtils {
             }
         }
 
-        while(auxExecutor.getActiveCount() > 0) {
-            try {
-                //            auxExecutor.awaitTermination(100,TimeUnit.MILLISECONDS);
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
         while(batchPutExecutor.getActiveCount() > 0){
             try {
                 //            auxExecutor.awaitTermination(100,TimeUnit.MILLISECONDS);
@@ -302,6 +294,16 @@ public class EnsembleCacheUtils {
                 e.printStackTrace();
             }
         }
+
+        while(auxExecutor.getActiveCount() > 0) {
+            try {
+                //            auxExecutor.awaitTermination(100,TimeUnit.MILLISECONDS);
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         for(NotifyingFuture future : localFutures)
         {
             try {
@@ -313,7 +315,7 @@ public class EnsembleCacheUtils {
                 e.printStackTrace();
             }
         }
-//        localFutures.clear();
+        localFutures.clear();
     }
 
     public static void putToCache(BasicCache cache, Object key, Object value) {

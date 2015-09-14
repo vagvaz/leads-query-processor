@@ -103,7 +103,7 @@ import java.util.Set;
                 }
             } else {
                 CloseableIterable<Map.Entry<String, Tuple>> iterable =
-                    inputCache.getAdvancedCache().filterEntries(new AcceptAllFilter());
+                    inputCache.getAdvancedCache().filterEntries(new AcceptAllFilter(rowCount));
                 for (Map.Entry<String, Tuple> entry : iterable) {
                     if (counter >= rowCount)
                         break;

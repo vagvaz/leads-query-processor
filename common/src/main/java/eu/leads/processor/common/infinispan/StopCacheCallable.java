@@ -5,11 +5,10 @@ package eu.leads.processor.common.infinispan;
  */
 
 import eu.leads.processor.common.LeadsListener;
-import eu.leads.processor.common.utils.PrintUtilities;
+import org.hibernate.annotations.common.util.impl.LoggerFactory;
 import org.infinispan.Cache;
-import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
-import org.infinispan.lifecycle.ComponentStatus;
+import org.slf4j.Logger;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -18,8 +17,6 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
     private static final long serialVersionUID = 8331682008912636781L;
     private final String cacheName;
     private transient Cache<K, V> cache;
-
-
     public StopCacheCallable(String cacheName) {
         this.cacheName = cacheName;
     }
@@ -29,7 +26,8 @@ public class StopCacheCallable<K, V> implements DistributedCallable<K, V, Void>,
      */
     @Override
     public Void call() throws Exception {
-        System.err.println("\nTry to clear stop " + cacheName + " from " +cache.getCacheManager().getAddress().toString());
+        Logger log = org.slf4j.LoggerFactory.getLogger(StopCacheCallable.class);
+        log.error("Try to clear stop " + cacheName + " from " +cache.getCacheManager().getAddress().toString());
         if(cache.getCacheManager().cacheExists(cacheName))
         {
 //            System.err.println(

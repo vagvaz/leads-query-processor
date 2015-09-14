@@ -37,8 +37,10 @@ public class CompletedMRActionHandler implements ActionHandler {
          actionResult.putObject("status", statusResult);
 //         actionResult.putString("deployerID", deployerId);
          actionResult.putObject("result",data);
-         actionResult.putString("replyGroup",action.getData().getObject("data").getString("replyGroup"));
+         actionResult.putString("replyGroup", action.getData().getObject("data").getString("replyGroup"));
          actionResult.putString("microcloud",action.getData().getObject("data").getString("microcloud"));
+         actionResult.getObject("result").putString("microcloud",action.getData().getObject("data").getString("microcloud"));
+         actionResult.getObject("result").putString("STATUS",action.getData().getObject("data").getString("STATUS"));
 
          if (!(actionResult == null || actionResult.equals(""))) {
             //               com.sendTo(from, result.getObject("result"));

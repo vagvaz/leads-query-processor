@@ -33,11 +33,12 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
   transient String address;
   private String prefix;
   private String addressesCacheName;
+  private long limit = -1 ;
   private transient EnsembleCache addressesCache;
 
   //  public SortCallableUpdated(String configString, String output){
-  public SortCallableUpdated(String[] sortColumns, Boolean[] ascending, String[] types, String output,
-                             String prefix){
+  public SortCallableUpdated(String[] sortColumns, Boolean[] ascending, String[] types, String output, String prefix,
+      long rowcount){
     super("{}", output);
     this.sortColumns = sortColumns;
     this.asceding = ascending;
@@ -45,6 +46,7 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
     this.output = output;
     this.prefix = prefix;
     this.addressesCacheName = output.substring(0,output.lastIndexOf("."))+".addresses";
+    this.limit = rowcount;
   }
 
   @Override public void initialize() {
@@ -111,11 +113,18 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
    public void   endCallable(){
     Comparator<Tuple> comparator = new TupleComparator(sortColumns,asceding,types);
     Collections.sort(tuples, comparator);
-    int counter = 0;
+    long counter = 0;
     String prefix = outputCache.getName();
     emanager.start();
+     if(limit > 0){
+       System.err.println("SORTCALLABLE: USING LIMIT " + limit);
+     }
+
     for (Tuple t : tuples) {
 //      System.out.println("output to " + outputCache.getName() + "   key " + prefix + counter);
+      if(limit > 0 && counter >= limit){
+        break;
+      }
       EnsembleCacheUtils.putToCache(outputCache,prefix + counter, t);
 
 //      outputCache.put(outputCache.getName()  + counter, t);
@@ -126,6 +135,7 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
 //                         +"."+imanager.getMemberName(),
 //                        prefix+"."+LQPConfiguration.getInstance().getMicroClusterName()
 //                          +"."+imanager.getMemberName());
+
      EnsembleCacheManager em = new EnsembleCacheManager(ensembleHost);
      em.start();
      addressesCache = em.getCache(addressesCacheName,new ArrayList<>(emanager.sites()),
@@ -146,7 +156,7 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
            ee.printStackTrace();
          }
        }
-     
+
     tuples.clear();
   }
 }
