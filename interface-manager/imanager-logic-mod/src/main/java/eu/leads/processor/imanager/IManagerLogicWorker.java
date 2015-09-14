@@ -331,6 +331,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             newAction.setDestination(action.getResult().getString("replyGroup"));
             newAction.setData(action.getResult().getObject("result"));
             newAction.setStatus(ActionStatus.COMPLETED.toString());
+            System.out.println("Send to " + newAction.getDestination() + " COMPLETED MAPREDUCE");
             com.sendTo(newAction.getDestination(),newAction.asJsonObject());
           }
           else {
