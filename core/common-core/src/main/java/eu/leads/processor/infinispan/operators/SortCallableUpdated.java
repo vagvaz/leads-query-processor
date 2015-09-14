@@ -13,6 +13,7 @@ import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.context.Flag;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
+import org.infinispan.ensemble.cache.distributed.DistributedEnsembleCache;
 import org.infinispan.filter.KeyValueFilter;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 
@@ -28,7 +29,7 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
   private Boolean[] asceding;
   private Integer[] sign;
   transient private List<Tuple> tuples;
-  private String output;
+//  private String output;
   transient String address;
   private String prefix;
   private String addressesCacheName;
@@ -125,6 +126,11 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
 //                         +"."+imanager.getMemberName(),
 //                        prefix+"."+LQPConfiguration.getInstance().getMicroClusterName()
 //                          +"."+imanager.getMemberName());
+     EnsembleCacheManager em = new EnsembleCacheManager(ensembleHost);
+     em.start();
+     addressesCache = em.getCache(addressesCacheName,new ArrayList<>(emanager.sites()),
+         EnsembleCacheManager.Consistency.DIST);
+     ((DistributedEnsembleCache)addressesCache).start();
     EnsembleCacheUtils.putToCacheDirect(addressesCache,outputCache.getName(),outputCache.getName());
     tuples.clear();
   }
