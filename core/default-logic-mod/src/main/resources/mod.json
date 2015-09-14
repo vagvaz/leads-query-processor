@@ -1,6 +1,8 @@
 {
   // Java verticle
   "main": "eu.leads.processor.core.comp.DefaultLogicManage",
+
+
   // In this example we also provide various other versions of the main verticle, you can uncomment this and
   // play around:
 
