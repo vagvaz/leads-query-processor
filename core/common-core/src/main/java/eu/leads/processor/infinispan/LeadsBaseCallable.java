@@ -445,7 +445,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
           try {
             if (type.equals("TEXT"))
-              return  new qualinfo(type, MathUtils.getTextFrom(root.getValueAsJson()));
+              return  new qualinfo(type,(Object)MathUtils.getTextFrom(root.getValueAsJson()));
             else if (type.equals("DATE"))
               System.err.print("Unable to Handle: " + root.getValueAsJson());
             else {
