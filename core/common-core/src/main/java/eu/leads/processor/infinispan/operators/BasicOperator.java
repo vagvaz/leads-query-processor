@@ -551,7 +551,7 @@ public abstract class BasicOperator extends Thread implements Operator{
 
     if(pendingMMC.contains(currentCluster)){
       ProfileEvent lem = new ProfileEvent("ActualExecMap",profilerLog);
-      if(!isRemote)
+//      if(!isRemote)
       localExecuteMap();
       lem.end();
     }
