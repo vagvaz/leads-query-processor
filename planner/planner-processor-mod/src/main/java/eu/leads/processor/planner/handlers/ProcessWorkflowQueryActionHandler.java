@@ -32,7 +32,7 @@ import java.util.Set;
  */
 public class ProcessWorkflowQueryActionHandler implements ActionHandler {
     private final Node com;
-    private final LogProxy log;
+//    private final LogProxy log;
     private final InfinispanManager persistence;
     private final String id;
     private final TaJoModule module;
@@ -40,7 +40,7 @@ public class ProcessWorkflowQueryActionHandler implements ActionHandler {
     public ProcessWorkflowQueryActionHandler(Node com, LogProxy log, InfinispanManager persistence,
                                              String id, TaJoModule module,String schedHost,String schedport) {
         this.com = com;
-        this.log = log;
+//        this.log = log;
         this.persistence = persistence;
         this.id = id;
         this.module = module;
