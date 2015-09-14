@@ -211,6 +211,7 @@ public class TupleBuffer {
         synchronized (mutex) {
             if (buffer.size() == 0) {
                 ensembleCache = null;
+                cacheName = null;
                 return;
             }
             if (ensembleCache == null) {
