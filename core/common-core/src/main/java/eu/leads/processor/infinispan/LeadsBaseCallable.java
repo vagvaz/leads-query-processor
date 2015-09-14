@@ -260,6 +260,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     }
 //    profCallable.end();
     finalizeCallable();
+    System.err.println("LAST LINE OF " + this.getClass().toString() + " "+embeddedCacheManager.getAddress().toString() + " ----------- END");
+    profilerLog.error("LAST LINE OF " + this.getClass().toString() + " "+embeddedCacheManager.getAddress().toString() + " ----------- END");
     return embeddedCacheManager.getAddress().toString();
   }
 
