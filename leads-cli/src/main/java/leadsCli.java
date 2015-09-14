@@ -173,7 +173,7 @@ public class leadsCli {
     QueryStatus currentStatus = WebServiceClient.submitQuery(username, sql);
     long submittime = System.currentTimeMillis();
 
-    int getquerydelaytime = 2000;
+    int getquerydelaytime = 1000;
     while (!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")) {
       sleep(getquerydelaytime);
       currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
