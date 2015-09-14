@@ -12,6 +12,7 @@ import org.vertx.java.core.json.JsonObject;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -55,8 +56,9 @@ public class Boot2 {
   static JsonObject jwebServiceClusterAddrs = new JsonObject();
   static JsonObject jcomponetsClusterAddrs = new JsonObject();
 
-
-
+  static String start_date_time;
+  static int module_deploy_num=0;
+  static String full_ensemble = "";
   private static boolean norun;
 
   public static void readConfiguration(String[] args) {
@@ -157,7 +159,7 @@ public class Boot2 {
         JsonObject modjson = convertConf2Json(subConf);
         modjson.putString("processors", c.getString("numberOfProcessors"));
         if (c.containsKey("modName")) {
-          modjson.putString("id", c.getString("modName") + "-default-" + UUID.randomUUID().toString());
+          modjson.putString("id", c.getString("modName") + "-default-" + get_date_unique_id());
           modjson.putString("modName", c.getString("modName"));
         }
         if (c.getString("name").equals("webservice"))
@@ -245,7 +247,7 @@ public class Boot2 {
         nodesList.add(nodeData);
       }
       cluster.putArray("nodes", nodesList);
-      cluster.putArray("allPublicIps",clusterPublicIPs);
+      cluster.putArray("allPublicIps", clusterPublicIPs);
       cluster.putArray("allPrivateIps",clusterPrivateIPs);
       clusters.add(cluster);
 
@@ -297,18 +299,18 @@ public class Boot2 {
 
     //Finally deploy modules !
     ip = 0;
-    System.out.println(" Deploying log-sink to Ip: " + adresses[ip]); //TODO FIX is run for instances
     deployComponent("log-sink-module", log_sinkJson, adresses[ip]);
+    System.out.println(" Deployed log-sink to Ip: " + adresses[ip]); //TODO FIX is run for instances
 
-    System.out.println(" Deploying webservice Ip: " + adresses[ip]); //TODO FIX is run for instances
     deployComponent("processor-webservice", webserviceJson, adresses[ip]);
+    System.out.println(" Deployed webservice Ip: " + adresses[ip]); //TODO FIX is run for instances
     //Deploy other modules
     for (Map.Entry<String, JsonObject> e : componentsJson.entrySet()) {
       JsonObject modJson = componentsJson.get(e.getKey());
       modJson = set_global_addresses(modJson, jwebServiceClusterAddrs, jcomponetsClusterAddrs);
       for (int i = 0; i < componentsInstances.get(e.getKey()); i++) {
         deployComponent(e.getKey(), modJson, adresses[ip]);
-        System.out.println("\nStarted : " + e.getKey() + " At: " + adresses[ip] + "Waiting for " + sleepTime + " seconds to start the next module.");
+        System.out.println("\r\nStarted : " + e.getKey() + " At: " + adresses[ip] +".");
         ip = (ip + 1) % adresses.length;
       }
     }
@@ -395,7 +397,7 @@ public class Boot2 {
         instancesCnt++;
       }
       //compAlladresses.putArray(entry.getKey(), clusterComponentsAddressed);
-      String ensembleString = "";
+      String ensembleString = new String();
       for (String ip:instancesPerNode.keySet()){
         int in=0;
         do{
@@ -410,7 +412,12 @@ public class Boot2 {
 //        ensembleString+=clusterComponentsAddressed.get(ip)+":11222;";
 //      }
       JsonArray ensembleStringtmp = new JsonArray();
-      ensembleStringtmp.add(ensembleString.substring(0,ensembleString.length()-1));
+      ensembleStringtmp.add(ensembleString.substring(0, ensembleString.length() - 1));
+      System.out.println("Ensemble String for " + entry.getKey() + " :" + ensembleStringtmp);
+      if(ensembleString.isEmpty())
+        full_ensemble=ensembleString.substring(0, ensembleString.length() - 1);
+      else
+        full_ensemble=full_ensemble+"|"+ensembleString.substring(0, ensembleString.length() - 1);
       compAlladresses.putArray(entry.getKey(), ensembleStringtmp);
       webserviceAlladresses.putArray(entry.getKey(), clusterWebServiceAddressed);
 //      if (instancesCnt >= componentsInstancesNames.size()) {
@@ -431,12 +438,12 @@ public class Boot2 {
 
       //deploy at least one log one webservice modules to each microcloud
       for (int i = 0; i < pAddrs.size() && i < componentsInstances.get("log-sink"); i++) {
-        System.out.println(" Deploying log-sink to: " + entry.getKey() + " Ip: " + pAddrs.get(i));
+        System.out.println(" Deploying log-sink to: " + entry.getKey() + " Ip: " + pAddrs.get(i) + " ");
         deployComponent("log-sink-module", log_sinkJson, pAddrs.get(i).toString());
       }
       for (int i = 0; i < pAddrs.size() && i < componentsInstances.get("webservice"); i++) {
 
-        System.out.println(" Deploying webservice to: " + entry.getKey() + " Ip: " + pAddrs.get(i));
+        System.out.println(" Deploying webservice to: " + entry.getKey() + " Ip: " + pAddrs.get(i) + " ");
         deployComponent("processor-webservice", webserviceJson, pAddrs.get(i).toString());
       }
       //TODO Check if successfull deployment ...
@@ -445,18 +452,23 @@ public class Boot2 {
       for (int s = 0; /*s < pAddrs.size() &&*/ instancesCnt < componentsInstancesNames.size(); s++) {
         JsonObject modJson = componentsJson.get(componentsInstancesNames.get(instancesCnt));
         //Fixed ?
-        modJson.putString("id", componentsInstancesNames.get(instancesCnt) + "-default-" + UUID.randomUUID().toString());
+        modJson.putString("id", componentsInstancesNames.get(instancesCnt) + "-default-" +  get_date_unique_id());
         String address = pAddrs.get(instancesCnt % pAddrs.size()).toString();
         modJson = set_global_addresses(modJson, webserviceAlladresses, compAlladresses);
         deployComponent(componentsInstancesNames.get(instancesCnt).toString(), modJson, address);
-        System.out.println(" \n\nStarted : " + componentsInstancesNames.get(instancesCnt) + " At: " + address + " Waiting for " + sleepTime + " seconds to start the next module.");
+        System.out.println("\r\n Started : " + componentsInstancesNames.get(instancesCnt) + " At: " + address );
         instancesCnt++;
       }
     }
   }
 
+  public static String get_date_unique_id(){
+    return start_date_time+Integer.toString(module_deploy_num++);
+  }
+
   public static void main(String[] args) {
 
+    start_date_time = new SimpleDateFormat("HHmmss").format(new Date());
     readConfiguration(args);
     get_hdfs_conf();
     init_components_configuration();
@@ -468,7 +480,9 @@ public class Boot2 {
       singleCloud();
     } else if (deploymentType.equals("multicloud")) {
       multiCloud();
+      System.out.println("Ensemble String for loaders: " + full_ensemble);
     }
+
   }
 
   private static JsonObject set_global_addresses(JsonObject modJson, JsonObject jwebServiceAddrs, JsonObject jcomponentsAddrs) {
@@ -537,7 +551,7 @@ public class Boot2 {
     ret.putObject("global", globalJson);
     if (subconf.containsKey("componentType")) {
       String componentType = subconf.getString("componentType");
-      ret.putString("id", componentType + "-default-" + UUID.randomUUID().toString());
+      ret.putString("id", componentType + "-default-" + get_date_unique_id());
       ret.putString("group", componentType);
       ret.putString("version", conf.getString("processor.version"));
       ret.putString("groupId", conf.getString("processor.groupId"));
@@ -674,13 +688,14 @@ public class Boot2 {
 
     runRemotely(modJson.getString("id"), ip, command);
     for (int t = 0; t < sleepTime * 2; t++) {
-      System.out.print(".");
+      System.out.printf("\rPlease wait "+ sleepTime+ "s Deploying: "+ component + " elapsed:" + Integer.toString(1+ t * 500/1000));
       try {
         Thread.sleep(500);
       } catch (InterruptedException e1) {
         e1.printStackTrace();
       }
     }
+    System.out.println("");
   }
 
   public static void runRemotely(String id, String ip, String command) {
@@ -711,7 +726,7 @@ public class Boot2 {
       command1 = command0 + " && " + "screen -S shell_" + id + " -p 0 -X stuff $\'" + command + "\r\'";//ping 147.27.18.1";
     }
 
-    System.out.print("Cmd: " + command1);
+    //System.out.print("Cmd: " + command1);
     logger.info("Execution command: " + command1);
     //command1 =command;
     remoteExecute(ip, command1);
@@ -860,7 +875,7 @@ public class Boot2 {
     jsch.setKnownHosts("~/.ssh/known_hosts");
     session.connect();
     logger.info("Securely connected to " + ip);
-    System.out.println("Connected");
+    //System.out.println("Connected");
     return session;
 
   }
