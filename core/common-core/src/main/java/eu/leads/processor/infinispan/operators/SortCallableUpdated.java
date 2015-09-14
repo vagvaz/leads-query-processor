@@ -131,7 +131,23 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
      addressesCache = em.getCache(addressesCacheName,new ArrayList<>(emanager.sites()),
          EnsembleCacheManager.Consistency.DIST);
      ((DistributedEnsembleCache)addressesCache).start();
-    EnsembleCacheUtils.putToCacheDirect(addressesCache,outputCache.getName(),outputCache.getName());
+//    EnsembleCacheUtils.putToCacheDirect(addressesCache,outputCache.getName(),outputCache.getName());
+     try {
+       addressesCache.put(outputCache.getName(), outputCache.getName());
+     }
+     catch(Exception e){
+       e.printStackTrace();
+       try {
+         addressesCache = emanager.getCache(addressesCacheName,new ArrayList<>(emanager.sites()),
+             EnsembleCacheManager.Consistency.DIST);
+         try {
+           addressesCache.put(outputCache.getName(), outputCache.getName());
+         }
+         catch(Exception e){
+           e.printStackTrace();
+         }
+       }
+     }
     tuples.clear();
   }
 }
