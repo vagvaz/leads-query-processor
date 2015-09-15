@@ -164,7 +164,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     }
     int count = 0;
     profCallable.end();
-    ProfileEvent profExecute = new ProfileEvent("Buildinglucece" + this.getClass().toString(), profilerLog);
+//    ProfileEvent profExecute = new ProfileEvent("Buildinglucece" + this.getClass().toString(), profilerLog);
 
     if(indexCaches!=null)
       if(indexCaches.size()>0) {
@@ -172,14 +172,14 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         long start=System.currentTimeMillis();
         luceneKeys = createLuceneQuerys(indexCaches, tree.getRoot());
         System.out.println(" time: " + (System.currentTimeMillis() - start) / 1000.0);
-        profExecute.end();
+//        profExecute.end();
       }
 
     if(luceneKeys ==null) {
       profCallable.start("Iterate Over Local Data");
       System.out.println("Iterate Over Local Data");
 
-      profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(), profilerLog);
+//      profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(), profilerLog);
 
 //    for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
 //      if (!cdl.localNodeIsPrimaryOwner(key))
@@ -188,12 +188,12 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(
         (KeyValueFilter<? super K, ? super V>) filter);
 //        .converter((Converter<? super K, ? super V, ?>) filter);
-    profExecute.end();
-    profExecute.start("ISPNIter");
+//    profExecute.end();
+//    profExecute.start("ISPNIter");
     try {
 
       for (Object object : iterable) {
-        profExecute.end();
+//        profExecute.end();
         Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
 
         //      V value = inputCache.get(key);
@@ -208,7 +208,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
           executeOn((K) key, value);
 //          profExecute.end();
 	}
-         profExecute.start("ISPNIter");
+//         profExecute.start("ISPNIter");
       }
       iterable.close();
       }
@@ -231,7 +231,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         qualinfo l=(qualinfo)luceneKeys;
         keys=getLuceneSet(l);
         System.out.println(" time: " + (System.currentTimeMillis() - start) / 1000.0);
-        profExecute.end();
+//        profExecute.end();
       } else if(luceneKeys instanceof HashSet)
         keys=(HashSet<LeadsIndex>)luceneKeys;
 

@@ -10,6 +10,8 @@ import java.util.*;
  * Created by vagvaz on 02/08/15.
  */
 public class PushData {
+    private static int delay;
+
     public static void main(String[] args) {
         OutputHandler dummy = new DummyOutputHandler();
 
@@ -55,7 +57,10 @@ public class PushData {
             System.out.println(" remoteString: " + args[2]);
         }
 
-
+        if(args.length > 3){
+            delay = Integer.parseInt(args[3]);
+            System.out.println("Using delay");
+        }
 
         OutputHandler outputHandler = new CacheOutputHandler();
         outputHandler.initialize(outputConfig);
@@ -98,8 +103,15 @@ public class PushData {
                 String key_ts = tuple.getAttribute("default.webpages.ts");
                 String key = "default.webpages:" + key_url + "," + key_ts;
                 keys.add(key);
-                outputHandler.append("default.webpages:" + key_url + "," + key_ts, tuple);
 
+                outputHandler.append("default.webpages:" + key_url + "," + key_ts, tuple);
+                if(delay > 0){
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
                 counter++;
                 if (counter % 100 == 0) {
                     System.err.println("read " + counter);

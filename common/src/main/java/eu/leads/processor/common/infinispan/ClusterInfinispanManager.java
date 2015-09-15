@@ -228,8 +228,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".content");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".page");
-    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".urldirectory");
-    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".urldirectory_ecom");
+    Cache uridirCache = (Cache) getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".urldirectory");
+    Cache uridirCacheEcom = (Cache) getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".urldirectory_ecom");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".page_core");
     getInMemoryCache(StringConstants.DEFAULT_DATABASE_NAME + ".page_core.compressed", 4000);
     BatchPutListener listener = new BatchPutListener(StringConstants.DEFAULT_DATABASE_NAME+".page_core.compressed",StringConstants.DEFAULT_DATABASE_NAME+".page_core");
@@ -257,6 +257,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache("leads.processor.catalog.indexesByColumn");
     getPersisentCache("leads.processor.databases.sub."+StringConstants.DEFAULT_DATABASE_NAME);
     putAdidasKeyWords(adidasKeywords);
+    putUriDirData(uridirCache);
+    putUriDirEcomData(uridirCacheEcom);
 //    getPersisentCache("batchputTest");
 //    getPersisentCache("batchputTest.compressed");
 
@@ -301,6 +303,31 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     System.out.println("We have started host:" + host);
 
+  }
+
+  private void putUriDirData(Cache uridirCache) {
+//    schema.addColumn("uri", Type.TEXT);
+//    schema.addColumn("ts", Type.INT8);
+//    schema.addColumn("dirassumption", Type.TEXT);
+//    schema.addColumn("ecomassumptionpagesno", Type.TEXT);
+//    schema.addColumn("pagesno", Type.TEXT);
+  }
+
+  private void putUriDirEcomData(Cache uridirCacheEcom) {
+//    schema.addColumn("uri", Type.TEXT);
+//    schema.addColumn("ts", Type.INT8);
+//    schema.addColumn("isatbbuttonindir", Type.TEXT);
+//    schema.addColumn("atbbuttonextractionlog", Type.TEXT);
+//    schema.addColumn("nameextractiontuples", Type.TEXT);
+//    schema.addColumn("priceextractiontuples", Type.TEXT);
+//    schema.addColumn("productclustercenter", Type.TEXT);
+//    schema.addColumn("categoryclustercenter", Type.TEXT);
+//    schema.addColumn("productcluster50pcdist", Type.TEXT);
+//    schema.addColumn("productcluster80pcdist", Type.TEXT);
+//    schema.addColumn("categorycluster50pcdist", Type.TEXT);
+//    schema.addColumn("categorycluster80pcdist", Type.TEXT);
+//    schema.addColumn("scalermean", Type.TEXT);
+//    schema.addColumn("scalerstd", Type.TEXT);
   }
 
   private void putAdidasKeyWords(Cache adidasKeywords) {

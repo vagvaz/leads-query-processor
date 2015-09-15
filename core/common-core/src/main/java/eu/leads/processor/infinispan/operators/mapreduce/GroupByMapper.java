@@ -27,8 +27,8 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
 
     transient List<String> columns;
     transient Logger log;
-    transient private ProfileEvent groupEvent;
-    transient private ProfileEvent mapEvent;
+//    transient private ProfileEvent groupEvent;
+//    transient private ProfileEvent mapEvent;
     transient  private Tuple emptyTuple;
     transient private StringBuilder builder;
     transient private Collector<String, Tuple> lc = null;
@@ -71,7 +71,7 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
             groupcounter++;
 //           collector.emit("***" ,  t.asString());
         }
-       mapEvent.end();
+//       mapEvent.end();
     }
 
     @Override
@@ -89,12 +89,12 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
           columns.add(current.getString("name"));
        }
         builder = new StringBuilder();
-        groupEvent = new ProfileEvent("groupbymap",log);
-        mapEvent = new ProfileEvent("groupbymap",log);
+//        groupEvent = new ProfileEvent("groupbymap",log);
+//        mapEvent = new ProfileEvent("groupbymap",log);
     }
 
     @Override protected void finalizeTask() {
-        groupEvent.end();
+//        groupEvent.end();
         if(columns.size() == 0){
           if(countTuple == null && groupcounter > 0) {
             System.out.println("LOCAL Count = " + groupcounter);

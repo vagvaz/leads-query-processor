@@ -165,6 +165,12 @@ public class LevelDBIndex {
             index.close();
             System.out.println("exit---");
         }
+        System.err.println("Bye bye after pressing any button");
+        try {
+            System.in.read();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 //    80.156.73.113:11222;80.156.73.116:11222;80.156.73.123:11222;80.156.73.128:11222
 //    ;
