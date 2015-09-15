@@ -251,24 +251,24 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                         }
                         return;
                      }
-//                     if(next != null && next.getNodeType().equals(LeadsNodeType.JOIN)){
-//                        if(node.getConfiguration().containsField("buildBloomFilter")){
-//                           List<String> inputs = next.getInputs();
-//                           String otherScanNode = "";
-//                           for(String input : inputs){
-//                              if(!input.equals(node.getNodeId())){
-//                                 otherScanNode = input;
-//                              }
-//                           }
-//                           List<PlanNode> sources = plan.getSources();
-//                           for(PlanNode s : sources){ // hijcak deployment and run 2nd run
-//                              if(s.getNodeId().equals(otherScanNode)){
-//                                 next = s;
-//                                 deployOperator(plan,next);
-//                              }
-//                           }
-//                        }
-//                     }
+                     if(next != null && next.getNodeType().equals(LeadsNodeType.JOIN)){
+                        if(node.getConfiguration().containsField("buildBloomFilter")){
+                           List<String> inputs = next.getInputs();
+                           String otherScanNode = "";
+                           for(String input : inputs){
+                              if(!input.equals(node.getNodeId())){
+                                 otherScanNode = input;
+                              }
+                           }
+                           List<PlanNode> sources = plan.getSources();
+                           for(PlanNode s : sources){ // hijcak deployment and run 2nd run
+                              if(s.getNodeId().equals(otherScanNode)){
+                                 next = s;
+                                 deployOperator(plan,next);
+                              }
+                           }
+                        }
+                     }
                      if (next.getNodeType().equals(LeadsNodeType.OUTPUT_NODE)) {
                         log.error("next is output");
                         plan.complete(next);
