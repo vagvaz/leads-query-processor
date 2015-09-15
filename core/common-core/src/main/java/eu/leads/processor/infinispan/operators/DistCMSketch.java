@@ -2,7 +2,6 @@ package eu.leads.processor.infinispan.operators;
 
 import org.infinispan.Cache;
 
-import java.io.Serializable;
 import java.util.Random;
 
 abstract class sketchArray{
@@ -21,21 +20,33 @@ class DistArray extends sketchArray {
 
 	public DistArray(int w, int d, Cache<Integer,Integer> ArrayCache, boolean reload  ) {
 		this.ArrayCache = ArrayCache;
-		if(reload) {
-			width =ArrayCache.get(-1);
-			depth = ArrayCache.get(-2);
-		}else{
-			this.ArrayCache.put(-1, w);
-			this.ArrayCache.put(-2, d);
+		try {
+			if (reload) {
+				width = this.ArrayCache.get(-1);
+				depth = this.ArrayCache.get(-2);
+			} else {
+				this.ArrayCache.put(-1, w);
+				this.ArrayCache.put(-2, d);
+			}
+		}catch (Exception e){
+			System.err.println("Unable to use ArrayCache loading/saving, Caution using default values." + e.getMessage());
 		}
 	}
 	int getValue(int x, int y) {
-		if(ArrayCache.containsKey(y*width+x))
-			return ArrayCache.get(y * width + x);
+		try{
+			if(ArrayCache.containsKey(y*width+x))
+				return ArrayCache.get(y * width + x);
+		}catch (Exception e){
+			System.err.println("Unable to get ArrayCache value at "+x + ","+ y+" " + e.getMessage());
+		}
 		return -1;
 	}
 	void putValue(int x, int y, int newValue) {
-		ArrayCache.put(y * width + x, newValue);
+		try{
+			ArrayCache.put(y * width + x, newValue);
+		}catch (Exception e){
+			System.err.println("Unable to put ArrayCache value at "+x + ","+ y+" " + e.getMessage());
+		}
 	}
 	void increase(int x, int y, int inc) {
 		putValue(x,y,getValue(x,y)+inc);
@@ -111,11 +122,16 @@ public class DistCMSketch {
 	}
 
 	public void storeAsObject(Cache<String,Object> sketchCache, String prefix){
-		if(darray instanceof LocalArray) {
-			sketchCache.put(prefix + "w", ((LocalArray) darray).getWidth());
-			sketchCache.put(prefix + "d", ((LocalArray) darray).getDepth());
-			sketchCache.put(prefix + "array",  ((LocalArray) darray).getArray());
-			sketchCache.put(prefix + "size",  count);
+
+		try{
+			if(darray instanceof LocalArray) {
+				sketchCache.put(prefix + "w", ((LocalArray) darray).getWidth());
+				sketchCache.put(prefix + "d", ((LocalArray) darray).getDepth());
+				sketchCache.put(prefix + "array",  ((LocalArray) darray).getArray());
+				sketchCache.put(prefix + "size",  count);
+			}
+		}catch (Exception e){
+			System.err.println("Unable to storeAsObject into cache: "+sketchCache+" " + e.getMessage());
 		}
 	}
 
