@@ -414,7 +414,7 @@ public class Boot2 {
       JsonArray ensembleStringtmp = new JsonArray();
       ensembleStringtmp.add(ensembleString.substring(0, ensembleString.length() - 1));
       System.out.println("Ensemble String for " + entry.getKey() + " :" + ensembleStringtmp);
-      if(ensembleString.isEmpty())
+      if(full_ensemble.isEmpty())
         full_ensemble=ensembleString.substring(0, ensembleString.length() - 1);
       else
         full_ensemble=full_ensemble+"|"+ensembleString.substring(0, ensembleString.length() - 1);
