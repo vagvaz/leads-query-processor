@@ -159,6 +159,7 @@ public class GoraInputHandler implements InputHandler<String, WebPage> {
         query.setLimit(batchSize);
         query.setSortingOrder(true);
         query.setSortingField("fetchTime");
+        query.setFilter(filter);
         List<PartitionQuery> queries = ((InfinispanQuery) query).split();
         listOfResults = new LinkedList<>();
         for (PartitionQuery partitionQuery : queries) {
