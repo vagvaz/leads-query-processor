@@ -751,7 +751,7 @@ public abstract class BasicOperator extends Thread implements Operator{
         profilerLog.error(e.getStackTrace().toString());
         e.printStackTrace();
         replyForFailExecution(action);
-      } catch (ExecutionException e) {
+      } catch (Exception e) {
         profilerLog.error("Execution Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
             e.getClass().toString());
         profilerLog.error(e.getMessage());
@@ -893,7 +893,7 @@ public abstract class BasicOperator extends Thread implements Operator{
         failed = true;
         replyForFailExecution(action);
         e.printStackTrace();
-      } catch (ExecutionException e) {
+      } catch (Exception e) {
         profilerLog.error("Exception in reduce Excuettion " + "reduce " + reducerCallable.getClass().toString() + "\n" +
             e.getClass().toString());
         profilerLog.error(e.getMessage());
@@ -1096,7 +1096,7 @@ public abstract class BasicOperator extends Thread implements Operator{
         failed = true;
         replyForFailExecution(action);
         e.printStackTrace();
-      } catch (ExecutionException e) {
+      } catch (Exception e) {
         profilerLog.error(
             "Exception in reduceLocal Execution " + "reduceLocal "
                 + reducerLocalCallable.getClass().toString() + "\n" + e.getClass().toString());
@@ -1157,14 +1157,18 @@ public abstract class BasicOperator extends Thread implements Operator{
          }catch(TimeoutException e){
 //            System.err.println("Future is not done yet " + ((start < 0) ? "next cancel in inf " : (" next cancel at "+ Long.toString(
 //                (long) (1.3 * Math.max(minimumTime,lastEnd-begin)))) ) );
-            profilerLog.error("Future is not done yet " + ((start < 0) ? "next cancel in inf " : (" next cancel at "+ Long.toString(
-                (long) (1.3 * Math.max(minimumTime,lastEnd-begin)))) ) );
+            if(start < 0 ) {
+              profilerLog.error("Future is not done yet " + "next cancel in inf ");
+            }else{
+                  profilerLog.error(" next cancel at " + Long.toString((long) (1.3 * Math.max(minimumTime, lastEnd - begin))));
+                  System.err.println(" next cancel at " + Long.toString((long) (1.3 * Math.max(minimumTime, lastEnd - begin))));
+            }
           }
         }
         if(futures.size() < threshold && start < 0 ){
           start = System.currentTimeMillis();
         }
-        else{
+        else if(futures.size() < threshold){
           dur = System.currentTimeMillis() - begin;
           if(dur > 1.3 * Math.max(minimumTime,lastEnd-begin));{
             try{
@@ -1173,6 +1177,7 @@ public abstract class BasicOperator extends Thread implements Operator{
                 System.err.println(callable.getClass().toString() + " Cancelled on  " + getName());
                 profilerLog.error(callable.getClass().toString() + " Completed on " + getName());
               }
+              futures.clear();
             }catch(Exception e){
               System.err.println("Exception while cancelling " + callable.getClass().toString() + " Cancelled on  " + getName());
               profilerLog.error("Exception while cancelling " + callable.getClass().toString() + " Completed on " + getName());
