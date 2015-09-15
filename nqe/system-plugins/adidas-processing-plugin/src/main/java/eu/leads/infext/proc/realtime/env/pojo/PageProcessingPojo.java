@@ -97,8 +97,8 @@ public class PageProcessingPojo extends AbstractExecutionPojo {
 		for(Entry<String,MDFamily> editedFamily : editableFamilies.entrySet()) {
 			String familyKey = editedFamily.getKey();
 			
-			String url = editedFamily.getValue().urlTimestamp.url;
-			String ts = editedFamily.getValue().urlTimestamp.timestamp == null ? now : editedFamily.getValue().urlTimestamp.timestamp;
+			String url = editedFamily.getValue().urlTimestamp.str1;
+			String ts = editedFamily.getValue().urlTimestamp.str2 == null ? now : editedFamily.getValue().urlTimestamp.str2;
 			String family = editedFamily.getValue().family;
 			String familyName = mapping.getProperty(family);
 			System.out.println(familyKey);

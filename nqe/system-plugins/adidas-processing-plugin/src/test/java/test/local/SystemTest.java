@@ -14,11 +14,10 @@ public class SystemTest extends Test {
 	@Override
 	protected void execute() {
 		/* INIT */
+		isFilter = true;
 		boolean initiated = init();
 		
 		if(initiated) {
-			
-			isFilter = true;
 			
 			AbstractDataStore ds = DataStoreSingleton.getDataStore();
 			Properties mapping = DataStoreSingleton.getMapping();

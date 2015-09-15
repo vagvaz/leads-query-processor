@@ -374,13 +374,15 @@ public class CassandraCQLDataStore extends AbstractDataStore {
 	public List<String> getResourceURIsOfDirectory(String dirUri) {
 		List<String> uris = new ArrayList<String>();
 		
-		String queryP01 = "SELECT uri FROM " + mapping.getProperty("leads_core");
-		//
-		String queryP02 = "\nWHERE ";
-		//
-		String queryP03 = mapping.getProperty("leads_core-fqdnurl") + " = '" + dirUri + "'";
-		//
-		String query = queryP01+queryP02+queryP03;
+//		String queryP01 = "SELECT uri FROM " + mapping.getProperty("leads_core");
+//		//
+//		String queryP02 = "\nWHERE ";
+//		//
+//		String queryP03 = mapping.getProperty("leads_core-fqdnurl") + " = '" + dirUri + "'";
+//		//
+//		String query = queryP01+queryP02+queryP03;
+		
+		String query = "SELECT uri FROM " + mapping.getProperty("leads_crawler_data");
 		
 		System.out.println(query);
 		Iterable<Row> rs;
@@ -392,7 +394,9 @@ public class CassandraCQLDataStore extends AbstractDataStore {
 		
 		for(Row row : rs) {
 			String uri= row.getString("uri");
-			uris.add(uri);
+			
+			if(uri.startsWith(dirUri))
+				uris.add(uri);
 		}
 		
 		return uris;

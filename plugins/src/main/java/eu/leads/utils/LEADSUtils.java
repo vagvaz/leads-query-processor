@@ -366,6 +366,20 @@ public class LEADSUtils {
 			intArray [i] = Integer.parseInt(stringArray[i]);
 		return intArray;
 	}
+
+	/**
+     * For now, we simply treat URIs with various requests values as the same one.
+     * 
+     * @param uri
+     * @return
+     */
+    public static String normalizeUri(String uri) {
+		int requestStart = uri.indexOf("?");
+		if(requestStart>0)
+			return uri.substring(0, requestStart);
+		else
+			return uri;
+	}
 	
 }
 
