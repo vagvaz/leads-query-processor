@@ -32,8 +32,10 @@ public class SystemInit {
 	
 	private static void setFilter(Configuration config) {
 		String filterString = config.getString("filter");
-		String[] filter = filterString.split(";");
-		ProcessingFilterSingleton.setFilter(filter);
+		if(filterString != null) {
+			String[] filter = filterString.split(";");
+			ProcessingFilterSingleton.setFilter(filter);
+		}
 	}
 	
 	private static void setLogging(Configuration config) throws Exception {

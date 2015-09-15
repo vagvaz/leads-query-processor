@@ -8,9 +8,10 @@ import org.apache.commons.lang.StringUtils;
 public class ProcessingFilterSingleton {
 	
 	private static String [] filter = null;
+	private static String filterStr = null;
 
 	public static void setFilterString(String str) {
-		filter = new String[] {str};
+		filterStr = str;
 	}
 	
 	public static void setFilter(String [] filter) {
@@ -18,9 +19,11 @@ public class ProcessingFilterSingleton {
 	}
 
 	public static boolean shouldProcess(String uri) {
-		if(filter==null)
+		if(filter!=null && StringUtils.startsWithAny(uri, filter))
 			return true;
-		if(StringUtils.startsWithAny(uri, filter))
+		else if(filterStr!=null && uri.contains(filterStr))
+			return true;
+		else if(filter==null && filterStr==null)
 			return true;
 		
 		return false;

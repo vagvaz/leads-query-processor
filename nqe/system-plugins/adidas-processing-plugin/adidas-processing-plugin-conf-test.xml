@@ -23,7 +23,7 @@
 	<mapreduce>false</mapreduce>
 	
 	<!-- Filter for the news sites -->
-	<filter>com.runnersworld;com.runblogger;com.solereview;uk.co.bbc;com.footwearnews;com.runningshoesguru;com.competitor</filter>
+	<!-- <filter>com.runnersworld;com.runblogger;com.solereview;uk.co.bbc;com.footwearnews;com.runningshoesguru;com.competitor</filter> -->
 	<!-- Filter for the Ecommerce sites -->
 	<!-- <filter>com.backcountry;com.holabirdsports;com.roadrunnersports</filter> -->
 	

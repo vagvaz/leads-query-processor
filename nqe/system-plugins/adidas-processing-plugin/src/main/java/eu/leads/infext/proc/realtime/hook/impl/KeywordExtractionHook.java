@@ -13,7 +13,7 @@ import org.apache.lucene.analysis.core.KeywordTokenizerFactory;
 
 import eu.leads.datastore.DataStoreSingleton;
 import eu.leads.datastore.datastruct.MDFamily;
-import eu.leads.datastore.datastruct.UrlTimestamp;
+import eu.leads.datastore.datastruct.StringPair;
 import eu.leads.infext.proc.com.indexing.KeywordMatchInfo;
 import eu.leads.infext.proc.com.indexing.KeywordsListSingletonExt;
 import eu.leads.infext.proc.com.indexing.LeadsDocumentConceptSearchCall;
