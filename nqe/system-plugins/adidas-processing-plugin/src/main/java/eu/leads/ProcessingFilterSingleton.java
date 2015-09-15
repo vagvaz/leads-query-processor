@@ -25,7 +25,6 @@ public class ProcessingFilterSingleton {
 			return true;
 		else if(filter==null && filterStr==null)
 			return true;
-		
 		return false;
 	}
 

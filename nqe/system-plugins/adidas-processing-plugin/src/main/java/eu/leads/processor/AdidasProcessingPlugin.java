@@ -119,11 +119,14 @@ public class AdidasProcessingPlugin implements PluginInterface {
     private boolean processTuple(Object key, Object value) {
 	   
 	    System.out.println("######## processTuple() method started");
-		
+			String webpageJson = (String)value;
+			Tuple webpage = new Tuple(webpageJson);
 		// Turn extract table:nutch_uri from key
 		String [] tableUri = key.toString().split(":", 2);
 		String table = tableUri[0];
-		String uri = tableUri[1];
+
+//		String uri = tableUri[1].split(",")[0];
+		String uri = webpage.getAttribute("default.webpages.url");
 		uri = LEADSUtils.normalizeUri(uri);
 		
 		if(!ProcessingFilterSingleton.shouldProcess(uri)) {
@@ -132,13 +135,11 @@ public class AdidasProcessingPlugin implements PluginInterface {
 		}
 		
 		// Convert value into tuple
-		String webpageJson = (String)value;
-		Tuple webpage = new Tuple(webpageJson);
 		
 		// Extract content and timestamp from the tuple
-		String content    = webpage.getAttribute("body");
-		String timestamp  = webpage.getAttribute("published");
-		Object headersObj = webpage.getGenericAttribute("headers");
+		String content    = webpage.getAttribute("default.webpages.body");
+		String timestamp  = webpage.getAttribute("default.webpages.ts");
+		Object headersObj = webpage.getGenericAttribute("default.webpages.headers");
 		
 		if(content != null && timestamp != null && headersObj != null) {
 			if(isContentTypeHTML(headersObj)) {
