@@ -6,6 +6,8 @@ import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.comp.ServiceStatus;
 import eu.leads.processor.core.net.MessageTypeConstants;
 import eu.leads.processor.core.net.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 /**
@@ -13,13 +15,15 @@ import org.vertx.java.core.json.JsonObject;
  */
 public class ServiceHandler implements LeadsMessageHandler {
     LeadsService owner;
-    LogProxy log;
+    LogProxy logg;
+    Logger log;
         // Calls to this proxy should be avoided in ManageVertice cause will freeze the vertx event loop
     Node com;
 
     public ServiceHandler(LeadsService owner, Node com, LogProxy logProxy) {
         this.owner = owner;
-        this.log = logProxy;
+        this.logg = logProxy;
+        log = LoggerFactory.getLogger(ServiceHandler.class);
         this.com = com;
     }
 
