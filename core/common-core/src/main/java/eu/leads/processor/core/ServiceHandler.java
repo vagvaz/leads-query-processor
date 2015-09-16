@@ -53,6 +53,7 @@ public class ServiceHandler implements LeadsMessageHandler {
                     break;
                 case EXIT:
                     owner.exitService();
+                    break;
                 default:
                     log.warn("unknown command received by " + owner.getServiceId() + "\n" + message
                                                                                                 .toString());

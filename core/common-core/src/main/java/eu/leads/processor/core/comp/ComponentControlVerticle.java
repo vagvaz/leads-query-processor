@@ -377,6 +377,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
         //GRACEFULLY shutting down
         this.state = ComponentState.STOPPING;
         com.sendToAllGroup(internalGroup, MessageUtils.createServiceCommand(ServiceCommand.EXIT));
+
     }
 
 
@@ -422,16 +423,28 @@ public class ComponentControlVerticle extends Verticle implements Component {
         if(mode!=null) {
             if (mode.equals(ComponentMode.TESTING)) {
                 log.info(componentType + "." + id + " is being killed ");
-                stop();
-                //System.exit(0);
+                vertx.setTimer(4000, new Handler<Long>() {
+                    @Override
+                    public void handle(Long aLong) {
+                        System.out.println(" Control component exiting ");
+                        System.exit(0);
+                    }
+                });
             } else {
                 log.error(componentType + "." + id + " received kill command but mode is  "
                         + mode.toString());
             }
-        }else{
-           log.error(componentType + "." + id + " received kill command but mode is null, stopping anyway ");
+        } else {
+            log.error(componentType + "." + id + " received kill command but mode is null, stopping anyway ");
+            com.sendToGroup(workQueueAddress, action.asJsonObject());
            com.unsubscribeFromAll();
-           stop();
+            vertx.setTimer(4000, new Handler<Long>() {
+                @Override
+                public void handle(Long aLong) {
+                    System.out.println(" Control component exiting ");
+                    System.exit(0);
+                }
+            });
         }
 
     }

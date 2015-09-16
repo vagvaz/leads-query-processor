@@ -124,11 +124,7 @@ public class SubmitQueryHandler implements Handler<HttpServerRequest> {
                 action.setLabel(IManagerConstants.QUIT);
                 action.setComponentType("webservice");
                 com.sendToAllGroup("leads.processor.control", action.asJsonObject());
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+
             }
             else {
                 action.setLabel(IManagerConstants.SUBMIT_QUERY);

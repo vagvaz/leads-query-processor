@@ -141,18 +141,14 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
                         } else {
                             System.err.println("Exit webprocessor try: "+shutdown_messages);
                             shutdown_messages++;
+                            vertx.setTimer(10000, new Handler<Long>() {
+                                @Override
+                                public void handle(Long aLong) {
+                                    System.err.println("Exit webprocessor at last");
+                                    System.exit(0);
+                                }
+                            });
 
-                            try {
-                                Thread.sleep(10);
-                                com.sendToAllGroup("leads.processor.control", action.asJsonObject());
-                            } catch (Exception e) {
-                                ;
-                            }
-                            if(shutdown_messages==2) {
-                              System.err.println("Exit webprocessor at last");
-                                vertx.stop();
-                                System.exit(0);
-                            }
                         }
                     }
 

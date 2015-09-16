@@ -110,7 +110,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
         SQLPlan plan = null;
         try {
             plan = getLogicaSQLPlan(expr,sqlQuery);
-            //System.out.println("\nPlan:" + plan.toString());
+            System.out.println("\nPlan:" + plan.toString());
         } catch (Exception e) {
             failQuery(e, sqlQuery);
             result.setResult(createFailResult(e, sqlQuery));

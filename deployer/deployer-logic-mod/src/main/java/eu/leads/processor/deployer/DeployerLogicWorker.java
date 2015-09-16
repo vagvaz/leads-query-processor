@@ -21,6 +21,7 @@ import eu.leads.processor.nqe.NQEConstants;
 import org.infinispan.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
@@ -103,12 +104,13 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
             System.out.println(" Quit Dep ");
             persistence.stopManager();
             log.error("Stopped Manager Exiting");
-            try {
-               Thread.sleep(10);
-            } catch (InterruptedException e) {
-               e.printStackTrace();
-            }
-            System.exit(0);
+            vertx.setTimer(1000, new Handler<Long>() {
+               @Override
+               public void handle(Long aLong) {
+                  System.out.println(" It is my time bye");
+                  System.exit(0);
+               }
+            });
          }
 
 

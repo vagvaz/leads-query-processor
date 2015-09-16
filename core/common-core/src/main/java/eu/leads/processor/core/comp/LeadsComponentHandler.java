@@ -1,6 +1,5 @@
 package eu.leads.processor.core.comp;
 
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.imanager.IManagerConstants;
@@ -13,7 +12,6 @@ public class LeadsComponentHandler implements LeadsMessageHandler {
 
     Component owner;
     LogProxy log;
-    PersistenceProxy persitence;
     Node com;
 
     public LeadsComponentHandler(Component owner, Node com, LogProxy log) {
@@ -24,6 +22,7 @@ public class LeadsComponentHandler implements LeadsMessageHandler {
 
     @Override
     public void handle(JsonObject message) {
+        System.err.println(" Leads Components Handler " + message.toString());
         if (message.getString("type").equals("command")) {
             String cmd = message.getString("command");
             ComponentCommand command = ComponentCommand.valueOf(cmd);
@@ -81,6 +80,7 @@ public class LeadsComponentHandler implements LeadsMessageHandler {
                 System.out.println(" Quit leads Component ");
                 if(message.getString("label").equals(IManagerConstants.QUIT))
                 {
+
                     System.out.println(" Shutdown "+ owner.getId());
                     owner.shutdown();
                     owner.kill();

@@ -132,13 +132,20 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
                   System.out.println(" Quit Imanager ");
                   action.setStatus(ActionStatus.COMPLETED.toString());
                   com.sendTo(logic, action.asJsonObject());
+                  com.sendTo(workqueue, action.asJsonObject());
+                  com.sendToAllGroup("leads.processor.control", action.asJsonObject());
                   persistence.stopManager();
 
                   log.error("Stopped Manager Exiting");
                   this.getVertx().stop();
                   log.error("Stopped component");
-                  Thread.sleep(20);
-                  System.exit(0);
+                  vertx.setTimer(1000, new Handler<Long>() {
+                     @Override
+                     public void handle(Long aLong) {
+                        System.out.println(" It is my time bye");
+                        System.exit(0);
+                     }
+                  });
                }
             }
          } else {

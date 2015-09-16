@@ -62,12 +62,13 @@ public class PlannerCatalogWorker extends Verticle {
                     catalogServer.StopServer();
                     System.err.println("planner Exiting");
 
-                    try{
-                      Thread.sleep(1000);
-                    }catch (Exception e){
-                      ;
-                    }
-                    System.exit(0);
+                    vertx.setTimer(1000, new Handler<Long>() {
+                      @Override
+                      public void handle(Long aLong) {
+                        System.out.println(" planner Exiting ");
+                        System.exit(0);
+                      }
+                    });
                   }
                 }
 
