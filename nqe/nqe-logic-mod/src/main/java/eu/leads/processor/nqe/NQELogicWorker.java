@@ -8,6 +8,8 @@ import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
@@ -25,11 +27,12 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
     JsonObject config;
     String monitor;
     String nqeGroup;
-    LogProxy log;
+    LogProxy logg;
     Node com;
     String id;
     String workQueueAddress;
     String currentCluster;
+    Logger log;
 
     @Override public void start() {
         super.start();
@@ -41,8 +44,8 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
         id = config.getString("id");
         com = new DefaultNode();
         com.initialize(id, nqeGroup, null, this, null, vertx);
-        log = new LogProxy(config.getString("log"), com);
-
+        logg = new LogProxy(config.getString("log"), com);
+        log = LoggerFactory.getLogger(NQELogicWorker.class);
 
     }
 

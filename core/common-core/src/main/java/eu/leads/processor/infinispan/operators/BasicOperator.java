@@ -330,7 +330,9 @@ public abstract class BasicOperator extends Thread implements Operator{
     if(outputSize == 0){
       outputSize =1;
     }
-    System.err.println("In#: " + inputSize + " Out#:" + outputSize + " Execution time: " + (endTime - startTime) / 1000.0 + " s");
+    System.err.println("In#: " + inputSize + " Out#:" + outputSize + " Execution time: " + (endTime - startTime) / 1000.0 + " s for " + this.getClass().toString() + "\n"+getName());
+    profilerLog.error("In#: " + inputSize + " Out#:" + outputSize + " Execution time: " + (endTime - startTime) / 1000.0 + " s for " + this.getClass().toString() + "\n"+getName());
+
     //    updateStatisticsCache(inputSize, outputSize, (endTime - startTime));
   }
 

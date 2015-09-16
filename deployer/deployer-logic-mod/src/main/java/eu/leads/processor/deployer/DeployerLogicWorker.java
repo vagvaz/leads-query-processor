@@ -211,6 +211,11 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                      PlanNode node = new PlanNode(action.getData().getObject("operator"));
                      String queryId = action.getData().getString("queryId");
                      ExecutionPlanMonitor plan = runningPlans.get(queryId);
+                     if(plan == null){
+                        System.err.println("\n\nDEPERR: RECEIVED OPERATOR THAT IS NOT HANDLED BE ME \n"+node.asJsonObject().encodePrettily());
+                        log.error("\n\nDEPERR: RECEIVED OPERATOR THAT IS NOT HANDLED BE ME \n"+node.asJsonObject().encodePrettily());
+                        return;
+                     }
                      plan.complete(node);
                      PlanNode next = plan.getNextOperator(node);
                      log.error("Deployer " + node.getNodeType() + " in action that  " + label
