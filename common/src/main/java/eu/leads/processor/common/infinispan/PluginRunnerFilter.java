@@ -320,7 +320,21 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
         if (!isInitialized) {
           initialize();
         }
+        if(plugin == null)
+        {
+          System.out.println("Plugin null");
+          return false;
+        }
 
+      if(plugin.getClassName() == null)
+      {
+        System.out.println("Plugin ClassName");
+        return false;
+      }
+      if(key == null){
+        System.out.println("key null");
+        return false;
+      }
         profEvent.end("");
         profEvent.start("Plugin: " + plugin.getClassName().toString() + " key " + key.toString());
         System.err.println(UUIDname + " Accept: Manager Address " + manager.getAddress());

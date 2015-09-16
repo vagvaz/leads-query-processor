@@ -10,6 +10,8 @@ import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.deployer.DeployerConstants;
 import eu.leads.processor.imanager.IManagerConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
@@ -25,8 +27,8 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
     JsonObject config;
     String deployer;
     String planner;
-    LogProxy log;
-
+    LogProxy logg;
+    Logger log;
     Node com;
     String id;
     String workQueueAddress;
@@ -42,8 +44,8 @@ public class PlannerLogicWorker extends Verticle implements LeadsMessageHandler 
         id = config.getString("id");
         com = new DefaultNode();
         com.initialize(id, planner, null, this, null, vertx);
-        log = new LogProxy(config.getString("log"), com);
-
+        logg = new LogProxy(config.getString("log"), com);
+        log = LoggerFactory.getLogger(PlannerLogicWorker.class);
         mapper = new ObjectMapper();
 
     }

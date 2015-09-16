@@ -124,9 +124,10 @@ public class AdidasProcessingPlugin implements PluginInterface {
 		// Turn extract table:nutch_uri from key
 		String [] tableUri = key.toString().split(":", 2);
 		String table = tableUri[0];
+
 //		String uri = tableUri[1].split(",")[0];
 		String uri = webpage.getAttribute("default.webpages.url");
-		uri = normalizeUri(uri);
+		uri = LEADSUtils.normalizeUri(uri);
 		
 		if(!ProcessingFilterSingleton.shouldProcess(uri)) {
 			System.out.println("Skipping "+uri);
@@ -176,20 +177,6 @@ public class AdidasProcessingPlugin implements PluginInterface {
 		if(contentType == null) return false;
 		if(contentType.toLowerCase().contains("html")) return true;
 		else return false;
-	}
-
-	/**
-     * For now, we simply treat URIs with various requests values as the same one.
-     * 
-     * @param uri
-     * @return
-     */
-    private String normalizeUri(String uri) {
-		int requestStart = uri.indexOf("?");
-		if(requestStart>0)
-			return uri.substring(0, requestStart);
-		else
-			return uri;
 	}
 
 @Override

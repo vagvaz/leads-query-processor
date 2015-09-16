@@ -45,7 +45,7 @@ import java.util.concurrent.Future;
 
 import static org.infinispan.test.AbstractCacheTest.getDefaultClusteredCacheConfig;
 
-//import org.infinispan.server.hotrod.test.HotRodTestingUtil;
+
 
 /**
  * Created by vagvaz on 5/23/14.
@@ -74,6 +74,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
   private int maxEntries;
   private int blockSize = 1;
   private int cacheSize = 64;
+  private int indexwriter_ram_buffer_size =64;
   private CompressionType compressionType = CompressionType.NONE;
   //  private static final EquivalentConcurrentHashMapV8<String, TestResources> testResources = new EquivalentConcurrentHashMapV8<>(AnyEquivalence.getInstance(), AnyEquivalence.getInstance());
 
@@ -83,6 +84,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
   public ClusterInfinispanManager() {
     host = "0.0.0.0";
     maxEntries = LQPConfiguration.getInstance().getConfiguration().getInt("node.infinispan.maxentries",5000);
+    indexwriter_ram_buffer_size =  LQPConfiguration.getInstance().getConfiguration().getInt("hibernate.search.default.indexwriter.ram_buffer_size",64);
     blockSize = LQPConfiguration.getInstance().getConfiguration().getInt("leads.processor.infinispan.leveldb.blocksize",blockSize);
     cacheSize = LQPConfiguration.getInstance().getConfiguration().getInt("leads.processor.infinispan.leveldb.cachesize",cacheSize);
     if(LQPConfiguration.getInstance().getConfiguration().getBoolean("leads.processor.infinispan.leveldb.compression",false)){
@@ -114,7 +116,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
   }
 
   @Override
-  public String getUniquePath(){
+  public String getUniquePath() {
 
     System.out.println("UNIQUE PATH = " + uniquePath);
     return uniquePath;
@@ -194,7 +196,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     builder.clustering().hash().numOwners(1);
     builder.jmxStatistics().enable();
     builder.transaction().transactionMode(TransactionMode.TRANSACTIONAL)
-        //            .persistence().passivation(true)
+        //            .persistence().passivation(false)
         .persistence().passivation(false).addSingleFileStore().location
         ("/tmp/leadsprocessor-data/"+uniquePath+"/webpage/")
         .fetchPersistentState(true)
@@ -228,8 +230,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".content");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".page");
-    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".urldirectory");
-    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".urldirectory_ecom");
+    Cache uridirCache = (Cache) getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".urldirectory");
+    Cache uridirCacheEcom = (Cache) getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".urldirectory_ecom");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".page_core");
     getInMemoryCache(StringConstants.DEFAULT_DATABASE_NAME + ".page_core.compressed", 4000);
     BatchPutListener listener = new BatchPutListener(StringConstants.DEFAULT_DATABASE_NAME+".page_core.compressed",StringConstants.DEFAULT_DATABASE_NAME+".page_core");
@@ -257,6 +259,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache("leads.processor.catalog.indexesByColumn");
     getPersisentCache("leads.processor.databases.sub."+StringConstants.DEFAULT_DATABASE_NAME);
     putAdidasKeyWords(adidasKeywords);
+    putUriDirData(uridirCache);
+    putUriDirEcomData(uridirCacheEcom);
 //    getPersisentCache("batchputTest");
 //    getPersisentCache("batchputTest.compressed");
 
@@ -301,6 +305,31 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     System.out.println("We have started host:" + host);
 
+  }
+
+  private void putUriDirData(Cache uridirCache) {
+//    schema.addColumn("uri", Type.TEXT);
+//    schema.addColumn("ts", Type.INT8);
+//    schema.addColumn("dirassumption", Type.TEXT);
+//    schema.addColumn("ecomassumptionpagesno", Type.TEXT);
+//    schema.addColumn("pagesno", Type.TEXT);
+  }
+
+  private void putUriDirEcomData(Cache uridirCacheEcom) {
+//    schema.addColumn("uri", Type.TEXT);
+//    schema.addColumn("ts", Type.INT8);
+//    schema.addColumn("isatbbuttonindir", Type.TEXT);
+//    schema.addColumn("atbbuttonextractionlog", Type.TEXT);
+//    schema.addColumn("nameextractiontuples", Type.TEXT);
+//    schema.addColumn("priceextractiontuples", Type.TEXT);
+//    schema.addColumn("productclustercenter", Type.TEXT);
+//    schema.addColumn("categoryclustercenter", Type.TEXT);
+//    schema.addColumn("productcluster50pcdist", Type.TEXT);
+//    schema.addColumn("productcluster80pcdist", Type.TEXT);
+//    schema.addColumn("categorycluster50pcdist", Type.TEXT);
+//    schema.addColumn("categorycluster80pcdist", Type.TEXT);
+//    schema.addColumn("scalermean", Type.TEXT);
+//    schema.addColumn("scalerstd", Type.TEXT);
   }
 
   private void putAdidasKeyWords(Cache adidasKeywords) {
@@ -381,7 +410,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .hash().numOwners(1)
             .indexing().index(Index.NONE).transaction().transactionMode(
             TransactionMode.NON_TRANSACTIONAL)
-            .persistence().passivation(true)
+            .persistence().passivation(false)
             //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
             //                                                                      .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
 
@@ -802,6 +831,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
       //
       System.out.println(cacheName+"  " + list.size());
+      log.error("LGCREATE "+cacheName+"  " + list.size());
       for (Future<Void> future : list) {
         try {
           future.get(); // wait for task to complete
@@ -837,7 +867,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .hash().numOwners(1)
             .indexing().index(Index.NONE).transaction().transactionMode(
                 TransactionMode.NON_TRANSACTIONAL)
-            .persistence().passivation(true)
+            .persistence().passivation(false)
                 //                                                      .addStore(LevelDBStoreConfigurationBuilder.class)
                 //               .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
 
@@ -950,10 +980,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
       cacheConfig =  new ConfigurationBuilder().read(defaultIndexConfig).transaction()
           .transactionMode(TransactionMode.NON_TRANSACTIONAL).persistence().passivation(false).clustering().indexing().index(Index.LOCAL).addProperty("default.directory_provider", "filesystem")
-          .addProperty("hibernate.search.default.indexBase","/tmp/leadsprocessor-data/"+uniquePath+"/infinispan/"+cacheName+"/")
+          .addProperty("hibernate.search.default.indexBase", "/tmp/leadsprocessor-data/" + uniquePath + "/infinispan/" + cacheName + "/")
           .addProperty("hibernate.search.default.exclusive_index_use", "true")
           .addProperty("hibernate.search.default.indexmanager", "near-real-time")
-          .addProperty("hibernate.search.default.indexwriter.ram_buffer_size", "256")
+          .addProperty("hibernate.search.default.indexwriter.ram_buffer_size",Integer.toString(indexwriter_ram_buffer_size))
           .addProperty("lucene_version", "LUCENE_CURRENT").build();
       System.out.println(" Indexed Cache Configuration for: " + cacheName );
     }

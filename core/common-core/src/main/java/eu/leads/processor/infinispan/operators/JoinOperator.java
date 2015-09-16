@@ -240,17 +240,14 @@ public class JoinOperator extends MapReduceOperator {
        */
         try {
             if (res != null) {
-                for (Future<?> result : res) {
-                    System.out.println(result.get());
-                    addresses.add((String) result.get());
-                }
+              double perc = handleCallables(res,mapperCallable);
                 System.out.println("map " + mapperCallable.getClass().toString() +
-                    " Execution is done");
+                    " Execution is done " + perc);
                 log.info("map " + mapperCallable.getClass().toString() +
-                    " Execution is done");
+                    " Execution is done " + perc);
             } else {
                 System.out.println("map " + mapperCallable.getClass().toString() +
-                    " Execution not done");
+                    " Execution not done ");
                 log.info("map " + mapperCallable.getClass().toString() +
                     " Execution not done");
                 failed = true;
@@ -284,17 +281,13 @@ public class JoinOperator extends MapReduceOperator {
 
 
 
-      addresses = new ArrayList<String>();
       try {
         if (res2 != null) {
-          for (Future<?> result : res2) {
-            System.out.println(result.get());
-            addresses.add((String) result.get());
-          }
+          double perc = handleCallables(res2,mapperCallable);
           System.out.println("map " + mapperCallable.getClass().toString() +
-                               " Execution is done");
+                               " Execution is done " + perc);
           log.info("map " + mapperCallable.getClass().toString() +
-                     " Execution is done");
+                     " Execution is done " + perc);
         } else {
           System.out.println("map " + mapperCallable.getClass().toString() +
                                " Execution not done");

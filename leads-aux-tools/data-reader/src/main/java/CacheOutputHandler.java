@@ -51,7 +51,7 @@ public class CacheOutputHandler<K, V> implements OutputHandler<K, V> {
     @Override public long append(Object key, Object value) {
 
         if (dummyOutputHandler == null) {
-            EnsembleCacheUtils.putToCache(cache, key, value);
+            EnsembleCacheUtils.putToCacheDirect(cache, key, value);
         } else {
             dummyOutputHandler.append(key, value);
         }

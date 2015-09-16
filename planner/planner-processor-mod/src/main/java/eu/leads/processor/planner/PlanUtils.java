@@ -1,6 +1,7 @@
 package eu.leads.processor.planner;
 
 import eu.leads.processor.core.plan.LeadsNodeType;
+import org.apache.tajo.algebra.OpType;
 import org.infinispan.commons.api.BasicCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -206,7 +207,9 @@ public class PlanUtils {
         ( node.getString("nodetype").equals(LeadsNodeType.JOIN.toString()))  ||
         ( node.getString("nodetype").equals(LeadsNodeType.PROJECTION.toString()))  ||
         ( node.getString("nodetype").equals(LeadsNodeType.HAVING.toString()))  ||
-        ( node.getString("nodetype").equals(LeadsNodeType.SELECTION.toString()))
+        ( node.getString("nodetype").equals(LeadsNodeType.SELECTION.toString())) ||
+      (node.getString("nodetype").equals(LeadsNodeType.EXPRS.toString()) && node.getObject("configuration")
+          .getObject("body").getString("operationType").equals(OpType.CreateIndex.toString()))
         ){
       Set<String> allSites = new HashSet<>();
       allSites.addAll(info.getObject("microclouds").getFieldNames());

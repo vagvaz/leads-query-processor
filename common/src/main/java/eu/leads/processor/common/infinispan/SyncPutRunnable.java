@@ -19,6 +19,7 @@ public class SyncPutRunnable implements Runnable {
     private Logger logger;
     private ProfileEvent event;
     private boolean remote = true;
+    private int retries = 3;
 
     public SyncPutRunnable(){
         logger = LoggerFactory.getLogger(SyncPutRunnable.class);
@@ -51,11 +52,18 @@ public class SyncPutRunnable implements Runnable {
                 } catch (Exception e) {
                     done = false;
                     System.err.println(
-                        "puting key " + key + " into " + cache.getName() + " failed for " + e
-                            .getClass().toString() + " " + e.getMessage());
-                    logger.error("puting key " + key + " into " + cache.getName() + " failed for " + e
-                            .getClass().toString() + " " + e.getMessage());
+                        "puting key " + key + " into " + cache.getName() + " failed for " + e.getClass().toString()
+                            + " " + e.getMessage());
+                    logger.error(
+                        "puting key " + key + " into " + cache.getName() + " failed for " + e.getClass().toString()
+                            + " " + e.getMessage());
                     PrintUtilities.logStackTrace(logger, e.getStackTrace());
+                    if(retries ==0)
+                    {
+                        System.err.println("puting key " + key + " into " + cache.getName() + " FAILED ");
+                        logger.error("puting key " + key + " into " + cache.getName() + " FAILED ");
+                    }
+                    retries--;
                 }
 
             }

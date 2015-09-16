@@ -33,7 +33,7 @@ import java.util.UUID;
  */
 public class ProcessSQLQueryActionHandler implements ActionHandler {
     private final Node com;
-    private final LogProxy log;
+//    private final LogProxy log;
     private final InfinispanManager persistence;
     private final String id;
     private String currentCluster;
@@ -50,7 +50,7 @@ public class ProcessSQLQueryActionHandler implements ActionHandler {
                                         String id, TaJoModule module,
                                         String schedHost,String schedPort,JsonObject globalInformation) {
         this.com = com;
-        this.log = log;
+//        this.log = log;
         this.persistence = persistence;
         this.id = id;
         this.module = module;

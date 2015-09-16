@@ -55,4 +55,14 @@ public class LeadsIndexString implements Serializable, LeadsIndex {
     public Object getAttributeValue() {
         return attributeValue;
     }
+
+    @Override
+    public boolean equals(LeadsIndex anObject) {
+        return this.keyName.equals(anObject.getKeyName());
+    }
+
+    @Override
+    public int hashCode() {
+        return keyName.hashCode();
+    }
 }

@@ -27,12 +27,13 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
 
     transient List<String> columns;
     transient Logger log;
-    transient private ProfileEvent groupEvent;
-    transient private ProfileEvent mapEvent;
+//    transient private ProfileEvent groupEvent;
+//    transient private ProfileEvent mapEvent;
     transient  private Tuple emptyTuple;
     transient private StringBuilder builder;
     transient private Collector<String, Tuple> lc = null;
-    int counter = 0;
+    transient  private Tuple countTuple =null;
+    int groupcounter = 0;
     public GroupByMapper(JsonObject configuration) {
         super(configuration);
         columns = new ArrayList<String>();
@@ -67,10 +68,10 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
         }else {
 //           System.out.println("**************" + t.asString() + " emit");
 //           collector.emit("***" ,  emptyTuple);
-            counter++;
+            groupcounter++;
 //           collector.emit("***" ,  t.asString());
         }
-       mapEvent.end();
+//       mapEvent.end();
     }
 
     @Override
@@ -88,19 +89,24 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
           columns.add(current.getString("name"));
        }
         builder = new StringBuilder();
-        groupEvent = new ProfileEvent("groupbymap",log);
-        mapEvent = new ProfileEvent("groupbymap",log);
+//        groupEvent = new ProfileEvent("groupbymap",log);
+//        mapEvent = new ProfileEvent("groupbymap",log);
     }
 
     @Override protected void finalizeTask() {
-        groupEvent.end();
+//        groupEvent.end();
         if(columns.size() == 0){
-            Tuple t = new Tuple();
-            t.setNumberAttribute("__count", counter);
-            if(lc != null) {
-              lc.emit("***", t);
-              lc = null;
+          if(countTuple == null && groupcounter > 0) {
+            System.out.println("LOCAL Count = " + groupcounter);
+            countTuple = new Tuple();
+            countTuple.setNumberAttribute("__count", groupcounter);
+            if (lc != null) {
+              lc.emit("***", countTuple);
             }
+            else{
+              System.out.println("\n\nLEADS COLLECTOR ==" + lc);
+            }
+          }
         }
         super.finalizeTask();
     }

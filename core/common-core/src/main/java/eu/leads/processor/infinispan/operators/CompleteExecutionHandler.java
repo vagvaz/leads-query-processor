@@ -20,7 +20,16 @@ public class CompleteExecutionHandler implements LeadsMessageHandler {
    public void handle(JsonObject message) {
       Action action = new Action(message);
       JsonObject data = action.getData();
-      operator.addResult(data.getString("microcloud"),data.getString("STATUS"));
+//      if(!data.containsField("microcloud"))
+//      {
+//         if(data.containsField("data")){
+//
+//         }
+//         operator.addResult(action.asJsonObject().getString("microcloud"), action.asJsonObject().getString("STATUS"));
+//      }else {
+       operator.addResult(data.getString("microcloud"), data.getString("STATUS"));
+//      }
+//      System.out.println("received result " + data.encodePrettily());
       operator.signal();
    }
 }

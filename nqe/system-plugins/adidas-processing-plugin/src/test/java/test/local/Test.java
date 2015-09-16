@@ -31,7 +31,9 @@ public abstract class Test {
 		else if(type.equals("plugin"))
 			test = new PluginTest();
 		
-		if(args.length>1) urlFilter = args[1];
+		if(args.length>1) { 
+			urlFilter = args[1];
+		}
 		
 		test.execute();
 	}

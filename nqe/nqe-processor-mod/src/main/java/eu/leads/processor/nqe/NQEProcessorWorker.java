@@ -3,6 +3,7 @@ package eu.leads.processor.nqe;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.ConfigurationUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
@@ -20,6 +21,8 @@ import eu.leads.processor.nqe.handlers.ExecuteMapReduceJobActionHandler;
 import eu.leads.processor.nqe.handlers.OperatorActionHandler;
 import eu.leads.processor.web.WebServiceClient;
 import org.infinispan.Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.eventbus.Message;
@@ -45,7 +48,8 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
   JsonObject config;
   EventBus bus;
   LeadsMessageHandler leadsHandler;
-  LogProxy log;
+  LogProxy logg;
+  Logger log;
   InfinispanManager persistence;
   Map<String, ActionHandler> handlers;
   Map<String, Action> activeActions;
@@ -55,6 +59,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
 
   @Override public void start() {
     super.start();
+    log = LoggerFactory.getLogger(NQEProcessorWorker.class);
     activeActions = new HashMap<String, Action>();
     leadsHandler = new LeadsMessageHandler() {
       @Override public void handle(JsonObject event) {
@@ -78,6 +83,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
                 // up debuggin
                 //                       replyAction.getData().putString("microcloud",currentCluster);
                 replyAction.getData().putString("STATUS", "SUCCESS");
+                replyAction.getData().putString("status", "SUCCESS");
                 replyAction.getData().putString("replyGroup", action.asJsonObject().getString("replyGroup"));
 
                 String webaddress = getURIFromGlobal(coordinator);
@@ -111,6 +117,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
               if (action.getLabel().equals(NQEConstants.OPERATOR_GET_RUNNING_STATUS)) {
                 Action runningAction = new Action(action.asJsonObject().copy());
                 runningAction.setLabel(NQEConstants.OPERATOR_RUNNING_STATUS);
+                runningAction.setStatus(INPROCESS.toString());
                 com.sendTo(action.getData().getString("replyTo"), runningAction.asJsonObject());
               } else if (action.getLabel().equals(NQEConstants.OPERATOR_GET_OWNER)) {
                 Action runningAction = new Action(action.asJsonObject().copy());
@@ -176,16 +183,16 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
     JsonObject msg = new JsonObject();
     msg.putString("processor", id + ".process");
     jobsCache = (Cache) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
-    log = new LogProxy(config.getString("log"), com);
+    logg = new LogProxy(config.getString("log"), com);
     handlers = new HashMap<String, ActionHandler>();
-    ActionHandler pluginHandler = new DeployPluginActionHandler(com, log, persistence, id, globalConfig);
-    handlers.put(NQEConstants.DEPLOY_OPERATOR, new OperatorActionHandler(com, log, persistence, id));
+    ActionHandler pluginHandler = new DeployPluginActionHandler(com, logg, persistence, id, globalConfig);
+    handlers.put(NQEConstants.DEPLOY_OPERATOR, new OperatorActionHandler(com, logg, persistence, id));
     handlers.put(NQEConstants.DEPLOY_PLUGIN, pluginHandler);
     handlers.put(NQEConstants.UNDEPLOY_PLUGIN, pluginHandler);
     handlers.put(NQEConstants.DEPLOY_REMOTE_OPERATOR,
-        new DeployRemoteOpActionHandler(com, log, persistence, id, globalConfig));
+        new DeployRemoteOpActionHandler(com, logg, persistence, id, globalConfig));
     handlers.put(NQEConstants.EXECUTE_MAP_REDUCE_JOB,
-        new ExecuteMapReduceJobActionHandler(com, log, persistence, id,globalConfig));
+        new ExecuteMapReduceJobActionHandler(com, logg, persistence, id,globalConfig));
     //
     bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {
       @Override public void handle(Message<JsonObject> event) {
@@ -211,7 +218,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
     } catch (Exception e) {
       log.error("Parsing port execption " + e.getMessage());
       System.err.println("Parsing port execption " + e.getMessage());
-      e.printStackTrace();
+      PrintUtilities.logStackTrace(log,e.getStackTrace());
       if (uri.endsWith(":")) {
         uri = uri + "8080";
       } else {

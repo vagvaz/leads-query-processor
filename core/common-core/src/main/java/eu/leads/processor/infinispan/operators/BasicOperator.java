@@ -12,11 +12,14 @@ import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.infinispan.LeadsBaseCallable;
+import eu.leads.processor.infinispan.LeadsMapperCallable;
+import eu.leads.processor.infinispan.LeadsReducerCallable;
 import eu.leads.processor.web.ActionResult;
 import eu.leads.processor.web.WebServiceClient;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.infinispan.Cache;
 import org.infinispan.commons.api.BasicCache;
+import org.infinispan.commons.util.concurrent.NotifyingFuture;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.distexec.DistributedTask;
@@ -72,7 +75,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     reduceLocal = action.getData().getObject("operator").containsField("reduceLocal");
   }
   protected BasicOperator(Node com, InfinispanManager manager,LogProxy log,Action action){
-    super(com.getId()+"-"+action.getId() + "-basic-operator-thread");
+    super(com.getId()+"-"+action.getId() + "-basic-operator-thread-"+UUID.randomUUID().toString());
     EngineUtils.initialize();
     System.err.println(this.getClass().getCanonicalName());
     mcResults = new HashMap<>();
@@ -88,7 +91,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       executeOnlyReduce = action.asJsonObject().containsField("reduce");
       reduceLocal = action.getData().getObject("operator").containsField("reduceLocal");
       System.err.println("IS REMOTE TRUE " + executeOnlyMap + " " + executeOnlyReduce);
-      log.error("IS REMOTE TRUE " + executeOnlyMap + " " + executeOnlyReduce);
+      profilerLog.error("IS REMOTE TRUE " + executeOnlyMap + " " + executeOnlyReduce);
     }
     else{
       executeOnlyMap = true;
@@ -97,7 +100,7 @@ public abstract class BasicOperator extends Thread implements Operator{
         executeOnlyMap = !conf.getBoolean("skipMap"); //if true then we do not need to execute the map  phase
       }
       reduceLocal = action.getData().getObject("operator").containsField("reduceLocal");
-      log.error("IS REMOTE FALSE ");
+      profilerLog.error("IS REMOTE FALSE ");
     }
 
     this.globalConfig = action.getGlobalConf();
@@ -271,10 +274,10 @@ public abstract class BasicOperator extends Thread implements Operator{
   public void cleanup() {
     //    profOperator.end("cleanup");
     //    profOperator.start("Op CleanUp");
-    //    if(!isRemote)
-    //    {
-    unsubscribeToMapActions("execution." + com.getId() + "." + action.getId());
-    //    }
+//        if(!isRemote)//vagvaz
+//        {
+    unsubscribeToMapActions("execution."+getName()+"." + com.getId() + "." + action.getId());
+//        }
     action.setStatus(ActionStatus.COMPLETED.toString());
 
     if(com != null)
@@ -289,12 +292,12 @@ public abstract class BasicOperator extends Thread implements Operator{
   public void failCleanup() {
     //    if(!isRemote)
     //    {
-    unsubscribeToMapActions("execution." + com.getId() + "." + action.getId());
+    unsubscribeToMapActions("execution."+getName()+"." + com.getId() + "." + action.getId());
     //    }
     action.setStatus(ActionStatus.COMPLETED.toString());
 
-    pendingMMC.clear();
-    pendingRMC.clear();
+//    pendingMMC.clear();
+//    pendingRMC.clear();
 
     //    mmcMutex.notifyAll();
 
@@ -327,7 +330,9 @@ public abstract class BasicOperator extends Thread implements Operator{
     if(outputSize == 0){
       outputSize =1;
     }
-    System.err.println("In#: " + inputSize + " Out#:" + outputSize + " Execution time: " + (endTime - startTime) / 1000.0 + " s");
+    System.err.println("In#: " + inputSize + " Out#:" + outputSize + " Execution time: " + (endTime - startTime) / 1000.0 + " s for " + this.getClass().toString() + "\n"+getName());
+    profilerLog.error("In#: " + inputSize + " Out#:" + outputSize + " Execution time: " + (endTime - startTime) / 1000.0 + " s for " + this.getClass().toString() + "\n"+getName());
+
     //    updateStatisticsCache(inputSize, outputSize, (endTime - startTime));
   }
 
@@ -479,6 +484,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     //    } catch (InterruptedException e) {
     //      e.printStackTrace();
     //    }
+    System.err.println("END OF RUN FOR " + this.getClass().toString() + " " + getName());
   }
   public void createCache(String microCloud, String cacheName ){
 
@@ -514,19 +520,23 @@ public abstract class BasicOperator extends Thread implements Operator{
 
   @Override
   public void signal(){
+//   System.err.println("SIGNALING " + this.toString() + " threadname " + getName());
     synchronized (mmcMutex) {
+//      System.err.println("mmcMutex " + this.toString() + " threadname " + getName());
       mmcMutex.notifyAll();
     }
   }
 
   @Override
   public synchronized void addResult(String mc, String status){
-    System.out.println("Deliver " + mc + " " + status);
-    PrintUtilities.printList(Arrays.asList(pendingMMC));
-    mcResults.put(mc,status);
-    pendingMMC.remove(mc);
-    System.out.println("AFTER\n");
-    PrintUtilities.printList(Arrays.asList(pendingMMC));
+//    synchronized (mmcMutex) {
+      System.out.println("Deliver " + mc + " " + status + this.getClass().toString() + " " + getName());
+      PrintUtilities.printList(Arrays.asList(pendingMMC));
+      mcResults.put(mc, status);
+      pendingMMC.remove(mc);
+      System.out.println("AFTER\n");
+      PrintUtilities.printList(Arrays.asList(pendingMMC));
+//    }
   }
   @Override
   public void executeMap(){
@@ -543,26 +553,35 @@ public abstract class BasicOperator extends Thread implements Operator{
 
     if(pendingMMC.contains(currentCluster)){
       ProfileEvent lem = new ProfileEvent("ActualExecMap",profilerLog);
+//      if(!isRemote)
       localExecuteMap();
       lem.end();
     }
 
-    synchronized (mmcMutex){
-      while(pendingMMC.size() > 0)
+    int size = Integer.MAX_VALUE;
+    synchronized (mmcMutex) {
+      size = pendingMMC.size();
+    }
+      while(size > 0)
       {
-        System.out.println("Sleeping to executing " + mapperCallable.getClass().toString() + " pending clusters ");
-        PrintUtilities.printList(Arrays.asList(pendingMMC));
-        try {
-          mmcMutex.wait(120000);
-        } catch (InterruptedException e) {
-          log.error("Interrupted " + e.getMessage());
-          break;
+        synchronized (mmcMutex) {
+          System.out.println("Sleeping to executing " + mapperCallable.getClass().toString() + " pending clusters " +this.getClass().toString() +" "+ this.getName());
+          PrintUtilities.printList(Arrays.asList(pendingMMC));
+          try {
+//            System.err.println("JUST BEF " + this.toString() + " threadname " + getName());
+            mmcMutex.wait(120000);
+//            System.err.println("JUST AF " + this.toString() + " threadname " + getName());
+            size = pendingMMC.size();
+          } catch (InterruptedException e) {
+            profilerLog.error("Interrupted " + e.getMessage());
+            break;
+          }
         }
       }
-    }
+
     for(Map.Entry<String,String> entry : mcResults.entrySet()){
       System.out.println("Execution on " + entry.getKey() + " was " + entry.getValue());
-      log.error("Execution on " + entry.getKey() + " was " + entry.getValue());
+      profilerLog.error("Execution on " + entry.getKey() + " was " + entry.getValue());
       if(entry.getValue().equals("FAIL"))
         failed =true;
     }
@@ -571,11 +590,11 @@ public abstract class BasicOperator extends Thread implements Operator{
 
   public void sendRemoteRequest(String mc, boolean b) {
     System.err.println("Send remote request to mc " + mc);
-    log.error("Send remote request to mc " + mc);
+    profilerLog.error("Send remote request to mc " + mc);
     Action copyAction = new Action(new JsonObject(action.toString()));
     Action newAction = new Action(copyAction);
     JsonObject dataAction = copyAction.asJsonObject().copy();
-    //    log.error("DATA ACTION = "+dataAction.toString());
+    //    serror("DATA ACTION = "+dataAction.toString());
     JsonObject sched = new JsonObject();
     sched.putArray(mc, globalConfig.getObject("microclouds").getArray(mc));
     //    if(dataAction.containsField("data")){
@@ -603,7 +622,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       newAction.getData().putString("reduce","reduce");
 
     }
-    newAction.getData().putString("replyGroup", "execution." + com.getId() + "." + action.getId());
+    newAction.getData().putString("replyGroup", "execution."+getName()+"." + com.getId() + "." + action.getId());
     newAction.getData().putString("coordinator",currentCluster);
     String uri = getURIForMC(mc);
     try {
@@ -612,16 +631,16 @@ public abstract class BasicOperator extends Thread implements Operator{
       ActionResult remoteResult = WebServiceClient.executeMapReduce(newAction.asJsonObject(), uri);
       System.out.println("Reply  " + remoteResult.toString());
       if(remoteResult.getStatus().equals("FAIL")){
-        log.error("Remote invocation for " + mc + " failed ");
+        profilerLog.error("Remote invocation for " + mc + " failed ");
         replyForFailExecution(newAction);
       }
     } catch (MalformedURLException e) {
-      log.error("Problem initializing web service client");
+      profilerLog.error("Problem initializing web service client");
       newAction.getData().putString("microcloud", mc);
       newAction.getData().putString("STATUS","FAIL");
       replyForFailExecution(newAction);
     } catch (IOException e) {
-      log.error("Problem remote callling remote execution web service client");
+      profilerLog.error("Problem remote callling remote execution web service client");
       newAction.getData().putString("microcloud", mc);
       newAction.getData().putString("STATUS","FAIL");
       replyForFailExecution(newAction);
@@ -633,7 +652,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     final boolean[] registered = {false};
     //TODO VAGVAZ
     synchronized (rmcMutex) {
-      com.subscribe("execution." + com.getId() + "." + action.getId(), handler, new Callable() {
+      com.subscribe("execution."+getName()+"." + com.getId() + "." + action.getId(), handler, new Callable() {
         @Override
         public Object call() throws Exception {
           synchronized (rmcMutex) {
@@ -649,7 +668,7 @@ public abstract class BasicOperator extends Thread implements Operator{
         if(!registered[0])
           rmcMutex.wait();
       } catch (InterruptedException e) {
-        log.error("Subscription wait interreped " + e.getMessage());
+        profilerLog.error("Subscription wait interreped " + e.getMessage());
         System.err.println("Subscription wait interreped " + e.getMessage());
       }
     }
@@ -668,81 +687,81 @@ public abstract class BasicOperator extends Thread implements Operator{
       //        return;
       //      }
       setMapperCallableEnsembleHost();
-      System.err.println(
-          "EXECUTE " + mapperCallable.getClass().toString() + " ON " + currentCluster + Thread.currentThread().toString());
-      ProfileEvent distTask = new ProfileEvent("setup map taks " + mapperCallable.getClass().toString(),profilerLog);
+      if(mapperCallable instanceof LeadsMapperCallable){
+//        LeadsMapperCallable lm = (LeadsMapperCallable) mapperCallable;
+        MapReduceOperator mr = (MapReduceOperator)this;
+        System.err.println("EXECUTE " + mr.mapper.getClass().toString() + " ON " + currentCluster + Thread.currentThread()
+            .toString());
+        profilerLog.error("EXECUTE " + mr.mapper.getClass().toString() + " ON " + currentCluster + Thread.currentThread()
+            .toString());
+        profilerLog.error("LEM: " + mr.mapper.getClass().toString() + " " + mapperCallable.getEnsembleHost());
+      }else {
+        System.err.println("EXECUTE " + mapperCallable.getClass().toString() + " ON " + currentCluster + Thread.currentThread()
+                .toString());
+        profilerLog.error("EXECUTE " + mapperCallable.getClass().toString() + " ON " + currentCluster + Thread.currentThread()
+            .toString());
+        profilerLog.error("LEM: " + mapperCallable.getClass().toString() + " " + mapperCallable.getEnsembleHost());
+      }
+//      ProfileEvent distTask = new ProfileEvent("setup map taks " + mapperCallable.getClass().toString(),profilerLog);
       DistributedExecutorService des = new DefaultExecutorService(inputCache);
       System.err.println("serrbuilding dist task");
-      log.error("logbuilding dist task");
+      profilerLog.error("logbuilding dist task");
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder(mapperCallable);
       builder.timeout(24, TimeUnit.HOURS);
       DistributedTask task = builder.build();
       System.err.println("serrsubmitting to local cluster task");
-      log.error("log submitting to local cluster task");
+      profilerLog.error("log submitting to local cluster task");
 
-      List<Future<String>> res = des.submitEverywhere(task);//new ArrayList<>();
-      List<Address> taskNodes =  inputCache.getAdvancedCache().getRpcManager().getMembers();
+      List<Future<String>> res = des.submitEverywhere(task);//new Arr?ayList<>();
+//      List<Address> taskNodes =  inputCache.getAdvancedCache().getRpcManager().getMembers();
       //      taskNodes.add(inputCache.getCacheManager().getAddress());
       //      for(Address node : taskNodes){
       //        Future<String> ft = des.submit(node,task);
       //        res.add(ft);
       //      }
-      distTask.end();
+//      distTask.end();
       //      Future<String> res = des.submit(callable);
       //      List<String> addresses = new ArrayList<String>();
       try {
         if (res != null) {
-          while(res.size() > 0 ){
-            Iterator<Future<String>> resultIterator = res.iterator();
-
-            while(resultIterator.hasNext()){
-              Future<String> future = resultIterator.next();
-              //              System.err.println("Checking whether " + future.toString() + " is Done " + future.isDone() );
-              //              if(future.isDone()){
-              System.err.println(mapperCallable.getClass().toString() + " completed on " + future
-                  .get());
-              resultIterator.remove();
-
-              //              }
-            }
-          }
+          double perc = handleCallables(res,mapperCallable);
           //          for (Future<?> result : res) {
           //            System.out.println(result.get());
           //            addresses.add((String) result.get());
           //          }
           System.out.println("map " + mapperCallable.getClass().toString() +
-              " Execution is done");
-          log.info("map " + mapperCallable.getClass().toString() +
-              " Execution is done");
+              " Execution is done " + perc);
+          profilerLog.info("map " + mapperCallable.getClass().toString() +
+              " Execution is done " + perc);
         } else {
           System.out.println("map " + mapperCallable.getClass().toString() +
               " Execution not done");
-          log.info("map " + mapperCallable.getClass().toString() +
+          profilerLog.info("map " + mapperCallable.getClass().toString() +
               " Execution not done");
           failed = true;
           replyForFailExecution(action);
         }
       } catch (InterruptedException e) {
-        log.error("Interrupted Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+        profilerLog.error("Interrupted Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
             e.getClass().toString());
-        log.error(e.getMessage());
+        profilerLog.error(e.getMessage());
         System.err.println(
             "Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
                 e.getClass().toString());
         System.err.println(e.getMessage());
         failed = true;
-        log.error(e.getStackTrace().toString());
+        profilerLog.error(e.getStackTrace().toString());
         e.printStackTrace();
         replyForFailExecution(action);
-      } catch (ExecutionException e) {
-        log.error("Execution Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
+      } catch (Exception e) {
+        profilerLog.error("Execution Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString() + "\n" +
             e.getClass().toString());
-        log.error(e.getMessage());
+        profilerLog.error(e.getMessage());
         System.err.println("Exception in Map Excuettion " + "map " + mapperCallable.getClass().toString()
             + "\n" +
             e.getClass().toString());
         System.err.println(e.getMessage());
-        log.error(e.getStackTrace().toString());
+        profilerLog.error(e.getStackTrace().toString());
         failed = true;
         e.printStackTrace();
         replyForFailExecution(action);
@@ -789,7 +808,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       }
     }
     result = result.substring(0, result.length() - 1);
-    log.error("EnsembleHost: " + result);
+    profilerLog.error("EnsembleHost: " + result);
 
     return result;
   }
@@ -817,7 +836,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       result += globalConfig.getObject("componentsAddrs").getArray(site).get(0).toString()+"|";//+":11222|";
     }
     result = result.substring(0,result.length()-1);
-    log.error("EnsembleHost: " + result);
+    profilerLog.error("EnsembleHost: " + result);
     return result;
   }
 
@@ -825,6 +844,22 @@ public abstract class BasicOperator extends Thread implements Operator{
   public void localExecuteReduce(){
 
     if(reducerCallable != null) {
+      if(reducerCallable instanceof LeadsReducerCallable){
+        //        LeadsMapperCallable lm = (LeadsMapperCallable) mapperCallable;
+        MapReduceOperator mr = (MapReduceOperator)this;
+        System.err.println("EXECUTE REDUCER" + mr.reducer.getClass().toString() + " ON " + currentCluster + Thread.currentThread()
+            .toString());
+        profilerLog.error("EXECUTE REDCUER" + mr.reducer.getClass().toString() + " ON " + currentCluster + Thread.currentThread()
+            .toString());
+        profilerLog.error("LEM: " + mr.reducer.getClass().toString() + " " + reducerCallable.getEnsembleHost());
+      }else {
+        System.err.println("EXECUTE " + reducerCallable.getClass().toString() + " ON " + currentCluster + Thread.currentThread()
+            .toString());
+        profilerLog.error("EXECUTE " + reducerCallable.getClass().toString() + " ON " + currentCluster + Thread.currentThread()
+            .toString());
+        profilerLog.error("LEM: " + reducerCallable.getClass().toString() + " " + reducerCallable.getEnsembleHost());
+      }
+
       DistributedExecutorService des = new DefaultExecutorService(reduceInputCache);
       setReducerCallableEnsembleHost();
       DistributedTaskBuilder builder = des.createDistributedTaskBuilder(reducerCallable);
@@ -832,29 +867,27 @@ public abstract class BasicOperator extends Thread implements Operator{
       DistributedTask task = builder.build();
       List<Future<String>> res = des.submitEverywhere(task);
       //      Future<String> res = des.submit(callable);
-      List<String> addresses = new ArrayList<String>();
+//      List<String> addresses = new ArrayList<String>();
       try {
         if (res != null) {
-          for (Future<?> result : res) {
-            System.out.println(result.get());
-            addresses.add((String) result.get());
-          }
+//          for (Future<?> result : res) {
+          double percentage = handleCallables(res,reducerCallable);
           System.out.println("reduce " + reducerCallable.getClass().toString() +
-              " Execution is done");
-          log.info("reduce " + reducerCallable.getClass().toString() +
-              " Execution is done");
+              " Execution is done " + percentage);
+          profilerLog.info("reduce " + reducerCallable.getClass().toString() +
+              " Execution is done " + percentage);
         } else {
           System.out.println("reduce " + reducerCallable.getClass().toString() +
               " Execution not done");
-          log.info("reduce " + reducerCallable.getClass().toString() +
+          profilerLog.info("reduce " + reducerCallable.getClass().toString() +
               " Execution not done");
           failed = true;
           replyForFailExecution(action);
         }
       } catch (InterruptedException e) {
-        log.error("Exception in reduce Excuettion " + "reduce " + reducerCallable.getClass().toString() + "\n" +
+        profilerLog.error("Exception in reduce Excuettion " + "reduce " + reducerCallable.getClass().toString() + "\n" +
             e.getClass().toString());
-        log.error(e.getMessage());
+        profilerLog.error(e.getMessage());
         System.err.println("Exception in reduce Excuettion " + "reduce " + reducerCallable.getClass()
             .toString() + "\n" +
             e.getClass().toString());
@@ -862,10 +895,10 @@ public abstract class BasicOperator extends Thread implements Operator{
         failed = true;
         replyForFailExecution(action);
         e.printStackTrace();
-      } catch (ExecutionException e) {
-        log.error("Exception in reduce Excuettion " + "reduce " + reducerCallable.getClass().toString() + "\n" +
+      } catch (Exception e) {
+        profilerLog.error("Exception in reduce Excuettion " + "reduce " + reducerCallable.getClass().toString() + "\n" +
             e.getClass().toString());
-        log.error(e.getMessage());
+        profilerLog.error(e.getMessage());
         System.err.println("Exception in reduce Excuettion " + "map " + reducerCallable.getClass().toString()
             + "\n" +
             e.getClass().toString());
@@ -881,7 +914,7 @@ public abstract class BasicOperator extends Thread implements Operator{
   public void replyForSuccessfulExecution(Action action) {
     action.getData().putString("microcloud",currentCluster);
     action.getData().putString("STATUS","SUCCESS");
-    com.sendTo("execution." + com.getId() + "." + action.getId(), action.asJsonObject());
+    com.sendTo("execution." + getName() + "." + com.getId() + "." + action.getId(), action.asJsonObject());
   }
 
   public void replyForFailExecution(Action action){
@@ -889,11 +922,13 @@ public abstract class BasicOperator extends Thread implements Operator{
       action.getData().putString("microcloud", currentCluster);
     }
     action.getData().putString("STATUS", "FAIL");
-    com.sendTo("execution." + com.getId() + "." + action.getId(),action.asJsonObject());
+    com.sendTo("execution."+getName()+"." + com.getId() + "." + action.getId(),action.asJsonObject());
   }
   @Override
   public void executeReduce(){
-    System.err.println("RUNNING REDUCE ON CLUSTER " + currentCluster + Thread.currentThread().toString());
+    System.err.println(
+        "RUNNING REDUCE ON CLUSTER " + this.getClass().toString() + " " + currentCluster + Thread.currentThread()
+            .toString());
     pendingMMC = new HashSet<>();
     mcResults = new HashMap<>();
     pendingMMC.addAll(pendingRMC);
@@ -921,20 +956,20 @@ public abstract class BasicOperator extends Thread implements Operator{
         try {
           mmcMutex.wait(240000);
         } catch (InterruptedException e) {
-          log.error("REduce Interrupted " + e.getMessage());
+          profilerLog.error("REduce Interrupted " + e.getMessage());
           break;
         }
       }
     }
     for(Map.Entry<String,String> entry : mcResults.entrySet()){
       System.out.println("Reduce Execution on " + entry.getKey() + " was " + entry.getValue());
-      log.error("Reduce Execution on " + entry.getKey() + " was " + entry.getValue());
+      profilerLog.error("Reduce Execution on " + entry.getKey() + " was " + entry.getValue());
       if(entry.getValue().equals("FAIL"))
         failed =true;
     }
   }
   public  String getURIForMC(String microCloud) {
-    log.error("Getting uriformc " + microCloud + " " + globalConfig.getObject("microclouds").toString());
+    profilerLog.error("Getting uriformc " + microCloud + " " + globalConfig.getObject("microclouds").toString());
     String uri = globalConfig.getObject("microclouds").getArray(microCloud).get(0);
 
 
@@ -945,7 +980,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       String portString = uri.substring(uri.lastIndexOf(":")+1);
       int port = Integer.parseInt(portString);
     }catch (Exception e){
-      log.error("Parsing port execption " + e.getMessage());
+      profilerLog.error("Parsing port execption " + e.getMessage());
       System.err.println("Parsing port execption " + e.getMessage());
       if(uri.endsWith(":")){
         uri = uri +"8080";
@@ -1010,7 +1045,7 @@ public abstract class BasicOperator extends Thread implements Operator{
   }
   public Set<String> getRunningMC(){
     Set<String> result= new HashSet<>();
-    JsonObject targetEndpoints = action.getData().getObject("operator").getObject ("scheduling");
+    JsonObject targetEndpoints = action.getData().getObject("operator").getObject("scheduling");
 
     for(String runningMC : targetEndpoints.getFieldNames()){
       //         JsonObject mc = targetEndpoints.getObject(targetMC);
@@ -1030,36 +1065,32 @@ public abstract class BasicOperator extends Thread implements Operator{
       DistributedTask task = builder.build();
       System.out.println("EXECUTE reduceLocal " + reduceLocalInputCache.getName() + " "+ reducerLocalCallable.getClass().toString() +
           " ON " + currentCluster + " with " + inputCache.size() + " keys");
-      log.error("EXECUTE reduceLocal " + reducerLocalCallable.getClass().toString() +
+      profilerLog.error("EXECUTE reduceLocal " + reducerLocalCallable.getClass().toString() +
           " ON " + currentCluster + " with " + inputCache.size() + " keys");
 
-      log.info("reduceLocal " + reducerLocalCallable.getClass().toString() +
+      profilerLog.info("reduceLocal " + reducerLocalCallable.getClass().toString() +
           " Execution is done");
       List<Future<String>> res = des.submitEverywhere(task);  // TODO(ap0n) Is this wrong?
-      List<String> addresses = new ArrayList<String>();
       try {
         if (res != null) {
-          for (Future<?> result : res) {
-            System.out.println("ReduceLocal completed on " + result.get());
-            addresses.add((String) result.get());
-          }
+          double perc = handleCallables(res,reducerLocalCallable);
           System.out.println("reduceLocal " + reducerLocalCallable.getClass().toString() +
-              " Execution is done");
-          log.info("reduceLocal " + reducerLocalCallable.getClass().toString() +
-              " Execution is done");
+              " Execution is done " + perc);
+          profilerLog.info("reduceLocal " + reducerLocalCallable.getClass().toString() +
+              " Execution is done " + perc );
         } else {
           System.out.println("reduceLocal " + reducerLocalCallable.getClass().toString() +
               " Execution not done");
-          log.info("reduceLocal " + reducerLocalCallable.getClass().toString() +
+          profilerLog.info("reduceLocal " + reducerLocalCallable.getClass().toString() +
               " Execution not done");
           failed = true;
           replyForFailExecution(action);
         }
       } catch (InterruptedException e) {
-        log.error(
+        profilerLog.error(
             "Exception in reduceLocal Execution " + "reduceLocal "
                 + reducerCallable.getClass().toString() + "\n" + e.getClass().toString());
-        log.error(e.getMessage());
+        profilerLog.error(e.getMessage());
         System.err.println("Exception in reduceLocal Execution " + "reduceLocal "
             + reducerLocalCallable.getClass().toString() + "\n"
             + e.getClass().toString());
@@ -1067,11 +1098,11 @@ public abstract class BasicOperator extends Thread implements Operator{
         failed = true;
         replyForFailExecution(action);
         e.printStackTrace();
-      } catch (ExecutionException e) {
-        log.error(
+      } catch (Exception e) {
+        profilerLog.error(
             "Exception in reduceLocal Execution " + "reduceLocal "
                 + reducerLocalCallable.getClass().toString() + "\n" + e.getClass().toString());
-        log.error(e.getMessage());
+        profilerLog.error(e.getMessage());
         System.err.println(
             "Exception in reduceLocal Execution " + "map "
                 + reducerLocalCallable.getClass().toString() + "\n" + e.getClass().toString());
@@ -1083,7 +1114,7 @@ public abstract class BasicOperator extends Thread implements Operator{
     }
     long end = System.currentTimeMillis();
     System.out.println("TIME FOR REDUCELOCAL = " + (end - start)/1000f);
-    log.error("TIME FOR REDUCELOCAL = " + (end - start)/1000f);
+    profilerLog.error("TIME FOR REDUCELOCAL = " + (end - start)/1000f);
     //    replyForSuccessfulExecution(action);
   }
 
@@ -1093,5 +1124,76 @@ public abstract class BasicOperator extends Thread implements Operator{
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+  @Override public void finalize(){
+    System.err.println("Finalize " + this.getClass().toString() +"  "+ getName());
+    if(this.isAlive())
+      this.interrupt();
+  }
+  public double handleCallables(List<Future<String>> futures, LeadsBaseCallable callable)
+      throws ExecutionException, InterruptedException {
+    int size = futures.size();
+    int threshold = 3;
+    long timeout = 30;
+    long minimumTime = 60000;
+    long start  = -1;
+    long dur = 0;
+    int counter = 0;
+    long lastEnd = 0;
+    long begin = System.currentTimeMillis();
+    try {
+      System.err.println("TOTAL_FUTURES: " + size + " for " + callable.getClass().toString() +"\n"+getName());
+      while (futures.size() > 0) {
+        Iterator<Future<String>> resultIterator = futures.iterator();
+        counter = 0;
+        while (resultIterator.hasNext()) {
+          Future<String> future = resultIterator.next();
+          try{
+//          System.err.println("Checking if done "+ counter++ +":" + future.toString() + " for " + callable.getClass().toString() +"in op " + getName() );
+            profilerLog.error("Checking if done "+ counter++ +":" + future.toString() + " for " + callable.getClass().toString() +"in op " + getName() );
+            String result = future.get(timeout,TimeUnit.SECONDS);
+            System.err.println(callable.getClass().toString() + " Completed on " + result + " " + getName());
+            profilerLog.error(callable.getClass().toString() + " Completed on " + result + " " + getName());
+          resultIterator.remove();
+            lastEnd = System.currentTimeMillis();
+         }catch(TimeoutException e){
+//            System.err.println("Future is not done yet " + ((start < 0) ? "next cancel in inf " : (" next cancel at "+ Long.toString(
+//                (long) (1.3 * Math.max(minimumTime,lastEnd-begin)))) ) );
+            if(start < 0 ) {
+              profilerLog.error("Future is not done yet " + "next cancel in inf ");
+            }else{
+                  profilerLog.error(" next cancel at " + Long.toString((long) (1.3 * Math.max(minimumTime, lastEnd - begin))));
+                  System.err.println(" next cancel at " + Long.toString((long) (1.3 * Math.max(minimumTime, lastEnd - begin))));
+            }
+          }
+        }
+        if(futures.size() < threshold && start < 0 ){
+          start = System.currentTimeMillis();
+        }
+        else if(futures.size() < threshold){
+          dur = System.currentTimeMillis() - begin;
+          if(dur > 1.3 * Math.max(minimumTime,lastEnd-begin));{
+            try{
+              for(Future f : futures){
+                f.cancel(true);
+                System.err.println(callable.getClass().toString() + " Cancelled on  " + getName());
+                profilerLog.error(callable.getClass().toString() + " Completed on " + getName());
+              }
+              futures.clear();
+            }catch(Exception e){
+              System.err.println("Exception while cancelling " + callable.getClass().toString() + " Cancelled on  " + getName());
+              profilerLog.error("Exception while cancelling " + callable.getClass().toString() + " Completed on " + getName());
+            }
+          }
+        }
+      }
+    }catch (Exception e){
+      profilerLog.error("EXCEPTION WHILE Handling Callables for " + this.getClass().toString() + " \nthread: " + getName());
+      PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
+      e.printStackTrace();
+      throw e;
+    }
+    int endSize = futures.size();
+    return (double)(size-endSize) / (double)size;
   }
 }

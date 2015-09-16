@@ -40,7 +40,7 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
     private JsonObject config;
     private EventBus bus;
     private LeadsMessageHandler leadsHandler;
-    private LogProxy log;
+//    private LogProxy log;
     private InfinispanManager persistence;
     private Map<String, ActionHandler> handlers;
     private TaJoModule module;
@@ -93,26 +93,26 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
         msg.putString("processor", id + ".process");
         handlers = new HashMap<String, ActionHandler>();
 
-        log = new LogProxy(config.getString("log"), com);
+//        log = new LogProxy(config.getString("log"), com);
         bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {
             @Override
             public void handle(Message<JsonObject> event) {
-               log.info(id + " Registration " + event.address().toString());
+               System.out.println(id + " Registration " + event.address().toString());
             }
         });
 
-      log.info(id +" started....");
+      System.out.println(id + " started....");
     }
 
     public void initialize(){
         persistence = new EnsembleInfinispanManager();
         persistence.startManager(LQPConfiguration.getInstance().getConfiguration().getString("node.ip")+":11222");
         handlers.put(QueryPlannerConstants.PROCESS_SQL_QUERY,
-            new ProcessSQLQueryActionHandler(com, log, persistence, id, module,schedHost,schedPort,config.getObject("global")));
+            new ProcessSQLQueryActionHandler(com, null, persistence, id, module,schedHost,schedPort,config.getObject("global")));
         handlers.put(QueryPlannerConstants.PROCESS_WORKFLOW_QUERY,
-            new ProcessWorkflowQueryActionHandler(com, log, persistence, id, module,schedHost,schedPort));
+            new ProcessWorkflowQueryActionHandler(com, null, persistence, id, module,schedHost,schedPort));
         handlers.put(QueryPlannerConstants.PROCESS_SPECIAL_QUERY,
-            new ProcessSpecialQueryActionHandler(com, log, persistence, id, module,schedHost,
+            new ProcessSpecialQueryActionHandler(com, null, persistence, id, module,schedHost,
                 schedPort,config.getObject("global")));
     }
     @Override
@@ -141,7 +141,7 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
                     }
                 }
             } else {
-                log.error(id
+                System.err.println(id
                               + " received message from eventbus that does not contain type field  \n"
                               + message.toString());
             }

@@ -29,6 +29,7 @@ public class leadsCli {
   protected String[] loc = {"a", "b", "c", "d"};
   private boolean DEBUG = false;
   private static boolean noResults = false;
+  private static boolean noPrint = false;
   public static void main(String[] args) throws Exception {
 
     System.out.println(" === Leads Command Line Interface === ");
@@ -49,7 +50,7 @@ public class leadsCli {
       MemoryHistory hist = setupHistory(reader, "leadscli");
 
       List<Completer> completors = new LinkedList<Completer>();
-      completors.add(new StringsCompleter("select", "from", "create index", "insert", "quit", "where"));
+      completors.add(new StringsCompleter("select", "from", "create index", "insert", "quit", "where","noprint","noresults","printresults"));
       reader.setPrompt("\u001B[33msql\u001B[0m> ");
       CandidateListCompletionHandler handler = new CandidateListCompletionHandler();
       reader.setCompletionHandler(handler);
@@ -71,8 +72,13 @@ public class leadsCli {
             noResults=true;
             continue;
           }
+          if (line.equalsIgnoreCase("noprint")) {
+            noPrint=true;
+            continue;
+          }
           if (line.equalsIgnoreCase("printresults")) {
             noResults=false;
+            noPrint=false;
             continue;
           }
           out.flush();
@@ -167,7 +173,7 @@ public class leadsCli {
     QueryStatus currentStatus = WebServiceClient.submitQuery(username, sql);
     long submittime = System.currentTimeMillis();
 
-    int getquerydelaytime = 2000;
+    int getquerydelaytime = 1000;
     while (!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")) {
       sleep(getquerydelaytime);
       currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
@@ -197,12 +203,17 @@ public class leadsCli {
         QueryResults res = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
         resultArrived = System.currentTimeMillis();
         System.out.printf("\rResult acquisition (delivery) time: " + (resultArrived - resultCompleted) + " ms.\n");
-
-        System.out.printf(" Please wait ... formatting results. ");
-        print_results(res);
+        if(noPrint)
+          System.out.println("Disabled result print acquisition. Use \"printresults\" command to enable.");
+        else{
+          System.out.printf(" Please wait ... formatting results. ");
+          print_results(res);
+        }
 
         resultPrinted = System.currentTimeMillis();
         System.out.print("\rFound " + res.getResult().size() + " results.                                      \n");
+
+
       }
       System.out.print("\nSubmit time: " + (submittime - start) + " ms, ");
       System.out.print("execution  time: " + (resultCompleted - submittime) + " ms, ");
@@ -212,6 +223,7 @@ public class leadsCli {
     } else {
       System.err.println(" Execution terminated: " + currentStatus.getErrorMessage());
     }
+    System.gc();
   }
 
   private static void print_results(QueryResults data) {
@@ -226,6 +238,8 @@ public class leadsCli {
       resultSet.add(new Tuple(s));
     }
     printResults(resultSet);
+    resultSet.clear();
+    resultSet=null;
   }
 
   //Print the results of the query

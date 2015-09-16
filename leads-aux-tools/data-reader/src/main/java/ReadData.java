@@ -22,9 +22,11 @@ public class ReadData {
         int limit = 10;
         if (args.length > 1)
             limit = Integer.parseInt(args[1]);
+        else
+        limit = 2000000;
         System.out.println("Limit :" + limit);
         inputConfig.setProperty("limit", Integer.toString(limit));
-        inputConfig.setProperty("batchSize", Integer.toString(10));
+        inputConfig.setProperty("batchSize", Integer.toString(100));
         //inputConfig.setProperty("connectionString", "clusterinfo.unineuchatel.ch:11225");
         String ensembleString = "clusterinfo.unineuchatel.ch:11225";
         ensembleString =

@@ -47,6 +47,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   transient protected Object luceneKeys;
   transient protected HashMap<String,Cache> indexCaches=null;
   transient protected FilterOperatorTree tree;
+  long start = 0;
+  long end = 0;
 
   //  transient protected RemoteCache outputCache;
 //  transient protected RemoteCache ecache;
@@ -138,6 +140,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //    }
 //    long end  = System.currentTimeMillis();
 //    System.err.println("runnables created in " + (end-start));
+    start = System.currentTimeMillis();
     EngineUtils.initialize();
   }
 
@@ -164,7 +167,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     }
     int count = 0;
     profCallable.end();
-    ProfileEvent profExecute = new ProfileEvent("Buildinglucece" + this.getClass().toString(), profilerLog);
+//    ProfileEvent profExecute = new ProfileEvent("Buildinglucece" + this.getClass().toString(), profilerLog);
 
     if(indexCaches!=null)
       if(indexCaches.size()>0) {
@@ -172,14 +175,14 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         long start=System.currentTimeMillis();
         luceneKeys = createLuceneQuerys(indexCaches, tree.getRoot());
         System.out.println(" time: " + (System.currentTimeMillis() - start) / 1000.0);
-        profExecute.end();
+//        profExecute.end();
       }
 
     if(luceneKeys ==null) {
       profCallable.start("Iterate Over Local Data");
       System.out.println("Iterate Over Local Data");
 
-      profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(), profilerLog);
+//      profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(), profilerLog);
 
 //    for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
 //      if (!cdl.localNodeIsPrimaryOwner(key))
@@ -188,12 +191,12 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(
         (KeyValueFilter<? super K, ? super V>) filter);
 //        .converter((Converter<? super K, ? super V, ?>) filter);
-    profExecute.end();
-    profExecute.start("ISPNIter");
+//    profExecute.end();
+//    profExecute.start("ISPNIter");
     try {
 
       for (Object object : iterable) {
-        profExecute.end();
+//        profExecute.end();
         Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
 
         //      V value = inputCache.get(key);
@@ -208,7 +211,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
           executeOn((K) key, value);
 //          profExecute.end();
 	}
-         profExecute.start("ISPNIter");
+//         profExecute.start("ISPNIter");
       }
       iterable.close();
       }
@@ -231,7 +234,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         qualinfo l=(qualinfo)luceneKeys;
         keys=getLuceneSet(l);
         System.out.println(" time: " + (System.currentTimeMillis() - start) / 1000.0);
-        profExecute.end();
+//        profExecute.end();
       } else if(luceneKeys instanceof HashSet)
         keys=(HashSet<LeadsIndex>)luceneKeys;
 
@@ -249,6 +252,9 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //            profExecute.end();
           }
         }
+        System.out.println(" Clear keys");
+
+        keys.clear();
       } catch (Exception e) {
         profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
         e.printStackTrace();
@@ -257,6 +263,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     }
 //    profCallable.end();
     finalizeCallable();
+    System.err.println("LAST LINE OF " + this.getClass().toString() + " "+embeddedCacheManager.getAddress().toString() + " ----------- END");
+    profilerLog.error("LAST LINE OF " + this.getClass().toString() + " "+embeddedCacheManager.getAddress().toString() + " ----------- END");
     return embeddedCacheManager.getAddress().toString();
   }
 
@@ -284,6 +292,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
        PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
       }
     profCallable.end("finalizeBaseCallable");
+    end = System.currentTimeMillis();
+    profilerLog.error("LBDISTEXEC: " + this.getClass().toString() + " run for " + (end-start) + " ms");
   }
 
   public void outputToCache(Object key, Object value){
@@ -352,7 +362,9 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       return null;
     System.out.println("Lucene Filter: " + fc.toString());
     List<LeadsIndex> list = fc.toBuilder().build().list();
-    return new HashSet<LeadsIndex>(list);
+    HashSet<LeadsIndex> ret =new HashSet<LeadsIndex>(list);
+    list.clear();
+    return ret;
   }
 
 
@@ -438,7 +450,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
           try {
             if (type.equals("TEXT"))
-              return  new qualinfo(type, MathUtils.getTextFrom(root.getValueAsJson()));
+              return  new qualinfo(type,(Object)MathUtils.getTextFrom(root.getValueAsJson()));
             else if (type.equals("DATE"))
               System.err.print("Unable to Handle: " + root.getValueAsJson());
             else {
@@ -473,8 +485,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     Object result = new HashSet();
     Object oleft = null;
     Object oright = null;
-    HashSet hleft = null;
-    HashSet hright = null;
+    HashSet<LeadsIndex> hleft = null;
+    HashSet<LeadsIndex> hright = null;
 
     qualinfo lleft = null;
     qualinfo lright = null;
@@ -488,13 +500,13 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       if (oleft instanceof LeadsBaseCallable.qualinfo)
         lleft = (qualinfo) oleft;
       if (oleft instanceof HashSet)
-        hleft = (HashSet) oleft;
+        hleft = (HashSet<LeadsIndex>) oleft;
     }
     if(oright != null){
       if (oright instanceof LeadsBaseCallable.qualinfo)
         lright = (qualinfo) oright;
       if (oright instanceof HashSet)
-        hright = (HashSet) oright;
+        hright = (HashSet<LeadsIndex>) oright;
     }
 
 
@@ -520,9 +532,33 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
           hright=getLuceneSet(lright);
 
         if(hleft !=null && hright!=null) {
-          System.out.println("Find Intersection #1: "+ hleft.size()+ " #2: "+ hright.size());
-          hleft.retainAll(hright);
-          return hleft;
+          System.out.println("Find Intersection #1: " + hleft.size() + " #2: " + hright.size());
+          if(true){
+            System.out.println("Slow Intersection");
+            HashSet<LeadsIndex> ret = new HashSet<>();
+            for(LeadsIndex k : hleft)
+              for(LeadsIndex l: hright){
+                if(k.equals(l))
+                {
+                  ret.add(k);
+                  break;
+                }
+              }
+            hleft.clear();
+            hright.clear();
+            return  ret;
+          }
+          else
+            if(hleft.size()<hright.size()) {
+              hleft.retainAll(hright);
+              hright.clear();
+              return hleft;
+            }else
+            {
+              hright.retainAll(hleft);
+              hleft.clear();
+              return hright;
+            }
         }
         //System.out.println("Fix AND with multiple indexes");
       }
@@ -536,7 +572,6 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
             FilterConditionContext fc = addCondition(f, lleft);
 
             f = fc.or().having("attributeValue");
-
             fc = addCondition(f, lright);
             return buildLucene(fc);
           }
@@ -549,8 +584,15 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
         if(hleft !=null && hright!=null) {
           System.out.println("Put all results together #1: "+ hleft.size()+ " #2: "+ hright.size());
-          hleft.addAll(hright);
-          return hleft;
+          if(hleft.size()>hright.size()){
+            hleft.addAll(hright);
+            hright.clear();
+            return hleft;
+          }else{
+            hright.addAll(hleft);
+            hleft.clear();
+            return hright;
+          }
         }
       }
       break;

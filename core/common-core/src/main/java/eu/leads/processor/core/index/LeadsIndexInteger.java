@@ -13,7 +13,7 @@ public class LeadsIndexInteger implements Serializable, LeadsIndex {
 //    private String cacheName;
 //    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
 //    private String  attributeName;
-    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
+    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES) @NumericField
     private int attributeValue;
     @Field(index= Index.NO, analyze= Analyze.NO, store= Store.YES)
     private String keyName;
@@ -50,5 +50,14 @@ public class LeadsIndexInteger implements Serializable, LeadsIndex {
 
     public Object getAttributeValue() {
         return attributeValue;
+    }
+    @Override
+    public boolean equals(LeadsIndex anObject) {
+        return keyName.equals(anObject.getKeyName());
+    }
+
+    @Override
+    public int hashCode() {
+        return keyName.hashCode();
     }
 }
