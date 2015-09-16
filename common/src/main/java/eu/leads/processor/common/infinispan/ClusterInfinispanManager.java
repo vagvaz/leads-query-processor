@@ -348,6 +348,12 @@ public class ClusterInfinispanManager implements InfinispanManager {
         "adidas ace",
         "messi",
         "kanye west",
+        "run",
+        "football",
+        "shoe",
+        "Adidas",
+        "arsenal",
+        "Arsenal",
         "pharrell williams"};
     String prefix = "default.adidas_keywords.";
     int counter = 0;

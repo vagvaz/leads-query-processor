@@ -2,8 +2,11 @@ import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.NutchTransformer;
 import org.apache.avro.generic.GenericData;
+import org.apache.commons.lang.StringUtils;
 import org.apache.nutch.storage.WebPage;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -14,6 +17,13 @@ public class PushData {
 
     public static void main(String[] args) {
         OutputHandler dummy = new DummyOutputHandler();
+        LQPConfiguration.initialize();
+        List<String> desiredDomains = new ArrayList<>();
+        for(Object domain : LQPConfiguration.getInstance().getConfiguration().getList("ignorelist")){
+            String uri = (String)domain;
+            String nutchUri = (uri);
+            desiredDomains.add(nutchUri);
+        }
 
         //        InputHandler inputHandler = new GoraInputHandler();
         //        Properties inputConfig = new Properties();
@@ -100,6 +110,13 @@ public class PushData {
                 //                outputHandler2.append(tuple.getAttribute("url"), new JsonObject(tuple.toString()).encodePrettily());
                 //                outputHandler3.append(entry.getValue().get(entry.getValue().getSchema().getField("url").pos()).toString(), entry.getValue().toString());
                 String key_url = tuple.getAttribute("default.webpages.url");
+                if (!StringUtils.startsWithAny(key_url, (String[]) desiredDomains.toArray())){
+                    rejected++;
+                    if (rejected % 100 == 0) {
+                        System.err.println("rejected " + rejected);
+                    }
+                    continue;
+                }
                 String key_ts = tuple.getAttribute("default.webpages.ts");
                 String key = "default.webpages:" + key_url + "," + key_ts;
                 keys.add(key);
@@ -128,5 +145,29 @@ public class PushData {
         outputHandler.close();
         System.err.println("Size of keys: " + keys.size());
         System.exit(0);
+    }
+    private static String transformUri(String standardUrl) {
+        String nutchUrl = "";
+        URL url_;
+        try {
+            url_ = new URL(standardUrl);
+
+            String authority = url_.getAuthority();
+            String protocol  = url_.getProtocol();
+            String file      = url_.getFile();
+
+            String [] authorityParts = authority.split("\\.");
+            for(int i=authorityParts.length-1; i>=0; i--)
+                nutchUrl += authorityParts[i] + ".";
+            nutchUrl = nutchUrl.substring(0, nutchUrl.length()-1);
+            nutchUrl += ":" + protocol;
+            nutchUrl += file;
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return nutchUrl;
     }
 }
