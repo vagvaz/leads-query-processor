@@ -47,6 +47,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   transient protected Object luceneKeys;
   transient protected HashMap<String,Cache> indexCaches=null;
   transient protected FilterOperatorTree tree;
+  long start = 0;
+  long end = 0;
 
   //  transient protected RemoteCache outputCache;
 //  transient protected RemoteCache ecache;
@@ -138,6 +140,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //    }
 //    long end  = System.currentTimeMillis();
 //    System.err.println("runnables created in " + (end-start));
+    start = System.currentTimeMillis();
     EngineUtils.initialize();
   }
 
@@ -289,6 +292,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
        PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
       }
     profCallable.end("finalizeBaseCallable");
+    end = System.currentTimeMillis();
+    profilerLog.error("LBDISTEXEC: " + this.getClass().toString() + " run for " + (end-start) + " ms");
   }
 
   public void outputToCache(Object key, Object value){
