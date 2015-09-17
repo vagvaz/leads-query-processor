@@ -105,7 +105,7 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
   @Override
   public void executeOn(K key, V ivalue) {
 
-    ProfileEvent createIndexExecute = new ProfileEvent("CreateIndexExecute", profilerLog);
+    //ProfileEvent createIndexExecute = new ProfileEvent("CreateIndexExecute", profilerLog);
     String ikey = (String) key;
     Tuple value = (Tuple) ivalue;
     try {
@@ -128,7 +128,7 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
       }
     }
 
-    createIndexExecute.end();
+    //createIndexExecute.end();
   }
 
   @Override
