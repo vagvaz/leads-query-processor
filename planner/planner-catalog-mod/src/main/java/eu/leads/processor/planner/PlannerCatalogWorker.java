@@ -57,15 +57,16 @@ public class PlannerCatalogWorker extends Verticle {
 
                     System.err.println("Continue");
                   }else{
-                    //persistence.stopManager();
+
                     System.err.println("planner Stopping Manager Exiting");
                     catalogServer.StopServer();
                     System.err.println("planner Exiting");
 
-                    vertx.setTimer(1000, new Handler<Long>() {
+                    vertx.setTimer(3000, new Handler<Long>() {
                       @Override
                       public void handle(Long aLong) {
                         System.out.println(" planner Exiting ");
+                        //vertx.stop();
                         System.exit(0);
                       }
                     });
@@ -156,10 +157,16 @@ public class PlannerCatalogWorker extends Verticle {
     } catch (IOException e) {
       e.printStackTrace();
     }
-    catalog.createTablespace(StringConstants.DEFAULT_TABLE_SPACE,
+    if(!catalog.existTablespace(StringConstants.DEFAULT_TABLE_SPACE))
+          catalog.createTablespace(StringConstants.DEFAULT_TABLE_SPACE,
             "leadsfs://localhost:" + container.config().getInteger("port") + "/warehouse");
-    catalog
-            .createDatabase(StringConstants.DEFAULT_DATABASE_NAME, StringConstants.DEFAULT_TABLE_SPACE);
+    else
+      System.out.println("TableSpace "+ StringConstants.DEFAULT_TABLE_SPACE +" exists");
+    if(!catalog.existDatabase(StringConstants.DEFAULT_DATABASE_NAME))
+       catalog.createDatabase(StringConstants.DEFAULT_DATABASE_NAME, StringConstants.DEFAULT_TABLE_SPACE);
+    else
+      System.out.println("DataBase name "+ StringConstants.DEFAULT_DATABASE_NAME +"  exists");
+
     System.out.println("Loading functions");
     try {
       int k = -29;

@@ -94,6 +94,7 @@ public class DeployerRecoveryWorker extends Verticle implements LeadsMessageHand
                         com.sendTo(action.getData().getString("replyTo"), action.getResult());
                     } else if(label.equals(IManagerConstants.QUIT)){
                         System.out.println(" Quit Deploy recovery ");
+                        persistence.stop();
                         stop();
                     }
                     else{

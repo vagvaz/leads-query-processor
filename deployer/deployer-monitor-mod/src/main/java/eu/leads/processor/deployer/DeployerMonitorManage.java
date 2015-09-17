@@ -99,9 +99,6 @@ public class DeployerMonitorManage extends ManageVerticle {
         return serviceType;
     }
 
-    @Override
-    public void exitService() {
-        System.exit(-1);
-    }
+
 
 }

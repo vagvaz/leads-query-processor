@@ -62,13 +62,15 @@ public class LogSink extends Verticle implements LeadsMessageHandler {
                             System.err.println("Continue");
                         } else {
                             System.err.println("LogSink");
+
+                            vertx.setTimer(1000, new Handler<Long>() {
+                                @Override
+                                public void handle(Long aLong) {
+                                    System.out.println(" LogSink Exiting ");
+                                    System.exit(0);
+                                }
+                            });
                             stop();
-                            try {
-                                Thread.sleep(1000);
-                            } catch (Exception e) {
-                                ;
-                            }
-                            System.exit(0);
                         }
                     }
 

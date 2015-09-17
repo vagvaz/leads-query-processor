@@ -252,12 +252,13 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
 
             persistence.stopManager();
 
-            log.error("Stopped Manager Exiting");
-            vertx.setTimer(1000, new Handler<Long>() {
+            log.error("Stopped Manager, Exiting");
+            vertx.setTimer(2000, new Handler<Long>() {
               @Override
               public void handle(Long aLong) {
                 System.out.println(" NQE Exiting ");
-                vertx.stop();
+                System.exit(0);
+                //vertx.stop();
               }
             });
           }

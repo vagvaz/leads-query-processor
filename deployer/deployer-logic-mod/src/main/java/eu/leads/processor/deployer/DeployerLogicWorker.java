@@ -107,8 +107,9 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
             vertx.setTimer(1000, new Handler<Long>() {
                @Override
                public void handle(Long aLong) {
-                  System.out.println(" It is my time bye");
-                  System.exit(0);
+                  System.out.println("Closing Deployer");
+                  vertx.stop();
+                  //System.exit(0);
                }
             });
          }

@@ -9,7 +9,6 @@ import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
-import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.imanager.IManagerConstants;
@@ -132,12 +131,19 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
                         com.sendTo(logic, result.asJsonObject());
                         message.reply();
                     }else{
-                        System.out.println(" Quit Planner ");
+                        //System.out.println(" Quit Planner ");
 
-//                        persistence.stopManager();
+                        //persistence.stopManager();
+                        System.out.println("Planner Processor ");
 //                        log.error("Stopped Manager Exiting");
-                        Thread.sleep(10);
-                        System.exit(0);
+                        vertx.setTimer(100, new Handler<Long>() {
+                            @Override
+                            public void handle(Long aLong) {
+                                System.out.println(" planner Processor Exiting ");
+                                vertx.stop();
+                                //System.exit(0);
+                            }
+                        });
                     }
                 }
             } else {

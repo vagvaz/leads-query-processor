@@ -426,8 +426,8 @@ public class ComponentControlVerticle extends Verticle implements Component {
                 vertx.setTimer(4000, new Handler<Long>() {
                     @Override
                     public void handle(Long aLong) {
-                        System.out.println(" Control component exiting ");
-                        System.exit(0);
+                        System.out.println(" Control component stopping ");
+                        vertx.stop();// System.exit(0);
                     }
                 });
             } else {
@@ -441,8 +441,9 @@ public class ComponentControlVerticle extends Verticle implements Component {
             vertx.setTimer(4000, new Handler<Long>() {
                 @Override
                 public void handle(Long aLong) {
-                    System.out.println(" Control component exiting ");
-                    System.exit(0);
+                    System.out.println(" Control component Stopping ");
+                    vertx.stop();
+                    //System.exit(0);
                 }
             });
         }
