@@ -9,6 +9,8 @@ import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.imanager.IManagerConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonArray;
@@ -46,7 +48,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
         //logic Component address, in the logic module of each component the actual workflow is implemented
     protected JsonObject logicConfig; //logig module configuration
     protected Node com;
-    protected LogProxy log;
+    protected LogProxy logg;
 //   protected PersistenceProxy persistence;
     protected LeadsComponentHandler componentHandler;
     protected JsonObject config; //components deployment configuration
@@ -63,7 +65,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
     protected JsonObject workQueueConfig;
     protected LeadsMessageHandler failHandler;
     protected ServiceController serviceController;
-
+    protected Logger log;
 
     /**
      * Verticle start reads the configuration for the deployed component. Including:
@@ -92,7 +94,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
         if(config.containsField("otherGroups"))
             secondaryGroups.addAll(config.getArray("otherGroups").toList());
 
-
+        log = LoggerFactory.getLogger(this.getClass());
         this.state = ComponentState.IDLE;
     }
 
@@ -114,7 +116,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
         String componentPrefix = componentType + "." + id;
         logAddress =
             componentPrefix + ".log"; //log Address, this will be used by all services for logging
-        log = new LogProxy(logAddress, com);
+        logg = new LogProxy(logAddress, com);
 
 //        persistenceAddress = componentPrefix + ".processor-0";
 //        persistence = new PersistenceProxy(persistenceAddress, com);
@@ -132,8 +134,8 @@ public class ComponentControlVerticle extends Verticle implements Component {
         servicesIds = new HashSet<>();
 
         internalGroup = componentPrefix + ".servicesGroup";
-        failHandler = new DefaultFailHandler(this, com, log);
-        componentHandler = new LeadsComponentHandler(this, com, log);
+        failHandler = new DefaultFailHandler(this, com, logg);
+        componentHandler = new LeadsComponentHandler(this, com, logg);
 
         //TODO check that messages will not be lost between controlverticle and logic (cause id)
         com.initialize(id + ".control", group, secondaryGroups, componentHandler, failHandler,
@@ -206,7 +208,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
             JsonObject s = (JsonObject) serviceIterator.next();
             arrayServices.add(componentPrefix + "." + s.getString("type") + ".manage");
         }
-        serviceController = new ServiceController(arrayServices, this, com, log);
+        serviceController = new ServiceController(arrayServices, this, com, logg);
         com.subscribe(id + ".serviceMonitor", serviceController);//, new StartCallable(callStart,this));
         this.state = ComponentState.INITIALIZED;
         if (callStart)

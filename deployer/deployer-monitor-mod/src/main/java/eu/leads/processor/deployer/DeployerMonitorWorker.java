@@ -138,7 +138,7 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
                         Integer currentLevel = actionToLevelMap.get(action.getId());
                         if (currentLevel == null) {
                             log.error("Received OPERATOR STATUS but action " + action.toString()
-                                          + " is not monitored " + currentLevel.toString());
+                                          + " is not monitored " + currentLevel);
                             return;
                         }
                         Action runningAction =
@@ -189,10 +189,12 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
         }
         Action completedAction = monitoredActions.get(currentLevel).remove(action.getId());
         if (completedAction == null) {
-            log.error("Action " + action.toString() + " was not in level " + currentLevel.toString()
-                          + " of DeployerMonitor" + id);
-            checkAllLevelsForAndRemove(action);
+            log.error(
+                "Action " + action.toString() + " was not in level " + currentLevel.toString() + " of DeployerMonitor"
+                    + id);
             com.sendTo(deployerLogic, action.asJsonObject());
+            checkAllLevelsForAndRemove(action);
+
             return;
         } else {
             com.sendTo(deployerLogic, action.asJsonObject());

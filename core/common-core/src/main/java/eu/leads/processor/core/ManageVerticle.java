@@ -5,6 +5,8 @@ import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.comp.ServiceStatus;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
 
@@ -18,7 +20,8 @@ public abstract class ManageVerticle extends Verticle implements LeadsService {
     protected JsonObject config;
     protected ServiceStatus status = ServiceStatus.IDLE;
 //    protected PersistenceProxy persistenceProxy;
-    protected LogProxy logProxy;
+    protected LogProxy logProxy2;
+    protected Logger logProxy;
     protected ServiceHandler serviceHandler;
     protected String parent;
 
@@ -29,7 +32,9 @@ public abstract class ManageVerticle extends Verticle implements LeadsService {
         id = config.getString("id");
         group = config.getString("group");
         parent = config.getString("parent");
-        //        initialize(config.getObject("conf"));
+        logProxy = LoggerFactory.getLogger(this.getClass());
+        //        initialize(config.getObject
+        // ("conf"));
 
     }
 
@@ -44,9 +49,9 @@ public abstract class ManageVerticle extends Verticle implements LeadsService {
 //        System.err.println(" \ncom " + com.toString());
 //        System.err.println("\nthis.config " + this.config.toString());
 //        System.err.println("\nPARAMETER->" + configuration.toString());
-        logProxy = new LogProxy(configuration.getString("log"), com);
+        logProxy2    = new LogProxy(configuration.getString("log"), com);
 //        persistenceProxy = new PersistenceProxy(configuration.getString("persistence"), com, vertx);
-        serviceHandler = new ServiceHandler(this, com, logProxy);
+        serviceHandler = new ServiceHandler(this, com, logProxy2);
         com.initialize(id + ".manage", group, null, serviceHandler, serviceHandler,
                           this.getVertx());
         setStatus(ServiceStatus.INITIALIZED);

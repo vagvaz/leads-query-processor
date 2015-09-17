@@ -333,7 +333,30 @@ public class ClusterInfinispanManager implements InfinispanManager {
   }
 
   private void putAdidasKeyWords(Cache adidasKeywords) {
-    String[] testKeywords = {"adidas","Nike","Puma","Asics"};
+    String[] testKeywords = {"adidas","Nike","Puma","Asics","nike mercurial",
+        "nike air max",
+        "nike air zoom",
+        "nike roshe",
+        "nike jordan",
+        "nike free 5.0",
+        "nike lunarglide",
+        "ronaldo",
+        "adidas supercolor",
+        "adidas superstar",
+        "adidas supernova boost",
+        "adidas terrex",
+        "yeezy boost",
+        "adidas ultra boost",
+        "adidas ace",
+        "messi",
+        "kanye west",
+        "run",
+        "football",
+        "shoe",
+        "Adidas",
+        "arsenal",
+        "Arsenal",
+        "pharrell williams"};
     String prefix = "default.adidas_keywords.";
     int counter = 0;
     for(String k : testKeywords){
