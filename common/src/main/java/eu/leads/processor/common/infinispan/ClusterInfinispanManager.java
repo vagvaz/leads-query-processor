@@ -229,7 +229,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".entities");
 
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".content");
-    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".page");
+    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".page");
     Cache uridirCache = (Cache) getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".urldirectory");
     Cache uridirCacheEcom = (Cache) getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".urldirectory_ecom");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".page_core");
@@ -244,7 +244,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".site");
     Cache adidasKeywords = (Cache) getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".adidas_keywords");
 
-    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".rankings");
+    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".rankings");
     getInMemoryCache(StringConstants.DEFAULT_DATABASE_NAME + ".rankings.compressed", 4000);
     listener = new BatchPutListener(StringConstants.DEFAULT_DATABASE_NAME+".rankings.compressed",StringConstants.DEFAULT_DATABASE_NAME+".rankings");
     addListener(listener, StringConstants.DEFAULT_DATABASE_NAME + ".rankings.compressed");
@@ -257,10 +257,17 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache("leads.processor.catalog.functions");
     getPersisentCache("leads.processor.catalog.indexes");
     getPersisentCache("leads.processor.catalog.indexesByColumn");
-    getPersisentCache("leads.processor.databases.sub."+StringConstants.DEFAULT_DATABASE_NAME);
+    getPersisentCache("leads.processor.databases.sub." + StringConstants.DEFAULT_DATABASE_NAME);
     putAdidasKeyWords(adidasKeywords);
     putUriDirData(uridirCache);
     putUriDirEcomData(uridirCacheEcom);
+    getPersisentCache("TablesSize");
+    Cache<String, String> allIndexes = (Cache) getPersisentCache("allIndexes");
+    for (String column : allIndexes.keySet()) {
+      System.out.println("Found index Cache key: " + column + " cacheName: " + allIndexes.get(column));
+      getIndexedPersistentCache(allIndexes.get(column));
+      getPersisentCache(allIndexes.get(column) + ".sketch");
+    }
 //    getPersisentCache("batchputTest");
 //    getPersisentCache("batchputTest.compressed");
 

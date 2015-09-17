@@ -9,26 +9,20 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
-import eu.leads.processor.math.FilterOperatorNode;
-import eu.leads.processor.math.FilterOperatorTree;
-import eu.leads.processor.math.MathUtils;
-import org.apache.hadoop.util.hash.Hash;
 import org.apache.tajo.algebra.CreateIndex;
 import org.apache.tajo.algebra.JsonHelper;
 import org.apache.tajo.algebra.Projection;
 import org.apache.tajo.algebra.Relation;
 import org.infinispan.Cache;
-import org.infinispan.commons.util.CloseableIteratorSet;
-import org.infinispan.ensemble.EnsembleCacheManager;
-import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
 
 
 public class CreateIndexOperator2 extends BasicOperator {
 
-  transient protected EnsembleCacheManager emanager;
+  //transient protected EnsembleCacheManager emanager;
   String tableName;
 
   public CreateIndexOperator2(Node com, InfinispanManager persistence, LogProxy log, Action action) {
@@ -64,7 +58,7 @@ public class CreateIndexOperator2 extends BasicOperator {
     System.out.println("Found nodes:" + nodes.size() + " " + Arrays.toString(nodes.toArray()) );
     System.out.println("Found columns:" + columns.size() + " " + Arrays.toString(columns.toArray()) );
     System.out.println("Found value:" + value.size() + " " + Arrays.toString(value.toArray()) );
-    ArrayList<Cache> sketchCaches= new ArrayList<>();
+    //ArrayList<Cache> sketchCaches= new ArrayList<>();
     //System.out.println(" TableName: " + tableName);
     if(!tableName.startsWith( StringConstants.DEFAULT_DATABASE_NAME))
      tableName = StringConstants.DEFAULT_DATABASE_NAME + "." + tableName;
@@ -80,7 +74,7 @@ public class CreateIndexOperator2 extends BasicOperator {
     for(String col:columns){
       Cache<Integer,Integer> tmp =(Cache) manager.getPersisentCache(tableName + "." + col + ".sketch");
 
-      sketchCaches.add(tmp);
+      //sketchCaches.add(tmp);
       System.out.println("Creating DistCMSketch " + tableName + "." + col + ".sketch");
 
       int finalyArray [][];

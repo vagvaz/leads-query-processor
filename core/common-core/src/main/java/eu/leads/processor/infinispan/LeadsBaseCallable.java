@@ -1,11 +1,14 @@
 package eu.leads.processor.infinispan;
 
-import eu.leads.processor.common.infinispan.*;
+import eu.leads.processor.common.infinispan.BatchPutListener;
+import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
+import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
+import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.core.index.*;
 import eu.leads.processor.core.EngineUtils;
+import eu.leads.processor.core.index.*;
 import eu.leads.processor.math.FilterOpType;
 import eu.leads.processor.math.FilterOperatorNode;
 import eu.leads.processor.math.FilterOperatorTree;
@@ -20,7 +23,9 @@ import org.infinispan.filter.KeyValueFilter;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.query.SearchManager;
-import org.infinispan.query.dsl.*;
+import org.infinispan.query.dsl.FilterConditionContext;
+import org.infinispan.query.dsl.FilterConditionEndContext;
+import org.infinispan.query.dsl.QueryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
@@ -252,7 +257,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 //            profExecute.end();
           }
         }
-        System.out.println(" Clear keys");
+        System.out.println(" Indexed Results processed, Clear keys");
 
         keys.clear();
       } catch (Exception e) {
@@ -396,7 +401,21 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   }
 
   FilterConditionEndContext getHaving(qualinfo l){
-    SearchManager sm = org.infinispan.query.Search.getSearchManager(indexCaches.get(l.attributeName));
+  Cache indexedCache= indexCaches.get(l.attributeName);
+    if (l.attributeType.equals("TEXT"))
+      indexedCache.getAdvancedCache().put("test",new LeadsIndexString());
+    else if (l.attributeType.startsWith("FLOAT4"))
+      indexedCache.getAdvancedCache().put("test",new LeadsIndexFloat());
+    else if (l.attributeType.startsWith("FLOAT8"))
+      indexedCache.getAdvancedCache().put("test",new LeadsIndexDouble());
+    else if (l.attributeType.startsWith("INT4"))
+      indexedCache.getAdvancedCache().put("test",new LeadsIndexInteger());
+    else if (l.attributeType.startsWith("INT8"))
+      indexedCache.getAdvancedCache().put("test",new LeadsIndexLong());
+    //indexedCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).remove("test");
+
+
+    SearchManager sm = org.infinispan.query.Search.getSearchManager(indexedCache);
     QueryFactory qf = sm.getQueryFactory();
     org.infinispan.query.dsl.QueryBuilder Qb;
     if (l.attributeType.equals("TEXT"))

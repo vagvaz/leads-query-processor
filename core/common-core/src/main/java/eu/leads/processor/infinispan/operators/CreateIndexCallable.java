@@ -16,12 +16,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
 
-
 /**
  * Created by vagvaz on 2/20/15.
  */
 public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements Serializable {
-
+  static final long serialVersionUID = 42L;
   transient protected FilterOperatorTree tree;
 
   protected Logger log = LoggerFactory.getLogger(CreateIndexCallable.class.toString());
