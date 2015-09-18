@@ -16,6 +16,8 @@ import org.infinispan.Cache;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.metadata.Metadata;
 import org.infinispan.notifications.cachelistener.filter.CacheEventFilter;
+import org.jgroups.util.ConcurrentLinkedBlockingQueue;
+import org.jgroups.util.ConcurrentLinkedBlockingQueue2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
@@ -28,6 +30,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static eu.leads.processor.plugins.EventType.*;
 
@@ -54,6 +59,7 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
   transient private LeadsStorage storageLayer;// = null;
   transient private String user;
   private transient volatile Object mutex = new Object();
+  private transient ThreadPoolExecutor executor;
   private transient ProfileEvent profEvent;
 
   public PluginRunnerFilter(EmbeddedCacheManager manager,String confString){
@@ -66,7 +72,7 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
     this.conf = new JsonObject(configString);
     log.error("init Imanager");
     imanager = new ClusterInfinispanManager(InfinispanClusterSingleton.getInstance().getManager().getCacheManager());
-
+    executor = new ThreadPoolExecutor(1,1,10000, TimeUnit.MILLISECONDS,new LinkedBlockingDeque<Runnable>());
     log.error("init");
     UUIDname = UUID.randomUUID().toString();
 
@@ -315,8 +321,6 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
                          Metadata newMetadata,
                          org.infinispan.notifications.cachelistener.filter.EventType eventType) {
     try {
-
-
         if (!isInitialized) {
           initialize();
         }
@@ -374,10 +378,13 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
         if (value instanceof Tuple) {
           value = value.toString();
         }
+      PluginRunnable runnable = new PluginRunnable(this,plugin);
         switch (eventType.getType()) {
           case CACHE_ENTRY_CREATED:
-            if (type.contains(CREATED))
-              plugin.created(key, value, targetCache);
+            if (type.contains(CREATED)) {
+              //              plugin.created(key, value, targetCache);
+              runnable.setParameters(key, value, targetCache, EventType.CREATED);
+            }
             break;
           case CACHE_ENTRY_REMOVED:
             if (type.contains(REMOVED)) {
@@ -386,16 +393,19 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
                 return false;
               }
               //          value = (String) oldValue;
-              plugin.removed(key, value, targetCache);
+//              plugin.removed(key, value, targetCache);
+              runnable.setParameters(key,value,targetCache,EventType.REMOVED);
             }
             break;
           case CACHE_ENTRY_MODIFIED:
             if (type.contains(MODIFIED))
-              plugin.modified(key, value, targetCache);
+//              plugin.modified(key, value, targetCache);
+              runnable.setParameters(key,value,targetCache,EventType.MODIFIED);
             break;
           default:
             break;
         }
+      executor.submit(runnable);
       profEvent.end();
         return false;
       }catch(Exception e){
