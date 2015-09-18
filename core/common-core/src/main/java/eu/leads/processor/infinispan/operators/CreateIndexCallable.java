@@ -8,6 +8,7 @@ import eu.leads.processor.core.index.LeadsIndexHelper;
 import eu.leads.processor.math.FilterOperatorTree;
 import org.apache.tajo.algebra.*;
 import org.infinispan.Cache;
+import org.infinispan.context.Flag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
@@ -116,7 +117,7 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
         String column = tableName + '.' + columnNames.get(c);
         LeadsIndex lInd = lindHelp.CreateLeadsIndex(value.getGenericAttribute(column), ikey, column, tableName);
         //putToCacheDirect(indexCaches.get(c), ikey, lInd);
-        indexCaches.get(c).put(ikey, lInd);
+        indexCaches.get(c).getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).put(ikey, lInd);
         sketches.get(c).add(value.getGenericAttribute(column));
       }
     }catch (Exception e){
