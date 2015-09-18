@@ -63,6 +63,136 @@ public class ScanOperator extends BasicOperator {
 				System.err.println(conf.getString("next.type") + " SCAN NOT IMPLEMENTED YET");
 			}
 		}
+
+		if(conf.getObject("body").containsField("versionStart"))
+		{
+			System.out.println("TS Version found.");
+			int Start =conf.getObject("body").getInteger("versionStart");
+			int Finish =conf.getObject("body").getInteger("versionFinish");
+			//Check input fields
+			JsonObject inputSchema;
+			boolean tsfound=false;
+
+			inputSchema = conf.getObject("body").getObject("inputSchema");
+			JsonArray fields = inputSchema.getArray("fields");
+
+			Iterator<Object> iterator = fields.iterator();
+			String columnName = null;
+			JsonObject columnjson=null;
+			while (iterator.hasNext()) {
+				columnjson = (JsonObject) iterator.next();
+				columnName = columnjson.getString("name");
+				if(columnName.contains("ts")) {
+					tsfound = true;
+					break;
+				}
+			}
+			if(tsfound){
+				JsonObject qual=new JsonObject();
+				System.out.println("TS column found.");
+
+				JsonObject rightExpr = new JsonObject();
+				JsonObject body = new JsonObject();
+				JsonObject datum = new JsonObject();
+				datum.putString("type", "INT8");
+				body.putString("type", "INT8");
+				body.putNumber("val", Start);
+				datum.putObject("body", body);
+				body = new JsonObject();
+				body.putObject("datum", datum);
+				body.putString("type", "CONST");
+				rightExpr.putString("type", "CONST");
+				rightExpr.putObject("object", body);
+
+
+				JsonObject leftExpr = new JsonObject();
+				body = new JsonObject();
+				body.putObject("column", columnjson);
+				body.putNumber("fieldId", -1);
+				body.putString("type", "FIELD");
+				leftExpr.putString("type", "FIELD");
+				leftExpr.putObject("body",body);
+
+				body = new JsonObject();
+				body.putString("type", "GEQ");
+				body.putObject("leftExpr", leftExpr);
+				body.putObject("rightExpr", rightExpr);
+				body.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
+				qual.putObject("body", body);
+				qual.putString("type", "GEQ");
+				qual.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
+
+				body = new JsonObject();
+				body.putString("type", "AND");
+				body.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
+				body.putObject("leftExpr", qual);
+				qual= new JsonObject();
+				qual.putObject("body", body);
+				qual.putString("type", "AND");
+				qual.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
+
+				//leftExpr=qual;
+				//qual=new JsonObject();
+
+				///RIGHT
+
+				rightExpr = new JsonObject();
+				body = new JsonObject();
+				datum = new JsonObject();
+				datum.putString("type", "INT8");
+				body.putString("type", "INT8");
+				body.putNumber("val", Finish);
+				datum.putObject("body", body);
+				body = new JsonObject();
+				body.putObject("datum", datum);
+				body.putString("type", "CONST");
+				rightExpr.putString("type", "CONST");
+				rightExpr.putObject("object", body);
+
+
+//				leftExpr = new JsonObject();
+//				body = new JsonObject();
+//				body.putObject("column",columnjson);
+//				body.putNumber("fieldId", -1);
+//				body.putString("type", "FIELD");
+//				leftExpr.putString("type", "FIELD");
+
+				body = new JsonObject();
+				body.putString("type","LEQ");
+				body.putObject("leftExpr", leftExpr);
+				body.putObject("rightExpr", rightExpr);
+				body.putObject("returnType",new JsonObject().putString("type","BOOLEAN"));
+				rightExpr=new JsonObject();
+				rightExpr.putObject("body",body);
+				rightExpr.putString("type", "LEQ");
+				rightExpr.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
+				qual.getObject("body").putObject("rightExpr",rightExpr);
+
+
+				if (conf.getObject("body").containsField("qual")) {
+					System.out.println(" qual exists, extend it with ts info ")
+					;//And the qual info
+					rightExpr = conf.getObject("body").getObject("qual");
+
+
+					body = new JsonObject();
+					body.putString("type", "AND");
+					body.putObject("leftExpr", qual);
+					body.putObject("rightExpr", rightExpr);
+					body.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
+					qual = new JsonObject();
+					qual.putObject("body", body);
+					qual.putString("type", "AND");
+					qual.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
+				}
+				//Create the qual
+				conf.getObject("body").putObject("qual",qual);
+
+				System.out.println("Create Qual :D : " + qual.encodePrettily());
+			}
+		}else{
+			System.out.println("No version.");
+		}
 		ProfileEvent scanExecute = new ProfileEvent("OperatorcheckIndex_usage", profilerLog);
 		if (checkIndex_usage())
 			conf.putBoolean("useIndex", true);
@@ -163,7 +293,7 @@ public class ScanOperator extends BasicOperator {
 			JsonObject inputSchema;
 			inputSchema = conf.getObject("body").getObject("inputSchema");
 			JsonArray fields = inputSchema.getArray("fields");
-			System.out.println("Check if inputSchema fields: " + fields.toArray().toString() + " are indexed.");
+			System.out.println("Check if inputSchema fields: " + fields.toString() + " are indexed.");
 
 			Iterator<Object> iterator = fields.iterator();
 			String columnName = null;
