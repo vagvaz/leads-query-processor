@@ -197,6 +197,7 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
 
             return;
         } else {
+            action.setStatus(ActionStatus.COMPLETED.toString());
             com.sendTo(deployerLogic, action.asJsonObject());
             return;
         }

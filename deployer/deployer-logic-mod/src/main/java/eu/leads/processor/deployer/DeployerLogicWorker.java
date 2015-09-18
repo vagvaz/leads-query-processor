@@ -3,6 +3,7 @@ package eu.leads.processor.deployer;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.ConfigurationUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
@@ -339,7 +340,8 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                      newAction = createNewAction(action);
                      newAction.getData().putObject("operator", node.asJsonObject());
                      newAction.getData().putObject("plan", plan.getLogicalPlan().asJsonObject());
-                     com.sendTo(recoveryAddress, newAction.asJsonObject());
+                     finalizeQuery(queryId);
+//                     com.sendTo(recoveryAddress, newAction.asJsonObject());
                   } else {
                      log.error("Unknown COMPLETED Action received " + action.toString());
                      return;
@@ -353,6 +355,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                   finalizeAction(action);
                }catch(Exception e){
                   log.error("Unexpected error encounted in DeployLogicWorker " + e.getClass().toString() + " " + e.getMessage());
+                  PrintUtilities.logStackTrace(log,e.getStackTrace());
                }
          }
       }

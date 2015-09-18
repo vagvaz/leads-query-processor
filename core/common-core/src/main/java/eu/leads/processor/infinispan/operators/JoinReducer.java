@@ -1,5 +1,6 @@
 package eu.leads.processor.infinispan.operators;
 
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.infinispan.LeadsCollector;
@@ -133,6 +134,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
                     profilerLog.error("EXCEPTION WHILE updating agg value");
                     profilerLog.error(e.getClass() + " " + e.getMessage());
                     profilerLog.error(iter.toString());
+                    PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
 //                    tmpprofCallable.end("JoinReducerExceptionExceptionEnd");
                 }
             }
@@ -201,6 +203,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
             }
         }catch(Exception e){
 //            profCallable.end("JoinReducerRest Exception");
+            PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
         }
 //        profCallable.end();
 //        reduceEvent.end();
