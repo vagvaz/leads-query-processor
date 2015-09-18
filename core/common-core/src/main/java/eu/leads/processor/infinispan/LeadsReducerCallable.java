@@ -1,5 +1,6 @@
 package eu.leads.processor.infinispan;
 
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.core.BerkeleyDBIndex;
 import eu.leads.processor.common.LeadsListener;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
@@ -9,6 +10,7 @@ import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Object> implements
     Serializable {
@@ -192,7 +194,15 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
         System.err.println("reducer finalizee collector");
 //        collector.finalizeCollector();
         System.err.println("finalzie super");
-        EnsembleCacheUtils.waitForAllPuts();
+        try {
+            EnsembleCacheUtils.waitForAllPuts();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
+        }
         super.finalizeCallable();
     }
 }

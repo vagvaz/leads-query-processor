@@ -1,6 +1,7 @@
 package eu.leads.processor.common.infinispan;
 
 import eu.leads.processor.common.LeadsListener;
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import org.infinispan.Cache;
@@ -12,6 +13,8 @@ import org.infinispan.notifications.cachelistener.annotation.CacheEntryCreated;
 import org.infinispan.notifications.cachelistener.annotation.CacheEntryModified;
 import org.infinispan.notifications.cachelistener.event.CacheEntryCreatedEvent;
 import org.infinispan.notifications.cachelistener.event.CacheEntryModifiedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.HashMap;
@@ -31,6 +34,7 @@ public class BatchPutListener implements LeadsListener {
     private transient Cache targetCache;
     private transient ConcurrentMap<NotifyingFuture<Void>,NotifyingFuture<Void>> futures;
     private transient Object mutex = null;
+    private Logger log = LoggerFactory.getLogger(BatchPutListener.class);
 
     public BatchPutListener(String compressedCache,String targetCacheName){
         this.compressedCache = compressedCache;
@@ -127,7 +131,11 @@ public class BatchPutListener implements LeadsListener {
         boolean retry = false;
         while(!isok){
 
-            EnsembleCacheUtils.waitForAuxPuts();
+            try {
+                EnsembleCacheUtils.waitForAuxPuts();
+            } catch (InterruptedException e) {
+                PrintUtilities.logStackTrace(log,e.getStackTrace());
+            }
             try{
                 for(Map.Entry<NotifyingFuture<Void>,NotifyingFuture<Void>> entry : futures.entrySet()){
                     entry.getKey().get();
@@ -140,6 +148,7 @@ public class BatchPutListener implements LeadsListener {
             catch (Exception e){
                 System.err.println("Exception " +  e.getClass().toString() + " in BatchPUtListener waitForPendingPuts" + e.getMessage());
                 e.printStackTrace();
+                PrintUtilities.logStackTrace(log, e.getStackTrace());
                 retry = true;
                 isok = true;
             }

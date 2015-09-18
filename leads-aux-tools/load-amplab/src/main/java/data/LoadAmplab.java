@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 import static data.LoadAmplab.plugs.PAGERANK;
 import static data.LoadAmplab.plugs.SENTIMENT;
@@ -488,7 +489,13 @@ public class LoadAmplab {
 
             }
             System.out.println("Wait For All Puts");
-            EnsembleCacheUtils.waitForAllPuts();
+            try {
+                EnsembleCacheUtils.waitForAllPuts();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
             System.out.println(tableName + " Avg Rate(tuples/sec): " + (float) numofEntries / (float) ((System.currentTimeMillis() - StartTime) / 1000.0) + " Totally Imported: " + numofEntries + " tuple byte size: " + serialize(data).length);
             System.out.println("Overall File Loading time: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - StartTime, "HH:mm:ss,SSS"));
         }

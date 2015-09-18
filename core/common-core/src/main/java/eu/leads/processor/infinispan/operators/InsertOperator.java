@@ -6,6 +6,7 @@ package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.Tuple;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 //import org.infinispan.versioning.VersionedCache;
 //import org.infinispan.versioning.impl.VersionedCacheTreeMapImpl;
@@ -152,7 +154,15 @@ public class InsertOperator extends BasicOperator {
 			}
 		}
 
-		EnsembleCacheUtils.waitForAllPuts();
+		try {
+			EnsembleCacheUtils.waitForAllPuts();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			PrintUtilities.logStackTrace(log, e.getStackTrace());
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+			PrintUtilities.logStackTrace(log, e.getStackTrace());
+		}
 		try {
 			if (ecache.get(key) == null) {
 				log.error("Insert Failed " + ecache.size());

@@ -29,6 +29,7 @@ import org.vertx.java.core.json.JsonObject;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 import static eu.leads.processor.common.infinispan.EnsembleCacheUtils.putToCache;
 
@@ -166,7 +167,15 @@ public class CreateIndexOperator extends BasicOperator {
 
     }
     log.info("Succesfully completed indexing records, columns:" + columnNames.size() + ", data per column:" + i);
-    EnsembleCacheUtils.waitForAllPuts();
+    try {
+      EnsembleCacheUtils.waitForAllPuts();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+      PrintUtilities.logStackTrace(log,e.getStackTrace());
+    } catch (ExecutionException e) {
+      e.printStackTrace();
+      PrintUtilities.logStackTrace(log, e.getStackTrace());
+    }
     cleanup();
   }
 

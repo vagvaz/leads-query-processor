@@ -43,7 +43,8 @@ public abstract class BasicOperator extends Thread implements Operator{
   protected InfinispanManager manager;
   protected Node com;
   protected Cache statisticsCache;
-  protected LogProxy log;
+  protected Logger log;
+  protected LogProxy logg;
   protected JsonObject globalConfig;
   protected Set<String> pendingMMC;
   protected Set<String> pendingRMC;
@@ -73,15 +74,17 @@ public abstract class BasicOperator extends Thread implements Operator{
     this.action = action;
     profOperator = new ProfileEvent("Operator- " + this.getClass().toString(),profilerLog);
     reduceLocal = action.getData().getObject("operator").containsField("reduceLocal");
+    log = LoggerFactory.getLogger(this.getClass());
   }
-  protected BasicOperator(Node com, InfinispanManager manager,LogProxy log,Action action){
+  protected BasicOperator(Node com, InfinispanManager manager,LogProxy logProxy,Action action){
     super(com.getId()+"-"+action.getId() + "-basic-operator-thread-"+UUID.randomUUID().toString());
+    log = LoggerFactory.getLogger(this.getClass());
     EngineUtils.initialize();
     System.err.println(this.getClass().getCanonicalName());
     mcResults = new HashMap<>();
     this.com = com;
     this.manager = manager;
-    this.log = log;
+    this.logg = logProxy;
     this.action = action;
     this.conf = action.getData().getObject("operator").getObject("configuration");
     isRemote = action.asJsonObject().containsField("remote");
@@ -152,11 +155,11 @@ public abstract class BasicOperator extends Thread implements Operator{
   }
 
   public LogProxy getLog() {
-    return log;
+    return logg;
   }
 
   public void setLog(LogProxy log) {
-    this.log = log;
+    this.logg = log;
   }
 
   public JsonObject getGlobalConfig() {
