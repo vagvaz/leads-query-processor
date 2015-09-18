@@ -5,6 +5,7 @@ import org.infinispan.ensemble.EnsembleCacheManager;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by vagvaz on 01/08/15.
@@ -60,7 +61,13 @@ public class CacheOutputHandler<K, V> implements OutputHandler<K, V> {
 
     @Override public void close() {
         if (dummyOutputHandler != null) {
-            EnsembleCacheUtils.waitForAllPuts();
+            try {
+                EnsembleCacheUtils.waitForAllPuts();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
