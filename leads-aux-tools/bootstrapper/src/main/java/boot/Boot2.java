@@ -254,6 +254,7 @@ public class Boot2 {
     }
   }
 
+
   public static void singleCloud(){
     System.out.println("Single cloud deployment");
 

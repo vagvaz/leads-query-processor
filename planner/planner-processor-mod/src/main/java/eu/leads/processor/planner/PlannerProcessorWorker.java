@@ -2,7 +2,6 @@ package eu.leads.processor.planner;
 
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.EnsembleInfinispanManager;
-import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.ConfigurationUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
@@ -10,9 +9,9 @@ import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
-import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.imanager.IManagerConstants;
 import eu.leads.processor.planner.handlers.ProcessSQLQueryActionHandler;
 import eu.leads.processor.planner.handlers.ProcessSpecialQueryActionHandler;
 import eu.leads.processor.planner.handlers.ProcessWorkflowQueryActionHandler;
@@ -125,11 +124,27 @@ public class PlannerProcessorWorker extends Verticle implements Handler<Message<
             if (body.containsField("type")) {
                 if (body.getString("type").equals("action")) {
                     Action action = new Action(body);
-                    ActionHandler ac = handlers.get(action.getLabel());
-                    Action result = ac.process(action);
-                    result.setStatus(ActionStatus.COMPLETED.toString());
-                    com.sendTo(logic, result.asJsonObject());
-                    message.reply();
+                    if(!action.getLabel().equals(IManagerConstants.QUIT)) {
+                        ActionHandler ac = handlers.get(action.getLabel());
+                        Action result = ac.process(action);
+                        result.setStatus(ActionStatus.COMPLETED.toString());
+                        com.sendTo(logic, result.asJsonObject());
+                        message.reply();
+                    }else{
+                        //System.out.println(" Quit Planner ");
+
+                        //persistence.stopManager();
+                        System.out.println("Planner Processor ");
+//                        log.error("Stopped Manager Exiting");
+                        vertx.setTimer(100, new Handler<Long>() {
+                            @Override
+                            public void handle(Long aLong) {
+                                System.out.println(" planner Processor Exiting ");
+                                vertx.stop();
+                                //System.exit(0);
+                            }
+                        });
+                    }
                 }
             } else {
                 System.err.println(id

@@ -8,6 +8,7 @@ import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.imanager.IManagerConstants;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.eventbus.Message;
@@ -84,11 +85,20 @@ public class DeployerProcessorWorker extends Verticle implements Handler<Message
             if (body.containsField("type")) {
                 if (body.getString("type").equals("action")) {
                     Action action = new Action(body);
-                    ActionHandler ac = handlers.get(action.getLabel());
-                    Action result = ac.process(action);
-                    result.setStatus(ActionStatus.COMPLETED.toString());
-                    com.sendTo(logic, result.asJsonObject());
-                    message.reply();
+
+                    if(!action.getLabel().equals(IManagerConstants.QUIT)) {
+                        action = new Action(body);
+                        ActionHandler ac = handlers.get(action.getLabel());
+                        Action result = ac.process(action);
+                        result.setStatus(ActionStatus.COMPLETED.toString());
+                        com.sendTo(logic, result.asJsonObject());
+                        message.reply();
+                    }else{
+                        //persistence.stopManager();
+                        log.error("Stopped Manager Exiting");
+                        Thread.sleep(10);
+                        System.exit(0);
+                    }
                 }
             } else {
                 log.error(id

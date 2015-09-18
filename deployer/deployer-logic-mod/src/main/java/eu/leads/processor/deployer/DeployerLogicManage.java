@@ -99,9 +99,10 @@ public class DeployerLogicManage extends ManageVerticle {
         return serviceType;
     }
 
-    @Override
-    public void exitService() {
-        System.exit(-1);
-    }
+//    @Override
+//    public void exitService() {
+//        vertx.stop();
+//        System.exit(-1);
+//    }
 
 }

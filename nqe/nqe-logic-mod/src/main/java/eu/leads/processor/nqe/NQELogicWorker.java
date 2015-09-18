@@ -8,6 +8,7 @@ import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.imanager.IManagerConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
@@ -114,6 +115,9 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
                     }else if (label.equals(NQEConstants.EXECUTE_MAP_REDUCE_JOB)) {
                         //here reply to the webservice with the ID of the job
                         com.sendTo(action.getData().getString("replyTo"), action.getResult());
+                    } else if(label.equals(IManagerConstants.QUIT)){
+                        System.out.println(" Quit Nqe logic ");
+                        stop();
                     }else {
                         log.error("Unknown COMPLETED OR INPROCESS Action received " + action.toString());
                         return;

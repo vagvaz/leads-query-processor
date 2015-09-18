@@ -96,5 +96,10 @@ public abstract class ManageVerticle extends Verticle implements LeadsService {
         JsonObject errorMessage = new JsonObject();
         errorMessage.putString("status.message", message);
     }
+    @Override
+    public void exitService() {
+        //vertx.stop();
+        System.exit(0);
+    }
 
 }

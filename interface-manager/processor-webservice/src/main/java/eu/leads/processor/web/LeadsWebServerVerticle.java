@@ -1,10 +1,14 @@
 package eu.leads.processor.web;
 
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.core.Action;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.imanager.IManagerConstants;
 import org.vertx.java.core.Handler;
+import org.vertx.java.core.eventbus.EventBus;
+import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.http.RouteMatcher;
 import org.vertx.java.core.json.JsonObject;
@@ -19,7 +23,7 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
     Node com;
     Logger log;
     String id;
-
+    static int shutdown_messages =0;
     public void start() {
 
         LQPConfiguration.initialize(true);
@@ -120,6 +124,37 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         vertx.createHttpServer().requestHandler(matcher)
             .listen((Integer) config.getNumber("port", 8080));
 
+        EventBus bus = vertx.eventBus();
+
+        bus.registerHandler("leads.processor.control", new Handler<Message>() {
+            @Override
+            public void handle(Message message) {
+                //System.err.println("  " + message.toString());
+
+                JsonObject body = (JsonObject) message.body();
+                if (body.containsField("type")) {
+                    if (body.getString("type").equals("action")) {
+                        Action action = new Action(body);
+                        if (!action.getLabel().equals(IManagerConstants.QUIT)) {
+
+                            System.err.println("Continue");
+                        } else {
+                            System.err.println("Exit webprocessor try: "+shutdown_messages);
+                            shutdown_messages++;
+                            vertx.setTimer(10000, new Handler<Long>() {
+                                @Override
+                                public void handle(Long aLong) {
+                                    System.err.println("Exit webprocessor at last");
+                                    System.exit(0);
+                                }
+                            });
+
+                        }
+                    }
+
+                }
+            }
+        });
         container.logger().info("Webserver started");
     }
 

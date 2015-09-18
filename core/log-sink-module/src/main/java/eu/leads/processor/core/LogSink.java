@@ -4,8 +4,12 @@ import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.imanager.IManagerConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vertx.java.core.Handler;
+import org.vertx.java.core.eventbus.EventBus;
+import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
@@ -42,6 +46,37 @@ public class LogSink extends Verticle implements LeadsMessageHandler {
         //      LQPConfiguration.parseFile(configuration);
         com = new DefaultNode();
         com.initialize(id, "leads.log.sink", groups, this, this, vertx);
+        EventBus bus = vertx.eventBus();
+
+        bus.registerHandler("leads.processor.control", new Handler<Message>() {
+            @Override
+            public void handle(Message message) {
+                System.err.println("  " + message.toString());
+
+                JsonObject body = (JsonObject) message.body();
+                if (body.containsField("type")) {
+                    if (body.getString("type").equals("action")) {
+                        Action action = new Action(body);
+                        if (!action.getLabel().equals(IManagerConstants.QUIT)) {
+
+                            System.err.println("Continue");
+                        } else {
+                            System.err.println("LogSink");
+
+                            vertx.setTimer(1000, new Handler<Long>() {
+                                @Override
+                                public void handle(Long aLong) {
+                                    System.out.println(" LogSink Exiting ");
+                                    System.exit(0);
+                                }
+                            });
+                            stop();
+                        }
+                    }
+
+                }
+            }
+        });
         System.out.println("LogSink Started");
     }
 

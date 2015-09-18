@@ -15,6 +15,7 @@ import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.QueryState;
 import eu.leads.processor.core.plan.QueryStatus;
+import eu.leads.processor.imanager.IManagerConstants;
 import eu.leads.processor.nqe.handlers.DeployRemoteOpActionHandler;
 import eu.leads.processor.nqe.handlers.ExecuteMapReduceJobActionHandler;
 import eu.leads.processor.nqe.handlers.OperatorActionHandler;
@@ -101,7 +102,7 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
                   JsonObject wrapper = new JsonObject(s);
                   QueryStatus queryStatus = new QueryStatus(wrapper.getObject("status"));
                   queryStatus.setStatus(QueryState.COMPLETED);
-                  wrapper.putObject("status",queryStatus.asJsonObject());
+                  wrapper.putObject("status", queryStatus.asJsonObject());
                   jobsCache.put(id, wrapper.toString());
                 } else {
                   log.info("Operator: " + action.getData().getString("operatorType") + " is completed");
@@ -234,16 +235,33 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
       if (body.containsField("type")) {
         if (body.getString("type").equals("action")) {
           Action action = new Action(body);
-          action.setGlobalConf(globalConfig);
-          ActionHandler ac = handlers.get(action.getLabel());
-          Action result = ac.process(action);
-          if(result.getLabel().equals(NQEConstants.EXECUTE_MAP_REDUCE_JOB)) {
-            result.setStatus(ActionStatus.COMPLETED.toString());
-            if(result.getData().getObject("operator").containsField("direct")) {
-              com.sendTo(logic, result.asJsonObject());
+          if(!action.getLabel().equals(IManagerConstants.QUIT)) {
+            action.setGlobalConf(globalConfig);
+            ActionHandler ac = handlers.get(action.getLabel());
+            Action result = ac.process(action);
+            if (result.getLabel().equals(NQEConstants.EXECUTE_MAP_REDUCE_JOB)) {
+              result.setStatus(ActionStatus.COMPLETED.toString());
+              if (result.getData().getObject("operator").containsField("direct")) {
+                com.sendTo(logic, result.asJsonObject());
+              }
             }
+            message.reply();
+          }else
+          {
+            System.out.println(" Quit NQE ");
+
+            persistence.stopManager();
+
+            log.error("Stopped Manager, Exiting");
+            vertx.setTimer(2000, new Handler<Long>() {
+              @Override
+              public void handle(Long aLong) {
+                System.out.println(" NQE Exiting ");
+                System.exit(0);
+                //vertx.stop();
+              }
+            });
           }
-          message.reply();
         }
       } else {
         log.error(id + " received message from eventbus that does not contain type field  \n" + message.toString());

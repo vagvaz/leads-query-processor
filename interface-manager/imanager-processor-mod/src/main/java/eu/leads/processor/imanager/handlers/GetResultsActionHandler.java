@@ -78,12 +78,12 @@ public class GetResultsActionHandler implements ActionHandler {
 	                persistence.removePersistentCache(cacheName);
 	                log.info("Cache Removed ");
                 }else {
-              log.info("GetResults before batchGet ");
-                  if (max < 0) {
-                    tuples = batchGet(cacheName, isSorted, min);
-                  } else {
-                    tuples = batchGet(cacheName, isSorted, min);
-                  }
+                    log.info("GetResults before batchGet ");
+                    if (max < 0) {
+                        tuples = batchGet(cacheName, isSorted, min);
+                    } else {
+                        tuples = batchGet(cacheName, isSorted, min);
+                    }
                     actionResult.putString("result", tuples.getArray("result").toString());
                 }
 
@@ -155,9 +155,9 @@ public class GetResultsActionHandler implements ActionHandler {
                 return result;
             }
       }
-      log.info("removing cache " + cacheName);
-      persistence.removePersistentCache(cacheName);
-      log.info("Cache Removed " );
+       log.info("removing cache " + cacheName);
+       persistence.removePersistentCache(cacheName);
+       log.info("Cache Removed ");
       result.putString("status", "ok");
       result.putArray("result", listOfValues);
       return result;

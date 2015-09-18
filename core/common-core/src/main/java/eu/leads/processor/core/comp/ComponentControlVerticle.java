@@ -2,10 +2,13 @@ package eu.leads.processor.core.comp;
 
 
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.core.Action;
+import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.ServiceCommand;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.imanager.IManagerConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.AsyncResult;
@@ -88,6 +91,9 @@ public class ComponentControlVerticle extends Verticle implements Component {
             services = new JsonArray();
         com = new DefaultNode();
         secondaryGroups = new HashSet<>();
+        if(config.containsField("otherGroups"))
+            secondaryGroups.addAll(config.getArray("otherGroups").toList());
+
         log = LoggerFactory.getLogger(this.getClass());
         this.state = ComponentState.IDLE;
     }
@@ -359,6 +365,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
         }
         //subscribe to componentType control
         com.subscribe(componentType + ".control", componentHandler);
+        com.subscribe("leads.processor.control", componentHandler);
     }
 
     @Override
@@ -372,6 +379,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
         //GRACEFULLY shutting down
         this.state = ComponentState.STOPPING;
         com.sendToAllGroup(internalGroup, MessageUtils.createServiceCommand(ServiceCommand.EXIT));
+
     }
 
 
@@ -404,17 +412,44 @@ public class ComponentControlVerticle extends Verticle implements Component {
     @Override
     public void cleanup() {
 
+
     }
 
     @Override
     public void kill() {
-        if (mode.equals(ComponentMode.TESTING)) {
-            log.info(componentType + "." + id + " is being killed ");
-            System.exit(-1);
+        Action action = new Action();
+        action.setLabel(IManagerConstants.QUIT);
+        action.setId("-3");
+        action.setStatus(ActionStatus.PENDING.toString());
+        com.sendRequestTo(workQueueAddress, action.asJsonObject(),  failHandler);
+        if(mode!=null) {
+            if (mode.equals(ComponentMode.TESTING)) {
+                log.info(componentType + "." + id + " is being killed ");
+                vertx.setTimer(4000, new Handler<Long>() {
+                    @Override
+                    public void handle(Long aLong) {
+                        System.out.println(" Control component stopping ");
+                        vertx.stop();// System.exit(0);
+                    }
+                });
+            } else {
+                log.error(componentType + "." + id + " received kill command but mode is  "
+                        + mode.toString());
+            }
         } else {
-            log.error(componentType + "." + id + " received kill command but mode is  "
-                          + mode.toString());
+            log.error(componentType + "." + id + " received kill command but mode is null, stopping anyway ");
+            com.sendToGroup(workQueueAddress, action.asJsonObject());
+           com.unsubscribeFromAll();
+            vertx.setTimer(4000, new Handler<Long>() {
+                @Override
+                public void handle(Long aLong) {
+                    System.out.println(" Control component Stopping ");
+                    vertx.stop();
+                    //System.exit(0);
+                }
+            });
         }
+
     }
 
     @Override

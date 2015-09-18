@@ -90,10 +90,10 @@ public class NQELogicManage extends ManageVerticle {
       return serviceType;
    }
 
-   @Override
-   public void exitService() {
-      System.exit(-1);
-   }
+//   @Override
+//   public void exitService() {
+//      System.exit(-1);
+//   }
 
 
 }

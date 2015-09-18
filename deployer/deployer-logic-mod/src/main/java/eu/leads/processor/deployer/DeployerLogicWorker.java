@@ -8,11 +8,11 @@ import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
-import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.*;
+import eu.leads.processor.imanager.IManagerConstants;
 import eu.leads.processor.infinispan.operators.DistCMSketch;
 import eu.leads.processor.math.FilterOperatorNode;
 import eu.leads.processor.math.FilterOperatorTree;
@@ -21,6 +21,7 @@ import eu.leads.processor.nqe.NQEConstants;
 import org.infinispan.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
@@ -99,6 +100,20 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
          Action newAction = null;
          action.setProcessedBy(id);
          //         action.setStatus(ActionStatus.INPROCESS.toString());
+         if(action.getLabel().equals(IManagerConstants.QUIT)) {
+            System.out.println(" Quit Dep ");
+            persistence.stopManager();
+            log.error("Stopped Manager Exiting");
+            vertx.setTimer(1000, new Handler<Long>() {
+               @Override
+               public void handle(Long aLong) {
+                  System.out.println("Closing Deployer");
+                  vertx.stop();
+                  //System.exit(0);
+               }
+            });
+         }
+
 
          switch (ActionStatus.valueOf(action.getStatus())) {
             case PENDING: //probably received an action from an external source

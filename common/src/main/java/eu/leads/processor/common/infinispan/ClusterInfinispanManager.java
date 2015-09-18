@@ -14,6 +14,7 @@ import org.infinispan.configuration.cache.Index;
 import org.infinispan.configuration.global.GlobalConfiguration;
 import org.infinispan.configuration.parsing.ConfigurationBuilderHolder;
 import org.infinispan.configuration.parsing.ParserRegistry;
+import org.infinispan.context.Flag;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.eviction.EvictionStrategy;
@@ -31,7 +32,6 @@ import org.infinispan.persistence.manager.PersistenceManager;
 import org.infinispan.remoting.transport.Address;
 import org.infinispan.server.hotrod.HotRodServer;
 import org.infinispan.server.hotrod.configuration.HotRodServerConfigurationBuilder;
-//import org.infinispan.server.hotrod.test.HotRodTestingUtil;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
 import org.infinispan.transaction.TransactionMode;
 import org.infinispan.transaction.lookup.JBossStandaloneJTAManagerLookup;
@@ -49,6 +49,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static org.infinispan.test.AbstractCacheTest.getDefaultClusteredCacheConfig;
+
+
 
 /**
  * Created by vagvaz on 5/23/14.
@@ -232,7 +234,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".entities");
 
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".content");
-    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".page");
+    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".page");
     Cache uridirCache = (Cache) getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".urldirectory");
     Cache uridirCacheEcom = (Cache) getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".urldirectory_ecom");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".page_core");
@@ -247,7 +249,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".site");
     Cache adidasKeywords = (Cache) getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".adidas_keywords");
 
-    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".rankings");
+    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME + ".rankings");
     getInMemoryCache(StringConstants.DEFAULT_DATABASE_NAME + ".rankings.compressed", 4000);
     listener = new BatchPutListener(StringConstants.DEFAULT_DATABASE_NAME+".rankings.compressed",StringConstants.DEFAULT_DATABASE_NAME+".rankings");
     addListener(listener, StringConstants.DEFAULT_DATABASE_NAME + ".rankings.compressed");
@@ -260,15 +262,17 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache("leads.processor.catalog.functions");
     getPersisentCache("leads.processor.catalog.indexes");
     getPersisentCache("leads.processor.catalog.indexesByColumn");
-    getPersisentCache("leads.processor.databases.sub."+StringConstants.DEFAULT_DATABASE_NAME);
+    getPersisentCache("leads.processor.databases.sub." + StringConstants.DEFAULT_DATABASE_NAME);
     putAdidasKeyWords(adidasKeywords);
     putUriDirData(uridirCache);
     putUriDirEcomData(uridirCacheEcom);
-    //    getPersisentCache("batchputTest");
-    //    getPersisentCache("batchputTest.compressed");
-
-    //    BatchPutListener batchPutListener = new BatchPutListener("batchputTest.compressed","batchputTest");
-    //    addListener(batchPutListener,"batchputTest.compressed");
+    getPersisentCache("TablesSize");
+    Cache<String, String> allIndexes = (Cache) getPersisentCache("allIndexes");
+    for (String column : allIndexes.keySet()) {
+      System.out.println("Found index Cache key: " + column + " cacheName: " + allIndexes.get(column));
+      getIndexedPersistentCache(allIndexes.get(column));
+      getPersisentCache(allIndexes.get(column) + ".sketch");
+    }
     NutchLocalListener nlistener = new NutchLocalListener(this,"default.webpages",LQPConfiguration.getInstance().getConfiguration().getString("nutch.listener.prefix"),currentComponent);
 
     manager.getCache("WebPage").addListener(nlistener);
@@ -594,13 +598,13 @@ public class ClusterInfinispanManager implements InfinispanManager {
    */
   @Override
   public void stopManager() {
-    // for(String cacheName : this.manager.getCacheNames())
-    //{
-    //    Cache cache= this.manager.getCache(cacheName,false);
-    //    if(cache != null && cache.getAdvancedCache().getStatus().equals(ComponentStatus.RUNNING))
-    //         cache.stop();
-    // }
-    this.manager.stop();
+
+     for(String cacheName : this.manager.getCacheNames())
+        if(manager.isRunning(cacheName)) {
+          manager.getCache(cacheName).getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).stop();
+          System.out.println("local Cache closed: " + cacheName);
+        }
+     this.manager.stop();
   }
 
   /**
@@ -959,7 +963,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).clustering()
         .cacheMode(CacheMode.LOCAL).transaction()
-        .transactionMode(TransactionMode.NON_TRANSACTIONAL).clustering().indexing().index(Index.LOCAL).build();
+        .transactionMode(TransactionMode.NON_TRANSACTIONAL)
+            .clustering().persistence().passivation(false).indexing().index(Index.LOCAL).build();
   }
 
 
@@ -1017,7 +1022,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       }
 
       cacheConfig =  new ConfigurationBuilder().read(defaultIndexConfig).transaction()
-          .transactionMode(TransactionMode.NON_TRANSACTIONAL).clustering().indexing().index(Index.LOCAL).addProperty("default.directory_provider", "filesystem")
+          .transactionMode(TransactionMode.NON_TRANSACTIONAL).persistence().passivation(false).clustering().indexing().index(Index.LOCAL).addProperty("default.directory_provider", "filesystem")
           .addProperty("hibernate.search.default.indexBase", "/tmp/leadsprocessor-data/" + uniquePath + "/infinispan/" + cacheName + "/")
           .addProperty("hibernate.search.default.exclusive_index_use", "true")
           .addProperty("hibernate.search.default.indexmanager", "near-real-time")

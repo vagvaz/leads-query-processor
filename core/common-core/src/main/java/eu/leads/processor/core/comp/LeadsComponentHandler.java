@@ -1,8 +1,8 @@
 package eu.leads.processor.core.comp;
 
-import eu.leads.processor.core.PersistenceProxy;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.imanager.IManagerConstants;
 import org.vertx.java.core.json.JsonObject;
 
 /**
@@ -12,7 +12,6 @@ public class LeadsComponentHandler implements LeadsMessageHandler {
 
     Component owner;
     LogProxy log;
-    PersistenceProxy persitence;
     Node com;
 
     public LeadsComponentHandler(Component owner, Node com, LogProxy log) {
@@ -23,6 +22,7 @@ public class LeadsComponentHandler implements LeadsMessageHandler {
 
     @Override
     public void handle(JsonObject message) {
+        System.err.println(" Leads Components Handler " + message.toString());
         if (message.getString("type").equals("command")) {
             String cmd = message.getString("command");
             ComponentCommand command = ComponentCommand.valueOf(cmd);
@@ -73,6 +73,22 @@ public class LeadsComponentHandler implements LeadsMessageHandler {
                     log.error(owner.getComponentType() + ":" + owner.getId()
                                   + " received an unknown command \n" + message.toString());
                     break;
+            }
+        }else{
+
+            if (message.getString("type").equals("action")){
+                System.out.println(" Quit leads Component ");
+                if(message.getString("label").equals(IManagerConstants.QUIT))
+                {
+
+                    System.out.println(" Shutdown "+ owner.getId());
+                    owner.shutdown();
+                    owner.kill();
+                }
+            }else {
+                log.error(owner.getComponentType() + ":" + owner.getId()
+                        + " received other\n" + message.toString());
+                owner.kill();
             }
         }
     }

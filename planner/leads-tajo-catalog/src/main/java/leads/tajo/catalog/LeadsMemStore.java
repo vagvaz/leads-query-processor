@@ -103,6 +103,9 @@ public class LeadsMemStore implements CatalogStore {
       manager.removePersistentCache("leads.processor.catalog.functions");
       manager.removePersistentCache("leads.processor.catalog.indexes");
       manager.removePersistentCache("leads.processor.catalog.indexesByColumn");
+      System.err.println("Stopping Manager ");
+      manager.stopManager();
+      System.err.println(" Manager Stopped");
    }
 
    @Override

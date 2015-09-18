@@ -3,6 +3,7 @@ package eu.leads.processor.core.index;
 /**
  * Created by trs on 18/6/2015.
  */
+
 public class LeadsIndexHelper {
 
 	LeadsIndex lInd = null;

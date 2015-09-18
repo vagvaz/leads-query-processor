@@ -208,7 +208,6 @@ public class DefaultNode implements Node, Handler<Long> {
                 }
             }
         });
-
     }
 
     private void subscribeForRequest(final String groupId, final LeadsMessageHandler handler, final long messageId, final JsonObject message, final String from) {
@@ -284,6 +283,7 @@ public class DefaultNode implements Node, Handler<Long> {
             }
         }
         conf.putArray("groups", array);
+        //System.out.println("id: "+ id + "Groups: "+array.toString());
         initialize(conf, defaultHandler, failHandler, vertx);
     }
 
@@ -291,8 +291,11 @@ public class DefaultNode implements Node, Handler<Long> {
         bus.registerHandler(getId(), comHandler);
         bus.registerHandler(getGroup(), comHandler);
         Iterator<Object> it = this.config.getArray("groups").iterator();
+        //System.out.println("registerToEventBusAddresses " +this.config.getArray("groups") );
         while (it.hasNext()) {
-            bus.registerHandler((String) it.next(), comHandler);
+            String id= (String)it.next();
+            //System.out.println("Subscribed " +id +" " + comHandler.toString() );
+            bus.registerHandler((String) id, comHandler);
         }
     }
 
