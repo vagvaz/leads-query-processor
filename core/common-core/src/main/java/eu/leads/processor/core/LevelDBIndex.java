@@ -1,9 +1,13 @@
 package eu.leads.processor.core;
 import com.sun.tools.javah.JNI;
+import eu.leads.processor.common.utils.PrintUtilities;
 import org.bson.BasicBSONEncoder;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.infinispan.commons.util.Util;
 import org.iq80.leveldb.*;
+import org.slf4j.*;
+import org.slf4j.Logger;
+
 import static org.fusesource.leveldbjni.JniDBFactory.*;
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +35,7 @@ public class LevelDBIndex {
     private WriteBatch batch;
     private WriteBatch keyBatch;
     private DBFactory dbfactory;
+    private Logger log = LoggerFactory.getLogger(LevelDBIndex.class);
     //    private BasicBSONEncoder encoder = new BasicBSONEncoder();
 
     public LevelDBIndex(String baseDir, String name){
@@ -230,35 +235,34 @@ public class LevelDBIndex {
         add(key,value);
     }
     public synchronized void add(Object keyObject , Object valueObject){
-        String key = null;
-        Tuple value = null;
+        try {
+            String key = null;
+            Tuple value = null;
 
-        key = keyObject.toString();
-        value = (Tuple) valueObject;
-        byte[] count = keysDB.get(bytes(key+"{}"));
-        Integer counter = -1;
-        if(count == null)
-        {
-            counter = 0;
-        }
-        else{
-//            ByteBuffer bytebuf = ByteBuffer.wrap(count);
-            counter = Integer.parseInt(new String(count));
-            counter += 1;
-        }
-        byte[] keyvalue = bytes(counter.toString());
-        keysDB.put(bytes(key+"{}"), keyvalue,writeOptions);
-        //        encoder = new BasicBSONEncoder();
-        BasicBSONEncoder encoder = new BasicBSONEncoder();
-        byte[] b = encoder.encode(value.asBsonObject());
+            key = keyObject.toString();
+            value = (Tuple) valueObject;
+            byte[] count = keysDB.get(bytes(key + "{}"));
+            Integer counter = -1;
+            if (count == null) {
+                counter = 0;
+            } else {
+                //            ByteBuffer bytebuf = ByteBuffer.wrap(count);
+                counter = Integer.parseInt(new String(count));
+                counter += 1;
+            }
+            byte[] keyvalue = bytes(counter.toString());
+            keysDB.put(bytes(key + "{}"), keyvalue, writeOptions);
+            //        encoder = new BasicBSONEncoder();
+            BasicBSONEncoder encoder = new BasicBSONEncoder();
+            byte[] b = encoder.encode(value.asBsonObject());
 
-        //        System.out.println(b.length);
-        //        dataDB.put(bytes(key+"{}"+counter),b,writeOptions);
-        batch.put(bytes(key+"{}"+counter),b);
-        batchCount++;
-            if(batchCount>= batchSize){
+            //        System.out.println(b.length);
+            //        dataDB.put(bytes(key+"{}"+counter),b,writeOptions);
+            batch.put(bytes(key + "{}" + counter), b);
+            batchCount++;
+            if (batchCount >= batchSize) {
                 try {
-                    dataDB.write(batch,writeOptions);
+                    dataDB.write(batch, writeOptions);
                     batch.close();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -267,6 +271,10 @@ public class LevelDBIndex {
                 batchCount = 0;
             }
 
+        }catch(Exception e){
+            e.printStackTrace();
+            PrintUtilities.logStackTrace(log,e.getStackTrace());
+        }
     }
 
 

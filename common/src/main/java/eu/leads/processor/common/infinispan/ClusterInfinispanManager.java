@@ -6,6 +6,7 @@ import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.NutchLocalListener;
 import org.infinispan.Cache;
+import org.infinispan.commands.RemoveCacheCommand;
 import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
@@ -17,12 +18,16 @@ import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.eviction.EvictionStrategy;
 import org.infinispan.eviction.EvictionThreadPolicy;
+import org.infinispan.factories.ComponentRegistry;
+import org.infinispan.factories.GlobalComponentRegistry;
+import org.infinispan.jmx.CacheJmxRegistration;
 import org.infinispan.lifecycle.ComponentStatus;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.persistence.leveldb.configuration.CompressionType;
 import org.infinispan.persistence.leveldb.configuration.LevelDBStoreConfiguration;
 import org.infinispan.persistence.leveldb.configuration.LevelDBStoreConfigurationBuilder;
+import org.infinispan.persistence.manager.PersistenceManager;
 import org.infinispan.remoting.transport.Address;
 import org.infinispan.server.hotrod.HotRodServer;
 import org.infinispan.server.hotrod.configuration.HotRodServerConfigurationBuilder;
@@ -208,8 +213,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
     {
       host = LQPConfiguration.getConf().getString("node.ip");
 
-//      if(!LQPConfiguration.getConf().getString("node.current.component").equals("planner"))
-        startHotRodServer(manager,host, serverPort);
+      //      if(!LQPConfiguration.getConf().getString("node.current.component").equals("planner"))
+      startHotRodServer(manager,host, serverPort);
 
     }
     getPersisentCache("clustered");
@@ -259,11 +264,11 @@ public class ClusterInfinispanManager implements InfinispanManager {
     putAdidasKeyWords(adidasKeywords);
     putUriDirData(uridirCache);
     putUriDirEcomData(uridirCacheEcom);
-//    getPersisentCache("batchputTest");
-//    getPersisentCache("batchputTest.compressed");
+    //    getPersisentCache("batchputTest");
+    //    getPersisentCache("batchputTest.compressed");
 
-//    BatchPutListener batchPutListener = new BatchPutListener("batchputTest.compressed","batchputTest");
-//    addListener(batchPutListener,"batchputTest.compressed");
+    //    BatchPutListener batchPutListener = new BatchPutListener("batchputTest.compressed","batchputTest");
+    //    addListener(batchPutListener,"batchputTest.compressed");
     NutchLocalListener nlistener = new NutchLocalListener(this,"default.webpages",LQPConfiguration.getInstance().getConfiguration().getString("nutch.listener.prefix"),currentComponent);
 
     manager.getCache("WebPage").addListener(nlistener);
@@ -306,28 +311,28 @@ public class ClusterInfinispanManager implements InfinispanManager {
   }
 
   private void putUriDirData(Cache uridirCache) {
-//    schema.addColumn("uri", Type.TEXT);
-//    schema.addColumn("ts", Type.INT8);
-//    schema.addColumn("dirassumption", Type.TEXT);
-//    schema.addColumn("ecomassumptionpagesno", Type.TEXT);
-//    schema.addColumn("pagesno", Type.TEXT);
+    //    schema.addColumn("uri", Type.TEXT);
+    //    schema.addColumn("ts", Type.INT8);
+    //    schema.addColumn("dirassumption", Type.TEXT);
+    //    schema.addColumn("ecomassumptionpagesno", Type.TEXT);
+    //    schema.addColumn("pagesno", Type.TEXT);
   }
 
   private void putUriDirEcomData(Cache uridirCacheEcom) {
-//    schema.addColumn("uri", Type.TEXT);
-//    schema.addColumn("ts", Type.INT8);
-//    schema.addColumn("isatbbuttonindir", Type.TEXT);
-//    schema.addColumn("atbbuttonextractionlog", Type.TEXT);
-//    schema.addColumn("nameextractiontuples", Type.TEXT);
-//    schema.addColumn("priceextractiontuples", Type.TEXT);
-//    schema.addColumn("productclustercenter", Type.TEXT);
-//    schema.addColumn("categoryclustercenter", Type.TEXT);
-//    schema.addColumn("productcluster50pcdist", Type.TEXT);
-//    schema.addColumn("productcluster80pcdist", Type.TEXT);
-//    schema.addColumn("categorycluster50pcdist", Type.TEXT);
-//    schema.addColumn("categorycluster80pcdist", Type.TEXT);
-//    schema.addColumn("scalermean", Type.TEXT);
-//    schema.addColumn("scalerstd", Type.TEXT);
+    //    schema.addColumn("uri", Type.TEXT);
+    //    schema.addColumn("ts", Type.INT8);
+    //    schema.addColumn("isatbbuttonindir", Type.TEXT);
+    //    schema.addColumn("atbbuttonextractionlog", Type.TEXT);
+    //    schema.addColumn("nameextractiontuples", Type.TEXT);
+    //    schema.addColumn("priceextractiontuples", Type.TEXT);
+    //    schema.addColumn("productclustercenter", Type.TEXT);
+    //    schema.addColumn("categoryclustercenter", Type.TEXT);
+    //    schema.addColumn("productcluster50pcdist", Type.TEXT);
+    //    schema.addColumn("productcluster80pcdist", Type.TEXT);
+    //    schema.addColumn("categorycluster50pcdist", Type.TEXT);
+    //    schema.addColumn("categorycluster80pcdist", Type.TEXT);
+    //    schema.addColumn("scalermean", Type.TEXT);
+    //    schema.addColumn("scalerstd", Type.TEXT);
   }
 
   private void putAdidasKeyWords(Cache adidasKeywords) {
@@ -396,9 +401,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
           else{
             uniquePath = currentComponent +"-"+UUID.randomUUID().toString();
           }
-//          for(int i = 1; i < files.length;i++){
-//            files[i].delete();
-//          }
+          //          for(int i = 1; i < files.length;i++){
+          //            files[i].delete();
+          //          }
           System.out.println("UNIQUE PATH = " + uniquePath);
 
 
@@ -516,7 +521,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       server = new HotRodServer();
       HotRodServerConfigurationBuilder serverConfigurationBuilder = new HotRodServerConfigurationBuilder();
       if (externalIP != null && !externalIP.equals("")){
-	if(externalIP.contains(":")) {
+        if(externalIP.contains(":")) {
           String external = externalIP.split(":")[0];
           String portString = externalIP.split(":")[1];
           System.err.println("EXPOSED IP = " + external + ":"+portString);
@@ -627,7 +632,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     DistributedExecutorService des = new DefaultExecutorService(manager.getCache("clustered"));
     List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
     //
-    System.out.println(cacheName+ " in memory  " + list.size());
+    System.out.println(cacheName + " in memory  " + list.size());
     for (Future<Void> future : list) {
       try {
         future.get(); // wait for task to complete
@@ -718,16 +723,29 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
     try {
       manager.removeCache(name);
-      if(manager.cacheExists(name+".compressed")){
-        System.err.println("---------REMOVE " + name + " and " + name+".compressed");
-        manager.removeCache(name+".compressed");
+      if (manager.cacheExists(name + ".compressed")) {
+        System.err.println("---------REMOVE " + name + " and " + name + ".compressed");
+        manager.removeCache(name + ".compressed");
       }
 
-//      PrintUtilities.printCaches(manager);
-    }catch (Exception e){
-      log.error("Exception while remove " + name + " " + e.getClass().toString() + " " + e.getMessage());
+      //      PrintUtilities.printCaches(manager);
+    } catch (Exception e) {
+      if (manager.isRunning(name)) {
+        GlobalComponentRegistry gcr = manager.getGlobalComponentRegistry();
+        ComponentRegistry cr = gcr.getNamedComponentRegistry(name);
+        if (cr != null) {
+          RemoveCacheCommand cmd = new RemoveCacheCommand(name, manager, gcr, cr.getComponent(PersistenceManager.class),
+              cr.getComponent(CacheJmxRegistration.class));
+          try {
+            cmd.perform(null);
+          } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            PrintUtilities.logStackTrace(log, throwable.getStackTrace());
+          }
+        }
+        log.error("Exception while remove " + name + " " + e.getClass().toString() + " " + e.getMessage());
+      }
     }
-
   }
 
   /**

@@ -210,8 +210,8 @@ public class TupleBuffer {
         System.out.println("FLush END to mc " + buffer.size() + " " + (ensembleCache == null ? "null" : ensembleCache.getName()));
         synchronized (mutex) {
             if (buffer.size() == 0) {
-                ensembleCache = null;
-                cacheName = null;
+//                ensembleCache = null;
+//                cacheName = null;
                 return;
             }
             if (ensembleCache == null) {
@@ -228,8 +228,8 @@ public class TupleBuffer {
             byte[] bytes = new byte[1];
             bytes[0] = -1;
             ensembleCache.put(Long.toString(localCounter), bytes);
-            ensembleCache = null;
-            cacheName = null;
+//            ensembleCache = null;
+//            cacheName = null;
             buffer.clear();
 
         }
@@ -288,24 +288,13 @@ public class TupleBuffer {
 
                 EnsembleCacheUtils.putToCacheDirect(localCache,entry.getKey(),entry.getValue());
             }
-//                tmpb.put(entry.getKey(), entry.getValue());
-//                if(tmpb.size() > batchThreshold) {
-//                    localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
-//                        .putAll(tmpb);//entry.getKey(), entry.getValue());
-//                    tmpb.clear();
-//                }
-//            }
-//            if(tmpb.size() > 0){
-//                localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES)
-//                    .putAll(tmpb);
-//                tmpb.clear();
-//            }
 
         }
         return result;
     }
 
     public void release() {
+        buffer.clear();
         ensembleCache =  null;
         cacheName = null;
     }

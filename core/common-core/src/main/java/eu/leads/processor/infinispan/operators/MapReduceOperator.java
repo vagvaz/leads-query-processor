@@ -120,6 +120,24 @@ public abstract class MapReduceOperator extends BasicOperator{
   }
 
   @Override
+  public void failCleanup(){
+    inputCache = (Cache) manager.getPersisentCache(inputCacheName);
+    super.failCleanup();
+    if(reduceLocal){
+      manager.removePersistentCache(intermediateLocalCache+".data");
+    }
+
+    if(executeOnlyReduce) {
+      //      intermediateCache.stop();
+      //      indexSiteCache.stop();
+      //      intermediateDataCache.stop();
+
+      manager.removePersistentCache(intermediateDataCache.getName());
+      //      keysCache.stop();
+    }
+  }
+
+  @Override
   public boolean isSingleStage() {
     return false;
   }

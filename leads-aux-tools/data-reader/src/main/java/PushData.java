@@ -18,11 +18,13 @@ public class PushData {
     public static void main(String[] args) {
         OutputHandler dummy = new DummyOutputHandler();
         LQPConfiguration.initialize();
-        List<String> desiredDomains = new ArrayList<>();
-        for(Object domain : LQPConfiguration.getInstance().getConfiguration().getList("ignorelist")){
+        List<Object> configList = LQPConfiguration.getInstance().getConfiguration().getList("ignorelist");
+        String[] desiredDomains = new String[configList.size()];
+        int index = 0;
+        for(Object domain : configList){
             String uri = (String)domain;
             String nutchUri = (uri);
-            desiredDomains.add(nutchUri);
+            desiredDomains[index++]=nutchUri;
         }
 
         //        InputHandler inputHandler = new GoraInputHandler();
@@ -110,7 +112,7 @@ public class PushData {
                 //                outputHandler2.append(tuple.getAttribute("url"), new JsonObject(tuple.toString()).encodePrettily());
                 //                outputHandler3.append(entry.getValue().get(entry.getValue().getSchema().getField("url").pos()).toString(), entry.getValue().toString());
                 String key_url = tuple.getAttribute("default.webpages.url");
-                if (!StringUtils.startsWithAny(key_url, (String[]) desiredDomains.toArray())){
+                if (!StringUtils.startsWithAny(key_url, desiredDomains)){
                     rejected++;
                     if (rejected % 100 == 0) {
                         System.err.println("rejected " + rejected);
