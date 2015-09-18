@@ -957,14 +957,34 @@ public class ClusterInfinispanManager implements InfinispanManager {
   }
 
   private void initIndexDefaultCacheConfig() {
-    if(defaultConfig == null){
-      initDefaultCacheConfig();
-    }
-
-    defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).clustering()
-        .cacheMode(CacheMode.LOCAL).transaction()
-        .transactionMode(TransactionMode.NON_TRANSACTIONAL)
-            .clustering().persistence().passivation(false).indexing().index(Index.LOCAL).build();
+//    if(defaultConfig == null){
+//      initDefaultCacheConfig();
+//    }
+    defaultIndexConfig = new ConfigurationBuilder() //.read(manager.getDefaultCacheConfiguration())
+        .clustering()
+        .cacheMode(CacheMode.LOCAL)
+        .indexing().index(Index.LOCAL).transaction().transactionMode(
+            TransactionMode.NON_TRANSACTIONAL)
+        .persistence().passivation(false)
+        .addStore(LevelDBStoreConfigurationBuilder.class)
+        .location("/tmp/leadsprocessor-data/leveldb/" + uniquePath + "/data/")
+            //                                 .location("/tmp/leveldb/data-foo/" + "/")
+        .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/expired/")
+            //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
+        .implementationType(LevelDBStoreConfiguration.ImplementationType.JNI)
+        .blockSize(blockSize * 1024 * 1024)
+        .compressionType(compressionType)
+        .cacheSize(cacheSize * 1024 * 1024)
+        .fetchPersistentState(true)
+        .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
+        .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
+            false).eviction().maxEntries(maxEntries).strategy(
+            EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
+        .build();
+//    defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).clustering()
+//        .cacheMode(CacheMode.LOCAL).transaction()
+//        .transactionMode(TransactionMode.NON_TRANSACTIONAL)
+//            .clustering().persistence().passivation(false).indexing().index(Index.LOCAL).build();
   }
 
 
@@ -1004,9 +1024,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
       cacheConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
           .clustering()
-          .cacheMode(CacheMode.DIST_SYNC)
-          .hash().numOwners(1)
-          .indexing().setProperty("auto-config", "true") .setProperty("default.directory_provider", "ram").index(Index.LOCAL).transaction().transactionMode(TransactionMode
+          .cacheMode(CacheMode.LOCAL)
+          .indexing().setProperty("default.directory_provider", "ram").index(Index.LOCAL).transaction().transactionMode(TransactionMode
               .NON_TRANSACTIONAL)
           .persistence()
               //                            .addStore(LevelDBStoreConfigurationBuilder.class
@@ -1022,7 +1041,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       }
 
       cacheConfig =  new ConfigurationBuilder().read(defaultIndexConfig).transaction()
-          .transactionMode(TransactionMode.NON_TRANSACTIONAL).persistence().passivation(false).clustering().indexing().index(Index.LOCAL).addProperty("default.directory_provider", "filesystem")
+          .transactionMode(TransactionMode.NON_TRANSACTIONAL).persistence().passivation(false).indexing().index(Index.LOCAL).addProperty("default.directory_provider", "filesystem")
           .addProperty("hibernate.search.default.indexBase", "/tmp/leadsprocessor-data/" + uniquePath + "/infinispan/" + cacheName + "/")
           .addProperty("hibernate.search.default.exclusive_index_use", "true")
           .addProperty("hibernate.search.default.indexmanager", "near-real-time")
