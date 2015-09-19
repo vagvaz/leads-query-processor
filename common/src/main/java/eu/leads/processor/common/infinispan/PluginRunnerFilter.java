@@ -106,6 +106,7 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
           System.err.println("Already initialized !!!! not again  " + UUIDname);
           return;
         }
+        executor = new ThreadPoolExecutor(1,1,10000, TimeUnit.MILLISECONDS,new LinkedBlockingDeque<Runnable>());
         System.err.println("Initilize " + UUIDname);
         log = LoggerFactory.getLogger(PluginRunnerFilter.class);
         log = LoggerFactory
