@@ -264,10 +264,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache("leads.processor.catalog.indexesByColumn");
     getPersisentCache("leads.processor.databases.sub." + StringConstants.DEFAULT_DATABASE_NAME);
     getPersisentCache("batchputTest");
-    getInMemoryCache("batchputTest.compressed",4000);
+    getInMemoryCache("batchputTest.compressed", 4000);
 
     BatchPutListener batchPutListener = new BatchPutListener("batchputTest.compressed","batchputTest");
-    addListener(batchPutListener,"batchputTest.compressed");
+    addListener(batchPutListener, "batchputTest.compressed");
 
     putAdidasKeyWords(adidasKeywords);
     putUriDirData(uridirCache);
@@ -467,9 +467,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
             TransactionMode.NON_TRANSACTIONAL)
             .persistence().passivation(false)
             .addStore(LevelDBStoreConfigurationBuilder.class)
-            .location("/tmp/leadsprocessor-data/leveldb/" + uniquePath + "/data/")
+            .location("/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/data/")
                 //                                 .location("/tmp/leveldb/data-foo/" + "/")
-            .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/expired/")
+            .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/expired/")
                 //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
             .implementationType(LevelDBStoreConfiguration.ImplementationType.AUTO)
             .blockSize(blockSize*1024*1024)
@@ -844,9 +844,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
         .transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
         .persistence().passivation(false)
         .addStore(LevelDBStoreConfigurationBuilder.class)
-        .location("/tmp/leadsprocessor-data/" + uniquePath + "/data/")
+        .location("/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/data/")
             //                                 .location("/tmp/leveldb/data-foo/" + "/")
-        .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/expired/")
+        .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/expired/")
             //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
         .implementationType(LevelDBStoreConfiguration.ImplementationType.JNI)
         .blockSize(blockSize * 1024 * 1024).compressionType(compressionType)
@@ -936,9 +936,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
                 TransactionMode.NON_TRANSACTIONAL)
             .persistence().passivation(false)
             .addStore(LevelDBStoreConfigurationBuilder.class)
-            .location("/tmp/leadsprocessor-data/leveldb/" + uniquePath + "/data/")
+            .location("/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/data/")
                 //                                 .location("/tmp/leveldb/data-foo/" + "/")
-            .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/expired/")
+            .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/expired/")
                 //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
             .implementationType(LevelDBStoreConfiguration.ImplementationType.JNI)
             .blockSize(blockSize * 1024 * 1024)
@@ -973,9 +973,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
             TransactionMode.NON_TRANSACTIONAL)
         .persistence().passivation(false)
         .addStore(LevelDBStoreConfigurationBuilder.class)
-        .location("/tmp/leadsprocessor-data/leveldb/" + uniquePath + "/data/")
+        .location("/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/data/")
             //                                 .location("/tmp/leveldb/data-foo/" + "/")
-        .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/expired/")
+        .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/expired/")
             //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
         .implementationType(LevelDBStoreConfiguration.ImplementationType.JNI)
         .blockSize(blockSize * 1024 * 1024)
