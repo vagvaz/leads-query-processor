@@ -28,7 +28,7 @@ public class ComponentControlVerticle extends Verticle implements Component {
 
     protected boolean resetting = false;
     protected boolean shuttingdown = false;
-    protected ComponentMode mode;
+    protected ComponentMode mode = ComponentMode.NORMAL;
     protected ComponentState state;
 
     protected String workQueueId; //worqueue module deployment id, used for undeployment

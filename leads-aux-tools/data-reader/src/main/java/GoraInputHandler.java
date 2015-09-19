@@ -207,7 +207,6 @@ public class GoraInputHandler implements InputHandler<String, WebPage> {
                     while(currentResult != null){
                         if(listOfResults.size() > 0){
                             currentResult = listOfResults.remove(0);
-                            currentResult = listOfResults.remove(0);
                             if(currentResult.next()){
                                 WebPage page = (WebPage) currentResult.get();
                                 numberOfValues++;
