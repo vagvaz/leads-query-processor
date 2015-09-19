@@ -14,6 +14,7 @@ import java.util.*;
  */
 public class PushData {
     private static int delay;
+    private static int skip = 0;
 
     public static void main(String[] args) {
         OutputHandler dummy = new DummyOutputHandler();
@@ -74,6 +75,10 @@ public class PushData {
             System.out.println("Using delay");
         }
 
+        if(args.length > 4) {
+            skip = Integer.parseInt(args[4]);
+            System.out.println("skip " + skip);
+        }
         OutputHandler outputHandler = new CacheOutputHandler();
         outputHandler.initialize(outputConfig);
 
@@ -98,6 +103,10 @@ public class PushData {
             processed++;
             if (processed % 100 == 0) {
                 System.err.println("processed " + processed);
+            }
+            if(skip > 0) {
+                skip--;
+                continue;
             }
             //            Map.Entry<String,GenericData.Record> entry = (Map.Entry<String, GenericData.Record>) inputHandler.next();
             //            if(entry != null)
