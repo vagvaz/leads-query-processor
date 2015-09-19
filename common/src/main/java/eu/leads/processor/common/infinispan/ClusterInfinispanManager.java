@@ -263,6 +263,12 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache("leads.processor.catalog.indexes");
     getPersisentCache("leads.processor.catalog.indexesByColumn");
     getPersisentCache("leads.processor.databases.sub." + StringConstants.DEFAULT_DATABASE_NAME);
+    getPersisentCache("batchputTest");
+    getInMemoryCache("batchputTest.compressed",4000);
+
+    BatchPutListener batchPutListener = new BatchPutListener("batchputTest.compressed","batchputTest");
+    addListener(batchPutListener,"batchputTest.compressed");
+
     putAdidasKeyWords(adidasKeywords);
     putUriDirData(uridirCache);
     putUriDirEcomData(uridirCacheEcom);
