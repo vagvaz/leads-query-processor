@@ -185,9 +185,9 @@ public class SortOperator extends BasicOperator {
       log.error("LGSORT: "+ getOutput() + ".addresses");
       Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
       System.err.println("creating " + getOutput() + ".addresses to "+ currentCluster);
-      createCache(currentCluster, getOutput() + ".addresses", "batchputlistener");
+      createCache(currentCluster, getOutput() + ".addresses", "batchputListener");
       System.err.println("creating " + getOutput() + ".addresses to " + coordinator);
-      createCache(coordinator,getOutput()+".addresses","batchputlistener");
+      createCache(coordinator,getOutput()+".addresses","batchputListener");
       //         manager.getPersisentCache();
       createCache(coordinator, prefix + "." + currentCluster + "." + manager.getMemberName().toString(),
           "batchputListener");
@@ -207,14 +207,14 @@ public class SortOperator extends BasicOperator {
 
       Set<String> targetMC = getTargetMC();
       for (String mc : targetMC) {
-        createCache(mc, getOutput(),"batchputListener");
+        createCache(mc, getOutput(),"batchputlistener");
         System.err.println("in local creating ---" + getOutput() + ".addresses to " + mc);
-        createCache(mc,getOutput()+".addresses","batchputlistener");
+        createCache(mc,getOutput()+".addresses","batchputListener");
       }
       System.err.println("in local creating " + getOutput() + ".addresses to "+ currentCluster);
       log.error("LGSORT: COORD"+ getOutput() + ".addresses");
       Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
-      createCache(currentCluster, getOutput() + ".addresses", "batchputlistener");
+      createCache(currentCluster, getOutput() + ".addresses", "batchputListener");
     }
   }
 
