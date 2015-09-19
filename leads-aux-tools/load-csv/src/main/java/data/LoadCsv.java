@@ -3,6 +3,7 @@ package data;
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
@@ -24,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 
 import static data.LoadCsv.plugs.PAGERANK;
 import static data.LoadCsv.plugs.SENTIMENT;
@@ -517,9 +519,14 @@ public class LoadCsv {
                 all_bytes +=numofBytes;
                 all_records+=numofEntries;
                 System.out.println("Totally Imported: " + numofEntries + ", Charbytes: " + numofChars +", bytes: " + numofBytes + ", average: " + numofBytes/numofEntries);
+                EnsembleCacheUtils.waitForAllPuts();
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
                 e.printStackTrace();
             }
 
