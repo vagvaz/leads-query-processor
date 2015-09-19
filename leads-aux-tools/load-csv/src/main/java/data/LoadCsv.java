@@ -10,6 +10,8 @@ import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.sentiment.SentimentAnalysisModule;
 import org.apache.commons.lang.time.DurationFormatUtils;
+import org.bson.BSONObject;
+import org.bson.BasicBSONObject;
 import org.infinispan.Cache;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
@@ -454,7 +456,7 @@ public class LoadCsv {
                         System.err.println("Line: " + lines + " Columns size: " + columns.size() + ", data column:" + StringData.length + " size mismatch, continue importing");
                         continue;
                     }
-                    JsonObject data = new JsonObject();
+                    BasicBSONObject data = new BasicBSONObject();
                     String key = StringData[primaryKeysPos[0]];
                     for (int i = 1; i < primaryKeysPos.length; i++) {
                         key += ":" + StringData[primaryKeysPos[i]];
@@ -468,12 +470,12 @@ public class LoadCsv {
                             /*if (columns.get(pos).equals("textcontent") || ta  bleName == "page_core")
                                 data.putString(fullCollumnName, "");
                             else*/
-                                data.putString(fullCollumnName, StringData[pos]);
+                                data.put(fullCollumnName, StringData[pos]);
                         else try {
                             if (columnType.get(pos) == Long.class)
-                                data.putNumber(fullCollumnName, Long.parseLong(StringData[pos]));
+                                data.put(fullCollumnName, Long.parseLong(StringData[pos]));
                             else if (columnType.get(pos) == Integer.class)
-                                data.putNumber(fullCollumnName, Integer.parseInt(StringData[pos]));
+                                data.put(fullCollumnName, Integer.parseInt(StringData[pos]));
                             else if (columnType.get(pos) == Float.class) {
                                 float num = Float.parseFloat(StringData[pos]);
 
@@ -481,7 +483,7 @@ public class LoadCsv {
                                     num = nextFloat(-5, 5);
                                     System.err.println("Found " + StringData[pos] + " .. ->  " + num);
                                 }
-                                data.putNumber(fullCollumnName, num);
+                                data.put(fullCollumnName, num);
                             } else {
                                 System.err.println("Not recognised type, stop importing");
                                 return;
@@ -489,17 +491,17 @@ public class LoadCsv {
                         } catch (NumberFormatException e) {
                             System.err.println("Line: " + lines + "Parsing error: " + StringData[pos]);
                             //e.printStackTrace();
-                            data.putNumber(fullCollumnName, nextFloat(-3, 3));
+                            data.put(fullCollumnName, nextFloat(-3, 3));
                         }
 
                     }
 
-                    put(key, data.toString());
+                    put(key, data);
                     numofBytes += key.getBytes().length+data.toString().getBytes().length;
 
                     try {
-                        sizeE+=serialize(data).length;
-                    } catch (IOException e) {
+                        sizeE+=data.toString().length();
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 
@@ -512,14 +514,15 @@ public class LoadCsv {
                         System.out.println("Imported: " + numofEntries + " -- size: " + sizeE);
                         //cache.endBatch(true);
                     }
-                   if(numofEntries%300==0){
-                                 return;
-                    }
+//                   if(numofEntries%300==0){
+//                                 return;
+//                    }
                 }
                 all_bytes +=numofBytes;
                 all_records+=numofEntries;
                 System.out.println("Totally Imported: " + numofEntries + ", Charbytes: " + numofChars +", bytes: " + numofBytes + ", average: " + numofBytes/numofEntries);
                 EnsembleCacheUtils.waitForAllPuts();
+                EnsembleCacheUtils.waitForAuxPuts();
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -533,21 +536,27 @@ public class LoadCsv {
 
     }
 
-    public static byte[] serialize(JsonObject obj) throws IOException {
-        ByteArrayOutputStream b = new ByteArrayOutputStream();
-        ObjectOutputStream o = new ObjectOutputStream(b);
-        o.writeObject(obj.toString());
-        return b.toByteArray();
-    }
+//    public static byte[] serialize(JsonObject obj) throws IOException {
+////        ByteArrayOutputStream b = new ByteArrayOutputStream();
+////        ObjectOutputStream o = new ObjectOutputStream(b);
+////        o.writeObject(obj.toString());
+////        return b.toByteArray();
+//    }
 
-    private static void put(String key, String value) {
+    private static void put(String key, BSONObject value) {
         Tuple tuple = new Tuple(value);
         if (remoteCache != null)
             remoteCache.put(remoteCache.getName() + ":" + key, tuple);
         else if (embeddedCache != null)
             embeddedCache.put(((Cache) embeddedCache).getName() + ":" + key, tuple);
-        else if (ensembleCache!=null)
-            ensembleCache.put( ensembleCache.getName() + ":" + key, tuple);
+        else if (ensembleCache!=null) {
+            EnsembleCacheUtils.putToCacheDirect(ensembleCache, ensembleCache.getName() + ":" + key, tuple);
+//            try {
+//                EnsembleCacheUtils.waitForAuxPuts();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+        }
         try {
             Thread.sleep(delay);
         } catch (InterruptedException e) {
