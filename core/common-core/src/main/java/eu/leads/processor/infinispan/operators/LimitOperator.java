@@ -99,7 +99,7 @@ import java.util.concurrent.ExecutionException;
                     Tuple t = tupleValue;
                     handlePagerank(t);
                     //                System.err.println(prefix+counter);
-                    EnsembleCacheUtils.putToCache(data, prefix + Integer.toString(counter), t);
+                    EnsembleCacheUtils.putToCacheDirect(data, prefix + Integer.toString(counter), t);
                     //                data.put(prefix + Integer.toString(counter), t.asString());
                 }
             } else {
@@ -111,7 +111,7 @@ import java.util.concurrent.ExecutionException;
                     String tupleId = entry.getKey().substring(entry.getKey().indexOf(":") + 1);
                     Tuple t = entry.getValue();
                     handlePagerank(t);
-                    EnsembleCacheUtils.putToCache(data, prefix + tupleId, t);
+                    EnsembleCacheUtils.putToCacheDirect(data, prefix + tupleId, t);
                     counter++;
                 }
                 iterable.close();
