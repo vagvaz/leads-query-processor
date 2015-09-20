@@ -35,6 +35,7 @@ import org.infinispan.server.hotrod.configuration.HotRodServerConfigurationBuild
 import org.infinispan.test.fwk.TestCacheManagerFactory;
 import org.infinispan.transaction.TransactionMode;
 import org.infinispan.transaction.lookup.JBossStandaloneJTAManagerLookup;
+import org.infinispan.util.concurrent.IsolationLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +48,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static org.infinispan.test.AbstractCacheTest.getDefaultClusteredCacheConfig;
 
@@ -264,10 +266,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getPersisentCache("leads.processor.catalog.indexesByColumn");
     getPersisentCache("leads.processor.databases.sub." + StringConstants.DEFAULT_DATABASE_NAME);
     getPersisentCache("batchputTest");
-    getInMemoryCache("batchputTest.compressed",4000);
+    getInMemoryCache("batchputTest.compressed", 4000);
 
     BatchPutListener batchPutListener = new BatchPutListener("batchputTest.compressed","batchputTest");
-    addListener(batchPutListener,"batchputTest.compressed");
+    addListener(batchPutListener, "batchputTest.compressed");
 
     putAdidasKeyWords(adidasKeywords);
     putUriDirData(uridirCache);
@@ -463,22 +465,23 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .clustering()
             .cacheMode(CacheMode.DIST_SYNC)
             .hash().numOwners(1)
-            .indexing().index(Index.NONE).transaction().transactionMode(
-            TransactionMode.NON_TRANSACTIONAL)
+            .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
             .persistence().passivation(false)
             .addStore(LevelDBStoreConfigurationBuilder.class)
-            .location("/tmp/leadsprocessor-data/leveldb/" + uniquePath + "/data/")
+            .location("/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/data/")
                 //                                 .location("/tmp/leveldb/data-foo/" + "/")
-            .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/expired/")
+            .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/expired/")
                 //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
             .implementationType(LevelDBStoreConfiguration.ImplementationType.AUTO)
-            .blockSize(blockSize*1024*1024)
+            .blockSize(blockSize * 1024 * 1024)
             .compressionType(CompressionType.SNAPPY)
-            .cacheSize(cacheSize*1024*1024)
+            .cacheSize(cacheSize * 1024 * 1024)
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
-            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-            false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
+            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(
+            maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
+            .locking().concurrencyLevel(1000).useLockStriping(false).isolationLevel(IsolationLevel.READ_COMMITTED).lockAcquisitionTimeout(500000,
+            TimeUnit.MILLISECONDS)
             .build();
       }
     } else { //do not use persistence
@@ -844,17 +847,19 @@ public class ClusterInfinispanManager implements InfinispanManager {
         .transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
         .persistence().passivation(false)
         .addStore(LevelDBStoreConfigurationBuilder.class)
-        .location("/tmp/leadsprocessor-data/" + uniquePath + "/data/")
+        .location("/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/data/")
             //                                 .location("/tmp/leveldb/data-foo/" + "/")
-        .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/expired/")
+        .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/expired/")
             //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
         .implementationType(LevelDBStoreConfiguration.ImplementationType.JNI)
         .blockSize(blockSize * 1024 * 1024).compressionType(compressionType)
         .cacheSize(cacheSize * 1024 * 1024)
         .fetchPersistentState(true)
         .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
-        .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-            false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
+        .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(maxEntries).strategy(
+            EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
+        .locking().concurrencyLevel(1000).useLockStriping(false).isolationLevel(
+            IsolationLevel.READ_COMMITTED).lockAcquisitionTimeout(500000, TimeUnit.MILLISECONDS)
         .build();
     manager.defineConfiguration(cacheName, configuration);
     Cache startedCache = manager.getCache(cacheName);
@@ -932,13 +937,12 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .clustering()
             .cacheMode(CacheMode.DIST_SYNC)
             .hash().numOwners(1)
-            .indexing().index(Index.NONE).transaction().transactionMode(
-                TransactionMode.NON_TRANSACTIONAL)
+            .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
             .persistence().passivation(false)
             .addStore(LevelDBStoreConfigurationBuilder.class)
-            .location("/tmp/leadsprocessor-data/leveldb/" + uniquePath + "/data/")
+            .location("/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/data/")
                 //                                 .location("/tmp/leveldb/data-foo/" + "/")
-            .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/expired/")
+            .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/expired/")
                 //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
             .implementationType(LevelDBStoreConfiguration.ImplementationType.JNI)
             .blockSize(blockSize * 1024 * 1024)
@@ -946,9 +950,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .cacheSize(cacheSize * 1024 * 1024)
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
-            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-                false).eviction().maxEntries(maxEntries).strategy(
-                EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
+            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(
+                maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
+            .locking().concurrencyLevel(1000).useLockStriping(false).isolationLevel(
+                IsolationLevel.READ_COMMITTED).lockAcquisitionTimeout(500000, TimeUnit.MILLISECONDS)
             .build();
       }
     } else { //do not use persistence
@@ -967,25 +972,21 @@ public class ClusterInfinispanManager implements InfinispanManager {
 //      initDefaultCacheConfig();
 //    }
     defaultIndexConfig = new ConfigurationBuilder() //.read(manager.getDefaultCacheConfiguration())
-        .clustering()
-        .cacheMode(CacheMode.LOCAL)
-        .indexing().index(Index.LOCAL).transaction().transactionMode(
-            TransactionMode.NON_TRANSACTIONAL)
-        .persistence().passivation(false)
-        .addStore(LevelDBStoreConfigurationBuilder.class)
-        .location("/tmp/leadsprocessor-data/leveldb/" + uniquePath + "/data/")
+        .clustering().cacheMode(CacheMode.LOCAL)
+        .indexing().index(Index.LOCAL).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).persistence()
+        .passivation(false).addStore(LevelDBStoreConfigurationBuilder.class).location(
+            "/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/data/")
             //                                 .location("/tmp/leveldb/data-foo/" + "/")
-        .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/expired/")
+        .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/expired/")
             //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
         .implementationType(LevelDBStoreConfiguration.ImplementationType.JNI)
-        .blockSize(blockSize * 1024 * 1024)
-        .compressionType(compressionType)
-        .cacheSize(cacheSize * 1024 * 1024)
-        .fetchPersistentState(true)
-        .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
-        .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-            false).eviction().maxEntries(maxEntries).strategy(
+        .blockSize(blockSize * 1024 * 1024).compressionType(compressionType)
+        .cacheSize(cacheSize * 1024 * 1024).fetchPersistentState(true).shared(false).purgeOnStartup(false).preload(
+            false).compatibility().enable()//.marshaller(new TupleMarshaller())
+        .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(maxEntries).strategy(
             EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
+        .locking().concurrencyLevel(1000).useLockStriping(false).isolationLevel(
+            IsolationLevel.READ_COMMITTED).lockAcquisitionTimeout(500000, TimeUnit.MILLISECONDS)
         .build();
 //    defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).clustering()
 //        .cacheMode(CacheMode.LOCAL).transaction()
