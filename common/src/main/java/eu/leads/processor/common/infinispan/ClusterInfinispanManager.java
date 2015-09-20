@@ -1049,7 +1049,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       cacheConfig =  new ConfigurationBuilder().read(defaultIndexConfig).transaction()
           .transactionMode(TransactionMode.NON_TRANSACTIONAL).persistence().passivation(false).indexing().index(Index.LOCAL).addProperty("default.directory_provider", "filesystem")
           .addProperty("hibernate.search.default.indexBase", "/tmp/leadsprocessor-data/" + uniquePath + "/infinispan/" + cacheName + "/")
-          .addProperty("hibernate.search.default.exclusive_index_use", "false")
+          .addProperty("hibernate.search.default.exclusive_index_use", "true")
           .addProperty("hibernate.search.default.indexmanager", "near-real-time")
           .addProperty("hibernate.search.default.indexwriter.ram_buffer_size",Integer.toString(indexwriter_ram_buffer_size))
           .addProperty("lucene_version", "LUCENE_CURRENT").build();
