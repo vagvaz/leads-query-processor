@@ -43,7 +43,8 @@ public abstract class BasicOperator extends Thread implements Operator{
   protected InfinispanManager manager;
   protected Node com;
   protected Cache statisticsCache;
-  protected LogProxy log;
+  protected Logger log;
+  protected LogProxy logg;
   protected JsonObject globalConfig;
   protected Set<String> pendingMMC;
   protected Set<String> pendingRMC;
@@ -73,15 +74,17 @@ public abstract class BasicOperator extends Thread implements Operator{
     this.action = action;
     profOperator = new ProfileEvent("Operator- " + this.getClass().toString(),profilerLog);
     reduceLocal = action.getData().getObject("operator").containsField("reduceLocal");
+    log = LoggerFactory.getLogger(this.getClass());
   }
-  protected BasicOperator(Node com, InfinispanManager manager,LogProxy log,Action action){
+  protected BasicOperator(Node com, InfinispanManager manager,LogProxy logProxy,Action action){
     super(com.getId()+"-"+action.getId() + "-basic-operator-thread-"+UUID.randomUUID().toString());
+    log = LoggerFactory.getLogger(this.getClass());
     EngineUtils.initialize();
     System.err.println(this.getClass().getCanonicalName());
     mcResults = new HashMap<>();
     this.com = com;
     this.manager = manager;
-    this.log = log;
+    this.logg = logProxy;
     this.action = action;
     this.conf = action.getData().getObject("operator").getObject("configuration");
     isRemote = action.asJsonObject().containsField("remote");
@@ -152,11 +155,11 @@ public abstract class BasicOperator extends Thread implements Operator{
   }
 
   public LogProxy getLog() {
-    return log;
+    return logg;
   }
 
   public void setLog(LogProxy log) {
-    this.log = log;
+    this.logg = log;
   }
 
   public JsonObject getGlobalConfig() {
@@ -1134,7 +1137,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       throws ExecutionException, InterruptedException {
     int size = futures.size();
     int threshold = 3;
-    long timeout = 30;
+    long timeout = 60;
     long minimumTime = 60000;
     long start  = -1;
     long dur = 0;
@@ -1151,7 +1154,13 @@ public abstract class BasicOperator extends Thread implements Operator{
           try{
 //          System.err.println("Checking if done "+ counter++ +":" + future.toString() + " for " + callable.getClass().toString() +"in op " + getName() );
             profilerLog.error("Checking if done "+ counter++ +":" + future.toString() + " for " + callable.getClass().toString() +"in op " + getName() );
-            String result = future.get(timeout,TimeUnit.SECONDS);
+            String result = null;
+            if(counter > 0)
+            {
+              result = future.get(timeout,TimeUnit.SECONDS);
+            }else{
+              result = future.get(5*timeout,TimeUnit.SECONDS);
+            }
             System.err.println(callable.getClass().toString() + " Completed on " + result + " " + getName());
             profilerLog.error(callable.getClass().toString() + " Completed on " + result + " " + getName());
           resultIterator.remove();
@@ -1160,7 +1169,9 @@ public abstract class BasicOperator extends Thread implements Operator{
 //            System.err.println("Future is not done yet " + ((start < 0) ? "next cancel in inf " : (" next cancel at "+ Long.toString(
 //                (long) (1.3 * Math.max(minimumTime,lastEnd-begin)))) ) );
             if(start < 0 ) {
-              profilerLog.error("Future is not done yet " + "next cancel in inf ");
+              if(counter == 0){
+                profilerLog.error("Future is not done yet " + "next cancel in inf ");
+              }
             }else{
                   profilerLog.error(" next cancel at " + Long.toString((long) (1.3 * Math.max(minimumTime, lastEnd - begin))));
                   System.err.println(" next cancel at " + Long.toString((long) (1.3 * Math.max(minimumTime, lastEnd - begin))));

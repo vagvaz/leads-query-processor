@@ -139,7 +139,7 @@ public class GoraInputHandler implements InputHandler<String, WebPage> {
         if (offset + batchSize < totalResults) {
             currentResult = issueQuery(offset, batchSize);
         } else {
-            currentResult = issueQuery(offset, totalResults - offset+1);
+            currentResult = issueQuery(offset, totalResults - offset);
         }
         return currentResult;
     }
@@ -203,21 +203,8 @@ public class GoraInputHandler implements InputHandler<String, WebPage> {
                     numberOfValues++;
                     return new AbstractMap.SimpleEntry<String, WebPage>(page.getUrl(), page);
                 } else if (listOfResults.size() > 0) {
-
-                    while(currentResult != null){
-                        if(listOfResults.size() > 0){
-                            currentResult = listOfResults.remove(0);
-                            currentResult = listOfResults.remove(0);
-                            if(currentResult.next()){
-                                WebPage page = (WebPage) currentResult.get();
-                                numberOfValues++;
-                                return new AbstractMap.SimpleEntry<String, WebPage>(page.getUrl(), page);
-                            }
-                        }
-                        readNextBatch();
-                        return next();
-
-                    }
+                    currentResult = listOfResults.remove(0);
+                    return next();
                 } else {
                     if (hasNext()) {
                         readNextBatch();

@@ -44,7 +44,8 @@ public class SyncPutRunnable implements Runnable {
                         cache.put(key, value);
                     }
                     else{
-                        ((Cache)cache).getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).put(key,value);
+//                        ((Cache)cache).getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).put(key,value);
+                        cache.put(key, value);
                     }
 //                    System.err.println("AFT PUT-----Key: " + key + "--Size:" + value.toString().length());
 //                    System.out.println("AFT PUT-----Key: " + key + "--Size:" + value.toString().length());
@@ -61,9 +62,14 @@ public class SyncPutRunnable implements Runnable {
                     if(retries ==0)
                     {
                         System.err.println("puting key " + key + " into " + cache.getName() + " FAILED ");
-                        logger.error("puting key " + key + " into " + cache.getName() + " FAILED ");
+                        logger.error("PUTFAILED: puting key " + key + " into " + cache.getName() + " FAILED ");
                     }
                     retries--;
+                    try {
+                        Thread.sleep(2);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
                 }
 
             }

@@ -12,6 +12,7 @@ import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.ensemble.cache.distributed.HashBasedPartitioner;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by vagvaz on 8/31/15.
@@ -37,7 +38,7 @@ public class BatchPutMain {
     private static int numberOfvalues = 13;
     private static HashMap<String,Integer> histogram;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
         clouds.put("dresden2",dresden2);
         clouds.put("dd1a",dd1a);
         clouds.put("dd2c",dd2c);

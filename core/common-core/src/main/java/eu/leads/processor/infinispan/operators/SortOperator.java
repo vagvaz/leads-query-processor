@@ -2,6 +2,7 @@ package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.TupleComparator;
@@ -47,8 +48,8 @@ public class SortOperator extends BasicOperator {
   private LeadsMapper<String,String,String,String> mapper;
 
 
-  public SortOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
-    super(com, persistence, log, action);
+  public SortOperator(Node com, InfinispanManager persistence,LogProxy logg, Action action) {
+    super(com, persistence, logg, action);
     JsonArray sortKeys = conf.getObject("body").getArray("sortKeys");
     Iterator<Object> sortKeysIterator = sortKeys.iterator();
     sortColumns = new String[sortKeys.size()];
@@ -184,9 +185,9 @@ public class SortOperator extends BasicOperator {
       log.error("LGSORT: "+ getOutput() + ".addresses");
       Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
       System.err.println("creating " + getOutput() + ".addresses to "+ currentCluster);
-      createCache(currentCluster, getOutput() + ".addresses", "batchputlistener");
+      createCache(currentCluster, getOutput() + ".addresses", "batchputListener");
       System.err.println("creating " + getOutput() + ".addresses to " + coordinator);
-      createCache(coordinator,getOutput()+".addresses","batchputlistener");
+      createCache(coordinator,getOutput()+".addresses","batchputListener");
       //         manager.getPersisentCache();
       createCache(coordinator, prefix + "." + currentCluster + "." + manager.getMemberName().toString(),
           "batchputListener");
@@ -206,14 +207,14 @@ public class SortOperator extends BasicOperator {
 
       Set<String> targetMC = getTargetMC();
       for (String mc : targetMC) {
-        createCache(mc, getOutput(),"batchputListener");
+        createCache(mc, getOutput(),"batchputlistener");
         System.err.println("in local creating ---" + getOutput() + ".addresses to " + mc);
-        createCache(mc,getOutput()+".addresses","batchputlistener");
+        createCache(mc,getOutput()+".addresses","batchputListener");
       }
       System.err.println("in local creating " + getOutput() + ".addresses to "+ currentCluster);
       log.error("LGSORT: COORD"+ getOutput() + ".addresses");
       Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
-      createCache(currentCluster, getOutput() + ".addresses", "batchputlistener");
+      createCache(currentCluster, getOutput() + ".addresses", "batchputListener");
     }
   }
 
@@ -256,7 +257,15 @@ public class SortOperator extends BasicOperator {
     emanager.start();
     SortMerger2 merger = new SortMerger2(addresses, getOutput(),comparator,manager,emanager,conf,getRowcount());
     merger.merge();
-    EnsembleCacheUtils.waitForAllPuts();
+    try {
+      EnsembleCacheUtils.waitForAllPuts();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+      PrintUtilities.logStackTrace(log,e.getStackTrace());
+    } catch (ExecutionException e) {
+      e.printStackTrace();
+      PrintUtilities.logStackTrace(log, e.getStackTrace());
+    }
   }
 
   @Override

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 //import eu.leads.processor.plan.ExecutionPlanNode;
 //import eu.leads.processor.sql.PlanNode;
@@ -116,7 +117,15 @@ import java.util.Set;
                 iterable.close();
 
             }
-            EnsembleCacheUtils.waitForAllPuts();
+            try {
+                EnsembleCacheUtils.waitForAllPuts();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                PrintUtilities.logStackTrace(log,e.getStackTrace());
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+                PrintUtilities.logStackTrace(log, e.getStackTrace());
+            }
             replyForSuccessfulExecution(action);
         }
 

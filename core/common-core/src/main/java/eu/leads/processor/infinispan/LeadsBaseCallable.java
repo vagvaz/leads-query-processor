@@ -38,7 +38,7 @@ import java.util.*;
  */
 public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
-  DistributedCallable<K, V, String>, Serializable {
+    DistributedCallable<K, V, String>, Serializable {
   protected String configString;
   protected String output;
   transient protected JsonObject conf;
@@ -56,8 +56,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   long end = 0;
 
   //  transient protected RemoteCache outputCache;
-//  transient protected RemoteCache ecache;
-//  transient protected RemoteCacheManager emanager;
+  //  transient protected RemoteCache ecache;
+  //  transient protected RemoteCacheManager emanager;
   transient protected EnsembleCacheManager emanager;
   transient protected EnsembleCache ecache;
   transient Logger profilerLog;
@@ -79,11 +79,11 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   }
 
 
-//  public static RemoteCacheManager createRemoteCacheManager() {
-//    ConfigurationBuilder builder = new ConfigurationBuilder();
-//    builder.addServer().host(LQPConfiguration.getConf().getString("node.ip")).port(11222);
-//    return new RemoteCacheManager(builder.build());
-//  }
+  //  public static RemoteCacheManager createRemoteCacheManager() {
+  //    ConfigurationBuilder builder = new ConfigurationBuilder();
+  //    builder.addServer().host(LQPConfiguration.getConf().getString("node.ip")).port(11222);
+  //    return new RemoteCacheManager(builder.build());
+  //  }
   @Override public void setEnvironment(Cache<K, V> cache, Set<K> inputKeys) {
     profilerLog  = LoggerFactory.getLogger("###PROF###" +  this.getClass().toString());
     profCallable.setProfileLogger(profilerLog);
@@ -94,7 +94,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       profCallable = new ProfileEvent("setEnvironment Callable " + this.getClass().toString(),profilerLog);
     embeddedCacheManager = cache.getCacheManager();
     imanager = new ClusterInfinispanManager(embeddedCacheManager);
-//    outputCache = (Cache) imanager.getPersisentCache(output);
+    //    outputCache = (Cache) imanager.getPersisentCache(output);
     keys = inputKeys;
     this.inputCache = cache;
     ProfileEvent tmpprofCallable = new ProfileEvent("setEnvironment manager " + this.getClass().toString(),profilerLog);
@@ -109,10 +109,10 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       System.err.println("EnsembleHost EXIST " + ensembleHost);
       emanager = new EnsembleCacheManager(ensembleHost);
       EnsembleCacheUtils.initialize(emanager);
-//      emanager.start();
-//      emanager = createRemoteCacheManager();
-//      ecache = emanager.getCache(output,new ArrayList<>(emanager.sites()),
-//          EnsembleCacheManager.Consistency.DIST);
+      //      emanager.start();
+      //      emanager = createRemoteCacheManager();
+      //      ecache = emanager.getCache(output,new ArrayList<>(emanager.sites()),
+      //          EnsembleCacheManager.Consistency.DIST);
     }
     else {
       profilerLog.error("EnsembleHost NULL");
@@ -120,31 +120,31 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       tmpprofCallable.start("Start EnsemlbeCacheManager");
       emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
       EnsembleCacheUtils.initialize(emanager);
-//      emanager.start();
-//            emanager = createRemoteCacheManager();
+      //      emanager.start();
+      //            emanager = createRemoteCacheManager();
     }
     emanager.start();
 
     tmpprofCallable.end();
     tmpprofCallable.start("Get cache ");
     ecache = emanager.getCache(output,new ArrayList<>(emanager.sites()),
-          EnsembleCacheManager.Consistency.DIST);
+        EnsembleCacheManager.Consistency.DIST);
     tmpprofCallable.end();
-      outputCache = ecache;
-//outputCache =  emanager.getCache(output,new ArrayList<>(emanager.sites()),
-//          EnsembleCacheManager.Consistency.DIST);
+    outputCache = ecache;
+    //outputCache =  emanager.getCache(output,new ArrayList<>(emanager.sites()),
+    //          EnsembleCacheManager.Consistency.DIST);
 
     initialize();
     profCallable.end("end_setEnv");
 
-//    long start = System.currentTimeMillis();
-//    executor = new ThreadPoolExecutor(threadBatch,5*threadBatch,5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
-//    runnables = new ConcurrentLinkedDeque<>();
-//    for (int i = 0; i <= 50*threadBatch; i++) {
-//      runnables.add(new ExecuteRunnable(this));
-//    }
-//    long end  = System.currentTimeMillis();
-//    System.err.println("runnables created in " + (end-start));
+    //    long start = System.currentTimeMillis();
+    //    executor = new ThreadPoolExecutor(threadBatch,5*threadBatch,5000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
+    //    runnables = new ConcurrentLinkedDeque<>();
+    //    for (int i = 0; i <= 50*threadBatch; i++) {
+    //      runnables.add(new ExecuteRunnable(this));
+    //    }
+    //    long end  = System.currentTimeMillis();
+    //    System.err.println("runnables created in " + (end-start));
     start = System.currentTimeMillis();
     EngineUtils.initialize();
   }
@@ -157,7 +157,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     }
     profCallable.start("Call getComponent ()");
     final ClusteringDependentLogic cdl = inputCache.getAdvancedCache().getComponentRegistry().getComponent
-                                                                                    (ClusteringDependentLogic.class);
+        (ClusteringDependentLogic.class);
     String compressedCacheName = inputCache.getName() +".compressed";
     if(inputCache.getCacheManager().cacheExists(compressedCacheName))
     {
@@ -172,7 +172,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     }
     int count = 0;
     profCallable.end();
-//    ProfileEvent profExecute = new ProfileEvent("Buildinglucece" + this.getClass().toString(), profilerLog);
+    //    ProfileEvent profExecute = new ProfileEvent("Buildinglucece" + this.getClass().toString(), profilerLog);
 
     if(indexCaches!=null)
       if(indexCaches.size()>0) {
@@ -180,53 +180,53 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         long start=System.currentTimeMillis();
         luceneKeys = createLuceneQuerys(indexCaches, tree.getRoot());
         System.out.println(" time: " + (System.currentTimeMillis() - start) / 1000.0);
-//        profExecute.end();
+        //        profExecute.end();
       }
 
     if(luceneKeys ==null) {
       profCallable.start("Iterate Over Local Data");
       System.out.println("Iterate Over Local Data");
 
-//      profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(), profilerLog);
+      //      profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(), profilerLog);
 
-//    for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
-//      if (!cdl.localNodeIsPrimaryOwner(key))
-//        continue;
-    Object filter = new LocalDataFilter<K,V>(cdl);
-    CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(
-        (KeyValueFilter<? super K, ? super V>) filter);
-//        .converter((Converter<? super K, ? super V, ?>) filter);
-//    profExecute.end();
-//    profExecute.start("ISPNIter");
-    try {
+      //    for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
+      //      if (!cdl.localNodeIsPrimaryOwner(key))
+      //        continue;
+      Object filter = new LocalDataFilter<K,V>(cdl);
+      CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(
+          (KeyValueFilter<? super K, ? super V>) filter);
+      //        .converter((Converter<? super K, ? super V, ?>) filter);
+      //    profExecute.end();
+      //    profExecute.start("ISPNIter");
+      try {
 
-      for (Object object : iterable) {
-//        profExecute.end();
-        Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
+        for (Object object : iterable) {
+          //        profExecute.end();
+          Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
 
-        //      V value = inputCache.get(key);
-        K key = (K) entry.getKey();
-        V value = (V) entry.getValue();
+          //      V value = inputCache.get(key);
+          K key = (K) entry.getKey();
+          V value = (V) entry.getValue();
 
-        if (value != null) {
-//          profExecute.start("ExOn" + (++count));
-//          ExecuteRunnable runable = EngineUtils.getRunnable();
-//          runable.setKeyValue(key, value,this);
-//          EngineUtils.submit(runable);
-          executeOn((K) key, value);
-//          profExecute.end();
-	}
-//         profExecute.start("ISPNIter");
+          if (value != null) {
+            //          profExecute.start("ExOn" + (++count));
+            //          ExecuteRunnable runable = EngineUtils.getRunnable();
+            //          runable.setKeyValue(key, value,this);
+            //          EngineUtils.submit(runable);
+            executeOn((K) key, value);
+            //          profExecute.end();
+          }
+          //         profExecute.start("ISPNIter");
+        }
+        iterable.close();
       }
-      iterable.close();
-      }
-	catch(Exception e){
+      catch(Exception e){
         iterable.close();
         profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
         PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
-    }
+      }
     }else{
-//      profCallable.start("Search_Over_Indexed_Data");
+      //      profCallable.start("Search_Over_Indexed_Data");
       System.out.println("Search Over Indexed Data");
 
 
@@ -239,7 +239,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         qualinfo l=(qualinfo)luceneKeys;
         keys=getLuceneSet(l);
         System.out.println(" time: " + (System.currentTimeMillis() - start) / 1000.0);
-//        profExecute.end();
+        //        profExecute.end();
       } else if(luceneKeys instanceof HashSet)
         keys=(HashSet<LeadsIndex>)luceneKeys;
 
@@ -252,9 +252,9 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
           K key = (K) lst.getKeyName();
           V value = inputCache.get(key);
           if (value != null) {
-//            profExecute.start("ExOn" + (++count));
+            //            profExecute.start("ExOn" + (++count));
             executeOn(key, value);
-//            profExecute.end();
+            //            profExecute.end();
           }
         }
         System.out.println(" Indexed Results processed, Clear keys");
@@ -266,7 +266,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
       }
     }
-//    profCallable.end();
+    //    profCallable.end();
     finalizeCallable();
     System.err.println("LAST LINE OF " + this.getClass().toString() + " "+embeddedCacheManager.getAddress().toString() + " ----------- END");
     profilerLog.error("LAST LINE OF " + this.getClass().toString() + " "+embeddedCacheManager.getAddress().toString() + " ----------- END");
@@ -284,18 +284,18 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   @Override public void finalizeCallable(){
     try {
       profCallable.start("finalizeBaseCallable");
-      EngineUtils.waitForAllExecute();
+      //      EngineUtils.waitForAllExecute();
       EnsembleCacheUtils.waitForAllPuts();
       emanager.stop();
       ecache = null;
-//
-//      ecache.stop();
-//      outputCache.stop();
+      //
+      //      ecache.stop();
+      //      outputCache.stop();
     }catch(Exception e){
-        System.err.println("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage() + " cause ");
+      System.err.println("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage() + " cause ");
       profilerLog.error(("LEADS Base callable "+e.getClass().toString()+ " " + e.getMessage() + " cause "));
-       PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
-      }
+      PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
+    }
     profCallable.end("finalizeBaseCallable");
     end = System.currentTimeMillis();
     profilerLog.error("LBDISTEXEC: " + this.getClass().toString() + " run for " + (end-start) + " ms");
@@ -485,7 +485,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         default:
           FilterOpType t = root.getType();
           if (t == FilterOpType.EQUAL || t == FilterOpType.LIKE || t == FilterOpType.GEQ || t == FilterOpType.GTH
-                  || t == FilterOpType.LEQ || t == FilterOpType.LTH) {
+              || t == FilterOpType.LEQ || t == FilterOpType.LTH) {
             if (left != null && right != null)
               return new qualinfo(t,left,right);
 
@@ -568,16 +568,16 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
             return  ret;
           }
           else
-            if(hleft.size()<hright.size()) {
-              hleft.retainAll(hright);
-              hright.clear();
-              return hleft;
-            }else
-            {
-              hright.retainAll(hleft);
-              hleft.clear();
-              return hright;
-            }
+          if(hleft.size()<hright.size()) {
+            hleft.retainAll(hright);
+            hright.clear();
+            return hleft;
+          }else
+          {
+            hright.retainAll(hleft);
+            hleft.clear();
+            return hright;
+          }
         }
         //System.out.println("Fix AND with multiple indexes");
       }
@@ -620,10 +620,10 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
         return  getSubLucene(indexCaches, root);
 
       }
-//			if (left != null)
-//				result.addAll(left);
-//			if (right != null)
-//				result.addAll(right);
+      //			if (left != null)
+      //				result.addAll(left);
+      //			if (right != null)
+      //				result.addAll(right);
     }
     return (((HashSet)result).isEmpty()) ? null : result;
   }

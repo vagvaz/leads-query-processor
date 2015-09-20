@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by vagvaz on 05/13/15.
@@ -342,7 +343,13 @@ public class LoadAmplab2 {
             }
             keyReader.close();
             System.out.println("File Closed. Wait For All Puts");
-            EnsembleCacheUtils.waitForAllPuts();
+            try {
+                EnsembleCacheUtils.waitForAllPuts();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
             System.out.println("File Imprt AvgRate(t/s): " + (numofEntries - loaded_tuples.get(tableName)) / ((System.currentTimeMillis() - currentStartTime) / 1000.0) + " Imported: " + numofEntries + "size: " + sizeE + " Avg tpl size: " + sizeE/(numofEntries - loaded_tuples.get(tableName))+ " file: " + csvfile);
 
             loaded_tuples.put(tableName, numofEntries);

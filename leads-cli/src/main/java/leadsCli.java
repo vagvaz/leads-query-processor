@@ -196,9 +196,10 @@ public class leadsCli {
     if (currentStatus.getStatus().equals("COMPLETED")) {
       resultCompleted = System.currentTimeMillis();
       System.out.println("Execution  time: " + (resultCompleted - submittime) + " ms.");
-      if(noResults)
+      if(noResults) {
         System.out.printf("Disabled results acquisition. Use \"printresults\" command to enable.");
-      else{
+        QueryResults res = WebServiceClient.getQueryResults(currentStatus.getId(), -1, -1);
+      }else{
         System.out.printf("Please wait ... getting results. ");
         QueryResults res = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
         resultArrived = System.currentTimeMillis();

@@ -3,6 +3,8 @@ package eu.leads.processor.common.infinispan;
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.distexec.DistributedCallable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -18,7 +20,7 @@ public class StartCacheCallable<K, V> implements DistributedCallable<K, V, Void>
     private transient Cache<K, V> cache;
     private boolean isIndexed = false;
     private boolean isPersistent = true;
-
+    private transient Logger log;
     public StartCacheCallable(String cacheName) {
         this.cacheName = cacheName;
         //        this.configuration = configuration;
@@ -41,7 +43,7 @@ public class StartCacheCallable<K, V> implements DistributedCallable<K, V, Void>
     public Void call() throws Exception {
         //        cache.getCacheManager().defineConfiguration(cacheName);
         //        cache.getCacheManager().defineConfiguration(cacheName, new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_ASYNC).async().l1().lifespan(100000L).hash().numOwners(3).build());
-
+        log = LoggerFactory.getLogger(StartCacheCallable.class);
 
         ClusterInfinispanManager manager = new ClusterInfinispanManager(cache.getCacheManager());
         if(manager.getCacheManager().cacheExists(cacheName)){
@@ -57,6 +59,10 @@ public class StartCacheCallable<K, V> implements DistributedCallable<K, V, Void>
         else {
             if(isPersistent) {
                 configuration = manager.getIndexedCacheDefaultConfiguration(cacheName);
+                if(configuration.clustering().cacheMode().isClustered()){
+                    System.err.println("\n\n\nPROBLEM INDEXED CACHE IS CLUSTERED\n\n\n");
+                    log.error("INDEX: " + cacheName + " IS NOT LOCAL");
+                }
             }
             else{
                 configuration = manager.getInMemoryConfiguration(cacheName, entries);

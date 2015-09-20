@@ -14,15 +14,18 @@ import java.util.*;
  */
 public class PushData {
     private static int delay;
+    private static int skip = 0;
 
     public static void main(String[] args) {
         OutputHandler dummy = new DummyOutputHandler();
         LQPConfiguration.initialize();
-        List<String> desiredDomains = new ArrayList<>();
-        for(Object domain : LQPConfiguration.getInstance().getConfiguration().getList("ignorelist")){
+        List<Object> configList = LQPConfiguration.getInstance().getConfiguration().getList("ignorelist");
+        String[] desiredDomains = new String[configList.size()];
+        int index = 0;
+        for(Object domain : configList){
             String uri = (String)domain;
             String nutchUri = (uri);
-            desiredDomains.add(nutchUri);
+            desiredDomains[index++]=nutchUri;
         }
 
         //        InputHandler inputHandler = new GoraInputHandler();
@@ -72,6 +75,10 @@ public class PushData {
             System.out.println("Using delay");
         }
 
+        if(args.length > 4) {
+            skip = Integer.parseInt(args[4]);
+            System.out.println("skip " + skip);
+        }
         OutputHandler outputHandler = new CacheOutputHandler();
         outputHandler.initialize(outputConfig);
 
@@ -97,6 +104,10 @@ public class PushData {
             if (processed % 100 == 0) {
                 System.err.println("processed " + processed);
             }
+            if(skip > 0) {
+                skip--;
+                continue;
+            }
             //            Map.Entry<String,GenericData.Record> entry = (Map.Entry<String, GenericData.Record>) inputHandler.next();
             //            if(entry != null)
             //           System.err.println("key: " + entry.getKey() + " value " + entry.getValue().toString() +"\ncontent ==" + );
@@ -110,7 +121,7 @@ public class PushData {
                 //                outputHandler2.append(tuple.getAttribute("url"), new JsonObject(tuple.toString()).encodePrettily());
                 //                outputHandler3.append(entry.getValue().get(entry.getValue().getSchema().getField("url").pos()).toString(), entry.getValue().toString());
                 String key_url = tuple.getAttribute("default.webpages.url");
-                if (!StringUtils.startsWithAny(key_url, (String[]) desiredDomains.toArray())){
+                if (!StringUtils.startsWithAny(key_url, desiredDomains)){
                     rejected++;
                     if (rejected % 100 == 0) {
                         System.err.println("rejected " + rejected);

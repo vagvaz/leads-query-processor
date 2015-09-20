@@ -12,6 +12,7 @@ import org.infinispan.context.Flag;
 import org.infinispan.filter.KeyValueFilter;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by vagvaz on 16/07/15.
@@ -144,7 +145,13 @@ System.err.println(dataCache.size());
     }
 
     private void flush() {
-        EnsembleCacheUtils.waitForAllPuts();
+        try {
+            EnsembleCacheUtils.waitForAllPuts();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void initTuple(){
