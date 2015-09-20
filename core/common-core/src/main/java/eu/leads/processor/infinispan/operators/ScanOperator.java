@@ -63,8 +63,8 @@ public class ScanOperator extends BasicOperator {
 				System.err.println(conf.getString("next.type") + " SCAN NOT IMPLEMENTED YET");
 			}
 		}
-
 		if(conf.getObject("body").containsField("versionStart"))
+		if(conf.getObject("body").getInteger("versionStart")>0)
 		{
 			System.out.println("TS Version found.");
 			int Start =conf.getObject("body").getInteger("versionStart");
@@ -102,14 +102,16 @@ public class ScanOperator extends BasicOperator {
 				body.putObject("datum", datum);
 				body.putString("type", "CONST");
 				rightExpr.putString("type", "CONST");
-				rightExpr.putObject("object", body);
+				rightExpr.putObject("body", body);
 
 
 				JsonObject leftExpr = new JsonObject();
 				body = new JsonObject();
+
 				body.putObject("column", columnjson);
 				body.putNumber("fieldId", -1);
 				body.putString("type", "FIELD");
+
 				leftExpr.putString("type", "FIELD");
 				leftExpr.putObject("body",body);
 
@@ -118,18 +120,18 @@ public class ScanOperator extends BasicOperator {
 				body.putObject("leftExpr", leftExpr);
 				body.putObject("rightExpr", rightExpr);
 				body.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
-				qual.putObject("body", body);
 				qual.putString("type", "GEQ");
-				qual.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
+				qual.putObject("body", body);
+				//qual.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
 
 				body = new JsonObject();
 				body.putString("type", "AND");
-				body.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
 				body.putObject("leftExpr", qual);
+				body.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
 				qual= new JsonObject();
-				qual.putObject("body", body);
 				qual.putString("type", "AND");
-				qual.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
+				qual.putObject("body", body);
+				//qual.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
 
 				//leftExpr=qual;
 				//qual=new JsonObject();
@@ -144,10 +146,10 @@ public class ScanOperator extends BasicOperator {
 				body.putNumber("val", Finish);
 				datum.putObject("body", body);
 				body = new JsonObject();
-				body.putObject("datum", datum);
 				body.putString("type", "CONST");
+				body.putObject("datum", datum);
 				rightExpr.putString("type", "CONST");
-				rightExpr.putObject("object", body);
+				rightExpr.putObject("body", body);
 
 
 //				leftExpr = new JsonObject();
@@ -158,14 +160,14 @@ public class ScanOperator extends BasicOperator {
 //				leftExpr.putString("type", "FIELD");
 
 				body = new JsonObject();
-				body.putString("type","LEQ");
+				body.putString("type", "LEQ");
 				body.putObject("leftExpr", leftExpr);
 				body.putObject("rightExpr", rightExpr);
 				body.putObject("returnType",new JsonObject().putString("type","BOOLEAN"));
 				rightExpr=new JsonObject();
-				rightExpr.putObject("body",body);
 				rightExpr.putString("type", "LEQ");
-				rightExpr.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
+				rightExpr.putObject("body",body);
+				//rightExpr.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
 				qual.getObject("body").putObject("rightExpr",rightExpr);
 
 
@@ -177,22 +179,24 @@ public class ScanOperator extends BasicOperator {
 
 					body = new JsonObject();
 					body.putString("type", "AND");
-					body.putObject("leftExpr", qual);
-					body.putObject("rightExpr", rightExpr);
+					body.putObject("leftExpr",rightExpr );
+					body.putObject("rightExpr",qual );
 					body.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
 					qual = new JsonObject();
-					qual.putObject("body", body);
+
 					qual.putString("type", "AND");
-					qual.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
+					qual.putObject("body", body);
+					//qual.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
 				}
 				//Create the qual
-				conf.getObject("body").putObject("qual",qual);
+				conf.getObject("body").putObject("qual", qual);
 
-				System.out.println("Create Qual :D : " + qual.encodePrettily());
+				System.out.println("Create Qual :D : " + conf.getObject("body").encodePrettily());
 			}
 		}else{
 			System.out.println("No version.");
 		}
+		System.out.println("Create Qual :D : " + conf.getObject("body").encodePrettily());
 		ProfileEvent scanExecute = new ProfileEvent("OperatorcheckIndex_usage", profilerLog);
 		if (checkIndex_usage())
 			conf.putBoolean("useIndex", true);
