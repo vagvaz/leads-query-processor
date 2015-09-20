@@ -435,7 +435,16 @@ public class ComponentControlVerticle extends Verticle implements Component {
             } else {
                 log.error(componentType + "." + id + " received kill command but mode is  "
                         + mode.toString());
-            }
+            }com.sendToGroup(workQueueAddress, action.asJsonObject());
+            com.unsubscribeFromAll();
+            vertx.setTimer(4000, new Handler<Long>() {
+                @Override
+                public void handle(Long aLong) {
+                    System.out.println(" Control component Stopping ");
+                    vertx.stop();
+                    //System.exit(0);
+                }
+            });
         } else {
             log.error(componentType + "." + id + " received kill command but mode is null, stopping anyway ");
             com.sendToGroup(workQueueAddress, action.asJsonObject());
