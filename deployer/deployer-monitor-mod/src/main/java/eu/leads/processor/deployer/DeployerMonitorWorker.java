@@ -8,6 +8,8 @@ import eu.leads.processor.core.net.DefaultNode;
 import eu.leads.processor.core.net.MessageUtils;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.nqe.NQEConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
@@ -29,7 +31,8 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
     String deployerMonitor;
     ConcurrentMap<String, Integer> actionToLevelMap;
     ConcurrentMap<Integer, Map<String, Action>> monitoredActions;
-    LogProxy log;
+    LogProxy logg;
+    Logger log = LoggerFactory.getLogger(DeployerMonitorWorker.class);
     Node com;
     String id;
     long timerID;
@@ -59,7 +62,7 @@ public class DeployerMonitorWorker extends Verticle implements LeadsMessageHandl
 
         com = new DefaultNode();
         com.initialize(id, deployerMonitor, null, this, null, vertx);
-        log = new LogProxy(config.getString("log"), com);
+        logg = new LogProxy(config.getString("log"), com);
         periodicHandler =
             new PeriodicCheckHandler(id, deployerLogic, nqeGroup, log, com, actionToLevelMap,
                                         monitoredActions);
