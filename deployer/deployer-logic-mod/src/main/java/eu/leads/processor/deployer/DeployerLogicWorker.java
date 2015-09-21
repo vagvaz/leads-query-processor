@@ -405,6 +405,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
             persistence.removePersistentCache(n.getNodeId());
          }
       }
+      runningPlans.remove(queryId);
       //LATER TODO we could inform Interface Manager about the query completion to inform UIs
    }
 
@@ -520,7 +521,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
          JsonObject inputSchema;
          inputSchema = conf.getObject("body").getObject("inputSchema");
          JsonArray fields = inputSchema.getArray("fields");
-         System.out.println("Check if fields: " + fields.toArray().toString() + " are indexed.");
+         System.out.println("Check if inputSchema fields: " + fields.toArray().toString() + " are indexed.");
 
          Iterator<Object> iterator = fields.iterator();
          String columnName = null;
@@ -563,7 +564,7 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                inputSize = sizeC.get(columnName.substring(0, columnName.lastIndexOf(".")));
             else {
                System.out.print("Size not found, Slow Get size() ");
-               inputSize = getSize(node);
+               inputSize = 4000000;//inputCache.size(); vagvaz
                System.out.println("... Caching size value.");
                sizeC.put(columnName.substring(0, columnName.lastIndexOf(".")),inputSize);
             }
