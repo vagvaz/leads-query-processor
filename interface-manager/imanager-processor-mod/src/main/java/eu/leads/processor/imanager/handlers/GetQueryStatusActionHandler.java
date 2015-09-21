@@ -44,6 +44,7 @@ public class GetQueryStatusActionHandler implements ActionHandler {
 
            }catch(Exception e){
          log.info("exception in read");
+              e.printStackTrace();
               actionResult.putString("error", "");
               result.setResult(actionResult);
             }
