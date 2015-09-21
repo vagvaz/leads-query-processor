@@ -15,6 +15,7 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.logging.Logger;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -126,7 +127,16 @@ public class SubmitQueryHandler implements Handler<HttpServerRequest> {
                 action.setLabel(IManagerConstants.QUIT);
                 action.setComponentType("webservice");
                 com.sendToAllGroup("leads.processor.control", action.asJsonObject());
-
+                try {
+                    JsonArray webAddress = com.getConfig().getArray("webserviceAddrs");
+                    for(Object addrs:webAddress.toList()) {
+                        WebServiceClient.initialize((String)addrs);
+                        WebServiceClient.submitQuery("leads", queryJ.getString("sql"));
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                //LQPConfiguration.getInstance().getConfiguration()
             }
             else {
                 action.setLabel(IManagerConstants.SUBMIT_QUERY);

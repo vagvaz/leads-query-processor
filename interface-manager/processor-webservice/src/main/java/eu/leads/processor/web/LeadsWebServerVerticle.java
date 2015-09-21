@@ -11,6 +11,7 @@ import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.http.RouteMatcher;
+import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Verticle;
@@ -24,6 +25,8 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
     Logger log;
     String id;
     static int shutdown_messages =0;
+    JsonObject globalConfig;
+
     public void start() {
 
         LQPConfiguration.initialize(true);
@@ -36,10 +39,27 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
         com = new DefaultNode();
 
         log = container.logger();
+
+
+
         com.initialize(id, "webservice", null, this, null, getVertx());
         JsonObject config = container.config();
         RouteMatcher matcher = new RouteMatcher();
-
+        System.out.println("local cluster: "+ LQPConfiguration.getInstance().getMicroClusterName());
+        globalConfig = config.getObject("global");
+        if(globalConfig!=null)
+            if(globalConfig.containsField("webserviceAddrs")){
+                JsonArray webserviceAddrs = new JsonArray();
+                 JsonObject webserviceAddrsClusters = globalConfig.getObject("webserviceAddrs");
+                for(String key:webserviceAddrsClusters.getFieldNames()){
+                    System.out.println("key :" + key + " value " + webserviceAddrsClusters.getArray(key).encodePrettily());
+                    if(!key.equals(LQPConfiguration.getInstance().getMicroClusterName()))
+                        webserviceAddrs.addString((String) webserviceAddrsClusters.getArray(key).get(0));
+                }
+                System.out.println("webserviceAddrs:"+webserviceAddrs.encodePrettily());
+                com.getConfig().putArray("webserviceAddrs", webserviceAddrs);
+            }
+        //
         //      startEmbeddedCacheManager(configFile);
         //      startLeadsWebModule("propertiesFile");
         GetObjectHandler getObjectHandler = new GetObjectHandler(com, log);
@@ -140,6 +160,7 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
                             System.err.println("Continue");
                         } else {
                             System.err.println("Exit webprocessor try: "+shutdown_messages);
+
                             shutdown_messages++;
                             vertx.setTimer(10000, new Handler<Long>() {
                                 @Override
