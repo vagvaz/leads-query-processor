@@ -408,7 +408,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             }
           });
           if(files.length > 0){
-            uniquePath = files[0].toString();
+            uniquePath = files[0].getName().toString();
           }
           else{
             uniquePath = currentComponent +"-"+UUID.randomUUID().toString();
