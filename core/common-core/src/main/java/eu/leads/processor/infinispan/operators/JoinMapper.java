@@ -153,7 +153,7 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
       bloomCacheName = conf.getObject("buildBloomFilter").getString("bloomCache");
       System.err.println("bloom cache is " + bloomCacheName);
       buildBloom = true;
-      bloomFilter = BloomFilter.create(Funnels.stringFunnel(Charset.defaultCharset()), 10000000 );
+      bloomFilter = BloomFilter.create(Funnels.stringFunnel(Charset.defaultCharset()), 1000000 );
     }
     else{
       buildBloom = false;

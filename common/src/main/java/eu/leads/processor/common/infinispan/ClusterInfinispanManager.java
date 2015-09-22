@@ -472,7 +472,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
                 //                                 .location("/tmp/leveldb/data-foo/" + "/")
             .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/expired/")
                 //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
-            .implementationType(LevelDBStoreConfiguration.ImplementationType.AUTO)
+            .implementationType(LevelDBStoreConfiguration.ImplementationType.JNI)
             .blockSize(blockSize * 1024 * 1024)
             .compressionType(CompressionType.SNAPPY)
             .cacheSize(cacheSize * 1024 * 1024)
