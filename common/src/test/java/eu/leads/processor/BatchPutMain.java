@@ -11,6 +11,7 @@ import org.infinispan.ensemble.Site;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.ensemble.cache.distributed.HashBasedPartitioner;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -18,7 +19,7 @@ import java.util.concurrent.ExecutionException;
  * Created by vagvaz on 8/31/15.
  */
 public class BatchPutMain {
-    static String dresden2 = "80.156.73.113:11222;80.156.73.116:11222";
+    static String dresden2 = "80.156.73.113:11222;80.156.73.116:11222;80.156.73.123:11222;80.156.73.128:11222";
     static String dd1a = "80.156.222.4:11222;80.156.222.18"; //qe8,qe9
     static String dd2c = "87.190.239.18:11222;87.190.239.130:11222"; //qe28,qe29
     static String softnet = "clu25.softnet.tuc.gr:11222;clu24.softnet.tuc.gr:11222";
@@ -31,23 +32,25 @@ public class BatchPutMain {
     static EnsembleCacheManager emanager;
     static Map<String,TupleBuffer> buffers = new HashMap<>();
     static HashBasedPartitioner partitioner;
-    private static int threshold = 10000;
+    private static int threshold = 1000;
     private static String cacheName = "batchputTest";
     private static EnsembleCache ecache;
     private static EnsembleCache ecache2;
-    private static int numberOfvalues = 13;
+    private static int numberOfvalues = 5;
     private static HashMap<String,Integer> histogram;
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
         clouds.put("dresden2",dresden2);
         clouds.put("dd1a",dd1a);
         clouds.put("dd2c",dd2c);
         clouds.put("softnet",softnet);
-        clouds.put("localcluster",local);
+        clouds.put("localcluster", local);
         if(args.length > 0){
             readArguments(args);
         }
 
+        LQPConfiguration.initialize();
+        EnsembleCacheUtils.initialize();
         String ensembleString  = "";
         for(String cloudString : activeClouds){
             ensembleString += clouds.get(cloudString)+"|";
@@ -56,6 +59,7 @@ public class BatchPutMain {
 
         ensembleString = ensembleString.substring(0,ensembleString.length()-1);
         emanager = new EnsembleCacheManager(ensembleString);
+        EnsembleCacheUtils.initialize(emanager,false);
         ArrayList elist = new ArrayList<>(emanager.sites());
         ecache = emanager.getCache(cacheName, new ArrayList<>(emanager.sites()),
             EnsembleCacheManager.Consistency.DIST);
@@ -86,6 +90,7 @@ public class BatchPutMain {
         }
        histogram = new HashMap<>();
         System.out.println("Inserting");
+        System.in.read();
         double step = 0.1;
         int counter = 0;
         long start = System.nanoTime();
@@ -101,11 +106,12 @@ public class BatchPutMain {
             }
             Tuple tuple = entry.getValue();
             if(batchPut){
-                String mc = decideMC(keyString);
-                if(buffers.get(mc).add(keyString,tuple)){
-                    buffers.get(mc).flushToMC();
-                    updateHist(mc);
-                }
+//                String mc = decideMC(keyString);
+//                if(buffers.get(mc).add(keyString,tuple)){
+//                    buffers.get(mc).flushToMC();
+//                    updateHist(mc);
+//                }
+                EnsembleCacheUtils.putToCache(ecache,keyString,tuple);
             }
             else{
                 try {
@@ -124,6 +130,7 @@ public class BatchPutMain {
         else{
             EnsembleCacheUtils.waitForAllPuts();
         }
+        EnsembleCacheUtils.waitForAllPuts();
         long end = System.nanoTime();
         double dur = (end - start)/1000000f;
         System.out.println("Duration: " + dur + " ms rate: " + (numberOfkeys/dur)+ " per ms");

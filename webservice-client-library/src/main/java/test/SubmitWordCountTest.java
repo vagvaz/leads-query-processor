@@ -253,7 +253,7 @@ public class SubmitWordCountTest {
     if(combine) {
       jsonObject.getObject("operator").putString("combine", "1");
     }
-    reduceLocal = true;
+    reduceLocal = false;
     if (reduceLocal) {
       jsonObject.getObject("operator").putString("reduceLocal", "true");
     }
@@ -300,7 +300,7 @@ public class SubmitWordCountTest {
             JsonObject data;
             System.out.print("Loading data to '" + CACHE_NAME + "' cache\n ");
             data = new JsonObject();
-            for (int i = 0; i < 111; i++) {
+            for (int i = 0; i < 1000; i++) {
               data.putString(String.valueOf(i), lines[i % lines.length]);
               if ((i + 1) % 100 == 0) {
                 ensembleCache.put(String.valueOf(i), new Tuple(data.toString()));
