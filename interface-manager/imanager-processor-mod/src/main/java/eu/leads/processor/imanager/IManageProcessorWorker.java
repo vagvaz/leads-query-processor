@@ -141,6 +141,7 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
 
 
                   System.out.println(" Quit Imanager ");
+                  message.reply();
                }
             }
          } else {
