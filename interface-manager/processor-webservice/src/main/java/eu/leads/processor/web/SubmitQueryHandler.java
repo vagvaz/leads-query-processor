@@ -120,7 +120,9 @@ public class SubmitQueryHandler implements Handler<HttpServerRequest> {
             Action action = new Action();
             action.setId(requestId);
             action.setCategory(StringConstants.ACTION);
-            if(query.trim().toLowerCase().startsWith("quit")) {
+
+            JsonObject queryJ = new JsonObject(query);
+            if(queryJ.getString("sql").toLowerCase().startsWith("quit")) {
                 action.setLabel(IManagerConstants.QUIT);
                 action.setComponentType("webservice");
                 com.sendToAllGroup("leads.processor.control", action.asJsonObject());
