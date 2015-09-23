@@ -133,8 +133,9 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
               queriesCache.put(query.getId(), query.asJsonObject().toString());
               startExecution(executionPlan);
              }else{
-              action.setLabel(NQEConstants.DEPLOY_CQL_OPERATOR);
-              com.sendTo(nqeGroup,action.asJsonObject());
+              newAction = new Action(action);
+              newAction.setLabel(NQEConstants.DEPLOY_CQL_OPERATOR);
+              com.sendTo(nqeGroup,newAction.asJsonObject());
              }
           }
           //               } else if (label.equals(DeployerConstants.DEPLOY_SINGLE_MR)){
@@ -555,7 +556,15 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
       return LQPConfiguration.getInstance().getConfiguration().getLong(tableName+".size",5000000L);
     }
     else{
-      return 5000000L;
+      if(tableName.contains("rankings")) {
+        return 18000000L;
+      }
+      else if(tableName.contains("uservisits")){
+        return 155000000L;
+      }
+      else {
+        return 5000000L;
+      }
     }
   }
 
