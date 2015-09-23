@@ -26,6 +26,10 @@ public class Apatar2Tajo {
     private static HashMap<String, Expr> GroupByOther = new HashMap<String, Expr>();
     private static HashMap<String, String> MRTableName = new HashMap<>();
     private static boolean foundHaving;
+
+    private static long Range=-1L;
+    private static long VersionStart=-1L;
+    private static long VersionFinish=-1L;
     private int funtionsCount = 0;
 
     public static Expr xml2tajo(File xmlFile) throws JDOMException, IOException {
@@ -342,7 +346,7 @@ public class Apatar2Tajo {
         if (cur.getAttribute("subProject") != null) {
             System.out.println("\nSubproject found  Reparsing");
             String xmlWithSpecial =
-                StringEscapeUtils.unescapeXml(StringEscapeUtils.unescapeXml(cur.getAttributeValue("subProject")));
+                    StringEscapeUtils.unescapeXml(StringEscapeUtils.unescapeXml(cur.getAttributeValue("subProject")));
             subExpr = visit_subproject(xmlWithSpecial, cur.getAttributeValue("title"));
 
             //            if(sub !=null)
@@ -451,7 +455,7 @@ public class Apatar2Tajo {
                         if (((Having) subExpr).hasChild()) { //There is Filter node
                             Selection s = (Selection) ((Having) subExpr).getChild(); //get the filter node
                             s.setChild(
-                                ((Aggregation) ChildExpr).getChild()); // set Filters node's child Agregation's child
+                                    ((Aggregation) ChildExpr).getChild()); // set Filters node's child Agregation's child
                             ((Aggregation) ChildExpr).setChild(s);
                             ((Having) subExpr).setChild(ChildExpr);
                         } else {
@@ -552,7 +556,7 @@ public class Apatar2Tajo {
                     node = node.getChild("tableInfo");
                     node = node.getChild("records");
                     System.out
-                        .println("ProjectNode  " + ((List<Element>) node.getChildren("com.apatar.core.Record")).size());
+                            .println("ProjectNode  " + ((List<Element>) node.getChildren("com.apatar.core.Record")).size());
                     List<Element> recordslist;
 
                     String columnName, columnType;
@@ -574,7 +578,7 @@ public class Apatar2Tajo {
                     }
 
                     exprs[exprs.length - 1] = new NamedExpr(new ValueListExpr(columns),
-                        "AfterTable:" + MRTableName.get(nextE.getAttributeValue("title")));
+                            "AfterTable:" + MRTableName.get(nextE.getAttributeValue("title")));
                     subExpr = new ValueListExpr(exprs);
                 }
 
@@ -584,8 +588,25 @@ public class Apatar2Tajo {
                 return mr;
             }
 
-        } else
-            System.out.println("Unknown Operator  ");
+        } else if (nodeType.equals("com.apatar.version.VersionNode")) {
+            if(ChildExpr.getType()==(OpType.RelationList)) {
+                RelationList relation = (RelationList) ChildExpr;
+                for (Expr rel : relation.getRelations()) {
+                    ((Relation) rel).setVersionFinish(VersionFinish);
+                    ((Relation) rel).setVersionStart(VersionStart);
+                }
+            }
+            return ChildExpr;
+        }  else if (nodeType.equals("com.apatar.sliding_window.Sliding_windowNode")){
+            if(ChildExpr.getType()==(OpType.RelationList)) {
+                RelationList relation = (RelationList) ChildExpr;
+                for (Expr rel : relation.getRelations()) {
+                    ((Relation) rel).setRange(Range);
+                }
+            }
+            return ChildExpr;
+        }else
+            System.out.println("Unknown Operator : "+ nodeType);
 
         return null;
     }
@@ -629,7 +650,7 @@ public class Apatar2Tajo {
 
                 //Store the connection name information
                 ArrowConnections[Integer.parseInt(from)][Integer.parseInt(to)] =
-                    subnode.getAttributeValue("end_conn_name");
+                        subnode.getAttributeValue("end_conn_name");
                 //Store the reversed tree connections
                 SubReverseArrowMap.put(to, from);
                 if (!SubReverseArrowTree.containsKey(to)) {
@@ -656,8 +677,8 @@ public class Apatar2Tajo {
 
                 subnode = (Element) sublist.get(j);
                 System.out.println(
-                    "SubNode id: " + subnode.getAttributeValue("id") + " " + subnode.getAttributeValue("nodeClass")
-                        + " , " + subnode.getAttributeValue("title"));
+                        "SubNode id: " + subnode.getAttributeValue("id") + " " + subnode.getAttributeValue("nodeClass")
+                                + " , " + subnode.getAttributeValue("title"));
                 String cId = subnode.getAttributeValue("id");
 
                 subnodesMap.put(cId, subnode);
@@ -698,7 +719,7 @@ public class Apatar2Tajo {
                             } else
                                 ret = new Selection(rec);
                             System.out
-                                .println(" Found rec:" + ret.toJson().toString() + " returning only this result ");
+                                    .println(" Found rec:" + ret.toJson().toString() + " returning only this result ");
 
                         } else {
                             System.out.println(" null child");
@@ -720,7 +741,7 @@ public class Apatar2Tajo {
                         print("", true, id, SubReverseArrowTree, subnodesMap);
 
                         Expr rec = recursiveGroupByFunction(id, SubReverseArrowTree, subnodesMap, ArrowConnections,
-                            subArrowMap, GroupByCollumns);
+                                subArrowMap, GroupByCollumns);
                         if (rec != null) {
                             if (rec.getType() == OpType.Target) {
                                 String qualifier = ((NamedExpr) rec).getAlias();
@@ -745,7 +766,7 @@ public class Apatar2Tajo {
                     Aggregation clause = new Aggregation();
                     ArrayList<Aggregation.GroupElement> groups = new ArrayList<Aggregation.GroupElement>(1);
                     groups.add(new Aggregation.GroupElement(Aggregation.GroupType.OrdinaryGroup,
-                        GroupByCollumns.toArray(new Expr[GroupByCollumns.size()])));
+                            GroupByCollumns.toArray(new Expr[GroupByCollumns.size()])));
                     int groupSize = 1;
                     clause.setGroups(groups.subList(0, groupSize).toArray(new Aggregation.GroupElement[groupSize]));
 
@@ -759,11 +780,11 @@ public class Apatar2Tajo {
                     //Fix recursive read of operator if more than 1
                     if (endNodes.size() > 1) {
                         System.err.print(
-                            "Found multiple end nodes, use multisort to connect the nodes, using just the first node, ignoring later");
+                                "Found multiple end nodes, use multisort to connect the nodes, using just the first node, ignoring later");
                     }
                     for (String id : endNodes) {
                         sortList = recursiveSortFunction(id, SubReverseArrowTree, subnodesMap,
-                            ArrowConnections);//GetSortSpec(id, SubReverseArrowTree, subnodesMap);
+                                ArrowConnections);//GetSortSpec(id, SubReverseArrowTree, subnodesMap);
                         if (sortList != null)
                             break;
 
@@ -827,6 +848,51 @@ public class Apatar2Tajo {
                 }
 
 
+            } else if (ParentNode.equals("Version")) {
+                System.out.println(" Version Node ");
+                for (int j = 0; j < sublist.size(); j++) {
+                    subnode = (Element) sublist.get(j);
+                    if (subnode.getAttributeValue("title").endsWith("Timestamp")) {
+                        System.out.println(" Found Node :" + subnode.getAttributeValue("title"));
+
+                        String nodeType = subnode.getAttributeValue("nodeClass");
+                        if (nodeType.equals("com.apatar.functions.ConstantFunctionNode")){//com.apatar.functions.constant.VersionFromFunction")) {
+                            String functionType = subnode.getAttributeValue("classFunction");
+
+                            String value = subnode.getChild(functionType).getAttributeValue("value");
+                            System.out.println(" Value: " + value);
+                            if (value == null)
+                                return null;
+                            else {
+                                if(functionType.endsWith("FromFunction"))
+                                    VersionStart = Long.parseLong(value);
+                                else if(functionType.endsWith("ToFunction"))
+                                    VersionFinish = Long.parseLong(value);
+                            }
+                        }
+                    }
+                }
+            }else if (ParentNode.equals("Sliding_window")) {
+                System.out.println("  Sliding_window Node ");
+                for (String id : endNodes) {
+                    subnode = (Element) subnodesMap.get(id);
+
+                    String nodeType = subnode.getAttributeValue("nodeClass");
+                    if (nodeType.equals("com.apatar.functions.ConstantFunctionNode")) {
+                        String functionType = subnode.getAttributeValue("classFunction");
+
+                        String value = subnode.getChild(functionType).getAttributeValue("value");
+                        System.out.println(" Value: " + value);
+                        if (value == null)
+                            return null;
+                        else
+                            Range = Long.parseLong(value);
+                    }
+                }
+            }else {
+
+
+                System.err.println("Unable to recognize ParentNode:" + ParentNode);
             }
         }
         return (Expr) ErrorMessageNullReturn("Error parsing subroot Node, ParentNode:" + ParentNode);
