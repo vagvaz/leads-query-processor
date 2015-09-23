@@ -34,4 +34,5 @@ public class NQEConstants {
    public static final String OPERATOR_GET_RUNNING_STATUS = "getOperatorStatus";
    public static final String DEPLOY_REMOTE_OPERATOR = "remoteOperator";
    public static final String EXECUTE_MAP_REDUCE_JOB = "executeMapReduceJob";
+   public static final String STOP_CQL = "stopCQL";
 }

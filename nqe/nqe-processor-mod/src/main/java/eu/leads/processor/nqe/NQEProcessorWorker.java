@@ -16,6 +16,7 @@ import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.QueryState;
 import eu.leads.processor.core.plan.QueryStatus;
 import eu.leads.processor.imanager.IManagerConstants;
+import eu.leads.processor.nqe.handlers.DeployCQLOperatorActionHandler;
 import eu.leads.processor.nqe.handlers.DeployRemoteOpActionHandler;
 import eu.leads.processor.nqe.handlers.ExecuteMapReduceJobActionHandler;
 import eu.leads.processor.nqe.handlers.OperatorActionHandler;
@@ -193,6 +194,8 @@ public class NQEProcessorWorker extends Verticle implements Handler<Message<Json
         new DeployRemoteOpActionHandler(com, logg, persistence, id, globalConfig));
     handlers.put(NQEConstants.EXECUTE_MAP_REDUCE_JOB,
         new ExecuteMapReduceJobActionHandler(com, logg, persistence, id,globalConfig));
+    handlers.put(NQEConstants.DEPLOY_CQL_OPERATOR, new DeployCQLOperatorActionHandler(com,logg,persistence,id,globalConfig));
+    handlers.put(NQEConstants.STOP_CQL,handlers.get(NQEConstants.DEPLOY_CQL_OPERATOR));//use the same handler for stoping cql
     //
     bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {
       @Override public void handle(Message<JsonObject> event) {

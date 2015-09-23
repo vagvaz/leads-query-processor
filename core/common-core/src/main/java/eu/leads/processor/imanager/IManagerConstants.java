@@ -27,4 +27,6 @@ public class IManagerConstants {
 	public static final String EXECUTE_MAPREDUCE = "executeMapReduce";
 	public static final String COMPLETED_MAPREDUCE = "completedMapReduce";
 	public static final String QUIT = "quit";
+	public static final String STOP_CACHE = "stopCache";
+	public static final String REMOVE_LISTENER = "removeListener";
 }

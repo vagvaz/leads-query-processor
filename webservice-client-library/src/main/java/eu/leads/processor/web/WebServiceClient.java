@@ -160,6 +160,7 @@ public class WebServiceClient {
     ActionResult result = mapper.readValue(response,ActionResult.class);
     return result;
   }
+
   public static ActionResult executeMapReduce(JsonObject mrAction,String host, String port) throws IOException {
     address = new URL(host+":"+port+prefix+"internal/executemr");
     HttpURLConnection connection = (HttpURLConnection)address.openConnection();
@@ -236,6 +237,23 @@ public class WebServiceClient {
     //System.err.println("responsed " + response);
     //System.out.print(". ");
     result = mapper.readValue(response, QueryStatus.class);
+    return result;
+  }
+  public static ActionResult stopCQLQuery(String queryId) throws IOException{
+    address = new URL(host+":"+port+prefix+"query/stopcql/"+queryId);
+    HttpURLConnection connection = (HttpURLConnection) address.openConnection();
+    connection = setUp(connection, "POST", MediaType.APPLICATION_JSON, true, true);
+    String response = getResult(connection);
+    ActionResult result = mapper.readValue(response, ActionResult.class);
+    return result;
+  }
+
+  public static ActionResult stopCache(String cacheName) throws IOException{
+    address = new URL(host+":"+port+prefix+"internal/stopCache/"+cacheName);
+    HttpURLConnection connection = (HttpURLConnection) address.openConnection();
+    connection = setUp(connection, "POST", MediaType.APPLICATION_JSON, true, true);
+    String response = getResult(connection);
+    ActionResult result = mapper.readValue(response, ActionResult.class);
     return result;
   }
 
