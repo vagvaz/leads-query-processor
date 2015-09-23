@@ -6,6 +6,7 @@ import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.nqe.NQEConstants;
+import org.slf4j.Logger;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -22,11 +23,11 @@ public class PeriodicCheckHandler implements Handler<Long> {
     Map<Integer, Map<String, Action>> monitoredActions;
     String ownerId;
     String nqeGroup;
-    LogProxy log;
+    Logger log;
     Node com;
     String deployerId;
 
-    public PeriodicCheckHandler(String ownerId, String deployerId, String nqeGroup, LogProxy log,
+    public PeriodicCheckHandler(String ownerId, String deployerId, String nqeGroup, Logger log,
                                    Node com,
                                    Map<String, Integer> actionToLevelMap,
                                    Map<Integer, Map<String, Action>> monitoredActions) {

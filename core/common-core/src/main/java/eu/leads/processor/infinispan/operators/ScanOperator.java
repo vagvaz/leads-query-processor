@@ -51,7 +51,10 @@ public class ScanOperator extends BasicOperator {
 				//            groupByOperator.setIntermediateCacheName(node.getNodeId()+".intermediate");
 				//            groupByOperator.init(conf.getObject("next").getObject("configuration"));
 			} else if (conf.getString("next.type").equals(LeadsNodeType.JOIN.toString())) {
-				joinOperator = true;// new JoinOperator(this.com,this.manager,this.log,this.action);
+//        if(conf.getObject("next").containsField("buildBloom")){
+//          conf.getObject("next").getObject("configuration").putObject("buildBloom",conf.getObject("next").getObject("buildBloom"));
+//        }	
+                        joinOperator = true;// new JoinOperator(this.com,this.manager,this.log,this.action);
 				//            PlanNode node = new PlanNode(conf.getObject("next").asObject());
 				//            joinOperator.setIntermediateCacheName(node.getNodeId()+".intermediate");
 				//            joinOperator.init(conf.getObject("next").getObject("configuration"));
@@ -208,13 +211,15 @@ public class ScanOperator extends BasicOperator {
 
 	@Override
 	public void cleanup() {
-		if(conf.containsField("next")){
-			if(conf.getObject("next").containsField("buildBloom")){
-				JsonObject bloomFilter = conf.getObject("next").getObject("buildBloom");
-				Cache<String,BloomFilter<String>> bloomCache = (Cache) manager.getPersisentCache(bloomFilter.getString("bloomCache"));
-				BloomFilter<String> centralized = null;
+	  if(conf.containsField("next")){
+	    if(conf.getObject("next").getObject("configuration").containsField("buildBloomFilter")){
+	      System.err.println("Building centralized BF");
+              JsonObject bloomFilter = conf.getObject("next").getObject("configuration").getObject("buildBloomFilter");
+              Cache<String,BloomFilter> bloomCache = (Cache) manager.getPersisentCache(bloomFilter.getString("bloomCache"));
+              BloomFilter centralized = null;
 				for(String key : bloomCache.keySet()){
-					if(centralized == null){
+					System.err.println("NODE BF: " + key);
+                                        if(centralized == null){
 						centralized = bloomCache.get(key);
 					}
 					else{
@@ -223,14 +228,17 @@ public class ScanOperator extends BasicOperator {
 					bloomCache.remove(key);
 				}
 
-				String e = computeEnsembleHost();
-				EnsembleCacheManager tmpmanager = new EnsembleCacheManager(e);
-				EnsembleCache ensembleBloomCache = tmpmanager.getCache(bloomFilter.getString("bloomCache"));
-				for(Object s : ensembleBloomCache.sites()){
-					Site site = (Site)s;
-					site.getCache().put(LQPConfiguration.getInstance().getMicroClusterName(),centralized);
+                      Set<String> set = getMicroCloudsFromOpSched();
+				              for(String mc : set) {
+                        EnsembleCacheManager tmpmanager = new EnsembleCacheManager(globalConfig.getObject("componentsAddrs").getArray(mc).get(0).toString());
+                        EnsembleCache ensembleBloomCache = tmpmanager.getCache(bloomFilter.getString("bloomCache"));
+                        ensembleBloomCache.put(LQPConfiguration.getInstance().getMicroClusterName(), centralized);
 				}
-			}
+			} else if (conf.getObject("next").getObject("configuration").containsField("useBloomFilter")){
+                          JsonObject bloomFilter = conf.getObject("next").getObject("configuration").getObject("useBloomFilter");
+                           manager.removePersistentCache(bloomFilter.getString("bloomCache"));
+
+                      }
 
 		}
 		System.err.println("CLEANING UP ");
@@ -247,9 +255,9 @@ public class ScanOperator extends BasicOperator {
 			else {
 				createCache(mc, getOutput() + ".data", "localIndexListener:batchputListener");
 				if (conf.containsField("next")) {
-					if (conf.getObject("next").containsField("buildBloom")) {
-						JsonObject bloomFilter = conf.getObject("next").getObject("buildBloom");
-						createCache(mc, bloomFilter.getString("bloomCache"));
+	                          if (conf.getObject("next").containsField("buildBloomFilter")) {
+                                    JsonObject bloomFilter = conf.getObject("next").getObject("configuration").getObject("buildBloomFilter");
+				    createCache(mc, bloomFilter.getString("bloomCache"));
 
 					}
 				}

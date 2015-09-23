@@ -269,7 +269,7 @@ public class ExecutionPlanMonitor {
             if(source.getNodeType() ==  LeadsNodeType.SCAN){
                 PlanNode next  = getNextOperator(source);
                 if(next.getNodeType() == LeadsNodeType.GROUP_BY || next.getNodeType() == LeadsNodeType.JOIN){// || next.getNodeType() == LeadsNodeType.SORT){
-                    source.getConfiguration().putObject("next",next.asJsonObject());
+                    source.getConfiguration().putObject("next",next.asJsonObject().copy());
                     source.getConfiguration().putString("next.type",next.getNodeType().toString());
                     next.getConfiguration().putBoolean("skipMap",true);
                 }
@@ -325,5 +325,8 @@ public class ExecutionPlanMonitor {
 
   public void updateNode(PlanNode node1) {
     plan.updateNode(node1);
+  }
+  public PlanNode getNode(String nodeId){
+    return plan.getNode(nodeId);
   }
 }

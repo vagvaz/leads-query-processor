@@ -7,6 +7,8 @@ import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.core.plan.QueryState;
+import eu.leads.processor.core.plan.QueryStatus;
 import org.infinispan.Cache;
 import org.vertx.java.core.json.JsonObject;
 
@@ -36,15 +38,21 @@ public class GetQueryStatusActionHandler implements ActionHandler {
        try {
             String queryId = action.getData().getString("queryId");
 //            JsonObject actionResult = persistence.get(StringConstants.QUERIESCACHE, queryId);
-//         log.info("read query");
+//         log.info("read query"); SELECT sourceIP FROM Rankings AS R JOIN  uservisits UV  ON R.pageURL = UV.desturl WHERE pagerank < 10  LIMIT 1;
+//         log.info("read query"); SELECT paeran     FROM Rankings  WHERE pagerank < 10  LIMIT 1;
             String queryJson = queriesCache.get(queryId);
 
-            JsonObject query = new JsonObject(queryJson);
-            result.setResult(query.getObject("status"));
-
+            if(queryJson != null) {
+              JsonObject query = new JsonObject(queryJson);
+              result.setResult(query.getObject("status"));
+            }
+            else{
+              result.setResult( new QueryStatus(queryId, QueryState.PENDING,"NON-EXISTENT").asJsonObject());
+            }
            }catch(Exception e){
          log.info("exception in read");
-              actionResult.putString("error", "");
+              e.printStackTrace();
+              actionResult.putString("error", e.getMessage());
               result.setResult(actionResult);
             }
         result.setStatus(ActionStatus.COMPLETED.toString());

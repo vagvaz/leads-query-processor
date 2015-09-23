@@ -340,7 +340,7 @@ public class SQLPlan extends DataType implements Plan {
       data.getObject("plan").putObject(node.getNodeId(),node.asJsonObject());
     }
     public void updateNode(PlanNode node) {
-        getPlanGraph().putObject(node.getNodeId(),node.asJsonObject());
+        data.getObject("plan").putObject(node.getNodeId(),node.asJsonObject());
         JsonArray oldNodesArray = data.getArray("nodes");
         JsonArray newNodesArray = new JsonArray();
         Iterator<Object> iterator = oldNodesArray.iterator();

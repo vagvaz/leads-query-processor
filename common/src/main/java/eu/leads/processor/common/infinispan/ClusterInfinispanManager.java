@@ -408,7 +408,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             }
           });
           if(files.length > 0){
-            uniquePath = files[0].toString();
+            uniquePath = files[0].getName().toString();
           }
           else{
             uniquePath = currentComponent +"-"+UUID.randomUUID().toString();
@@ -472,7 +472,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
                 //                                 .location("/tmp/leveldb/data-foo/" + "/")
             .expiredLocation("/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/expired/")
                 //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
-            .implementationType(LevelDBStoreConfiguration.ImplementationType.AUTO)
+            .implementationType(LevelDBStoreConfiguration.ImplementationType.JNI)
             .blockSize(blockSize * 1024 * 1024)
             .compressionType(CompressionType.SNAPPY)
             .cacheSize(cacheSize * 1024 * 1024)
@@ -480,8 +480,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(
             maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
-            .locking().concurrencyLevel(1000).useLockStriping(false).isolationLevel(IsolationLevel.READ_COMMITTED).lockAcquisitionTimeout(500000,
-            TimeUnit.MILLISECONDS)
+            .locking().concurrencyLevel(1000)
             .build();
       }
     } else { //do not use persistence
@@ -858,8 +857,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
         .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(maxEntries).strategy(
             EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
-        .locking().concurrencyLevel(1000).useLockStriping(false).isolationLevel(
-            IsolationLevel.READ_COMMITTED).lockAcquisitionTimeout(500000, TimeUnit.MILLISECONDS)
+        .locking().concurrencyLevel(1000)
         .build();
     manager.defineConfiguration(cacheName, configuration);
     Cache startedCache = manager.getCache(cacheName);
@@ -952,8 +950,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(
                 maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
-            .locking().concurrencyLevel(1000).useLockStriping(false).isolationLevel(
-                IsolationLevel.READ_COMMITTED).lockAcquisitionTimeout(500000, TimeUnit.MILLISECONDS)
+            .locking().concurrencyLevel(1000)
             .build();
       }
     } else { //do not use persistence
@@ -985,8 +982,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             false).compatibility().enable()//.marshaller(new TupleMarshaller())
         .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(maxEntries).strategy(
             EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
-        .locking().concurrencyLevel(1000).useLockStriping(false).isolationLevel(
-            IsolationLevel.READ_COMMITTED).lockAcquisitionTimeout(500000, TimeUnit.MILLISECONDS)
+        .locking().concurrencyLevel(1000)
         .build();
 //    defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).clustering()
 //        .cacheMode(CacheMode.LOCAL).transaction()
