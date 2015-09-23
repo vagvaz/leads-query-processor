@@ -118,7 +118,11 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
                     } else if(label.equals(IManagerConstants.QUIT)){
                         System.out.println(" Quit Nqe logic ");
                         stop();
-                    }else {
+                    }else if(label.equals(NQEConstants.DEPLOY_CQL_OPERATOR)) {
+                        System.out.println(" CQL OPERATOR !!!! ");
+                        //action.getData().putString("STATUS", "SUCCESS");
+                        //com.sendTo(action.getData().getString("replyTo"), action.getResult());
+                    }else{
                         log.error("Unknown COMPLETED OR INPROCESS Action received " + action.toString());
                         return;
                     }

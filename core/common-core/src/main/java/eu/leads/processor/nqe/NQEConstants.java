@@ -10,7 +10,9 @@ public class NQEConstants {
    public static final String WGS_OPERATOR = "wgsOperator";
    public static final String PPPQ_OPERATOR = "pppqOperator";
    public static final String DEPLOY_OPERATOR = "deployOperator";
-//   public static final String MAPREDUCE_IMPLEMENTATION = "mapReduceOperator";
+   public static final String DEPLOY_CQL_OPERATOR = "deployCQLOperator";
+
+   //   public static final String MAPREDUCE_IMPLEMENTATION = "mapReduceOperator";
 //   public static final String DEFAULT_IMPLEMENTATION = "defaultImplementation";
 //   public static final String READ_OP = "readOperator";
 //   public static final String PROJECT_OP = "projectOperator";

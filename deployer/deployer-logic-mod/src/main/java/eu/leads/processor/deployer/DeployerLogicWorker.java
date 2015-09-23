@@ -119,18 +119,23 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
          switch (ActionStatus.valueOf(action.getStatus())) {
             case PENDING: //probably received an action from an external source
                if (label.equals(DeployerConstants.DEPLOY_SQL_PLAN)) {
-                  SQLPlan plan = new SQLPlan(action.getData().getObject("plan"));
-                  ExecutionPlanMonitor executionPlan = new ExecutionPlanMonitor(plan);
-                  executionPlan.setAction(action);
-                  runningPlans.put(plan.getQueryId(), executionPlan);
-                  String queryJson = queriesCache.get(plan.getQueryId());
-                  if (queryJson == null || queryJson.equals("")) {
-                     failQuery(plan.getQueryId(), "Could not read query from queries");
+                  if(!checkRangeQuery(action.getData().getObject("plan"))) {
+                     SQLPlan plan = new SQLPlan(action.getData().getObject("plan"));
+                     ExecutionPlanMonitor executionPlan = new ExecutionPlanMonitor(plan);
+                     executionPlan.setAction(action);
+                     runningPlans.put(plan.getQueryId(), executionPlan);
+                     String queryJson = queriesCache.get(plan.getQueryId());
+                     if (queryJson == null || queryJson.equals("")) {
+                        failQuery(plan.getQueryId(), "Could not read query from queries");
+                     }
+                     SQLQuery query = new SQLQuery(new JsonObject(queryJson));
+                     query.getQueryStatus().setStatus(QueryState.RUNNING);
+                     queriesCache.put(query.getId(), query.asJsonObject().toString());
+                     startExecution(executionPlan);
+                  }else{
+                     action.setLabel(NQEConstants.DEPLOY_CQL_OPERATOR);
+                     com.sendTo(nqeGroup,action.asJsonObject());
                   }
-                  SQLQuery query = new SQLQuery(new JsonObject(queryJson));
-                  query.getQueryStatus().setStatus(QueryState.RUNNING);
-                  queriesCache.put(query.getId(), query.asJsonObject().toString());
-                  startExecution(executionPlan);
                }
 //               } else if (label.equals(DeployerConstants.DEPLOY_SINGLE_MR)){
 //                  JsonObject operator = action.getData();
@@ -361,6 +366,25 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
       }
    }
 
+   private boolean checkRangeQuery(JsonObject plan){
+      try {
+         JsonObject rootsBynode = plan.getObject("nodesByPID");
+         for (String nodes : rootsBynode.getFieldNames()) {
+            JsonObject node = rootsBynode.getObject(nodes);
+            if (node.getString("type").equals("SCAN")) {
+               if (node.getObject("body").getNumber("range").longValue() >= 0) {
+                  return true;
+               }
+            }
+
+         }
+      }catch (Exception e){
+         System.err.print("Something went wrong in checkRangeQuery.");
+      }
+      return false;
+   }
+
+
    private void deployRemoteOperator(Action action,JsonObject operator, PlanNode mrOperator) {
       Action deployAction = createNewAction(action);
       log.error(
@@ -512,6 +536,8 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
    private boolean hasIndexedPredicate(PlanNode node) {
       return checkIndex_usage(node);
    }
+
+
 
    private boolean checkIndex_usage(PlanNode node) {
       JsonObject conf = node.getConfiguration();
