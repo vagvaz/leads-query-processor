@@ -480,7 +480,6 @@ public class DeployerLogicWorker extends Verticle implements LeadsMessageHandler
                 executionPlan.updateNode(node2);
                 deployOperator(executionPlan, node1);
               }
->>>>>>> origin/m36-end
             }
             else if(hasIndexedPredicate(node1)){
               //choose node1

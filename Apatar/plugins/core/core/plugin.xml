@@ -4,7 +4,7 @@
 
     <requires>
         <import plugin-id="com.apatar.ui"/>
-        <import plugin-id="com.apatar.systemtray"/>
+<!--         <import plugin-id="com.apatar.systemtray"/> -->
         <import plugin-id="com.apatar.thirdparty"/>
         <import plugin-id="com.apatar.functions"/>
     </requires>
