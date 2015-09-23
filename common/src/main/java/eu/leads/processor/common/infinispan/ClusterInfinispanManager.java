@@ -697,7 +697,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
       return manager.getCache(name);
     }
     else{
-      createIndexedCache(name,configuration);
+//      createIndexedCache(name,configuration);
+      manager.defineConfiguration(name,configuration);
     }
     return manager.getCache(name);
   }
