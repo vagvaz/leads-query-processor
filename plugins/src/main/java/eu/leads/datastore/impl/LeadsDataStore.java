@@ -17,9 +17,9 @@ import com.sun.tools.corba.se.idl.constExpr.GreaterThan;
 import eu.leads.datastore.AbstractDataStore;
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.URIVersion;
+import eu.leads.datastore.persistent.TablesCache;
 import eu.leads.processor.web.QueryResults;
 import eu.leads.utils.LEADSUtils;
-
 import static ch.lambdaj.Lambda.*;
 import static org.hamcrest.Matchers.*;
 import static java.util.Arrays.*;
@@ -44,32 +44,48 @@ public class LeadsDataStore extends AbstractDataStore {
 	@Override
 	public SortedSet<URIVersion> getLeadsResourceMDFamily(String uri, String family, int lastVersions, String timestamp, boolean before) {
 		SortedSet<URIVersion> uriVersions = new TreeSet<URIVersion>();
-
-//		boolean reverse = false;
-
-		String queryP01 = "SELECT * FROM " + family;
+		
+		// Persistence
+		boolean isUrldirectory = false;
+		boolean isUrldirectoryEcom = false;
+		if(family.equals("default.urldirectory"))
+			isUrldirectory = true;
+		if(family.equals("default.urldirectory_ecom"))
+			isUrldirectoryEcom = true;	
 		//
-		String queryP02 = " WHERE ";
-		//
-		String queryP03 = "uri = '" + uri + "'";
-		//
-		String queryP04 = "";
-//		if(timestamp != null) {
-//			queryP04 += " AND ";
-//			if(before) 	queryP04 += "ts < ";
-//			else		queryP04 += "ts = ";
-//			queryP04 += timestamp;
-//		}
-		//
-//		if(before) {
-//			queryP04 += " ORDER BY ts DESC";
-//			queryP04 += " LIMIT " + lastVersions;
-//		}
-		//
-		String query = queryP01+queryP02+queryP03+queryP04;
-
-		QueryResults rs;
-		rs = LeadsQueryInterface.execute(query);
+		
+		QueryResults rs = null;
+		
+		if(isUrldirectory || isUrldirectoryEcom)
+			rs = TablesCache.getTableRow(family, uri);
+		
+		if(rs==null) {
+	//		boolean reverse = false;
+	
+			String queryP01 = "SELECT * FROM " + family;
+			//
+			String queryP02 = " WHERE ";
+			//
+			String queryP03 = "uri = '" + uri + "'";
+			//
+			String queryP04 = "";
+	//		if(timestamp != null) {
+	//			queryP04 += " AND ";
+	//			if(before) 	queryP04 += "ts < ";
+	//			else		queryP04 += "ts = ";
+	//			queryP04 += timestamp;
+	//		}
+			//
+	//		if(before) {
+	//			queryP04 += " ORDER BY ts DESC";
+	//			queryP04 += " LIMIT " + lastVersions;
+	//		}
+			//
+			String query = queryP01+queryP02+queryP03+queryP04;
+			
+			rs = LeadsQueryInterface.execute(query);
+		
+		}
 		
 //		if((rs == null || rs.getResult().size() == 0) && timestamp != null && before == true) {
 //
@@ -87,6 +103,10 @@ public class LeadsDataStore extends AbstractDataStore {
 //		}
 		
 		if(rs != null) {
+			
+			if(isUrldirectory || isUrldirectoryEcom)
+				TablesCache.setTableRow(family, uri, rs);
+			
 			for(String row : rs.getResult()) {
 				JSONObject jsonRow = new JSONObject(row);
 				Map<String,Cell> columnsMap = new HashMap<String, Cell>();

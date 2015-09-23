@@ -49,7 +49,7 @@ public class LeadsQueryInterface {
 		boolean isInsert = false;
 		
 		if(lowerSql.startsWith("insert"))
-			isInsert = true;
+			isInsert = true;		
 		
 		if(queryMode) {
 	    	/* TIME */ long start = System.currentTimeMillis();
