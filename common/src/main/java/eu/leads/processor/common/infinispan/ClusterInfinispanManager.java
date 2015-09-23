@@ -480,7 +480,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(
             maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
-            .locking().concurrencyLevel(1000)
+//            .locking().concurrencyLevel(1000)
             .build();
       }
     } else { //do not use persistence
@@ -857,7 +857,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
         .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(maxEntries).strategy(
             EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
-        .locking().concurrencyLevel(1000)
+//        .locking().concurrencyLevel(1000)
         .build();
     manager.defineConfiguration(cacheName, configuration);
     Cache startedCache = manager.getCache(cacheName);
@@ -950,7 +950,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(
                 maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
-            .locking().concurrencyLevel(1000)
+//            .locking().concurrencyLevel(1000)
             .build();
       }
     } else { //do not use persistence
@@ -982,7 +982,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             false).compatibility().enable()//.marshaller(new TupleMarshaller())
         .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(maxEntries).strategy(
             EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
-        .locking().concurrencyLevel(1000)
+//        .locking().concurrencyLevel(1000)
         .build();
 //    defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).clustering()
 //        .cacheMode(CacheMode.LOCAL).transaction()
