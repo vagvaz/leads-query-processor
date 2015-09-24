@@ -44,8 +44,8 @@ public class SyncPutRunnable implements Runnable {
                         cache.put(key, value);
                     }
                     else{
-//                        ((Cache)cache).getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).put(key,value);
-                        cache.put(key, value);
+                        ((Cache)cache).getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).put(key,value);
+//                        cache.put(key, value);
                     }
 //                    System.err.println("AFT PUT-----Key: " + key + "--Size:" + value.toString().length());
 //                    System.out.println("AFT PUT-----Key: " + key + "--Size:" + value.toString().length());

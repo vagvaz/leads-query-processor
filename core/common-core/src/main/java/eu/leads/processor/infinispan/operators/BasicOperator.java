@@ -25,6 +25,8 @@ import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.distexec.DistributedTask;
 import org.infinispan.distexec.DistributedTaskBuilder;
 import org.infinispan.remoting.transport.Address;
+import org.infinispan.remoting.transport.jgroups.SuspectException;
+import org.jgroups.SuspectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
@@ -1137,7 +1139,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       throws ExecutionException, InterruptedException {
     int size = futures.size();
     int threshold = 3;
-    long timeout = 60;
+    long timeout = 240;
     long minimumTime = 60000;
     long start  = -1;
     long dur = 0;
@@ -1159,7 +1161,7 @@ public abstract class BasicOperator extends Thread implements Operator{
             {
               result = future.get(timeout,TimeUnit.SECONDS);
             }else{
-              result = future.get(5*timeout,TimeUnit.SECONDS);
+              result = future.get(2*timeout,TimeUnit.SECONDS);
             }
             System.err.println(callable.getClass().toString() + " Completed on " + result + " " + getName());
             profilerLog.error(callable.getClass().toString() + " Completed on " + result + " " + getName());
@@ -1176,6 +1178,11 @@ public abstract class BasicOperator extends Thread implements Operator{
                   profilerLog.error(" next cancel at " + Long.toString((long) (1.3 * Math.max(minimumTime, lastEnd - begin))));
                   System.err.println(" next cancel at " + Long.toString((long) (1.3 * Math.max(minimumTime, lastEnd - begin))));
             }
+          }catch(SuspectException se){
+            System.err.println("Cancelling possible SupsectException");
+            profilerLog.error("Cancelling possible SupsectException");
+            future.cancel(true);
+            resultIterator.remove();
           }
         }
         if(futures.size() < threshold && start < 0 ){
@@ -1188,7 +1195,7 @@ public abstract class BasicOperator extends Thread implements Operator{
               for(Future f : futures){
                 f.cancel(true);
                 System.err.println(callable.getClass().toString() + " Cancelled on  " + getName());
-                profilerLog.error(callable.getClass().toString() + " Completed on " + getName());
+                profilerLog.error(callable.getClass().toString() + " Cancelled on " + getName());
               }
               futures.clear();
             }catch(Exception e){
