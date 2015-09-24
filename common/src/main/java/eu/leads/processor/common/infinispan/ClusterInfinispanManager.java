@@ -687,7 +687,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     if(manager.cacheExists(name)){
       return manager.getCache(name);
     }
-    return getIndexedPersistentCache(name, getDefaultIndexedCacheConfiguration());
+    return getIndexedPersistentCache(name, getIndexedCacheDefaultConfiguration(name));
   }
 
 
