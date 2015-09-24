@@ -17,7 +17,7 @@ import com.sun.tools.corba.se.idl.constExpr.GreaterThan;
 import eu.leads.datastore.AbstractDataStore;
 import eu.leads.datastore.datastruct.Cell;
 import eu.leads.datastore.datastruct.URIVersion;
-import eu.leads.datastore.persistent.TablesCache;
+//import eu.leads.datastore.persistent.TablesCache;
 import eu.leads.processor.web.QueryResults;
 import eu.leads.utils.LEADSUtils;
 import static ch.lambdaj.Lambda.*;
@@ -57,7 +57,7 @@ public class LeadsDataStore extends AbstractDataStore {
 		QueryResults rs = null;
 		
 		if(isUrldirectory || isUrldirectoryEcom)
-			rs = TablesCache.getTableRow(family, uri);
+//			rs = TablesCache.getTableRow(family, uri);
 		
 		if(rs==null) {
 	//		boolean reverse = false;
@@ -105,7 +105,7 @@ public class LeadsDataStore extends AbstractDataStore {
 		if(rs != null) {
 			
 			if(isUrldirectory || isUrldirectoryEcom)
-				TablesCache.setTableRow(family, uri, rs);
+//				TablesCache.setTableRow(family, uri, rs);
 			
 			for(String row : rs.getResult()) {
 				JSONObject jsonRow = new JSONObject(row);
