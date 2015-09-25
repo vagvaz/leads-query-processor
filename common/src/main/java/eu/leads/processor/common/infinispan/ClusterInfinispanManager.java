@@ -180,9 +180,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     manager.defineConfiguration("defaultCache",getCacheDefaultConfiguration("defaultCache"));
     manager.getCache("defaultCache");
     manager.getCache();
-    ClusterTopologyManager clusterTopologyManager = manager
-        .getGlobalComponentRegistry().getComponent(ClusterTopologyManager.class);
-     clusterTopologyManager.setRebalancingEnabled(false);
+    
     //    manager = TestCacheManagerFactory.createClusteredCacheManager(holder.getGlobalConfigurationBuilder(),initDefaultCacheConfigBuilder());
     //    TestCacheManagerFactory.amendGlobalConfiguration(holder.getGlobalConfigurationBuilder(),transportFlags);
 

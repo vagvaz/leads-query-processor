@@ -19,6 +19,7 @@
                                             core-threads="200" max-threads="300" queue-length="200"
                                             keepalive-time="500000"/>
         <scheduled-thread-pool name="infinispan-eviction" thread-factory="infinispan-factory"/>
+
     </threads>
 
     <cache-container name="defaultContainer" statistics="false" default-cache="defaultCache"
