@@ -113,7 +113,8 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
     if(counter % 10000 == 0){
       Thread.yield();
       try {
-        Thread.sleep(100);
+        log.error("sleeping after " + counter);
+        Thread.sleep(200);
       } catch (InterruptedException e) {
         e.printStackTrace();
       }

@@ -21,6 +21,9 @@ public class GetQueryStatusActionHandler implements ActionHandler {
     InfinispanManager persistence;
     String id;
     Cache <String,String> queriesCache;
+  String queryId;
+  String queryJson;
+  JsonObject query;
     public GetQueryStatusActionHandler(Node com, LogProxy log, InfinispanManager persistence,
                                           String id) {
         this.com = com;
@@ -36,14 +39,14 @@ public class GetQueryStatusActionHandler implements ActionHandler {
         Action result = action;
 //       JsonObject actionResult = new JsonObject();
        try {
-            String queryId = action.getData().getString("queryId");
+            queryId = action.getData().getString("queryId");
 //            JsonObject actionResult = persistence.get(StringConstants.QUERIESCACHE, queryId);
 //         log.info("read query"); SELECT sourceIP FROM Rankings AS R JOIN  uservisits UV  ON R.pageURL = UV.desturl WHERE pagerank < 10  LIMIT 1;
 //         log.info("read query"); SELECT paeran     FROM Rankings  WHERE pagerank < 10  LIMIT 1;
-            String queryJson = queriesCache.get(queryId);
+            queryJson = queriesCache.get(queryId);
 
             if(queryJson != null) {
-              JsonObject query = new JsonObject(queryJson);
+              query = new JsonObject(queryJson);
               result.setResult(query.getObject("status"));
               query = null;
             }

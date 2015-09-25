@@ -16,7 +16,7 @@
         <cached-thread-pool name="infinispan-cached" thread-factory="infinispan-factory"/>
         <blocking-bounded-queue-thread-pool name="infinispan-transport"
                                             thread-factory="infinispan-factory"
-                                            core-threads="12" max-threads="60" queue-length="10000"
+                                            core-threads="50" max-threads="120" queue-length="10000"
                                             keepalive-time="10000"/>
         <scheduled-thread-pool name="infinispan-eviction" thread-factory="infinispan-factory"/>
         <thread-factory name="remote-factory" group-name="infinispan" thread-name-pattern="RemoteCommandThread"/>
