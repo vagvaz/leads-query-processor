@@ -34,7 +34,7 @@ public class GetQueryStatusActionHandler implements ActionHandler {
     public Action process(Action action) {
 //      log.info("process get query status");
         Action result = action;
-       JsonObject actionResult = new JsonObject();
+//       JsonObject actionResult = new JsonObject();
        try {
             String queryId = action.getData().getString("queryId");
 //            JsonObject actionResult = persistence.get(StringConstants.QUERIESCACHE, queryId);
@@ -45,16 +45,21 @@ public class GetQueryStatusActionHandler implements ActionHandler {
             if(queryJson != null) {
               JsonObject query = new JsonObject(queryJson);
               result.setResult(query.getObject("status"));
+              query = null;
             }
             else{
               result.setResult( new QueryStatus(queryId, QueryState.PENDING,"NON-EXISTENT").asJsonObject());
             }
+            queryJson = null;
+
            }catch(Exception e){
          log.info("exception in read");
               e.printStackTrace();
+          JsonObject actionResult = new JsonObject();
               actionResult.putString("error", e.getMessage());
               result.setResult(actionResult);
-            }
+          }
+
         result.setStatus(ActionStatus.COMPLETED.toString());
 //      log.info("preturn query status");
         return result;
