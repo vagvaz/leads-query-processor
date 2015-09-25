@@ -33,6 +33,7 @@ import org.infinispan.remoting.transport.Address;
 import org.infinispan.server.hotrod.HotRodServer;
 import org.infinispan.server.hotrod.configuration.HotRodServerConfigurationBuilder;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
+import org.infinispan.topology.ClusterTopologyManager;
 import org.infinispan.transaction.TransactionMode;
 import org.infinispan.transaction.lookup.JBossStandaloneJTAManagerLookup;
 import org.infinispan.util.concurrent.IsolationLevel;
@@ -179,7 +180,9 @@ public class ClusterInfinispanManager implements InfinispanManager {
     manager.defineConfiguration("defaultCache",getCacheDefaultConfiguration("defaultCache"));
     manager.getCache("defaultCache");
     manager.getCache();
-
+    ClusterTopologyManager clusterTopologyManager = manager
+        .getGlobalComponentRegistry().getComponent(ClusterTopologyManager.class);
+     clusterTopologyManager.setRebalancingEnabled(false);
     //    manager = TestCacheManagerFactory.createClusteredCacheManager(holder.getGlobalConfigurationBuilder(),initDefaultCacheConfigBuilder());
     //    TestCacheManagerFactory.amendGlobalConfiguration(holder.getGlobalConfigurationBuilder(),transportFlags);
 
@@ -684,7 +687,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
   @Override
   public ConcurrentMap getIndexedPersistentCache(String name) {
-    if(manager.cacheExists(name)){
+    if (manager.cacheExists(name)){
       return manager.getCache(name);
     }
     return getIndexedPersistentCache(name, getIndexedCacheDefaultConfiguration(name));
@@ -693,7 +696,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
   @Override
   public ConcurrentMap getIndexedPersistentCache(String name, Configuration configuration) {
-    if(manager.cacheExists(name)){
+    if(manager.cacheExists(name)) {
       return manager.getCache(name);
     }
     else{
@@ -808,8 +811,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
   /**
    * {@inheritDoc}
    */
-  @Override
-  public void removeListener(Object listener, String cacheName) {
+  @Override public void removeListener(Object listener, String cacheName) {
     Cache cache = (Cache) getPersisentCache(cacheName);
     removeListener(listener, cache);
   }
