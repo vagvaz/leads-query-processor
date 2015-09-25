@@ -122,7 +122,7 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
         String column = fullColumnNames.get(c);  // tableName + '.' + columnNames.get(c);
         LeadsIndex lInd = lindHelp.CreateLeadsIndex(value.getGenericAttribute(column), ikey, column, tableName);
         //putToCacheDirect(indexCaches.get(c), ikey, lInd);
-        indexCaches.get(c).getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).put(ikey, lInd);
+        indexCaches.get(c).getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL,Flag.IGNORE_RETURN_VALUES).put(ikey, lInd);
         sketches.get(c).add(value.getGenericAttribute(column));
       }
     }catch (Exception e){
