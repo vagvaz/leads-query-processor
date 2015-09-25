@@ -2,7 +2,7 @@
 <config>
 
 	<technology>leads</technology>
-	<host>http://5.147.254.199</host>
+	<host>http://80.156.73.113</host>
 	<port>8080</port>
 	
 	<loggingDir>${env:LEADS_ADIDAS_LOGS}</loggingDir>

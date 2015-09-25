@@ -21,7 +21,7 @@ class FindPageCluster(object):
         self.clusters_properties = {"prod": [product_cluster_center, product_cluster_50pc_dist, product_cluster_80pc_dist],
                                    "cat":  [category_cluster_center, category_cluster_50pc_dist, category_cluster_80pc_dist]}
         
-        scaler = preprocessing.Scaler()
+        scaler = preprocessing.StandardScaler()
         scaler.mean_ = scaler_mean                                 
         scaler.std_ = scaler_std
         self.scaler = scaler
