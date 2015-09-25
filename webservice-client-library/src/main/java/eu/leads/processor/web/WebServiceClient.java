@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.leads.processor.common.plugins.PluginPackage;
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.encrypt.CStore;
 import eu.leads.processor.encrypt.ClientSide;
 import eu.leads.processor.encrypt.Etuple;
@@ -12,6 +13,13 @@ import eu.leads.processor.encrypt.Record;
 import eu.leads.processor.plugins.EventType;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang.SerializationUtils;
+import org.infinispan.client.hotrod.RemoteCache;
+import org.infinispan.client.hotrod.RemoteCacheManager;
+import org.infinispan.client.hotrod.annotation.ClientCacheEntryCreated;
+import org.infinispan.client.hotrod.annotation.ClientCacheEntryModified;
+import org.infinispan.client.hotrod.annotation.ClientCacheEntryRemoved;
+import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
+import org.infinispan.notifications.cachelistener.event.CacheEntryEvent;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.json.JsonArray;
@@ -672,7 +680,7 @@ public class WebServiceClient {
     uploadValue.putString("key", String.valueOf(key));
     uploadValue.putString("cache",encryptedCache);
     uploadValue.putBoolean("isData", false);
-    uploadValue.putArray("value",array);
+    uploadValue.putArray("value", array);
     setBody(connection, uploadValue);
     String response = getResult(connection);
     JsonObject reply = new JsonObject(response);
@@ -686,7 +694,7 @@ public class WebServiceClient {
     List<String> result = null;
     ClientSide client = new ClientSide(fileName);
     String token = client.TSetGetTag(value);
-    JsonObject status = submitEncryptedQuery(user,encryptedCache,token);
+    JsonObject status = submitEncryptedQuery(user, encryptedCache, token);
     String outputCache = status.getString("output");
     boolean successful = waitForFinish(status);
     if(successful){
@@ -741,6 +749,48 @@ public class WebServiceClient {
     result = reply;
 
     return result;
+  }
+
+  private static RemoteCacheManager createRemoteCacheManager(String ip, int port) {
+    ConfigurationBuilder builder = new ConfigurationBuilder();
+    builder.addServer().host(ip).port(port);
+    return new RemoteCacheManager(builder.build());
+  }
+
+  class MyListener {
+    public HashMap<String, Tuple> getTable() {
+      return table;
+    }
+
+    private final HashMap<String, Tuple> table;
+
+
+    //        System.err.println("Plugin probably Failed on " + entry.getType() + " " + entry.getEventData().getKey() + " ---> " + entry.getEventData().getValue());
+
+
+    public MyListener(HashMap<String,Tuple> table) {
+      this.table = table;
+
+    }
+    @ClientCacheEntryCreated
+    @ClientCacheEntryModified
+    @ClientCacheEntryRemoved
+    public void handleClientEvent(CacheEntryEvent e) {
+      System.out.println(e);
+    }
+  }
+
+  public static void AttachRemoteListener(String cacheName, String ip, int port, Object listestener){
+    RemoteCacheManager remoteCacheManager = createRemoteCacheManager(ip,port);
+    RemoteCache<Object, Object> remoteCache = remoteCacheManager.getCache(cacheName);
+
+    System.out.println("Using cache " + cacheName);
+    //
+    if (remoteCache == null) {
+      System.err.println("Cache " + cacheName + " not found!");
+      System.exit(1);
+    }
+    remoteCache.addClientListener(listestener);
   }
 
 }
