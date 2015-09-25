@@ -21,9 +21,17 @@ import java.util.*;
 import static java.lang.Thread.sleep;
 
 public class leadsCli {
+  private static String currentquid;
+
+  public enum waitResults {WAIT_SQL, WAIT_CQL, FINISHED};
+
   transient protected static Random r;
   private static String host;
   private static int port;
+  private static waitResults waitingQuery=waitResults.FINISHED;
+
+  private static HashMap<String,Tuple> cqlResults=null;
+
   private static String username = "leads";
   protected long rowsC = 60;
   protected String[] loc = {"a", "b", "c", "d"};
@@ -32,6 +40,7 @@ public class leadsCli {
   private static boolean noPrint = false;
   public static void main(String[] args) throws Exception {
 
+    cqlResults=new HashMap<>();
     System.out.println(" === Leads Command Line Interface === ");
 
     InitializeWebClient(args);
@@ -46,6 +55,7 @@ public class leadsCli {
     ConsoleReader reader = null;
     try {
       reader = new ConsoleReader();
+      reader.setHandleUserInterrupt(true);
 
       MemoryHistory hist = setupHistory(reader, "leadscli");
 
@@ -118,7 +128,6 @@ public class leadsCli {
             }
           }
         }
-
       } while (true);
 
     } catch (Exception e) {
@@ -135,6 +144,29 @@ public class leadsCli {
     } finally {
       if (reader != null)
         reader.getTerminal().restore();
+    }
+  }
+
+  private static void handle_userInterrupt(){
+    try {
+    switch (waitingQuery) {
+      case WAIT_SQL:
+        waitingQuery=waitResults.FINISHED;
+        System.out.println(" User terminated.");
+        break;
+      case WAIT_CQL:
+        //connect to remote manager and send quit;
+
+        WebServiceClient.stopCQLQuery(currentquid);
+        waitingQuery=waitResults.FINISHED;
+        System.out.println(" User terminated.");
+        break;
+      case FINISHED:
+        break;
+
+    }
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
@@ -167,27 +199,39 @@ public class leadsCli {
 //        }
   }
 
-  static void send_query_and_wait(ConsoleReader reader, String sql) throws IOException, InterruptedException {
+  static void send_query_and_wait(final ConsoleReader reader, String sql) throws IOException, InterruptedException {
     long start = System.currentTimeMillis();
     long resultCompleted, resultArrived = 0, resultPrinted = 0;
     QueryStatus currentStatus = WebServiceClient.submitQuery(username, sql);
+    currentquid=currentStatus.getId();
     long submittime = System.currentTimeMillis();
 
+
+    Thread th = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        System.out.println("Ctrl + C, Terminate ");
+        while(true)
+          try {
+            reader.readLine();
+          } catch (jline.console.UserInterruptException e) {
+            handle_userInterrupt();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+      }
+    });
+    th.start();
+
+
     int getquerydelaytime = 1000;
-    while (!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")) {
+    while (!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED") && waitingQuery!=waitResults.FINISHED) {
       sleep(getquerydelaytime);
       currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
 //            System.out.print("s: " + currentStatus.toString());
 //            System.out.println(", o: " + currentStatus.toString());
       //System.out.println("The query with id " + currentStatus.getId() + " is " + currentStatus.getStatus());
       System.out.printf("\rPlease wait ... elapsed: %f s", (System.currentTimeMillis() - start) / 1000.0);
-      if(reader.getInput().available()>0) {
-        System.out.print(" "+reader.getInput().available());
-        if (reader.readCharacter() == 27) {
-          System.out.println(" User terminated.");
-          break;
-        }
-      }
 
     }
     Date curr_date = new Date(System.currentTimeMillis());
