@@ -256,6 +256,24 @@ public class WebServiceClient {
     ActionResult result = mapper.readValue(response, ActionResult.class);
     return result;
   }
+  public static ActionResult removeListener(String cacheName,String listener) throws IOException{
+    address = new URL(host+":"+port+prefix+"internal/removeListener/"+cacheName+"/"+listener);
+    HttpURLConnection connection = (HttpURLConnection) address.openConnection();
+    connection = setUp(connection, "POST", MediaType.APPLICATION_JSON, true, true);
+    String response = getResult(connection);
+    ActionResult result = mapper.readValue(response, ActionResult.class);
+    return result;
+  }
+
+  public static ActionResult addListener(String cacheName,String listener,JsonObject conf) throws IOException{
+    address = new URL(host+":"+port+prefix+"internal/addListener/"+cacheName+"/"+listener);
+    HttpURLConnection connection = (HttpURLConnection) address.openConnection();
+    connection = setUp(connection, "POST", MediaType.APPLICATION_JSON, true, true);
+    setBody(connection,conf);
+    String response = getResult(connection);
+    ActionResult result = mapper.readValue(response, ActionResult.class);
+    return result;
+  }
 
   public static QueryResults getQueryResults(String id, long min, long max) throws IOException {
     QueryResults result = new QueryResults();

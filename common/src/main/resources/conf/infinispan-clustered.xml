@@ -27,7 +27,7 @@
         <!--<serialization version="70"/>-->
         <jmx domain="eu.leads.processor" duplicate-domains="true"></jmx>
         <distributed-cache name="defaultCache" mode="SYNC" owners="1" l1-lifespan="600000" start="true"
-                           statistics="true">
+                           statistics="true" >
             <compatibility></compatibility>
             <!--<indexing index="NONE">-->
             <!--<property name="default.directory_provider">ram</property>-->

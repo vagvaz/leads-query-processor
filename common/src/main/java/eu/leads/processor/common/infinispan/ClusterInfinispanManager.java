@@ -1,5 +1,6 @@
 package eu.leads.processor.common.infinispan;
 
+import eu.leads.processor.common.LeadsListener;
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
@@ -697,7 +698,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       return manager.getCache(name);
     }
     else{
-      createIndexedCache(name,configuration);
+      manager.defineConfiguration(name, configuration);
     }
     return manager.getCache(name);
   }
@@ -801,7 +802,43 @@ public class ClusterInfinispanManager implements InfinispanManager {
    */
   @Override
   public void removeListener(Object listener, Cache cache) {
-    cache.removeListener(listener);
+//    cache.removeListener(listener);
+    String listenerId = null;
+    if(listener instanceof LeadsListener){
+      LeadsListener l = (LeadsListener)listener;
+      listenerId = l.getId();
+    }
+    else if(listener instanceof String){
+      String name = (String) listener;
+      if(name.equals("scan")){
+        name =  ScanCQLListener.class.toString();
+      }else if(name.equals("topk-1")){
+        name =  TopkFirstStageListener.class.toString();
+      }else if(name.equals("topk-2")){
+        name =  TopkSecondStageListener.class.toString();
+      }else if(name.equals("output")){
+        name = OutputCQLListener.class.toString();
+      }
+      else{
+        System.err.println("Listener unknown " + name);
+      }
+      listenerId = name;
+    }
+
+    RemoveListenerCallable callable = new RemoveListenerCallable(cache.getName(),listenerId);
+    DistributedExecutorService des = new DefaultExecutorService(cache);
+    List<Future<Void>> list = des.submitEverywhere(callable);
+    //
+    System.out.println("removed " + listenerId+" from  " + cache.getName());
+    log.error("REMOVELISTENER " + listenerId + " from  " + cache.getName());
+    for (Future<Void> future : list) {
+      try {
+        future.get(); // wait for task to complete
+      } catch (InterruptedException e) {
+      } catch (ExecutionException e) {
+      }
+    }
+
   }
 
   /**
@@ -896,17 +933,17 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
   private void createIndexedCache(String name, Configuration configuration) {
     //    manager.defineConfiguration(name,getCacheDefaultConfiguration(name));
-    DistributedExecutorService des = new DefaultExecutorService(manager.getCache("clustered"));
-    List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(name,true));
-    //
-    System.out.println(" i "+ name +" " + list.size());
-    for (Future<Void> future : list) {
-      try {
-        future.get(); // wait for task to complete
-      } catch (InterruptedException e) {
-      } catch (ExecutionException e) {
-      }
-    }
+//    DistributedExecutorService des = new DefaultExecutorService(manager.getCache("clustered"));
+//    List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(name,true));
+//    //
+//    System.out.println(" i "+ name +" " + list.size());
+//    for (Future<Void> future : list) {
+//      try {
+//        future.get(); // wait for task to complete
+//      } catch (InterruptedException e) {
+//      } catch (ExecutionException e) {
+//      }
+//    }
   }
 
 

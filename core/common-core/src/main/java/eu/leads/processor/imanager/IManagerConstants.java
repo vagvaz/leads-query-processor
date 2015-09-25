@@ -29,4 +29,5 @@ public class IManagerConstants {
 	public static final String QUIT = "quit";
 	public static final String STOP_CACHE = "stopCache";
 	public static final String REMOVE_LISTENER = "removeListener";
+	public static final String ADD_LISTENER = "addListener";
 }

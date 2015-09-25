@@ -85,6 +85,7 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
     Handler<HttpServerRequest> stopCacheHandler = new StopCacheHandler(com,log);
     Handler<HttpServerRequest> stopCQLHandler = new StopCQLHandler(com,log);
     Handler<HttpServerRequest> removeListenerHandler = new RemoveListenerHandler(com,log);
+    Handler<HttpServerRequest> addListenerHandler = new AddListenerHandler(com,log);
 
     //object
     failHandler = new Handler<HttpServerRequest>() {
@@ -116,6 +117,7 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
     matcher.post("/rest/internal/completedmr/",completedMRHandler);
     matcher.post("/rest/internal/stopCache/:cache",stopCacheHandler);
     matcher.post("/rest/internal/removeListener/:cache/:listener",removeListenerHandler);
+    matcher.post("/rest/internal/addListener/:cache/:listener",addListenerHandler);
     matcher.post("/rest/query/stopcql/:id",stopCQLHandler);
     matcher.post("/rest/mrjob/submit/", executeMapReduceJobHandler);
     //

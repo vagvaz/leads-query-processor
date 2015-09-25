@@ -21,6 +21,7 @@ public class GetQueryStatusActionHandler implements ActionHandler {
     InfinispanManager persistence;
     String id;
     Cache <String,String> queriesCache;
+    JsonObject actionResult = new JsonObject();
     public GetQueryStatusActionHandler(Node com, LogProxy log, InfinispanManager persistence,
                                           String id) {
         this.com = com;
@@ -28,13 +29,14 @@ public class GetQueryStatusActionHandler implements ActionHandler {
         this.persistence = persistence;
         this.id = id;
        queriesCache = (Cache) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
+      actionResult = new QueryStatus("",QueryState.PENDING,"INITIAL").asJsonObject();
     }
 
     @Override
     public Action process(Action action) {
 //      log.info("process get query status");
         Action result = action;
-       JsonObject actionResult = new JsonObject();
+
        try {
             String queryId = action.getData().getString("queryId");
 //            JsonObject actionResult = persistence.get(StringConstants.QUERIESCACHE, queryId);
@@ -44,6 +46,7 @@ public class GetQueryStatusActionHandler implements ActionHandler {
 
             if(queryJson != null) {
               JsonObject query = new JsonObject(queryJson);
+
               result.setResult(query.getObject("status"));
             }
             else{

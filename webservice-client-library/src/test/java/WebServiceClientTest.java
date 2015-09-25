@@ -16,7 +16,7 @@ public class WebServiceClientTest {
     private static int port;
 
     public static void main(String[] args) throws IOException {
-        host = "http://192.168.1.104";
+        host = "http://127.0.0.1";
         //        host = "http://5.147.254.199";
         //       host = "http://5.147.254.161";
         //        host = "http://80.156.73.113";
@@ -33,6 +33,8 @@ public class WebServiceClientTest {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+        String cqlQuery = "leads.6a03a89a-ecef-4a1e-80d4-febf72aab676";
+        WebServiceClient.stopCQLQuery(cqlQuery);
 
         JsonObject object = new JsonObject();
         object.putString("name", "vag");
