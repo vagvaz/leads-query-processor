@@ -516,7 +516,7 @@ public class LeadsDataStore extends AbstractDataStore {
 	public Map<Long, Map<String, Object>> getUsersKeywordsListExt() {
 		Map<Long, Map<String, Object>> keywordsTuples = new HashMap<>();
 		
-		QueryResults rs = LeadsQueryInterface.execute("SELECT * FROM default.adidas_keywords");
+		QueryResults rs = LeadsQueryInterface.execute("SELECT * FROM default.adidas_keywords;");
 		
 		if(rs != null) {
 			for(String row : rs.getResult()) {
@@ -527,6 +527,7 @@ public class LeadsDataStore extends AbstractDataStore {
 					String column = (String)o;
 					value.put(column, jsonRow.get(column));
 				}
+				keywordsTuples.put(key, value);
 			}
 		}
 		
