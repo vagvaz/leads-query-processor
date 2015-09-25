@@ -29,6 +29,7 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
   transient private String tableName;
   transient String IndexName;
   transient ArrayList<String> columnNames;
+  transient ArrayList<String> fullColumnNames;
   transient Logger profilerLog;
   private ProfileEvent fullProcessing;
   transient ArrayList<Cache> indexCaches;
@@ -60,9 +61,13 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
     for (Sort.SortSpec sc : collumns)
       columnNames.add(((ColumnReferenceExpr) sc.getKey()).getName());
 
+    fullColumnNames = new ArrayList<>();
+
     System.out.println(" TableName: " + tableName);
     tableName = StringConstants.DEFAULT_DATABASE_NAME + "." + tableName;
-
+    for(String s : columnNames){
+      fullColumnNames.add(tableName+"."+s);
+    }
     System.out.println(" TableName: " + tableName);
 
     System.out.println(" IndexName: " + IndexName);
@@ -114,7 +119,7 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
         return;
       }
       for (int c = 0; c < columnNames.size(); c++) {
-        String column = tableName + '.' + columnNames.get(c);
+        String column = fullColumnNames.get(c);  // tableName + '.' + columnNames.get(c);
         LeadsIndex lInd = lindHelp.CreateLeadsIndex(value.getGenericAttribute(column), ikey, column, tableName);
         //putToCacheDirect(indexCaches.get(c), ikey, lInd);
         indexCaches.get(c).getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).put(ikey, lInd);
