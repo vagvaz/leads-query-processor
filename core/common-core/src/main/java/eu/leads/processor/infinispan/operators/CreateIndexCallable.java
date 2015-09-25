@@ -36,7 +36,7 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
   transient int printStackTraceCnt=0;
   transient ArrayList<DistCMSketch> sketches;
   transient LeadsIndexHelper lindHelp ;
-
+  int counter = 0;
   public CreateIndexCallable(String configString, String output) {
     super(configString, output);
   }
@@ -109,7 +109,15 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
 
   @Override
   public void executeOn(K key, V ivalue) {
-
+    counter++;
+    if(counter % 10000 == 0){
+      Thread.yield();
+      try {
+        Thread.sleep(100);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
     //ProfileEvent createIndexExecute = new ProfileEvent("CreateIndexExecute", profilerLog);
     String ikey = (String) key;
     Tuple value = (Tuple) ivalue;
