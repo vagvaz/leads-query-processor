@@ -27,7 +27,7 @@
         <transport stack="tcp" remote-command-executor="infinispan-transport"/>
         <!--<serialization version="70"/>-->
         <jmx domain="eu.leads.processor" duplicate-domains="true"></jmx>
-        <distributed-cache name="defaultCache" mode="SYNC" owners="1" l1-lifespan="600000" start="true"
+        <distributed-cache name="defaultCache" mode="SYNC" owners="1"  start="true"
                            statistics="true">
             <compatibility></compatibility>
             <!--<indexing index="NONE">-->
