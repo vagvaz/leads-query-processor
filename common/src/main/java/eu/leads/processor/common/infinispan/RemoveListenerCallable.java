@@ -1,5 +1,6 @@
 package eu.leads.processor.common.infinispan;
 
+import eu.leads.processor.common.LeadsListener;
 import org.infinispan.Cache;
 import org.infinispan.distexec.DistributedCallable;
 
@@ -12,13 +13,13 @@ import java.util.Set;
 public class RemoveListenerCallable<K, V> implements DistributedCallable<K, V, Void> {
     private static final long serialVersionUID = 8331682008912636730L;
     private final String cacheName;
-    private final Object listener;
+    private final String listener;
     //    private final Configuration configuration;
     private transient Cache<K, V> cache;
 
     public RemoveListenerCallable(String cacheName, Object listener) {
         this.cacheName = cacheName;
-        this.listener = listener;
+        this.listener = (String) listener;
     }
 
 
@@ -32,9 +33,12 @@ public class RemoveListenerCallable<K, V> implements DistributedCallable<K, V, V
         Iterator<Object> iterator = listeners.iterator();
         while (iterator.hasNext()) {
             Object current = iterator.next();
-            if (this.listener.equals(current)) {
-                cache.removeListener(current);
-                return null;
+            if (current instanceof LeadsListener) {
+                LeadsListener l = (LeadsListener)current;
+                if(l.getId().equals(listener)) {
+                    cache.removeListener(current);
+                    return null;
+                }
             }
         }
         //Try to remove by class Name
@@ -55,6 +59,6 @@ public class RemoveListenerCallable<K, V> implements DistributedCallable<K, V, V
      */
     @Override
     public void setEnvironment(Cache<K, V> cache, Set<K> inputKeys) {
-        this.cache = cache;
+        this.cache = (Cache<K, V>) InfinispanClusterSingleton.getInstance().getManager().getPersisentCache(cacheName);
     }
 }

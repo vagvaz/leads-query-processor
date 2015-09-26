@@ -22,32 +22,32 @@ public class LogProxy {
     }
 
     public void info(String message) {
-        logMessage.putString("type", "info");
-        logMessage.putString("message", message);
-        bus.sendToAllGroup(logId, logMessage);
+//        logMessage.putString("type", "info");
+//        logMessage.putString("message", message);
+//        bus.sendToAllGroup(logId, logMessage);
     }
 
     public void warn(String message) {
-        logMessage.putString("type", "warn");
-        logMessage.putString("message", message);
-        bus.sendToAllGroup(logId, logMessage);
+//        logMessage.putString("type", "warn");
+//        logMessage.putString("message", message);
+//        bus.sendToAllGroup(logId, logMessage);
     }
 
     public void error(String message) {
-        logMessage.putString("type", "error");
-        logMessage.putString("message", message);
-        bus.sendToAllGroup(logId, logMessage);
+//        logMessage.putString("type", "error");
+//        logMessage.putString("message", message);
+//        bus.sendToAllGroup(logId, logMessage);
     }
 
     public void debug(String message) {
-        logMessage.putString("type", "debug");
-        logMessage.putString("message", message);
-        bus.sendToAllGroup(logId, logMessage);
+//        logMessage.putString("type", "debug");
+//        logMessage.putString("message", message);
+//        bus.sendToAllGroup(logId, logMessage);
     }
 
     public void fatal(String message) {
-        logMessage.putString("type", "fatal");
-        logMessage.putString("message", message);
-        bus.sendToAllGroup(logId, logMessage);
+//        logMessage.putString("type", "fatal");
+//        logMessage.putString("message", message);
+//        bus.sendToAllGroup(logId, logMessage);
     }
 }

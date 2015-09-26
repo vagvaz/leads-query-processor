@@ -99,7 +99,9 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
       handlers.put(IManagerConstants.CREATE_NEW_ENC_QUERY, new CreateEncQueryActionHandler(com,log,persistence,id));
       handlers.put(IManagerConstants.EXECUTE_MAPREDUCE,new ExecuteMRActionHandler(com,log,persistence,id));
       handlers.put(IManagerConstants.COMPLETED_MAPREDUCE, new CompletedMRActionHandler(com,log,persistence,id));
-
+      handlers.put(IManagerConstants.STOP_CACHE, new StopCacheActionHandler(com,log,persistence,id));
+      handlers.put(IManagerConstants.ADD_LISTENER, new AddListenerActionHandler(com,log,persistence,id));
+      handlers.put(IManagerConstants.REMOVE_LISTENER, new RemoveListenerActionHandler(com,log,persistence,id));
 
 
       bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {
