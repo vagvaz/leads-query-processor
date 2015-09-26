@@ -369,9 +369,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
         "run",
         "football",
         "shoe",
-        "Adidas",
+        "adidas",
         "arsenal",
-        "Arsenal",
         "pharrell williams"};
     String prefix = "default.adidas_keywords.";
     int counter = 0;
@@ -457,7 +456,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-            false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(
+            false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LRU).threadPolicy(
             EvictionThreadPolicy.DEFAULT);
 
       } else { //Use leveldb
@@ -480,7 +479,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(
-            maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
+            maxEntries).strategy(EvictionStrategy.LRU).threadPolicy(EvictionThreadPolicy.DEFAULT)
 //            .locking().concurrencyLevel(1000)
             .build();
       }
@@ -664,7 +663,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         .index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
         .compatibility().enable()//.marshaller(new TupleMarshaller())
         .expiration().lifespan(-1).maxIdle(120000).wakeUpInterval(-1).reaperEnabled(
-            false).eviction().maxEntries(inMemSize).strategy(EvictionStrategy.LIRS).build();
+            false).eviction().maxEntries(inMemSize).strategy(EvictionStrategy.LRU).build();
     return config;
   }
 
@@ -857,7 +856,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         .fetchPersistentState(true)
         .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
         .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(maxEntries).strategy(
-            EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
+            EvictionStrategy.LRU).threadPolicy(EvictionThreadPolicy.DEFAULT)
 //        .locking().concurrencyLevel(1000)
         .build();
     manager.defineConfiguration(cacheName, configuration);
@@ -928,7 +927,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-                false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
+                false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LRU).threadPolicy(EvictionThreadPolicy.DEFAULT)
             .build();
 
       } else { //Use leveldb
@@ -950,7 +949,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(true)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(
-                maxEntries).strategy(EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
+                maxEntries).strategy(EvictionStrategy.LRU).threadPolicy(EvictionThreadPolicy.DEFAULT)
 //            .locking().concurrencyLevel(1000)
             .build();
       }
@@ -982,7 +981,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         .cacheSize(cacheSize * 1024 * 1024).fetchPersistentState(true).shared(false).purgeOnStartup(false).preload(
             false).compatibility().enable()//.marshaller(new TupleMarshaller())
         .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(maxEntries).strategy(
-            EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.DEFAULT)
+            EvictionStrategy.LRU).threadPolicy(EvictionThreadPolicy.DEFAULT)
 //        .locking().concurrencyLevel(1000)
         .build();
 //    defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).clustering()
