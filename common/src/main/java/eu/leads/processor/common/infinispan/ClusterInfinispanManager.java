@@ -201,7 +201,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         .addProperty("hibernate.search.default.indexmanager", "near-real-time")
         .addProperty("hibernate.search.default.indexwriter.ram_buffer_size", "128")
         .addProperty("lucene_version", "LUCENE_CURRENT");
-    builder.clustering().hash().numOwners(1);
+    builder.clustering().l1().disable().clustering().hash().numOwners(1);
     builder.jmxStatistics().enable();
     builder.transaction().transactionMode(TransactionMode.TRANSACTIONAL)
         //            .persistence().passivation(false)
@@ -659,7 +659,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     //do not use persistence
 
     Configuration config = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
-        .clustering().cacheMode(CacheMode.DIST_SYNC).hash().numOwners(1).indexing()
+        .clustering().l1().disable().clustering().cacheMode(CacheMode.DIST_SYNC).hash().numOwners(1).indexing()
         .index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
         .compatibility().enable()//.marshaller(new TupleMarshaller())
         .expiration().lifespan(-1).maxIdle(120000).wakeUpInterval(-1).reaperEnabled(
@@ -842,7 +842,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       return manager.getCache(cacheName);
     }
     Configuration configuration = new ConfigurationBuilder()
-        .clustering().cacheMode(CacheMode.LOCAL)
+        .clustering().l1().disable().clustering().cacheMode(CacheMode.LOCAL)
         .transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
         .persistence().passivation(false)
         .addStore(LevelDBStoreConfigurationBuilder.class)
@@ -865,10 +865,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
   }
 
   private void createCache(String cacheName, Configuration cacheConfiguration) {
-    //    if (!cacheConfiguration.clustering().cacheMode().isClustered()) {
+    //    if (!cacheConfiguration.clustering().l1().disable().clustering().cacheMode().isClustered()) {
     //      log.warn("Configuration given for " + cacheName
     //          + " is not clustered so using default cluster configuration");
-    //      //            cacheConfiguration = new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_ASYNC).async().l1().lifespan(100000L).hash().numOwners(3).build();
+    //      //            cacheConfiguration = new ConfigurationBuilder().clustering().l1().disable().clustering().cacheMode(CacheMode.DIST_ASYNC).async().l1().lifespan(100000L).hash().numOwners(3).build();
     //    }
     //      if(manager.cacheExists(cacheName))
     //         return;
@@ -969,7 +969,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 //      initDefaultCacheConfig();
 //    }
     defaultIndexConfig = new ConfigurationBuilder() //.read(manager.getDefaultCacheConfiguration())
-        .clustering().cacheMode(CacheMode.LOCAL)
+        .clustering().l1().disable().clustering().cacheMode(CacheMode.LOCAL)
         .indexing().index(Index.LOCAL).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).persistence()
         .passivation(false).addStore(LevelDBStoreConfigurationBuilder.class).location(
             "/tmp/leadsprocessor-data/" + uniquePath + "/leveldb/data/")
@@ -987,7 +987,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
 //    defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).clustering()
 //        .cacheMode(CacheMode.LOCAL).transaction()
 //        .transactionMode(TransactionMode.NON_TRANSACTIONAL)
-//            .clustering().persistence().passivation(false).indexing().index(Index.LOCAL).build();
+//            .clustering().l1().disable().clustering().persistence().passivation(false).indexing().index(Index.LOCAL).build();
   }
 
 
