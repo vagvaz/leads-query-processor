@@ -917,7 +917,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         defaultConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
             .clustering()
             .cacheMode(CacheMode.DIST_SYNC)
-            .hash().numOwners(1)
+            .hash().numOwners(1).numSegments(72)
             .indexing().index(Index.NONE).transaction().transactionMode(
                 TransactionMode.NON_TRANSACTIONAL)
             .persistence().passivation(false)

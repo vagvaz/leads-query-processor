@@ -211,6 +211,11 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
 //               log.info("End of leadsIntermidateIterator " + e.getMessage());
                break;
             }
+            if(e instanceof InterruptedException){
+               //profilerLog.error(this.imanager.getCacheManager().getAddress().toString() + " was interrupted ");
+               log.error(this.imanager.getCacheManager().getAddress().toString() + " was interrupted ");
+               throw e;
+            }
             log.error("EXCEPTION WHILE updating agg value");
             log.error(e.getClass() + " " + e.getMessage());
             log.error(iterator.toString());
@@ -240,7 +245,11 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
                t.setAttribute(name, tupleValue);
             }
          }catch (Exception e ){
-
+            if(e instanceof InterruptedException){
+               //profilerLog.error(this.imanager.getCacheManager().getAddress().toString() + " was interrupted ");
+               log.error(this.imanager.getCacheManager().getAddress().toString() + " was interrupted ");
+               throw e;
+            }
             log.error("EXCEPTION ON FINAL setting agg value");
             log.error(e.getClass() + " " + e.getMessage());
             log.error(iterator.toString());

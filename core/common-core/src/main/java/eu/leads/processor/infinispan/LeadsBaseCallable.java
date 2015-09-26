@@ -227,8 +227,13 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       }
       catch(Exception e){
         iterable.close();
-        profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
-        PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
+        if(e instanceof InterruptedException){
+          profilerLog.error(this.imanager.getCacheManager().getAddress().toString() + " was interrupted ");
+        }
+        else {
+          profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
+          PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
+        }
       }
     }else{
       //      profCallable.start("Search_Over_Indexed_Data");
@@ -266,9 +271,13 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
         keys.clear();
       } catch (Exception e) {
-        profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
-        e.printStackTrace();
-        PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
+        if(e instanceof InterruptedException){
+          profilerLog.error(this.imanager.getCacheManager().getAddress().toString() + " was interrupted ");
+        }else {
+          profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
+          e.printStackTrace();
+          PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
+        }
       }
     }
     //    profCallable.end();

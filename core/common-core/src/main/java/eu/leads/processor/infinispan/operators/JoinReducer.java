@@ -130,7 +130,11 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
                     break;
                 }
                 else{
-
+                    if(e instanceof InterruptedException){
+                        profilerLog.error(this.imanager.getCacheManager().getAddress().toString() + " was interrupted ");
+//                        log.error(this.imanager.getCacheManager().getAddress().toString() + " was interrupted ");
+                        throw e;
+                    }
                     profilerLog.error("EXCEPTION WHILE updating agg value");
                     profilerLog.error(e.getClass() + " " + e.getMessage());
                     profilerLog.error(iter.toString());
