@@ -775,28 +775,7 @@ public class WebServiceClient {
     return new RemoteCacheManager(builder.build());
   }
 
-  class MyListener {
-    public HashMap<String, Tuple> getTable() {
-      return table;
-    }
 
-    private final HashMap<String, Tuple> table;
-
-
-    //        System.err.println("Plugin probably Failed on " + entry.getType() + " " + entry.getEventData().getKey() + " ---> " + entry.getEventData().getValue());
-
-
-    public MyListener(HashMap<String,Tuple> table) {
-      this.table = table;
-
-    }
-    @ClientCacheEntryCreated
-    @ClientCacheEntryModified
-    @ClientCacheEntryRemoved
-    public void handleClientEvent(CacheEntryEvent e) {
-      System.out.println(e);
-    }
-  }
 
   public static void AttachRemoteListener(String cacheName, String ip, int port, Object listestener){
     RemoteCacheManager remoteCacheManager = createRemoteCacheManager(ip,port);
