@@ -6,13 +6,12 @@ import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
-import junit.framework.TestCase;
 import org.infinispan.Cache;
 
 import java.io.IOException;
 import java.util.Map;
 
-public class InfinispanClusterTest extends TestCase {
+public class InfinispanClusterTest  {
     public static void main(String[] args) throws IOException {
         LQPConfiguration.initialize();
        LQPConfiguration.getInstance().getConfiguration().setProperty("node.current.component", "catalog-worker");
