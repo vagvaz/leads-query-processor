@@ -141,7 +141,7 @@ public class AdidasProcessingPlugin implements PluginInterface {
 		String timestamp  = webpage.getAttribute("default.webpages.ts");
 		Object headersObj = webpage.getGenericAttribute("default.webpages.headers");
 		
-		if(content != null && timestamp != null && headersObj != null) {
+		if(content != null && !content.trim().isEmpty() && timestamp != null && headersObj != null) {
 			if(isContentTypeHTML(headersObj)) {
 				HashMap<String,Object> cacheColumns = new HashMap<>();
 				cacheColumns.put(DataStoreSingleton.getMapping().getProperty("leads_crawler_data-content"), content);

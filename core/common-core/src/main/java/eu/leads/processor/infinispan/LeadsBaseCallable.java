@@ -54,6 +54,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   transient protected FilterOperatorTree tree;
   long start = 0;
   long end = 0;
+  int readCounter = 0;
 
   //  transient protected RemoteCache outputCache;
   //  transient protected RemoteCache ecache;
@@ -202,6 +203,10 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
         for (Object object : iterable) {
           //        profExecute.end();
+          readCounter++;
+          if(readCounter % 10000 == 0){
+            Thread.yield();
+          }
           Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
 
           //      V value = inputCache.get(key);
@@ -222,8 +227,13 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       }
       catch(Exception e){
         iterable.close();
-        profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
-        PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
+        if(e instanceof InterruptedException){
+          profilerLog.error(this.imanager.getCacheManager().getAddress().toString() + " was interrupted ");
+        }
+        else {
+          profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
+          PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
+        }
       }
     }else{
       //      profCallable.start("Search_Over_Indexed_Data");
@@ -261,9 +271,13 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
         keys.clear();
       } catch (Exception e) {
-        profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
-        e.printStackTrace();
-        PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
+        if(e instanceof InterruptedException){
+          profilerLog.error(this.imanager.getCacheManager().getAddress().toString() + " was interrupted ");
+        }else {
+          profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
+          e.printStackTrace();
+          PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
+        }
       }
     }
     //    profCallable.end();

@@ -53,443 +53,309 @@ public class ScanOperator extends BasicOperator {
 			} else if (conf.getString("next.type").equals(LeadsNodeType.JOIN.toString())) {
 //        if(conf.getObject("next").containsField("buildBloom")){
 //          conf.getObject("next").getObject("configuration").putObject("buildBloom",conf.getObject("next").getObject("buildBloom"));
-//        }	
-                        joinOperator = true;// new JoinOperator(this.com,this.manager,this.log,this.action);
-				//            PlanNode node = new PlanNode(conf.getObject("next").asObject());
-				//            joinOperator.setIntermediateCacheName(node.getNodeId()+".intermediate");
-				//            joinOperator.init(conf.getObject("next").getObject("configuration"));
-			} else if (conf.getString("next.type").equals(LeadsNodeType.SORT.toString())) {
-				sortOperator = true;//new SortOperator(this.com,this.manager,this.log,this.action);
-				//            sortOperator.init(conf.getObject("next").getObject("configuration"));
-				System.err.println("SORT SCAN NOT IMPLEMENTED YET");
-			} else {
-				System.err.println(conf.getString("next.type") + " SCAN NOT IMPLEMENTED YET");
-			}
-		}
-		if(conf.getObject("body").containsField("versionStart"))
-		if(conf.getObject("body").getInteger("versionStart")>0)
-		{
-			System.out.println("TS Version found.");
-			int Start =conf.getObject("body").getInteger("versionStart");
-			int Finish =conf.getObject("body").getInteger("versionFinish");
-			//Check input fields
-			JsonObject inputSchema;
-			boolean tsfound=false;
-
-			inputSchema = conf.getObject("body").getObject("inputSchema");
-			JsonArray fields = inputSchema.getArray("fields");
-
-			Iterator<Object> iterator = fields.iterator();
-			String columnName = null;
-			JsonObject columnjson=null;
-			while (iterator.hasNext()) {
-				columnjson = (JsonObject) iterator.next();
-				columnName = columnjson.getString("name");
-				if(columnName.contains("ts")) {
-					tsfound = true;
-					break;
-				}
-			}
-			if(tsfound){
-				JsonObject qual=new JsonObject();
-				System.out.println("TS column found.");
-
-				JsonObject rightExpr = new JsonObject();
-				JsonObject body = new JsonObject();
-				JsonObject datum = new JsonObject();
-				datum.putString("type", "INT8");
-				body.putString("type", "INT8");
-				body.putNumber("val", Start);
-				datum.putObject("body", body);
-				body = new JsonObject();
-				body.putObject("datum", datum);
-				body.putString("type", "CONST");
-				rightExpr.putString("type", "CONST");
-				rightExpr.putObject("body", body);
+//        }
+        joinOperator = true;// new JoinOperator(this.com,this.manager,this.log,this.action);
+        //            PlanNode node = new PlanNode(conf.getObject("next").asObject());
+        //            joinOperator.setIntermediateCacheName(node.getNodeId()+".intermediate");
+        //            joinOperator.init(conf.getObject("next").getObject("configuration"));
+      } else if (conf.getString("next.type").equals(LeadsNodeType.SORT.toString())) {
+        sortOperator = true;//new SortOperator(this.com,this.manager,this.log,this.action);
+        //            sortOperator.init(conf.getObject("next").getObject("configuration"));
+        System.err.println("SORT SCAN NOT IMPLEMENTED YET");
+      } else {
+        System.err.println(conf.getString("next.type") + " SCAN NOT IMPLEMENTED YET");
+      }
+    }
+    ProfileEvent scanExecute = new ProfileEvent("OperatorcheckIndex_usage", profilerLog);
+    if (checkIndex_usage())
+      conf.putBoolean("useIndex", true);
+    else
+      conf.putBoolean("useIndex", false);
+    scanExecute.end();
+  }
 
 
-				JsonObject leftExpr = new JsonObject();
-				body = new JsonObject();
+  @Override
+  public void cleanup() {
+    if(conf.containsField("next")){
+      if(conf.getObject("next").getObject("configuration").containsField("buildBloomFilter")){
+        System.err.println("Building centralized BF");
+        JsonObject bloomFilter = conf.getObject("next").getObject("configuration").getObject("buildBloomFilter");
+        Cache<String,BloomFilter> bloomCache = (Cache) manager.getPersisentCache(bloomFilter.getString("bloomCache"));
+        BloomFilter centralized = null;
+        for(String key : bloomCache.keySet()){
+          System.err.println("NODE BF: " + key);
+          if(centralized == null){
+            centralized = bloomCache.get(key);
+          }
+          else{
+            centralized.putAll(bloomCache.get(key));
+          }
+          bloomCache.remove(key);
+        }
 
-				body.putObject("column", columnjson);
-				body.putNumber("fieldId", -1);
-				body.putString("type", "FIELD");
+        Set<String> set = getMicroCloudsFromOpTarget();
+        for(String mc : set) {
+          EnsembleCacheManager tmpmanager = new EnsembleCacheManager(globalConfig.getObject("componentsAddrs").getArray(mc).get(0).toString());
+          EnsembleCache ensembleBloomCache = tmpmanager.getCache(bloomFilter.getString("bloomCache"));
+          ensembleBloomCache.put(LQPConfiguration.getInstance().getMicroClusterName(), centralized);
+        }
+      } else if (conf.getObject("next").getObject("configuration").containsField("useBloomFilter")){
+        JsonObject bloomFilter = conf.getObject("next").getObject("configuration").getObject("useBloomFilter");
+        manager.removePersistentCache(bloomFilter.getString("bloomCache"));
 
-				leftExpr.putString("type", "FIELD");
-				leftExpr.putObject("body",body);
+      }
 
-				body = new JsonObject();
-				body.putString("type", "GEQ");
-				body.putObject("leftExpr", leftExpr);
-				body.putObject("rightExpr", rightExpr);
-				body.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
-				qual.putString("type", "GEQ");
-				qual.putObject("body", body);
-				//qual.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
+    }
+    System.err.println("CLEANING UP ");
+    super.cleanup();
+  }
 
-				body = new JsonObject();
-				body.putString("type", "AND");
-				body.putObject("leftExpr", qual);
-				body.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
-				qual= new JsonObject();
-				qual.putString("type", "AND");
-				qual.putObject("body", body);
-				//qual.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
+  @Override
+  public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
+    Set<String> targetMC = getTargetMC();
+    for (String mc : targetMC) {
+      if (!conf.containsField("next")) {
+        createCache(mc,getOutput(),"batchputListener");
+      }
+      else {
+        createCache(mc, getOutput() + ".data", "localIndexListener:batchputListener");
+        if (conf.containsField("next")) {
+          if (conf.getObject("next").containsField("buildBloomFilter")) {
+            JsonObject bloomFilter = conf.getObject("next").getObject("configuration").getObject("buildBloomFilter");
+            createCache(mc, bloomFilter.getString("bloomCache"));
 
-				//leftExpr=qual;
-				//qual=new JsonObject();
+          }
+        }
+      }
 
-				///RIGHT
+    }
+  }
 
-				rightExpr = new JsonObject();
-				body = new JsonObject();
-				datum = new JsonObject();
-				datum.putString("type", "INT8");
-				body.putString("type", "INT8");
-				body.putNumber("val", Finish);
-				datum.putObject("body", body);
-				body = new JsonObject();
-				body.putString("type", "CONST");
-				body.putObject("datum", datum);
-				rightExpr.putString("type", "CONST");
-				rightExpr.putObject("body", body);
+  @Override
+  public void setupMapCallable() {
+    inputCache = (Cache) manager.getPersisentCache(getInput());
+    LeadsCollector collector = new LeadsCollector<>(0, getOutput());
+    mapperCallable = new ScanCallableUpdate<>(conf.toString(), getOutput(), collector);
+  }
 
+  @Override
+  public String getOutput() {
+    String result = super.getOutput();
+    if (groupByOperator) {
+      result = conf.getObject("next").getString("id") + ".intermediate";
+    }
+    if (joinOperator) {
+      result = conf.getObject("next").getString("id") + ".intermediate";
+    }
+    if (sortOperator) {
 
-//				leftExpr = new JsonObject();
-//				body = new JsonObject();
-//				body.putObject("column",columnjson);
-//				body.putNumber("fieldId", -1);
-//				body.putString("type", "FIELD");
-//				leftExpr.putString("type", "FIELD");
+    }
+    return result;
+  }
 
-				body = new JsonObject();
-				body.putString("type", "LEQ");
-				body.putObject("leftExpr", leftExpr);
-				body.putObject("rightExpr", rightExpr);
-				body.putObject("returnType",new JsonObject().putString("type","BOOLEAN"));
-				rightExpr=new JsonObject();
-				rightExpr.putString("type", "LEQ");
-				rightExpr.putObject("body",body);
-				//rightExpr.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
-				qual.getObject("body").putObject("rightExpr",rightExpr);
+  @Override
+  public void setupReduceCallable() {
 
+  }
 
-				if (conf.getObject("body").containsField("qual")) {
-					System.out.println(" qual exists, extend it with ts info ")
-					;//And the qual info
-					rightExpr = conf.getObject("body").getObject("qual");
-
-
-					body = new JsonObject();
-					body.putString("type", "AND");
-					body.putObject("leftExpr",rightExpr );
-					body.putObject("rightExpr",qual );
-					body.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
-					qual = new JsonObject();
-
-					qual.putString("type", "AND");
-					qual.putObject("body", body);
-					//qual.putObject("returnType", new JsonObject().putString("type", "BOOLEAN"));
-				}
-				//Create the qual
-				conf.getObject("body").putObject("qual", qual);
-
-				System.out.println("Create Qual :D : " + conf.getObject("body").encodePrettily());
-			}
-		}else{
-			System.out.println("No version.");
-		}
-		System.out.println("Create Qual :D : " + conf.getObject("body").encodePrettily());
-		ProfileEvent scanExecute = new ProfileEvent("OperatorcheckIndex_usage", profilerLog);
-		if (checkIndex_usage())
-			conf.putBoolean("useIndex", true);
-		else
-			conf.putBoolean("useIndex", false);
-		scanExecute.end();
-	}
+  @Override
+  public boolean isSingleStage() {
+    return true;
+  }
 
 
-	@Override
-	public void cleanup() {
-	  if(conf.containsField("next")){
-	    if(conf.getObject("next").getObject("configuration").containsField("buildBloomFilter")){
-	      System.err.println("Building centralized BF");
-              JsonObject bloomFilter = conf.getObject("next").getObject("configuration").getObject("buildBloomFilter");
-              Cache<String,BloomFilter> bloomCache = (Cache) manager.getPersisentCache(bloomFilter.getString("bloomCache"));
-              BloomFilter centralized = null;
-				for(String key : bloomCache.keySet()){
-					System.err.println("NODE BF: " + key);
-                                        if(centralized == null){
-						centralized = bloomCache.get(key);
-					}
-					else{
-						centralized.putAll(bloomCache.get(key));
-					}
-					bloomCache.remove(key);
-				}
+  private boolean checkIndex_usage() {
+    if (conf.getObject("body").containsField("qual")) {
+      System.out.println("Scan Check if fields are indexed.");
+      JsonObject inputSchema;
+      inputSchema = conf.getObject("body").getObject("inputSchema");
+      JsonArray fields = inputSchema.getArray("fields");
+      System.out.println("Check if inputSchema fields: " + fields.toArray().toString() + " are indexed.");
 
-                      Set<String> set = getMicroCloudsFromOpSched();
-				              for(String mc : set) {
-                        EnsembleCacheManager tmpmanager = new EnsembleCacheManager(globalConfig.getObject("componentsAddrs").getArray(mc).get(0).toString());
-                        EnsembleCache ensembleBloomCache = tmpmanager.getCache(bloomFilter.getString("bloomCache"));
-                        ensembleBloomCache.put(LQPConfiguration.getInstance().getMicroClusterName(), centralized);
-				}
-			} else if (conf.getObject("next").getObject("configuration").containsField("useBloomFilter")){
-                          JsonObject bloomFilter = conf.getObject("next").getObject("configuration").getObject("useBloomFilter");
-                           manager.removePersistentCache(bloomFilter.getString("bloomCache"));
+      Iterator<Object> iterator = fields.iterator();
+      String columnName = null;
+      HashMap indexCaches = new HashMap<>();
+      HashMap sketches = new HashMap<>();
+      while (iterator.hasNext()) {
+        JsonObject tmp = (JsonObject) iterator.next();
+        columnName = tmp.getString("name");
+        //System.out.print("Check if exists: " +  columnName + " ");
+        if (manager.getCacheManager().cacheExists(columnName)) {
+          indexCaches.put(columnName, (Cache) manager.getIndexedPersistentCache(columnName));
+          System.out.print(columnName + " exists! ");
+        }
 
-                      }
+        if (manager.getCacheManager().cacheExists(columnName + ".sketch")) {
+          sketches.put(columnName, new DistCMSketch((Cache) manager.getPersisentCache(columnName + ".sketch"), true));
+          System.out.println(" exists!");
+        }
+      }
 
-		}
-		System.err.println("CLEANING UP ");
-		super.cleanup();
-	}
+      if (indexCaches.size() == 0) {
+        System.out.println("Nothing Indexed");
+        return false;
+      } else {
+        System.out.print("At least some fields are Indexed: ");
+        for (Object s : indexCaches.keySet())
+          System.out.println((String) s);
+      }
+      long start = System.currentTimeMillis();
 
-	@Override
-	public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
-		Set<String> targetMC = getTargetMC();
-		for (String mc : targetMC) {
-			if (!conf.containsField("next")) {
-				createCache(mc,getOutput(),"batchputListener");
-			}
-			else {
-				createCache(mc, getOutput() + ".data", "localIndexListener:batchputListener");
-				if (conf.containsField("next")) {
-	                          if (conf.getObject("next").containsField("buildBloomFilter")) {
-                                    JsonObject bloomFilter = conf.getObject("next").getObject("configuration").getObject("buildBloomFilter");
-				    createCache(mc, bloomFilter.getString("bloomCache"));
+      FilterOperatorTree tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
+      Object selectvt = getSelectivity(sketches, tree.getRoot());
+      System.out.println("  selectvt CMS " + selectvt + "  computation time: " + (System.currentTimeMillis() - start) / 1000.0);
+      long inputSize;
+      if (selectvt != null) {
+        start = System.currentTimeMillis();
+        System.out.println("Get size of table " + columnName.substring(0, columnName.lastIndexOf(".")));
+        Cache<String, Long> sizeC = (Cache) manager.getPersisentCache("TablesSize");
+        if (sizeC.containsKey(columnName.substring(0, columnName.lastIndexOf("."))))
+          inputSize = sizeC.get(columnName.substring(0, columnName.lastIndexOf(".")));
+        else {
+          System.out.print("Size not found, Slow Get size() ");
+          inputSize = inputCache.size();
+          System.out.println("... Caching size value.");
+          sizeC.put(columnName.substring(0, columnName.lastIndexOf(".")),inputSize);
+        }
+        System.out.println(" Found size: " + inputSize);
 
-					}
-				}
-			}
+        double selectivity = (double) selectvt / (double) inputSize;
+        System.out.println("Scan  Selectivity: " + selectivity);
+        System.out.println("  Selectivity, inputSize " + inputSize + "  computation time: " + (System.currentTimeMillis() - start) / 1000.0);
 
-		}
-	}
+        if (selectivity < 0.5) {
+          System.out.println("Scan Use indexes!! ");
+          return indexCaches.size() > 0;
+        }
+      } else
+        System.out.println("No Selectivity!!");
 
-	@Override
-	public void setupMapCallable() {
-		inputCache = (Cache) manager.getPersisentCache(getInput());
-		LeadsCollector collector = new LeadsCollector<>(0, getOutput());
-		mapperCallable = new ScanCallableUpdate<>(conf.toString(), getOutput(), collector);
-	}
+    } else
+      System.out.println("No Qual!!");
 
-	@Override
-	public String getOutput() {
-		String result = super.getOutput();
-		if (groupByOperator) {
-			result = conf.getObject("next").getString("id") + ".intermediate";
-		}
-		if (joinOperator) {
-			result = conf.getObject("next").getString("id") + ".intermediate";
-		}
-		if (sortOperator) {
+    System.out.println("Don't Use indexes!! ");
+    return false;
+  }
 
-		}
-		return result;
-	}
+  Object getSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
+    if (root == null)
+      return null;
+    Object left = getSelectivity(sketchCaches, root.getLeft());
+    Object right = getSelectivity(sketchCaches, root.getRight());
 
-	@Override
-	public void setupReduceCallable() {
-
-	}
-
-	@Override
-	public boolean isSingleStage() {
-		return true;
-	}
-
-
-	private boolean checkIndex_usage() {
-		if (conf.getObject("body").containsField("qual")) {
-			System.out.println("Scan Check if fields are indexed.");
-			JsonObject inputSchema;
-			inputSchema = conf.getObject("body").getObject("inputSchema");
-			JsonArray fields = inputSchema.getArray("fields");
-			System.out.println("Check if inputSchema fields: " + fields.toString() + " are indexed.");
-
-			Iterator<Object> iterator = fields.iterator();
-			String columnName = null;
-			HashMap indexCaches = new HashMap<>();
-			HashMap sketches = new HashMap<>();
-			while (iterator.hasNext()) {
-				JsonObject tmp = (JsonObject) iterator.next();
-				columnName = tmp.getString("name");
-				//System.out.print("Check if exists: " +  columnName + " ");
-				if (manager.getCacheManager().cacheExists(columnName)) {
-					indexCaches.put(columnName, (Cache) manager.getIndexedPersistentCache(columnName));
-					System.out.print(columnName + " exists! ");
-				}
-
-				if (manager.getCacheManager().cacheExists(columnName + ".sketch")) {
-					sketches.put(columnName, new DistCMSketch((Cache) manager.getPersisentCache(columnName + ".sketch"), true));
-					System.out.println(" exists!");
-				}
-			}
-
-			if (indexCaches.size() == 0) {
-				System.out.println("Nothing Indexed");
-				return false;
-			} else {
-				System.out.print("At least some fields are Indexed: ");
-				for (Object s : indexCaches.keySet())
-					System.out.println((String) s);
-			}
-			long start = System.currentTimeMillis();
-
-			FilterOperatorTree tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
-			Object selectvt = getSelectivity(sketches, tree.getRoot());
-			System.out.println("  selectvt CMS " + selectvt + "  computation time: " + (System.currentTimeMillis() - start) / 1000.0);
-			long inputSize;
-			if (selectvt != null) {
-				start = System.currentTimeMillis();
-				System.out.println("Get size of table " + columnName.substring(0, columnName.lastIndexOf(".")));
-				Cache<String, Long> sizeC = (Cache) manager.getPersisentCache("TablesSize");
-				if (sizeC.containsKey(columnName.substring(0, columnName.lastIndexOf("."))))
-					inputSize = sizeC.get(columnName.substring(0, columnName.lastIndexOf(".")));
-				else {
-					System.out.print("Size not found, Slow Get size() ");
-					inputSize = inputCache.size();
-					System.out.println("... Caching size value.");
-					sizeC.put(columnName.substring(0, columnName.lastIndexOf(".")),inputSize);
-				}
-				System.out.println(" Found size: " + inputSize);
-
-				double selectivity = (double) selectvt / (double) inputSize;
-				System.out.println("Scan  Selectivity: " + selectivity);
-				System.out.println("  Selectivity, inputSize " + inputSize + "  computation time: " + (System.currentTimeMillis() - start) / 1000.0);
-
-				if (selectivity < 0.5) {
-					System.out.println("Scan Use indexes!! ");
-					return indexCaches.size() > 0;
-				}
-			} else
-				System.out.println("No Selectivity!!");
-
-		} else
-			System.out.println("No Qual!!");
-
-		System.out.println("Don't Use indexes!! ");
-		return false;
-	}
-
-	Object getSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
-		if (root == null)
-			return null;
-		Object left = getSelectivity(sketchCaches, root.getLeft());
-		Object right = getSelectivity(sketchCaches, root.getRight());
-
-		switch (root.getType()) {
-			case AND:
-				if (left != null && right != null)
-					return Math.min((double) left, (double) right);
-				break;
-			case OR:
-				if (left != null && right != null)
-					return (double) left + (double) right;
-				break;
-			default:
-				System.out.println("SubQual " + root.getType());
-				return getSubSelectivity(sketchCaches, root);
-		}
-		return (left != null) ? left : right;
-	}
+    switch (root.getType()) {
+      case AND:
+        if (left != null && right != null)
+          return Math.min((double) left, (double) right);
+        break;
+      case OR:
+        if (left != null && right != null)
+          return (double) left + (double) right;
+        break;
+      default:
+        System.out.println("SubQual " + root.getType());
+        return getSubSelectivity(sketchCaches, root);
+    }
+    return (left != null) ? left : right;
+  }
 
 
-	Object getSubSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
-		Object result = null;
-		double dleft = -1000;
-		double dright = -1000;
-		String sleft = null;
-		String sright = null;
-		if (root == null)
-			return null;
-		Object oleft = getSubSelectivity(sketchCaches, root.getLeft());
-		Object oright = getSubSelectivity(sketchCaches, root.getRight());
+  Object getSubSelectivity(HashMap<String, DistCMSketch> sketchCaches, FilterOperatorNode root) {
+    Object result = null;
+    double dleft = -1000;
+    double dright = -1000;
+    String sleft = null;
+    String sright = null;
+    if (root == null)
+      return null;
+    Object oleft = getSubSelectivity(sketchCaches, root.getLeft());
+    Object oright = getSubSelectivity(sketchCaches, root.getRight());
 
-		if (oleft instanceof Double)
-			dleft = (double) oleft;
-		if (oright instanceof Double)
-			dright = (double) oright;
-		if (oleft instanceof String)
-			sleft = (String) oleft;
-		if (oright instanceof String)
-			sright = (String) oright;
+    if (oleft instanceof Double)
+      dleft = (double) oleft;
+    if (oright instanceof Double)
+      dright = (double) oright;
+    if (oleft instanceof String)
+      sleft = (String) oleft;
+    if (oright instanceof String)
+      sright = (String) oright;
 
-		switch (root.getType()) {
-			case EQUAL:
-				if (sleft != null && oright != null) {
-					String collumnName = sleft;
-					return sketchCaches.get(collumnName).get(oright);
-				}
-				break;
-			case FIELD:
-				String collumnName = root.getValueAsJson().getObject("body").getObject("column").getString("name");
-				//String type = root.getValueAsJson().getObject("body").getObject("column").getObject("dataType").getString("type");
-				System.out.print("Field name:" + collumnName);
+    switch (root.getType()) {
+      case EQUAL:
+        if (sleft != null && oright != null) {
+          String collumnName = sleft;
+          return sketchCaches.get(collumnName).get(oright);
+        }
+        break;
+      case FIELD:
+        String collumnName = root.getValueAsJson().getObject("body").getObject("column").getString("name");
+        //String type = root.getValueAsJson().getObject("body").getObject("column").getObject("dataType").getString("type");
+        System.out.print("Field name:" + collumnName);
 
-				if (sketchCaches.containsKey(collumnName)) {
-					System.out.println(" Found sketch:" + collumnName);
+        if (sketchCaches.containsKey(collumnName)) {
+          System.out.println(" Found sketch:" + collumnName);
 
-					return collumnName;
+          return collumnName;
 
-				}
-				System.out.println(" no sketch " );
-				return null;
-			//break;
+        }
+        System.out.println(" no sketch " );
+        return null;
+      //break;
 
-			case CONST:
-				JsonObject datum = root.getValueAsJson().getObject("body").getObject("datum");
-				String type = datum.getObject("body").getString("type");
-				Number ret=0;// = MathUtils.getTextFrom(root.getValueAsJson());
-				//System.out.println("Operator Found datum: " + datum.toString());
+      case CONST:
+        JsonObject datum = root.getValueAsJson().getObject("body").getObject("datum");
+        String type = datum.getObject("body").getString("type");
+        Number ret=0;// = MathUtils.getTextFrom(root.getValueAsJson());
+        //System.out.println("Operator Found datum: " + datum.toString());
 
-				try {
-					if (type.equals("TEXT"))
-						return  MathUtils.getTextFrom(root.getValueAsJson());
-					else {
-						Number a = datum.getObject("body").getNumber("val");
-						if (a != null)
-							return a;
-					}
-				} catch (Exception e) {
-					System.err.print("Error " + ret + " to type " + type +"" + e.getMessage());
-				}
-				return null;
-			case LTH:
-				return 0.4;
+        try {
+          if (type.equals("TEXT"))
+            return  MathUtils.getTextFrom(root.getValueAsJson());
+          else {
+            Number a = datum.getObject("body").getNumber("val");
+            if (a != null)
+              return a;
+          }
+        } catch (Exception e) {
+          System.err.print("Error " + ret + " to type " + type +"" + e.getMessage());
+        }
+        return null;
+      case LTH:
+        return 0.4;
 
-			////        if(left !=null && oright !=null)
-			////          return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
-			//        return null;
-			//        break;
-			case LEQ:
-				return 0.4;
-			//        if(left !=null && oright !=null)
-			//          return left.and().having("attributeValue").lte(oright);//,right.getValueAsJson());
-			//        break;
-			case GTH:
-				return 0.4;
-			//        if(left !=null && oright !=null)
-			//          return left.and().having("attributeValue").gt(oright);//,right.getValueAsJson());
-			//        break;
-			case GEQ:
-				return 0.4;
-			//        if(left !=null && oright !=null)
-			//          return left.and().having("attributeValue").gte(oright);//,right.getValueAsJson());
-			//        break;
-			//
-			//      case LIKE:
-			//        if(left !=null && oright !=null) {
-			//          return left.and().having("attributeValue").like((String) oright);//,right.getValueAsJson());
-			//        }break;
-			//
-			//
-			//      case ROW_CONSTANT:
-			//        //TODO
-			//        break;
-			default:
-				return 0.01;
-		}
-		return null;
-	}
+      ////        if(left !=null && oright !=null)
+      ////          return left.and().having("attributeValue").lt(oright);//,right.getValueAsJson());
+      //        return null;
+      //        break;
+      case LEQ:
+        return 0.4;
+      //        if(left !=null && oright !=null)
+      //          return left.and().having("attributeValue").lte(oright);//,right.getValueAsJson());
+      //        break;
+      case GTH:
+        return 0.4;
+      //        if(left !=null && oright !=null)
+      //          return left.and().having("attributeValue").gt(oright);//,right.getValueAsJson());
+      //        break;
+      case GEQ:
+        return 0.4;
+      //        if(left !=null && oright !=null)
+      //          return left.and().having("attributeValue").gte(oright);//,right.getValueAsJson());
+      //        break;
+      //
+      //      case LIKE:
+      //        if(left !=null && oright !=null) {
+      //          return left.and().having("attributeValue").like((String) oright);//,right.getValueAsJson());
+      //        }break;
+      //
+      //
+      //      case ROW_CONSTANT:
+      //        //TODO
+      //        break;
+      default:
+        return 0.01;
+    }
+    return null;
+  }
 }

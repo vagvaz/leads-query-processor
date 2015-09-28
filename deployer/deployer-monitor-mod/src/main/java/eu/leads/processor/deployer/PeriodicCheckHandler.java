@@ -61,7 +61,7 @@ public class PeriodicCheckHandler implements Handler<Long> {
             Action requestOwner = createNewAction(action.getValue());
             requestOwner.setLabel(NQEConstants.OPERATOR_GET_OWNER);
             requestOwner.getData().putString("replyTo",com.getId());
-            com.sendToAllGroup(nqeGroup, requestOwner.asJsonObject());
+//            com.sendToAllGroup(nqeGroup, requestOwner.asJsonObject());
             moveActionToLevel(iterator,action.getValue(), 1);
         }
         actions.clear();
@@ -95,7 +95,7 @@ public class PeriodicCheckHandler implements Handler<Long> {
             Action requestStatus = createNewAction(timedOutAction);
             requestStatus.setLabel(NQEConstants.OPERATOR_GET_RUNNING_STATUS);
             requestStatus.getData().putString("replyTo",com.getId());
-            com.sendTo(owner, requestStatus.asJsonObject());
+//            com.sendTo(owner, requestStatus.asJsonObject());
             moveActionToLevel(iterator,action.getValue(), 2);
         }
         actions.clear();
@@ -110,7 +110,7 @@ public class PeriodicCheckHandler implements Handler<Long> {
             Action requestStatus = createNewAction(timedOutAction);
             requestStatus.setLabel(NQEConstants.OPERATOR_GET_RUNNING_STATUS);
            requestStatus.getData().putString("replyTo",com.getId());
-            com.sendTo(owner, requestStatus.asJsonObject());
+//            com.sendTo(owner, requestStatus.asJsonObject());
             moveActionToLevel(iterator,action.getValue(), 3);
         }
         actions.clear();
@@ -124,7 +124,7 @@ public class PeriodicCheckHandler implements Handler<Long> {
             Action failed = createNewAction(failedAction);
             failedAction.setLabel(NQEConstants.OPERATOR_FAILED);
             failed.getData().putObject("failedAction", failedAction.asJsonObject());
-            com.sendTo(deployerId, failedAction.asJsonObject());
+//            com.sendTo(deployerId, failedAction.asJsonObject());
         }
         monitoredActions.get(3).clear();
     }

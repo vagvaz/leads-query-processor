@@ -1,6 +1,8 @@
 {
   // Java verticle
   "main": "eu.leads.processor.deployer.DeployerControlVerticle",
+  "worker": true,
+  "multi-threaded": true,
   // In this example we also provide various other versions of the main verticle, you can uncomment this and
   // play around:
 

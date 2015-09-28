@@ -238,13 +238,13 @@ public class TupleBuffer {
         return null;
       Map<Object,Object> tmp = buffer;
       buffer = new HashMap<>();
-      Map<Object,Object> tmpb = new HashMap<>();
+//      Map<Object,Object> tmpb = new HashMap<>();
 
-      for(Map.Entry<Object,Object> entry : tmp.entrySet()) {
-
-        EnsembleCacheUtils.putToCacheDirect(localCache,entry.getKey(),entry.getValue());
-      }
-
+//      for(Map.Entry<Object,Object> entry : tmp.entrySet()) {
+//
+//        EnsembleCacheUtils.putToCacheDirect(localCache,entry.getKey(),entry.getValue());
+//      }
+      result = localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).putAllAsync(tmp);
     }
     return result;
   }

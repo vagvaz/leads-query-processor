@@ -124,14 +124,14 @@ public class KeywordExtractionHook extends AbstractHook {
 		return result;
 	}
 	
-	  private void addKeywordsToIndexer() {
+	  public void addKeywordsToIndexer() {
 			List<List<Object>> keywordsDef = new ArrayList<>();
 			
 			List<Map<String, Object>> keywordsList = KeywordsListSingletonExt.getInstance().getKeywordsList();
 			for(Map<String, Object> keywordMap : keywordsList) {
 				List<Object> keywordInfo = new ArrayList<>();
 				
-				Long id 					= (Long) keywordMap.get(mapping.getProperty("leads_input_keywords-id"));
+				Long id 					= Long.parseLong(keywordMap.get(mapping.getProperty("leads_input_keywords-id")).toString());
 				String keywordsString 		= (String) keywordMap.get(mapping.getProperty("leads_input_keywords-keywords"));	
 				int nonMatchingWords 		= (int) keywordMap.get(mapping.getProperty("leads_input_keywords-non_matching_words"));
 				int nonMatchingChars 		= (int) keywordMap.get(mapping.getProperty("leads_input_keywords-non_matching_chars"));

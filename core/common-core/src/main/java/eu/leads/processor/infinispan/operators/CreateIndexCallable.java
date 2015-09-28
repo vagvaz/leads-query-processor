@@ -29,13 +29,14 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
   transient private String tableName;
   transient String IndexName;
   transient ArrayList<String> columnNames;
+  transient ArrayList<String> fullColumnNames;
   transient Logger profilerLog;
   private ProfileEvent fullProcessing;
   transient ArrayList<Cache> indexCaches;
   transient int printStackTraceCnt=0;
   transient ArrayList<DistCMSketch> sketches;
   transient LeadsIndexHelper lindHelp ;
-
+  int counter = 0;
   public CreateIndexCallable(String configString, String output) {
     super(configString, output);
   }
@@ -60,9 +61,13 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
     for (Sort.SortSpec sc : collumns)
       columnNames.add(((ColumnReferenceExpr) sc.getKey()).getName());
 
+    fullColumnNames = new ArrayList<>();
+
     System.out.println(" TableName: " + tableName);
     tableName = StringConstants.DEFAULT_DATABASE_NAME + "." + tableName;
-
+    for(String s : columnNames){
+      fullColumnNames.add(tableName+"."+s);
+    }
     System.out.println(" TableName: " + tableName);
 
     System.out.println(" IndexName: " + IndexName);
@@ -104,7 +109,18 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
 
   @Override
   public void executeOn(K key, V ivalue) {
-
+    counter++;
+    if(counter % 10000 == 0){
+      Thread.yield();
+      try {
+        if(counter % 100000 == 0) {
+          log.error("sleeping after " + counter);
+        }
+        Thread.sleep(150);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
     //ProfileEvent createIndexExecute = new ProfileEvent("CreateIndexExecute", profilerLog);
     String ikey = (String) key;
     Tuple value = (Tuple) ivalue;
@@ -114,13 +130,18 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
         return;
       }
       for (int c = 0; c < columnNames.size(); c++) {
-        String column = tableName + '.' + columnNames.get(c);
+        String column = fullColumnNames.get(c);  // tableName + '.' + columnNames.get(c);
         LeadsIndex lInd = lindHelp.CreateLeadsIndex(value.getGenericAttribute(column), ikey, column, tableName);
         //putToCacheDirect(indexCaches.get(c), ikey, lInd);
-        indexCaches.get(c).getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).put(ikey, lInd);
+        indexCaches.get(c).getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL,Flag.IGNORE_RETURN_VALUES).put(ikey, lInd);
         sketches.get(c).add(value.getGenericAttribute(column));
       }
-    }catch (Exception e){
+    }
+    catch (Exception e){
+      if(e instanceof InterruptedException){
+        profilerLog.error("Got Interrupted");
+        throw e;
+      }
       System.err.println(" Ex " + key + " " + e.toString());
       if((printStackTraceCnt++%1000)==0) {
         System.err.println("StackTraces "+printStackTraceCnt);
