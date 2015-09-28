@@ -209,7 +209,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         //            .persistence().passivation(false)
         .persistence().passivation(false).addSingleFileStore().location
         ("/tmp/leadsprocessor-data/"+uniquePath+"/webpage/")
-        .fetchPersistentState(true)
+        .fetchPersistentState(false)
         .shared(false).purgeOnStartup(false).preload(false).expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
         false);
     //    builder.transaction().transactionManagerLookup(new GenericTransactionManagerLookup()).dataContainer().valueEquivalence(AnyEquivalence.getInstance());
@@ -447,7 +447,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         Configuration  c = holder.getDefaultConfigurationBuilder().build(gc);
         result.read(c).clustering()
             .cacheMode(CacheMode.DIST_SYNC)
-            .hash().numOwners(1).numSegments(segments)
+            .hash().numOwners(1).numSegments(segments).locking().useLockStriping(false).concurrencyLevel(1000)
             .indexing().index(Index.NONE).transaction().transactionMode(
             TransactionMode.NON_TRANSACTIONAL)
             .persistence().passivation(false)
@@ -455,7 +455,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             //                                                                      .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
 
             .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath + "/filestore/")
-            .fetchPersistentState(true)
+            .fetchPersistentState(false)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
             false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LRU).threadPolicy(
@@ -466,7 +466,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         result.read(holder.getDefaultConfigurationBuilder().build())
             .clustering()
             .cacheMode(CacheMode.DIST_SYNC)
-            .hash().numOwners(1).numSegments(segments)
+            .hash().numOwners(1).numSegments(segments).locking().useLockStriping(false).concurrencyLevel(1000)
             .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
             .persistence().passivation(false)
             .addStore(LevelDBStoreConfigurationBuilder.class)
@@ -478,10 +478,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .blockSize(blockSize * 1024 * 1024)
             .compressionType(CompressionType.SNAPPY)
             .cacheSize(cacheSize * 1024 * 1024)
-            .fetchPersistentState(true)
+            .fetchPersistentState(false)
             .shared(false).purgeOnStartup(true).preload(false).compatibility().enable()
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(
-            maxEntries).strategy(EvictionStrategy.LRU).threadPolicy(EvictionThreadPolicy.DEFAULT)
+            maxEntries).strategy(EvictionStrategy.LRU).threadPolicy(EvictionThreadPolicy.DEFAULT).storeAsBinary()
 //            .locking().concurrencyLevel(1000)
             .build();
       }
@@ -490,7 +490,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       result.read(holder.getDefaultConfigurationBuilder().build())
           .clustering()
           .cacheMode(CacheMode.DIST_SYNC)
-          .hash().numOwners(1).numSegments(segments)
+          .hash().numOwners(1).numSegments(segments).locking().useLockStriping(false).concurrencyLevel(1000)
           .indexing().index(Index.NONE).transaction().transactionMode(
           TransactionMode.NON_TRANSACTIONAL).compatibility().enable()
           .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
@@ -661,7 +661,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     //do not use persistence
 
     Configuration config = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
-        .clustering().l1().disable().clustering().cacheMode(CacheMode.DIST_SYNC).hash().numOwners(1).numSegments(segments).indexing()
+        .clustering().l1().disable().clustering().cacheMode(CacheMode.DIST_SYNC).hash().numOwners(1).numSegments(segments).locking().useLockStriping(false).concurrencyLevel(1000).indexing()
         .index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
         .compatibility().enable()//.marshaller(new TupleMarshaller())
         .expiration().lifespan(-1).maxIdle(120000).wakeUpInterval(-1).reaperEnabled(
@@ -855,10 +855,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
         .implementationType(LevelDBStoreConfiguration.ImplementationType.JNI)
         .blockSize(blockSize * 1024 * 1024).compressionType(compressionType)
         .cacheSize(cacheSize * 1024 * 1024)
-        .fetchPersistentState(true)
+        .fetchPersistentState(false)
         .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
         .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(maxEntries).strategy(
-            EvictionStrategy.LRU).threadPolicy(EvictionThreadPolicy.DEFAULT)
+            EvictionStrategy.LRU).threadPolicy(EvictionThreadPolicy.DEFAULT).storeAsBinary()
 //        .locking().concurrencyLevel(1000)
         .build();
     manager.defineConfiguration(cacheName, configuration);
@@ -918,7 +918,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         defaultConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
             .clustering()
             .cacheMode(CacheMode.DIST_SYNC)
-            .hash().numOwners(1).numSegments(segments)
+            .hash().numOwners(1).numSegments(segments).locking().useLockStriping(false).concurrencyLevel(1000)
             .indexing().index(Index.NONE).transaction().transactionMode(
                 TransactionMode.NON_TRANSACTIONAL)
             .persistence().passivation(false)
@@ -926,17 +926,17 @@ public class ClusterInfinispanManager implements InfinispanManager {
                 //               .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
 
             .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath + "/filestore")
-            .fetchPersistentState(true)
+            .fetchPersistentState(false)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-                false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LRU).threadPolicy(EvictionThreadPolicy.DEFAULT)
+                false).eviction().maxEntries(maxEntries).strategy(EvictionStrategy.LRU).threadPolicy(EvictionThreadPolicy.DEFAULT).storeAsBinary()
             .build();
 
       } else { //Use leveldb
         defaultConfig = new ConfigurationBuilder() //.read(manager.getDefaultCacheConfiguration())
             .clustering()
             .cacheMode(CacheMode.DIST_SYNC)
-            .hash().numOwners(1).numSegments(segments)
+            .hash().numOwners(1).numSegments(segments).locking().useLockStriping(false).concurrencyLevel(1000)
             .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
             .persistence().passivation(false)
             .addStore(LevelDBStoreConfigurationBuilder.class)
@@ -948,10 +948,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .blockSize(blockSize * 1024 * 1024)
             .compressionType(compressionType)
             .cacheSize(cacheSize * 1024 * 1024)
-            .fetchPersistentState(true)
+            .fetchPersistentState(false)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(
-                maxEntries).strategy(EvictionStrategy.LRU).threadPolicy(EvictionThreadPolicy.DEFAULT)
+                maxEntries).strategy(EvictionStrategy.LRU).threadPolicy(EvictionThreadPolicy.DEFAULT).storeAsBinary()
 //            .locking().concurrencyLevel(1000)
             .build();
       }
@@ -959,7 +959,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
       defaultConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
           .clustering()
           .cacheMode(CacheMode.DIST_SYNC)
-          .hash().numOwners(1).numSegments(segments)
+          .hash().numOwners(1).numSegments(segments).locking().useLockStriping(false).concurrencyLevel(1000)
           .indexing().index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL).compatibility().enable()//.marshaller(new TupleMarshaller())
           .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)//.eviction().maxEntries(maxEntries).strategy(EvictionStrategy.NONE)
           .build();
@@ -980,10 +980,10 @@ public class ClusterInfinispanManager implements InfinispanManager {
             //                                 .expiredLocation("/tmp/leveldb/expired-foo" + "/")
         .implementationType(LevelDBStoreConfiguration.ImplementationType.JNI)
         .blockSize(blockSize * 1024 * 1024).compressionType(compressionType)
-        .cacheSize(cacheSize * 1024 * 1024).fetchPersistentState(true).shared(false).purgeOnStartup(false).preload(
+        .cacheSize(cacheSize * 1024 * 1024).fetchPersistentState(false).shared(false).purgeOnStartup(false).preload(
             false).compatibility().enable()//.marshaller(new TupleMarshaller())
         .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(maxEntries).strategy(
-            EvictionStrategy.LRU).threadPolicy(EvictionThreadPolicy.DEFAULT)
+            EvictionStrategy.LRU).threadPolicy(EvictionThreadPolicy.DEFAULT).storeAsBinary()
 //        .locking().concurrencyLevel(1000)
         .build();
 //    defaultIndexConfig =  new ConfigurationBuilder().read(defaultConfig).clustering()
@@ -1000,13 +1000,13 @@ public class ClusterInfinispanManager implements InfinispanManager {
 
 
       cacheConfig = new ConfigurationBuilder()//.read(manager.getDefaultCacheConfiguration())
-          .clustering().cacheMode(CacheMode.DIST_SYNC).hash().numOwners(1).numSegments(segments)
+          .clustering().cacheMode(CacheMode.DIST_SYNC).hash().numOwners(1).numSegments(segments).locking().useLockStriping(false).concurrencyLevel(1000)
           .indexing().index(Index.LOCAL).transaction().transactionMode(TransactionMode
               .NON_TRANSACTIONAL)
           .persistence()
               //                            .addStore(LevelDBStoreConfigurationBuilder.class
               //                            .location("/tmp/").shared(true).purgeOnStartup(true).preload(false).compatibility().enable()
-          .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath+"/filestore").fetchPersistentState(true).purgeOnStartup(false).shared(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
+          .addSingleFileStore().location("/tmp/leadsprocessor-data/" + uniquePath+"/filestore").fetchPersistentState(false).purgeOnStartup(false).shared(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
           .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false)
           .build();
     }
