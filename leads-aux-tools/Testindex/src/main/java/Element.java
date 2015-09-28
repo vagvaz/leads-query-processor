@@ -10,6 +10,7 @@ class Element implements Serializable {
 
     public Element(String attributeValue) {
         this.attributeValue = attributeValue;
+        this.keyName = "adffsaddfsadfadfadfadfa";
     }
     @Field(index= Index.NO, analyze= Analyze.NO, store= Store.YES)
     private String keyName;

@@ -1,4 +1,7 @@
 
+import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
+import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.util.NamedThreadFactory;
 import org.hibernate.search.annotations.Analyze;
@@ -11,6 +14,7 @@ import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.global.GlobalConfiguration;
 import org.infinispan.configuration.global.GlobalConfigurationBuilder;
+import org.infinispan.context.Flag;
 import org.infinispan.eviction.EvictionStrategy;
 import org.infinispan.eviction.EvictionThreadPolicy;
 import org.infinispan.manager.DefaultCacheManager;
@@ -29,6 +33,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.hibernate.search.annotations.*;
 
@@ -37,11 +42,11 @@ import org.hibernate.search.annotations.*;
  */
 public class IndexBenchmark {
 
-  static int NUM_THREADS = 1;
-  static int NUM_ELEMENTS_PER_THREAD = 500000;
+  static int NUM_THREADS = 8;
+  static int NUM_ELEMENTS_PER_THREAD = 1000000;
   static String fileLocation = "/tmp/test/";
     static String value;
-
+  static Random random = new Random();
 
   public static int countIndex(Cache<?, ?> cache) {
     IndexReader indexReader = Search.getSearchManager(cache).getSearchFactory().getIndexReaderAccessor().open(Element.class);
@@ -51,8 +56,8 @@ public class IndexBenchmark {
   public static String randSmallString() {
     char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
     StringBuilder sb = new StringBuilder();
-    Random random = new Random();
-    for (int i = 0; i < 50; i++) {
+
+    for (int i = 0; i < 130; i++) {
       char c = chars[random.nextInt(chars.length)];
       sb.append(c);
     }
@@ -62,35 +67,35 @@ public class IndexBenchmark {
 
   public static void main(String[] args) throws InterruptedException {
 
-    GlobalConfiguration globalConfiguration = new GlobalConfigurationBuilder().transport().defaultTransport().clusterName("test").build();
-
-    Configuration configuration0 = new ConfigurationBuilder()
-            .clustering() //ok
-            .cacheMode(CacheMode.DIST_SYNC) //ok
-            .hash().numOwners(1) //ok
-            .indexing().index(org.infinispan.configuration.cache.Index.LOCAL) //ok
-            .addProperty("hibernate.search.default.indexBase", fileLocation + "/lucene/")
-            .addProperty("hibernate.search.default.indexmanager", "near-real-time")
-            .addProperty("hibernate.search.default.indexwriter.ram_buffer_size", "256")
-            .addProperty("lucene_version", "LUCENE_CURRENT").
-                    transaction().transactionMode(
-                    TransactionMode.NON_TRANSACTIONAL) //ok
-            .persistence().passivation(true)//ok
-            .addStore(LevelDBStoreConfigurationBuilder.class) //ok
-            .location(fileLocation + "/leveldb/data/")//ok
-            .expiredLocation(fileLocation + "/leveldb/expire")//ok
-            .implementationType(LevelDBStoreConfiguration.ImplementationType.JNI)//ok
-            .blockSize(1024 * 1024 * 1024)// check
-            .compressionType(CompressionType.SNAPPY)//check
-            .cacheSize(1024 * 1024 * 1024)//check
-            .fetchPersistentState(true)//ok
-            .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//ok //.marshaller(new TupleMarshaller())
-            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
-                    false).eviction().maxEntries(50000).strategy( //check
-                    EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.PIGGYBACK)
-            .build();
-
-
+//    GlobalConfiguration globalConfiguration = new GlobalConfigurationBuilder().transport().defaultTransport().clusterName("test").build();
+//
+//    Configuration configuration0 = new ConfigurationBuilder()
+//            .clustering() //ok
+//            .cacheMode(CacheMode.DIST_SYNC) //ok
+//            .hash().numOwners(1) //ok
+//            .indexing().index(org.infinispan.configuration.cache.Index.LOCAL) //ok
+//            .addProperty("hibernate.search.default.indexBase", fileLocation + "/lucene/")
+//            .addProperty("hibernate.search.default.indexmanager", "near-real-time")
+//            .addProperty("hibernate.search.default.indexwriter.ram_buffer_size", "256")
+//            .addProperty("lucene_version", "LUCENE_CURRENT").
+//                    transaction().transactionMode(
+//                    TransactionMode.NON_TRANSACTIONAL) //ok
+//            .persistence().passivation(true)//ok
+//            .addStore(LevelDBStoreConfigurationBuilder.class) //ok
+//            .location(fileLocation + "/leveldb/data/")//ok
+//            .expiredLocation(fileLocation + "/leveldb/expire")//ok
+//            .implementationType(LevelDBStoreConfiguration.ImplementationType.JNI)//ok
+//            .blockSize(1024 * 1024 * 1024)// check
+//            .compressionType(CompressionType.SNAPPY)//check
+//            .cacheSize(1024 * 1024 * 1024)//check
+//            .fetchPersistentState(true)//ok
+//            .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//ok //.marshaller(new TupleMarshaller())
+//            .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
+//                    false).eviction().maxEntries(50000).strategy( //check
+//                    EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.PIGGYBACK)
+//            .build();
+//
+//
     Configuration configuration = new ConfigurationBuilder()
             .clustering() //ok
             .cacheMode(CacheMode.LOCAL) //ok
@@ -117,10 +122,11 @@ public class IndexBenchmark {
                     false).eviction().maxEntries(1024).strategy( //check
                     EvictionStrategy.LIRS).threadPolicy(EvictionThreadPolicy.PIGGYBACK)
             .build();
-
-    DefaultCacheManager defaultCacheManager = new DefaultCacheManager(globalConfiguration, configuration);
-
-    final Cache<Integer, Element> cache = defaultCacheManager.getCache();
+//
+//    DefaultCacheManager defaultCacheManager = new DefaultCacheManager(globalConfiguration, configuration);
+    LQPConfiguration.initialize();
+    InfinispanManager manager = InfinispanClusterSingleton.getInstance().getManager();
+    final Cache<String, Element> cache = (Cache<String, Element>) manager.getIndexedPersistentCache("testIndexCache");
 
     Search.getSearchManager(cache).getSearchFactory().addClasses(Element.class);
     IndexReader indexReader = Search.getSearchManager(cache).getSearchFactory().getIndexReaderAccessor().open(Element.class);
@@ -132,16 +138,17 @@ public class IndexBenchmark {
     long start = System.currentTimeMillis();
       final ArrayList<String> searchValue=new ArrayList<String>();
     for (int i = 0; i < NUM_THREADS; i++) {
+
       executorService.submit(new Runnable() {
-        @Override
-        public void run() {
+        @Override public void run() {
+          int finalI = counter.incrementAndGet();
           for (int j = 0; j < NUM_ELEMENTS_PER_THREAD; j++) {
-            int key = counter.incrementAndGet();
-            value = key + "-value"+randSmallString();
-            cache.put(key, new Element(value));
-            if (key != 0 && key % 10000 == 0) {
-                searchValue.add(value);
-              System.out.printf("\rInserted %d, index is at %d value " + value, key, countIndex(cache));
+            //            int key = counter.incrementAndGet();
+            value = finalI + "." + j + "-value" + randSmallString();
+            cache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES,Flag.CACHE_MODE_LOCAL).put(value, new Element(value));
+            if (j != 0 && j % 10000 == 0) {
+              searchValue.add(value);
+              System.out.printf("\rInserted %d, index is at %d value " + value, j, countIndex(cache));
             }
           }
         }
@@ -193,6 +200,6 @@ public class IndexBenchmark {
           list = lucenequery.list();
       }
       System.out.println(" Results " + list.size() +" Mean Runtime 2 Query: " + (System.currentTimeMillis()-stop)/(float)searchValue.size() + " ms\n");
-    defaultCacheManager.stop();
+    InfinispanClusterSingleton.getInstance().getManager().stopManager();
   }
 }
