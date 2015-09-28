@@ -66,7 +66,7 @@ public class SortMerger2 {
          values.add(t);
          cacheNames.add(entry);
       }
-      if(rowcount <= batchSize)
+      if(rowcount <= batchSize && rc > 0)
          batchSize = 2*rowcount;
       if(caches.size() != 0)
          perCache = batchSize / caches.size();
