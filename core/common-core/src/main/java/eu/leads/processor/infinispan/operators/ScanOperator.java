@@ -94,7 +94,7 @@ public class ScanOperator extends BasicOperator {
           bloomCache.remove(key);
         }
 
-        Set<String> set = getMicroCloudsFromOpSched();
+        Set<String> set = getMicroCloudsFromOpTarget();
         for(String mc : set) {
           EnsembleCacheManager tmpmanager = new EnsembleCacheManager(globalConfig.getObject("componentsAddrs").getArray(mc).get(0).toString());
           EnsembleCache ensembleBloomCache = tmpmanager.getCache(bloomFilter.getString("bloomCache"));
