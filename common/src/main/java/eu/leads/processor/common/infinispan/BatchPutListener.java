@@ -93,11 +93,11 @@ public class BatchPutListener implements LeadsListener {
             }
             TupleBuffer tupleBuffer = new TupleBuffer((byte[]) value);
 //            Map tmpb = new HashMap();
-//            for (Map.Entry<Object, Object> entry : tupleBuffer.getBuffer().entrySet()) {
-//                EnsembleCacheUtils.putToCacheDirect(targetCache,entry.getKey(),entry.getValue());
-//            }
-            NotifyingFuture f = tupleBuffer.flushToCache(targetCache);
-            futures.put(f,f);
+            for (Map.Entry<Object, Object> entry : tupleBuffer.getBuffer().entrySet()) {
+                EnsembleCacheUtils.putToCacheDirect(targetCache,entry.getKey(),entry.getValue());
+            }
+//            NotifyingFuture f = tupleBuffer.flushToCache(targetCache);
+//            futures.put(f,f);
             tupleBuffer.getBuffer().clear();
             tupleBuffer = null;
 

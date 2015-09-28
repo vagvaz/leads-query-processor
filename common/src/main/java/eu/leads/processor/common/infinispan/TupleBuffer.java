@@ -240,11 +240,11 @@ public class TupleBuffer {
       buffer = new HashMap<>();
 //      Map<Object,Object> tmpb = new HashMap<>();
 
-//      for(Map.Entry<Object,Object> entry : tmp.entrySet()) {
+      for(Map.Entry<Object,Object> entry : tmp.entrySet()) {
 //
-//        EnsembleCacheUtils.putToCacheDirect(localCache,entry.getKey(),entry.getValue());
-//      }
-      result = localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).putAllAsync(tmp);
+        EnsembleCacheUtils.putToCacheDirect(localCache,entry.getKey(),entry.getValue());
+      }
+//      result = localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).putAllAsync(tmp);
     }
     return result;
   }
