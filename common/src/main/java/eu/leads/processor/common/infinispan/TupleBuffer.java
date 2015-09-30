@@ -125,6 +125,7 @@ public class TupleBuffer {
 
   public void flushToMC() {
     byte[] bytes = null;
+    int retries = 3;
     synchronized (mutex) {
       if (ensembleCache == null) {
         this.ensembleCache = emanager.getCache(cacheName + ".compressed", new ArrayList<>(emanager.sites()),
@@ -148,6 +149,12 @@ public class TupleBuffer {
 
       }
     } catch (Exception e) {
+      retries--;
+      if(retries < 0){
+        isok = true;
+        System.err.println("FLUSH TO MC FAILED " + uuid + " " + ensembleCache.getName());
+        log.error("FLUSH TO MC FAILED " + uuid + " " + ensembleCache.getName());
+      }
       if (e instanceof TimeoutException) {
         try {
           Thread.sleep(10);
