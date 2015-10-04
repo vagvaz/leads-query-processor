@@ -393,22 +393,47 @@ public class leadsCli {
     public HashMap<String, Tuple> getTable() {
       return table;
     }
-
+    //private int collumnNamesPrinted=0;
     private final HashMap<String, Tuple> table;
-
+    private Set<String> fields = null;
 
     //        System.err.println("Plugin probably Failed on " + entry.getType() + " " + entry.getEventData().getKey() + " ---> " + entry.getEventData().getValue());
-
-
     public ResultsListener(HashMap<String,Tuple> table) {
       this.table = table;
-
     }
     @ClientCacheEntryCreated
     @ClientCacheEntryModified
     @ClientCacheEntryRemoved
     public void handleClientEvent(CacheEntryEvent e) {
+      String[][] outputTable;
+      Tuple res = (Tuple) e;
+      int width = res.getFieldSet().size();
       System.out.println(e);
+      int colCount = 0;
+      int rowCount = 0;
+      if (fields == null) {
+        outputTable = new String[2][width];
+        fields = res.getFieldSet();
+        //Read fields
+        for (String field : fields) {
+          outputTable[0][colCount] = field;
+          colCount++;
+        }
+        rowCount++;
+      } else
+        outputTable = new String[1][width];
+
+      colCount = 0;
+      for (String field : fields) {
+        Object value = res.getGenericAttribute(field);
+        if (value != null)
+          outputTable[rowCount][colCount] = value.toString();
+        else
+          outputTable[rowCount][colCount] = "(NULL)";
+        colCount++;
+      }
+      PrettyPrinter printer = new PrettyPrinter(System.out);
+      printer.print(outputTable);
     }
   }
 }
