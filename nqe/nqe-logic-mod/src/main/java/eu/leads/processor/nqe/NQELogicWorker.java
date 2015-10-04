@@ -93,9 +93,10 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
                         com.sendWithEventBus(workQueueAddress, action.asJsonObject());
                     }else if(label.equals(NQEConstants.STOP_CQL)){
                         com.sendWithEventBus(workQueueAddress,action.asJsonObject());
-                    }else if(){
-
                     }
+//                    else if(){
+//
+//                    }
 
                     else {
                         log.error("Unknown PENDING Action received " + action.toString());

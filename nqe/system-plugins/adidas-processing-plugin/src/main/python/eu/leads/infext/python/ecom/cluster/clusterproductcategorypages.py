@@ -30,8 +30,8 @@ class PagesDataset():
                    float(fl[10]),float(fl[11])]
             new_features_lists.append(nfl)
             
-        scaler = preprocessing.Scaler().fit(new_features_lists)
-        print "mean", scaler.mean_                                      
+        scaler = preprocessing.StandardScaler().fit(new_features_lists)
+        print "mean", scaler.mean_
         print "std", scaler.std_ 
         
         self.scaler = scaler             

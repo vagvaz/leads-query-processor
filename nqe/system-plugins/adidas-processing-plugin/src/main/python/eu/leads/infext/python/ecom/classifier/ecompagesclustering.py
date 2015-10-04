@@ -1,7 +1,7 @@
 '''
 Created on Jun 13, 2014
 
-@author: lequocdo
+@author: amo_remix
 '''
 
 class EcomPagesClustering():

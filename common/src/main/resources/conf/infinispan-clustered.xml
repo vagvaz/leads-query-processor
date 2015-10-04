@@ -12,22 +12,23 @@
 
     <threads>
         <thread-factory name="infinispan-factory" group-name="infinispan"
-                        thread-name-pattern="%G %i" priority="5"/>
+                        thread-name-pattern="RemoteCommandThread%G %i"/>
         <cached-thread-pool name="infinispan-cached" thread-factory="infinispan-factory"/>
         <blocking-bounded-queue-thread-pool name="infinispan-transport"
                                             thread-factory="infinispan-factory"
-                                            core-threads="200" max-threads="300" queue-length="200"
-                                            keepalive-time="500000"/>
+                                            core-threads="50" max-threads="120" queue-length="10000"
+                                            keepalive-time="10000"/>
         <scheduled-thread-pool name="infinispan-eviction" thread-factory="infinispan-factory"/>
+        <thread-factory name="remote-factory" group-name="infinispan" thread-name-pattern="RemoteCommandThread"/>
     </threads>
 
     <cache-container name="defaultContainer" statistics="false" default-cache="defaultCache"
                      start="true">
-        <transport stack="tcp"/>
+        <transport stack="tcp" remote-command-executor="infinispan-transport"/>
         <!--<serialization version="70"/>-->
         <jmx domain="eu.leads.processor" duplicate-domains="true"></jmx>
-        <distributed-cache name="defaultCache" mode="SYNC" owners="1" l1-lifespan="600000" start="true"
-                           statistics="true" >
+        <distributed-cache name="defaultCache" mode="SYNC" owners="1"  start="true"
+                           statistics="true">
             <compatibility></compatibility>
             <!--<indexing index="NONE">-->
             <!--<property name="default.directory_provider">ram</property>-->

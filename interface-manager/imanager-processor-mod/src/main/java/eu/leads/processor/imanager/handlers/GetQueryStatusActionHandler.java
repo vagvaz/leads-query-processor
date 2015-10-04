@@ -21,7 +21,9 @@ public class GetQueryStatusActionHandler implements ActionHandler {
     InfinispanManager persistence;
     String id;
     Cache <String,String> queriesCache;
-    JsonObject actionResult = new JsonObject();
+  String queryId;
+  String queryJson;
+  JsonObject query;
     public GetQueryStatusActionHandler(Node com, LogProxy log, InfinispanManager persistence,
                                           String id) {
         this.com = com;
@@ -29,35 +31,38 @@ public class GetQueryStatusActionHandler implements ActionHandler {
         this.persistence = persistence;
         this.id = id;
        queriesCache = (Cache) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
-      actionResult = new QueryStatus("",QueryState.PENDING,"INITIAL").asJsonObject();
-    }
+         }
 
     @Override
     public Action process(Action action) {
 //      log.info("process get query status");
         Action result = action;
-
+//       JsonObject actionResult = new JsonObject();
        try {
-            String queryId = action.getData().getString("queryId");
+            queryId = action.getData().getString("queryId");
 //            JsonObject actionResult = persistence.get(StringConstants.QUERIESCACHE, queryId);
 //         log.info("read query"); SELECT sourceIP FROM Rankings AS R JOIN  uservisits UV  ON R.pageURL = UV.desturl WHERE pagerank < 10  LIMIT 1;
 //         log.info("read query"); SELECT paeran     FROM Rankings  WHERE pagerank < 10  LIMIT 1;
-            String queryJson = queriesCache.get(queryId);
+            queryJson = queriesCache.get(queryId);
 
             if(queryJson != null) {
-              JsonObject query = new JsonObject(queryJson);
-
+              query = new JsonObject(queryJson);
               result.setResult(query.getObject("status"));
+              query = null;
             }
             else{
               result.setResult( new QueryStatus(queryId, QueryState.PENDING,"NON-EXISTENT").asJsonObject());
             }
+            queryJson = null;
+
            }catch(Exception e){
          log.info("exception in read");
               e.printStackTrace();
+          JsonObject actionResult = new JsonObject();
               actionResult.putString("error", e.getMessage());
               result.setResult(actionResult);
-            }
+          }
+
         result.setStatus(ActionStatus.COMPLETED.toString());
 //      log.info("preturn query status");
         return result;
