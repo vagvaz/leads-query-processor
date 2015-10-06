@@ -4,6 +4,10 @@ import eu.leads.processor.web.QueryStatus;
 import eu.leads.processor.web.WebServiceClient;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.infinispan.client.hotrod.annotation.ClientCacheEntryCreated;
+import org.infinispan.client.hotrod.annotation.ClientCacheEntryModified;
+import org.infinispan.client.hotrod.annotation.ClientCacheEntryRemoved;
+import org.infinispan.notifications.cachelistener.event.CacheEntryEvent;
 import org.jdom.JDOMException;
 
 import javax.swing.*;
@@ -20,6 +24,8 @@ import java.net.MalformedURLException;
 import java.text.DecimalFormat;
 import java.util.*;
 
+import static java.lang.Thread.sleep;
+
 public class LeadsResultsGui extends JPanel {
     transient protected static Random r;
     static XMLConfiguration config = null;
@@ -32,6 +38,11 @@ public class LeadsResultsGui extends JPanel {
     protected String[] loc = {"a", "b", "c", "d"};
     private boolean DEBUG = false;
 
+    private static String currentquid;
+
+    public enum waitResults {WAIT_SQL, WAIT_CQL, FINISHED};
+    private static waitResults waitingQuery=waitResults.FINISHED;
+    private static HashMap<String,Tuple> cqlResults=null;
 
     public LeadsResultsGui(Vector<Vector> data, Vector<String> columnNames) {
         super(new GridBagLayout());
@@ -173,7 +184,17 @@ public class LeadsResultsGui extends JPanel {
         //Wait for results
         try {
             Apatar2Tajo.init_string_maps();
-            convert_results(send_query_and_wait(Apatar2Tajo.xml2tajo(xmlFile).toJson()));
+            String tajoJson = Apatar2Tajo.xml2tajo(xmlFile).toJson();
+            if(Apatar2Tajo.Range!=-1L)
+            convert_results(send_query_and_wait(tajoJson));
+            else
+            {
+                System.err.println("Sliding Window ");
+                HashMap cqlResults =new HashMap<>();
+                ResultsListener resL = new ResultsListener(cqlResults);
+                while (waitingQuery != waitResults.FINISHED)
+                    sleep(1000);
+            }
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Leads Results", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
@@ -413,6 +434,55 @@ public class LeadsResultsGui extends JPanel {
             return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         }
     }
+
+    static class ResultsListener {
+        public HashMap<String, Tuple> getTable() {
+            return table;
+        }
+        //private int collumnNamesPrinted=0;
+        private final HashMap<String, Tuple> table;
+        private Set<String> fields = null;
+
+        //        System.err.println("Plugin probably Failed on " + entry.getType() + " " + entry.getEventData().getKey() + " ---> " + entry.getEventData().getValue());
+        public ResultsListener(HashMap<String,Tuple> table) {
+            this.table = table;
+        }
+        @ClientCacheEntryCreated
+        @ClientCacheEntryModified
+        @ClientCacheEntryRemoved
+        public void handleClientEvent(CacheEntryEvent e) {
+            String[][] outputTable;
+            Tuple res = (Tuple) e;
+            int width = res.getFieldSet().size();
+            System.out.println(e);
+            int colCount = 0;
+            int rowCount = 0;
+            if (fields == null) {
+                outputTable = new String[2][width];
+                fields = res.getFieldSet();
+                //Read fields
+                for (String field : fields) {
+                    outputTable[0][colCount] = field;
+                    colCount++;
+                }
+                rowCount++;
+            } else
+                outputTable = new String[1][width];
+        }
+//            colCount = 0;
+//            for (String field : fields) {
+//                Object value = res.getGenericAttribute(field);
+//                if (value != null)
+//                    outputTable[rowCount][colCount] = value.toString();
+//                else
+//                    outputTable[rowCount][colCount] = "(NULL)";
+//                colCount++;
+//            }
+//            PrettyPrinter printer = new PrettyPrinter(System.out);
+//            printer.print(outputTable);
+//        }
+    }
+
 }
 
 

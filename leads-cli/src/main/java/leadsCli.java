@@ -28,13 +28,14 @@ public class leadsCli {
   private static String currentquid;
 
   public enum waitResults {WAIT_SQL, WAIT_CQL, FINISHED};
+  private static waitResults waitingQuery=waitResults.FINISHED;
+  private static HashMap<String,Tuple> cqlResults=null;
+
 
   transient protected static Random r;
   private static String host;
   private static int port;
-  private static waitResults waitingQuery=waitResults.FINISHED;
 
-  private static HashMap<String,Tuple> cqlResults=null;
 
   private static String username = "leads";
   protected long rowsC = 60;

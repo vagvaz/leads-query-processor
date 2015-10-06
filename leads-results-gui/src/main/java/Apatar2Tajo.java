@@ -27,7 +27,7 @@ public class Apatar2Tajo {
     private static HashMap<String, String> MRTableName = new HashMap<>();
     private static boolean foundHaving;
 
-    private static long Range=-1L;
+    public static long Range=-1L;
     private static long VersionStart=-1L;
     private static long VersionFinish=-1L;
     private int funtionsCount = 0;
