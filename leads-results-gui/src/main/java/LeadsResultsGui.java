@@ -13,6 +13,7 @@ import org.jdom.JDOMException;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,7 +38,8 @@ public class LeadsResultsGui extends JPanel {
     protected long rowsC = 60;
     protected String[] loc = {"a", "b", "c", "d"};
     private boolean DEBUG = false;
-
+    public static DefaultTableModel model=null;
+    public static JTable table = null;
     private static String currentquid;
 
     public enum waitResults {WAIT_SQL, WAIT_CQL, FINISHED};
@@ -47,8 +49,16 @@ public class LeadsResultsGui extends JPanel {
     public LeadsResultsGui(Vector<Vector> data, Vector<String> columnNames) {
         super(new GridBagLayout());
 
+        model = new DefaultTableModel();
+        for(String c:columnNames)
+            model.addColumn(c);
 
-        final JTable table = new JTable(data, columnNames);
+        final JTable table2 = new JTable(model);
+        this.table=table2;
+        if(data!=null)
+            for(Vector v:data)
+                model.addRow(v);
+        //final JTable table = new JTable(data, columnNames);
 
         table.setPreferredScrollableViewportSize(new Dimension(1000, 220));
         //table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -194,6 +204,8 @@ public class LeadsResultsGui extends JPanel {
                 ResultsListener resL = new ResultsListener(cqlResults);
                 while (waitingQuery != waitResults.FINISHED)
                     sleep(1000);
+                System.exit(-1);
+                return;
             }
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Leads Results", JOptionPane.ERROR_MESSAGE);
@@ -461,11 +473,17 @@ public class LeadsResultsGui extends JPanel {
                 outputTable = new String[2][width];
                 fields = res.getFieldSet();
                 //Read fields
+
                 for (String field : fields) {
-                    outputTable[0][colCount] = field;
-                    colCount++;
+                    columnNames.add(field);
+
                 }
-                rowCount++;
+
+                javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        createAndShowGUI(null, columnNames);
+                    }
+                });
             } else
                 outputTable = new String[1][width];
         }
