@@ -13,4 +13,8 @@ public class IntersectOperator extends MapReduceOperator {
    public IntersectOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
       super(com, persistence,log, action);
    }
+
+   @Override public String getContinuousListenerClass() {
+      return null;
+   }
 }

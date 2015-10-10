@@ -11,6 +11,7 @@ import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.ensemble.EnsembleCacheManager;
+import org.infinispan.ensemble.Site;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -99,7 +100,7 @@ public class SubmitWordCountTest {
             // put the remaining lines
             ensembleCache.put(id + "-" + String.valueOf(putCount++), new Tuple(data.toString()));
           }
-
+          Object value = getKeyFrom(ensembleCache,(Object)id);
           bufferedReader.close();
         } catch (FileNotFoundException e) {
           e.printStackTrace();
@@ -108,6 +109,19 @@ public class SubmitWordCountTest {
         }
       }
     }
+
+    private Object getKeyFrom(EnsembleCache ensembleCache, Object key) {
+      Object result = null;
+      for(Object s : ensembleCache.sites()){
+        EnsembleCache siteCache  = ((Site)s).getCache(ensembleCache.getName());
+        result = siteCache.get(key);
+        if(result != null) {
+          return result;
+        }
+      }
+      return result;
+    }
+
   }
 
   private static void putData(String dataDirectory) {
@@ -257,6 +271,7 @@ public class SubmitWordCountTest {
     if (reduceLocal) {
       jsonObject.getObject("operator").putString("reduceLocal", "true");
     }
+    jsonObject.getObject("operator").putString("recComposableReduce","recComposableReduce");
     JsonObject targetEndpoints = scheduling;
     jsonObject.getObject("operator").putObject("targetEndpoints",targetEndpoints);
     //                   new JsonObject()
@@ -300,9 +315,9 @@ public class SubmitWordCountTest {
             JsonObject data;
             System.out.print("Loading data to '" + CACHE_NAME + "' cache\n ");
             data = new JsonObject();
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < 100; i++) {
               data.putString(String.valueOf(i), lines[i % lines.length]);
-              if ((i + 1) % 100 == 0) {
+              if ((i + 1) % 2 == 0) {
                 ensembleCache.put(String.valueOf(i), new Tuple(data.toString()));
                 data = new JsonObject();
               }
@@ -335,7 +350,7 @@ public class SubmitWordCountTest {
 
       printResults(id, 5);
       verifyResults(id, resultWords, ensembleString);
-      printResults("metrics");
+//      printResults("metrics");
 
       System.out.println("\nDONE IN: " + secs + " sec");
 

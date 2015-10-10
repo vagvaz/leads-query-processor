@@ -11,22 +11,21 @@ import eu.leads.processor.core.EngineUtils;
 import eu.leads.processor.core.comp.LeadsMessageHandler;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
+import eu.leads.processor.infinispan.FlushContinuousListenerCallable;
 import eu.leads.processor.infinispan.LeadsBaseCallable;
 import eu.leads.processor.infinispan.LeadsMapperCallable;
 import eu.leads.processor.infinispan.LeadsReducerCallable;
+import eu.leads.processor.infinispan.continuous.BasicContinuousOperatorListener;
 import eu.leads.processor.web.ActionResult;
 import eu.leads.processor.web.WebServiceClient;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.infinispan.Cache;
 import org.infinispan.commons.api.BasicCache;
-import org.infinispan.commons.util.concurrent.NotifyingFuture;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.distexec.DistributedTask;
 import org.infinispan.distexec.DistributedTaskBuilder;
-import org.infinispan.remoting.transport.Address;
 import org.infinispan.remoting.transport.jgroups.SuspectException;
-import org.jgroups.SuspectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
@@ -63,6 +62,8 @@ public abstract class BasicOperator extends Thread implements Operator{
   protected boolean executeOnlyMap = false;
   protected  boolean executeOnlyReduce = false;
   protected boolean reduceLocal = false;
+  protected boolean isRecCompReduceLocal = false;
+  protected boolean isRecCompReduce = false;
   long startTime;
   protected boolean failed = false;
   protected volatile Object mmcMutex = new Object();
@@ -71,6 +72,9 @@ public abstract class BasicOperator extends Thread implements Operator{
   protected Map<String, String> mcResults;
   protected Logger profilerLog  = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
   protected ProfileEvent profOperator;
+  protected JsonObject mapContinuousConf;
+  protected JsonObject reduceLocalContinuousConf;
+  protected JsonObject reduceContinuousConf;
   protected BasicOperator(Action action) {
     conf = action.getData();
     this.action = action;
@@ -95,8 +99,10 @@ public abstract class BasicOperator extends Thread implements Operator{
       executeOnlyMap = action.asJsonObject().containsField("map");
       executeOnlyReduce = action.asJsonObject().containsField("reduce");
       reduceLocal = action.getData().getObject("operator").containsField("reduceLocal");
-      System.err.println("IS REMOTE TRUE " + executeOnlyMap + " " + executeOnlyReduce);
-      profilerLog.error("IS REMOTE TRUE " + executeOnlyMap + " " + executeOnlyReduce);
+      isRecCompReduceLocal = action.getData().getObject("operator").containsField("recComposableReduceLocal");
+      isRecCompReduce = action.getData().getObject("operator").containsField("recComposableReduce");
+      System.err.println("IS REMOTE TRUE map " + executeOnlyMap+ " reduce local " +  reduceLocal + " reduce " + executeOnlyReduce + " recCompRL " + isRecCompReduceLocal + " recCompR " + isRecCompReduce);
+      profilerLog.error("IS REMOTE TRUE map " + executeOnlyMap+ " reduce local " +  reduceLocal + " reduce " + executeOnlyReduce + " recCompRL " + isRecCompReduceLocal + " recCompR " + isRecCompReduce);
     }
     else{
       executeOnlyMap = true;
@@ -105,7 +111,10 @@ public abstract class BasicOperator extends Thread implements Operator{
         executeOnlyMap = !conf.getBoolean("skipMap"); //if true then we do not need to execute the map  phase
       }
       reduceLocal = action.getData().getObject("operator").containsField("reduceLocal");
-      profilerLog.error("IS REMOTE FALSE ");
+      isRecCompReduceLocal = action.getData().getObject("operator").containsField("recComposableReduce");
+      isRecCompReduce = action.getData().getObject("operator").containsField("recComposableReduce");
+      System.err.println("REMOTE FALSE map " + executeOnlyMap+ " reduce local " +  reduceLocal + " reduce " + executeOnlyReduce + " recCompRL " + isRecCompReduceLocal + " recCompR " + isRecCompReduce);
+      profilerLog.error("REMOTE FALSE map " + executeOnlyMap+ " reduce local " +  reduceLocal + " reduce " + executeOnlyReduce + " recCompRL " + isRecCompReduceLocal + " recCompR " + isRecCompReduce);
     }
 
     this.globalConfig = action.getGlobalConf();
@@ -146,14 +155,6 @@ public abstract class BasicOperator extends Thread implements Operator{
 
   public void setCom(Node com) {
     this.com = com;
-  }
-
-  public Cache getStatisticsCache() {
-    return statisticsCache;
-  }
-
-  public void setStatisticsCache(Cache statisticsCache) {
-    this.statisticsCache = statisticsCache;
   }
 
   public LogProxy getLog() {
@@ -277,19 +278,14 @@ public abstract class BasicOperator extends Thread implements Operator{
 
   @Override
   public void cleanup() {
-    //    profOperator.end("cleanup");
-    //    profOperator.start("Op CleanUp");
-//        if(!isRemote)//vagvaz
-//        {
-    unsubscribeToMapActions("execution."+getName()+"." + com.getId() + "." + action.getId());
-//        }
-    action.setStatus(ActionStatus.COMPLETED.toString());
 
-    if(com != null)
-      com.sendTo(action.getData().getString("owner"),action.asJsonObject());
-    else
+    unsubscribeToMapActions("execution."+getName()+"." + com.getId() + "." + action.getId());
+    action.setStatus(ActionStatus.COMPLETED.toString());
+    if(com != null) {
+      com.sendTo(action.getData().getString("owner"), action.asJsonObject());
+    } else {
       System.err.println("PROBLEM Uninitialized com");
-    //    profOperator.end();
+    }
     updateStatistics(inputCache, null, outputCache);
   }
 
@@ -867,7 +863,13 @@ public abstract class BasicOperator extends Thread implements Operator{
 
       DistributedExecutorService des = new DefaultExecutorService(reduceInputCache);
       setReducerCallableEnsembleHost();
-      DistributedTaskBuilder builder = des.createDistributedTaskBuilder(reducerCallable);
+
+      DistributedTaskBuilder builder = null;
+      if(!isRecCompReduce) {
+       builder =  des.createDistributedTaskBuilder(reducerCallable);
+      } else{
+       builder = des.createDistributedTaskBuilder( new FlushContinuousListenerCallable("{}",""));
+      }
       builder.timeout(24, TimeUnit.HOURS);
       DistributedTask task = builder.build();
       List<Future<String>> res = des.submitEverywhere(task);
@@ -1065,7 +1067,12 @@ public abstract class BasicOperator extends Thread implements Operator{
     if (reducerLocalCallable != null) {
       DistributedExecutorService des = new DefaultExecutorService(reduceLocalInputCache);
       setReducerLocaleEnsembleHost();
-      DistributedTaskBuilder builder = des.createDistributedTaskBuilder(reducerLocalCallable);
+      DistributedTaskBuilder builder = null;
+      if(isRecCompReduceLocal){
+        builder = des.createDistributedTaskBuilder(reducerLocalCallable);
+      } else{
+        builder = des.createDistributedTaskBuilder( new FlushContinuousListenerCallable("{}",""));
+      }
       builder.timeout(24, TimeUnit.HOURS);
       DistributedTask task = builder.build();
       System.out.println("EXECUTE reduceLocal " + reduceLocalInputCache.getName() + " "+ reducerLocalCallable.getClass().toString() +
@@ -1213,5 +1220,45 @@ public abstract class BasicOperator extends Thread implements Operator{
     }
     int endSize = futures.size();
     return (double)(size-endSize) / (double)size;
+  }
+
+
+  @Override public JsonObject getContinuousMap() {
+    JsonObject result = new JsonObject();
+    result.putString("listener", BasicContinuousOperatorListener.class.getCanonicalName().toString());
+    result.putString("operatorClass",getContinuousListenerClass());
+    JsonObject listenerConf = new JsonObject();
+    listenerConf.putObject("operator",new JsonObject());
+    listenerConf.getObject("operator").putObject("configuration", conf);
+    listenerConf.getObject("operator").putString("isMap","true");
+    listenerConf.putString("operatorClass",getContinuousListenerClass());
+    result.putObject("conf",listenerConf);
+    return result;
+  }
+
+  @Override public JsonObject getContinuousReduceLocal() {
+    JsonObject result = new JsonObject();
+    result.putString("listener",BasicContinuousOperatorListener.class.getCanonicalName().toString());
+    result.putString("operatorClass",getContinuousListenerClass());
+    JsonObject listenerConf = new JsonObject();
+    listenerConf.putObject("operator",new JsonObject());
+    listenerConf.getObject("operator").putObject("configuration", conf);
+    listenerConf.getObject("operator").putString("isReduce","true");
+    listenerConf.getObject("operator").putString("isLocal","true");
+    listenerConf.putString("operatorClass",getContinuousListenerClass());
+    result.putObject("conf",listenerConf);
+    return result;
+  }
+
+  @Override public JsonObject getContinuousReduce() {
+    JsonObject result = new JsonObject();
+    result.putString("listener", BasicContinuousOperatorListener.class.getCanonicalName().toString());
+    JsonObject listenerConf = new JsonObject();
+    listenerConf.putObject("operator",new JsonObject());
+    listenerConf.getObject("operator").putObject("configuration",conf);
+    listenerConf.getObject("operator").putString("isReduce","true");
+    listenerConf.putString("operatorClass",getContinuousListenerClass());
+    result.putObject("conf",listenerConf);
+    return result;
   }
 }

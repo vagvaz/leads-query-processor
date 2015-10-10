@@ -16,9 +16,11 @@ import org.vertx.java.core.json.JsonObject;
 public class StopCacheActionHandler implements ActionHandler {
   InfinispanManager imanager;
   Logger logger;
-  public StopCacheActionHandler(Node com, LogProxy log, InfinispanManager persistence, String id) {
+  JsonObject global;
+  public StopCacheActionHandler(Node com, LogProxy log, InfinispanManager persistence, String id,JsonObject global) {
     logger = LoggerFactory.getLogger(StopCacheActionHandler.class);
     imanager = persistence;
+    this.global = global;
   }
 
   @Override public Action process(Action action){

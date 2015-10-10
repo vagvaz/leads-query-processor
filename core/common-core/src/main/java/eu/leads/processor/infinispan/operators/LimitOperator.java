@@ -202,6 +202,10 @@ import java.util.concurrent.ExecutionException;
         }
     }
 
+    @Override public String getContinuousListenerClass() {
+        return null;
+    }
+
     @Override public void setupMapCallable() {
 
     }

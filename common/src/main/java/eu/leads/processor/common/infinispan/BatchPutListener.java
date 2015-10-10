@@ -75,6 +75,10 @@ public class BatchPutListener implements LeadsListener {
         manager = null;
     }
 
+    @Override public void setConfString(String s) {
+
+    }
+
     @CacheEntryCreated
     public void created(CacheEntryCreatedEvent event){
         if(event.isPre()){

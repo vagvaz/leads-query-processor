@@ -1,9 +1,6 @@
 package eu.leads.processor.infinispan;
 
-import eu.leads.processor.common.infinispan.BatchPutListener;
-import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
-import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
-import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.infinispan.*;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
@@ -41,17 +38,18 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     DistributedCallable<K, V, String>, Serializable {
   protected String configString;
   protected String output;
-  transient protected JsonObject conf;
-  transient protected boolean isInitialized;
-  transient protected EmbeddedCacheManager embeddedCacheManager;
-  transient protected InfinispanManager imanager;
-  transient protected Set<K> keys;
-  transient protected  Cache<K,V> inputCache;
-  transient protected EnsembleCache outputCache;
+  transient protected JsonObject conf = null;
+  transient protected boolean isInitialized = false;
+  transient protected EmbeddedCacheManager embeddedCacheManager = null;
+  transient protected InfinispanManager imanager = null;
+  transient protected Set<K> keys = null;
+  transient protected  Cache<K,V> inputCache = null;
+  transient protected EnsembleCache outputCache = null;
   protected String ensembleHost;
-  transient protected Object luceneKeys;
+  transient protected Object luceneKeys = null;
   transient protected HashMap<String,Cache> indexCaches=null;
-  transient protected FilterOperatorTree tree;
+  transient protected FilterOperatorTree tree = null;
+  transient protected EnsembleCacheUtilsSingle ensembleCacheUtils;
   long start = 0;
   long end = 0;
   int readCounter = 0;
@@ -63,6 +61,8 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
   transient protected EnsembleCache ecache;
   transient Logger profilerLog;
   protected ProfileEvent profCallable;
+  private LeadsCollector collector;
+
   public LeadsBaseCallable(String configString, String output){
     this.configString = configString;
     this.output = output;
@@ -93,7 +93,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       profCallable.start("setEnvironment Callable ");
     }else
       profCallable = new ProfileEvent("setEnvironment Callable " + this.getClass().toString(),profilerLog);
-    embeddedCacheManager = cache.getCacheManager();
+    embeddedCacheManager = InfinispanClusterSingleton.getInstance().getManager().getCacheManager();
     imanager = new ClusterInfinispanManager(embeddedCacheManager);
     //    outputCache = (Cache) imanager.getPersisentCache(output);
     keys = inputKeys;
@@ -103,13 +103,14 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
 
     LQPConfiguration.initialize();
     tmpprofCallable.end();
-    EnsembleCacheUtils.initialize();
+//    EnsembleCacheUtils.initialize();
+    ensembleCacheUtils = new EnsembleCacheUtilsSingle();
     if(ensembleHost != null && !ensembleHost.equals("")) {
       tmpprofCallable.start("Start EnsemlbeCacheManager");
       profilerLog.error("EnsembleHost EXIST " + ensembleHost);
       System.err.println("EnsembleHost EXIST " + ensembleHost);
       emanager = new EnsembleCacheManager(ensembleHost);
-      EnsembleCacheUtils.initialize(emanager);
+      ensembleCacheUtils.initialize(emanager);
       //      emanager.start();
       //      emanager = createRemoteCacheManager();
       //      ecache = emanager.getCache(output,new ArrayList<>(emanager.sites()),
@@ -120,7 +121,7 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       System.err.println("EnsembleHost NULL");
       tmpprofCallable.start("Start EnsemlbeCacheManager");
       emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
-      EnsembleCacheUtils.initialize(emanager);
+      ensembleCacheUtils.initialize(emanager);
       //      emanager.start();
       //            emanager = createRemoteCacheManager();
     }
@@ -194,8 +195,10 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
       //      if (!cdl.localNodeIsPrimaryOwner(key))
       //        continue;
       Object filter = new LocalDataFilter<K,V>(cdl);
+
       CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(
           (KeyValueFilter<? super K, ? super V>) filter);
+      
       //        .converter((Converter<? super K, ? super V, ?>) filter);
       //    profExecute.end();
       //    profExecute.start("ISPNIter");
@@ -319,6 +322,17 @@ public  abstract class LeadsBaseCallable <K,V> implements LeadsCallable<K,V>,
     EnsembleCacheUtils.putToCache(outputCache,key.toString(),value  );
   }
 
+  public void setConfigString(String configString) {
+    this.configString = configString;
+  }
+
+  public void setOutput(String output) {
+    this.output = output;
+  }
+
+  public void setCollector(LeadsCollector collector) {
+    this.collector = collector;
+  }
 
 
 

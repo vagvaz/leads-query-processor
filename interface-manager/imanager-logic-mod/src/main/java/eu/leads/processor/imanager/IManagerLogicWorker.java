@@ -36,6 +36,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
   String planner;
   LogProxy logg;
   Logger log;
+  JsonObject globalConfig;
   //    PersistenceProxy persistence;
   Node com;
   String id;
@@ -64,6 +65,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
 
     if(config.containsField("global")){
       JsonObject global = config.getObject("global");
+      globalConfig = global;
       if(global.containsField("hdfs.uri") && global.containsField("hdfs.prefix") && global.containsField("hdfs.user"))
       {
         storageConf.setProperty("hdfs.url", global.getString("hdfs.uri"));
@@ -351,13 +353,13 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             System.out.println(" Imanager logic worker recovery ");
             stop();
           }else if(label.equals(IManagerConstants.STOP_CACHE)){
-            JsonObject webServiceReply = action.getResult().getObject("status");
+            JsonObject webServiceReply = action.getResult();
             com.sendTo(action.getData().getString("replyTo"),webServiceReply);
           }else if(label.equals(IManagerConstants.ADD_LISTENER)){
-            JsonObject webServiceReply = action.getResult().getObject("status");
+            JsonObject webServiceReply = action.getResult();
             com.sendTo(action.getData().getString("replyTo"),webServiceReply);
           } else if(label.equals(IManagerConstants.REMOVE_LISTENER)){
-            JsonObject webServiceReply = action.getResult().getObject("status");
+            JsonObject webServiceReply = action.getResult();
             com.sendTo(action.getData().getString("replyTo"),webServiceReply);
           }
           else {

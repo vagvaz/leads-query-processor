@@ -19,7 +19,7 @@ public class WebServiceClientTest {
         host = "http://127.0.0.1";
         //        host = "http://5.147.254.199";
         //       host = "http://5.147.254.161";
-        //        host = "http://80.156.73.113";
+//                host = "http://80.156.73.113";
         port = 8080;
         if (args.length == 2) {
             host = args[0];
@@ -33,9 +33,9 @@ public class WebServiceClientTest {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-        String cqlQuery = "leads.6a03a89a-ecef-4a1e-80d4-febf72aab676";
-        WebServiceClient.stopCQLQuery(cqlQuery);
-
+//        String cqlQuery = "leads.6a03a89a-ecef-4a1e-80d4-febf72aab676";
+//        WebServiceClient.stopCQLQuery(cqlQuery);
+        WebServiceClient.addListener("foo","bar.conf.eu",new JsonObject());
         JsonObject object = new JsonObject();
         object.putString("name", "vag");
         object.putString("surname", "vaz");

@@ -38,7 +38,11 @@ public class SSEPointQueryOperator extends BasicOperator {
 
    }
 
-   @Override
+  @Override public String getContinuousListenerClass() {
+    return null;
+  }
+
+  @Override
    public void setupMapCallable() {
 
    }

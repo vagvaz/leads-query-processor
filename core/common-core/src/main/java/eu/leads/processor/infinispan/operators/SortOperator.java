@@ -218,6 +218,10 @@ public class SortOperator extends BasicOperator {
     }
   }
 
+  @Override public String getContinuousListenerClass() {
+    return null;
+  }
+
   @Override
   public void setMapperCallableEnsembleHost(){
     if(isRemote) {

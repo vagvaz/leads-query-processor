@@ -158,7 +158,11 @@ public class JoinOperator extends MapReduceOperator {
            super.cleanup();
     }
 
-//   @Override
+  @Override public String getContinuousListenerClass() {
+    return null;
+  }
+
+  //   @Override
 //   public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
 //      Set<String> targetMC = getTargetMC();
 //      for(String mc : targetMC){

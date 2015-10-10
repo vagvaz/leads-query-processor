@@ -132,6 +132,10 @@ public class ScanOperator extends BasicOperator {
     }
   }
 
+  @Override public String getContinuousListenerClass() {
+    return null;
+  }
+
   @Override
   public void setupMapCallable() {
     inputCache = (Cache) manager.getPersisentCache(getInput());

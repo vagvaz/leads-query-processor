@@ -46,7 +46,7 @@ public class AddListenerHandler implements Handler<HttpServerRequest> {
   public void handle(HttpServerRequest request) {
     request.response().setStatusCode(200);
     request.response().putHeader(WebStrings.CONTENT_TYPE, WebStrings.APP_JSON);
-    log.info("Submit Query ");
+
     String reqId = UUID.randomUUID().toString();
     AddListenerReplyHandler replyHandler = new AddListenerReplyHandler(reqId, request);
     AddListenerBodyHandler bodyHanlder = new AddListenerBodyHandler(reqId, replyHandler);
@@ -81,6 +81,7 @@ public class AddListenerHandler implements Handler<HttpServerRequest> {
         replyForError(message);
         return;
       }
+      System.err.println("Replying " + message.toString());
       message.removeField(MessageUtils.FROM);
       message.removeField(MessageUtils.TO);
       message.removeField(MessageUtils.COMTYPE);
@@ -95,7 +96,7 @@ public class AddListenerHandler implements Handler<HttpServerRequest> {
         log.error(message.getString("message"));
         request.response().end("{}");
       } else {
-        log.error("No Query to submit");
+        log.error("nothing to add as listener");
         request.response().setStatusCode(400);
       }
       cleanup(requestId);
@@ -121,11 +122,14 @@ public class AddListenerHandler implements Handler<HttpServerRequest> {
         replyHandler.replyForError(null);
       }
 
+      System.err.println(" add listener");
       Action action = new Action();
       action.setId(requestId);
       action.setCategory(StringConstants.ACTION);
 
       JsonObject queryJ = new JsonObject(query);
+      cache = queryJ.getString("cache");
+      listener = queryJ.getString("listener");
       if (Strings.isNullOrEmpty(cache)) {
         replyHandler.replyForError(null);
         return;
@@ -138,11 +142,13 @@ public class AddListenerHandler implements Handler<HttpServerRequest> {
       action.setTriggered("");
       action.setTriggers(new JsonArray());
       action.setStatus(ActionStatus.PENDING.toString());
-      JsonObject queryRequest = new JsonObject();
-      queryRequest.putString("cache", cache);
-      queryRequest.putString("listener", listener);
-      queryRequest.putObject("conf",queryJ);
+      JsonObject queryRequest = new JsonObject(query);
+//      queryRequest.putString("cache", cache);
+//      queryRequest.putString("listener", listener);
+//      queryRequest.putObject("conf",queryJ);
+      System.err.println(query.toString());
       action.setData(queryRequest);
+      com.sendRequestToGroup(IMANAGERQUEUE,action.asJsonObject(),replyHandler);
     }
   }
 }

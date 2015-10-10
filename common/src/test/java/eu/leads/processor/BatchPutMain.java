@@ -22,11 +22,11 @@ public class BatchPutMain {
     static String dresden2 = "80.156.73.113:11222;80.156.73.116:11222;80.156.73.123:11222;80.156.73.128:11222";
     static String dd1a = "80.156.222.4:11222;80.156.222.18"; //qe8,qe9
     static String dd2c = "87.190.239.18:11222;87.190.239.130:11222"; //qe28,qe29
-    static String softnet = "clu25.softnet.tuc.gr:11222;clu24.softnet.tuc.gr:11222";
+    static String softnet = "147.27.14.38:11222;147.27.14.37:11222";
     static String local = "192.168.178.43:11222;192.168.178.43:11223";
     static Map<String,String> clouds = new HashMap<>();
     static List<String> activeClouds = new ArrayList<>();
-    static int numberOfkeys = 0;
+    static int numberOfkeys = 10;
     static boolean batchPut = false;
     static Map<String,EnsembleCacheManager> emanagers = new HashMap<>();
     static EnsembleCacheManager emanager;
@@ -36,7 +36,7 @@ public class BatchPutMain {
     private static String cacheName = "batchputTest";
     private static EnsembleCache ecache;
     private static EnsembleCache ecache2;
-    private static int numberOfvalues = 5;
+    private static int numberOfvalues = 1;
     private static HashMap<String,Integer> histogram;
 
     public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
@@ -90,7 +90,6 @@ public class BatchPutMain {
         }
        histogram = new HashMap<>();
         System.out.println("Inserting");
-        System.in.read();
         double step = 0.1;
         int counter = 0;
         long start = System.nanoTime();
@@ -117,7 +116,7 @@ public class BatchPutMain {
                 try {
                     EnsembleCacheUtils.putToCache(ecache,keyString, tuple);
                 }catch (Exception e){
-
+                    e.printStackTrace();
                 }
             }
         }

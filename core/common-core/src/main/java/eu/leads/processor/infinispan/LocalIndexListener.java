@@ -24,7 +24,7 @@ import org.vertx.java.core.json.JsonObject;
  */
 @Listener(sync = true,primaryOnly = true,clustered = false)
 public class LocalIndexListener implements LeadsListener {
-
+    private String  confString;
     transient private volatile Object mutex ;
     String cacheName;
     transient LevelDBIndex index;
@@ -79,7 +79,7 @@ public class LocalIndexListener implements LeadsListener {
         //        if(event.getKey() instanceof ComplexIntermediateKey) {
 //        pevent.start("IndexPut");
             ComplexIntermediateKey key = (ComplexIntermediateKey) event.getKey();
-//        System.err.println("PREKey created " + event.getKey() + " key " + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
+        System.err.println("PREKey created " + event.getKey() + " key " + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
 //        if(index instanceof BerkeleyDBIndex) {
 //            ((Tuple) event.getValue()).setAttribute("__complexKey", key.asString());
 //        }
@@ -101,7 +101,7 @@ public class LocalIndexListener implements LeadsListener {
 //            System.err.println("PREKey modified " + event.getKey() + " key "  + key.getKey() + " " + key.getNode() + " " + key.getSite() + " " + key.getCounter());
             return;
         }
-//        System.err.println("local " + event.isOriginLocal() + " " + event.isCommandRetried() + " " + event.isCreated() + " " + event.isPre());
+        System.err.println("localmodify " + event.isOriginLocal() + " " + event.isCommandRetried() + " " + event.isCreated() + " " + event.isPre());
 //        log.error("orig " + event.isOriginLocal() + " ret " + event.isCommandRetried() + " crea " + event.isCreated() + " pre  " + event.isPre());
 
 //        pevent.start("IndexPut");
@@ -160,6 +160,10 @@ public class LocalIndexListener implements LeadsListener {
         }
         keysCache = null;
         dataCache = null;
+    }
+
+    @Override public void setConfString(String s) {
+       confString = s;
     }
 
     void waitForAllData(){

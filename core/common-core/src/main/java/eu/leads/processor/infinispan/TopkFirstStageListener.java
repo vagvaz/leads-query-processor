@@ -1,12 +1,13 @@
-package eu.leads.processor.common.infinispan;
+package eu.leads.processor.infinispan;
 
-import eu.leads.processor.common.LeadsListener;
+import eu.leads.processor.common.continuous.BasicContinuousListener;
+import eu.leads.processor.common.infinispan.InfinispanManager;
 import org.vertx.java.core.json.JsonObject;
 
 /**
  * Created by vagvaz on 9/25/15.
  */
-public class TopkFirstStageListener implements LeadsListener{
+public class TopkFirstStageListener extends BasicContinuousListener{
   public TopkFirstStageListener(JsonObject conf) {
 
   }
@@ -23,6 +24,19 @@ public class TopkFirstStageListener implements LeadsListener{
 
   }
 
+  @Override protected void initializeContinuousListener(JsonObject conf) {
+
+  }
+
+  @Override protected void processBuffer() {
+
+  }
+
+  @Override public void finalizeListener() {
+
+  }
+
+
   @Override public void initialize(InfinispanManager manager) {
 
   }
@@ -34,4 +48,5 @@ public class TopkFirstStageListener implements LeadsListener{
   @Override public void close() {
 
   }
+
 }

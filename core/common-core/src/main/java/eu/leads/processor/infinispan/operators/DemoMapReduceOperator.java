@@ -33,4 +33,8 @@ public class DemoMapReduceOperator extends MapReduceOperator {
    public void cleanup() {
       super.cleanup();
    }
+
+   @Override public String getContinuousListenerClass() {
+      return null;
+   }
 }

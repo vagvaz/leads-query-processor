@@ -15,9 +15,11 @@ import org.vertx.java.core.json.JsonObject;
 public class RemoveListenerActionHandler implements ActionHandler {
   private Logger log;
   private InfinispanManager imanager;
-  public RemoveListenerActionHandler(Node com, LogProxy logg, InfinispanManager persistence, String id) {
+  JsonObject global;
+  public RemoveListenerActionHandler(Node com, LogProxy logg, InfinispanManager persistence, String id,JsonObject global) {
     log = LoggerFactory.getLogger(RemoveListenerActionHandler.class);
     imanager =persistence;
+    this.global = global;
   }
 
   @Override public Action process(Action action) {

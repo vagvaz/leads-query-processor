@@ -34,10 +34,8 @@ import org.infinispan.remoting.transport.Address;
 import org.infinispan.server.hotrod.HotRodServer;
 import org.infinispan.server.hotrod.configuration.HotRodServerConfigurationBuilder;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
-import org.infinispan.topology.ClusterTopologyManager;
 import org.infinispan.transaction.TransactionMode;
 import org.infinispan.transaction.lookup.JBossStandaloneJTAManagerLookup;
-import org.infinispan.util.concurrent.IsolationLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +48,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import static org.infinispan.test.AbstractCacheTest.getDefaultClusteredCacheConfig;
 
@@ -814,18 +811,18 @@ public class ClusterInfinispanManager implements InfinispanManager {
     }
     else if(listener instanceof String){
       String name = (String) listener;
-      if(name.equals("scan")){
-        name =  ScanCQLListener.class.toString();
-      }else if(name.equals("topk-1")){
-        name =  TopkFirstStageListener.class.toString();
-      }else if(name.equals("topk-2")){
-        name =  TopkSecondStageListener.class.toString();
-      }else if(name.equals("output")){
-        name = OutputCQLListener.class.toString();
-      }
-      else{
-        System.err.println("Listener unknown " + name);
-      }
+//      if(name.equals("scan")){
+//        name =  ScanCQLListener.class.toString();
+//      }else if(name.equals("topk-1")){
+//        name =  TopkFirstStageListener.class.toString();
+//      }else if(name.equals("topk-2")){
+//        name =  TopkSecondStageListener.class.toString();
+//      }else if(name.equals("output")){
+//        name = OutputCQLListener.class.toString();
+//      }
+//      else{
+//        System.err.println("Listener unknown " + name);
+//      }
       listenerId = name;
     }
 

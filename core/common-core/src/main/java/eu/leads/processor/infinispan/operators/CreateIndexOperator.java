@@ -189,6 +189,10 @@ public class CreateIndexOperator extends BasicOperator {
 
   }
 
+  @Override public String getContinuousListenerClass() {
+    return null;
+  }
+
   @Override
   public void setupMapCallable() {
 
