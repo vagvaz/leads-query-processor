@@ -39,6 +39,7 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
   private transient Cache bloomCache;
   private  int filtered = 0;
 //  private int counter = 0;
+  public  JoinMapper(){};
   public JoinMapper(String s) {
     super(s);
   }

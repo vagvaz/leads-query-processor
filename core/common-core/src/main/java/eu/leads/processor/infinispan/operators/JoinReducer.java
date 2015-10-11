@@ -28,6 +28,7 @@ public class JoinReducer extends LeadsReducer<String,Tuple> {
     //    private transient ProfileEvent tmpprofCallable;
 //    private transient ProfileEvent tmpProfileEvent;
 
+    public JoinReducer(){}
     public JoinReducer(String s) {
         super(s);
         configString = s;

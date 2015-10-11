@@ -42,6 +42,7 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
   protected transient InfinispanManager imanager;
   protected transient Logger log ;
   protected  transient EnsembleCacheManager readManager;
+  public WGSMapper(){}
   @Override
   public  void initialize() {
     imanager = InfinispanClusterSingleton.getInstance().getManager();

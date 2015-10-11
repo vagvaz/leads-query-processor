@@ -58,6 +58,7 @@ public abstract class BasicContinuousOperator implements LeadsContinuousOperator
     result.setOutput(conf.getString("output"));
     collector = new LeadsCollector(LQPConfiguration.getInstance().getConfiguration().getInt("node.combiner.buffersize",1000),output);
     result.setCollector(collector);
+    result.setCallableIndex(-2);
     result.setEnvironment(inputCache,null);
     return result;
   }
@@ -126,6 +127,7 @@ public abstract class BasicContinuousOperator implements LeadsContinuousOperator
   @Override public void finalizeOperator() {
     Future future = processInput();
     try {
+      callable.finalizeCallable();
       future.get();
       emanager.stop();
     } catch (InterruptedException e) {

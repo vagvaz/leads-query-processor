@@ -51,6 +51,7 @@ public class DefaultNode implements Node, Handler<Long> {
         };
         incomingMessages = CacheBuilder.newBuilder().expireAfterWrite((retries / 3) * timeout, TimeUnit.MILLISECONDS).build();
         logger = org.slf4j.LoggerFactory.getLogger(DefaultNode.class);
+
     }
 
     /**
@@ -257,7 +258,7 @@ public class DefaultNode implements Node, Handler<Long> {
 
     @Override
     public void initialize(JsonObject config, LeadsMessageHandler defaultHandler,
-                              LeadsMessageHandler failHandler, Vertx vertx) {
+                              LeadsMessageHandler failHandler, final Vertx vertx) {
         this.config = config.copy();
         logger = org.slf4j.LoggerFactory.getLogger(this.getId());
         comHandler = new CommunicationHandler(defaultHandler, this);
@@ -266,7 +267,8 @@ public class DefaultNode implements Node, Handler<Long> {
 
         registerToEventBusAddresses(this.config);
         this.vertx = vertx;
-        vertx.setPeriodic(timeout,this);
+
+        this.vertx.setPeriodic(timeout,this);
     }
 
     @Override

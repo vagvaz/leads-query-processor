@@ -20,6 +20,7 @@ public class TransformMapper extends LeadsMapper<String, Tuple, String, Tuple> {
         super(configString);
     }
 
+    public TransformMapper(){}
 
     @Override
     public void map(String key, Tuple value, Collector<String, Tuple> collector) {

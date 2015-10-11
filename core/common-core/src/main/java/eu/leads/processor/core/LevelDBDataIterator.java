@@ -29,7 +29,7 @@ public class LevelDBDataIterator implements Iterator<Object> {
 //        readOptions.verifyChecksums(false);
     }
 
-    @Override public boolean hasNext() {
+    @Override public synchronized boolean hasNext() {
         if(currentCounter <= total){
             return true;
         }
@@ -41,24 +41,16 @@ public class LevelDBDataIterator implements Iterator<Object> {
         return false;
     }
 
-    @Override public Object next() {
-        if(currentCounter <= total){
-            Map.Entry<byte[],byte[]> entry = iterator.next();
-//            if(validateKey(entry.getKey())){
-                BasicBSONDecoder decoder = new BasicBSONDecoder();
-                Tuple result = new Tuple(decoder.readObject(entry.getValue()));
-                currentCounter++;
-                return result;
-//            }
-           // else{
-//                throw new NoSuchElementException("Counter " + currentCounter + " total " + total + " but next returned key " + getKey(entry.getKey()));
-//            }
+    @Override public synchronized Object next() {
+        if(currentCounter <= total) {
+            Map.Entry<byte[], byte[]> entry = iterator.next();
+            //            if(validateKey(entry.getKey())){
+            BasicBSONDecoder decoder = new BasicBSONDecoder();
+            Tuple result = new Tuple(decoder.readObject(entry.getValue()));
+            currentCounter++;
+            return result;
+            //            }
         }
-//        try {
-//            iterator.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
         throw new NoSuchElementException("Leveldb Iterator no more values");
     }
 

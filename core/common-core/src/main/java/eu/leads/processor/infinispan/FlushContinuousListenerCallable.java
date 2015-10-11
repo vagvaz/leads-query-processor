@@ -1,6 +1,10 @@
 package eu.leads.processor.infinispan;
 
 import eu.leads.processor.common.continuous.BasicContinuousListener;
+import org.infinispan.Cache;
+import org.slf4j.LoggerFactory;
+
+import java.util.Set;
 
 /**
  * Created by vagvaz on 10/9/15.
@@ -25,6 +29,11 @@ public class FlushContinuousListenerCallable extends LeadsBaseCallable{
     profilerLog.error("LEADSLOG: Flushed leadslistener for " + inputCache.getName());
     //return super.call();
     return inputCache.getCacheManager().getAddress().toString();
+  }
+
+  @Override public void setEnvironment(Cache cache, Set inputKeys) {
+    inputCache = cache;
+    profilerLog = LoggerFactory.getLogger(FlushContinuousListenerCallable.class);
   }
 
   @Override public void executeOn(Object key, Object value) {

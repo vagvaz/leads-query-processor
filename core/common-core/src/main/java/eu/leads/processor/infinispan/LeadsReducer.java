@@ -47,7 +47,7 @@ public  class LeadsReducer<K, V> implements Reducer<K, V>,Serializable {
 
    public LeadsReducer(JsonObject configuration) {
       this.conf = configuration;
-
+      this.configString = configuration.toString();
    }
 
    public LeadsReducer(String configString) {

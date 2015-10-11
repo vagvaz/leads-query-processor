@@ -15,6 +15,7 @@ public class LeadsSQLMapper extends LeadsMapper<String,String,String,String> {
     super(configString);
   }
 
+  public LeadsSQLMapper(){}
   @Override public void map(String key, String value, Collector<String, String> collector) {
 
   }

@@ -1,5 +1,6 @@
 package eu.leads.processor.infinispan.operators;
 
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 
 /**
@@ -8,6 +9,7 @@ import eu.leads.processor.core.Tuple;
 public class ProjectCallableUpdated<K,V> extends LeadsSQLCallable<K,V> {
   transient private String prefix = "";
 
+  public ProjectCallableUpdated(){super();}
   public ProjectCallableUpdated(String configString, String output) {
     super(configString, output);
   }
@@ -15,7 +17,11 @@ public class ProjectCallableUpdated<K,V> extends LeadsSQLCallable<K,V> {
   @Override public void initialize() {
     super.initialize();
     prefix = conf.getString("output") + ":";
-
+    collector.setOnMap(false);
+    collector.setManager(this.embeddedCacheManager);
+    collector.setEmanager(emanager);
+    collector.setSite(LQPConfiguration.getInstance().getMicroClusterName());
+    collector.initializeCache(inputCache.getName(), imanager);
   }
 
   @Override public void executeOn(K ikey, V ivalue) {
@@ -27,6 +33,6 @@ public class ProjectCallableUpdated<K,V> extends LeadsSQLCallable<K,V> {
 //    handlePagerank(projected);
     projected = prepareOutput(projected);
 //    outputCache.put(prefix + tupleId, projected.asString());
-    outputToCache(prefix + tupleId, projected);
+    collector.emit(prefix + tupleId, projected);
   }
 }

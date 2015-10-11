@@ -26,6 +26,7 @@ public class ProjectMapper extends LeadsMapper<String, Tuple, String, Tuple> imp
     transient private String prefix = "";
 
 
+  public ProjectMapper(){}
    public ProjectMapper(JsonObject configuration) {
         super(configuration);
     }

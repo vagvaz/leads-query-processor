@@ -111,7 +111,6 @@ public abstract class BasicContinuousListener implements LeadsListener {
   }
 
   @Override public void close() {
-    flush();
     buffer.clear();
     try {
       processingThread.join();
@@ -122,13 +121,15 @@ public abstract class BasicContinuousListener implements LeadsListener {
 
   public void flush() {
     isFlushed = true;
-    while(!eventQueue.isEmpty() && !buffer.isEmpty()){
+    while(!eventQueue.isEmpty() || !buffer.isEmpty()){
       synchronized (mutex){
         try {
+          synchronized (queueMutex){
+            queueMutex.notifyAll();
+          }
           mutex.wait();
-          if(eventQueue.isEmpty()){
-            processBuffer();
-            buffer.clear();
+          if(!eventQueue.isEmpty() && !buffer.isEmpty()){
+            System.err.println("FLUSH woke up and evenqt que " + eventQueue.isEmpty() + " buffer size " + buffer.isEmpty() + " " + buffer.size());
           }
         } catch (InterruptedException e) {
           e.printStackTrace();
@@ -147,7 +148,7 @@ public abstract class BasicContinuousListener implements LeadsListener {
     if(event.isPre()){
       return;
     }
-    System.out.println("process key " + event.getKey().toString());
+//    System.out.println("process key " + event.getKey().toString());
     EventTriplet triplet = new EventTriplet(EventType.CREATED,event.getKey(),event.getValue());
     synchronized (queueMutex) {
       eventQueue.add(triplet);

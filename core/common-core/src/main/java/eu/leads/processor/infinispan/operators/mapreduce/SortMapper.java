@@ -20,6 +20,7 @@ public class SortMapper extends LeadsMapper<String, Tuple, String, Tuple> {
     Integer counter = 0;
     Integer numParts = 0;
 
+    public SortMapper(){}
     public SortMapper(JsonObject configuration) {
         super(configuration);
     }

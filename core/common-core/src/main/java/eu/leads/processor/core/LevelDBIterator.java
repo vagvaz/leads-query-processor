@@ -29,32 +29,32 @@ public class LevelDBIterator implements Iterable<Map.Entry<String, Integer>>,
 //        System.out.println( new String(this.iterator.peekPrev().getKey()));
     }
 
-    @Override public Iterator<Map.Entry<String, Integer>> iterator() {
+    @Override public synchronized Iterator<Map.Entry<String, Integer>> iterator() {
         return this;
     }
 
-    @Override public boolean hasNext() {
+    @Override public synchronized boolean hasNext() {
         return iterator.hasNext();
     }
 
-    @Override public Map.Entry<String, Integer> next() {
+    @Override public synchronized Map.Entry<String, Integer> next() {
         String key;
         Integer value;
-//        if(iterator.hasNext()) {
+        if(iterator.hasNext()) {
             Map.Entry<byte[],byte[]> entry = iterator.next();
             key = new String(entry.getKey());
             value =  Integer.parseInt(new String(entry.getValue()));
 
             return new AbstractMap.SimpleEntry<String, Integer>(key.substring(0,key.length()-2), value);
-//        }
-
+        }
+        return null;
     }
 
     @Override public void remove() {
 
     }
 
-    public void close(){
+    public synchronized void close(){
         try {
             iterator.close();
         } catch (IOException e) {

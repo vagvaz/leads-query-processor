@@ -2,6 +2,7 @@ package eu.leads.processor.infinispan;
 
 import eu.leads.processor.common.LeadsListener;
 import eu.leads.processor.core.LevelDBIndex;
+import eu.leads.processor.core.MapDBIndex;
 import org.infinispan.Cache;
 
 import java.io.Serializable;
@@ -15,9 +16,10 @@ public class GenericLocalReducerCallable<kOut, vOut> extends LeadsBaseCallable<k
     private static final long serialVersionUID = 8028728191155715526L;
     private LeadsReducer<kOut, vOut> reducer = null;
     private LeadsCollector collector;
-    private transient LevelDBIndex index;
+    private transient MapDBIndex index;
     private transient LeadsListener leadsListener;
 
+    public GenericLocalReducerCallable(){super();}
     public GenericLocalReducerCallable(String cacheName, String s) {
 
             super("{}", cacheName);
@@ -25,15 +27,8 @@ public class GenericLocalReducerCallable<kOut, vOut> extends LeadsBaseCallable<k
             collector.setOnMap(true);
         }
 
-        //    public void setLocalSite(String localSite){
-        //        collector.setLocalSite(localSite);
-        //    }
-
         @Override
         public void executeOn(kOut key, Object value) {
-            //    LeadsIntermediateIterator<vOut> values = new LeadsIntermediateIterator<>((String) key, prefix,
-            //                                                                             imanager);
-            //    Iterator<vOut> values = ((List)value).iterator();
             Iterator<vOut> values = (Iterator<vOut>) value;
             reducer.reduce(key, values, collector);
         }
@@ -59,7 +54,7 @@ public class GenericLocalReducerCallable<kOut, vOut> extends LeadsBaseCallable<k
                     localIndexListener.waitForAllData();
 
                     System.err.println("getIndex");
-                    index = localIndexListener.getIndex();
+//                    index = localIndexListener.getIndex(callableParallelism);
                     //                index.flush();
                     break;
                 }
@@ -74,28 +69,6 @@ public class GenericLocalReducerCallable<kOut, vOut> extends LeadsBaseCallable<k
                      index.getKeyIterator(entry.getKey(),entry.getValue());
                 executeOn((kOut)entry.getKey(),iterator);
             }
-            //            CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(new LocalDataFilter<K,V>(cdl));
-            //            profExecute.end();
-            //            try {
-            //                for (Object object : iterable) {
-            //                    Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
-            //
-            //                    //      V value = inputCache.get(key);
-            //                    K key = (K) entry.getKey();
-            //                    V value = (V) entry.getValue();
-            //
-            //                    if (value != null) {
-            //                        profExecute.start("ExOn" + (++count));
-            //                        executeOn((K) key, value);
-            //                        profExecute.end();
-            //                    }
-            //                }
-            //            }
-            //            catch(Exception e){
-            //                iterable.close();
-            //                profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
-            //                PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
-            //            }
             profCallable.end();
             finalizeCallable();
             return embeddedCacheManager.getAddress().toString();

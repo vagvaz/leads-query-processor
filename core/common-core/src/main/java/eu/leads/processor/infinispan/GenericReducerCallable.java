@@ -33,6 +33,7 @@ public class GenericReducerCallable<K, V> extends LeadsBaseCallable<K,Object > {
   transient LeadsStorage storageLayer;
   transient private Logger log = null;
 
+  public GenericReducerCallable(){super();}
   public GenericReducerCallable(String configString, String output) {
     super(configString, output);
   }

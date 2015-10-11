@@ -13,6 +13,7 @@ public class FilterCallableUpdated<K,V> extends LeadsSQLCallable<K,V> implements
 
   protected String qualString;
   transient protected FilterOperatorTree tree;
+  public  FilterCallableUpdated(){super();}
 
   public FilterCallableUpdated(String configString, String output, String qualString) {
     super(configString, output);

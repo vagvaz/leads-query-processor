@@ -22,6 +22,7 @@ public abstract  class LeadsSQLCallable<K,V> extends LeadsBaseCallable<K,V> impl
    transient HashMap<String,DistCMSketch> sketches=null;
   transient  List<String> attributeFunctions;
 
+  public LeadsSQLCallable(){super();}
   public LeadsSQLCallable(String configString, String output) {
     super(configString, output);
   }

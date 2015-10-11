@@ -8,7 +8,8 @@ import org.slf4j.LoggerFactory;
  * Created by vagvaz on 9/1/15.
  */
 public class BatchPutRunnable implements Runnable{
-    TupleBuffer buffer = null;
+  private EnsembleCacheUtilsSingle owner;
+  TupleBuffer buffer = null;
     int retries = 10;
     Logger log = LoggerFactory.getLogger(BatchPutRunnable.class);
 
@@ -18,7 +19,12 @@ public class BatchPutRunnable implements Runnable{
     public BatchPutRunnable(int retries){
         this.retries=retries ;
     }
-    public TupleBuffer getBuffer(){
+
+  public BatchPutRunnable(int i, EnsembleCacheUtilsSingle ensembleCacheUtilsSingle) {
+    this.owner = ensembleCacheUtilsSingle;
+  }
+
+  public TupleBuffer getBuffer(){
         return buffer;
     }
     public void setBuffer(TupleBuffer buffer){
@@ -40,7 +46,11 @@ public class BatchPutRunnable implements Runnable{
             retries--;
             PrintUtilities.logStackTrace(log,e.getStackTrace());
         }
-        EnsembleCacheUtils.addBatchPutRunnable(this);
+        if(owner != null){
+          owner.addBatchPutRunnable(this);
+        }else {
+          EnsembleCacheUtils.addBatchPutRunnable(this);
+        }
     }
 
 

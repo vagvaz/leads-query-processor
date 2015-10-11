@@ -27,6 +27,7 @@ public class SortReducer extends LeadsReducer<String, Tuple> {
     private String output;
     ConcurrentMap<String, Tuple> out;
 
+    public SortReducer(){}
     public SortReducer(JsonObject configuration) {
         super(configuration);
     }

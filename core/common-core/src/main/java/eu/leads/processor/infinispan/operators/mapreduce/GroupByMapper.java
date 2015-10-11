@@ -39,6 +39,7 @@ public class GroupByMapper extends LeadsMapper<String, Tuple, String, Tuple> {
         columns = new ArrayList<String>();
     }
 
+  public GroupByMapper(){}
    public GroupByMapper(String configString) {
       super(configString);
    }

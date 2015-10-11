@@ -68,7 +68,7 @@ public class BatchPutMain {
         for(Object s : ecache.sites()){
             Site site = (Site)s;
             String eString = site.getName();
-            buffers.put(site.getName(),new TupleBuffer(threshold,ecache, new EnsembleCacheManager(eString)));
+            buffers.put(site.getName(),new TupleBuffer(threshold,ecache, new EnsembleCacheManager(eString),null));
             System.out.println("cache site: " + site.getName());
         }
 

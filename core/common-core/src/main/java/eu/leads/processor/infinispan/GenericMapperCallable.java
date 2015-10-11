@@ -34,6 +34,7 @@ public class GenericMapperCallable<K,V,kOut,vOut> extends LeadsBaseCallable<K,V>
   transient private LeadsCombiner combiner;
   transient LeadsStorage storageLayer;
   transient Logger log = null;
+  public GenericMapperCallable(){super();}
   public GenericMapperCallable(String configString, String output) {
     super(configString, output);
   }

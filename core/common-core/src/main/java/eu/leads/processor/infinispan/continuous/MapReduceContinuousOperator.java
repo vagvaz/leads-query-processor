@@ -17,7 +17,7 @@ public abstract class MapReduceContinuousOperator extends BasicContinuousOperato
       if(islocal){
         result = new LeadsLocalReducerCallable(inputCache.getName(),getLocalReducer(),"",LQPConfiguration.getInstance().getMicroClusterName());
       }else{
-        result = new LeadsLocalReducerCallable(inputCache.getName(),getReducer(),"",LQPConfiguration.getInstance().getMicroClusterName());
+        result = new LeadsReducerCallable(inputCache.getName(),getReducer(),"");
       }
     }else{
       result = new LeadsMapperCallable(inputCache,collector,getMapper(), LQPConfiguration.getInstance().getMicroClusterName());

@@ -44,6 +44,7 @@ public class GroupByReducer extends LeadsReducer<String, Tuple> {
    transient ProfileEvent groupReducerEvent;
    transient ProfileEvent reducerEvent;
    transient boolean isCountStar = false;
+   public  GroupByReducer(){}
    public GroupByReducer(JsonObject configuration) {
       super(configuration);
    }

@@ -1068,7 +1068,7 @@ public abstract class BasicOperator extends Thread implements Operator{
       DistributedExecutorService des = new DefaultExecutorService(reduceLocalInputCache);
       setReducerLocaleEnsembleHost();
       DistributedTaskBuilder builder = null;
-      if(isRecCompReduceLocal){
+      if(!isRecCompReduceLocal){
         builder = des.createDistributedTaskBuilder(reducerLocalCallable);
       } else{
         builder = des.createDistributedTaskBuilder( new FlushContinuousListenerCallable("{}",""));
@@ -1253,6 +1253,7 @@ public abstract class BasicOperator extends Thread implements Operator{
   @Override public JsonObject getContinuousReduce() {
     JsonObject result = new JsonObject();
     result.putString("listener", BasicContinuousOperatorListener.class.getCanonicalName().toString());
+    result.putString("operatorClass",getContinuousListenerClass());
     JsonObject listenerConf = new JsonObject();
     listenerConf.putObject("operator",new JsonObject());
     listenerConf.getObject("operator").putObject("configuration",conf);

@@ -247,6 +247,7 @@ public abstract class MapReduceOperator extends BasicOperator{
       reduceConf.getObject("conf").putNumber("parallelism", parallelism);
       reduceConf.getObject("conf").putString("input",inputListener);
       reduceConf.getObject("conf").putString("ensembleHost",ensembleString);
+      reduceConf.getObject("conf").getObject("operator").putString("output",outputListener);
       reduceConf.getObject("conf").getObject("operator").putString("ensembleString",ensembleString);
       reduceConf.getObject("conf").getObject("operator").putNumber("parallelism", parallelism);
       WebUtils.addListener(inputListener,getContinuousListenerClass(),reduceConf,globalConfig);
