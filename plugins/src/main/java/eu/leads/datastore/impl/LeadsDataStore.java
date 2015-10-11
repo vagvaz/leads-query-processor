@@ -184,7 +184,7 @@ public class LeadsDataStore extends AbstractDataStore {
 	@Override
 	public boolean putLeadsResourceMDFamily(String uri, String ts, String family, List<Cell> cells) {
 		
-		List<String> fullColumnsList = tablesColumns.get(family);
+/*		List<String> fullColumnsList = tablesColumns.get(family);*/
 
 		List<String> columnsList = new ArrayList<String>();
 		List<Object> valuesList  = new ArrayList<Object>();
@@ -192,20 +192,20 @@ public class LeadsDataStore extends AbstractDataStore {
 			String columnName = cell.getKey();
 			Object value = cell.getValue();
 			//
-			if(fullColumnsList.contains(columnName)) {
-				columnsList.add(columnName);
-				//
-				if(LEADSUtils.isNumber(value))
-					valuesList.add(value);
-				else
-					valuesList.add("'"+StringEscapeUtils.escapeJava(value.toString())+"'");
-				fullColumnsList.remove(columnName);
-			}
-		}
-		for(String columnName : fullColumnsList) {
+			//if(fullColumnsList.contains(columnName)) {
 			columnsList.add(columnName);
-			valuesList.add("NULL");
+			//
+			if(LEADSUtils.isNumber(value))
+				valuesList.add(value);
+			else
+				valuesList.add("'"+StringEscapeUtils.escapeJava(value.toString())+"'");
+				//fullColumnsList.remove(columnName);
+			//}
 		}
+//		for(String columnName : fullColumnsList) {
+//			columnsList.add(columnName);
+//			valuesList.add("NULL");
+//		}
 
 		int i=0;
 
