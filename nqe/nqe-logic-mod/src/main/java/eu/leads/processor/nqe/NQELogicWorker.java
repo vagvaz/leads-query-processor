@@ -97,7 +97,6 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
 //                    else if(){
 //
 //                    }
-
                     else {
                         log.error("Unknown PENDING Action received " + action.toString());
                         return;

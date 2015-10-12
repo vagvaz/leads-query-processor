@@ -24,6 +24,7 @@ public class TransformReducer extends LeadsReducer<String, Tuple> {
     transient String prefix;
 
 
+    public TransformReducer(){}
     public TransformReducer(JsonObject configuration) {
         super(configuration);
     }

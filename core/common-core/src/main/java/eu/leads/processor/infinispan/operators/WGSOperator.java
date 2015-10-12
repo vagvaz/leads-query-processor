@@ -265,6 +265,11 @@ public class WGSOperator extends MapReduceOperator {
       }
     }
   }
+
+  @Override public String getContinuousListenerClass() {
+    return null;
+  }
+
   //   @Override
   public void run2() {
     int count = 0;

@@ -25,7 +25,7 @@ public class WGSReducer extends LeadsReducer<String, String> {
    public WGSReducer(String configString) {
       super(configString);
    }
-
+  public WGSReducer(){}
    @Override
    public void initialize(){
       isInitialized = true;

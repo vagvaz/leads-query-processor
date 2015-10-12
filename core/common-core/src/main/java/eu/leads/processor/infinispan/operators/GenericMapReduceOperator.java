@@ -51,6 +51,10 @@ public class GenericMapReduceOperator extends MapReduceOperator {
 
    }
 
+   @Override public String getContinuousListenerClass() {
+      return null;
+   }
+
 
    @Override public void setupMapCallable() {
       conf.putString("output",getOutput());

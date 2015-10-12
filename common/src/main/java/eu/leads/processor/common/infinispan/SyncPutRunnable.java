@@ -20,7 +20,7 @@ public class SyncPutRunnable implements Runnable {
     private ProfileEvent event;
     private boolean remote = true;
     private int retries = 3;
-
+    private EnsembleCacheUtilsSingle owner;
     public SyncPutRunnable(){
         logger = LoggerFactory.getLogger(SyncPutRunnable.class);
         event = new ProfileEvent("SyncPutInit",logger);
@@ -32,6 +32,11 @@ public class SyncPutRunnable implements Runnable {
         this.key = key;
         this.value = value;
     }
+
+    public SyncPutRunnable(EnsembleCacheUtilsSingle ensembleCacheUtilsSingle) {
+        this.owner = ensembleCacheUtilsSingle;
+    }
+
     @Override public void run() {
 //        event.start("SyncPut");
         if(key != null && value != null) {
@@ -77,7 +82,11 @@ public class SyncPutRunnable implements Runnable {
         this.cache = null;
         this.key= null;
         this.value = null;
-        EnsembleCacheUtils.addRunnable(this);
+        if(owner != null){
+            owner.addRunnable(this);
+        }else {
+            EnsembleCacheUtils.addRunnable(this);
+        }
 //        event.end();
     }
 

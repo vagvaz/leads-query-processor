@@ -19,6 +19,7 @@ public class WordCountMapper extends LeadsMapper<String, Tuple, String, Tuple> {
     super(configString);
   }
 
+  public WordCountMapper(){}
   @Override
   public void map(String key, Tuple value, Collector<String, Tuple> collector) {
     //    System.out.println(getClass().getName() + ".map!");

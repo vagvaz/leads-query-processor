@@ -18,6 +18,8 @@ import org.infinispan.configuration.parsing.ParserRegistry;
 import org.infinispan.context.Flag;
 import org.infinispan.distexec.DefaultExecutorService;
 import org.infinispan.distexec.DistributedExecutorService;
+import org.infinispan.distexec.DistributedTask;
+import org.infinispan.distexec.DistributedTaskBuilder;
 import org.infinispan.eviction.EvictionStrategy;
 import org.infinispan.eviction.EvictionThreadPolicy;
 import org.infinispan.factories.ComponentRegistry;
@@ -34,10 +36,8 @@ import org.infinispan.remoting.transport.Address;
 import org.infinispan.server.hotrod.HotRodServer;
 import org.infinispan.server.hotrod.configuration.HotRodServerConfigurationBuilder;
 import org.infinispan.test.fwk.TestCacheManagerFactory;
-import org.infinispan.topology.ClusterTopologyManager;
 import org.infinispan.transaction.TransactionMode;
 import org.infinispan.transaction.lookup.JBossStandaloneJTAManagerLookup;
-import org.infinispan.util.concurrent.IsolationLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -288,34 +288,6 @@ public class ClusterInfinispanManager implements InfinispanManager {
     NutchLocalListener nlistener = new NutchLocalListener(this,"default.webpages",LQPConfiguration.getInstance().getConfiguration().getString("nutch.listener.prefix"),currentComponent);
 
     manager.getCache("WebPage").addListener(nlistener);
-
-
-    //    System.err.println("Loading all the available data from nutch Cache");
-    //    final ClusteringDependentLogic cdl = manager.getCache("WebPage").getAdvancedCache().getComponentRegistry()
-    //                                           .getComponent
-    //                                              (ClusteringDependentLogic.class);
-    //    for(Object key : manager.getCache("WebPage").keySet()) {
-    //      if (!cdl.localNodeIsPrimaryOwner(key))
-    //        continue;
-    //      Object value = manager.getCache("WebPage").get(key);
-    //      if (value != null) {
-    //        listener.processWebPage(key,value);
-    //      }
-    //    }
-    //    getPersisentCache("WebPage");
-    //    Marshaller marshaller = null;
-    //    try {
-    //      marshaller = Util.getInstanceStrict(MARSHALLER, Thread.currentThread().getContextClassLoader());
-    //    } catch (ClassNotFoundException e) {
-    //      e.printStackTrace();
-    //    } catch (InstantiationException e) {
-    //      e.printStackTrace();
-    //    } catch (IllegalAccessException e) {
-    //      e.printStackTrace();
-    //    }
-
-
-
 
     //I might want to sleep here for a little while
     PrintUtilities.printList(manager.getMembers());
@@ -645,7 +617,12 @@ public class ClusterInfinispanManager implements InfinispanManager {
   private void createInMemoryCache(String cacheName, int inMemSize) {
 
     DistributedExecutorService des = new DefaultExecutorService(manager.getCache("clustered"));
-    List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
+    List<Future<Void>> list = null;
+    DistributedTaskBuilder builder = null;
+    builder = des.createDistributedTaskBuilder(new StartCacheCallable(cacheName,true,false,inMemSize));
+    builder.timeout(20, TimeUnit.SECONDS);
+    DistributedTask task = builder.build();
+    list = des.submitEverywhere(task);
     //
     System.out.println(cacheName + " in memory  " + list.size());
     for (Future<Void> future : list) {
@@ -653,6 +630,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
         future.get(); // wait for task to complete
       } catch (InterruptedException e) {
       } catch (ExecutionException e) {
+      } catch (Exception e){
+        e.printStackTrace();
       }
     }
   }
@@ -665,7 +644,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         .clustering().l1().disable().clustering().cacheMode(CacheMode.DIST_SYNC).hash().numOwners(1).numSegments(segments).locking().useLockStriping(false).concurrencyLevel(1000).indexing()
         .index(Index.NONE).transaction().transactionMode(TransactionMode.NON_TRANSACTIONAL)
         .compatibility().enable()//.marshaller(new TupleMarshaller())
-        .expiration().lifespan(-1).maxIdle(120000).wakeUpInterval(-1).reaperEnabled(
+        .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(
             false).eviction().maxEntries(inMemSize).strategy(EvictionStrategy.LRU).build();
     return config;
   }
@@ -734,6 +713,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
         log.error(e.getClass().toString() + " while removing " + name + " " + e.getMessage());
       } catch (ExecutionException e) {
         log.error(e.getClass().toString() + " while removing " + name + " " + e.getMessage());
+      }catch (Exception e){
+        e.printStackTrace();
       }
     }
 
@@ -769,24 +750,42 @@ public class ClusterInfinispanManager implements InfinispanManager {
    */
   @Override
   public void addListener(Object listener, Cache cache) {
-    DistributedExecutorService des = new DefaultExecutorService(cache);
-    List<Future<Void>> list = new LinkedList<Future<Void>>();
-    //        for (Address a : getMembers()) {
 
+    boolean toadd = true;
+    if (cache.getCacheManager().cacheExists(cache.getName())) {
+      if (listener instanceof LeadsListener) {
+        for (Object l : cache.getListeners()) {
+          if (l.getClass().getCanonicalName().equals(listener.getClass().getCanonicalName())) {
+            toadd = false;
+          }
+        }
+      }
+      if (!toadd) {
+        return;
+      }
+    }
+
+    DistributedExecutorService des = new DefaultExecutorService(cache);
+    List<Future<String>> list = null;
+    DistributedTaskBuilder builder = null;
+    builder = des.createDistributedTaskBuilder(new AddListenerCallable(cache.getName(),listener));
+    builder.timeout(1, TimeUnit.MINUTES);
+    DistributedTask task = builder.build();
     try {
-      list =     des.submitEverywhere(new AddListenerCallable(cache.getName(),listener));
-      //                list.add(des.submit(a, new AddListenerCallable(cache.getName(), listener)));
+      list =     des.submitEverywhere(task);
     } catch (Exception e) {
       System.out.println(e.getMessage());
     }
-    //        }
 
-
-    for (Future<Void> future : list) {
+    for (Future<String> future : list) {
       try {
         future.get(); // wait for task to complete
       } catch (InterruptedException e) {
+        e.printStackTrace();
       } catch (ExecutionException e) {
+        e.printStackTrace();
+      }catch (Exception e){
+        e.printStackTrace();
       }
     }
   }
@@ -813,24 +812,29 @@ public class ClusterInfinispanManager implements InfinispanManager {
     }
     else if(listener instanceof String){
       String name = (String) listener;
-      if(name.equals("scan")){
-        name =  ScanCQLListener.class.toString();
-      }else if(name.equals("topk-1")){
-        name =  TopkFirstStageListener.class.toString();
-      }else if(name.equals("topk-2")){
-        name =  TopkSecondStageListener.class.toString();
-      }else if(name.equals("output")){
-        name = OutputCQLListener.class.toString();
-      }
-      else{
-        System.err.println("Listener unknown " + name);
-      }
+//      if(name.equals("scan")){
+//        name =  ScanCQLListener.class.toString();
+//      }else if(name.equals("topk-1")){
+//        name =  TopkFirstStageListener.class.toString();
+//      }else if(name.equals("topk-2")){
+//        name =  TopkSecondStageListener.class.toString();
+//      }else if(name.equals("output")){
+//        name = OutputCQLListener.class.toString();
+//      }
+//      else{
+//        System.err.println("Listener unknown " + name);
+//      }
       listenerId = name;
     }
 
     RemoveListenerCallable callable = new RemoveListenerCallable(cache.getName(),listenerId);
     DistributedExecutorService des = new DefaultExecutorService(cache);
-    List<Future<Void>> list = des.submitEverywhere(callable);
+
+    List<Future<Void>> list = null;
+    DistributedTaskBuilder builder = des.createDistributedTaskBuilder(callable);
+    builder.timeout(2, TimeUnit.MINUTES);
+    DistributedTask task = builder.build();
+    des.submitEverywhere(task);
     //
     System.out.println("removed " + listenerId+" from  " + cache.getName());
     log.error("REMOVELISTENER " + listenerId + " from  " + cache.getName());
@@ -839,6 +843,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
         future.get(); // wait for task to complete
       } catch (InterruptedException e) {
       } catch (ExecutionException e) {
+      } catch (Exception e){
+        e.printStackTrace();
       }
     }
 
@@ -895,6 +901,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
         .fetchPersistentState(false)
         .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()
         .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(maxEntries).strategy(
+
             EvictionStrategy.LRU).threadPolicy(EvictionThreadPolicy.DEFAULT).storeAsBinary()
 //        .locking().concurrencyLevel(1000)
         .build();
@@ -919,7 +926,12 @@ public class ClusterInfinispanManager implements InfinispanManager {
     else {
       //      manager.defineConfiguration(cacheName,getCacheDefaultConfiguration(cacheName));
       DistributedExecutorService des = new DefaultExecutorService(manager.getCache());
-      List<Future<Void>> list = des.submitEverywhere(new StartCacheCallable(cacheName));
+      List<Future<Void>> list = null;
+          DistributedTaskBuilder builder = null;
+      builder = des.createDistributedTaskBuilder(new StartCacheCallable(cacheName));
+      builder.timeout(1, TimeUnit.MINUTES);
+      DistributedTask task = builder.build();
+        list = des.submitEverywhere(task);
       //
       System.out.println(cacheName+"  " + list.size());
       log.error("LGCREATE "+cacheName+"  " + list.size());
@@ -928,6 +940,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
           future.get(); // wait for task to complete
         } catch (InterruptedException e) {
         } catch (ExecutionException e) {
+        }catch (Exception e){
+          e.printStackTrace();
         }
       }
     }
@@ -988,6 +1002,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
             .fetchPersistentState(false)
             .shared(false).purgeOnStartup(false).preload(false).compatibility().enable()//.marshaller(new TupleMarshaller())
             .expiration().lifespan(-1).maxIdle(-1).wakeUpInterval(-1).reaperEnabled(false).eviction().maxEntries(
+
                 maxEntries).strategy(EvictionStrategy.LRU).threadPolicy(EvictionThreadPolicy.DEFAULT).storeAsBinary()
 //            .locking().concurrencyLevel(1000)
             .build();

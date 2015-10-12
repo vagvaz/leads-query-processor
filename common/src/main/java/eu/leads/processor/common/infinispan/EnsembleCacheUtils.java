@@ -46,6 +46,8 @@ public class EnsembleCacheUtils {
     private static ConcurrentLinkedQueue<NotifyingFuture> localFutures;
     private static int localBatchSize =10;
     private static boolean isSetup=false;
+    private static volatile java.lang.Object runnableMutex = new Object();
+    private static volatile java.lang.Object batchRunnableMutex = new Object();
 
 
     public static void initialize() {
@@ -185,15 +187,16 @@ public class EnsembleCacheUtils {
 
     public  static SyncPutRunnable getRunnable(){
         SyncPutRunnable result = null;
-        //        synchronized (runnableMutex){
+
         result = runnables.poll();
         while(result == null){
-            try {
-                Thread.sleep(0,500000);
-                //                    Thread.yield();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+                try {
+                    Thread.sleep(0, 500000);
+                    //                    Thread.yield();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
             result = runnables.poll();
             //            }
         }
@@ -206,12 +209,14 @@ public class EnsembleCacheUtils {
         //        synchronized (runnableMutex){
         result = microcloudRunnables.poll();
         while(result == null){
-            try {
-                Thread.sleep(0,500000);
-                //                    Thread.yield();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+
+                try {
+                    Thread.sleep(0,500000);
+                    //                    Thread.yield();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
             result = microcloudRunnables.poll();
             //            }
         }
@@ -228,6 +233,19 @@ public class EnsembleCacheUtils {
         microcloudRunnables.add(runnable);
     }
 
+    public void addLocalFuture(NotifyingFuture future){
+        localFutures.add(future);
+    }
+
+    public void removeCompleted(){
+        Iterator<NotifyingFuture> it = localFutures.iterator();
+        while(it.hasNext()){
+            NotifyingFuture f = it.next();
+            if(f.isDone()){
+                it.remove();
+            }
+        }
+    }
 
     public static void waitForAuxPuts() throws InterruptedException {
         while(auxExecutor.getActiveCount() > 0) {
@@ -258,7 +276,7 @@ public class EnsembleCacheUtils {
                 else{
                     if(cache.getValue().getBuffer().size() > 0) {
                         Cache localCache = (Cache) localManager.getPersisentCache(cache.getKey());
-                        cache.getValue().flushToCache(localCache);
+                        cache.getValue().flushToLocalCache();
                         //                        cache.getValue().release();
                     }
                 }
@@ -356,7 +374,7 @@ public class EnsembleCacheUtils {
         }
         TupleBuffer tupleBuffer = buffer.get(cache.getName());
         if(tupleBuffer == null){
-            tupleBuffer= new TupleBuffer(batchSize,cache.getName(),ensembleManagers.get(mc),mc);
+            tupleBuffer= new TupleBuffer(batchSize,cache.getName(),ensembleManagers.get(mc),mc,null);
             microclouds.get(mc).put(cache.getName(),tupleBuffer);
         }
         if(tupleBuffer.getCacheName()==null)
@@ -376,51 +394,51 @@ public class EnsembleCacheUtils {
             putToCacheDirect(cache,key,value);
             return;
         }
-        //        Map<String,TupleBuffer> mcBufferMap = microclouds.get(localMC);
+                Map<String,TupleBuffer> mcBufferMap = microclouds.get(localMC);
 
-        //        if(mcBufferMap == null) { // create buffer map for localMC
-        //            microclouds.put(localMC, new ConcurrentHashMap<String, TupleBuffer>());
-        //        }
-        //        TupleBuffer tupleBuffer = mcBufferMap.get(cache.getName());
-        //        if(tupleBuffer == null){ // create tuple buffer for cache
-        //            tupleBuffer= new TupleBuffer(localBatchSize,cache.getName(),ensembleManagers.get(localMC),localMC);
-        //            microclouds.get(localMC).put(cache.getName(),tupleBuffer);
-        //        }
-        //        if(tupleBuffer.getCacheName()==null)
-        //        {
-        //            tupleBuffer.setCacheName(cache.getName());
-        //        }
-        //        if(tupleBuffer.add(key, (Tuple) value)){
-        //            if(tupleBuffer.getMC().equals(localMC)){
+                if(mcBufferMap == null) { // create buffer map for localMC
+                    microclouds.put(localMC, new ConcurrentHashMap<String, TupleBuffer>());
+                }
+//                TupleBuffer tupleBuffer = mcBufferMap.get(cache.getName());
+//                if(tupleBuffer == null){ // create tuple buffer for cache
+//                    tupleBuffer= new TupleBuffer(localBatchSize,cache.getName(),ensembleManagers.get(localMC),localMC);
+//                    microclouds.get(localMC).put(cache.getName(),tupleBuffer);
+//                }
+//                if(tupleBuffer.getCacheName()==null)
+//                {
+//                    tupleBuffer.setCacheName(cache.getName());
+//                }
+//                if(tupleBuffer.add(key, (Tuple) value)){
+//                    if(tupleBuffer.getMC().equals(localMC)){
         Cache localCache =
             (Cache) localManager.getPersisentCache(  cache.getName());
         EnsembleCacheUtils.putToCacheDirect(localCache,key,value);
-        //                localFutures.add(tupleBuffer.flushToCache(localCache));
-        //                tupleBuffer.flushToCache(localCache);
-        //                while(localFutures.size() > threadBatch){
-        //                    Iterator<NotifyingFuture> iterator = localFutures.iterator();
-        //                    while(iterator.hasNext()){
-        //                        NotifyingFuture future = iterator.next();
-        //                        try {
-        //                            if(future != null)
-        //                            {
-        //                                future.get(10,TimeUnit.MILLISECONDS);
-        //                                iterator.remove();
-        //                            }
-        //                            else{
-        //                                iterator.remove();
-        //                            }
-        //                        } catch (InterruptedException e) {
-        //                            e.printStackTrace();
-        //                        } catch (ExecutionException e) {
-        //                            e.printStackTrace();
-        //                        } catch (TimeoutException e) {
-        //                            e.printStackTrace();
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
+//                        localFutures.add(tupleBuffer.flushToCache(localCache));
+//        //                tupleBuffer.flushToCache(localCache);
+//                        while(localFutures.size() > threadBatch){
+//                            Iterator<NotifyingFuture> iterator = localFutures.iterator();
+//                            while(iterator.hasNext()){
+//                                NotifyingFuture future = iterator.next();
+//                                try {
+//                                    if(future != null)
+//                                    {
+//                                        future.get(10,TimeUnit.MILLISECONDS);
+//                                        iterator.remove();
+//                                    }
+//                                    else{
+//                                        iterator.remove();
+//                                    }
+//                                } catch (InterruptedException e) {
+//                                    e.printStackTrace();
+//                                } catch (ExecutionException e) {
+//                                    e.printStackTrace();
+//                                } catch (TimeoutException e) {
+//                                    e.printStackTrace();
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
     }
 
     public static void putToCacheDirect(BasicCache cache,Object key,Object value){

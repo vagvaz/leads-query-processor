@@ -109,9 +109,7 @@ public class LevelDBIndex {
 
     public static void main(String[] args) {
         for (int i = 0; i <100; i++) {
-
-
-            LevelDBIndex index = new LevelDBIndex("/media/storage/vagvaz/testdb/", "mydb");
+            LevelDBIndex index = new LevelDBIndex("/tmp/testdb/", "mydb");
             if(t==null)
             initTuple();
             int numberofkeys = 500000;
@@ -181,10 +179,13 @@ public class LevelDBIndex {
 //    ;
     public synchronized void flush() {
         try {
-
-            dataDB.write(batch);
-            batch.close();
-            batch = dataDB.createWriteBatch();
+            if(dataDB != null){
+                if(batch != null) {
+                    dataDB.write(batch);
+                    batch.close();
+                    batch = dataDB.createWriteBatch();
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -231,10 +232,10 @@ public class LevelDBIndex {
         return t;
     }
 
-    public void put(Object key,Object value){
+    public synchronized void put(Object key,Object value){
         add(key,value);
     }
-    public synchronized void add(Object keyObject , Object valueObject){
+    public void add(Object keyObject , Object valueObject){
         try {
             String key = null;
             Tuple value = null;
@@ -284,9 +285,11 @@ public class LevelDBIndex {
         if(keyIterator != null){
             keyIterator.close();
         }
+        keyIterator = null;
         if(valuesIterator!= null){
             valuesIterator.close();
         }
+        valuesIterator = null;
         if(keysDB != null){
             try {
                 keysDB.close();
@@ -295,9 +298,13 @@ public class LevelDBIndex {
                 e.printStackTrace();
             }
         }
+        keysDB = null;
         if(dataDB != null){
             try {
-                batch.close();
+                if(batch != null)
+                {
+                    batch.close();
+                }
 
                 dataDB.close();
                 dbfactory.destroy(datadbFile, new Options());
@@ -305,7 +312,7 @@ public class LevelDBIndex {
                 e.printStackTrace();
             }
         }
-
+        dataDB = null;
 //        for(File f : keydbFile.listFiles())
 //        {
 //            f.delete();
@@ -323,7 +330,9 @@ public class LevelDBIndex {
 //        {
 //            f.delete();
 //        }
-        baseDirFile.delete();
+        if(baseDirFile.exists()) {
+            baseDirFile.delete();
+        }
 //        System.out.println("press");
 //        try {
 //            System.in.read();

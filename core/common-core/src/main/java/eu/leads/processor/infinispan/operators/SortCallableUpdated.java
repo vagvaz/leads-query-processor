@@ -2,6 +2,7 @@ package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.AcceptAllFilter;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
+import eu.leads.processor.common.infinispan.EnsembleCacheUtilsSingle;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
@@ -18,6 +19,7 @@ import org.infinispan.filter.KeyValueFilter;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by vagvaz on 2/20/15.
@@ -35,7 +37,7 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
   private String addressesCacheName;
   private long limit = -1 ;
   private transient EnsembleCache addressesCache;
-
+  public SortCallableUpdated(){super();}
   //  public SortCallableUpdated(String configString, String output){
   public SortCallableUpdated(String[] sortColumns, Boolean[] ascending, String[] types, String output, String prefix,
       long rowcount){
@@ -60,6 +62,11 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
     addressesCache = emanager.getCache(addressesCacheName,new ArrayList<>(emanager.sites()),
         EnsembleCacheManager.Consistency.DIST);
     tuples = new ArrayList<>(100);
+    collector.setOnMap(false);
+    collector.setManager(this.embeddedCacheManager);
+    collector.setEmanager(emanager);
+    collector.setSite(LQPConfiguration.getInstance().getMicroClusterName());
+    collector.initializeCache(inputCache.getName(), imanager);
   }
 
   @Override public String call() throws Exception {
@@ -111,6 +118,8 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
   }
 
    public void   endCallable(){
+     EnsembleCacheUtilsSingle ensembleCacheUtilsSingle = new EnsembleCacheUtilsSingle();
+     ensembleCacheUtilsSingle.initialize(emanager);
     Comparator<Tuple> comparator = new TupleComparator(sortColumns,asceding,types);
     Collections.sort(tuples, comparator);
     long counter = 0;
@@ -125,7 +134,7 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
       if(limit > 0 && counter >= limit){
         break;
       }
-      EnsembleCacheUtils.putToCache(outputCache,prefix + counter, t);
+      ensembleCacheUtilsSingle.putToCache(outputCache,prefix + counter, t);
 
 //      outputCache.put(outputCache.getName()  + counter, t);
       counter++;
@@ -156,7 +165,11 @@ public class SortCallableUpdated<K,V> extends LeadsBaseCallable<K,V> {
            ee.printStackTrace();
          }
        }
-
     tuples.clear();
-  }
+     try {
+       ensembleCacheUtilsSingle.waitForAllPuts();
+     } catch (Exception e) {
+       e.printStackTrace();
+     }
+   }
 }

@@ -47,6 +47,9 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
   }
   public LeadsMapper(String configString){this.configString = configString;}
 
+  public void setConfigString(String configString){
+    this.configString = configString;
+  }
   public void  setCacheManager(EmbeddedCacheManager manager){
     this.manager = manager;
   }

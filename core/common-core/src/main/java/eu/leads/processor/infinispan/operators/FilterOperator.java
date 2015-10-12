@@ -120,7 +120,11 @@ public class FilterOperator extends BasicOperator {
       }
    }
 
-   @Override
+  @Override public String getContinuousListenerClass() {
+    return null;
+  }
+
+  @Override
    public void setupMapCallable() {
       inputCache = (Cache) manager.getPersisentCache(getInput());
       mapperCallable =  new FilterCallableUpdated<>(conf.toString(),getOutput(),conf.getObject("body").getObject("qual").toString());

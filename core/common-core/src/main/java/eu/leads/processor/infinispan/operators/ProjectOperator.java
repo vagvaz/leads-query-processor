@@ -88,7 +88,11 @@ public class ProjectOperator extends BasicOperator {
       }
    }
 
-   @Override
+  @Override public String getContinuousListenerClass() {
+    return null;
+  }
+
+  @Override
    public void setupMapCallable() {
       inputCache = (Cache) manager.getPersisentCache(getInput());
      System.out.println("INPUT CACHE SIZE " + inputCache.size());

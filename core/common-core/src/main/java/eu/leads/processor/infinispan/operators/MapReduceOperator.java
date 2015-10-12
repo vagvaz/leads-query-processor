@@ -3,6 +3,7 @@ package eu.leads.processor.infinispan.operators;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
+import eu.leads.processor.core.WebUtils;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.infinispan.*;
@@ -13,6 +14,8 @@ import eu.leads.processor.infinispan.LeadsMapperCallable;
 import eu.leads.processor.infinispan.LeadsReducer;
 import eu.leads.processor.infinispan.LeadsReducerCallable;
 
+import eu.leads.processor.infinispan.continuous.WordCountContinuousOperator;
+import eu.leads.processor.web.WebServiceClient;
 import org.infinispan.Cache;
 import org.infinispan.commons.api.BasicCache;
 import org.vertx.java.core.json.JsonObject;
@@ -106,15 +109,20 @@ public abstract class MapReduceOperator extends BasicOperator{
     inputCache = (Cache) manager.getPersisentCache(inputCacheName);
     super.cleanup();
     if(reduceLocal){
-      manager.removePersistentCache(intermediateLocalCache+".data");
+      if(!isRemote){
+        WebUtils.stopCache(intermediateLocalCacheName+".data",globalConfig);
+      }
+//      manager.removePersistentCache(intermediateLocalCache+".data");
     }
 
     if(executeOnlyReduce) {
 //      intermediateCache.stop();
 //      indexSiteCache.stop();
 //      intermediateDataCache.stop();
-
-      manager.removePersistentCache(intermediateDataCache.getName());
+      if(!isRemote) {
+        WebUtils.stopCache(intermediateCacheName+".data",globalConfig);
+//        manager.removePersistentCache(intermediateDataCache.getName());
+      }
 //      keysCache.stop();
     }
   }
@@ -124,15 +132,16 @@ public abstract class MapReduceOperator extends BasicOperator{
     inputCache = (Cache) manager.getPersisentCache(inputCacheName);
     super.failCleanup();
     if(reduceLocal){
-      manager.removePersistentCache(intermediateLocalCache+".data");
+      WebUtils.stopCache(intermediateLocalCacheName+".data",globalConfig);
+//      manager.removePersistentCache(intermediateLocalCache+".data");
     }
 
     if(executeOnlyReduce) {
       //      intermediateCache.stop();
       //      indexSiteCache.stop();
       //      intermediateDataCache.stop();
-
-      manager.removePersistentCache(intermediateDataCache.getName());
+      WebUtils.stopCache(intermediateCacheName+".data",globalConfig);
+//      manager.removePersistentCache(intermediateDataCache.getName());
       //      keysCache.stop();
     }
   }
@@ -152,10 +161,18 @@ public abstract class MapReduceOperator extends BasicOperator{
         //create Intermediate cache name for data on the same Sites as outputCache
         if(!conf.containsField("skipMap")) {
 //          if(!conf.getBoolean("skipMap")){
+          if(!isRecCompReduce) {
             createCache(mc, intermediateCacheName + ".data", "localIndexListener:batchputListener");
+          }else{
+            createCache(mc, intermediateCacheName + ".data", "batchputListener");
+          }
           if (reduceLocal) {
             System.out.println("REDUCE LOCAL DETECTED CREATING CACHE");
-            createCache(mc, intermediateLocalCacheName + ".data","localIndexListener:batchputListener");
+            if(!isRecCompReduceLocal) {
+              createCache(mc, intermediateLocalCacheName + ".data", "localIndexListener:batchputListener");
+            }else{
+              createCache(mc, intermediateLocalCacheName + ".data", "batchputListener");
+            }
           }
           else{
             System.out.println("NO REDUCE LOCAL");
@@ -194,13 +211,52 @@ public abstract class MapReduceOperator extends BasicOperator{
   //vagvaz                                   LQPConfiguration.getInstance().getMicroClusterName());
       if (reduceLocal) {
         collector = new LeadsCollector(1000, intermediateLocalCacheName);
+        if(isRecCompReduceLocal){
+          JsonObject reduceLocalConf = getContinuousReduceLocal();
+          String ensembleString = computeEnsembleHost(false);
+          String inputListener = intermediateLocalCacheName+".data";
+          String outputListener = intermediateCacheName;
+          String window = "sizeBased";
+          int windowSize = LQPConfiguration.getInstance().getConfiguration().getInt("node.continuous.windowSize",1000);
+          int parallelism = LQPConfiguration.getInstance().getConfiguration().getInt("node.engine.parallelism",4);
+          reduceLocalConf.putString("cache",inputListener);
+          reduceLocalConf.getObject("conf").putString("window",window);
+          reduceLocalConf.getObject("conf").putNumber("windowSize",windowSize);
+          reduceLocalConf.getObject("conf").putNumber("parallelism", parallelism);
+          reduceLocalConf.getObject("conf").putString("input",inputListener);
+          reduceLocalConf.getObject("conf").putString("ensembleHost",ensembleString);
+          reduceLocalConf.getObject("conf").getObject("operator").putString("ensembleString",ensembleString);
+          reduceLocalConf.getObject("conf").getObject("operator").putString("output",outputListener);
+          reduceLocalConf.getObject("conf").getObject("operator").putNumber("parallelism", parallelism);
+          WebUtils.addListener(inputListener,getContinuousListenerClass(),reduceLocalConf,globalConfig);
+        }
       } else {
         collector = new LeadsCollector(1000, intermediateCacheName);
       }
+    if(isRecCompReduce){
+      JsonObject reduceConf = getContinuousReduce();
+      String ensembleString = computeEnsembleHost(false);
+      String inputListener = intermediateCacheName+".data";
+      String outputListener = getOutput();
+      String window = "sizeBased";
+      int windowSize = LQPConfiguration.getInstance().getConfiguration().getInt("node.continuous.windowSize",1000);
+      int parallelism = LQPConfiguration.getInstance().getConfiguration().getInt("node.engine.parallelism",4);
+      reduceConf.putString("cache",inputListener);
+      reduceConf.getObject("conf").putString("window",window);
+      reduceConf.getObject("conf").putNumber("windowSize",windowSize);
+      reduceConf.getObject("conf").putNumber("parallelism", parallelism);
+      reduceConf.getObject("conf").putString("input",inputListener);
+      reduceConf.getObject("conf").putString("ensembleHost",ensembleString);
+      reduceConf.getObject("conf").getObject("operator").putString("output",outputListener);
+      reduceConf.getObject("conf").getObject("operator").putString("ensembleString",ensembleString);
+      reduceConf.getObject("conf").getObject("operator").putNumber("parallelism", parallelism);
+      WebUtils.addListener(inputListener,getContinuousListenerClass(),reduceConf,globalConfig);
+    }
 
     mapperCallable = new LeadsMapperCallable((Cache) inputCache, collector, mapper,
         LQPConfiguration.getInstance()
             .getMicroClusterName());
+
 //    if(combiner != null && action.getData().getObject("operator").containsField("combine")){
 //      ((LeadsMapperCallable)mapperCallable).setCombiner(combiner);
 //    }

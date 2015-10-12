@@ -88,5 +88,9 @@ public class JoinOperator2 extends MapReduceOperator {
       super.cleanup();
    }
 
+  @Override public String getContinuousListenerClass() {
+    return null;
+  }
+
 
 }

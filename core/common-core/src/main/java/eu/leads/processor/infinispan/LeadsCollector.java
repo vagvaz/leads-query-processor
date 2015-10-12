@@ -3,6 +3,7 @@ package eu.leads.processor.infinispan;
 
 import eu.leads.processor.common.infinispan.ClusterInfinispanManager;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
+import eu.leads.processor.common.infinispan.EnsembleCacheUtilsSingle;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.plan.LeadsNodeType;
@@ -20,14 +21,16 @@ import org.vertx.java.core.json.JsonObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
                                                      Serializable {
 
   private static final long serialVersionUID = -602082107893975415L;
-//  private final AtomicInteger emitCount;
-//  private final int maxCollectorSize;
+  private int emitCount = 0;
+  private int maxCollectorSize;
   private transient BasicCache storeCache;
   protected transient BasicCache intermediateDataCache;
   protected transient Cache inputCache;
@@ -40,6 +43,7 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
   private transient EmbeddedCacheManager manager;
   private transient EnsembleCacheManager emanager;
   private transient Logger log = null;
+  private transient EnsembleCacheUtilsSingle ensembleCacheUtilsSingle;
   private boolean onMap = true;
   private String site;
   private String node;
@@ -56,10 +60,8 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
 
   public LeadsCollector(int maxCollectorSize,
                          String collectorCacheName) {
-    super();
-
 //    emitCount = new AtomicInteger();
-//    this.maxCollectorSize = maxCollectorSize;
+    this.maxCollectorSize = maxCollectorSize;
     cacheName = collectorCacheName;
   }
 
@@ -74,10 +76,16 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
     this.site = other.site;
     this.node = other.node;
     this.cacheName = other.cacheName;
-    this.baseIntermKey = other.baseIntermKey;
+    this.ensembleHost = other.ensembleHost;
+    this.counter = 0;
+    this.isReduceLocal = other.isReduceLocal;
+//    this.combiner = other.combiner;
+    this.baseIntermKey = new ComplexIntermediateKey(other.baseIntermKey);
+    this.maxCollectorSize = other.maxCollectorSize;
 //    this.currentKey = other.currentKey;
     this.mutex = new Object();
     this.nextCallable = null;
+//    this.ensembleCacheUtilsSingle = new EnsembleCacheUtilsSingle();
   }
 
   public LeadsCollector(int maxCollectorSize, String cacheName,InfinispanManager manager){
@@ -174,24 +182,35 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
     this.imanager = imanager;
   }
 
+  public int getEmitCount() {
+    return emitCount;
+  }
+
+  public void setEmitCount(int emitCount) {
+    this.emitCount = emitCount;
+  }
+
+  public int getMaxCollectorSize() {
+    return maxCollectorSize;
+  }
+
+  public void setMaxCollectorSize(int maxCollectorSize) {
+    this.maxCollectorSize = maxCollectorSize;
+  }
+
   public void initializeCache(String inputCacheName,InfinispanManager imanager){
+    ensembleCacheUtilsSingle = new EnsembleCacheUtilsSingle();
+    ensembleCacheUtilsSingle.initialize(emanager);
     counter = 0;
     this.imanager = imanager;
     log = LoggerFactory.getLogger(LeadsCollector.class);
-
+    if(site == null){
+      LQPConfiguration.getInstance().getMicroClusterName();
+    }
     if(onMap) {
       intermediateDataCache = (BasicCache) emanager.getCache(cacheName + ".data",new ArrayList<>(emanager.sites()),
           EnsembleCacheManager.Consistency.DIST);
-      //create Intermediate  keys cache name for data on the same Sites as outputCache;
-//      keysCache = (BasicCache) emanager.getCache(storeCache.getName() + ".keys",new ArrayList<>(emanager.sites()),
-//          EnsembleCacheManager.Consistency.DIST);
-      //createIndexCache for getting all the nodes that contain values with the same key! in a mc
-//      indexSiteCache = (BasicCache) emanager.getCache(storeCache.getName() + ".indexed",new ArrayList<>(emanager.sites()),
-//          EnsembleCacheManager.Consistency.DIST);
-//      counterCache = imanager.getLocalCache(storeCache.getName()+"."+inputCacheName+"."+manager.getAddress().toString()
-//                                        + ".counters");
-//      baseIndexedKey = new IndexedComplexIntermediateKey(site, manager.getAddress().toString(),inputCacheName);
-      baseIntermKey = new ComplexIntermediateKey(site, manager.getAddress().toString(),inputCacheName);
+      baseIntermKey = new ComplexIntermediateKey(site, manager.getAddress().toString() + UUID.randomUUID().toString(),inputCacheName);
       mutex = new Object();
     }
     else{
@@ -228,7 +247,7 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
 //      baseIntermKey.setCounter(currentCount);
       ComplexIntermediateKey newKey = new ComplexIntermediateKey(baseIntermKey.getSite(),baseIntermKey.getNode(),key.toString(),baseIntermKey.getCache(),counter);
 //      System.err.println("WRITING " + baseIntermKey + " " + baseIntermKey.asString());
-      EnsembleCacheUtils.putToCache(intermediateDataCache,newKey,value);
+      ensembleCacheUtilsSingle.putToCache(intermediateDataCache,newKey,value);
 //      if(LQPConfiguration.getInstance().getConfiguration().getBoolean("processor.validate.intermediate")){
 //        ComplexIntermediateKey v = new ComplexIntermediateKey(baseIntermKey.getSite(),baseIntermKey.getNode(),key.toString(),baseIntermKey.getCache(),currentCount);
 //        Object o = intermediateDataCache.get(v);
@@ -236,25 +255,18 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
 //      }
     }
     else{
-      EnsembleCacheUtils.putToCache(storeCache, key, value);
+      ensembleCacheUtilsSingle.putToCache(storeCache, key, value);
     }
   }
-
-
-  public void initializeCache(EmbeddedCacheManager manager) {
-    imanager = new ClusterInfinispanManager(manager);
-    storeCache = (Cache) imanager.getPersisentCache(cacheName);
-  }
-
 
   public void reset() {
     storeCache.clear();
 //    emitCount.set(0);
   }
 
-//  public boolean isOverflown() {
-//    return emitCount.get() > maxCollectorSize;
-//  }
+  public boolean isOverflown() {
+    return emitCount > maxCollectorSize;
+  }
 
   public void initializeNextCallable(JsonObject conf) {
     if(conf.getString("next.type").equals(LeadsNodeType.GROUP_BY.toString())){
@@ -281,6 +293,15 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>,
   public void finalizeCollector(){
     if(nextCallable != null){
       nextCallable.finalizeCallable();
+    }
+    try {
+      ensembleCacheUtilsSingle.waitForAllPuts();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    } catch (ExecutionException e) {
+      e.printStackTrace();
+    } catch (Exception e){
+      e.printStackTrace();
     }
   }
 

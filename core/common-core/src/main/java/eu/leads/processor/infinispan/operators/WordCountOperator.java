@@ -6,6 +6,7 @@ import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.infinispan.LeadsCombiner;
 import eu.leads.processor.infinispan.LeadsReducer;
+import eu.leads.processor.infinispan.continuous.WordCountContinuousOperator;
 import eu.leads.processor.infinispan.operators.WordCountMapper;
 import eu.leads.processor.infinispan.operators.WordCountReducer;
 
@@ -31,6 +32,11 @@ public class WordCountOperator extends MapReduceOperator {
     setLocalReducer(wordCountReducer);
     init_statistics(this.getClass().getCanonicalName());
   }
+
+  @Override public String getContinuousListenerClass() {
+    return WordCountContinuousOperator.class.getCanonicalName().toString();
+  }
+
 
   @Override public void setupMapCallable() {
     //      init(conf);

@@ -47,6 +47,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
 	private ProfileEvent fullProcessing;
 
 
+	public ScanCallableUpdate(){super();}
 	public ScanCallableUpdate(String configString, String output, LeadsCollector collector) {
 		super(configString, collector.getCacheName());
 		this.collector = collector;

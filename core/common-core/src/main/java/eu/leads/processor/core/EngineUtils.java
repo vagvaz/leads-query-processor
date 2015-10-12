@@ -1,6 +1,8 @@
 package eu.leads.processor.core;
 
+import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.SyncPutRunnable;
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.infinispan.ExecuteRunnable;
 import org.slf4j.Logger;
@@ -25,9 +27,9 @@ public class EngineUtils {
                 return;
             }
 
-            threadBatch = LQPConfiguration.getInstance().getConfiguration().getInt(
-                "node.engine.threads", 1);
-
+//            threadBatch = LQPConfiguration.getInstance().getConfiguration().getInt(
+//                "node.engine.threads", 1);
+            threadBatch = LQPConfiguration.getInstance().getConfiguration().getInt("node.engine.parallelism",4);
             System.out.println("Executor threads " + threadBatch + "  " );
             initialized = true;
             executor = new ThreadPoolExecutor((int)threadBatch,(int)(threadBatch),2000, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
@@ -41,6 +43,8 @@ public class EngineUtils {
     public  static ExecuteRunnable getRunnable(){
         ExecuteRunnable result = null;
         //        synchronized (runnableMutex){
+        PrintUtilities.printAndLog(log,
+        InfinispanClusterSingleton.getInstance().getManager().getMemberName().toString() + ": GETRunnable " + runnables.size());
         result = runnables.poll();
         while(result == null){
             Thread.yield();
@@ -50,6 +54,8 @@ public class EngineUtils {
 //                            } catch (InterruptedException e) {
 //                                e.printStackTrace();
 //                            }
+//            PrintUtilities.printAndLog(log,InfinispanClusterSingleton.getInstance().getManager().getMemberName().toString() + ": whileGETRunnable " + runnables.size());
+
             result = runnables.poll();
             //            }
         }
@@ -58,14 +64,17 @@ public class EngineUtils {
     }
 
     public static void addRunnable(ExecuteRunnable runnable){
-        //        synchronized (runnableMutex){
+//                synchronized (runnableMutex){
         runnables.add(runnable);
         //            runnableMutex.notify();
         //        }
+        PrintUtilities.printAndLog(log,
+            InfinispanClusterSingleton.getInstance().getManager().getMemberName().toString() + ": addRunnable " + runnables.size());
     }
     public static void waitForAllExecute() {
 
-        while(executor.getActiveCount() > 0)
+        while(runnables.size() != threadBatch)
+//            System.out.println("sleeping because run " + runnables.size() + " and " + threadBatch );
             try {
                 //            executor.awaitTermination(100,TimeUnit.MILLISECONDS);
                 Thread.sleep(100);

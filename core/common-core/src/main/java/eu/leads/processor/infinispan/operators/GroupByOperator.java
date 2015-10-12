@@ -68,8 +68,12 @@ public class GroupByOperator extends MapReduceOperator {
       super.cleanup();
     }
 
+  @Override public String getContinuousListenerClass() {
+    return null;
+  }
 
-   @Override
+
+  @Override
    public void setupMapCallable() {
 //      init(conf);
       setMapper(new GroupByMapper(conf.toString()));

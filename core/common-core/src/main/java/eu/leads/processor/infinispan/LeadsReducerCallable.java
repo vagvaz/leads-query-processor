@@ -4,11 +4,15 @@ import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.core.BerkeleyDBIndex;
 import eu.leads.processor.common.LeadsListener;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
+import eu.leads.processor.core.EngineUtils;
+import eu.leads.processor.core.LevelDBIndex;
 import eu.leads.processor.core.LevelDBIndex;
 import org.infinispan.Cache;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -19,13 +23,14 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
      */
     private static final long serialVersionUID = 3724554288677416505L;
     private LeadsReducer<kOut, vOut> reducer = null;
-    private LeadsCollector collector;
+//    private LeadsCollector collector;
     private String prefix;
 //    private transient LevelDBIndex index;
     private transient LevelDBIndex index;
     private transient LeadsListener leadsListener;
-    String site;
+    private transient Iterator<Map.Entry<String, Integer>> iterator;
 
+    public LeadsReducerCallable(){super();}
     public LeadsReducerCallable(String cacheName, LeadsReducer<kOut, vOut> reducer, String prefix) {
         super("{}", cacheName);
         this.reducer = reducer;
@@ -34,12 +39,39 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
         this.prefix = prefix;
     }
 
-    public void setLocalSite(String localSite){
-//        collector.setLocalSite(localSite);
+    public String getPrefix() {
+        return prefix;
     }
 
-    @Override public void setEnvironment(Cache<kOut, Object> cache, Set<kOut> inputKeys) {
-        super.setEnvironment(cache, inputKeys);
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
+    public LeadsReducer<kOut, vOut> getReducer() {
+        Class<?> reducerClass = reducer.getClass();
+        Constructor<?> constructor = null;
+        try {
+            constructor = reducerClass.getConstructor();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        LeadsReducer result = null;
+        try {
+            result = (LeadsReducer) constructor.newInstance();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        result.setConfigString(configString);
+
+        return result;
+    }
+
+    public void setReducer(LeadsReducer<kOut, vOut> reducer) {
+        this.reducer = reducer;
     }
 
     @Override public void executeOn(kOut key, Object value) {
@@ -58,81 +90,24 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
             (ClusteringDependentLogic.class);
         profCallable.end();
         profCallable.start("InitIndex");
-//        ProfileEvent profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(),profilerLog);
-        int count=0;
-        //    for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
-        //      if (!cdl.localNodeIsPrimaryOwner(key))
-        //        continue;
-        Cache dataCache = inputCache.getCacheManager().getCache(prefix+".data");
-        
-        index = null;
-//        EnsembleCacheUtils.waitForAllPuts();
-        for(Object listener : dataCache.getListeners()){
-            if(listener instanceof LocalIndexListener){
-                System.err.println("listener class is " + listener.getClass().toString());
-                LocalIndexListener localIndexListener = (LocalIndexListener) listener;
-                leadsListener = localIndexListener;
-                System.err.println("WaitForAllData");
-                localIndexListener.waitForAllData();
-
-                System.err.println("getIndex");
-                index = localIndexListener.getIndex();
-//                index.flush();
-                break;
+        try {
+            for(ExecuteRunnable runnable : executeRunnables){
+                EngineUtils.submit(runnable);
             }
+        }catch (Exception e){
+            e.printStackTrace();
         }
-        if(index == null){
-            System.err.println("\n\n\n\n\n\nIndex was not installed serious...\n\n\n\n\n\n");
-            profilerLog.error("\n\n\n\n\n\nIndex was not installed serious...\n\n\n\n\n\n");
-            return embeddedCacheManager.getAddress().toString();
+
+        EngineUtils.waitForAllExecute();
+        for(LeadsBaseCallable callable : callables){
+            callable.finalizeCallable();
+            System.err.println("---reducer callable finalized " + callable.getCallableIndex() );
+
         }
-//        System.err.println(
-//            "LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache()
-//                .size() + " input: " + inputCache.getAdvancedCache()
-//                .withFlags(Flag.CACHE_MODE_LOCAL).size());
-//        profilerLog.error("MRLOG: LeadsIndex size " + index.getKeysCache().size() + " data " + index.getDataCache()
-//                .size() );
-//        if(index.getKeysCache().size() != index.getDataCache().size()/2) {
-//            for (Map.Entry<String, Integer> entry : index.getKeysIterator()) {
-//                if (entry.getValue() != 1) {
-//                    System.err.println("THE KEY IS " + entry.getKey() + " " + entry.getValue());
-//                    profilerLog
-//                        .error("MRLOG: " + "THE KEY IS " + entry.getKey() + " " + entry.getValue());
-//
-//                }
-//            }
-//        }
-        System.err.println("Start processing");
         profCallable.end();
-        for(Map.Entry<String,Integer> entry : index.getKeysIterator()){
-            Iterator iterator =
-                 index.getKeyIterator(entry.getKey(),entry.getValue());
-            executeOn((kOut)entry.getKey(),iterator);
-        }
-        //            CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).filterEntries(new LocalDataFilter<K,V>(cdl));
-        //            profExecute.end();
-        //            try {
-        //                for (Object object : iterable) {
-        //                    Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
-        //
-        //                    //      V value = inputCache.get(key);
-        //                    K key = (K) entry.getKey();
-        //                    V value = (V) entry.getValue();
-        //
-        //                    if (value != null) {
-        //                        profExecute.start("ExOn" + (++count));
-        //                        executeOn((K) key, value);
-        //                        profExecute.end();
-        //                    }
-        //                }
-        //            }
-        //            catch(Exception e){
-        //                iterable.close();
-        //                profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
-        //                PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
-        //            }
-        profCallable.end();
-        finalizeCallable();
+        callables.clear();
+        executeRunnables.clear();
+//        finalizeCallable();
         return embeddedCacheManager.getAddress().toString();
     }
 
@@ -147,62 +122,74 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
         collector.initializeCache(inputCache.getName(), imanager);
 
         this.reducer.initialize();
-    }
-    //    public vOut call() throws Exception {
-    //        if (federationReducer == null) {
-    //            System.out.println(" Reducer not initialized ");
-    //        } else {
-    //           federationReducer.setCacheManager(inputCache.getCacheManager());
-    //            // System.out.println(" Run Reduce ");
-    //            vOut result = null;
-    ////            System.out.println("inputCache Cache Size:"
-    ////                    + this.inputCache.size());
-    ////            for (Entry<kOut, List<vOut>> entry : inputCache.entrySet()) {
-    //          final ClusteringDependentLogic cdl = inputCache.getAdvancedCache().getComponentRegistry().getComponent(ClusteringDependentLogic.class);
-    //          for(Object ikey : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()){
-    //            if(!cdl.localNodeIsPrimaryOwner(ikey))
-    //              continue;
-    //                kOut key = (kOut)ikey;
-    //                List<vOut> list = inputCache.get(key);
-    //                if(list == null || list.size() == 0){
-    //                  continue;
-    //                }
-    //
-    //                vOut res = federationReducer.reduce(key, list.iterator());
-    //                if(res == null || res.toString().equals("")){
-    //                  ;
-    //                }
-    //                else
-    //                {
-    ////                  outCache.put(key, res);
-    //                }
-    //            }
-    //
-    //            return result;
-    //        }
-    //        return null;
-    //    }
 
+        Cache dataCache = inputCache.getCacheManager().getCache(prefix+".data");
+
+        index = null;
+        //        EnsembleCacheUtils.waitForAllPuts();
+        for(Object listener : dataCache.getListeners()){
+            if(listener instanceof LocalIndexListener){
+                System.err.println("listener class is " + listener.getClass().toString());
+                LocalIndexListener localIndexListener = (LocalIndexListener) listener;
+                leadsListener = localIndexListener;
+                System.err.println("WaitForAllData");
+                localIndexListener.waitForAllData();
+
+                System.err.println("getIndex " + callableIndex);
+                index = localIndexListener.getIndex(callableIndex);
+                //                index.flush();
+                break;
+            }
+        }
+        if(index == null){
+            System.err.println("\n\n\n\n\n\nIndex was not installed serious...\n\n\n\n\n\n");
+            profilerLog.error("\n\n\n\n\n\nIndex was not installed serious...\n\n\n\n\n\n");
+            setContinueRunning(false);
+            return;
+        }
+        iterator = index.getKeysIterator().iterator();
+        System.err.println("Start processing");
+        profCallable.end();
+
+    }
+
+
+    @Override public synchronized Map.Entry poll() {
+        AbstractMap.SimpleEntry result = null;
+//        synchronized (iterator) {
+            if (index == null || iterator == null) {
+                continueRunning =false;
+                return null;
+            }
+            if (iterator.hasNext()) {
+                Map.Entry<String, Integer> entry = iterator.next();
+                result = new AbstractMap.SimpleEntry(entry.getKey(), index.getKeyIterator(entry.getKey(), entry.getValue()));
+            }
+            else{
+                continueRunning = false;
+                iterator =null;
+                result = null;
+            }
+
+//        }
+        return result;
+    }
+
+    public boolean isEmpty() {
+        return (iterator != null) ? !iterator.hasNext() : true;
+    }
     @Override
     public void finalizeCallable() {
             System.err.println("reduce finalize reducer");
         reducer.finalizeTask();
         index.close();
-        inputCache.removeListener(leadsListener);
-//        ((Cache)index.getDataCache()).stop();
-//        ((Cache)index.getKeysCache()).stop();
+//        inputCache.removeListener(leadsListener);
+
         System.err.println("reducer finalizee collector");
 //        collector.finalizeCollector();
         System.err.println("finalzie super");
-        try {
-            EnsembleCacheUtils.waitForAllPuts();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            PrintUtilities.logStackTrace(profilerLog,e.getStackTrace());
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-            PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
-        }
+        collector.finalizeCollector();
         super.finalizeCallable();
+
     }
 }

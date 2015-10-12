@@ -27,6 +27,7 @@ public class WordCountReducer extends LeadsCombiner<String, Tuple> {
     super(configString);
   }
 
+  public WordCountReducer(){}
 
   @Override public void initialize() {
     super.initialize();

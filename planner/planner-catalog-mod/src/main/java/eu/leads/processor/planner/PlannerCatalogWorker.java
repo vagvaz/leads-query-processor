@@ -185,7 +185,7 @@ public class PlannerCatalogWorker extends Verticle {
     } catch (ServiceException e) {
       e.printStackTrace();
     }
-//      SELECT C.fqdnurl AS fqdn,k.sentiment FROM keywords as k JOIN page_core as C  ON C.uri = k.uri  where k.partid like 'ecom_prod_name:000' group by fqdn order by  k.sentiment ;
+
     System.out.println(catalog.getFunctions().size() + " functions loaded.");
 
     Schema webPagesSchema = new Schema();

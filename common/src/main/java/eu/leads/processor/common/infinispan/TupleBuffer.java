@@ -12,8 +12,10 @@ import org.infinispan.Cache;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.concurrent.NotifyingFuture;
 import org.infinispan.context.Flag;
+import org.infinispan.distribution.DistributionManager;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
+import org.infinispan.remoting.transport.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
@@ -37,16 +39,23 @@ public class TupleBuffer {
   private transient long localCounter;
   private transient volatile Object mutex = new Object();
   private transient String mc;
+  private transient Cache localCache;
+  private transient Map<String,Map<Object,Object>> nodeMaps;
   private String cacheName;
   private transient String uuid;
   private int batchThreshold = 10;
+  private int size = 0;
   private Logger log = LoggerFactory.getLogger(TupleBuffer.class);
+  private transient EnsembleCacheUtilsSingle ensembleCacheUtilsSingle;
+  private transient Address localAddress;
+  private DistributionManager distMan;
 
   public TupleBuffer(){
     buffer = new HashMap<>();
     threshold = 500;
     localCounter = 0;
     batchThreshold = LQPConfiguration.getInstance().getConfiguration().getInt("node.ensemble.batchput.batchsize",batchThreshold);
+    nodeMaps = new HashMap<>();
   }
   public TupleBuffer(byte[] bytes){
     BSONDecoder decoder = new BasicBSONDecoder();
@@ -72,6 +81,10 @@ public class TupleBuffer {
 
       inputStream = null;
       byteStream =null;
+//      ensembleCacheUtilsSingle = new EnsembleCacheUtilsSingle();
+      this.ensembleCacheUtilsSingle = ensembleCacheUtilsSingle;
+      nodeMaps = new HashMap<>();
+      localAddress = InfinispanClusterSingleton.getInstance().getManager().getMemberName();
     }catch (Exception e){
       e.printStackTrace();
     }
@@ -83,22 +96,38 @@ public class TupleBuffer {
     uuid = UUID.randomUUID().toString();
     batchThreshold = LQPConfiguration.getInstance().getConfiguration().getInt(
         "node.ensemble.batchput.batchsize", batchThreshold);
+    nodeMaps = new HashMap<>();
+    localAddress = InfinispanClusterSingleton.getInstance().getManager().getMemberName();
   }
 
-  public TupleBuffer(int threshold, BasicCache cache, EnsembleCacheManager ensembleCacheManager) {
+  public TupleBuffer(int threshold, BasicCache cache, EnsembleCacheManager ensembleCacheManager,EnsembleCacheUtilsSingle ensembleCacheUtilsSingle) {
+    this.ensembleCacheUtilsSingle = ensembleCacheUtilsSingle;
+//    this.ensembleCacheUtilsSingle = new EnsembleCacheUtilsSingle();
     this.threshold = threshold;
     buffer = new HashMap<>();
     this.emanager = ensembleCacheManager;
     //        this.ensembleCache = emanager.getCache(cache.getName()+".compressed", new ArrayList<>(ensembleCacheManager.sites()),
     //            EnsembleCacheManager.Consistency.DIST);
+    nodeMaps = new HashMap<>();
+    localAddress = InfinispanClusterSingleton.getInstance().getManager().getMemberName();
+    if(cache instanceof Cache){
+      localCache = (Cache) cache;
+      distMan = localCache.getAdvancedCache().getDistributionManager();
+      for(Address address :((Cache) cache).getAdvancedCache().getRpcManager().getMembers()){
+        nodeMaps.put(address.toString(),new HashMap<Object, Object>());
+      }
+    }
     localCounter = 0;
     this.cacheName = cache.getName();
     uuid = UUID.randomUUID().toString();
     batchThreshold = LQPConfiguration.getInstance().getConfiguration().getInt(
         "node.ensemble.batchput.batchsize", batchThreshold);
+
   }
 
-  public TupleBuffer(int threshold, String cacheName, EnsembleCacheManager ensembleCacheManager,String mc) {
+  public TupleBuffer(int threshold, String cacheName, EnsembleCacheManager ensembleCacheManager,String mc,EnsembleCacheUtilsSingle ensembleCacheUtilsSingle) {
+    this.ensembleCacheUtilsSingle = ensembleCacheUtilsSingle;
+//    ensembleCacheUtilsSingle = new EnsembleCacheUtilsSingle();
     this.threshold = threshold;
     buffer = new HashMap<>();
     this.emanager = ensembleCacheManager;
@@ -110,6 +139,8 @@ public class TupleBuffer {
     uuid = UUID.randomUUID().toString();
     batchThreshold = LQPConfiguration.getInstance().getConfiguration().getInt(
         "node.ensemble.batchput.batchsize", batchThreshold);
+    nodeMaps = new HashMap<>();
+    localAddress = InfinispanClusterSingleton.getInstance().getManager().getMemberName();
   }
   public String getMC(){return mc;}
   public Map<Object,Object> getBuffer(){
@@ -118,8 +149,15 @@ public class TupleBuffer {
 
   public boolean add(Object key, Object value){
     synchronized (mutex) {
-      buffer.put(key, value);
-      return (buffer.size() >= threshold);
+      if(localCache == null) {
+        buffer.put(key, value);
+        size++;
+        return (size >= threshold);
+      }else{
+//        ensembleCacheUtilsSingle.addLocalFuture(localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).putAsync(key,value));
+        ensembleCacheUtilsSingle.putToCacheDirect(localCache,key,value);
+        return (size >= threshold);
+      }
     }
   }
 
@@ -139,6 +177,7 @@ public class TupleBuffer {
 
       bytes = this.serialize();
       buffer.clear();
+      size = 0;
     }
     boolean isok = false;
     try {
@@ -230,23 +269,45 @@ public class TupleBuffer {
     return cacheName;
   }
 
-  public NotifyingFuture flushToCache(Cache localCache) {
+  public void flushToCache(Cache localCache) {
     NotifyingFuture result =null;
-
+    if(nodeMaps.size() == 0){
+      for(Address address :(localCache).getAdvancedCache().getRpcManager().getMembers()){
+        nodeMaps.put(address.toString(),new HashMap<Object, Object>());
+      }
+    }
+    distMan = localCache.getAdvancedCache().getDistributionManager();
     synchronized (mutex){
       if(buffer == null || buffer.size() == 0)
-        return null;
+        return;
+//        return null;
       Map<Object,Object> tmp = buffer;
       buffer = new HashMap<>();
-      Map<Object,Object> tmpb = new HashMap<>();
+//      Map<Object,Object> tmpb = new HashMap<>();
 
+//      Address a;
+//      ensembleCacheUtilsSingle.removeCompleted();
       for(Map.Entry<Object,Object> entry : tmp.entrySet()) {
-
-        EnsembleCacheUtils.putToCacheDirect(localCache,entry.getKey(),entry.getValue());
+//
+//        ensembleCacheUtilsSingle.putToCacheDirect(localCache,entry.getKey(),entry.getValue());
+//        a = distMan.getPrimaryLocation(entry.getKey());
+//        nodeMaps.get(a.toString()).put(entry.getKey(),entry.getValue());
+        if(ensembleCacheUtilsSingle !=null) {
+          ensembleCacheUtilsSingle.putToCacheDirect(localCache, entry.getKey(), entry.getValue());
+        }else{
+          EnsembleCacheUtils.putToCacheDirect(localCache, entry.getKey(), entry.getValue());
+        }
+//        ensembleCacheUtilsSingle.addLocalFuture(localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).putAsync(entry.getKey(),entry.getValue()));
       }
 
+//      for (Map.Entry<String, Map<Object, Object>> entry : nodeMaps.entrySet()) {
+//          if (entry.getValue().size() > 0){
+//            ensembleCacheUtilsSingle.addLocalFuture(localCache.putAllAsync(entry.getValue()));
+//          }
+//        }
+
     }
-    return result;
+//    return result;
   }
 
   public void release() {
@@ -257,5 +318,20 @@ public class TupleBuffer {
 
   public void setCacheName(String cacheName) {
     this.cacheName = cacheName;
+  }
+
+  public void flushToLocalCache() {
+    if(size == 0)
+      return;
+    ensembleCacheUtilsSingle.removeCompleted();
+    synchronized (mutex) {
+      for (Map.Entry<Object, Object> entry : buffer.entrySet()) {
+//        if (entry.getValue().size() > 0){
+//          ensembleCacheUtilsSingle.addLocalFuture(localCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).putAsync(
+//              entry.getKey(), entry.getValue()));
+        ensembleCacheUtilsSingle.putToCacheDirect(localCache,entry.getKey(),entry.getValue());
+      }
+
+    }
   }
 }

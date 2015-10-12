@@ -16,55 +16,57 @@ import org.vertx.java.core.json.JsonObject;
  * Created by vagvaz on 8/6/14.
  */
 public class GetQueryStatusActionHandler implements ActionHandler {
-    Node com;
-    LogProxy log;
-    InfinispanManager persistence;
-    String id;
-    Cache <String,String> queriesCache;
+  Node com;
+  LogProxy log;
+  InfinispanManager persistence;
+  String id;
+  Cache <String,String> queriesCache;
   String queryId;
   String queryJson;
   JsonObject query;
-    public GetQueryStatusActionHandler(Node com, LogProxy log, InfinispanManager persistence,
-                                          String id) {
-        this.com = com;
-        this.log = log;
-        this.persistence = persistence;
-        this.id = id;
-       queriesCache = (Cache) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
-         }
 
-    @Override
-    public Action process(Action action) {
-//      log.info("process get query status");
-        Action result = action;
-//       JsonObject actionResult = new JsonObject();
-       try {
-            queryId = action.getData().getString("queryId");
-//            JsonObject actionResult = persistence.get(StringConstants.QUERIESCACHE, queryId);
-//         log.info("read query"); SELECT sourceIP FROM Rankings AS R JOIN  uservisits UV  ON R.pageURL = UV.desturl WHERE pagerank < 10  LIMIT 1;
-//         log.info("read query"); SELECT paeran     FROM Rankings  WHERE pagerank < 10  LIMIT 1;
-            queryJson = queriesCache.get(queryId);
+  public GetQueryStatusActionHandler(Node com, LogProxy log, InfinispanManager persistence,
+      String id) {
+    this.com = com;
+    this.log = log;
+    this.persistence = persistence;
+    this.id = id;
+    queriesCache = (Cache) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
+  }
 
-            if(queryJson != null) {
-              query = new JsonObject(queryJson);
-              result.setResult(query.getObject("status"));
-              query = null;
-            }
-            else{
-              result.setResult( new QueryStatus(queryId, QueryState.PENDING,"NON-EXISTENT").asJsonObject());
-            }
-            queryJson = null;
+  @Override
+  public Action process(Action action) {
+    //      log.info("process get query status");
+    Action result = action;
 
-           }catch(Exception e){
-         log.info("exception in read");
-              e.printStackTrace();
-          JsonObject actionResult = new JsonObject();
-              actionResult.putString("error", e.getMessage());
-              result.setResult(actionResult);
-          }
+    try {
+      queryId = action.getData().getString("queryId");
+      //            JsonObject actionResult = persistence.get(StringConstants.QUERIESCACHE, queryId);
+      //         log.info("read query"); SELECT sourceIP FROM Rankings AS R JOIN  uservisits UV  ON R.pageURL = UV.desturl WHERE pagerank < 10  LIMIT 1;
+      //         log.info("read query"); SELECT paeran     FROM Rankings  WHERE pagerank < 10  LIMIT 1;
+      queryJson = queriesCache.get(queryId);
 
-        result.setStatus(ActionStatus.COMPLETED.toString());
-//      log.info("preturn query status");
-        return result;
+
+      if(queryJson != null) {
+        query = new JsonObject(queryJson);
+        result.setResult(query.getObject("status"));
+        query = null;
+      }
+      else{
+        result.setResult( new QueryStatus(queryId, QueryState.PENDING,"NON-EXISTENT").asJsonObject());
+      }
+      queryJson = null;
+
+    }catch(Exception e){
+      log.info("exception in read");
+      e.printStackTrace();
+      JsonObject actionResult = new JsonObject();
+      actionResult.putString("error", e.getMessage());
+      result.setResult(actionResult);
     }
+
+    result.setStatus(ActionStatus.COMPLETED.toString());
+    //      log.info("preturn query status");
+    return result;
+  }
 }

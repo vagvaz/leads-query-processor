@@ -117,7 +117,7 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
     matcher.post("/rest/internal/completedmr/",completedMRHandler);
     matcher.post("/rest/internal/stopCache/:cache",stopCacheHandler);
     matcher.post("/rest/internal/removeListener/:cache/:listener",removeListenerHandler);
-    matcher.post("/rest/internal/addListener/:cache/:listener",addListenerHandler);
+    matcher.post("/rest/internal/addListener",addListenerHandler);
     matcher.post("/rest/query/stopcql/:id",stopCQLHandler);
     matcher.post("/rest/mrjob/submit/", executeMapReduceJobHandler);
     //
@@ -145,6 +145,17 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
             .putHeader(WebStrings.CONTENT_TYPE, WebStrings.TEXT_HTML);
         httpServerRequest.response()
             .end("<html><h1>Leads Query Processor REST Service</h1> <p>Yes I am online</p></html>");
+
+      }
+    });
+    matcher.get("/", new Handler<HttpServerRequest>() {
+      @Override
+      public void handle(HttpServerRequest httpServerRequest) {
+        httpServerRequest.response().setStatusCode(200);
+        httpServerRequest.response()
+            .putHeader(WebStrings.CONTENT_TYPE, WebStrings.TEXT_HTML);
+        httpServerRequest.response()
+            .end("<html><h1>Leads Query Processor REST Service</h1></html>");
 
       }
     });

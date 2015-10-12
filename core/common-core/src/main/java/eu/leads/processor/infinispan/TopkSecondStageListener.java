@@ -1,6 +1,7 @@
-package eu.leads.processor.common.infinispan;
+package eu.leads.processor.infinispan;
 
 import eu.leads.processor.common.LeadsListener;
+import eu.leads.processor.common.infinispan.InfinispanManager;
 import org.vertx.java.core.json.JsonObject;
 
 /**
@@ -32,6 +33,10 @@ public class TopkSecondStageListener implements LeadsListener {
   }
 
   @Override public void close() {
+
+  }
+
+  @Override public void setConfString(String s) {
 
   }
 }

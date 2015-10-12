@@ -47,12 +47,16 @@ public  class LeadsReducer<K, V> implements Reducer<K, V>,Serializable {
 
    public LeadsReducer(JsonObject configuration) {
       this.conf = configuration;
-
+      this.configString = configuration.toString();
    }
 
    public LeadsReducer(String configString) {
       this.configString = configString;
 
+   }
+
+   public void setConfigString(String confString){
+      this.configString = confString;
    }
 
    public void setCacheManager(EmbeddedCacheManager manager){
