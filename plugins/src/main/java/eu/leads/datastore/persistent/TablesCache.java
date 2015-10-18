@@ -12,6 +12,7 @@ public class TablesCache {
 	
 	public static void setTableRow(String table, String id, QueryResults qr) {
 		StringPair key = new StringPair(table, id);
+		System.out.println("Storing row "+id+" of table "+table+" in local table's cache.");
 		rowsMap.put(key,qr);
 	}
 	

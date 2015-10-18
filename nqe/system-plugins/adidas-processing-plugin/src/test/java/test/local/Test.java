@@ -48,9 +48,9 @@ public abstract class Test {
 		try {
 			config = new XMLConfiguration(
 //				"/home/ubuntu/.adidas/test/leads-query-processor/nqe/system-plugins/adidas-processing-plugin/adidas-processing-plugin-conf.xml");
-					"/leads/workm30/leads-query-processor/nqe/system-plugins/adidas-processing-plugin/adidas-processing-plugin-conf-test.xml");
+					"/leads/workm30/leads-query-processor/nqe/system-plugins/adidas-processing-plugin/adidas-processing-plugin-conf.xml");
 			
-			LeadsQueryInterface.setQueryMode(false);
+//			LeadsQueryInterface.setQueryMode(false);
 			KeywordsListSingletonExt.testKeywordsMode(defineKeywordsMap());
 			if(isFilter) ProcessingFilterSingleton.setFilterString(urlFilter);
 			
@@ -79,9 +79,10 @@ public abstract class Test {
 	    plugin.created(tableName+":"+this.uri,
 				new Tuple() {
 					private static final long serialVersionUID = 821216041925139493L; { 
-					setAttribute("body", content);
-					setAttribute("published", ts);
-					setAttribute("headers", new HashMap<String,String>(){
+					setAttribute("default.webpages.body", content);
+					setAttribute("default.webpages.ts", ts);
+					setAttribute("default.webpages.url", uri);
+					setAttribute("default.webpages.headers", new HashMap<String,String>(){
 						private static final long serialVersionUID = 101L;{ 
 							put("Content-Type","text/html; charset=UTF-8");}});
 					}}.asJsonObject().toString(),
