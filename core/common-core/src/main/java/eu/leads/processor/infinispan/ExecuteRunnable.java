@@ -3,15 +3,14 @@ package eu.leads.processor.infinispan;
 import eu.leads.processor.core.EngineUtils;
 
 import java.util.Map;
-import java.util.Queue;
 
 /**
  * Created by vagvaz on 8/19/15.
  */
 public class ExecuteRunnable implements Runnable {
-    Object key;
-    Object value;
-    private LeadsBaseCallable callable;
+  Object key;
+  Object value;
+  private LeadsBaseCallable callable;
 
   public ExecuteRunnable(LeadsBaseCallable callable) {
     this.callable = callable;
@@ -21,33 +20,33 @@ public class ExecuteRunnable implements Runnable {
 
   }
 
-  public void setKeyValue(Object key, Object value,LeadsBaseCallable callable){
-        this.key = key;
-        this.value = value;
-        this.callable = callable;
-    }
+  public void setKeyValue(Object key, Object value, LeadsBaseCallable callable) {
+    this.key = key;
+    this.value = value;
+    this.callable = callable;
+  }
 
-    @Override public void run() {
+  @Override public void run() {
 
-      Map.Entry entry = null;
-      while(callable.isContinueRunning() || !callable.isEmpty()) {
+    Map.Entry entry = null;
+    while (callable.isContinueRunning() || !callable.isEmpty()) {
+      entry = callable.poll();
+      while (entry != null) {
+        key = entry.getKey();
+        value = entry.getValue();
+        callable.executeOn(key, value);
         entry = callable.poll();
-        while(entry != null) {
-          key = entry.getKey();
-          value = entry.getValue();
-          callable.executeOn(key, value);
-          entry  = callable.poll();
-        }
-        try {
-          Thread.sleep(0,10000);
-          Thread.yield();
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
       }
-      callable = null;
-      EngineUtils.addRunnable(this);
+      try {
+        Thread.sleep(0, 10000);
+        Thread.yield();
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
     }
+    callable = null;
+    EngineUtils.addRunnable(this);
+  }
 
   public <K, V> void setCallable(LeadsBaseCallable<K, V> callable) {
     this.callable = callable;

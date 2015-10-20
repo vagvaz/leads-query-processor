@@ -4,7 +4,6 @@ import eu.leads.processor.infinispan.LeadsMapper;
 import eu.leads.processor.infinispan.LeadsReducer;
 import eu.leads.processor.infinispan.operators.WordCountMapper;
 import eu.leads.processor.infinispan.operators.WordCountReducer;
-import org.vertx.java.core.json.JsonObject;
 
 /**
  * Created by vagvaz on 10/6/15.

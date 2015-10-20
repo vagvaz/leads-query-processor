@@ -7,7 +7,7 @@ import org.vertx.java.core.json.JsonObject;
 /**
  * Created by vagvaz on 9/25/15.
  */
-public class TopkFirstStageListener extends BasicContinuousListener{
+public class TopkFirstStageListener extends BasicContinuousListener {
   public TopkFirstStageListener(JsonObject conf) {
 
   }

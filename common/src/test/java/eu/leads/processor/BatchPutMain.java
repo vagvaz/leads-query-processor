@@ -24,6 +24,7 @@ public class BatchPutMain {
     static String dd2c = "87.190.239.18:11222;87.190.239.130:11222"; //qe28,qe29
     static String softnet = "147.27.14.38:11222;147.27.14.37:11222";
     static String local = "192.168.178.43:11222;192.168.178.43:11223";
+    static String unine = "192.42.43.31:11222";
     static Map<String,String> clouds = new HashMap<>();
     static List<String> activeClouds = new ArrayList<>();
     static int numberOfkeys = 10;
@@ -45,6 +46,7 @@ public class BatchPutMain {
         clouds.put("dd2c",dd2c);
         clouds.put("softnet",softnet);
         clouds.put("localcluster", local);
+        clouds.put("unine",unine);
         if(args.length > 0){
             readArguments(args);
         }

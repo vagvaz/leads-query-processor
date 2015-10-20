@@ -37,7 +37,7 @@ public class SubmitWordCountTest {
   private static final String HAMM5_IP = "5.147.254.161";
   private static final String HAMM6_IP = "5.147.254.199";
   private static final String LOCAL = "127.0.0.1";
-  private static final String CACHE_NAME = "default.keywords";
+  private static final String CACHE_NAME = "default.page_core";
   private static final int PUT_THREADS_COUNT = 100;
   private static Map<String,String> microcloudAddresses;
   private static Map<String,String> activeIps;
@@ -267,11 +267,12 @@ public class SubmitWordCountTest {
     if(combine) {
       jsonObject.getObject("operator").putString("combine", "1");
     }
-    reduceLocal = false;
+    reduceLocal = true;
     if (reduceLocal) {
       jsonObject.getObject("operator").putString("reduceLocal", "true");
     }
-    jsonObject.getObject("operator").putString("recComposableReduce","recComposableReduce");
+//    jsonObject.getObject("operator").putString("recComposableReduce","recComposableReduce");
+    jsonObject.getObject("operator").putString("recComposableLocalReduce","recComposableLocalReduce");
     JsonObject targetEndpoints = scheduling;
     jsonObject.getObject("operator").putObject("targetEndpoints",targetEndpoints);
     //                   new JsonObject()
@@ -305,19 +306,20 @@ public class SubmitWordCountTest {
                                               new ArrayList<>(ensembleCacheManager.sites()),
                                               EnsembleCacheManager.Consistency.DIST);
 
-            String[] lines = {"this is a line",
-                              "arnaki aspro kai paxy",
-                              "ths manas to kamari",
-                              "this another line is yoda said",
-                              "rudolf to elafaki",
-                              "na fame pilafaki"};
+//            String[] lines = {"this is a line",
+//                              "arnaki aspro kai paxy",
+//                              "ths manas to kamari",
+//                              "this another line is yoda said",
+//                              "rudolf to elafaki",
+//                              "na fame pilafaki"};
 
+      String[] lines = {"this is a line arnaki aspro kai paxy         ths manas to kamari           this another line is yoda said     rudolf to elafaki       na fame pilafaki"};
             JsonObject data;
             System.out.print("Loading data to '" + CACHE_NAME + "' cache\n ");
             data = new JsonObject();
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 200; i++) {
               data.putString(String.valueOf(i), lines[i % lines.length]);
-              if ((i + 1) % 2 == 0) {
+              if ((i + 1) % 1 == 0) {
                 ensembleCache.put(String.valueOf(i), new Tuple(data.toString()));
                 data = new JsonObject();
               }

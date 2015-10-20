@@ -13,16 +13,18 @@ import java.util.*;
 /**
  * Created by vagvaz on 2/18/15.
  */
-public abstract  class LeadsSQLCallable<K,V> extends LeadsBaseCallable<K,V> implements
-    Serializable {
+public abstract class LeadsSQLCallable<K, V> extends LeadsBaseCallable<K, V> implements Serializable {
   transient protected JsonObject inputSchema;
   transient protected JsonObject outputSchema;
-  transient protected Map<String,String> outputMap;
-  transient protected Map<String,List<JsonObject>> targetsMap;
-   transient HashMap<String,DistCMSketch> sketches=null;
-  transient  List<String> attributeFunctions;
+  transient protected Map<String, String> outputMap;
+  transient protected Map<String, List<JsonObject>> targetsMap;
+  transient HashMap<String, DistCMSketch> sketches = null;
+  transient List<String> attributeFunctions;
 
-  public LeadsSQLCallable(){super();}
+  public LeadsSQLCallable() {
+    super();
+  }
+
   public LeadsSQLCallable(String configString, String output) {
     super(configString, output);
   }
@@ -36,53 +38,51 @@ public abstract  class LeadsSQLCallable<K,V> extends LeadsBaseCallable<K,V> impl
     outputMap = new HashMap<>();
     attributeFunctions = new ArrayList<>();
     JsonArray targets = conf.getObject("body").getArray("targets");
-    if(conf.containsField("body") && conf.getObject("body").containsField("targets")) {
+    if (conf.containsField("body") && conf.getObject("body").containsField("targets")) {
       Iterator<Object> targetIterator = targets.iterator();
       while (targetIterator.hasNext()) {
         JsonObject target = (JsonObject) targetIterator.next();
         if (target.getObject("expr").getString("type").equalsIgnoreCase("field")) {
-          List<JsonObject> tars = targetsMap.get(
-              target.getObject("expr").getObject("body").getObject("column").getString("name"));
+          List<JsonObject> tars =
+              targetsMap.get(target.getObject("expr").getObject("body").getObject("column").getString("name"));
           if (tars == null) {
             tars = new ArrayList<>();
           }
           tars.add(target);
-          targetsMap
-              .put(target.getObject("expr").getObject("body").getObject("column").getString("name"),
-                  tars);
-        }
-        else{
-            List<JsonObject> tars = new ArrayList<>();
-            tars.add(target);
-            targetsMap.put(target.getObject("column").getString("name"), tars);
-            attributeFunctions.add(target.getObject("column").getString("name"));
+          targetsMap.put(target.getObject("expr").getObject("body").getObject("column").getString("name"), tars);
+        } else {
+          List<JsonObject> tars = new ArrayList<>();
+          tars.add(target);
+          targetsMap.put(target.getObject("column").getString("name"), tars);
+          attributeFunctions.add(target.getObject("column").getString("name"));
         }
       }
     }
   }
 
   protected void executeFunctions(Tuple tuple) {
-    for(String func : attributeFunctions){
+    for (String func : attributeFunctions) {
       JsonObject function = targetsMap.get(func).get(0);
-      Object functionResult = MathUtils.executeFunction(tuple,function.getObject("expr").getObject("body"));
-      tuple.setAttribute(func,functionResult);
+      Object functionResult = MathUtils.executeFunction(tuple, function.getObject("expr").getObject("body"));
+      tuple.setAttribute(func, functionResult);
     }
   }
+
   protected void renameAllTupleAttributes(Tuple tuple) {
     JsonArray fields = inputSchema.getArray("fields");
     Iterator<Object> iterator = fields.iterator();
     String columnName = null;
     String fieldName = tuple.getFieldNames().iterator().next();
-    String tableName = fieldName.substring(fieldName.indexOf(".")+1,fieldName.lastIndexOf("."));
+    String tableName = fieldName.substring(fieldName.indexOf(".") + 1, fieldName.lastIndexOf("."));
     while (iterator.hasNext()) {
       JsonObject tmp = (JsonObject) iterator.next();
       columnName = tmp.getString("name");
-      if(columnName.contains("."+tableName+".")){
+      if (columnName.contains("." + tableName + ".")) {
         return;
       }
       int lastPeriod = columnName.lastIndexOf(".");
       String attributeName = columnName.substring(lastPeriod + 1);
-      tuple.renameAttribute(StringConstants.DEFAULT_DATABASE_NAME+"."+tableName+"."+ attributeName, columnName);
+      tuple.renameAttribute(StringConstants.DEFAULT_DATABASE_NAME + "." + tableName + "." + attributeName, columnName);
     }
   }
 
@@ -98,29 +98,27 @@ public abstract  class LeadsSQLCallable<K,V> extends LeadsBaseCallable<K,V> impl
     //WARNING
     //       System.err.println("out: " + tuple.asString());
 
-    if(targetsMap.size() == 0)
-    {
+    if (targetsMap.size() == 0) {
       //          System.err.println("s 0 ");
       return tuple;
 
     }
     //END OF WANRING
     List<String> toRemoveFields = new ArrayList<String>();
-    Map<String,List<String>> toRename = new HashMap<String,List<String>>();
+    Map<String, List<String>> toRename = new HashMap<String, List<String>>();
     for (String field : tuple.getFieldNames()) {
       List<JsonObject> ob = targetsMap.get(field);
       if (ob == null)
         toRemoveFields.add(field);
       else {
-        for(JsonObject obb : ob)
-        {
-          List<String> ren  = toRename.get(field);
-          if(ren == null){
+        for (JsonObject obb : ob) {
+          List<String> ren = toRename.get(field);
+          if (ren == null) {
             ren = new ArrayList<>();
           }
           //               toRename.put(field, ob.getObject("column").getString("name"));
           ren.add(obb.getObject("column").getString("name"));
-          toRename.put(field,ren);
+          toRename.put(field, ren);
         }
       }
     }

@@ -1,7 +1,5 @@
 package eu.leads.processor.core;
 
-import com.sleepycat.persist.model.*;
-
 import java.io.Serializable;
 
 /**
@@ -9,35 +7,37 @@ import java.io.Serializable;
  */
 public class TupleWrapper implements Serializable {
 
-    String key;
-    private Tuple tuple;
+  String key;
+  private Tuple tuple;
 
-    public TupleWrapper(){}
+  public TupleWrapper() {
+  }
 
-    public TupleWrapper(String key , int counter, Tuple tuple){
-        this.key = key;
-        this.tuple = tuple;
-    }
-    public String getKey() {
-        return key;
-    }
+  public TupleWrapper(String key, int counter, Tuple tuple) {
+    this.key = key;
+    this.tuple = tuple;
+  }
 
-    public void setKey(String key) {
-        this.key = key;
-    }
+  public String getKey() {
+    return key;
+  }
 
-    public Tuple getTuple() {
-        return tuple;
-    }
+  public void setKey(String key) {
+    this.key = key;
+  }
 
-    public void setTuple(Tuple tuple) {
-        this.tuple = tuple;
-    }
+  public Tuple getTuple() {
+    return tuple;
+  }
 
-    @Override public String toString() {
-        return "TupleWrapper{" +
-            "key='" + key + '\'' +
-            ", tuple=" + tuple +
-            '}';
-    }
+  public void setTuple(Tuple tuple) {
+    this.tuple = tuple;
+  }
+
+  @Override public String toString() {
+    return "TupleWrapper{" +
+        "key='" + key + '\'' +
+        ", tuple=" + tuple +
+        '}';
+  }
 }

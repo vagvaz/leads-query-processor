@@ -47,7 +47,7 @@ public class TupleBuffer {
   private int size = 0;
   private Logger log = LoggerFactory.getLogger(TupleBuffer.class);
   private transient EnsembleCacheUtilsSingle ensembleCacheUtilsSingle;
-  private transient Address localAddress;
+//  private transient Address localAddress;
   private DistributionManager distMan;
 
   public TupleBuffer(){
@@ -84,7 +84,6 @@ public class TupleBuffer {
 //      ensembleCacheUtilsSingle = new EnsembleCacheUtilsSingle();
       this.ensembleCacheUtilsSingle = ensembleCacheUtilsSingle;
       nodeMaps = new HashMap<>();
-      localAddress = InfinispanClusterSingleton.getInstance().getManager().getMemberName();
     }catch (Exception e){
       e.printStackTrace();
     }
@@ -97,7 +96,6 @@ public class TupleBuffer {
     batchThreshold = LQPConfiguration.getInstance().getConfiguration().getInt(
         "node.ensemble.batchput.batchsize", batchThreshold);
     nodeMaps = new HashMap<>();
-    localAddress = InfinispanClusterSingleton.getInstance().getManager().getMemberName();
   }
 
   public TupleBuffer(int threshold, BasicCache cache, EnsembleCacheManager ensembleCacheManager,EnsembleCacheUtilsSingle ensembleCacheUtilsSingle) {
@@ -109,7 +107,7 @@ public class TupleBuffer {
     //        this.ensembleCache = emanager.getCache(cache.getName()+".compressed", new ArrayList<>(ensembleCacheManager.sites()),
     //            EnsembleCacheManager.Consistency.DIST);
     nodeMaps = new HashMap<>();
-    localAddress = InfinispanClusterSingleton.getInstance().getManager().getMemberName();
+//    localAddress = InfinispanClusterSingleton.getInstance().getManager().getMemberName();
     if(cache instanceof Cache){
       localCache = (Cache) cache;
       distMan = localCache.getAdvancedCache().getDistributionManager();
@@ -140,7 +138,7 @@ public class TupleBuffer {
     batchThreshold = LQPConfiguration.getInstance().getConfiguration().getInt(
         "node.ensemble.batchput.batchsize", batchThreshold);
     nodeMaps = new HashMap<>();
-    localAddress = InfinispanClusterSingleton.getInstance().getManager().getMemberName();
+//    localAddress = InfinispanClusterSingleton.getInstance().getManager().getMemberName();
   }
   public String getMC(){return mc;}
   public Map<Object,Object> getBuffer(){

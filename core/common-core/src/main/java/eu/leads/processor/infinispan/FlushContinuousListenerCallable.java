@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Created by vagvaz on 10/9/15.
  */
-public class FlushContinuousListenerCallable extends LeadsBaseCallable{
+public class FlushContinuousListenerCallable extends LeadsBaseCallable {
   public FlushContinuousListenerCallable(String configString, String output) {
     super(configString, output);
   }
@@ -17,8 +17,8 @@ public class FlushContinuousListenerCallable extends LeadsBaseCallable{
   @Override public String call() throws Exception {
     System.out.println("LEADSLOG: Flush leadslistener for " + inputCache.getName());
     profilerLog.error("LEADSLOG: Flush leadslistener for " + inputCache.getName());
-    for(Object listener : inputCache.getListeners()){
-      if(listener instanceof BasicContinuousListener){
+    for (Object listener : inputCache.getListeners()) {
+      if (listener instanceof BasicContinuousListener) {
         BasicContinuousListener l = (BasicContinuousListener) listener;
         l.flush();
         l.finalizeListener();

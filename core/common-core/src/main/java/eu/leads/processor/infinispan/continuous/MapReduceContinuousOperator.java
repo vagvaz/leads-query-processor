@@ -11,21 +11,26 @@ public abstract class MapReduceContinuousOperator extends BasicContinuousOperato
   LeadsReducer reducer;
   LeadsReducer localReducer;
   LeadsCombiner combiner;
+
   @Override protected LeadsBaseCallable getCallableInstance(boolean isReduce, boolean islocal) {
     LeadsBaseCallable result = null;
-    if(isReduce){
-      if(islocal){
-        result = new LeadsLocalReducerCallable(inputCache.getName(),getLocalReducer(),"",LQPConfiguration.getInstance().getMicroClusterName());
-      }else{
-        result = new LeadsReducerCallable(inputCache.getName(),getReducer(),"");
+    if (isReduce) {
+      if (islocal) {
+        result = new LeadsLocalReducerCallable(inputCache.getName(), getLocalReducer(), "",
+            LQPConfiguration.getInstance().getMicroClusterName());
+      } else {
+        result = new LeadsReducerCallable(inputCache.getName(), getReducer(), "");
       }
-    }else{
-      result = new LeadsMapperCallable(inputCache,collector,getMapper(), LQPConfiguration.getInstance().getMicroClusterName());
+    } else {
+      result = new LeadsMapperCallable(inputCache, collector, getMapper(),
+          LQPConfiguration.getInstance().getMicroClusterName());
     }
     return result;
   }
 
   protected abstract LeadsReducer getReducer();
+
   protected abstract LeadsReducer getLocalReducer();
+
   protected abstract LeadsMapper getMapper();
 }

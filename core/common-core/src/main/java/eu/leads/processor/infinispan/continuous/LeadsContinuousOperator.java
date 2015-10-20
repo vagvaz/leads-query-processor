@@ -14,11 +14,18 @@ import java.util.concurrent.Future;
  */
 public interface LeadsContinuousOperator {
   public void initializeContinuousOperator(JsonObject conf);
-  public void executeOn(Object key,Object value, LeadsCollector collector);
-  public void onRemove(Object key,Object value);
+
+  public void executeOn(Object key, Object value, LeadsCollector collector);
+
+  public void onRemove(Object key, Object value);
+
   public void setInput(Iterator<Map.Entry> iterator);
+
   public void setInputCache(Cache cache);
+
   public Future processInput();
+
   public Future processInput(List<Map.Entry> input);
+
   public void finalizeOperator();
 }
