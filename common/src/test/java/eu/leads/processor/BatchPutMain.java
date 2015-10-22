@@ -1,6 +1,7 @@
 package eu.leads.processor;
 
 import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
+import eu.leads.processor.common.infinispan.EnsembleCacheUtilsSingle;
 import eu.leads.processor.common.infinispan.InfinispanClusterSingleton;
 import eu.leads.processor.common.infinispan.TupleBuffer;
 import eu.leads.processor.common.utils.PrintUtilities;
@@ -39,7 +40,7 @@ public class BatchPutMain {
     private static EnsembleCache ecache2;
     private static int numberOfvalues = 1;
     private static HashMap<String,Integer> histogram;
-
+    private static HashMap<String,EnsembleCacheUtilsSingle> ensembleCacheUtilsSingles;
     public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
         clouds.put("dresden2",dresden2);
         clouds.put("dd1a",dd1a);
@@ -66,11 +67,15 @@ public class BatchPutMain {
         ecache = emanager.getCache(cacheName, new ArrayList<>(emanager.sites()),
             EnsembleCacheManager.Consistency.DIST);
 
+        ensembleCacheUtilsSingles = new HashMap<>();
 
         for(Object s : ecache.sites()){
             Site site = (Site)s;
             String eString = site.getName();
-            buffers.put(site.getName(),new TupleBuffer(threshold,ecache, new EnsembleCacheManager(eString),null));
+            ensembleCacheUtilsSingles.put(eString,new EnsembleCacheUtilsSingle());
+            EnsembleCacheManager emanager = new EnsembleCacheManager(eString);
+//            buffers.put(site.getName(),new TupleBuffer(threshold,ecache.getName(), emanager ,eString, ensembleCacheUtilsSingles.get(eString) ));
+            buffers.put(site.getName(),new TupleBuffer(threshold,ecache.getName(), emanager ,eString, null ));
             System.out.println("cache site: " + site.getName());
         }
 

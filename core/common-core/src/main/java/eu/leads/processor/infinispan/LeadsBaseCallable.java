@@ -8,30 +8,38 @@ import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.EngineUtils;
+import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.index.*;
 import eu.leads.processor.math.FilterOpType;
 import eu.leads.processor.math.FilterOperatorNode;
 import eu.leads.processor.math.FilterOperatorTree;
 import eu.leads.processor.math.MathUtils;
 import org.infinispan.Cache;
-import org.infinispan.commons.util.CloseableIterable;
-import org.infinispan.context.Flag;
+import org.infinispan.commons.marshall.Marshaller;
 import org.infinispan.distexec.DistributedCallable;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
-import org.infinispan.filter.KeyValueFilter;
+import org.infinispan.factories.ComponentRegistry;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 import org.infinispan.manager.EmbeddedCacheManager;
+import org.infinispan.marshall.core.MarshalledEntryImpl;
+import org.infinispan.persistence.leveldb.LevelDBStore;
+import org.infinispan.persistence.manager.PersistenceManager;
+import org.infinispan.persistence.manager.PersistenceManagerImpl;
+import org.infinispan.persistence.spi.InitializationContext;
 import org.infinispan.query.SearchManager;
 import org.infinispan.query.dsl.FilterConditionContext;
 import org.infinispan.query.dsl.FilterConditionEndContext;
 import org.infinispan.query.dsl.QueryFactory;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
@@ -56,7 +64,7 @@ public abstract class LeadsBaseCallable<K, V> implements LeadsCallable<K, V>,
   transient protected FilterOperatorTree tree = null;
   transient protected List<LeadsBaseCallable> callables;
   transient protected List<ExecuteRunnable> executeRunnables;
-  transient Queue<Map.Entry<K, V>> input;
+  transient Queue input;
   protected int callableIndex = -1;
   protected int callableParallelism = 1;
   protected boolean continueRunning = true;
@@ -64,7 +72,9 @@ public abstract class LeadsBaseCallable<K, V> implements LeadsCallable<K, V>,
   long start = 0;
   long end = 0;
   int readCounter = 0;
-
+  int processed = 0;
+  int processThreshold = 1000;
+  int readThreshold = 1000;
   //  transient protected RemoteCache outputCache;
   //  transient protected RemoteCache ecache;
   //  transient protected RemoteCacheManager emanager;
@@ -73,6 +83,9 @@ public abstract class LeadsBaseCallable<K, V> implements LeadsCallable<K, V>,
   transient Logger profilerLog;
   protected ProfileEvent profCallable;
   protected LeadsCollector collector;
+  private int listSize;
+  private int sleepTimeMilis;
+  private int sleepTimeNanos;
 
   public LeadsBaseCallable() {
     callableParallelism = LQPConfiguration.getInstance().getConfiguration().getInt("node.engine.parallelism", 4);
@@ -147,21 +160,23 @@ public abstract class LeadsBaseCallable<K, V> implements LeadsCallable<K, V>,
     return input;
   }
 
-  public void setInput(Queue<Map.Entry<K, V>> input) {
-    this.input = input;
-  }
-
   public boolean isContinueRunning() {
     return continueRunning;
   }
 
   public void setContinueRunning(boolean continueRunning) {
     this.continueRunning = continueRunning;
+    synchronized (input) {
+      input.notify();
+    }
+
   }
 
   @Override public void setEnvironment(Cache<K, V> cache, Set<K> inputKeys) {
     profilerLog = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
-
+    listSize = LQPConfiguration.getInstance().getConfiguration().getInt("node.list.size", 500);
+    sleepTimeMilis = LQPConfiguration.getInstance().getConfiguration().getInt("node.sleep.time.milis", 0);
+    sleepTimeNanos = LQPConfiguration.getInstance().getConfiguration().getInt("node.sleep.time.nanos", 10000);
     EngineUtils.initialize();
     PrintUtilities.printAndLog(profilerLog,
         InfinispanClusterSingleton.getInstance().getManager().getMemberName().toString() + ": setupEnvironment");
@@ -226,33 +241,18 @@ public abstract class LeadsBaseCallable<K, V> implements LeadsCallable<K, V>,
       profilerLog.error("EnsembleHost EXIST " + ensembleHost);
       System.err.println("EnsembleHost EXIST " + ensembleHost);
       emanager = new EnsembleCacheManager(ensembleHost);
-      //      ensembleCacheUtilsSingle.initialize(emanager);
-      //      emanager.start();
-      //      emanager = createRemoteCacheManager();
-      //      ecache = emanager.getCache(output,new ArrayList<>(emanager.sites()),
-      //          EnsembleCacheManager.Consistency.DIST);
     } else {
       profilerLog.error("EnsembleHost NULL");
       System.err.println("EnsembleHost NULL");
       tmpprofCallable.start("Start EnsemlbeCacheManager");
       emanager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
-      //      ensembleCacheUtilsSingle.initialize(emanager);
-      //      emanager.start();
-      //            emanager = createRemoteCacheManager();
     }
     emanager.start();
 
-    tmpprofCallable.end();
-    tmpprofCallable.start("Get cache ");
     ecache = emanager.getCache(output, new ArrayList<>(emanager.sites()), EnsembleCacheManager.Consistency.DIST);
-    tmpprofCallable.end();
     outputCache = ecache;
-    //outputCache =  emanager.getCache(output,new ArrayList<>(emanager.sites()),
-    //          EnsembleCacheManager.Consistency.DIST);
     input = new LinkedList<>();
     initialize();
-    profCallable.end("end_setEnv");
-
     start = System.currentTimeMillis();
     PrintUtilities.printAndLog(profilerLog,
         InfinispanClusterSingleton.getInstance().getManager().getMemberName().toString() + ": setupEnvironment "
@@ -279,72 +279,116 @@ public abstract class LeadsBaseCallable<K, V> implements LeadsCallable<K, V>,
         }
       }
     }
-    int count = 0;
-    profCallable.end();
-    //    ProfileEvent profExecute = new ProfileEvent("Buildinglucece" + this.getClass().toString(), profilerLog);
-
-    if (indexCaches != null)
-      if (indexCaches.size() > 0) {
+    if(indexCaches!=null)
+      if(indexCaches.size()>0) {
         System.out.print("Building Lucene query or qualinfo ");
-        long start = System.currentTimeMillis();
+        long start=System.currentTimeMillis();
         luceneKeys = createLuceneQuerys(indexCaches, tree.getRoot());
         System.out.println(" time: " + (System.currentTimeMillis() - start) / 1000.0);
         //        profExecute.end();
       }
 
-    if (luceneKeys == null) {
-      profCallable.start("Iterate Over Local Data");
-      System.out.println("Iterate Over Local Data");
-
-      //      profExecute = new ProfileEvent("GetIteratble " + this.getClass().toString(), profilerLog);
-
-      //    for(Object key : inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).keySet()) {
-      //      if (!cdl.localNodeIsPrimaryOwner(key))
-      //        continue;
+    if(luceneKeys ==null) {
+      int count = 0;
+      System.err.println("Iterate Over Local Data");
       Object filter = new LocalDataFilter<K, V>(cdl);
+      //
+      //      CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL)
+      //          .filterEntries((KeyValueFilter<? super K, ? super V>) filter);
+      ComponentRegistry registry = inputCache.getAdvancedCache().getComponentRegistry();
+      PersistenceManagerImpl persistenceManager =
+          (PersistenceManagerImpl) registry.getComponent(PersistenceManager.class);
+      LevelDBStore dbStore = (LevelDBStore) persistenceManager.getAllLoaders().get(0);
 
-      CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL)
-          .filterEntries((KeyValueFilter<? super K, ? super V>) filter);
-
-      //        .converter((Converter<? super K, ? super V, ?>) filter);
-      //    profExecute.end();
-      //    profExecute.start("ISPNIter");
       try {
-        for (ExecuteRunnable runnable : executeRunnables) {
-          EngineUtils.submit(runnable);
-        }
-        for (Object object : iterable) {
-          //        profExecute.end();
-          readCounter++;
-          if (readCounter % 10000 == 0) {
-            Thread.yield();
+        Field db = dbStore.getClass().getDeclaredField("db");
+        db.setAccessible(true);
+        DB realDb = (DB) db.get(dbStore);
+        DBIterator iterable = realDb.iterator();
+        iterable.seekToFirst();
+        Field ctxField = dbStore.getClass().getDeclaredField("ctx");
+        ctxField.setAccessible(true);
+        InitializationContext ctx = (InitializationContext) ctxField.get(dbStore);
+        Marshaller m = ctx.getMarshaller();
+        try {
+          for (ExecuteRunnable runnable : executeRunnables) {
+            EngineUtils.submit(runnable);
           }
-          Map.Entry<K, V> entry = (Map.Entry<K, V>) object;
+          int i = 0;
+          List<Map.Entry> buffer = new LinkedList<>();
+          while (iterable.hasNext()) {
 
-          //      V value = inputCache.get(key);
-          //          K key = (K) entry.getKey();
-          //          V value = (V) entry.getValue();
+            buffer.clear();
+            boolean tocontinue = true;
+            for (; tocontinue && buffer.size() < callableParallelism * listSize; ) {
 
-          if (entry.getValue() != null) {
-            //          profExecute.start("ExOn" + (++count));
-            //          ExecuteRunnable runable = EngineUtils.getRunnable();
-            //          runable.setKeyValue(key, value,this);
-            //          EngineUtils.submit(runable);
-            //            executeOn((K) key, value);
-            callables.get((readCounter % callableParallelism)).addToInput(entry);
-            //          profExecute.end();
+              Map.Entry<byte[], byte[]> entryIspn = iterable.next();
+              String key = (String) m.objectFromByteBuffer(entryIspn.getKey());
+              org.infinispan.marshall.core.MarshalledEntryImpl value =
+                  (MarshalledEntryImpl) m.objectFromByteBuffer(entryIspn.getValue());
+
+              Tuple tuple = (Tuple) m.objectFromByteBuffer(value.getValueBytes().getBuf());
+              //        profExecute.end();
+              readCounter++;
+              if (readCounter > readThreshold) {
+                profilerLog.error(callableIndex + " Read: " + readCounter);
+                readThreshold *= 1.3;
+              }
+              Map.Entry<K, V> bufferentry = new AbstractMap.SimpleEntry(key, tuple);
+              buffer.add(bufferentry);
+              if (buffer.size() != listSize) {
+                tocontinue = iterable.hasNext();
+              } else {
+                tocontinue = false;
+              }
+            }
+            //          profilerLog.error("Read Buffer " + buffer.size());
+            //          for (int j = 0; j < callableParallelism; j++) {
+            //            profilerLog.error(j+": " + j + callables.get(j).getInput().size());
+            //          }
+            for (Map.Entry entry : buffer) {
+              int roundRobinWithoutAddition = 0;
+              if (entry.getValue() != null) {
+                while (true) {
+                  //              PrintUtilities.printAndLog(profilerLog, i + ": size " + callables.get(i).getInput().size());
+                  if (callables.get(i).getSize() <= listSize) {
+                    //                PrintUtilities.printAndLog(profilerLog, i + ": chosen " + callables.get(i).getInput().size());
+                    callables.get(i).addToInput(entry);
+                    i = (i + 1) % callableParallelism;
+                    break;
+                  }
+                  i = (i + 1) % callableParallelism;
+                  roundRobinWithoutAddition++;
+                  if (roundRobinWithoutAddition % callableParallelism == 0) {
+                    //                  PrintUtilities.printAndLog(profilerLog, "Sleeping because everyting full " + roundRobinWithoutAddition);
+                    Thread.sleep((roundRobinWithoutAddition / callableParallelism) * sleepTimeMilis,
+                        (roundRobinWithoutAddition / callableParallelism) * sleepTimeNanos);
+                    //                  roundRobinWithoutAddition = 0;
+                  }
+                  //              i = (i+1)%callableParallelism;
+                }
+              }
+            }
+
           }
-          //         profExecute.start("ISPNIter");
+          iterable.close();
+        } catch (Exception e) {
+          iterable.close();
+          if (e instanceof InterruptedException) {
+            profilerLog.error(this.imanager.getCacheManager().getAddress().toString() + " was interrupted ");
+            for (ExecuteRunnable ex : executeRunnables) {
+              if (ex.isRunning()) {
+                ex.cancel();
+              }
+            }
+          } else {
+            profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
+            PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
+          }
         }
-        iterable.close();
-      } catch (Exception e) {
-        iterable.close();
-        if (e instanceof InterruptedException) {
-          profilerLog.error(this.imanager.getCacheManager().getAddress().toString() + " was interrupted ");
-        } else {
-          profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
-          PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
-        }
+      }catch (Exception e){
+        profilerLog.error("Exception in LEADSBASEBACALLABE " + e.getClass().toString());
+        PrintUtilities.logStackTrace(profilerLog, e.getStackTrace());
       }
     } else {
       //      profCallable.start("Search_Over_Indexed_Data");
@@ -402,24 +446,36 @@ public abstract class LeadsBaseCallable<K, V> implements LeadsCallable<K, V>,
     }
     callables.clear();
     executeRunnables.clear();
-    System.err.println("LAST LINE OF " + this.getClass().toString() + " " + embeddedCacheManager.getAddress().toString()
-        + " ----------- END");
-    profilerLog.error("LAST LINE OF " + this.getClass().toString() + " " + embeddedCacheManager.getAddress().toString()
-        + " ----------- END");
+    PrintUtilities.printAndLog(profilerLog,
+        "LAST LINE OF " + this.getClass().toString() + " " + embeddedCacheManager.getAddress().toString()
+            + " ----------- END");
+
     return embeddedCacheManager.getAddress().toString();
   }
 
   private synchronized void addToInput(Map.Entry<K, V> entry) {
     //    synchronized (input){
-    input.add(entry);
-    //    }
+    synchronized (input) {
+      input.add(entry);
+      input.notify();
+    }
   }
 
-  public synchronized Map.Entry poll() {
+  public Map.Entry poll() {
+    //    profilerLog.error(callableIndex+": POLL CALLED ");
     Map.Entry result = null;
-    //    synchronized (input){
-    result = input.poll();
-    //    }
+    synchronized (input) {
+      result = (Map.Entry) input.poll();
+    }
+
+    if (result != null) {
+      //      profilerLog.error(callableIndex+": POLL CALLED  PROCESSED " + processed);
+      processed++;
+    }
+    if (processed > processThreshold) {
+      profilerLog.error(callableIndex + " processed " + processed);
+      processThreshold *= 1.3;
+    }
     return result;
   }
 
@@ -476,7 +532,6 @@ public abstract class LeadsBaseCallable<K, V> implements LeadsCallable<K, V>,
   }
 
 
-
   public class qualinfo {
     String attributeName = "";
     String attributeType = "";
@@ -490,12 +545,11 @@ public abstract class LeadsBaseCallable<K, V> implements LeadsCallable<K, V>,
       this.compValue = compValue;
     }
 
-    public qualinfo(FilterOpType opType, qualinfo left, qualinfo right) throws Exception {
+    public qualinfo( FilterOpType opType, qualinfo left, qualinfo right) throws Exception {
       this(left.attributeName, left.attributeType);
       complete(right);
       this.opType = opType;
     }
-
     public qualinfo(String attributeType, Object compValue) {
       this.attributeName = attributeName;
       this.attributeType = attributeType;
@@ -504,8 +558,8 @@ public abstract class LeadsBaseCallable<K, V> implements LeadsCallable<K, V>,
     }
 
     public qualinfo complete(qualinfo other) throws Exception {
-      if (!this.attributeType.equals(other.attributeType)) {
-        throw new Exception("Different Types " + this.attributeType + " " + other.attributeType);
+      if(!this.attributeType.equals(other.attributeType)){
+        throw new Exception("Different Types " + this.attributeType + " " +other.attributeType);
       }
 
 
@@ -639,7 +693,7 @@ public abstract class LeadsBaseCallable<K, V> implements LeadsCallable<K, V>,
 
           try {
             if (type.equals("TEXT"))
-              return new qualinfo(type, (Object) MathUtils.getTextFrom(root.getValueAsJson()));
+              return new qualinfo(type, (String) MathUtils.getTextFrom(root.getValueAsJson()));
             else if (type.equals("DATE"))
               System.err.print("Unable to Handle: " + root.getValueAsJson());
             else {
@@ -792,6 +846,19 @@ public abstract class LeadsBaseCallable<K, V> implements LeadsCallable<K, V>,
     return (((HashSet) result).isEmpty()) ? null : result;
   }
 
+
+  public LeadsCollector getCollector() {
+    return collector;
+  }
+
+
+  public int getSize() {
+    int result = -1;
+    synchronized (input) {
+      result =  input.size();
+    }
+    return result;
+  }
 
 
 }
