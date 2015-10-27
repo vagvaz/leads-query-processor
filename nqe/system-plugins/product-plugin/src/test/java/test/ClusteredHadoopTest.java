@@ -9,15 +9,14 @@ import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.storage.LeadsStorage;
 import eu.leads.processor.common.utils.storage.LeadsStorageFactory;
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin;
+import eu.leads.processor.plugins.product.ProductPlugin;
 import org.infinispan.Cache;
 
 import java.util.ArrayList;
 import java.util.Properties;
 
 //import eu.leads.processor.common.infinispan.CacheManagerFactory;
-//import eu.leads.processor.plugins.transform.TransformPlugin;
-//import eu.leads.processor.plugins.transform.TransformPlugin;
+//import eu.leads.processor.plugins.sentiment.SentimentAnalysisPlugin;
 
 /**
  * Created by vagvaz on 6/8/14.
@@ -26,7 +25,7 @@ public class ClusteredHadoopTest {
     static LeadsStorage storage = null;
 
     public static void main(String[] args) {
-        Class pluginClass = SentimentAnalysisPlugin.class;
+        Class pluginClass = ProductPlugin.class;
 
         LQPConfiguration.initialize();
         ArrayList<InfinispanManager> clusters = new ArrayList<InfinispanManager>();
@@ -84,7 +83,7 @@ public class ClusteredHadoopTest {
 
         //distributed deployment  ( plugin id, cache to install, events)
         //PluginManager.deployPlugin();
-//        PluginManager.deployPluginListener(TransformPlugin.class.getCanonicalName(), "default.webpages",
+//        PluginManager.deployPluginListener(ProductPlugin.class.getCanonicalName(), "default.webpages",
 //
 //                                      EventType.CREATEANDMODIFY,"defaultUser");
         plugin.setUser("vagvaz");

@@ -10,6 +10,7 @@ import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.EngineUtils;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.index.*;
+import eu.leads.processor.infinispan.operators.SortCallableUpdated;
 import eu.leads.processor.math.FilterOpType;
 import eu.leads.processor.math.FilterOperatorNode;
 import eu.leads.processor.math.FilterOperatorTree;
@@ -106,7 +107,10 @@ public abstract class LeadsBaseCallable<K, V> implements LeadsCallable<K, V>,
     try {
       Constructor<?> constructor = this.getClass().getConstructor();
       result = (LeadsBaseCallable) constructor.newInstance();
-      result.setCollector(new LeadsCollector(collector.getMaxCollectorSize(), collector.getCacheName()));
+
+//      if(collector !=null) {
+        result.setCollector(new LeadsCollector(1000, output));
+//      }
       result.setEnsembleHost(ensembleHost);
       result.setOutput(output);
       result.setConfigString(configString);
@@ -180,42 +184,49 @@ public abstract class LeadsBaseCallable<K, V> implements LeadsCallable<K, V>,
     EngineUtils.initialize();
     PrintUtilities.printAndLog(profilerLog,
         InfinispanClusterSingleton.getInstance().getManager().getMemberName().toString() + ": setupEnvironment");
-    if (callableIndex == -1) {
+    if(! (this instanceof SortCallableUpdated)) {
+      if (callableIndex == -1) {
 
-      executeRunnables = new ArrayList<>(callableParallelism);
-
-      callables = new ArrayList<>(callableParallelism);
-      for (int i = 0; i < callableParallelism; i++) {
-        PrintUtilities.printAndLog(profilerLog,
-            InfinispanClusterSingleton.getInstance().getManager().getMemberName().toString() + ": setupEnvironment "
-                + i);
-        if (i == 0) {
-          this.setCallableIndex(0);
-          callables.add(this);
-          ExecuteRunnable runnable = EngineUtils.getRunnable();
-          runnable.setCallable(this);
-          executeRunnables.add(runnable);
-        } else {
-          LeadsBaseCallable newCallable = this.copy();
+        executeRunnables = new ArrayList<>(callableParallelism);
+        collector = new LeadsCollector(0, output);
+        callables = new ArrayList<>(callableParallelism);
+        for (int i = 0; i < callableParallelism; i++) {
           PrintUtilities.printAndLog(profilerLog,
-              InfinispanClusterSingleton.getInstance().getManager().getMemberName().toString() + ": setupEnvironment "
-                  + i + ".0");
-          newCallable.setCallableIndex(i);
-          newCallable.setEnvironment(cache, inputKeys);
-          PrintUtilities.printAndLog(profilerLog,
-              InfinispanClusterSingleton.getInstance().getManager().getMemberName().toString() + ": setupEnvironment "
-                  + i + ".1");
-          callables.add(newCallable);
-          ExecuteRunnable runnable = EngineUtils.getRunnable();
-          PrintUtilities.printAndLog(profilerLog,
-              InfinispanClusterSingleton.getInstance().getManager().getMemberName().toString() + ": setupEnvironment "
-                  + i + ".3");
-          runnable.setCallable(newCallable);
-          executeRunnables.add(runnable);
+              InfinispanClusterSingleton.getInstance().getManager().getMemberName().toString() + ": setupEnvironment " + i);
+          if (i == 0) {
+            this.setCallableIndex(0);
+            callables.add(this);
+            ExecuteRunnable runnable = EngineUtils.getRunnable();
+            runnable.setCallable(this);
+            executeRunnables.add(runnable);
+            collector.setMaxCollectorSize(0);
+            if (this instanceof SortCallableUpdated) {
+              break;
+            }
+          } else {
+            LeadsBaseCallable newCallable = this.copy();
+            PrintUtilities.printAndLog(profilerLog,
+                InfinispanClusterSingleton.getInstance().getManager().getMemberName().toString() + ": setupEnvironment "
+                    + i + ".0");
+            newCallable.setCallableIndex(i);
+            newCallable.collector.setMaxCollectorSize(i);
+            newCallable.setEnvironment(cache, inputKeys);
+            PrintUtilities.printAndLog(profilerLog,
+                InfinispanClusterSingleton.getInstance().getManager().getMemberName().toString() + ": setupEnvironment "
+                    + i + ".1");
+            callables.add(newCallable);
+            ExecuteRunnable runnable = EngineUtils.getRunnable();
+            PrintUtilities.printAndLog(profilerLog,
+                InfinispanClusterSingleton.getInstance().getManager().getMemberName().toString() + ": setupEnvironment "
+                    + i + ".3");
+            runnable.setCallable(newCallable);
+            executeRunnables.add(runnable);
+          }
         }
       }
+    } else{
+      collector = new LeadsCollector(100, output);
     }
-
     profCallable = new ProfileEvent("name", profilerLog);
     profCallable.setProfileLogger(profilerLog);
     if (profCallable != null) {

@@ -1,7 +1,6 @@
 package eu.leads.processor.infinispan.operators;
 
-import eu.leads.processor.common.infinispan.AcceptAllFilter;
-import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.common.infinispan.*;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
@@ -14,6 +13,7 @@ import eu.leads.processor.infinispan.LeadsReducerCallable;
 import eu.leads.processor.infinispan.operators.mapreduce.WGSMapper;
 import eu.leads.processor.infinispan.operators.mapreduce.WGSReducer;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
+import org.bson.types.BasicBSONList;
 import org.infinispan.Cache;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.CloseableIterable;
@@ -59,6 +59,10 @@ public class WGSOperator extends MapReduceOperator {
   @Override public void init(JsonObject config) {
     super.init(conf);
     init_statistics(this.getClass().getCanonicalName());
+//    String ensembleString = computeEnsembleHost();
+//    EnsembleCacheManager emanager = new EnsembleCacheManager(ensembleString);
+//    EnsembleCache ecache = emanager.getCache(getOutput()+"iter0", new ArrayList<>(emanager.sites()), EnsembleCacheManager.Consistency.DIST);
+//    ecache.put(configBody.getString("url"),configBody.getString("url"));
   }
 
   public void setupMapReduceJob(String inputCacheName, String intermediateCacheName1, String outputCacheName) {
@@ -79,136 +83,53 @@ public class WGSOperator extends MapReduceOperator {
 
   }
 
-  @Override public void run() {
-    //      int count = 0;
-    //      String currentInput = getName() +".iter0";
-    //      String currentOutput = "";
-    //      String currentIntermediate = getName()+".itermediate0";
-    //      inputCacheName = getName() +".iter0";
-    //      inputCache = (Cache) manager.getPersisentCache(inputCacheName);
-    //      JsonObject configBody = conf.getObject("body");
-    //      inputCache.put(configBody.getString("url"),configBody.getString("url"));
-    //      Cache realOutput = (Cache) manager.getPersisentCache(conf.getString("realOutput"));
-    //      for ( count = 0; count < configBody.getInteger("depth"); count++) {
-    //         currentInput = getName() +".iter"+count;
-    //         currentOutput = getName() +".iter"+(count+1);
-    //         currentIntermediate = getName()+".itermediate"+count;
-    ////         inputCache = (Cache)manager.getPersisentCache(currentInput);
-    ////         inputCache = (Cache)manager.getPersisentCache(getName()+".iter"+String.valueOf(count));
-    //         System.out.println("realOutput " + conf.getString("realOutput") + " \nsize" + realOutput.size());
-    //
-    //         JsonObject jobConfig = new JsonObject();
-    //         jobConfig.putNumber("iteration", count);
-    //         jobConfig.putNumber("depth", configBody.getInteger("depth"));
-    //         jobConfig.putArray("attributes", attributesArray);
-    //         if(count < configBody.getInteger("depth")){
-    //            jobConfig.putString("outputCache",currentOutput);
-    //         }
-    //         else
-    //         {
-    //            jobConfig.putString("outputCache","");
-    //         }
-    //         jobConfig.putString("realOutput",conf.getString("realOutput"));
-    //         jobConfig.putString("webCache","default.webpages");
-    //         setupMapReduceJob(currentInput,currentIntermediate,currentOutput);
-    //         executeMapReducePhase(jobConfig);
-    //      }
-    if (!isRemote) {
-      int count = 0;
-      currentInput = getOutput() + ".iter0";
-      currentOutput = getOutput() + ".iter1";
-      currentIntermediate = getOutput() + ".intermediate0";
-
-      //           inputCacheName = getName() +".iter0";
-      //           inputCache = (Cache) manager.getPersisentCache(inputCacheName);
-      configBody = conf.getObject("body");
-      realOutput = conf.getString("realOutput");
-      //           inputCache.put(configBody.getString("url"),configBody.getString("url"));
-      //           Cache realOutput = (Cache) manager.getPersisentCache(conf.getString("realOutput"));
-
-      for (count = 0; count < conf.getObject("body").getInteger("depth"); count++) {
-
-        PrintUtilities.printMap(manager.getPersisentCache(realOutput));
-        findPendingMMCFromGlobal();
-        findPendingRMCFromGlobal();
-        iteration = count;
-
-        createCaches(isRemote, executeOnlyMap, executeOnlyReduce);
-        currentInput = getOutput() + ".iter" + count;
-        currentOutput = getOutput() + ".iter" + (count + 1);
-        currentIntermediate = getOutput() + ".intermediate" + count;
-        if (executeOnlyMap) {
-          setupMapCallable();
-          executeMap();
-        }
-        if (!failed) {
-          if (executeOnlyReduce) {
-            setupReduceCallable();
-            executeReduce();
-          }
-          if (!failed) {
-            //            cleanup();
-            unsubscribeToMapActions("execution." + com.getId() + "." + action.getId());
-          } else {
-            failCleanup();
-          }
-        } else {
-          failCleanup();
-        }
-      }
-    } else {
-      findPendingMMCFromGlobal();
-      findPendingRMCFromGlobal();
-      iteration = conf.getObject("body").getInteger("iteration");
-
-      //      createCaches(isRemote, executeOnlyMap, executeOnlyReduce);
-      currentInput = getOutput() + ".iter" + iteration;
-      currentOutput = getOutput() + ".iter" + (iteration + 1);
-      currentIntermediate = getOutput() + ".intermediate" + iteration;
-      if (executeOnlyMap) {
-        setupMapCallable();
-        executeMap();
-      }
-      if (!failed) {
-        if (executeOnlyReduce) {
-          setupReduceCallable();
-          executeReduce();
-        }
-        if (!failed) {
-          cleanup();
-        } else {
-          failCleanup();
-        }
-      } else {
-        failCleanup();
-      }
+//  @Override
+  public void run2() {
+//  @Override public void run() {
+    if(isRemote){
+      super.run();
+      return;
     }
-    cleanup();
+    for (int count = 0; count < conf.getObject("body").getInteger("depth"); count++) {
+      conf.putString("currentInput",getOutput()+"iter"+count);
+      conf.putString("currentIntermediate",getOutput()+"intermediate"+count);
+      conf.putString("realOuput",conf.getString("realOutput"));
+      conf.putNumber("iteration",count);
+      conf.putNumber("depth",conf.getObject("body").getInteger("depth"));
+      if(count != conf.getObject("body").getInteger("depth")-1 ){
+        conf.putString("outputEnsembleHost",getEnsembleHost(getRunningMC()));
+      } else{
+        Set<String> runningMc= new HashSet<>();
+        runningMc.add(LQPConfiguration.getInstance().getMicroClusterName());
+        conf.putString("outputEnsembleHost", getEnsembleHost(runningMc));
+      }
+      super.run();
+    }
+    super.cleanup();
   }
 
   @Override public void setupMapCallable() {
     inputCacheName = currentInput;
     intermediateCacheName = currentIntermediate;
-    configBody.putNumber("iteration", iteration);
-    configBody.putNumber("depth", configBody.getInteger("depth"));
+    JsonObject configBody = new JsonObject();
+    configBody.putNumber("iteration", conf.getInteger("iteration"));
+    configBody.putNumber("depth", conf.getInteger("depth"));
     configBody.putArray("attributes", attributesArray);
-    configBody.putString("outputEnsembleHost", getEnsembleHost(getRunningMC()));
+    configBody.putString("outputEnsembleHost", conf.getString("runningMC"));
+//    configBody.putNumber("iteration", iteration);
+//    configBody.putNumber("depth", configBody.getInteger("depth"));
+//    configBody.putArray("attributes", attributesArray);
+//    configBody.putString("outputEnsembleHost", getEnsembleHost(getRunningMC()));
     if (iteration < configBody.getInteger("depth")) {
-      configBody.putString("outputCache", currentOutput);
+      configBody.putString("outputCache", conf.getString("currentOutput"));
 
     } else {
       configBody.putString("outputCache", "");
     }
-    if (iteration == 0) {
-      EnsembleCacheManager cacheManager = new EnsembleCacheManager(configBody.getString("outputEnsembleHost"));
-      EnsembleCache c = cacheManager
-          .getCache(inputCacheName, new ArrayList<>(cacheManager.sites()), EnsembleCacheManager.Consistency.DIST);
-      c.put(configBody.getString("url"), configBody.getString("url"));
-      String url = (String) c.get(configBody.getString("url"));
-      if (url != null) {
-        System.err.println("Injection Succeded");
-      }
-    }
+
+    inputCacheName = conf.getString("currentInput");
+    inputCache = (Cache) manager.getPersisentCache(conf.getString("currentInput"));
+    intermediateCacheName = conf.getString("currentIntermediate");
     configBody.putString("webCache", "default.webpages");
     action.getData().getObject("operator").getObject("configuration").putObject("body", configBody);
     setMapper(new WGSMapper(configBody.toString()));
@@ -238,13 +159,13 @@ public class WGSOperator extends MapReduceOperator {
             createCache(mc, realOutput);
           }
           tmpIntermediateCacheName = getOutput() + ".intermediate" + i;
-          createCache(mc, tmpIntermediateCacheName + i);
+//          createCache(mc, tmpIntermediateCacheName + i);
           //create Intermediate cache name for data on the same Sites as outputCache
-          createCache(mc, tmpIntermediateCacheName + ".data");
+          createCache(mc, tmpIntermediateCacheName + ".data","localIndexListener:batchputListener");
           //create Intermediate  keys cache name for data on the same Sites as outputCache;
-          createCache(mc, tmpIntermediateCacheName + ".keys");
+//          createCache(mc, tmpIntermediateCacheName + ".keys");
           //createIndexCache for getting all the nodes that contain values with the same key! in a mc
-          createCache(mc, tmpIntermediateCacheName + ".indexed");
+//          createCache(mc, tmpIntermediateCacheName + ".indexed");
         }
         String tmpInputName = getOutput() + ".iter";
         for (String inputMC : getRunningMC()) {
@@ -263,18 +184,32 @@ public class WGSOperator extends MapReduceOperator {
     return null;
   }
 
-  //   @Override
-  public void run2() {
+  @Override
+  public void run() {
     int count = 0;
+    String ensembleString = getEnsembleHost(getRunningMC());
+    EnsembleCacheManager emanager = new EnsembleCacheManager(ensembleString);
+
+    EnsembleCacheUtilsSingle single = new EnsembleCacheUtilsSingle();
+    single.initialize(emanager);
+    Map<String,String> mcMap = new HashMap<>();
+    for(String mc : getRunningMC()){
+      mcMap.put(globalConfig.getObject("componentsAddrs").getArray(mc).get(0).toString(),mc);
+    }
+
     inputCacheName = getOutput() + ".iter0";
-    inputCache = (Cache) manager.getPersisentCache(inputCacheName);
+//    EnsembleCache inputCache = (EnsembleCache) emanager.getCache(inputCacheName, new ArrayList<>(emanager.sites()),
+//        EnsembleCacheManager.Consistency.DIST);
+//    EnsembleCache inputCache = (EnsembleCache) emanager.getPersisentCache(inputCacheName);
+    inputCache = (Cache) manager.getPersisentCache(getOutput()+"iter0");
     JsonObject configBody = conf.getObject("body");
     inputCache.put(configBody.getString("url"), configBody.getString("url"));
     Cache realOutput = (Cache) manager.getPersisentCache(conf.getString("realOutput"));
-    Cache webCache = (Cache) manager.getPersisentCache("default.webpages");
-    pagerank = (Cache) manager.getPersisentCache("pagerankCache");
-    approx_sum = (Cache) manager.getPersisentCache("approx_sum_cache");
-    Cache approx = (Cache) manager.getPersisentCache("approx_sum_cache");
+    EnsembleCache webCache = (EnsembleCache) emanager.getCache("default.webpages", new ArrayList<>(emanager.sites()),
+        EnsembleCacheManager.Consistency.DIST);
+//    pagerank = (Cache) emanager.getPersisentCache("pagerankCache");
+//    approx_sum = (Cache) emanager.getPersisentCache("approx_sum_cache");
+//    Cache approx = (Cache) emanager.getPersisentCache("approx_sum_cache");
     String prefix = webCache.getName() + ":";
     //      Cache currentLevel = (Cache) manager.getPersisentCache(inputCacheName+".curelevel");
     //      Cache nextLevel   = (Cache) manager.getPersisentCache(inputCacheName +".nextlevel");
@@ -284,26 +219,45 @@ public class WGSOperator extends MapReduceOperator {
     for (count = 0; count < configBody.getInteger("depth"); count++) {
       HashSet<String> newCurrent = new HashSet<>();
       for (String w : nextLevel) {
-        String jsonString = (String) webCache.get(prefix + w);
-        if (jsonString == null || jsonString.equals("")) {
-          continue;
-        }
-        Tuple t = new Tuple(jsonString);
+//        String jsonString = (String) webCache.get(prefix + w);
+//        if (jsonString == null || jsonString.equals("")) {
+//          continue;
+//        }
+//        Tuple t = new Tuple(jsonString);
 
+
+//        EnsembleCacheManager ensembleCacheManager = new EnsembleCacheManager(ensembleString);
+        Tuple t  = (Tuple) EnsembleCacheUtils.getFromCache(webCache, prefix + w);
+        if(t==null)
+          continue;
         JsonObject result = new JsonObject();
-        result.putString("url", t.getAttribute("url"));
+        result.putString("url", t.getAttribute("default.webpages.url"));
         result.putString("pagerank", computePagerank(result.getString("url")));
-        result.putString("sentiment", t.getGenericAttribute("sentiment").toString());
-        result.putValue("links", t.getGenericAttribute("links"));
+        result.putString("sentiment", t.getGenericAttribute("default.webpages.sentiment").toString());
+        BasicBSONList linksList = (BasicBSONList) t.getGenericAttribute("default.webpages.links");
+        JsonArray linksarray = new JsonArray();
+        Iterator<Object> it = linksList.iterator();
+        while(it.hasNext()){
+          String link = (String)it.next();
+          linksarray.add(link);
+        }
+        result.putValue("links",linksarray);
+        String mc = single.decideMC(result.getString("url"));
+        result.putString("micro-cluster", mcMap.get(mc));
         currentLevel.add(result);
         if (count < 2)
           if (!result.getElement("links").isArray())
             continue;
         JsonArray links = result.getArray("links");
         Iterator<Object> iterator = links.iterator();
+        int counter = 0;
         while (iterator.hasNext()) {
           String link = (String) iterator.next();
           newCurrent.add(link);
+          counter++;
+          if(counter > 15){
+            break;
+          }
         }
       }
 
@@ -318,15 +272,19 @@ public class WGSOperator extends MapReduceOperator {
 
   private String computePagerank(String url) {
     double result = 0.0;
-    if (totalSum < 0) {
-      computeTotalSum();
+//    if (totalSum < 0) {
+//      computeTotalSum();
+//    }
+//    DSPMNode currentPagerank = (DSPMNode) pagerank.get(url);
+//    if (currentPagerank == null || totalSum <= 0) {
+//
+//      return Double.toString(0.0f);
+//    }
+//    result = currentPagerank.getVisitCount() / totalSum;
+    result = (1.0/url.length()) / 1000;
+    if(url.contains("yahoo") || url.contains("google") || url.contains("twitter") || url.contains("linkedin") ){
+      result *= 2;
     }
-    DSPMNode currentPagerank = (DSPMNode) pagerank.get(url);
-    if (currentPagerank == null || totalSum <= 0) {
-
-      return Double.toString(0.0f);
-    }
-    result = currentPagerank.getVisitCount() / totalSum;
     return Double.toString(result);
 
   }
@@ -409,9 +367,6 @@ public class WGSOperator extends MapReduceOperator {
 
   }
 
-  @Override public void execute() {
-    super.execute();
-  }
 
   @Override public void cleanup() {
     super.cleanup();
@@ -420,3 +375,76 @@ public class WGSOperator extends MapReduceOperator {
 
 
 }
+
+
+//    if (!isRemote) {
+//      int count = 0;
+//      currentInput = getOutput() + ".iter0";
+//      currentOutput = getOutput() + ".iter1";
+//      currentIntermediate = getOutput() + ".intermediate0";
+//
+//      //           inputCacheName = getName() +".iter0";
+//      //           inputCache = (Cache) manager.getPersisentCache(inputCacheName);
+//      configBody = conf.getObject("body");
+//      realOutput = conf.getString("realOutput");
+//      //           inputCache.put(configBody.getString("url"),configBody.getString("url"));
+//      //           Cache realOutput = (Cache) manager.getPersisentCache(conf.getString("realOutput"));
+//
+//      for (count = 0; count < conf.getObject("body").getInteger("depth"); count++) {
+//
+//        PrintUtilities.printMap(manager.getPersisentCache(realOutput));
+//        findPendingMMCFromGlobal();
+//        findPendingRMCFromGlobal();
+//        iteration = count;
+//
+//        createCaches(isRemote, executeOnlyMap, executeOnlyReduce);
+//        currentInput = getOutput() + ".iter" + count;
+//        currentOutput = getOutput() + ".iter" + (count + 1);
+//        currentIntermediate = getOutput() + ".intermediate" + count;
+//        if (executeOnlyMap) {
+//          setupMapCallable();
+//          executeMap();
+//        }
+//        if (!failed) {
+//          if (executeOnlyReduce) {
+//            setupReduceCallable();
+//            executeReduce();
+//          }
+//          if (!failed) {
+//            //            cleanup();
+//            unsubscribeToMapActions("execution." + com.getId() + "." + action.getId());
+//          } else {
+//            failCleanup();
+//          }
+//        } else {
+//          failCleanup();
+//        }
+//      }
+//    } else {
+//      findPendingMMCFromGlobal();
+//      findPendingRMCFromGlobal();
+//      iteration = conf.getObject("body").getInteger("iteration");
+//
+//      //      createCaches(isRemote, executeOnlyMap, executeOnlyReduce);
+//      currentInput = getOutput() + ".iter" + iteration;
+//      currentOutput = getOutput() + ".iter" + (iteration + 1);
+//      currentIntermediate = getOutput() + ".intermediate" + iteration;
+//      if (executeOnlyMap) {
+//        setupMapCallable();
+//        executeMap();
+//      }
+//      if (!failed) {
+//        if (executeOnlyReduce) {
+//          setupReduceCallable();
+//          executeReduce();
+//        }
+//        if (!failed) {
+//          cleanup();
+//        } else {
+//          failCleanup();
+//        }
+//      } else {
+//        failCleanup();
+//      }
+//    }
+//    cleanup();

@@ -4,6 +4,7 @@ import eu.leads.processor.common.continuous.BasicContinuousListener;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtilsSingle;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
+import eu.leads.processor.infinispan.operators.*;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.notifications.Listener;
@@ -70,8 +71,19 @@ import java.util.concurrent.Future;
     String operatorClassName = conf.getString("operatorClass");
     BasicContinuousOperator operator = null;
 
-
-    if (operatorClassName.equals(WordCountContinuousOperator.class.getCanonicalName().toString())) {
+    if (operatorClassName.equals(ScanOperator.class.getCanonicalName().toString())) {
+      operator = new ScanContinuousOperator();
+    } else if (operatorClassName.equals(FilterOperator.class.getCanonicalName().toString())) {
+      operator = new FilterContinuousOperator();
+    } else if (operatorClassName.equals(ProjectOperator.class.getCanonicalName().toString())) {
+      operator = new ProjectContinuousOperator();
+    } else if (operatorClassName.equals(GroupByOperator.class.getCanonicalName().toString())) {
+      operator = new GroupByContinuousOperator();
+    }else if (operatorClassName.equals(SortOperator.class.getCanonicalName().toString())){
+      operator = new TopkOperator();
+    } else if (operatorClassName.equals(LimitOperator.class.getCanonicalName().toString())){
+      operator = new TopkOperator();
+    } else if (operatorClassName.equals(WordCountContinuousOperator.class.getCanonicalName().toString())) {
       operator = new WordCountContinuousOperator();
     } else if (operatorClassName.equals(CountMinOperatorContinuous.class.getCanonicalName().toString())) {
       operator = new CountMinOperatorContinuous();

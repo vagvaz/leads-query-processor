@@ -271,12 +271,14 @@ public class LeadsCollector<KOut, VOut> implements Collector<KOut, VOut>, Serial
       nextCallable = new LeadsMapperCallable(null, new LeadsCollector(0, cacheName),
           new GroupByMapper(conf.getObject("next").getObject("configuration").toString()), site);
       nextCallable.setEnsembleHost(ensembleHost);
+      nextCallable.setCallableIndex(maxCollectorSize);
       nextCallable.setEnvironment(inputCache, null);
       //      nextCallable.initialize();
     } else if (conf.getString("next.type").equals(LeadsNodeType.JOIN.toString())) {
       nextCallable = new LeadsMapperCallable(null, new LeadsCollector(0, cacheName),
           new JoinMapper(conf.getObject("next").getObject("configuration").toString()), site);
       nextCallable.setEnsembleHost(ensembleHost);
+      nextCallable.setCallableIndex(maxCollectorSize);
       nextCallable.setEnvironment(inputCache, null);
       //      nextCallable.initialize();
     } else if (conf.getString("next.type").equals(LeadsNodeType.SORT.toString())) {

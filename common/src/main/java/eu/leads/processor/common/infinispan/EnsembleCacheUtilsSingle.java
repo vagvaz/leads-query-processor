@@ -173,7 +173,7 @@ public class EnsembleCacheUtilsSingle  {
     return result;
   }
 
-  private String decideMC(String keyString) {
+  public String decideMC(String keyString) {
     EnsembleCache cache = partitioner.locate(keyString);
     String result = "";
     for (Object s : cache.sites()) {
@@ -272,8 +272,8 @@ public class EnsembleCacheUtilsSingle  {
 
    public void waitForAuxPuts() throws InterruptedException {
     //    System.err.println("WaitForAuxPuts");
-    //    while(runnables.size() != 15*(threadBatch)) {
-    while (auxExecutor.getActiveCount() > 1) {
+        while(runnables.size() != LQPConfiguration.getInstance().getConfiguration().getInt("node.thread.multiplier", 100)*(threadBatch)) {
+//    while (auxExecutor.getActiveCount() > 0) {
       try {
         //            auxExecutor.awaitTermination(100,TimeUnit.MILLISECONDS);
 
@@ -321,8 +321,8 @@ public class EnsembleCacheUtilsSingle  {
     //flush remotely batchputlisteners
 
     //    System.err.println("Wait batchput");
-    //    while( microcloudRunnables.size() !=  10*totalBatchPutThreads){
-    while (batchPutExecutor.getActiveCount() > 1) {
+        while( microcloudRunnables.size() !=  LQPConfiguration.getInstance().getConfiguration().getInt("node.thread.multiplier", 100)*totalBatchPutThreads){
+//    while (batchPutExecutor.getActiveCount() > 0) {
       try {
         //            auxExecutor.awaitTermination(100,TimeUnit.MILLISECONDS);
         System.err.println("microRunna " + microcloudRunnables.size() + " instead of " + (10 * totalBatchPutThreads));

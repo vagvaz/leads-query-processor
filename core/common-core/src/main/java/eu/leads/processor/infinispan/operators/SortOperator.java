@@ -66,7 +66,7 @@ public class SortOperator extends BasicOperator {
     if (conf.containsField("limit")) {
       rowcount = conf.getObject("limit").getObject("body").getLong("fetchFirstNum");
     } else {
-      rowcount = -1;
+      rowcount = Integer.MAX_VALUE;
     }
 
     if (isRemote) {

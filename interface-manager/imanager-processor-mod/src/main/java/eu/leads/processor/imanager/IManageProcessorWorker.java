@@ -83,6 +83,8 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
                           new GetQueryStatusActionHandler(com, log, persistence, id));
       handlers.put(IManagerConstants.GET_RESULTS,
                           new GetResultsActionHandler(com, log, persistence, id));
+      handlers.put(IManagerConstants.GET_WEB_RESULTS,
+          new GetWebResultsActionHandler(com, log, persistence, id));
       handlers.put(IManagerConstants.CREATE_NEW_QUERY,
                           new CreateQueryActionHandler(com, log, persistence, id));
       handlers.put(IManagerConstants.CREATE_NEW_WORKFLOW,

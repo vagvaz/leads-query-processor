@@ -24,7 +24,8 @@ public class SizeBasedInputBuffer implements InputBuffer {
   }
 
   private boolean isOverflown() {
-    return data.size() >= maximumSize;
+    return true;
+//    return data.size() >= maximumSize;
   }
 
   @Override public boolean remove(Object key) {

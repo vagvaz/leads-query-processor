@@ -13,6 +13,7 @@ import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.distexec.mapreduce.Collector;
 import org.infinispan.ensemble.EnsembleCacheManager;
+import org.infinispan.ensemble.cache.EnsembleCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonArray;
@@ -33,7 +34,7 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
 
   protected transient String prefix;
   protected transient List<String> attributes;
-  protected transient BasicCache webCache;
+  protected transient EnsembleCache webCache;
   protected transient BasicCache outputCache;
   protected transient int depth;
   protected transient int iteration;
@@ -85,8 +86,8 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
     //      if (jsonString==null || jsonString.equals("")){
     //         return;
     //      }
-    System.err.println("Running map for " + key.toString());
-    Object oo = webCache.get(prefix + key);
+    System.err.println("\n\n\n\n\n\n\nRunning map for " + key.toString()+"\n\n\n\n\n\n");
+    Object oo =  EnsembleCacheUtils.getFromCache(webCache, prefix + key);
     Tuple webpage = null;
     if (oo instanceof Tuple) {
       webpage = (Tuple) oo;
@@ -121,18 +122,19 @@ public class WGSMapper extends LeadsMapper<String, String, String, String> {
     Tuple t = new Tuple(webpage);
     handlePagerank(t);
     JsonObject result = new JsonObject();
-    result.putString("url", t.getAttribute("url"));
+    result.putString("url", t.getAttribute("default.webpages.url"));
     result.putString("pagerank", computePagerank(result.getString("url")));
-    result.putString("sentiment", t.getGenericAttribute("sentiment").toString());
+    result.putString("sentiment", t.getGenericAttribute("default.webpages.sentiment").toString());
     //    result.putString("microCluster",LQPConfiguration.getInstance().getMicroClusterName());
-    ArrayList<String> microclouds = new ArrayList<>();
-    microclouds.add("hamm5");
-    microclouds.add("hamm6");
-    microclouds.add("dresden2");
+//    ArrayList<String> microclouds = new ArrayList<>();
+//    microclouds.add("hamm5");
+//    microclouds.add("hamm6");
+//    microclouds.add("dresden2");
 
-    int mcIndex = Math.abs((t.getAttribute("url").hashCode())) % microclouds.size();
-    result.putString("micro-cluster", microclouds.get(mcIndex));
-    ArrayList<Object> linksArray = (ArrayList<Object>) t.getGenericAttribute("links");
+//    int mcIndex = Math.abs((t.getAttribute("url").hashCode())) % microclouds.size();
+    result.putString("micro-cluster",LQPConfiguration.getInstance().getMicroClusterName());
+//    result.putString("micro-cluster", microclouds.get(mcIndex));
+    ArrayList<Object> linksArray = (ArrayList<Object>) t.getGenericAttribute("default.webpages.links");
     JsonArray array = new JsonArray();
     for (Object o : linksArray) {
       log.error("ADDING TO LINKS " + o.toString());

@@ -121,7 +121,10 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             //            log.info("completed reply get results");
             action.getData().putString("replyTo", msg.getString("from"));
             com.sendWithEventBus(workQueueAddress, action.asJsonObject());
-          } else if (label.equals(IManagerConstants.SUBMIT_QUERY)) {
+          } else if(label.equals(IManagerConstants.GET_WEB_RESULTS)){
+            action.getData().putString("replyTo", msg.getString("from"));
+            com.sendWithEventBus(workQueueAddress, action.asJsonObject());
+          }else if (label.equals(IManagerConstants.SUBMIT_QUERY)) {
             newAction = createNewAction(action);
             newAction.setCategory(ActionCategory.ACTION.toString());
             newAction.setLabel(IManagerConstants.CREATE_NEW_QUERY);
@@ -255,6 +258,8 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
           } else if (label.equals(IManagerConstants.GET_RESULTS)) {
             //            log.info("completed reply get query results");
             com.sendTo(action.getData().getString("replyTo"), action.getResult());
+          } else if(label.equals(IManagerConstants.GET_WEB_RESULTS)){
+            com.sendTo(action.getData().getString("replyTo"), action.getResult());
           } else if (label.equals(IManagerConstants.CREATE_NEW_QUERY)) {
             JsonObject webServiceReply = action.getResult().getObject("status");
             //Reply to the SUBMIT Query Action to the webservice
@@ -282,8 +287,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
               plannerAction.setDestination(StringConstants.PLANNERQUEUE);
               plannerAction.setData(action.getResult());
               newAction = plannerAction;
-              com.sendTo(plannerAction.getDestination(),
-                  plannerAction.asJsonObject());
+              com.sendTo(plannerAction.getDestination(), plannerAction.asJsonObject());
             }
           } else if (label.equals(IManagerConstants.CREATE_NEW_SPECIAL_QUERY)) {
             JsonObject webServiceReply = action.getResult().getObject("status");

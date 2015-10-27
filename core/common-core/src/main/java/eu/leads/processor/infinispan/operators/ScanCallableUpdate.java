@@ -35,7 +35,7 @@ public class ScanCallableUpdate<K, V> extends LeadsSQLCallable<K, V> implements 
   transient boolean versioning;
   boolean onVersionedCache;
   transient protected long versionStart = -1, versionFinish = -1, range = -1;
-  protected LeadsCollector collector;
+//  protected LeadsCollector collector;
 
   protected Logger log = LoggerFactory.getLogger(ScanCallableUpdate.class.toString());
   private VersionScalar minVersion = null;
