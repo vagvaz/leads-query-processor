@@ -20,7 +20,7 @@ public class PushData {
     public static void main(String[] args) {
         OutputHandler dummy = new DummyOutputHandler();
         LQPConfiguration.initialize();
-        List<Object> configList = LQPConfiguration.getInstance().getConfiguration().getList("ignorelist");
+        List<Object> configList = LQPConfiguration.getInstance().getConfiguration().getList("ignorelist",null);
         String[] desiredDomains = null;
         if(configList != null) {
             desiredDomains = new String[configList.size()];
@@ -118,7 +118,7 @@ public class PushData {
 //            dummy.append(entry.getKey(), entry);
 //            JsonObject ob = new JsonObject(entry.toString());
 
-            System.out.println("---------------------------------------------------------------");
+//            System.out.println("---------------------------------------------------------------");
             if (entry == null) {
                 continue;
             }
@@ -129,7 +129,7 @@ public class PushData {
                 //                outputHandler2.append(tuple.getAttribute("url"), new JsonObject(tuple.toString()).encodePrettily());
                 //                outputHandler3.append(entry.getValue().get(entry.getValue().getSchema().getField("url").pos()).toString(), entry.getValue().toString());
                 String key_url = tuple.getAttribute("default.webpages.url");
-                if(desiredDomains != null) {
+                if(configList!= null && configList.size() > 0) {
                     if (!StringUtils.startsWithAny(key_url, desiredDomains)) {
                         rejected++;
                         if (rejected % 100 == 0) {
