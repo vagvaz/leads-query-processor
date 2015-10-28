@@ -4,6 +4,7 @@ import eu.leads.processor.plugins.NutchTransformer;
 import org.apache.avro.generic.GenericData;
 import org.apache.commons.lang.StringUtils;
 import org.apache.nutch.storage.WebPage;
+import org.vertx.java.core.json.JsonObject;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -20,12 +21,15 @@ public class PushData {
         OutputHandler dummy = new DummyOutputHandler();
         LQPConfiguration.initialize();
         List<Object> configList = LQPConfiguration.getInstance().getConfiguration().getList("ignorelist");
-        String[] desiredDomains = new String[configList.size()];
-        int index = 0;
-        for(Object domain : configList){
-            String uri = (String)domain;
-            String nutchUri = (uri);
-            desiredDomains[index++]=nutchUri;
+        String[] desiredDomains = null;
+        if(configList != null) {
+            desiredDomains = new String[configList.size()];
+            int index = 0;
+            for (Object domain : configList) {
+                String uri = (String) domain;
+                String nutchUri = (uri);
+                desiredDomains[index++] = nutchUri;
+            }
         }
 
         //        InputHandler inputHandler = new GoraInputHandler();
@@ -111,22 +115,28 @@ public class PushData {
             //            Map.Entry<String,GenericData.Record> entry = (Map.Entry<String, GenericData.Record>) inputHandler.next();
             //            if(entry != null)
             //           System.err.println("key: " + entry.getKey() + " value " + entry.getValue().toString() +"\ncontent ==" + );
-            //            dummy.append(tuple.getAttribute("url"), tuple);
+            dummy.append(entry.getKey(), entry);
+//            JsonObject ob = new JsonObject(entry.toString());
+
+            System.out.println("---------------------------------------------------------------");
             if (entry == null) {
                 continue;
             }
             if ((entry.getValue().get(entry.getValue().getSchema().getField("content").pos()) != null)) {
                 Tuple tuple = transformer.transform(entry.getValue());
+                dummy.append(tuple.getAttribute("default.webpages.url"), tuple);
                 //                outputHandler.append(tuple.getAttribute("url"), tuple);
                 //                outputHandler2.append(tuple.getAttribute("url"), new JsonObject(tuple.toString()).encodePrettily());
                 //                outputHandler3.append(entry.getValue().get(entry.getValue().getSchema().getField("url").pos()).toString(), entry.getValue().toString());
                 String key_url = tuple.getAttribute("default.webpages.url");
-                if (!StringUtils.startsWithAny(key_url, desiredDomains)){
-                    rejected++;
-                    if (rejected % 100 == 0) {
-                        System.err.println("rejected " + rejected);
+                if(desiredDomains != null) {
+                    if (!StringUtils.startsWithAny(key_url, desiredDomains)) {
+                        rejected++;
+                        if (rejected % 100 == 0) {
+                            System.err.println("rejected " + rejected);
+                        }
+                        continue;
                     }
-                    continue;
                 }
                 String key_ts = tuple.getAttribute("default.webpages.ts");
                 String key = "default.webpages:" + key_url + "," + key_ts;
