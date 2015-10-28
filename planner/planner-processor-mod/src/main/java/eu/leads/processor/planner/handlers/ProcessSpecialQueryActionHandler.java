@@ -75,7 +75,8 @@ public class ProcessSpecialQueryActionHandler implements ActionHandler {
             node.init(desc);
             WGSUrlDepthNode rootNode = new WGSUrlDepthNode(1);
             rootNode.setUrl(query.getUrl());
-            rootNode.setDepth(query.getDepth());
+//            rootNode.setDepth(query.getDepth());
+            rootNode.setDepth(query.getDepth()-1);
             rootNode.setChild(node);
             SQLPlan plan = new SQLPlan(query.getId(), rootNode);
             Set<SQLPlan> candidatePlans = new HashSet<SQLPlan>();
