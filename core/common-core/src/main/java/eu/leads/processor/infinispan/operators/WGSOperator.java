@@ -15,6 +15,8 @@ import eu.leads.processor.infinispan.operators.mapreduce.WGSReducer;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
 import org.bson.types.BasicBSONList;
 import org.infinispan.Cache;
+import org.infinispan.client.hotrod.RemoteCacheManager;
+import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.distexec.DefaultExecutorService;
@@ -22,6 +24,7 @@ import org.infinispan.distexec.DistributedExecutorService;
 import org.infinispan.distexec.DistributedTask;
 import org.infinispan.distexec.DistributedTaskBuilder;
 import org.infinispan.ensemble.EnsembleCacheManager;
+import org.infinispan.ensemble.Site;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -45,6 +48,7 @@ public class WGSOperator extends BasicOperator {
   private String currentOutput;
   private String currentIntermediate;
   private String realOutput;
+  private RemoteCacheManager[] rms;
 
   public WGSOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
     super(com, persistence, log, action);
@@ -192,6 +196,11 @@ public class WGSOperator extends BasicOperator {
   public void run() {
     int count = 0;
     String ensembleString = getEnsembleHost(globalConfig.getObject("microclouds").getFieldNames());
+    rms = new RemoteCacheManager[globalConfig.getObject("microclouds").getFieldNames().size()];
+    int index = 0;
+    for(String mc : globalConfig.getObject("microclouds").getFieldNames()){
+      rms[index++] = createRemoteCacheManager((String) globalConfig.getObject("microclouds").getArray(mc).get(0));
+    }
     EnsembleCacheManager emanager = new EnsembleCacheManager(ensembleString);
 
     EnsembleCacheUtilsSingle single = new EnsembleCacheUtilsSingle();
@@ -231,7 +240,8 @@ public class WGSOperator extends BasicOperator {
 
 
 //        EnsembleCacheManager ensembleCacheManager = new EnsembleCacheManager(ensembleString);
-        Tuple t  = (Tuple) EnsembleCacheUtils.getFromCache(webCache, prefix + w);
+        Tuple t  = (Tuple) getFromCache(webCache, prefix + w);
+//        Tuple t  = (Tuple) EnsembleCacheUtils.getFromCache(webCache, prefix + w);
         if(t==null)
           continue;
         JsonObject result = new JsonObject();
@@ -274,6 +284,24 @@ public class WGSOperator extends BasicOperator {
       currentLevel = new JsonArray();
     }
     cleanup();
+  }
+
+  private RemoteCacheManager createRemoteCacheManager(String microcloud) {
+    ConfigurationBuilder builder = new ConfigurationBuilder();
+    builder.addServer().host(microcloud).port(11222);
+    return new RemoteCacheManager(builder.build());
+  }
+
+  private Object getFromCache(EnsembleCache ensembleCache, String key) {
+    Object result = null;
+    for(RemoteCacheManager s : rms){
+      BasicCache siteCache  = s.getCache(ensembleCache.getName());
+      result = siteCache.get(key);
+      if(result != null) {
+        return result;
+      }
+    }
+    return result;
   }
 
   private String computePagerank(String url) {
