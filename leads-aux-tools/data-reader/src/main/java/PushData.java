@@ -115,7 +115,7 @@ public class PushData {
             //            Map.Entry<String,GenericData.Record> entry = (Map.Entry<String, GenericData.Record>) inputHandler.next();
             //            if(entry != null)
             //           System.err.println("key: " + entry.getKey() + " value " + entry.getValue().toString() +"\ncontent ==" + );
-            dummy.append(entry.getKey(), entry);
+//            dummy.append(entry.getKey(), entry);
 //            JsonObject ob = new JsonObject(entry.toString());
 
             System.out.println("---------------------------------------------------------------");
@@ -124,7 +124,7 @@ public class PushData {
             }
             if ((entry.getValue().get(entry.getValue().getSchema().getField("content").pos()) != null)) {
                 Tuple tuple = transformer.transform(entry.getValue());
-                dummy.append(tuple.getAttribute("default.webpages.url"), tuple);
+//                dummy.append(tuple.getAttribute("default.webpages.url"), tuple);
                 //                outputHandler.append(tuple.getAttribute("url"), tuple);
                 //                outputHandler2.append(tuple.getAttribute("url"), new JsonObject(tuple.toString()).encodePrettily());
                 //                outputHandler3.append(entry.getValue().get(entry.getValue().getSchema().getField("url").pos()).toString(), entry.getValue().toString());
