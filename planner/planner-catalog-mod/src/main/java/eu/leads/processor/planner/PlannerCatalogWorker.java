@@ -33,7 +33,8 @@ import java.util.Set;
 /**
  * Created by vagvaz on 8/25/14.
  */
-public class PlannerCatalogWorker extends Verticle {
+public class
+    PlannerCatalogWorker extends Verticle {
   LeadsCatalog catalogServer = null;
   TajoConf conf = new TajoConf();
   JsonObject globalConfig;
@@ -222,6 +223,10 @@ public class PlannerCatalogWorker extends Verticle {
     TableDesc webpages = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"webpages"), webPagesSchema, meta, getTestDir("webpages").toUri());
     //catalog.createTable(webpages);
     createTable(catalog,webpages);
+
+    TableDesc webpage = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"webpage"), webPagesSchema, meta, getTestDir("webpage").toUri());
+    createTable(catalog,webpage);
+
 
     Schema testwebPagesSchema = new Schema();
     testwebPagesSchema.addColumn("url",Type.TEXT);
