@@ -259,9 +259,11 @@ public class WGSOperator extends BasicOperator {
           String link = (String) iterator.next();
           newCurrent.add(link);
           counter++;
-          if(counter > 15){
-            break;
-          }
+
+
+//          if(counter > 15){
+//            break;
+//          }
         }
       }
 
