@@ -38,7 +38,7 @@ public class ClusteredTest {
         PluginPackage plugin = new PluginPackage(NutchTransformPlugin.class.getCanonicalName(),
                                                         NutchTransformPlugin.class.getCanonicalName(),
                                                         "/home/vagvaz/Projects/idea/nutch-transform-plugin/target/nutch-transform-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar",
-                                                        "/home/vagvaz/Projects/idea/nutch-transform-plugin/nutch-transform-plugin-conf.xml" );
+                                                        "/home/vagvaz/Projects/idea/nutch-transform-plugin/nutch-product-plugin-conf.xml" );
         Properties conf = new Properties();
         conf.setProperty("prefix","/tmp/leads/");
         PluginManager.initialize(LeadsStorageFactory.LOCAL, conf);

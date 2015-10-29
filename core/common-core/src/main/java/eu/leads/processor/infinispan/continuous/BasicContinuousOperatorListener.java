@@ -1,28 +1,17 @@
 package eu.leads.processor.infinispan.continuous;
 
-import eu.leads.processor.common.LeadsListener;
 import eu.leads.processor.common.continuous.BasicContinuousListener;
-import eu.leads.processor.common.continuous.EventTriplet;
 import eu.leads.processor.common.infinispan.EnsembleCacheUtilsSingle;
-import eu.leads.processor.infinispan.continuous.WordCountContinuousOperator;
-import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.plugins.EventType;
+import eu.leads.processor.infinispan.operators.*;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.notifications.Listener;
-import org.infinispan.notifications.cachelistener.annotation.CacheEntryCreated;
-import org.infinispan.notifications.cachelistener.annotation.CacheEntryModified;
-import org.infinispan.notifications.cachelistener.annotation.CacheEntryRemoved;
-import org.infinispan.notifications.cachelistener.event.CacheEntryCreatedEvent;
-import org.infinispan.notifications.cachelistener.event.CacheEntryModifiedEvent;
-import org.infinispan.notifications.cachelistener.event.CacheEntryRemovedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -33,38 +22,35 @@ import java.util.concurrent.Future;
 /**
  * Created by vagvaz on 10/5/15.
  */
-@Listener(sync = true,primaryOnly = true)
-public class BasicContinuousOperatorListener extends BasicContinuousListener {
+@Listener(sync = true, primaryOnly = true) public class BasicContinuousOperatorListener
+    extends BasicContinuousListener {
 
   protected String ensembleHost;
   protected transient EnsembleCacheManager ensembleCacheManager;
   protected transient EnsembleCache outputCache;
   protected transient ArrayList<LeadsContinuousOperator> operators;
-  protected transient ArrayList<LinkedList<Map.Entry> > inputEntry;
+  protected transient ArrayList<LinkedList<Map.Entry>> inputEntry;
   protected transient Logger log;
-  protected transient EnsembleCacheUtilsSingle ensembleCacheUtilsSingle;
+  protected transient EnsembleCacheUtilsSingle keyValueDataTransfer;
   protected int parallelism = 1;
   protected transient Class<?> operatorClass = null;
 
-
-
   @Override protected void initializeContinuousListener(JsonObject conf) {
     log = LoggerFactory.getLogger(this.getClass());
-    ensembleCacheUtilsSingle = new EnsembleCacheUtilsSingle();
-    if(this.conf.containsField("ensembleHost")){
+    keyValueDataTransfer = new EnsembleCacheUtilsSingle();
+    if (this.conf.containsField("ensembleHost")) {
       ensembleHost = this.conf.getString("ensembleHost");
     }
-    if(ensembleHost != null && !ensembleHost.equals("")) {
+    if (ensembleHost != null && !ensembleHost.equals("")) {
       log.error("EnsembleHost EXIST " + ensembleHost);
       System.err.println("EnsembleHost EXIST " + ensembleHost);
       ensembleCacheManager = new EnsembleCacheManager(ensembleHost);
-      ensembleCacheUtilsSingle.initialize(ensembleCacheManager);
+      keyValueDataTransfer.initialize(ensembleCacheManager);
       //      emanager.start();
       //      emanager = createRemoteCacheManager();
       //      ecache = emanager.getCache(output,new ArrayList<>(emanager.sites()),
       //          EnsembleCacheManager.Consistency.DIST);
-    }
-    else {
+    } else {
       log.error("EnsembleHost NULL");
       System.err.println("EnsembleHost NULL");
       ensembleCacheManager = new EnsembleCacheManager(LQPConfiguration.getConf().getString("node.ip") + ":11222");
@@ -81,14 +67,30 @@ public class BasicContinuousOperatorListener extends BasicContinuousListener {
     }
   }
 
-  public  LeadsContinuousOperator initializeOperator(JsonObject conf)
-  {
+  public LeadsContinuousOperator initializeOperator(JsonObject conf) {
     String operatorClassName = conf.getString("operatorClass");
     BasicContinuousOperator operator = null;
 
-
-    if(operatorClassName.equals(WordCountContinuousOperator.class.getCanonicalName().toString())){
+    if (operatorClassName.equals(ScanOperator.class.getCanonicalName().toString())) {
+      operator = new ScanContinuousOperator();
+    } else if (operatorClassName.equals(FilterOperator.class.getCanonicalName().toString())) {
+      operator = new FilterContinuousOperator();
+    } else if (operatorClassName.equals(ProjectOperator.class.getCanonicalName().toString())) {
+      operator = new ProjectContinuousOperator();
+    } else if (operatorClassName.equals(GroupByOperator.class.getCanonicalName().toString())) {
+      operator = new GroupByContinuousOperator();
+    }else if (operatorClassName.equals(SortOperator.class.getCanonicalName().toString())){
+      operator = new TopkOperator();
+    } else if (operatorClassName.equals(LimitOperator.class.getCanonicalName().toString())){
+      operator = new TopkOperator();
+    } else if (operatorClassName.equals(WordCountContinuousOperator.class.getCanonicalName().toString())) {
       operator = new WordCountContinuousOperator();
+    } else if (operatorClassName.equals(CountMinOperatorContinuous.class.getCanonicalName().toString())) {
+      operator = new CountMinOperatorContinuous();
+    } else if (operatorClassName.equals(KMeansOperatorContinuous.class.getCanonicalName().toString())) {
+      operator = new KMeansOperatorContinuous();
+    } else {
+      PrintUtilities.printAndLog(log, "SERIOIS ERROR Continuous class is not KNOWND " + operatorClassName);
     }
     operator.setInputCache(inputCache);
     operator.initializeContinuousOperator(operatorConf);
@@ -96,20 +98,26 @@ public class BasicContinuousOperatorListener extends BasicContinuousListener {
   }
 
   @Override protected void processBuffer() {
-    try{
-      System.out.println("Processing buffer BasicContinuousOperatorListner");
-      Iterator iterator = buffer.iterator();
-      while(iterator.hasNext()){
+    try {
+      //      System.out.println("Processing buffer BasicContinuousOperatorListner");
+      Map map = buffer.getMapAndReset();
+      if (map.size() == 0) {
+        return;
+      }
+      Iterator iterator = map.entrySet().iterator();
+      while (iterator.hasNext()) {
         Map.Entry entry = (Map.Entry) iterator.next();
+        iterator.remove();
         int index = (Math.abs(entry.getKey().hashCode()) % parallelism);
         inputEntry.get(index).add(entry);
       }
+      //      map.clear();
       ArrayList<Future> futures = new ArrayList<>();
       for (int i = 0; i < parallelism; i++) {
         operators.get(i).setInput(inputEntry.get(i).iterator());
         futures.add(operators.get(i).processInput());
       }
-      for(Future f : futures){
+      for (Future f : futures) {
         try {
           f.get();
         } catch (InterruptedException e) {
@@ -118,97 +126,87 @@ public class BasicContinuousOperatorListener extends BasicContinuousListener {
           e.printStackTrace();
         }
       }
-      for (LinkedList list : inputEntry){
+      for (LinkedList list : inputEntry) {
         list.clear();
       }
-    }catch (Exception e){
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
   @Override public void finalizeListener() {
     processBuffer();
-    for(LeadsContinuousOperator operator : operators){
+    for (LeadsContinuousOperator operator : operators) {
       operator.finalizeOperator();
     }
     operators.clear();
     inputEntry.clear();
-    try{
-      ensembleCacheManager.stop();
-    }catch (Exception e){
-      e.printStackTrace();
-    }
-  }
-
-
-  @CacheEntryCreated
-  @Override
-  public void entryCreated(CacheEntryCreatedEvent event){
     try {
-      if (event.isPre()) {
-        return;
-      }
-      if (event.isCommandRetried())
-        return;
-      if (!event.isOriginLocal())
-        return;
-//      log.error("process key " + event.getKey().toString());
-//      System.out.println("process key " + event.getKey().toString());
-
-      EventTriplet triplet = new EventTriplet(EventType.CREATED, event.getKey(), event.getValue());
-      synchronized (queueMutex) {
-        eventQueue.add(triplet);
-        queueMutex.notify();
-      }
-    }catch (Exception e){
+      ensembleCacheManager.stop();
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  @CacheEntryModified
-  @Override
-  public void entryModified(CacheEntryModifiedEvent event){
-    try{
-//      log.error("process key " + event.getKey().toString());
-      if(event.isPre()){
-        return;
-      }
-      if(event.isCreated())
-        return;
-      if(event.isCommandRetried())
-        return;
-      if(!event.isOriginLocal())
-        return;
-      EventTriplet triplet = new EventTriplet(EventType.MODIFIED,event.getKey(),event.getValue());
-      synchronized (queueMutex){
-        eventQueue.add(triplet);
-        queueMutex.notify();
-      }
-    }catch (Exception e){
-      e.printStackTrace();
-    }
-  }
 
-  @CacheEntryRemoved
-  @Override
-  public void entryModified(CacheEntryRemovedEvent event){
-    try{
-      if(event.isCommandRetried())
-        return;
-      if(!event.isOriginLocal())
-        return;
-//      System.out.println("process key " + event.getKey().toString());
-//      log.error("process key " + event.getKey().toString());
-      if(event.isPre()){
-        return;
-      }
-      EventTriplet triplet = new EventTriplet(EventType.REMOVED,event.getKey(),event.getOldValue());
-      synchronized (queueMutex){
-        eventQueue.add(triplet);
-        queueMutex.notify();
-      }
-    }catch (Exception e){
-      e.printStackTrace();
-    }
-  }
+  //  @CacheEntryCreated @Override public void entryCreated(CacheEntryCreatedEvent event) {
+  //    try {
+  //      if (event.isPre()) {
+  //        return;
+  //      }
+  //      if (event.isCommandRetried())
+  //        return;
+  //      if (!event.isOriginLocal())
+  //        return;
+  //      //      log.error("process key " + event.getKey().toString());
+  //      //      System.out.println("process key " + event.getKey().toString());
+  //
+  //      EventTriplet triplet = new EventTriplet(EventType.CREATED, event.getKey(), event.getValue());
+  //      synchronized (queueMutex) {
+  //        eventQueue.add(triplet);
+  //        queueMutex.notify();
+  //      }
+  //    } catch (Exception e) {
+  //      e.printStackTrace();
+  //    }
+  //  }
+  //
+  //  @CacheEntryModified @Override public void entryModified(CacheEntryModifiedEvent event) {
+  //    try {
+  //      //      log.error("process key " + event.getKey().toString());
+  //      if (event.isPre()) {
+  //        return;
+  //      }
+  //      if (event.isCreated())
+  //        return;
+  //      if (event.isCommandRetried())
+  //        return;
+  //      EventTriplet triplet = new EventTriplet(EventType.MODIFIED, event.getKey(), event.getValue());
+  //      synchronized (queueMutex) {
+  //        eventQueue.add(triplet);
+  //        queueMutex.notify();
+  //      }
+  //    } catch (Exception e) {
+  //      e.printStackTrace();
+  //    }
+  //  }
+  //
+  //  @CacheEntryRemoved @Override public void entryModified(CacheEntryRemovedEvent event) {
+  //    try {
+  //      if (event.isCommandRetried())
+  //        return;
+  //      //      System.out.println("process key " + event.getKey().toString());
+  //      //      log.error("process key " + event.getKey().toString());
+  //      if (event.isPre()) {
+  //        return;
+  //      }
+  //      EventTriplet triplet = new EventTriplet(EventType.REMOVED, event.getKey(), event.getOldValue());
+  //      synchronized (queueMutex) {
+  //        eventQueue.add(triplet);
+  //        queueMutex.notify();
+  //      }
+  //    } catch (Exception e) {
+  //      e.printStackTrace();
+  //    }
+  //  }
 }

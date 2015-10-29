@@ -11,16 +11,15 @@ import com.fasterxml.jackson.databind.util.StdConverter;
  * To change this template use File | Settings | File Templates.
  */
 public class MathTreeOperatorConverter extends StdConverter<JsonNode, FilterOperatorTree> {
-    @Override
-    public FilterOperatorTree convert(JsonNode value) {
-        return null;
-    }
+  @Override public FilterOperatorTree convert(JsonNode value) {
+    return null;
+  }
 
-//    @Override
-//    public MathOperatorTree convert(JsonNode jsonNode) {
-//        MathOperatorTreeNode root;
-//        MathTreeOperatorNodeConverter converter = new MathTreeOperatorNodeConverter();
-//        root = converter.convert(jsonNode.path("root"));
-//        return new MathOperatorTree(root);
-//    }
+  //    @Override
+  //    public MathOperatorTree convert(JsonNode jsonNode) {
+  //        MathOperatorTreeNode root;
+  //        MathTreeOperatorNodeConverter converter = new MathTreeOperatorNodeConverter();
+  //        root = converter.convert(jsonNode.path("root"));
+  //        return new MathOperatorTree(root);
+  //    }
 }

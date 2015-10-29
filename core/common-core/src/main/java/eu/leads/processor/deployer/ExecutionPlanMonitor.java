@@ -329,4 +329,16 @@ public class ExecutionPlanMonitor {
   public PlanNode getNode(String nodeId){
     return plan.getNode(nodeId);
   }
+
+  public PlanNode getNodeByType(LeadsNodeType type) {
+    PlanNode result = null;
+    JsonObject planNodes = plan.getPlanGraph();
+    for(String nodeId : planNodes.getFieldNames()) {
+      PlanNode node = plan.getNode(nodeId);
+      if (node.getNodeType().equals(type)) {
+          result = node;
+      }
+    }
+    return result;
+  }
 }

@@ -2,129 +2,121 @@ package eu.leads.processor.infinispan.operators;
 
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.utils.storage.LeadsStorage;
-import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
-import eu.leads.processor.infinispan.*;
+import eu.leads.processor.infinispan.GenericLocalReducerCallable;
+import eu.leads.processor.infinispan.GenericMapperCallable;
+import eu.leads.processor.infinispan.GenericReducerCallable;
+import eu.leads.processor.infinispan.LeadsCollector;
 import org.infinispan.Cache;
 import org.infinispan.commons.api.BasicCache;
-import org.infinispan.distexec.DefaultExecutorService;
-import org.infinispan.distexec.DistributedExecutorService;
-import org.infinispan.distexec.DistributedTask;
-import org.infinispan.distexec.DistributedTaskBuilder;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.ByteArrayOutputStream;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by vagvaz on 3/31/15.
  */
 public class GenericMapReduceOperator extends MapReduceOperator {
-   public GenericMapReduceOperator(Node com, InfinispanManager persistence, LogProxy log, Action action, LeadsStorage storage) {
-      super(com, persistence, log, action);
-      conf.putString("storageType", storage.getStorageType());
-      ByteArrayOutputStream storageConfigurationStream = new ByteArrayOutputStream();
-      try {
-         storage.getConfiguration().store(storageConfigurationStream, "");
-      } catch (Exception e) {
-         e.printStackTrace();
-      }
-      conf.putBinary("storageConfiguration", storageConfigurationStream.toByteArray());
-   }
+  public GenericMapReduceOperator(Node com, InfinispanManager persistence, LogProxy log, Action action,
+      LeadsStorage storage) {
+    super(com, persistence, log, action);
+    conf.putString("storageType", storage.getStorageType());
+    ByteArrayOutputStream storageConfigurationStream = new ByteArrayOutputStream();
+    try {
+      storage.getConfiguration().store(storageConfigurationStream, "");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    conf.putBinary("storageConfiguration", storageConfigurationStream.toByteArray());
+  }
 
-   @Override
-   public void init(JsonObject config) {
-      super.init(config);
+  @Override public void init(JsonObject config) {
+    super.init(config);
 
-      //Read Mapper class
-      //read mapjar path
-      //read reducer class
-      //read reducer path
-      //read Config path or //read config
-      //Storage //storagetype
-      //tmpdir prefix
+    //Read Mapper class
+    //read mapjar path
+    //read reducer class
+    //read reducer path
+    //read Config path or //read config
+    //Storage //storagetype
+    //tmpdir prefix
 
-   }
+  }
 
-   @Override public String getContinuousListenerClass() {
-      return null;
-   }
+  @Override public String getContinuousListenerClass() {
+    return null;
+  }
 
 
-   @Override public void setupMapCallable() {
-      conf.putString("output",getOutput());
-      inputCache = (Cache) manager.getPersisentCache(inputCacheName);
-      //    intermediateCache = (BasicCache) manager.getPersisentCache(intermediateCacheName);
-      //create Intermediate cache name for data on the same Sites as outputCache
-      //    intermediateDataCache = (BasicCache) manager.getPersisentCache(intermediateCacheName+".data");
-      //create Intermediate  keys cache name for data on the same Sites as outputCache;
-      //    keysCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".keys");
-      //createIndexCache for getting all the nodes that contain values with the same key! in a mc
-      //    indexSiteCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".indexed");
-      //    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
-      //    outputCache = (BasicCache) manager.getPersisentCache(outputCacheName);
-      //    reduceInputCache = (Cache) keysCache;
-      //vagvaz    collector = new LeadsCollector(0, intermediateCacheName);
-      //vagvaz    mapperCallable = new LeadsMapperCallable((Cache) inputCache,collector,mapper,
-      //vagvaz                                   LQPConfiguration.getInstance().getMicroClusterName());
-      if (reduceLocal) {
-         collector = new LeadsCollector(1000, intermediateLocalCacheName);
-      } else {
-         collector = new LeadsCollector(1000, intermediateCacheName);
-      }
-      mapperCallable = new GenericMapperCallable(intermediateCacheName,conf.toString());
-      ////                                                   ((Cache) inputCache,collector,mapper,
-      ////                                                                          LQPConfiguration.getInstance().getMicroClusterName());
-   }
+  @Override public void setupMapCallable() {
+    conf.putString("output", getOutput());
+    inputCache = (Cache) manager.getPersisentCache(inputCacheName);
+    //    intermediateCache = (BasicCache) manager.getPersisentCache(intermediateCacheName);
+    //create Intermediate cache name for data on the same Sites as outputCache
+    //    intermediateDataCache = (BasicCache) manager.getPersisentCache(intermediateCacheName+".data");
+    //create Intermediate  keys cache name for data on the same Sites as outputCache;
+    //    keysCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".keys");
+    //createIndexCache for getting all the nodes that contain values with the same key! in a mc
+    //    indexSiteCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".indexed");
+    //    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
+    //    outputCache = (BasicCache) manager.getPersisentCache(outputCacheName);
+    //    reduceInputCache = (Cache) keysCache;
+    //vagvaz    collector = new LeadsCollector(0, intermediateCacheName);
+    //vagvaz    mapperCallable = new LeadsMapperCallable((Cache) inputCache,collector,mapper,
+    //vagvaz                                   LQPConfiguration.getInstance().getMicroClusterName());
+    if (reduceLocal) {
+      collector = new LeadsCollector(1000, intermediateLocalCacheName);
+    } else {
+      collector = new LeadsCollector(1000, intermediateCacheName);
+    }
+    mapperCallable = new GenericMapperCallable(intermediateCacheName, conf.toString());
+    ////                                                   ((Cache) inputCache,collector,mapper,
+    ////                                                                          LQPConfiguration.getInstance().getMicroClusterName());
+  }
 
-   @Override public void setupReduceCallable() {
-      conf.putString("output", getOutput());
-      //    intermediateCache = (BasicCache) manager.getPersisentCache(intermediateCacheName);
-      //    log.error("ReducerIntermediate " + intermediateCache.size());
-      //create Intermediate cache name for data on the same Sites as outputCache
-      intermediateDataCache = (BasicCache) manager.getPersisentCache(intermediateCacheName+".data");
-      //    log.error("ReducerIntermediateData " + intermediateDataCache.size());
-      //create Intermediate  keys cache name for data on the same Sites as outputCache;
-      //    keysCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".keys");
-      //    log.error("ReducerIntermediateKeys " + keysCache.size());
-      //createIndexCache for getting all the nodes that contain values with the same key! in a mc
-      //    indexSiteCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".indexed");
-      //    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
-      //    log.error("ReducerIntermediateSite " + indexSiteCache.size());
-      outputCache = (BasicCache) manager.getPersisentCache(outputCacheName);
-      //    reduceInputCache = (Cache) keysCache;
-      collector = new LeadsCollector(0, outputCache.getName());
-      inputCache = (Cache) intermediateDataCache;
-      reduceInputCache = inputCache;
-      //    inputCache = (Cache) keysCache;
-      reducerCallable = new GenericReducerCallable(getOutput(),conf.toString());
-      ////                                                         (outputCache.getName(), reducer,
-      ////                                                                                 intermediateCacheName);
-   }
+  @Override public void setupReduceCallable() {
+    conf.putString("output", getOutput());
+    //    intermediateCache = (BasicCache) manager.getPersisentCache(intermediateCacheName);
+    //    log.error("ReducerIntermediate " + intermediateCache.size());
+    //create Intermediate cache name for data on the same Sites as outputCache
+    intermediateDataCache = (BasicCache) manager.getPersisentCache(intermediateCacheName + ".data");
+    //    log.error("ReducerIntermediateData " + intermediateDataCache.size());
+    //create Intermediate  keys cache name for data on the same Sites as outputCache;
+    //    keysCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".keys");
+    //    log.error("ReducerIntermediateKeys " + keysCache.size());
+    //createIndexCache for getting all the nodes that contain values with the same key! in a mc
+    //    indexSiteCache = (BasicCache)manager.getPersisentCache(intermediateCacheName+".indexed");
+    //    indexSiteCache = (BasicCache)manager.getIndexedPersistentCache(intermediateCacheName+".indexed");
+    //    log.error("ReducerIntermediateSite " + indexSiteCache.size());
+    outputCache = (BasicCache) manager.getPersisentCache(outputCacheName);
+    //    reduceInputCache = (Cache) keysCache;
+    collector = new LeadsCollector(0, outputCache.getName());
+    inputCache = (Cache) intermediateDataCache;
+    reduceInputCache = inputCache;
+    //    inputCache = (Cache) keysCache;
+    reducerCallable = new GenericReducerCallable(getOutput(), conf.toString());
+    ////                                                         (outputCache.getName(), reducer,
+    ////                                                                                 intermediateCacheName);
+  }
 
-   @Override
-   public void setupReduceLocalCallable() {
-      // TODO(ap0n): conf.putString("output", getOutput());
-      intermediateLocalDataCache = (BasicCache) manager.getPersisentCache(intermediateLocalCacheName
-          + ".data");
-      log.error("ReducerIntermediateLocalData " + intermediateLocalDataCache.size());
-      outputCache = (BasicCache) manager.getPersisentCache(intermediateCacheName);
-      reduceLocalInputCache = (Cache) intermediateLocalCache;
+  @Override public void setupReduceLocalCallable() {
+    // TODO(ap0n): conf.putString("output", getOutput());
+    intermediateLocalDataCache = (BasicCache) manager.getPersisentCache(intermediateLocalCacheName + ".data");
+    log.error("ReducerIntermediateLocalData " + intermediateLocalDataCache.size());
+    outputCache = (BasicCache) manager.getPersisentCache(intermediateCacheName);
+    reduceLocalInputCache = (Cache) intermediateLocalCache;
 
-      collector = new LeadsCollector(1000, outputCache.getName());
+    collector = new LeadsCollector(1000, outputCache.getName());
 
-      //         reducerLocalCallable = new LeadsLocalReducerCallable(outputCache.getName(), localReducer,
-      //             intermediateLocalCacheName, LQPConfiguration
-      //             .getInstance().getMicroClusterName());
-      reducerLocalCallable = new GenericLocalReducerCallable(outputCache.getName(),conf.toString());
-      System.err.println("reduInput " + reduceLocalInputCache.size());
-      combiner = null;
-   }
+    //         reducerLocalCallable = new LeadsLocalReducerCallable(outputCache.getName(), localReducer,
+    //             intermediateLocalCacheName, LQPConfiguration
+    //             .getInstance().getMicroClusterName());
+    reducerLocalCallable = new GenericLocalReducerCallable(outputCache.getName(), conf.toString());
+    System.err.println("reduInput " + reduceLocalInputCache.size());
+    combiner = null;
+  }
 }
 //   @Override
 //   public void run() {

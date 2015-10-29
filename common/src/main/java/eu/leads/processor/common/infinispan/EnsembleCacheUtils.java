@@ -567,4 +567,16 @@ public class EnsembleCacheUtils {
             }
         }
     }
+
+    public static Object getFromCache(EnsembleCache ensembleCache, String key) {
+        Object result = null;
+        for(Object s : ensembleCache.sites()){
+            BasicCache siteCache  = ((Site)s).getManager().getCache(ensembleCache.getName());
+            result = siteCache.get(key);
+            if(result != null) {
+                return result;
+            }
+        }
+        return result;
+    }
 }

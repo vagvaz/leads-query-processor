@@ -14,7 +14,6 @@ import eu.leads.processor.math.FilterOperatorTree;
 import eu.leads.processor.math.MathUtils;
 import org.infinispan.Cache;
 import org.infinispan.ensemble.EnsembleCacheManager;
-import org.infinispan.ensemble.Site;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -28,32 +27,31 @@ import java.util.Set;
  */
 public class ScanOperator extends BasicOperator {
 
-	boolean joinOperator;
-	boolean groupByOperator;
-	boolean sortOperator;
+  boolean joinOperator;
+  boolean groupByOperator;
+  boolean sortOperator;
 
-	public ScanOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
-		super(com, persistence, log, action);
-	}
+  public ScanOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
+    super(com, persistence, log, action);
+  }
 
-	//  public FilterOperator(PlanNode node) {
-	//      super(node, OperatorType.FILTER);
-	//  }
+  //  public FilterOperator(PlanNode node) {
+  //      super(node, OperatorType.FILTER);
+  //  }
 
 
-	@Override
-	public void init(JsonObject config) {
-		inputCache = (Cache) manager.getPersisentCache(getInput());
-		if (conf.containsField("next")) {
-			if (conf.getString("next.type").equals(LeadsNodeType.GROUP_BY.toString())) {
-				groupByOperator = true;//new GroupByOperator(this.com,this.manager,this.log,this.action);
-				//            PlanNode node = new PlanNode(conf.getObject("next").asObject());
-				//            groupByOperator.setIntermediateCacheName(node.getNodeId()+".intermediate");
-				//            groupByOperator.init(conf.getObject("next").getObject("configuration"));
-			} else if (conf.getString("next.type").equals(LeadsNodeType.JOIN.toString())) {
-//        if(conf.getObject("next").containsField("buildBloom")){
-//          conf.getObject("next").getObject("configuration").putObject("buildBloom",conf.getObject("next").getObject("buildBloom"));
-//        }
+  @Override public void init(JsonObject config) {
+    inputCache = (Cache) manager.getPersisentCache(getInput());
+    if (conf.containsField("next")) {
+      if (conf.getString("next.type").equals(LeadsNodeType.GROUP_BY.toString())) {
+        groupByOperator = true;//new GroupByOperator(this.com,this.manager,this.log,this.action);
+        //            PlanNode node = new PlanNode(conf.getObject("next").asObject());
+        //            groupByOperator.setIntermediateCacheName(node.getNodeId()+".intermediate");
+        //            groupByOperator.init(conf.getObject("next").getObject("configuration"));
+      } else if (conf.getString("next.type").equals(LeadsNodeType.JOIN.toString())) {
+        //        if(conf.getObject("next").containsField("buildBloom")){
+        //          conf.getObject("next").getObject("configuration").putObject("buildBloom",conf.getObject("next").getObject("buildBloom"));
+        //        }
         joinOperator = true;// new JoinOperator(this.com,this.manager,this.log,this.action);
         //            PlanNode node = new PlanNode(conf.getObject("next").asObject());
         //            joinOperator.setIntermediateCacheName(node.getNodeId()+".intermediate");
@@ -209,32 +207,31 @@ public class ScanOperator extends BasicOperator {
   }
 
 
-  @Override
-  public void cleanup() {
-    if(conf.containsField("next")){
-      if(conf.getObject("next").getObject("configuration").containsField("buildBloomFilter")){
+  @Override public void cleanup() {
+    if (conf.containsField("next")) {
+      if (conf.getObject("next").getObject("configuration").containsField("buildBloomFilter")) {
         System.err.println("Building centralized BF");
         JsonObject bloomFilter = conf.getObject("next").getObject("configuration").getObject("buildBloomFilter");
-        Cache<String,BloomFilter> bloomCache = (Cache) manager.getPersisentCache(bloomFilter.getString("bloomCache"));
+        Cache<String, BloomFilter> bloomCache = (Cache) manager.getPersisentCache(bloomFilter.getString("bloomCache"));
         BloomFilter centralized = null;
-        for(String key : bloomCache.keySet()){
+        for (String key : bloomCache.keySet()) {
           System.err.println("NODE BF: " + key);
-          if(centralized == null){
+          if (centralized == null) {
             centralized = bloomCache.get(key);
-          }
-          else{
+          } else {
             centralized.putAll(bloomCache.get(key));
           }
           bloomCache.remove(key);
         }
 
         Set<String> set = getMicroCloudsFromOpTarget();
-        for(String mc : set) {
-          EnsembleCacheManager tmpmanager = new EnsembleCacheManager(globalConfig.getObject("componentsAddrs").getArray(mc).get(0).toString());
+        for (String mc : set) {
+          EnsembleCacheManager tmpmanager =
+              new EnsembleCacheManager(globalConfig.getObject("componentsAddrs").getArray(mc).get(0).toString());
           EnsembleCache ensembleBloomCache = tmpmanager.getCache(bloomFilter.getString("bloomCache"));
           ensembleBloomCache.put(LQPConfiguration.getInstance().getMicroClusterName(), centralized);
         }
-      } else if (conf.getObject("next").getObject("configuration").containsField("useBloomFilter")){
+      } else if (conf.getObject("next").getObject("configuration").containsField("useBloomFilter")) {
         JsonObject bloomFilter = conf.getObject("next").getObject("configuration").getObject("useBloomFilter");
         manager.removePersistentCache(bloomFilter.getString("bloomCache"));
 
@@ -245,14 +242,12 @@ public class ScanOperator extends BasicOperator {
     super.cleanup();
   }
 
-  @Override
-  public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
+  @Override public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
     Set<String> targetMC = getTargetMC();
     for (String mc : targetMC) {
       if (!conf.containsField("next")) {
-        createCache(mc,getOutput(),"batchputListener");
-      }
-      else {
+        createCache(mc, getOutput(), "batchputListener");
+      } else {
         createCache(mc, getOutput() + ".data", "localIndexListener:batchputListener");
         if (conf.containsField("next")) {
           if (conf.getObject("next").containsField("buildBloomFilter")) {
@@ -270,15 +265,13 @@ public class ScanOperator extends BasicOperator {
     return null;
   }
 
-  @Override
-  public void setupMapCallable() {
+  @Override public void setupMapCallable() {
     inputCache = (Cache) manager.getPersisentCache(getInput());
     LeadsCollector collector = new LeadsCollector<>(0, getOutput());
     mapperCallable = new ScanCallableUpdate<>(conf.toString(), getOutput(), collector);
   }
 
-  @Override
-  public String getOutput() {
+  @Override public String getOutput() {
     String result = super.getOutput();
     if (groupByOperator) {
       result = conf.getObject("next").getString("id") + ".intermediate";
@@ -292,13 +285,11 @@ public class ScanOperator extends BasicOperator {
     return result;
   }
 
-  @Override
-  public void setupReduceCallable() {
+  @Override public void setupReduceCallable() {
 
   }
 
-  @Override
-  public boolean isSingleStage() {
+  @Override public boolean isSingleStage() {
     return true;
   }
 
@@ -342,7 +333,8 @@ public class ScanOperator extends BasicOperator {
 
       FilterOperatorTree tree = new FilterOperatorTree(conf.getObject("body").getObject("qual"));
       Object selectvt = getSelectivity(sketches, tree.getRoot());
-      System.out.println("  selectvt CMS " + selectvt + "  computation time: " + (System.currentTimeMillis() - start) / 1000.0);
+      System.out.println(
+          "  selectvt CMS " + selectvt + "  computation time: " + (System.currentTimeMillis() - start) / 1000.0);
       long inputSize;
       if (selectvt != null) {
         start = System.currentTimeMillis();
@@ -354,13 +346,14 @@ public class ScanOperator extends BasicOperator {
           System.out.print("Size not found, Slow Get size() ");
           inputSize = inputCache.size();
           System.out.println("... Caching size value.");
-          sizeC.put(columnName.substring(0, columnName.lastIndexOf(".")),inputSize);
+          sizeC.put(columnName.substring(0, columnName.lastIndexOf(".")), inputSize);
         }
         System.out.println(" Found size: " + inputSize);
 
         double selectivity = (double) selectvt / (double) inputSize;
         System.out.println("Scan  Selectivity: " + selectivity);
-        System.out.println("  Selectivity, inputSize " + inputSize + "  computation time: " + (System.currentTimeMillis() - start) / 1000.0);
+        System.out.println("  Selectivity, inputSize " + inputSize + "  computation time: "
+            + (System.currentTimeMillis() - start) / 1000.0);
 
         if (selectivity < 0.5) {
           System.out.println("Scan Use indexes!! ");
@@ -437,26 +430,26 @@ public class ScanOperator extends BasicOperator {
           return collumnName;
 
         }
-        System.out.println(" no sketch " );
+        System.out.println(" no sketch ");
         return null;
       //break;
 
       case CONST:
         JsonObject datum = root.getValueAsJson().getObject("body").getObject("datum");
         String type = datum.getObject("body").getString("type");
-        Number ret=0;// = MathUtils.getTextFrom(root.getValueAsJson());
+        Number ret = 0;// = MathUtils.getTextFrom(root.getValueAsJson());
         //System.out.println("Operator Found datum: " + datum.toString());
 
         try {
           if (type.equals("TEXT"))
-            return  MathUtils.getTextFrom(root.getValueAsJson());
+            return MathUtils.getTextFrom(root.getValueAsJson());
           else {
             Number a = datum.getObject("body").getNumber("val");
             if (a != null)
               return a;
           }
         } catch (Exception e) {
-          System.err.print("Error " + ret + " to type " + type +"" + e.getMessage());
+          System.err.print("Error " + ret + " to type " + type + "" + e.getMessage());
         }
         return null;
       case LTH:

@@ -66,6 +66,7 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
     PutObjectHandler putObjectHandler = new PutObjectHandler(com, log);
     GetQueryStatusHandler getQueryStatusHandler = new GetQueryStatusHandler(com, log);
     GetResultsHandler getResultsHandler = new GetResultsHandler(com, log);
+    Handler<HttpServerRequest> getWebResultsHandler = new GetWebResultsHandler(com, log);
     Handler<HttpServerRequest> submitWorkflowHandler = new SubmitWorkflowHandler(com, log);
     Handler<HttpServerRequest> submitDataHandler = new SubmitPluginHandler(com, log);
 
@@ -125,6 +126,7 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
     matcher.get("/rest/query/status/:id", getQueryStatusHandler);
     //      //id:[a-zA-Z0-9]+@[a-zA-Z0-9]+}/{min:[0-9]+}/{max:[0-9]+}
     matcher.get("/rest/query/results/:id/min/:min/max/:max", getResultsHandler);
+    matcher.get("/rest/query/webresults/:id/", getWebResultsHandler);
     matcher.post("/rest/query/submit", submitQueryHandler);
     matcher.post("/rest/workflow/submit", submitWorkflowHandler);
     matcher.post("/rest/data/submit", submitDataHandler);

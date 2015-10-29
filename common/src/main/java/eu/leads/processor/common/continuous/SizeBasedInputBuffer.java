@@ -3,7 +3,6 @@ package eu.leads.processor.common.continuous;
 import com.google.common.cache.RemovalListener;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -14,17 +13,19 @@ public class SizeBasedInputBuffer implements InputBuffer {
   private int maximumSize;
   private RemovalListener listener;
 
-  public SizeBasedInputBuffer(int maximumSize){
+  public SizeBasedInputBuffer(int maximumSize) {
     this.maximumSize = maximumSize;
     data = new HashMap(maximumSize);
   }
+
   @Override public boolean add(Object key, Object value) {
-    data.put(key,value);
+    data.put(key, value);
     return isOverflown();
   }
 
   private boolean isOverflown() {
-    return data.size() >= maximumSize;
+    return true;
+//    return data.size() >= maximumSize;
   }
 
   @Override public boolean remove(Object key) {
@@ -33,7 +34,7 @@ public class SizeBasedInputBuffer implements InputBuffer {
   }
 
   @Override public boolean modify(Object key, Object value) {
-    return this.add(key,value);
+    return this.add(key, value);
   }
 
   @Override public boolean isEmpty() {
@@ -56,8 +57,10 @@ public class SizeBasedInputBuffer implements InputBuffer {
     return null;
   }
 
-  @Override public Iterator iterator() {
-    return data.entrySet().iterator();
+  @Override public Map getMapAndReset() {
+    Map result = data;
+    data = new HashMap();
+    return result;
   }
 
   @Override public void clear() {
@@ -66,7 +69,7 @@ public class SizeBasedInputBuffer implements InputBuffer {
 
   @Override public Map reset() {
     Map result = data;
-    data  = new HashMap(maximumSize);
+    data = new HashMap(maximumSize);
     return result;
   }
 }

@@ -7,59 +7,55 @@ import java.io.Serializable;
 /**
  * Created by angelos on 11/02/15.
  */
-@Indexed
-public class LeadsIndexDouble implements Serializable, LeadsIndex {
-//    @Field(index= Index.NO, analyze= Analyze.NO, store= Store.YES)
-//    private String cacheName;
-//    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
-//    private String  attributeName;
-    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES) @NumericField
-    private Double attributeValue;
-    @Field(index= Index.NO, analyze= Analyze.NO, store= Store.YES)
-    private String keyName;
+@Indexed public class LeadsIndexDouble implements Serializable, LeadsIndex {
+  //    @Field(index= Index.NO, analyze= Analyze.NO, store= Store.YES)
+  //    private String cacheName;
+  //    @Field(index= Index.YES, analyze= Analyze.NO, store= Store.YES)
+  //    private String  attributeName;
+  @Field(index = Index.YES, analyze = Analyze.NO, store = Store.YES) @NumericField private Double attributeValue;
+  @Field(index = Index.NO, analyze = Analyze.NO, store = Store.YES) private String keyName;
 
-    public LeadsIndexDouble(){
+  public LeadsIndexDouble() {
 
-    }
+  }
 
-    public void setCacheName(String cacheName) {
-        ;//this.cacheName = cacheName;
-    }
+  public void setCacheName(String cacheName) {
+    ;//this.cacheName = cacheName;
+  }
 
-    public void setKeyName(String keyName) {
-        this.keyName = keyName;
-    }
+  public void setKeyName(String keyName) {
+    this.keyName = keyName;
+  }
 
-    public void setAttributeName(String attributeName) {
-        ;//this.attributeName = attributeName;
-    }
+  public void setAttributeName(String attributeName) {
+    ;//this.attributeName = attributeName;
+  }
 
-    public void setAttributeValue(Object attributeValue) {
-        this.attributeValue = (Double) attributeValue;
-    }
+  public void setAttributeValue(Object attributeValue) {
+    this.attributeValue = (Double) attributeValue;
+  }
 
-    public String getCacheName() {
-        return ""; // cacheName;
-    }
+  public String getCacheName() {
+    return ""; // cacheName;
+  }
 
-    public String getKeyName() {
-        return keyName;
-    }
+  public String getKeyName() {
+    return keyName;
+  }
 
-    public String getAttributeName() {
-        return ""; // attributeName;
-    }
+  public String getAttributeName() {
+    return ""; // attributeName;
+  }
 
-    public Object getAttributeValue() {
-        return attributeValue;
-    }
-    @Override
-    public boolean equals(LeadsIndex anObject) {
-        return keyName.equals(anObject.getKeyName());
-    }
+  public Object getAttributeValue() {
+    return attributeValue;
+  }
 
-    @Override
-    public int hashCode() {
-        return keyName.hashCode();
-    }
+  @Override public boolean equals(LeadsIndex anObject) {
+    return keyName.equals(anObject.getKeyName());
+  }
+
+  @Override public int hashCode() {
+    return keyName.hashCode();
+  }
 }

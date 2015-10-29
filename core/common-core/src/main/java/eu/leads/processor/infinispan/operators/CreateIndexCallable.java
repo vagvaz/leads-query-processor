@@ -33,16 +33,16 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
   transient Logger profilerLog;
   private ProfileEvent fullProcessing;
   transient ArrayList<Cache> indexCaches;
-  transient int printStackTraceCnt=0;
+  transient int printStackTraceCnt = 0;
   transient ArrayList<DistCMSketch> sketches;
-  transient LeadsIndexHelper lindHelp ;
+  transient LeadsIndexHelper lindHelp;
   int counter = 0;
+
   public CreateIndexCallable(String configString, String output) {
     super(configString, output);
   }
 
-  @Override
-  public void initialize() {
+  @Override public void initialize() {
     super.initialize();
     profilerLog = LoggerFactory.getLogger("###PROF###" + this.getClass().toString());
     System.out.println("Emanager has " + emanager.sites().size() + " sites");
@@ -52,7 +52,7 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
 
     IndexName = newExpr.getIndexName();
     if (IndexName.isEmpty())
-      IndexName = "noname"+UUID.randomUUID();
+      IndexName = "noname" + UUID.randomUUID();
 
     tableName = (((Relation) ((Projection) newExpr.getChild()).getChild())).getName();
     Sort.SortSpec[] collumns = newExpr.getSortSpecs();
@@ -65,8 +65,8 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
 
     System.out.println(" TableName: " + tableName);
     tableName = StringConstants.DEFAULT_DATABASE_NAME + "." + tableName;
-    for(String s : columnNames){
-      fullColumnNames.add(tableName+"."+s);
+    for (String s : columnNames) {
+      fullColumnNames.add(tableName + "." + s);
     }
     System.out.println(" TableName: " + tableName);
 
@@ -76,7 +76,7 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
     //fix IndexName
     Cache<String, String> allIndexes = (Cache) imanager.getPersisentCache("allIndexes");
     for (String column : columnNames) {
-      System.out.println("Saving Index name: " + IndexName +" for cache " + tableName + "." + column);
+      System.out.println("Saving Index name: " + IndexName + " for cache " + tableName + "." + column);
       allIndexes.put(IndexName, tableName + "." + column);
     }
 
@@ -86,7 +86,7 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
       System.out.println("Creating Index Caches, column " + tableName + "." + columnNames.get(c));
       indexCaches.add((Cache) imanager.getIndexedPersistentCache(tableName + "." + columnNames.get(c)));
       System.out.println("Creating DistCMSketch " + tableName + "." + columnNames.get(c) + ".sketch");
-      sketches.add(new DistCMSketch(null,false));
+      sketches.add(new DistCMSketch(null, false));
     }
     inputCache = (Cache) imanager.getPersisentCache(tableName);
 
@@ -107,13 +107,12 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
     return false;
   }
 
-  @Override
-  public void executeOn(K key, V ivalue) {
+  @Override public void executeOn(K key, V ivalue) {
     counter++;
-    if(counter % 10000 == 0){
+    if (counter % 10000 == 0) {
       Thread.yield();
       try {
-        if(counter % 100000 == 0) {
+        if (counter % 100000 == 0) {
           log.error("sleeping after " + counter);
         }
         Thread.sleep(150);
@@ -133,18 +132,18 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
         String column = fullColumnNames.get(c);  // tableName + '.' + columnNames.get(c);
         LeadsIndex lInd = lindHelp.CreateLeadsIndex(value.getGenericAttribute(column), ikey, column, tableName);
         //putToCacheDirect(indexCaches.get(c), ikey, lInd);
-        indexCaches.get(c).getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL,Flag.IGNORE_RETURN_VALUES).put(ikey, lInd);
+        indexCaches.get(c).getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL, Flag.IGNORE_RETURN_VALUES)
+            .put(ikey, lInd);
         sketches.get(c).add(value.getGenericAttribute(column));
       }
-    }
-    catch (Exception e){
-      if(e instanceof InterruptedException){
+    } catch (Exception e) {
+      if (e instanceof InterruptedException) {
         profilerLog.error("Got Interrupted");
         throw e;
       }
       System.err.println(" Ex " + key + " " + e.toString());
-      if((printStackTraceCnt++%1000)==0) {
-        System.err.println("StackTraces "+printStackTraceCnt);
+      if ((printStackTraceCnt++ % 1000) == 0) {
+        System.err.println("StackTraces " + printStackTraceCnt);
         e.printStackTrace();
       }
     }
@@ -152,19 +151,19 @@ public class CreateIndexCallable<K, V> extends LeadsSQLCallable<K, V> implements
     //createIndexExecute.end();
   }
 
-  @Override
-  public void finalizeCallable() {
+  @Override public void finalizeCallable() {
     try {
-      Cache<String,Object> sketchesM=  (Cache)imanager.getPersisentCache("sketchMerge");
+      Cache<String, Object> sketchesM = (Cache) imanager.getPersisentCache("sketchMerge");
       for (int c = 0; c < columnNames.size(); c++) {
-        sketches.get(c).storeAsObject(sketchesM,  embeddedCacheManager.getAddress().toString()+":"+columnNames.get(c)+":");
+        sketches.get(c)
+            .storeAsObject(sketchesM, embeddedCacheManager.getAddress().toString() + ":" + columnNames.get(c) + ":");
       }
       fullProcessing.end();
       super.finalizeCallable();
-    }catch (Exception e){
-      System.err.println(" Ex "+ e.toString());
-      if((printStackTraceCnt++%1000)==0) {
-        System.err.println("StackTraces "+printStackTraceCnt);
+    } catch (Exception e) {
+      System.err.println(" Ex " + e.toString());
+      if ((printStackTraceCnt++ % 1000) == 0) {
+        System.err.println("StackTraces " + printStackTraceCnt);
         e.printStackTrace();
       }
     }

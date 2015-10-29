@@ -16,13 +16,13 @@ import java.util.Map;
 /**
  * Created by vagvaz on 2/20/15.
  */
-public class JoinCallableUpdated<K,V> extends LeadsSQLCallable<K,V> {
-  transient  protected JsonObject joinQual;
+public class JoinCallableUpdated<K, V> extends LeadsSQLCallable<K, V> {
+  transient protected JsonObject joinQual;
   transient protected String tableName;
   transient protected String otherTableName;
   transient protected Cache outerCache;
   transient protected FilterOperatorTree tree;
-  transient protected Map<String,List<Tuple>> groups;
+  transient protected Map<String, List<Tuple>> groups;
   protected String configString;
   protected String output;
   protected boolean left;
@@ -30,7 +30,8 @@ public class JoinCallableUpdated<K,V> extends LeadsSQLCallable<K,V> {
   protected String outerColumn;
   protected final String outerCacheName;
   protected Logger log = org.slf4j.LoggerFactory.getLogger(JoinCallableUpdated.class);
-  public JoinCallableUpdated(String configString, String output,String outerCacheName,boolean left) {
+
+  public JoinCallableUpdated(String configString, String output, String outerCacheName, boolean left) {
     super(configString, output);
     this.outerCacheName = outerCacheName;
     this.left = left;
@@ -47,10 +48,10 @@ public class JoinCallableUpdated<K,V> extends LeadsSQLCallable<K,V> {
 
   @Override public void executeOn(K ikey, V ivalue) {
     CloseableIterable<Map.Entry<String, Tuple>> iterable = null;
-    try{
+    try {
       log.error("read tuple");
-//      Tuple current = new Tuple((String)inputCache.get(ikey));
-      Tuple current = (Tuple)ivalue;
+      //      Tuple current = new Tuple((String)inputCache.get(ikey));
+      Tuple current = (Tuple) ivalue;
       //          String columnValue = current.getGenericAttribute(innerColumn).toString();
       String key = (String) ikey;
       String currentKey = key.substring(key.indexOf(":") + 1);
@@ -66,11 +67,10 @@ public class JoinCallableUpdated<K,V> extends LeadsSQLCallable<K,V> {
       //        ignoreColumns.add(innerColumn);
       //        ignoreColumns.add(outerColumn);
       String prefix = output + ":";
-    log.error("start iteratorble");
-      iterable =
-        outerCache.getAdvancedCache().filterEntries(new QualFilter(tree.getJson().toString()));
+      log.error("start iteratorble");
+      iterable = outerCache.getAdvancedCache().filterEntries(new QualFilter(tree.getJson().toString()));
       for (Map.Entry<String, Tuple> outerEntry : iterable) {
-//        Tuple outerTuple = new Tuple(outerEntry.getValue());
+        //        Tuple outerTuple = new Tuple(outerEntry.getValue());
         Tuple outerTuple = outerEntry.getValue();
         log.error("join tuples");
         Tuple resultTuple = new Tuple(current, outerTuple, ignoreColumns);
@@ -83,12 +83,12 @@ public class JoinCallableUpdated<K,V> extends LeadsSQLCallable<K,V> {
       }
       iterable.close();
 
-    }catch (Exception e) {
-      if(iterable != null)
+    } catch (Exception e) {
+      if (iterable != null)
         iterable.close();
-      System.err.println("Iterating over " + outerCacheName
-                           + " for batch resulted in Exception " + e.getClass().toString()  + "\n"
-                           + e.getMessage() + "\n from  " + outerCacheName);
+      System.err.println(
+          "Iterating over " + outerCacheName + " for batch resulted in Exception " + e.getClass().toString() + "\n" + e
+              .getMessage() + "\n from  " + outerCacheName);
     }
   }
 

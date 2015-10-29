@@ -1,9 +1,7 @@
 package eu.leads.processor.infinispan;
 
 import eu.leads.processor.common.continuous.BasicContinuousListener;
-import eu.leads.processor.common.LeadsRemovalListener;
 import eu.leads.processor.common.infinispan.InfinispanManager;
-import eu.leads.processor.core.Tuple;
 import eu.leads.processor.math.FilterOperatorTree;
 import org.vertx.java.core.json.JsonObject;
 
@@ -12,6 +10,7 @@ import org.vertx.java.core.json.JsonObject;
  */
 public class ScanCQLListener extends BasicContinuousListener {
   private transient FilterOperatorTree tree;
+
   public ScanCQLListener(JsonObject conf) {
 
   }
@@ -25,7 +24,7 @@ public class ScanCQLListener extends BasicContinuousListener {
   }
 
   @Override public void initialize(InfinispanManager manager, JsonObject conf) {
-    super.initialize(manager,conf);
+    super.initialize(manager, conf);
   }
 
   @Override protected void initializeContinuousListener(JsonObject conf) {

@@ -1,5 +1,6 @@
 package eu.leads.processor.plugins;
 
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import org.apache.avro.generic.GenericData;
 
@@ -39,7 +40,7 @@ public class NutchTransformer {
             List<String> links = new ArrayList<>();
             Map<String,String> mapLinks = ((Map<String,String>)wp.get("outlinks"));
             if(mapLinks!= null) {
-               for (String outlink : mapLinks.values()) {
+               for (String outlink : mapLinks.keySet()) {
                   links.add(outlink);
                }
             }
@@ -63,11 +64,15 @@ public class NutchTransformer {
          else if(entry.getValue().equals("url")) {
 //            tuple.setAttribute("default.webpages."+"url", wp.get(entry.getKey()));
             String url = (String) wp.get("url");
-            if(url.startsWith("http")){
+            if(url.startsWith("http") && LQPConfiguration.getInstance().getConfiguration().getBoolean("use.nutch.url",false)){
                url = transformUri(url);
             }
             tuple.setAttribute("default.webpages."+"url", url);
 
+         }
+         else if (entry.getValue().equals("domainName")){
+            String transforUri = transformUri((String) wp.get("url"));
+            tuple.setAttribute("default.webpages.domainName",transforUri.substring(0,transforUri.indexOf(":")));
          }
          else{
             tuple.setAttribute("default.webpages."+entry.getValue(),wp.get(entry.getKey()));

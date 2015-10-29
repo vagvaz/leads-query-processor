@@ -36,7 +36,7 @@ public class SortOperator extends BasicOperator {
   transient protected String[] sortColumns;
   transient protected Boolean[] asceding;
   transient protected String[] types;
-  transient  protected long rowcount = Long.MAX_VALUE;
+  transient protected long rowcount = Long.MAX_VALUE;
   String prefix;
   List<String> addresses;
 
@@ -45,43 +45,40 @@ public class SortOperator extends BasicOperator {
   }
 
 
-  private LeadsMapper<String,String,String,String> mapper;
+  private LeadsMapper<String, String, String, String> mapper;
 
 
-  public SortOperator(Node com, InfinispanManager persistence,LogProxy logg, Action action) {
+  public SortOperator(Node com, InfinispanManager persistence, LogProxy logg, Action action) {
     super(com, persistence, logg, action);
     JsonArray sortKeys = conf.getObject("body").getArray("sortKeys");
     Iterator<Object> sortKeysIterator = sortKeys.iterator();
     sortColumns = new String[sortKeys.size()];
     asceding = new Boolean[sortKeys.size()];
-    types = new  String[sortKeys.size()];
+    types = new String[sortKeys.size()];
     int counter = 0;
-    while(sortKeysIterator.hasNext()){
+    while (sortKeysIterator.hasNext()) {
       JsonObject sortKey = (JsonObject) sortKeysIterator.next();
       sortColumns[counter] = sortKey.getObject("sortKey").getString("name");
       asceding[counter] = sortKey.getBoolean("ascending");
       types[counter] = sortKey.getObject("sortKey").getObject("dataType").getString("type");
       counter++;
     }
-    if(conf.containsField("limit")){
+    if (conf.containsField("limit")) {
       rowcount = conf.getObject("limit").getObject("body").getLong("fetchFirstNum");
-    }
-    else{
-      rowcount = -1;
+    } else {
+      rowcount = Integer.MAX_VALUE;
     }
 
-    if(isRemote){
+    if (isRemote) {
       prefix = action.getData().getString("prefix");
-    }
-    else{
+    } else {
       prefix = UUID.randomUUID().toString();
       action.getData().putString("prefix", prefix);
     }
     addresses = new ArrayList<>();
   }
 
-  @Override
-  public void init(JsonObject config) {
+  @Override public void init(JsonObject config) {
     //        super.init(config); //fix set correctly caches names
     //fix configuration
     init_statistics(this.getClass().getCanonicalName());
@@ -91,20 +88,21 @@ public class SortOperator extends BasicOperator {
   public void ru2n() {
     long startTime = System.nanoTime();
     Cache inputCache = (Cache) this.manager.getPersisentCache(getInput());
-    Cache beforeMerge = (Cache)this.manager.getPersisentCache(getOutput()+".merge");
+    Cache beforeMerge = (Cache) this.manager.getPersisentCache(getOutput() + ".merge");
     Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
     DistributedExecutorService des = new DefaultExecutorService(inputCache);
     //     String prefix = UUID.randomUUID().toString();
-    SortCallableUpdated<String,Tuple> callable = new SortCallableUpdated(sortColumns,asceding,types,getOutput()+".merge",prefix,rowcount);
+    SortCallableUpdated<String, Tuple> callable =
+        new SortCallableUpdated(sortColumns, asceding, types, getOutput() + ".merge", prefix, rowcount);
     //      SortCallable callable = new SortCallable(sortColumns,asceding,types,getOutput()+".merge",UUID.randomUUID().toString());
-    DistributedTaskBuilder builder = des.createDistributedTaskBuilder( callable);
+    DistributedTaskBuilder builder = des.createDistributedTaskBuilder(callable);
     builder.timeout(1, TimeUnit.HOURS);
     DistributedTask task = builder.build();
-    for(Address cacheNodes : inputCache.getAdvancedCache().getRpcManager().getMembers()){
-      String tmpCacheName = prefix+"."+cacheNodes.toString();
+    for (Address cacheNodes : inputCache.getAdvancedCache().getRpcManager().getMembers()) {
+      String tmpCacheName = prefix + "." + cacheNodes.toString();
       manager.getPersisentCache(tmpCacheName);
     }
-    manager.getPersisentCache(prefix+"."+manager.getMemberName().toString());
+    manager.getPersisentCache(prefix + "." + manager.getMemberName().toString());
     List<Future<String>> res = des.submitEverywhere(task);
     List<String> addresses = new ArrayList<String>();
     try {
@@ -112,10 +110,8 @@ public class SortOperator extends BasicOperator {
         for (Future<?> result : res) {
           addresses.add((String) result.get());
         }
-        System.out.println("sort callable  Execution is done on " + addresses.get(addresses.size()-1));
-      }
-      else
-      {
+        System.out.println("sort callable  Execution is done on " + addresses.get(addresses.size() - 1));
+      } else {
         System.out.println("sort callable Execution not done");
       }
     } catch (InterruptedException e) {
@@ -126,7 +122,7 @@ public class SortOperator extends BasicOperator {
     //      Merge outputs
 
     //       Cache outputCache = (Cache) manager.getPersisentCache(getOutput());
-    for(String cacheName : addresses){
+    for (String cacheName : addresses) {
       manager.removePersistentCache(cacheName);
     }
     manager.removePersistentCache(beforeMerge.getName());
@@ -160,17 +156,15 @@ public class SortOperator extends BasicOperator {
     cleanup();
     //Store Values for statistics
     //      updateStatistics(inputCache.size(), manager.getPersisentCache(getOutput()).size(), System.nanoTime() - startTime);
-    updateStatistics(inputCache,null,outputCache);
+    updateStatistics(inputCache, null, outputCache);
   }
 
-  @Override
-  public void cleanup() {
+  @Override public void cleanup() {
     super.cleanup();
 
   }
 
-  @Override
-  public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
+  @Override public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
     //need to get the input Cache here because we need to get the nodes addresses in order to create the
     // necessary caches for the merge
     log.error("LGSORT: CREATE CACHES");
@@ -180,14 +174,14 @@ public class SortOperator extends BasicOperator {
       //         String prefix = action.getData().getObject("data").getString("prefix");
       for (Address cacheNodes : inputCache.getAdvancedCache().getRpcManager().getMembers()) {
         String tmpCacheName = prefix + "." + currentCluster + "." + cacheNodes.toString();
-        createCache(coordinator, tmpCacheName,"batchputListener");
+        createCache(coordinator, tmpCacheName, "batchputListener");
       }
-      log.error("LGSORT: "+ getOutput() + ".addresses");
+      log.error("LGSORT: " + getOutput() + ".addresses");
       Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
-      System.err.println("creating " + getOutput() + ".addresses to "+ currentCluster);
+      System.err.println("creating " + getOutput() + ".addresses to " + currentCluster);
       createCache(currentCluster, getOutput() + ".addresses", "batchputListener");
       System.err.println("creating " + getOutput() + ".addresses to " + coordinator);
-      createCache(coordinator,getOutput()+".addresses","batchputListener");
+      createCache(coordinator, getOutput() + ".addresses", "batchputListener");
       //         manager.getPersisentCache();
       createCache(coordinator, prefix + "." + currentCluster + "." + manager.getMemberName().toString(),
           "batchputListener");
@@ -197,22 +191,23 @@ public class SortOperator extends BasicOperator {
       for (Address cacheNodes : inputCache.getAdvancedCache().getRpcManager().getMembers()) {
         String tmpCacheName = prefix + "." + currentCluster + "." + cacheNodes.toString();
         //                  manager.getPersisentCache(tmpCacheName);
-        createCache(currentCluster,tmpCacheName,"batchputListener");
+        createCache(currentCluster, tmpCacheName, "batchputListener");
       }
 
-      createCache(currentCluster, prefix + "." + currentCluster+"."+manager.getMemberName().toString(),"batchputListener");
+      createCache(currentCluster, prefix + "." + currentCluster + "." + manager.getMemberName().toString(),
+          "batchputListener");
       //               manager.getPersisentCache(prefix+"."+currentCluster+"."+manager.getMemberName().toString());
       //            }
 
 
       Set<String> targetMC = getTargetMC();
       for (String mc : targetMC) {
-        createCache(mc, getOutput(),"batchputlistener");
+        createCache(mc, getOutput(), "batchputlistener");
         System.err.println("in local creating ---" + getOutput() + ".addresses to " + mc);
-        createCache(mc,getOutput()+".addresses","batchputListener");
+        createCache(mc, getOutput() + ".addresses", "batchputListener");
       }
-      System.err.println("in local creating " + getOutput() + ".addresses to "+ currentCluster);
-      log.error("LGSORT: COORD"+ getOutput() + ".addresses");
+      System.err.println("in local creating " + getOutput() + ".addresses to " + currentCluster);
+      log.error("LGSORT: COORD" + getOutput() + ".addresses");
       Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
       createCache(currentCluster, getOutput() + ".addresses", "batchputListener");
     }
@@ -222,58 +217,53 @@ public class SortOperator extends BasicOperator {
     return null;
   }
 
-  @Override
-  public void setMapperCallableEnsembleHost(){
-    if(isRemote) {
-      String ensembleHost = globalConfig.getObject("componentsAddrs").getArray(action.asJsonObject().getString("coordinator")).get(
-          0).toString();
+  @Override public void setMapperCallableEnsembleHost() {
+    if (isRemote) {
+      String ensembleHost =
+          globalConfig.getObject("componentsAddrs").getArray(action.asJsonObject().getString("coordinator")).get(0)
+              .toString();
       mapperCallable.setEnsembleHost(ensembleHost);
-    }
-    else{
+    } else {
       String ensembleHost = globalConfig.getObject("componentsAddrs").getArray(currentCluster).get(0).toString();
       mapperCallable.setEnsembleHost(ensembleHost);
     }
   }
 
 
-  @Override
-  public void setupMapCallable() {
+  @Override public void setupMapCallable() {
     //      String prefix = UUID.randomUUID().toString();
     inputCache = (Cache) this.manager.getPersisentCache(getInput());
-    mapperCallable =  new SortCallableUpdated(sortColumns,asceding,types,getOutput()+".merge",prefix, rowcount);
+    mapperCallable = new SortCallableUpdated(sortColumns, asceding, types, getOutput() + ".merge", prefix, rowcount);
   }
 
-  @Override
-  public void setupReduceCallable() {
+  @Override public void setupReduceCallable() {
 
     Cache addressesCache = (Cache) this.manager.getPersisentCache(getOutput() + ".addresses");
-    for(Object address : addressesCache.keySet()){
+    for (Object address : addressesCache.keySet()) {
       System.out.println("ICache " + address);
       addresses.add(address.toString());
     }
   }
 
-  @Override
-  public void executeReduce(){
-    TupleComparator comparator = new TupleComparator(sortColumns,asceding,types);
+  @Override public void executeReduce() {
+    TupleComparator comparator = new TupleComparator(sortColumns, asceding, types);
     String ensembleHost = computeEnsembleHost();
     EnsembleCacheManager emanager = new EnsembleCacheManager(ensembleHost);
     emanager.start();
-    SortMerger2 merger = new SortMerger2(addresses, getOutput(),comparator,manager,emanager,conf,getRowcount());
+    SortMerger2 merger = new SortMerger2(addresses, getOutput(), comparator, manager, emanager, conf, getRowcount());
     merger.merge();
     try {
       EnsembleCacheUtils.waitForAllPuts();
     } catch (InterruptedException e) {
       e.printStackTrace();
-      PrintUtilities.logStackTrace(log,e.getStackTrace());
+      PrintUtilities.logStackTrace(log, e.getStackTrace());
     } catch (ExecutionException e) {
       e.printStackTrace();
       PrintUtilities.logStackTrace(log, e.getStackTrace());
     }
   }
 
-  @Override
-  public boolean isSingleStage() {
+  @Override public boolean isSingleStage() {
     return false;
   }
 
@@ -317,4 +307,5 @@ public class SortOperator extends BasicOperator {
         }
         return getType() + builder.toString();
     }
-*/}
+*/
+}

@@ -21,81 +21,83 @@ import java.util.Map;
 //All the job is done into the MathOperatorTreeNode
 
 public class FilterOperatorTree {
-   FilterOperatorNode root;
-   public FilterOperatorTree(String treeAsDoc){
+  FilterOperatorNode root;
 
-   }
-   public FilterOperatorTree(JsonObject tree){
-      JsonObject tm= new JsonObject();
-      tm.putObject("tree",tree);
-      org.vertx.java.core.json.JsonElement test = tm.getElement("tree");
-      root = new FilterOperatorNode(tm.getElement("tree"));
-   }
+  public FilterOperatorTree(String treeAsDoc) {
 
-   public FilterOperatorTree(org.vertx.java.core.json.JsonElement qual) {
-      root = new FilterOperatorNode(qual);
-   }
+  }
 
-   public FilterOperatorTree() {
+  public FilterOperatorTree(JsonObject tree) {
+    JsonObject tm = new JsonObject();
+    tm.putObject("tree", tree);
+    org.vertx.java.core.json.JsonElement test = tm.getElement("tree");
+    root = new FilterOperatorNode(tm.getElement("tree"));
+  }
 
-   }
+  public FilterOperatorTree(org.vertx.java.core.json.JsonElement qual) {
+    root = new FilterOperatorNode(qual);
+  }
 
-   public boolean accept(Tuple tuple){
-      return root.accept(tuple);
-   }
+  public FilterOperatorTree() {
 
-   public FilterOperatorNode getRoot() {
-      return root;
-   }
+  }
 
-   public JsonObject getJson() {
-      JsonObject result = new JsonObject();
-      result = root.toJson(result);
-      return result;
-   }
+  public boolean accept(Tuple tuple) {
+    return root.accept(tuple);
+  }
 
-   public void loadFromJson(String treeAsJson) {
-      JsonObject tree = new JsonObject(treeAsJson);
-      root = new FilterOperatorNode();
-      root.fromJson(tree);
-   }
+  public FilterOperatorNode getRoot() {
+    return root;
+  }
 
-   public Map<String, List<String>> getJoinColumns() {
-      Map<String,List<String>> result  = new HashMap<>();
-      result = root.getAllFieldsByTable(result);
-      return result;
-   }
+  public JsonObject getJson() {
+    JsonObject result = new JsonObject();
+    result = root.toJson(result);
+    return result;
+  }
 
-   public void renameTableDatum(String tableName, String toRename) {
-      root.renameTableReference(tableName,toRename);
-   }
-//    public MathOperatorTree(MathOperatorTreeNode root) {
-//        this.root = root;
-//    }
-//
-//    public MathOperatorTreeNode getRoot() {
-//        return root;
-//    }
-//
-//    public void setRoot(MathOperatorTreeNode root) {
-//        this.root = root;
-//    }
-//
-//    private MathOperatorTreeNode root;
-//
-//    @JsonCreator
-//    public MathOperatorTree(@JsonProperty("root") JsonNode node) {
-//        root = new MathOperatorTreeNode(node);
-//    }
-//
-//    @Override
-//    public String toString() {
-//        String result = root.toString();
-//        return result;
-//    }
-//
-//    @JsonIgnore
-//    public boolean accept(Tuple tuple, QueryContext context) {
-//        return root.accept(tuple, context);
-//    }
+  public void loadFromJson(String treeAsJson) {
+    JsonObject tree = new JsonObject(treeAsJson);
+    root = new FilterOperatorNode();
+    root.fromJson(tree);
+  }
+
+  public Map<String, List<String>> getJoinColumns() {
+    Map<String, List<String>> result = new HashMap<>();
+    result = root.getAllFieldsByTable(result);
+    return result;
+  }
+
+  public void renameTableDatum(String tableName, String toRename) {
+    root.renameTableReference(tableName, toRename);
+  }
+  //    public MathOperatorTree(MathOperatorTreeNode root) {
+  //        this.root = root;
+  //    }
+  //
+  //    public MathOperatorTreeNode getRoot() {
+  //        return root;
+  //    }
+  //
+  //    public void setRoot(MathOperatorTreeNode root) {
+  //        this.root = root;
+  //    }
+  //
+  //    private MathOperatorTreeNode root;
+  //
+  //    @JsonCreator
+  //    public MathOperatorTree(@JsonProperty("root") JsonNode node) {
+  //        root = new MathOperatorTreeNode(node);
+  //    }
+  //
+  //    @Override
+  //    public String toString() {
+  //        String result = root.toString();
+  //        return result;
+  //    }
+  //
+  //    @JsonIgnore
+  //    public boolean accept(Tuple tuple, QueryContext context) {
+  //        return root.accept(tuple, context);
+  //    }
 }
