@@ -8,15 +8,20 @@ import eu.leads.processor.common.plugins.PluginPackage;
 import eu.leads.processor.common.utils.storage.LeadsStorage;
 import eu.leads.processor.common.utils.storage.LeadsStorageFactory;
 import eu.leads.processor.conf.ConfigurationUtilities;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
+import eu.leads.processor.core.WebUtils;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.plugins.EventType;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang.SerializationUtils;
 import org.infinispan.Cache;
+import org.infinispan.client.hotrod.RemoteCache;
+import org.infinispan.client.hotrod.RemoteCacheManager;
+import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.vertx.java.core.json.JsonObject;
@@ -43,8 +48,11 @@ public class DeployPluginActionHandler implements ActionHandler {
   private LeadsStorage storage;
   private JsonObject globalConfig;
   private EnsembleCacheManager emanager;
+  private String localEnsembleString;
+  private String globalEnsembleString;
+  List<RemoteCacheManager> remoteCacheManagers;
 
-   public DeployPluginActionHandler(Node com, LogProxy log, InfinispanManager persistence,
+  public DeployPluginActionHandler(Node com, LogProxy log, InfinispanManager persistence,
        String id, JsonObject globalConfig) {
      this.com = com;
      this.log = log;
@@ -87,8 +95,24 @@ public class DeployPluginActionHandler implements ActionHandler {
          EnsembleCacheManager.Consistency.DIST);
      pluginRepository = emanager.getCache(StringConstants.PLUGIN_CACHE,new ArrayList<>(emanager.sites()),
          EnsembleCacheManager.Consistency.DIST);
+
+    globalEnsembleString = WebUtils.computeEnsemleString(globalConfig);
+    localEnsembleString = WebUtils.computeEnsembleString(globalConfig, LQPConfiguration.getInstance().getMicroClusterName());
+    remoteCacheManagers = new ArrayList<>();
+    for(String mc : globalConfig.getObject("microclouds").getFieldNames()){
+      String ip = globalConfig.getObject("microclouds").getArray(mc).get(0);
+      if(ip.contains(":")){
+        ip = ip.split(":")[0];
+      }
+      remoteCacheManagers.add(createRemoteCacheManager(ip,11222));
+    }
    }
 
+  private  RemoteCacheManager createRemoteCacheManager(String ip, int port) {
+    ConfigurationBuilder builder = new ConfigurationBuilder();
+    builder.addServer().host(ip).port(port);
+    return new RemoteCacheManager(builder.build());
+  }
    @Override
    public Action process(Action action) {
      Action result = action;
@@ -131,7 +155,7 @@ public class DeployPluginActionHandler implements ActionHandler {
            try {
              listener[0] = PluginManager
                  .deployPluginListenerWithEvents(pluginId, targetCache, user, events, persistence,
-                     storage);
+                     storage,localEnsembleString,globalEnsembleString,remoteCacheManagers);
              activeListeners.put(targetCache + ":" + pluginId + user, listener[0]);
            }
            catch(Exception e){
@@ -167,7 +191,11 @@ public class DeployPluginActionHandler implements ActionHandler {
          return result;
        }
        PluginHandlerListener listener = activeListeners.get(cacheName+":"+pluginId+username);
-       persistence.removeListener(listener, (Cache) persistence.getPersisentCache(cacheName));
+//       persistence.removeListener(listener, (Cache) persistence.getPersisentCache(cacheName));
+       for(RemoteCacheManager remoteCacheManager : remoteCacheManagers){
+         RemoteCache cache = remoteCacheManager.getCache(cacheName);
+         cache.removeClientListener(listener);
+       }
        reply.putString("status","SUCCESS");
        reply.putString("message","");
        action.setResult(reply);

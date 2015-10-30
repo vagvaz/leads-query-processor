@@ -35,31 +35,46 @@ public class PluginRunnable implements Runnable{
     this.queue = queue;
     event = new ProfileEvent("Nothing",log);
   }
+
+  public PluginRunnable(PluginRunnerFilter pluginRunnerFilter) {
+    this.runnerFilter = pluginRunnerFilter;
+    log = LoggerFactory.getLogger(PluginRunnable.class);
+  }
+
   @Override public void run() {
-    event.start("PLUGINRunnable: plugin-> " + plugin.getId() + " key " + key.toString());
-    while(true && keepRunning){
-      if(queue.isEmpty() || plugin == null){
-        try {
-          Thread.sleep(2000);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
+//    event.start("PLUGINRunnable: plugin-> " + plugin.getId() + " key " + key.toString());
+    try {
+//      log.error("Pluggin RUNNABLE RUN");
+      while (true) {
+//        log.error("Pluggin RUNNABLE RUN " + queue.isEmpty() + " " + (plugin == null));
+        if (queue.isEmpty() || plugin == null) {
+          try {
+            Thread.sleep(2000, 0);
+            plugin = runnerFilter.getPlugin();
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+        } else {
+          EventTriplet triplet = (EventTriplet) queue.poll();
+//          log.error("Pluggin RUNNABLE RUN " + triplet.getKey());
+          switch (triplet.getType()) {
+            case CREATED:
+              plugin.created(triplet.getKey(), triplet.getValue(), cache);
+              break;
+            case MODIFIED:
+              plugin.modified(triplet.getKey(), triplet.getValue(), cache);
+              break;
+            case REMOVED:
+              plugin.removed(triplet.getKey(), triplet.getValue(), cache);
+              break;
+          }
+          triplet = null;
         }
       }
-      else{
-        EventTriplet triplet = (EventTriplet) queue.poll();
-        switch (triplet.getType()) {
-          case CREATED:
-            plugin.created(triplet.getKey(),triplet.getValue(),cache);
-            break;
-          case MODIFIED:
-            plugin.modified(triplet.getKey(), triplet.getValue(), cache);
-            break;
-          case REMOVED:
-            plugin.removed(triplet.getKey(), triplet.getValue(), cache);
-            break;
-        }
-        triplet = null;
-      }
+    }catch (Exception e){
+      PrintUtilities.logStackTrace(log,e.getStackTrace());
+      e.printStackTrace();
+
     }
 //    log.error("Rum plugin " + plugin.getId() + " for " + key.toString());
 //    try {
@@ -97,5 +112,9 @@ public class PluginRunnable implements Runnable{
 
   public void setKeepRunning(boolean keepRunning){
     this.keepRunning = keepRunning;
+  }
+
+  public void setQueue(ConcurrentDiskQueue queue) {
+    this.queue = queue;
   }
 }

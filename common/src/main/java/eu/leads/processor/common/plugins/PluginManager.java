@@ -448,8 +448,9 @@ public class PluginManager {
     return runner;
   }
 
-  public static PluginHandlerListener deployPluginListenerWithEvents(String pluginId, String cacheName, String
-          user, EventType[] events, InfinispanManager manager, LeadsStorage storage) {
+  public static PluginHandlerListener deployPluginListenerWithEvents(String pluginId, String cacheName, String user,
+      EventType[] events, InfinispanManager manager, LeadsStorage storage, String localEnsembleString,
+      String globalEnsembleString,List<RemoteCacheManager> remoteCacheManagers) {
     Properties conf = new Properties();
     conf.put("target", cacheName);
     conf.put("config", StringConstants.PLUGIN_ACTIVE_CACHE);
@@ -464,6 +465,8 @@ public class PluginManager {
     configuration.putArray("types", new JsonArray());
     configuration.putString("id", UUID.randomUUID().toString());
     configuration.putString("user", user);
+    configuration.putString("localEnsembleString",localEnsembleString);
+    configuration.putString("globalEnsembleString",globalEnsembleString);
     for (EventType e : events) {
       configuration.getArray("types").add(e.toString());
     }
@@ -480,22 +483,23 @@ public class PluginManager {
     PluginHandlerListener runner = new PluginHandlerListener();
 
     //    manager.addListener(listener, cacheName);
-    RemoteCacheManager remoteCacheManager = createRemoteCacheManager();
-    RemoteCache<Object, Object> remoteCache = remoteCacheManager.getCache(cacheName);
+    for(RemoteCacheManager remoteCacheManager : remoteCacheManagers) {
+      RemoteCache<Object, Object> remoteCache = remoteCacheManager.getCache(cacheName);
 
-    //
-    System.out.println("Using cache " + cacheName);
-    //
-    if (remoteCache == null) {
-      System.err.println("Cache " + cacheName + " not found!");
-      System.exit(1);
+      //
+      System.out.println("Using cache " + cacheName);
+      //
+      if (remoteCache == null) {
+        System.err.println("Cache " + cacheName + " not found!");
+        System.exit(1);
+      }
+      //        if (remoteCache == null) {
+      //            System.err.println("Cache " + cacheName + " not found!");
+      //            return;
+      //        }
+      //
+      remoteCache.addClientListener(runner, new Object[] {configuration.toString()}, new Object[0]);
     }
-    //        if (remoteCache == null) {
-    //            System.err.println("Cache " + cacheName + " not found!");
-    //            return;
-    //        }
-    //
-    remoteCache.addClientListener(runner, new Object[]{configuration.toString()}, new Object[0]);
     return runner;
   }
 

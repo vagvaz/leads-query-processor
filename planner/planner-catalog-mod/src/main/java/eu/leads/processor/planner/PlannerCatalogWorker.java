@@ -228,6 +228,9 @@ public class
     createTable(catalog,webpage);
 
 
+    TableDesc grep = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"grep"), webPagesSchema, meta, getTestDir("grep").toUri());
+    createTable(catalog,grep);
+
     Schema testwebPagesSchema = new Schema();
     testwebPagesSchema.addColumn("url",Type.TEXT);
     testwebPagesSchema.addColumn("domainname",Type.TEXT);
