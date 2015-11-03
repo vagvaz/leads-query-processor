@@ -17,7 +17,7 @@ import java.util.Set;
  * Created by vagvaz on 4/15/15.
  */
 
-public class PlanUtils {
+public class  PlanUtils {
   public static Logger log = LoggerFactory.getLogger(PlanUtils.class);
 
   public static JsonObject updateKeyspaceParameter(JsonObject plan) {

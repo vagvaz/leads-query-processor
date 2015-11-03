@@ -1,5 +1,6 @@
 package eu.leads.processor.plugins;
 
+import eu.leads.processor.common.google.pagerank.Pagerank;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import org.apache.avro.generic.GenericData;
@@ -7,10 +8,7 @@ import org.apache.avro.generic.GenericData;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 //import org.apache.nutch.storage.WebPage;
 
@@ -32,7 +30,7 @@ public class NutchTransformer {
       Tuple tuple =  new Tuple();
 
       for(Map.Entry<String,String> entry : webpageMapping.entrySet()){
-         if(wp.get(entry.getKey()) == null){
+         if(wp.get(entry.getKey()) == null && !(entry.getValue().toLowerCase().equals("domainname") || entry.getValue().equals("pagerank"))){
             tuple.setAttribute("default.webpages."+entry.getValue(),null);
             continue;
          }
@@ -73,6 +71,21 @@ public class NutchTransformer {
          else if (entry.getValue().equals("domainName")){
             String transforUri = transformUri((String) wp.get("url"));
             tuple.setAttribute("default.webpages.domainName",transforUri.substring(0,transforUri.indexOf(":")));
+         }
+         else if (entry.getValue().equals("pagerank")){
+            try {
+//               String transforUri = transformUri((String) wp.get("url"));
+//               double pagerank = Pagerank.get((String) wp.get("url"));
+//               tuple.setAttribute("default.webpages.pagerank", pagerank);
+               Random random  = new Random(wp.get("url").hashCode());
+               double d = random.nextDouble();
+               tuple.setAttribute("default.webpages.pagerank",(Math.ceil(100*d))/10.0);
+            }
+            catch (Exception e){
+               Random random  = new Random(wp.get("url").hashCode());
+               double d = random.nextDouble();
+               tuple.setAttribute("default.webpages.pagerank",(Math.ceil(100*d))/10.0);
+            }
          }
          else{
             tuple.setAttribute("default.webpages."+entry.getValue(),wp.get(entry.getKey()));

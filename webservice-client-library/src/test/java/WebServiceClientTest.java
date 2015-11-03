@@ -1,3 +1,4 @@
+import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.web.QueryResults;
 import eu.leads.processor.web.QueryStatus;
@@ -16,7 +17,8 @@ public class WebServiceClientTest {
     private static int port;
 
     public static void main(String[] args) throws IOException {
-        host = "http://127.0.0.1";
+//        host = "http://127.0.0.1";
+        host = "http://87.190.239.18";
         //        host = "http://5.147.254.199";
         //       host = "http://5.147.254.161";
 //                host = "http://80.156.73.113";
@@ -35,7 +37,7 @@ public class WebServiceClientTest {
         }
 //        String cqlQuery = "leads.6a03a89a-ecef-4a1e-80d4-febf72aab676";
 //        WebServiceClient.stopCQLQuery(cqlQuery);
-        WebServiceClient.addListener("foo","bar.conf.eu",new JsonObject());
+//        WebServiceClient.addListener("foo","bar.conf.eu",new JsonObject());
         JsonObject object = new JsonObject();
         object.putString("name", "vag");
         object.putString("surname", "vaz");
@@ -70,7 +72,7 @@ public class WebServiceClientTest {
         //            QueryResults results = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
         //            System.out.println("worflow query results size " + results.getResult().size());
         //        }
-        String sampleQuery = " SELECT url from webpages order by url";
+        String sampleQuery =  "SELECT url from webpages  limit 10";
 
         QueryStatus currentStatus = WebServiceClient.submitQuery("webServiceTest", sampleQuery);
         while (!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")) {
@@ -85,12 +87,15 @@ public class WebServiceClientTest {
         if (currentStatus.getStatus().equals("COMPLETED")) {
             QueryResults results = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
             String firstUrl = results.getResult().get(0);
+            PrintUtilities.printList(results.getResult());
             results.getResult().clear();
             results = null;
             Tuple t = new Tuple(firstUrl);
             HashMap<String, String> properties = new HashMap<>();
+//            properties.put("url", "https://www.yahoo.com/");
             properties.put("url", t.getAttribute("default.webpages.url"));
-            properties.put("depth", "3");
+            properties.put("depth", "4");
+            long start = System.currentTimeMillis();
             JsonObject wgsreply = WebServiceClient.submitSpecialQuery("webServiceTest", "rec_call", properties);
             QueryStatus wgsStatus = WebServiceClient.getQueryStatus(wgsreply.getString("id"));
             while (!wgsStatus.getStatus().equals("COMPLETED") && !wgsStatus.getStatus().equals("FAILED")) {
@@ -101,6 +106,8 @@ public class WebServiceClientTest {
                 }
                 wgsStatus = WebServiceClient.getQueryStatus(wgsStatus.getId());
             }
+            long end = System.currentTimeMillis();
+            System.out.println("SPECIAL TOOK "  +(end/1000 -start/1000 ) +  " secs");
             if (wgsStatus.getStatus().equals("COMPLETED")) {
                 JsonObject level0 = WebServiceClient.getObject(wgsreply.getString("output"), "0", null);
                 JsonObject level1 = WebServiceClient.getObject(wgsreply.getString("output"), "1", null);
