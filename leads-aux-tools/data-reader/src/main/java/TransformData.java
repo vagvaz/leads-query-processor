@@ -60,7 +60,7 @@ public class TransformData {
     outputConfig.setProperty("baseDir", "/tmp/leads/transform");
     outputConfig.setProperty("filename", "tuples");
     outputConfig.setProperty("valueThreshold", "10000");
-    String tablename = "emptyName";
+    String tablename = "default.webpages";
     if (args.length > 1) {
       tablename = args[1];
       outputConfig.setProperty("cacheName", tablename);
@@ -121,7 +121,7 @@ public class TransformData {
         continue;
       }
       if ((entry.getValue().get(entry.getValue().getSchema().getField("content").pos()) != null)) {
-         Tuple tuple = transformer.transform(entry.getValue());
+        Tuple tuple = transformer.transform(entry.getValue());
         //                dummy.append(tuple.getAttribute("default.webpages.url"), tuple);
         //                outputHandler.append(tuple.getAttribute("url"), tuple);
         //                outputHandler2.append(tuple.getAttribute("url"), new JsonObject(tuple.toString()).encodePrettily());

@@ -184,6 +184,18 @@ public class MapReduceJob extends DataType {
 
   }
 
+  public void setReduceLocalPipelining(boolean isPipeline){
+    if(isPipeline) {
+      data.getObject("operator").putString("recComposableLocalReduce", "recComposableLocalReduce");
+    }
+  }
+
+  public void setReducePipelining(boolean isPipeline){
+    if(isPipeline) {
+      data.getObject("operator").putString("recComposableReduce", "recComposableReduce");
+    }
+  }
+
   public boolean hasReduceLocal() {
     return data.getObject("operator").containsField("reduceLocal");
   }

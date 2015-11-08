@@ -9,7 +9,7 @@ import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.storage.LeadsStorage;
 import eu.leads.processor.common.utils.storage.LeadsStorageFactory;
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.plugins.product.ProductPlugin;
+import eu.leads.processor.plugins.grep.GrepPlugin;
 import org.infinispan.Cache;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class ClusteredHadoopTest {
     static LeadsStorage storage = null;
 
     public static void main(String[] args) {
-        Class pluginClass = ProductPlugin.class;
+        Class pluginClass = GrepPlugin.class;
 
         LQPConfiguration.initialize();
         ArrayList<InfinispanManager> clusters = new ArrayList<InfinispanManager>();
@@ -44,7 +44,7 @@ public class ClusteredHadoopTest {
         PluginPackage plugin = new PluginPackage(pluginClass.getCanonicalName(),
                 pluginClass.getCanonicalName(),
                 "/home/trs/Projects/LEADS/leads-query-processor/nqe/system-plugins/sentiment-plugin/target/sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar"
-              , "/home/trs/Projects/LEADS/leads-query-processor/nqe/system-plugins/sentiment-plugin/sentiment-conf.xml"); //"/home/vagvaz/Projects/idea/transform-plugin/product-plugin-conf.xml" );
+              , "/home/trs/Projects/LEADS/leads-query-processor/nqe/system-plugins/sentiment-plugin/sentiment-conf.xml"); //"/home/vagvaz/Projects/idea/transform-plugin/grep-plugin-conf.xml" );
 
         //plugin.calculate_MD5();
         Properties conf = new Properties();
@@ -83,7 +83,7 @@ public class ClusteredHadoopTest {
 
         //distributed deployment  ( plugin id, cache to install, events)
         //PluginManager.deployPlugin();
-//        PluginManager.deployPluginListener(ProductPlugin.class.getCanonicalName(), "default.webpages",
+//        PluginManager.deployPluginListener(GrepPlugin.class.getCanonicalName(), "default.webpages",
 //
 //                                      EventType.CREATEANDMODIFY,"defaultUser");
         plugin.setUser("vagvaz");

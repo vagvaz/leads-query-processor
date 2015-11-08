@@ -8,7 +8,7 @@ import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.plugins.EventType;
 import eu.leads.processor.plugins.PluginInterface;
-import eu.leads.processor.plugins.product.ProductPlugin;
+import eu.leads.processor.plugins.grep.GrepPlugin;
 import org.apache.commons.configuration.XMLConfiguration;
 
 import java.util.Map;
@@ -37,7 +37,7 @@ public class LocalTest {
         //Set plugin configuration (could be loaded from file
         config.setProperty("cache", "mycache");
         config.setProperty("attributes", "domainName,url,responseCode");
-        PluginInterface plugin = new ProductPlugin();
+        PluginInterface plugin = new GrepPlugin();
         //deploy plugin to local cache
         PluginManager.deployLocalPlugin(plugin, config, webCacheName, EventType.CREATEANDMODIFY,
                                            InfinispanClusterSingleton.getInstance().getManager());

@@ -10,7 +10,7 @@ import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.common.utils.storage.LeadsStorage;
 import eu.leads.processor.common.utils.storage.LeadsStorageFactory;
 import eu.leads.processor.conf.LQPConfiguration;
-import eu.leads.processor.plugins.product.ProductPlugin;
+import eu.leads.processor.plugins.grep.GrepPlugin;
 import org.infinispan.Cache;
 
 import java.io.*;
@@ -37,11 +37,11 @@ public class ClusteredTest {
 
         //Create plugin package for upload (id,class name, jar file path, xml configuration)
         /*PluginPackage plugin = new PluginPackage();*/
-        System.out.println("PLUGIN ID: " + ProductPlugin.class.getCanonicalName());
-        PluginPackage plugin = new PluginPackage(ProductPlugin.class.getCanonicalName(),
-                                                    ProductPlugin.class.getCanonicalName(),
-                "/home/vagvaz/Projects/idea/product-plugin/target/product-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar",
-                "/home/vagvaz/Projects/idea/product-plugin/product-plugin-conf.xml" );
+        System.out.println("PLUGIN ID: " + GrepPlugin.class.getCanonicalName());
+        PluginPackage plugin = new PluginPackage(GrepPlugin.class.getCanonicalName(),
+                                                    GrepPlugin.class.getCanonicalName(),
+                "/home/vagvaz/Projects/idea/grep-plugin/target/grep-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar",
+                "/home/vagvaz/Projects/idea/grep-plugin/grep-plugin-conf.xml" );
       Properties conf = new Properties();
       conf.setProperty("prefix","/tmp/leads/");
       PluginManager.initialize(LeadsStorageFactory.LOCAL, conf);
@@ -62,7 +62,7 @@ public class ClusteredTest {
 
         //distributed deployment  ( plugin id, cache to install, events)
         //PluginManager.deployPlugin();
-//        PluginManager.deployPluginListener(ProductPlugin.class.getCanonicalName(), "default.webpages",
+//        PluginManager.deployPluginListener(GrepPlugin.class.getCanonicalName(), "default.webpages",
 //
 //                                      EventType.CREATEANDMODIFY,"defaultUser");
     plugin.setUser("vagvaz");

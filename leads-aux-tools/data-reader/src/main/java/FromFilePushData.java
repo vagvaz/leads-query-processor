@@ -98,11 +98,11 @@ public class FromFilePushData {
     int rejected = 0;
     int processed = 0;
     Set<String> keys = new HashSet<String>();
-
+    Map.Entry<String, Tuple> entry =null;
     while (inputHandler.hasNext()) {
       // Map.Entry<String,WebPage> entry;
       //            entry = (Map.Entry<String,WebPage>) inputHandler.next();
-      Map.Entry<String, Tuple> entry = inputHandler.next();
+      entry = inputHandler.next();
       processed++;
       if (processed % 100 == 0) {
         System.err.println("processed " + processed);
@@ -121,14 +121,17 @@ public class FromFilePushData {
       if (entry == null) {
         continue;
       }
-      if ((entry.getValue().getAttribute("default.webpages.body")) != null) {
+      if ((entry.getValue().getAttribute("default.webpages"+".body")) != null) {
 //        Tuple tuple = transformer.transform(entry.getValue());
         Tuple tuple = entry.getValue();
+        if(!tablename.equals("default.webpages")){
+          tuple.renameAllForTable(tablename);
+        }
         //                dummy.append(tuple.getAttribute("default.webpages.url"), tuple);
         //                outputHandler.append(tuple.getAttribute("url"), tuple);
         //                outputHandler2.append(tuple.getAttribute("url"), new JsonObject(tuple.toString()).encodePrettily());
         //                outputHandler3.append(entry.getValue().get(entry.getValue().getSchema().getField("url").pos()).toString(), entry.getValue().toString());
-        String key_url = tuple.getAttribute("default.webpages.url");
+        String key_url = tuple.getAttribute(tablename+".url");
         if(configList!= null && configList.size() > 0) {
           if (!StringUtils.startsWithAny(key_url, desiredDomains)) {
             rejected++;
@@ -138,11 +141,17 @@ public class FromFilePushData {
             continue;
           }
         }
-        String key_ts = tuple.getAttribute("default.webpages.ts");
-        String key = "default.webpages:" + key_url + "," + key_ts;
-        keys.add(key);
+        if(LQPConfiguration.getInstance().getConfiguration().getBoolean("use.ts.forkey")) {
+          String key_ts = tuple.getAttribute(tablename + ".ts");
+//          String key = ;
+          keys.add(tablename + ":" + key_url + "," + key_ts);
+          outputHandler.append(tablename+":" + key_url + "," + key_ts, tuple);
+        } else{
 
-        outputHandler.append("default.webpages:" + key_url + "," + key_ts, tuple);
+          keys.add(tablename + ":" + key_url );
+          outputHandler.append(tablename+":" + key_url, tuple);
+        }
+
         if(delay > 0){
           try {
             Thread.sleep(delay);

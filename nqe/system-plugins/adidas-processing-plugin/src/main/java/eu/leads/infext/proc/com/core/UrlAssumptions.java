@@ -130,7 +130,7 @@ public class UrlAssumptions {
 		
 		// if more that minimum number of pages to count
 		if(pagesInDirCount > minPagesInDirCount) {
-			// if can be assumed that is Ecom product offerings dir
+			// if can be assumed that is Ecom grep offerings dir
 			if(ecomPOValue > ecomPOAssumptionCoef)
 				assumptions.add(mapping.getProperty("ecomPO"));
 			// if can be assumed that is a mix of Ecom pages

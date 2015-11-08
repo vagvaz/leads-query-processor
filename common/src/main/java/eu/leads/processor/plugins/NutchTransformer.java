@@ -6,6 +6,7 @@ import eu.leads.processor.core.Tuple;
 import org.apache.avro.generic.GenericData;
 
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -70,16 +71,20 @@ public class NutchTransformer {
          }
          else if (entry.getValue().equals("domainName")){
             String transforUri = transformUri((String) wp.get("url"));
-            tuple.setAttribute("default.webpages.domainName",transforUri.substring(0,transforUri.indexOf(":")));
+            try {
+               tuple.setAttribute("default.webpages.domainName",Pagerank.getDomainName(transforUri));
+            } catch (URISyntaxException e) {
+               e.printStackTrace();
+            }
          }
          else if (entry.getValue().equals("pagerank")){
             try {
-//               String transforUri = transformUri((String) wp.get("url"));
-//               double pagerank = Pagerank.get((String) wp.get("url"));
-//               tuple.setAttribute("default.webpages.pagerank", pagerank);
-               Random random  = new Random(wp.get("url").hashCode());
-               double d = random.nextDouble();
-               tuple.setAttribute("default.webpages.pagerank",(Math.ceil(100*d))/10.0);
+               String transforUri = transformUri((String) wp.get("url"));
+               double pagerank = Pagerank.get((String) wp.get("url"));
+               tuple.setAttribute("default.webpages.pagerank", pagerank);
+//               Random random  = new Random(wp.get("url").hashCode());
+//               double d = random.nextDouble();
+//               tuple.setAttribute("default.webpages.pagerank",(Math.ceil(100*d))/10.0);
             }
             catch (Exception e){
                Random random  = new Random(wp.get("url").hashCode());
@@ -92,8 +97,8 @@ public class NutchTransformer {
          }
 
       }
-      tuple.setAttribute("default.webpages."+"pagerank",-1.0);
-      tuple.setAttribute("default.webpages."+"sentiment",-1.0);
+//      tuple.setAttribute("default.webpages."+"pagerank",-1.0);
+      tuple.setAttribute("default.webpages."+"sentiment",0.0);
       tuple.setAttribute("default.webpages."+"responseCode",200);
 //
 //      tuple.setAttribute("default.webpages."+"url", wp.get("key"));
