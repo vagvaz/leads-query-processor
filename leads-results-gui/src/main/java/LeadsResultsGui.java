@@ -165,53 +165,59 @@ public class LeadsResultsGui extends JPanel {
 
     public static void main(String[] args) throws JDOMException, InterruptedException {
         username = "Leads-gui";
-        //Read xml
-        if (args.length < 1) {
-            System.err.println("Not enough arguments Exiting");
-            return;
-        }
-        try {
-            config = new XMLConfiguration("leads-results-gui-settings.xml");
-            System.err.println("Found Xml settings file");
+        boolean guiTesting=true;
+        if(guiTesting == false) {
+            //Read xml
+            if (args.length < 1) {
+                System.err.println("Not enough arguments Exiting");
+                return;
+            }
+            try {
+                config = new XMLConfiguration("leads-results-gui-settings.xml");
+                System.err.println("Found Xml settings file");
 
-        } catch (ConfigurationException e) {
-            JOptionPane.showMessageDialog(null, "Xml configuration error", "Leads Results", JOptionPane.ERROR_MESSAGE);
-            System.err.print("Xml error: " + e.getMessage());
-        }
+            } catch (ConfigurationException e) {
+                JOptionPane.showMessageDialog(null, "Xml configuration error", "Leads Results", JOptionPane.ERROR_MESSAGE);
+                System.err.print("Xml error: " + e.getMessage());
+            }
 
 
-        File xmlFile = new File(args[0]);
+            File xmlFile = new File(args[0]);
 
-        System.out.println("Trying to open file: " + args[0]);
-        if (xmlFile.exists()) {
-            System.out.println("File Exists");
-        } else {
-            System.err.println("File DOES NOT Exists");
-            JOptionPane.showMessageDialog(null, "File DOES NOT Exists", "Leads Results", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        //Send Expr Json for execution
-        //Wait for results
-        try {
-            Apatar2Tajo.init_string_maps();
-            String tajoJson = Apatar2Tajo.xml2tajo(xmlFile).toJson();
-            if(Apatar2Tajo.Range!=-1L)
-            convert_results(send_query_and_wait(tajoJson));
-            else
-            {
-                System.err.println("Sliding Window ");
-                HashMap cqlResults =new HashMap<>();
-                ResultsListener resL = new ResultsListener(cqlResults);
-                while (waitingQuery != waitResults.FINISHED)
-                    sleep(1000);
+            System.out.println("Trying to open file: " + args[0]);
+            if (xmlFile.exists()) {
+                System.out.println("File Exists");
+            } else {
+                System.err.println("File DOES NOT Exists");
+                JOptionPane.showMessageDialog(null, "File DOES NOT Exists", "Leads Results", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            //Send Expr Json for execution
+            //Wait for results
+            try {
+                Apatar2Tajo.init_string_maps();
+                String tajoJson = Apatar2Tajo.xml2tajo(xmlFile).toJson();
+                if (Apatar2Tajo.Range != -1L)
+                    convert_results(send_query_and_wait(tajoJson));
+                else {
+                    System.err.println("Sliding Window ");
+                    HashMap cqlResults = new HashMap<>();
+                    ResultsListener resL = new ResultsListener(cqlResults);
+                    while (waitingQuery != waitResults.FINISHED)
+                        sleep(1000);
+                    System.exit(-1);
+                    return;
+                }
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Leads Results", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
                 System.exit(-1);
                 return;
             }
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Leads Results", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-            System.exit(-1);
-            return;
+        }else{
+            rowdata = TestData();
+            columnNames = TestColumnNames();
+
         }
 
         // Display Data
@@ -219,16 +225,37 @@ public class LeadsResultsGui extends JPanel {
         //creating and showing this application's GUI.
         //
         if (rowdata != null)
-            if (rowdata.size() > 0)
+            if (rowdata.size() > 0) {
                 javax.swing.SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        createAndShowGUI(rowdata, columnNames);
+                        createAndShowGUI(null, columnNames);
                     }
                 });
+                while(model==null)
+                    sleep(400);
+                for (int i = 0; i < rowdata.size(); i++) {
+
+                    model.addRow(rowdata.get(i));
+                    //model.getDataVector().addElement(rowdata.get(i));
+                    sleep(1000);
+                    //model.removeRow(0);
+                }
+                model.insertRow(3, rowdata.get(1));
+                sleep(1000);
+                model.insertRow(3, (Object[]) null);
+                sleep(1000);
+                for(int c=0;c<columnNames.size();c++){
+
+                    model.setValueAt(rowdata.get(1).get(c),3,c);
+                }
+
+            }
             else {
                 System.err.println("No results");
                 JOptionPane.showMessageDialog(null, "No results", "Leads Results", JOptionPane.ERROR_MESSAGE);
             }
+
+
     }
 
     private static void InitializeWebClient(String args[]) {
@@ -487,6 +514,21 @@ public class LeadsResultsGui extends JPanel {
             } else
                 outputTable = new String[1][width];
         }
+
+        /* model.addRow(rowdata.get(i));
+                    //model.getDataVector().addElement(rowdata.get(i));
+                    sleep(1000);
+                    //model.removeRow(0);
+                }
+                model.insertRow(3, rowdata.get(1));
+                sleep(1000);
+                model.insertRow(3, (Object[]) null);
+                sleep(1000);
+                for(int c=0;c<columnNames.size();c++){
+
+                    model.setValueAt(rowdata.get(1).get(c),3,c);
+                }
+                */
 //            colCount = 0;
 //            for (String field : fields) {
 //                Object value = res.getGenericAttribute(field);
