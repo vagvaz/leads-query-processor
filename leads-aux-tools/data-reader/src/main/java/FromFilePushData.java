@@ -141,7 +141,7 @@ public class FromFilePushData {
             continue;
           }
         }
-        if(LQPConfiguration.getInstance().getConfiguration().getBoolean("use.ts.forkey")) {
+        if(LQPConfiguration.getInstance().getConfiguration().getBoolean("use.ts.forkey",false)) {
           String key_ts = tuple.getAttribute(tablename + ".ts");
 //          String key = ;
           keys.add(tablename + ":" + key_url + "," + key_ts);
