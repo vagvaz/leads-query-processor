@@ -37,10 +37,10 @@
             <!--<node name='leads-qe29' privateIp='10.134.1.130'>87.190.239.19</node>-->
             <!--<node name='leads-qe33' privateIp='10.134.1.131'>87.190.239.30</node>-->
             <node name='leads-qe30' privateIp='10.134.1.129'>87.190.239.14</node>
-            <node name='leads-qe34' privateIp='10.134.1.132'>87.190.239.17</node>
+            <!--<node name='leads-qe34' privateIp='10.134.1.132'>87.190.239.17</node>-->
             <!--<node name='leads-qe32' privateIp='10.134.1.130'>87.190.239.12</node>-->
             <node name='leads-qe36' privateIp='10.134.1.131'>87.190.239.15</node>
-            <!--<node name='leads-qe35' privateIp='10.134.1.129'>87.190.239.16</node>-->
+            <node name='leads-qe35' privateIp='10.134.1.129'>87.190.239.16</node>
             <!--<node name='leads-qe31' privateIp='10.134.1.132'>87.190.239.13</node>-->
         </MC>
         <MC name='dd2a' credentials="cloudandheat">
