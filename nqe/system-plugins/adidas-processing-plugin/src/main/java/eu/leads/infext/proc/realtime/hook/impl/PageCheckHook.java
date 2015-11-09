@@ -103,7 +103,7 @@ public class PageCheckHook extends AbstractHook {
 		}
 		
 		if(longPathNeeded) {
-			// LONG PATH: determine if it is product offering, then try to determine schema
+			// LONG PATH: determine if it is grep offering, then try to determine schema
 			 String [] returnStringsArray = ecomFindExtractionLongPath(content, lang, 
 					generalParametersList, generalEcomParametersList, previousVersionType);
 			 ecomTypeAssumption = returnStringsArray[1];
@@ -205,7 +205,7 @@ public class PageCheckHook extends AbstractHook {
 						boolean isCorrect = ecomPageEval.determinePageEcomFeatures();
 						if(isCorrect) {
 							if(ecomPageEval.getEcomAssumption() == EcomClassificationEnum.ECOM_PRODUCT_OFFERING_PAGE)
-								// if there is a change that this is the product offering page, try to determine extraction schema
+								// if there is a change that this is the grep offering page, try to determine extraction schema
 								// based on content and other "similar" pages
 								extractionCandidatesJSONString = getEcomNamePriceExtractionSchemasFromDir(fqdnEcomParameters);
 							else

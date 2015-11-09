@@ -17,10 +17,13 @@ import eu.leads.processor.math.FilterOperatorTree;
 import eu.leads.processor.math.MathUtils;
 import org.infinispan.Cache;
 import org.infinispan.commons.marshall.Marshaller;
+import org.infinispan.commons.util.CloseableIterable;
+import org.infinispan.context.Flag;
 import org.infinispan.distexec.DistributedCallable;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.factories.ComponentRegistry;
+import org.infinispan.filter.KeyValueFilter;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.marshall.core.MarshalledEntryImpl;
@@ -304,42 +307,46 @@ public abstract class LeadsBaseCallable<K, V> implements LeadsCallable<K, V>,
       System.err.println("Iterate Over Local Data");
       Object filter = new LocalDataFilter<K, V>(cdl);
       //
-      //      CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL)
-      //          .filterEntries((KeyValueFilter<? super K, ? super V>) filter);
-      ComponentRegistry registry = inputCache.getAdvancedCache().getComponentRegistry();
-      PersistenceManagerImpl persistenceManager =
-          (PersistenceManagerImpl) registry.getComponent(PersistenceManager.class);
-      LevelDBStore dbStore = (LevelDBStore) persistenceManager.getAllLoaders().get(0);
+            CloseableIterable iterable = inputCache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL)
+                .filterEntries((KeyValueFilter<? super K, ? super V>) filter);
+//      ComponentRegistry registry = inputCache.getAdvancedCache().getComponentRegistry();
+//      PersistenceManagerImpl persistenceManager =
+//          (PersistenceManagerImpl) registry.getComponent(PersistenceManager.class);
+//      LevelDBStore dbStore = (LevelDBStore) persistenceManager.getAllLoaders().get(0);
 
       try {
-        Field db = dbStore.getClass().getDeclaredField("db");
-        db.setAccessible(true);
-        DB realDb = (DB) db.get(dbStore);
-        DBIterator iterable = realDb.iterator();
-        iterable.seekToFirst();
-        Field ctxField = dbStore.getClass().getDeclaredField("ctx");
-        ctxField.setAccessible(true);
-        InitializationContext ctx = (InitializationContext) ctxField.get(dbStore);
-        Marshaller m = ctx.getMarshaller();
+//        Field db = dbStore.getClass().getDeclaredField("db");
+//        db.setAccessible(true);
+//        DB realDb = (DB) db.get(dbStore);
+//        DBIterator iterable = realDb.iterator();
+//        iterable.seekToFirst();
+//        Field ctxField = dbStore.getClass().getDeclaredField("ctx");
+//        ctxField.setAccessible(true);
+//        InitializationContext ctx = (InitializationContext) ctxField.get(dbStore);
+//        Marshaller m = ctx.getMarshaller();
         try {
           for (ExecuteRunnable runnable : executeRunnables) {
             EngineUtils.submit(runnable);
           }
           int i = 0;
           List<Map.Entry> buffer = new LinkedList<>();
-          while (iterable.hasNext()) {
+          Iterator<Map.Entry<Object,Object>> iterator = iterable.iterator();
+          while (iterator.hasNext()) {
 
             buffer.clear();
             boolean tocontinue = true;
             for (; tocontinue && buffer.size() < callableParallelism * listSize; ) {
 
-              Map.Entry<byte[], byte[]> entryIspn = iterable.next();
-              String key = (String) m.objectFromByteBuffer(entryIspn.getKey());
-              org.infinispan.marshall.core.MarshalledEntryImpl value =
-                  (MarshalledEntryImpl) m.objectFromByteBuffer(entryIspn.getValue());
+//              Map.Entry<byte[], byte[]> entryIspn = itera.next();
+//              String key = (String) m.objectFromByteBuffer(entryIspn.getKey());
+//              org.infinispan.marshall.core.MarshalledEntryImpl value =
+//                  (MarshalledEntryImpl) m.objectFromByteBuffer(entryIspn.getValue());
 
-              Tuple tuple = (Tuple) m.objectFromByteBuffer(value.getValueBytes().getBuf());
+//              Tuple tuple = (Tuple) m.objectFromByteBuffer(value.getValueBytes().getBuf());
               //        profExecute.end();
+              Map.Entry<Object,Object> entry = iterator.next();
+              String key = (String) entry.getKey();
+              Tuple tuple = (Tuple) entry.getValue();
               readCounter++;
               if (readCounter > readThreshold) {
                 profilerLog.error(callableIndex + " Read: " + readCounter);
@@ -348,7 +355,7 @@ public abstract class LeadsBaseCallable<K, V> implements LeadsCallable<K, V>,
               Map.Entry<K, V> bufferentry = new AbstractMap.SimpleEntry(key, tuple);
               buffer.add(bufferentry);
               if (buffer.size() != listSize) {
-                tocontinue = iterable.hasNext();
+                tocontinue = iterator.hasNext();
               } else {
                 tocontinue = false;
               }

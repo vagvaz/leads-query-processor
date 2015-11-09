@@ -182,4 +182,21 @@ public class WebUtils {
     }
   }
 
+  public static String computeEnsembleString(JsonObject globalConfig, String microClusterName) {
+    if(globalConfig.getObject("componentsAddrs").containsField(microClusterName)) {
+      return globalConfig.getObject("componentsAddrs").getArray(microClusterName).get(0);
+    } else{
+      return "";
+    }
+  }
+
+  public static String computeEnsemleString(JsonObject globalConfig) {
+    String result = "";
+    for(String mc : globalConfig.getObject("microclouds").getFieldNames()){
+     result = result + computeEnsembleString(globalConfig,mc) + "|";
+    }
+    return result.substring(0,result.length()-1);
+  }
+
+
 }

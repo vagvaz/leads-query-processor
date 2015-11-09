@@ -45,7 +45,7 @@ public class ClusteredHadoopTest {
         PluginPackage plugin = new PluginPackage(pluginClass.getCanonicalName(),
                 pluginClass.getCanonicalName(),
                 "/home/trs/Projects/LEADS/leads-query-processor/nqe/system-plugins/sentiment-plugin/target/sentiment-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar"
-              , "/home/trs/Projects/LEADS/leads-query-processor/nqe/system-plugins/sentiment-plugin/sentiment-conf.xml"); //"/home/vagvaz/Projects/idea/transform-plugin/product-plugin-conf.xml" );
+              , "/home/trs/Projects/LEADS/leads-query-processor/nqe/system-plugins/sentiment-plugin/sentiment-conf.xml"); //"/home/vagvaz/Projects/idea/transform-plugin/grep-plugin-conf.xml" );
 
         //plugin.calculate_MD5();
         Properties conf = new Properties();

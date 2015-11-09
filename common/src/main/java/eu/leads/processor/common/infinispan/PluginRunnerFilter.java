@@ -45,6 +45,7 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
   private String configString;
   private String UUIDname;
 
+
   transient private EmbeddedCacheManager manager;
   transient private ClusterInfinispanManager imanager;
   transient private Cache pluginsCache;
@@ -63,7 +64,11 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
   private transient ThreadPoolExecutor executor;
   private transient ProfileEvent profEvent;
   private transient ConcurrentDiskQueue queue;
-  private PluginRunnable pluginRunnable;
+  private transient PluginRunnable pluginRunnable;
+  private transient Thread runnableThread;
+  private transient String globalEnsembleString = null;
+  private transient String localEnsembleString = null;
+
 
   public PluginRunnerFilter(EmbeddedCacheManager manager,String confString){
     log = LoggerFactory.getLogger(manager.getAddress().toString()+":"+PluginRunnerFilter.class.toString());
@@ -117,6 +122,9 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
       profEvent = new ProfileEvent("InitialLog",log);
       this.manager = InfinispanClusterSingleton.getInstance().getManager().getCacheManager();
       this.conf = new JsonObject(configString);
+      localEnsembleString = this.conf.getString("localEnsembleString");
+      globalEnsembleString = this.conf.getString("globalEnsembleString");
+
       imanager = (ClusterInfinispanManager) InfinispanClusterSingleton.getInstance().getManager();
 
       log.error("get activePluginCache");
@@ -166,24 +174,28 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
       log.error("init Targetcache");
       targetCache = (Cache) imanager.getPersisentCache(targetCacheName);
       log.error("init plugin");
-
+      pluginRunnable = new PluginRunnable(this);
+      queue = new ConcurrentDiskQueue(100);
+      pluginRunnable.setQueue(queue);
+      pluginRunnable.setCache(targetCache);
+      runnableThread = new Thread(pluginRunnable);
       Thread t = new Thread(new Runnable() {
         @Override public void run() {
           initializePlugin(pluginsCache, pluginName, user);
-          pluginRunnable.setPlugin(plugin);
-          System.err.println("Plugin " + plugin.getClassName().toString() + " Loaded from jar and initialized");
+
+//          pluginRunnable.setPlugin(plugin);
+          log.error("Plugin " + plugin.getClassName().toString() + " Loaded from jar and initialized");
         }
       });
-      queue = new ConcurrentDiskQueue(100);
-      pluginRunnable = new PluginRunnable(this,plugin,queue);
-      pluginRunnable.setCache(targetCache);
+
       t.start();
+      runnableThread.start();
       //            initializePlugin(pluginsCache, pluginName, user);
       isInitialized = true;
       log.error("Initialized plugin " + pluginName + " on " + targetCacheName);
       System.err.println("Initialized plugin " + pluginName + " on " + targetCacheName);
 
-      executor.submit(pluginRunnable);
+
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -244,6 +256,12 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
       log.error("exception " + e.getMessage());
       e.printStackTrace();
     }
+    if(localEnsembleString != null){
+      pluginConfig.setProperty("localEnsembleString",localEnsembleString);
+    }
+    if(globalEnsembleString != null){
+      pluginConfig.setProperty("globalEnsembleString",globalEnsembleString);
+    }
     //    String className = (String) cache.get(plugName + ":className");
     String className = pluginPackage.getClassName();
     log.error("Init plugClass");
@@ -256,7 +274,7 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
         plugin = (PluginInterface) con.newInstance();
         log.error("initialize plugin ");
         plugin.initialize(pluginConfig, imanager);
-
+        pluginRunnable.setPlugin(plugin);
       } catch (ClassNotFoundException e) {
         log.error("exception " + e.getClass().toString());
         log.error("exception " + e.getMessage());
@@ -332,24 +350,24 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
       if (!isInitialized) {
         initialize();
       }
-      if(plugin == null)
-      {
-        System.out.println("Plugin null");
-        return false;
-      }
-
-      if(plugin.getClassName() == null)
-      {
-        System.out.println("Plugin ClassName");
-        return false;
-      }
+//      if(plugin == null)
+//      {
+//        System.out.println("Plugin null");
+//        return false;
+//      }
+//
+//      if(plugin.getClassName() == null)
+//      {
+//        System.out.println("Plugin ClassName");
+//        return false;
+//      }
       if(key == null){
         System.out.println("key null");
         return false;
       }
-      profEvent.end("");
-      profEvent.start("Plugin: " + plugin.getClassName().toString() + " key " + key.toString());
-      System.err.println(UUIDname + " Accept: Manager Address " + manager.getAddress());
+//      profEvent.end("");
+//      profEvent.start("Plugin: " + plugin.getClassName().toString() + " key " + key.toString());
+//      System.err.println(UUIDname + " Accept: Manager Address " + manager.getAddress());
       log.error(UUIDname + "Accept: Manager Address " + manager.getAddress());
 
       if (key == null) {
@@ -358,7 +376,7 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
       }
 
       if (newValue == null) {
-        System.out.println("newValue is null key:" + (String) key);
+//        System.out.println("newValue is null key:" + (String) key);
         log.error("Accept newValue is null key:" + (String) key);
         return false;
       }
@@ -401,4 +419,7 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
   }
 
 
+  public PluginInterface getPlugin() {
+    return plugin;
+  }
 }

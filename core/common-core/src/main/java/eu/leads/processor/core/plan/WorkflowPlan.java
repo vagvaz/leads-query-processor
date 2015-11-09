@@ -42,6 +42,7 @@ public class WorkflowPlan extends DataType implements Plan {
   private void computeInternalStructures(LogicalRootNode rootNode, String queryId) {
     JsonObject planGraph = generatePlan(rootNode);
     setPlanGraph(planGraph);
+    //       System.out.println("PLAN$$\n"+ planGraph.encodePrettily() );
     JsonArray nodes = new JsonArray();
     for (String node : planGraph.getFieldNames()) {
       nodes.add(planGraph.getObject(node));
@@ -162,6 +163,18 @@ public class WorkflowPlan extends DataType implements Plan {
       top.addInput(right.getNodeId());
       left.setOutput(top.getNodeId());
       right.setOutput(top.getNodeId());
+      if (current instanceof JoinNode) {
+        System.out.println("\n\n\n\n\n\n\n\nJOIN\n\n\n\n\n\n\n\n\n" + current.toJson());
+        JoinNode joinNode = (JoinNode) current;
+        System.out.println("\n\n\n\n\n\n\n\nJOIN\n\n\n\n\n\n\n\n\n" + current.toJson());
+        LogicalNode leftNode = joinNode.getLeftChild();
+        LogicalNode rightNode = joinNode.getRightChild();
+        JsonObject leftSchema = new JsonObject(leftNode.getOutSchema().toJson());
+        JsonObject rightSchema = new JsonObject(rightNode.getOutSchema().toJson());
+        top.asJsonObject().getObject("configuration").getObject("body").putObject("leftSchema", leftSchema);
+        top.asJsonObject().getObject("configuration").getObject("body").putObject("rightSchema", rightSchema);
+
+      }
       top.asJsonObject().getObject("configuration").getObject("body").removeField("leftChild");
       top.asJsonObject().getObject("configuration").getObject("body").removeField("rightChild");
       result.putObject(top.getNodeId(), top.asJsonObject());
@@ -171,7 +184,7 @@ public class WorkflowPlan extends DataType implements Plan {
       if (current instanceof RelationNode) {
         if (current instanceof ScanNode) {
           ScanNode sc = (ScanNode) current;
-          top.addInput(sc.getCanonicalName());
+          top.addInput(sc.getTableDesc().getName());
           result.putObject(top.getNodeId(), top.asJsonObject());
         } else if (current instanceof TableSubQueryNode) {
           TableSubQueryNode tmp = (TableSubQueryNode) current;
@@ -186,16 +199,25 @@ public class WorkflowPlan extends DataType implements Plan {
         } else {
           System.err.println("PROBLEM WITH RELNODE TYPES");
         }
+      } else if (current instanceof EvalExprNode) {
+        EvalExprNode tmp = (EvalExprNode) current;
+        PlanNode currentNode = new PlanNode(tmp, getQueryId());
+        currentNode.addInput("");
+        currentNode.setOutput(top.getOutput());
+        result.putObject(currentNode.getNodeId(), currentNode.asJsonObject());
+        setIsSpecial(true);
       } else {
         System.err.println("PROBLEM WITH NODE TYPES");
       }
 
     }
   }
+  public void setIsSpecial(boolean isSpecial) {
+    data.putBoolean("planIsSpecial", true);
+  }
 
-  @Override public PlanNode getOutput() {
-    PlanNode result = new PlanNode(data.getObject("output"));
-    return result;
+  public boolean getIsSpecial() {
+    return data.getBoolean("planIsSpecial", false);
   }
 
   @Override public void setOutput(PlanNode node) {
@@ -236,12 +258,16 @@ public class WorkflowPlan extends DataType implements Plan {
   }
 
   @Override public void setRootNode(JsonObject rootNode) {
-    data.putObject("rootNode", rootNode);
+    ;
   }
 
   @Override public void setRootNode(LogicalRootNode rootNode) {
-    JsonObject jsonObject = new JsonObject(rootNode.toJson());
-    setRootNode(jsonObject);
+    data.putObject("rootNode", new JsonObject(rootNode.toJson()));
+  }
+
+  @Override public PlanNode getOutput() {
+    PlanNode result = new PlanNode(data.getObject("output"));
+    return result;
   }
 
   @Override public JsonObject getPlanGraph() {

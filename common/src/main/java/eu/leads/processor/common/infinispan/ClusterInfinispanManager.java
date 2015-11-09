@@ -6,6 +6,7 @@ import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.NutchLocalListener;
+import org.apache.commons.io.FileUtils;
 import org.infinispan.Cache;
 import org.infinispan.commands.RemoveCacheCommand;
 import org.infinispan.configuration.cache.CacheMode;
@@ -86,6 +87,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
   private int indexwriter_ram_buffer_size =64;
   private CompressionType compressionType = CompressionType.NONE;
   private int segments = 54;
+  private int operationCounter = 0;
   //  private static final EquivalentConcurrentHashMapV8<String, TestResources> testResources = new EquivalentConcurrentHashMapV8<>(AnyEquivalence.getInstance(), AnyEquivalence.getInstance());
 
   /**
@@ -263,6 +265,7 @@ public class ClusterInfinispanManager implements InfinispanManager {
     getInMemoryCache(StringConstants.DEFAULT_DATABASE_NAME + ".uservisits.compressed", 4000);
     listener = new BatchPutListener(StringConstants.DEFAULT_DATABASE_NAME+".uservisits.compressed",StringConstants.DEFAULT_DATABASE_NAME+".uservisits");
     addListener(listener, StringConstants.DEFAULT_DATABASE_NAME + ".uservisits.compressed");
+    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".greptable");
     getPersisentCache("leads.processor.catalog.tablespaces");
     getPersisentCache("leads.processor.catalog.databases");
     getPersisentCache("leads.processor.catalog.functions");
@@ -743,6 +746,56 @@ public class ClusterInfinispanManager implements InfinispanManager {
         log.error("Exception while remove " + name + " " + e.getClass().toString() + " " + e.getMessage());
       }
     }
+    try {
+      FileUtils.deleteDirectory(new File("/tmp/leadsprocessor-data/"+uniquePath+"/leveldb/data/"+name));
+      FileUtils.deleteDirectory(new File("/tmp/leadsprocessor-data/"+uniquePath+"/leveldb/expired/"+name));
+      operationCounter= (operationCounter+ 1)%Integer.MAX_VALUE;
+      if(operationCounter % 1000 == 0){
+        clearDirs();
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+  }
+
+  private void clearDirs() {
+    File f = new File("/tmp/leadsprocessor-data/"+uniquePath+"/leveldb/expired/");
+    File[] toDelete = f.listFiles(new FilenameFilter() {
+      @Override public boolean accept(File file, String s) {
+        if(file.getName().startsWith("leads") || file.getName().startsWith("adidas.")){
+          return true;
+        }
+        return false;
+      }
+    });
+
+    for(File old : toDelete){
+      try {
+        FileUtils.forceDelete(old);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+
+    f = new File("/tmp/leadsprocessor-data/"+uniquePath+"/leveldb/data/");
+     toDelete = f.listFiles(new FilenameFilter() {
+      @Override public boolean accept(File file, String s) {
+        if(file.getName().startsWith("leads.") || file.getName().startsWith("adidas.")){
+          return true;
+        }
+        return false;
+      }
+    });
+
+    for(File old : toDelete){
+      try {
+        FileUtils.forceDelete(old);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+
   }
 
   /**

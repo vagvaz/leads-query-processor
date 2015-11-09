@@ -230,7 +230,7 @@ app.resources["REDIRECT_BLACK_URLS_LIST"] = [
 "sneakerswitch",
 "/enlightened"
 ];
-// product availability messages
+// grep availability messages
 app.resources["IN_STOCK"]="Auf Lager";
 app.resources["QTY_IN_STOCK"]="{0}Artikel auf Lager";
 app.resources["PREORDER"]="<span style=\"color:green;font-weight:bold;\">Jetzt vorbestellen!</span> Nur noch {0} Tage für die Vorbestellung";
@@ -5674,7 +5674,7 @@ adidas.Analytics.tagPageElement.apply(adidas.Analytics,["PERSONALIZE: HOVER: CUS
 
 
 <script type="text/javascript"><!--
-// THIS MUST BE CALLED BEFORE ANY app.product calls!!!
+// THIS MUST BE CALLED BEFORE ANY app.grep calls!!!
 // execute unobtrusive js code
 app.execUjs();
 jQuery(document).ready(function(){
@@ -6097,7 +6097,7 @@ if(dw&&dw.__ac){dw.__ac.page({category: 'men-Shoes'})};
 
 
 
-<div class="productinfo " itemprop="offers" itemscope itemtype="http://schema.org/Offer"> <!-- dwMarker="product" dwContentID="de1nUiaagOcdYaaadblx6KmiRG" -->
+<div class="productinfo " itemprop="offers" itemscope itemtype="http://schema.org/Offer"> <!-- dwMarker="grep" dwContentID="de1nUiaagOcdYaaadblx6KmiRG" -->
 
 <div class="product_shipping_info">
 
@@ -7866,23 +7866,23 @@ width:142px;
 
 <script>
 /*
-$( "#product-grid" ).on( "click", ".hockeycard .image", function() {
+$( "#grep-grid" ).on( "click", ".hockeycard .image", function() {
     cmCreateElementTag("Image", "Hockeycard");
 });
 
-$( "#product-grid" ).on( "click", ".hockeycard .swatches img", function() {
+$( "#grep-grid" ).on( "click", ".hockeycard .swatches img", function() {
     cmCreateElementTag("Swatches", "Hockeycard");
 });
 
-$( "#product-grid" ).on( "click", ".hockeycard a div", function() {
+$( "#grep-grid" ).on( "click", ".hockeycard a div", function() {
     cmCreateElementTag("Link", "Hockeycard");
 });
 
-$( "#product-grid" ).on( "click", ".hockeycard .buttons button", function() {
+$( "#grep-grid" ).on( "click", ".hockeycard .buttons button", function() {
     cmCreateElementTag($(this).data('action'), "Hockeycard");
 });
 
-$( "#product-grid" ).on( "click", ".hockeycard .buttons a", function() {
+$( "#grep-grid" ).on( "click", ".hockeycard .buttons a", function() {
     cmCreateElementTag("Customize", "Hockeycard");
 });
 */

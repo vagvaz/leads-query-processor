@@ -16,7 +16,7 @@
         <module>topk-plugin</module>
         <module>synopses-test-plugin</module>
         <module>adidas-processing-plugin</module>
-        <module>product-plugin</module>
+        <module>grep-plugin</module>
     </modules>
 
 

@@ -80,7 +80,7 @@ public class lib {
 			}
 		}
 		
-		// now compute local inner product
+		// now compute local inner grep
 		double minMaxInnerProductPerRow = Double.MAX_VALUE;
 		double minMinInnerProductPerRow = Double.MAX_VALUE;
 		for (int dcnt = 0; dcnt < d; dcnt++) {
@@ -111,7 +111,7 @@ public class lib {
 			radius[dcnt] = Math.abs(currentEstimation[dcnt]-drift[dcnt])/2d;
 		}
 		
-		// now compute local inner product
+		// now compute local inner grep
 		double minMaxValue = Double.MAX_VALUE;
 		double minMinValue = Double.MAX_VALUE;
 		for (int dcnt = 0; dcnt < d; dcnt++) {
@@ -316,7 +316,7 @@ public class lib {
 //			DeltaV[singleRow] = (sketchEstimations[wcnt][singleRow] - lastSyncedLocal[wcnt][singleRow]);
 //			if (currentEstimation[singleRow]<minDiff) {minDiff=currentEstimation[singleRow];smallestDiffRow=singleRow;}
 //		}
-//		// now compute local inner product
+//		// now compute local inner grep
 //		double minMaxValue = Double.MAX_VALUE;
 //		double minMinValue = Double.MAX_VALUE;
 //
@@ -348,7 +348,7 @@ public class lib {
 		DeltaV[singleRow] = (sketchEstimations[wcnt][singleRow] - lastSyncedLocal[wcnt][singleRow]);
 		if (currentEstimation[singleRow]<minScore) {minScore=currentEstimation[singleRow];bestRow=singleRow;}
 		
-		// now compute local inner product
+		// now compute local inner grep
 		double minMaxValue = Double.MAX_VALUE;
 		double minMinValue = Double.MAX_VALUE;
 
@@ -382,7 +382,7 @@ public class lib {
 			if (currentEstimation[dcnt]<minScore) {minScore=currentEstimation[dcnt];bestRow=dcnt;}
 		}
 		
-		// now compute local inner product
+		// now compute local inner grep
 		double minMaxValue = Double.MAX_VALUE;
 		double minMinValue = Double.MAX_VALUE;
 
@@ -423,7 +423,7 @@ public class lib {
 			radiusMagnitude[dcnt] = lib.getMagnitude(radius);
 		}
 		
-		// now compute local inner product
+		// now compute local inner grep
 		double minMaxInnerProductPerRow = Double.MAX_VALUE;
 		double minMinInnerProductPerRow = Double.MAX_VALUE;
 		for (int dcnt = 0; dcnt < d; dcnt++) {
@@ -468,7 +468,7 @@ public class lib {
 			}
 		}
 		
-		// now compute local inner product
+		// now compute local inner grep
 		double minMaxInnerProductPerRow = Double.MAX_VALUE;
 		double minMinInnerProductPerRow = Double.MAX_VALUE;
 		for (int dcnt = 0; dcnt < d; dcnt++) {
@@ -645,7 +645,7 @@ public class lib {
 			radiusMagnitude[dcnt] = lib.getMagnitudeOfRowMultipliedByNodes(radius, dcnt,numberOfNodes);
 		}
 		
-		// now compute local inner product
+		// now compute local inner grep
 		double minMaxInnerProductPerRow = Double.MAX_VALUE;
 		double minMinInnerProductPerRow = Double.MAX_VALUE;
 		for (int dcnt = 0; dcnt < d; dcnt++) {

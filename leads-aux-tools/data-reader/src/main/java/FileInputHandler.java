@@ -28,6 +28,7 @@ public class FileInputHandler<K extends Serializable, V> implements InputHandler
     File[] files;
     int currentFile = 0;
     long numberOfValues;
+    private boolean fullyRead = false;
 
     @Override public void initialize(Properties conf) {
         if (conf.containsKey("limit")) {
@@ -148,16 +149,18 @@ public class FileInputHandler<K extends Serializable, V> implements InputHandler
         if (numberOfValues >= limit) {
             return false;
         }
-        if (currentFile < files.length) {
+        if(fullyRead)
+            return false;
+        if (currentFile <= files.length) {
             result = true;
         } else {
-            try {
-                if (keyReader.available() > 0) {
-                    result = true;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                if (keyReader.available() > 0) {
+//                    result = true;
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
         return result;
     }
@@ -168,17 +171,7 @@ public class FileInputHandler<K extends Serializable, V> implements InputHandler
         if (numberOfValues >= limit) {
             return null;
         }
-        try {
-            if (keyReader.available() == 0) {
-                if (currentFile < files.length) {
-                    useFile(files[currentFile]);
-                    currentFile++;
-                    return next();
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
         try {
             if (defaultValue instanceof WebPage || defaultValue instanceof GenericData.Record) {
                 //                int byteSize = keyReader.readInt();
@@ -195,7 +188,20 @@ public class FileInputHandler<K extends Serializable, V> implements InputHandler
                 return new AbstractMap.SimpleEntry<K, V>(key, value);
             }
         } catch (EOFException eof) {
-
+//            try {
+//                if (keyReader.available() == 0) {
+                    if (currentFile < files.length) {
+                        useFile(files[currentFile]);
+                        currentFile++;
+                        return next();
+                    } else{
+                        fullyRead = true;
+                        return null;
+                    }
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
 
         } catch (IOException e) {
             e.printStackTrace();

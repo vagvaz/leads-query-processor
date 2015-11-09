@@ -15,6 +15,9 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Verticle;
+
+import java.util.logging.FileHandler;
+
 /**
  * Created by vagvaz on 8/3/14.
  */
@@ -87,7 +90,7 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
     Handler<HttpServerRequest> stopCQLHandler = new StopCQLHandler(com,log);
     Handler<HttpServerRequest> removeListenerHandler = new RemoveListenerHandler(com,log);
     Handler<HttpServerRequest> addListenerHandler = new AddListenerHandler(com,log);
-
+    Handler<HttpServerRequest> fileHandler = new WebFileHandler(com,log);
     //object
     failHandler = new Handler<HttpServerRequest>() {
       @Override
@@ -124,6 +127,8 @@ public class LeadsWebServerVerticle extends Verticle implements LeadsMessageHand
     //
     //      //query   [a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+\-[a-zA-Z0-9]+
     matcher.get("/rest/query/status/:id", getQueryStatusHandler);
+
+    matcher.get("/files/:file", fileHandler);
     //      //id:[a-zA-Z0-9]+@[a-zA-Z0-9]+}/{min:[0-9]+}/{max:[0-9]+}
     matcher.get("/rest/query/results/:id/min/:min/max/:max", getResultsHandler);
     matcher.get("/rest/query/webresults/:id/", getWebResultsHandler);
