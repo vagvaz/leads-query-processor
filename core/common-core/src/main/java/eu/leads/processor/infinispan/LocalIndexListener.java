@@ -87,7 +87,7 @@ import java.util.List;
   @CacheEntryCreated public void created(CacheEntryCreatedEvent event) {
     if (isDirty) {
       System.err.println("DIRTY === ");
-      System.exit(-1);
+//      System.exit(-1);
     }
     if (event.isPre()) {
       return;
@@ -114,7 +114,7 @@ import java.util.List;
   @CacheEntryModified public void modified(CacheEntryModifiedEvent event) {
     if (isDirty) {
       System.err.println("DIRTY ++++++=== ");
-      System.exit(-1);
+//      System.exit(-1);
     }
     if (event.isPre()) {
       //            ComplexIntermediateKey key = (ComplexIntermediateKey) event.getKey();
