@@ -134,6 +134,7 @@ public class GrepPlugin implements PluginInterface {
     summaryMap = (BasicCache) infinispanManager.getPersisentCache(targetCacheName+".count");
     if(globalEnsembleString==null || localEnsembleString == null){
       PrintUtilities.printAndLog(log,"global: " + globalEnsembleString + " local " + localEnsembleString);
+      return;
     } else{
       countManager = new EnsembleCacheManager(localEnsembleString);
       countManager.start();
@@ -144,6 +145,7 @@ public class GrepPlugin implements PluginInterface {
       summaryMap = countManager.getCache(targetCacheName+".count", new ArrayList<>(countManager.sites()),
           EnsembleCacheManager.Consistency.DIST);
     }
+    PrintUtilities.printAndLog(log,"2global: " + globalEnsembleString + " 2local " + localEnsembleString);
     //Create thread that periodically updates the caches from the local data
     thread = new Thread(new Runnable() {
       @Override public void run() {
