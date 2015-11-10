@@ -275,6 +275,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
     BatchPutListener batchPutListener = new BatchPutListener("batchputTest.compressed","batchputTest");
     addListener(batchPutListener, "batchputTest.compressed");
 
+    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".greptable");
+
     putAdidasKeyWords(adidasKeywords);
     putUriDirData(uridirCache);
     putUriDirEcomData(uridirCacheEcom);
