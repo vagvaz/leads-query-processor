@@ -3,6 +3,7 @@ package eu.leads.processor.infinispan;
 import eu.leads.processor.common.LeadsListener;
 import eu.leads.processor.core.EngineUtils;
 import eu.leads.processor.core.LevelDBIndex;
+import eu.leads.processor.core.MapDBIndex;
 import org.infinispan.Cache;
 import org.infinispan.interceptors.locking.ClusteringDependentLogic;
 
@@ -22,7 +23,7 @@ public class LeadsReducerCallable<kOut, vOut> extends LeadsBaseCallable<kOut, Ob
   //    private LeadsCollector collector;
   private String prefix;
   //    private transient LevelDBIndex index;
-  private transient LevelDBIndex index;
+  private transient MapDBIndex index;
   private transient LeadsListener leadsListener;
   private transient Iterator<Map.Entry<String, Integer>> iterator;
 
