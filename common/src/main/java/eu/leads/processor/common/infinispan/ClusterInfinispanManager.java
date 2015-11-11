@@ -266,6 +266,8 @@ public class ClusterInfinispanManager implements InfinispanManager {
     listener = new BatchPutListener(StringConstants.DEFAULT_DATABASE_NAME+".uservisits.compressed",StringConstants.DEFAULT_DATABASE_NAME+".uservisits");
     addListener(listener, StringConstants.DEFAULT_DATABASE_NAME + ".uservisits.compressed");
     getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".greptable");
+    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".demo");
+    getPersisentCache(StringConstants.DEFAULT_DATABASE_NAME+".demo.count");
     getPersisentCache("leads.processor.catalog.tablespaces");
     getPersisentCache("leads.processor.catalog.databases");
     getPersisentCache("leads.processor.catalog.functions");
