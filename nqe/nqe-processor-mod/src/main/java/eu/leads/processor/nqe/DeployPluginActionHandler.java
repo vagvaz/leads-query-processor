@@ -1,6 +1,7 @@
 package eu.leads.processor.nqe;
 
 import eu.leads.processor.common.StringConstants;
+import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.infinispan.PluginHandlerListener;
 import eu.leads.processor.common.plugins.PluginManager;
@@ -24,6 +25,7 @@ import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.ensemble.EnsembleCacheManager;
+import org.infinispan.ensemble.cache.EnsembleCache;
 import org.vertx.java.core.json.JsonObject;
 
 import java.util.ArrayList;
@@ -44,7 +46,7 @@ public class DeployPluginActionHandler implements ActionHandler {
   private Map<String,String> informEndpoints;
   private BasicCache ownersPlugins;
   private BasicCache activePlugins;
-  private BasicCache pluginRepository;
+  private EnsembleCache pluginRepository;
   private LeadsStorage storage;
   private JsonObject globalConfig;
   private EnsembleCacheManager emanager;
@@ -137,7 +139,7 @@ public class DeployPluginActionHandler implements ActionHandler {
        }
        //CHeck plugin if exists
 
-       PluginPackage plugin = (PluginPackage) pluginRepository.get(pluginId);
+       PluginPackage plugin = (PluginPackage) EnsembleCacheUtils.getFromCache(pluginRepository,pluginId);
        //plugin.setConfig(config.toString().getBytes());
        if(plugin == null){
          result.setStatus(ActionStatus.FAILED.toString());

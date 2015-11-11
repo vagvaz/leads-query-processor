@@ -258,6 +258,7 @@ public class MapDBIndex {
   //
 
   public void close() {
+    System.err.println("\n\n\n\nCLOSING INDEX BEFORE READING ");
     if (keyIterator != null) {
       //      keyIterator.close();
 

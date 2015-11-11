@@ -79,10 +79,10 @@ public class EngineUtils {
 
   public static void waitForAllExecute() {
 
-    while (executor.getActiveCount() > 0)
+    while (runnables.size() !=  10*(threadBatch) )
       //            System.out.println("sleeping because run " + runnables.size() + " and " + threadBatch );
       try {
-        //            executor.awaitTermination(100,TimeUnit.MILLISECONDS);
+//                    executor.awaitTermination(100,TimeUnit.MILLISECONDS);
         Thread.sleep(100);
       } catch (InterruptedException e) {
         e.printStackTrace();

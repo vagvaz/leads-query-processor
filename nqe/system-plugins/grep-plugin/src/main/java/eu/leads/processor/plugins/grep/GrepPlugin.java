@@ -18,12 +18,11 @@ public class GrepPlugin implements PluginInterface {
   private BasicCache grepCache;
   private BasicCache summaryMap;
   private List<String> products;
-  private Logger log = LoggerFactory.getLogger(GrepPlugin.class);
+  private Logger log;
   private String globalEnsembleString;
   private String localEnsembleString;
   private EnsembleCacheManager globalManager;
   private EnsembleCacheManager countManager;
-  private Logger logger = LoggerFactory.getLogger(this.getClassName());
   private Map<String,Integer> countMap;
   private Map<String,String> urlMap;
   private Thread thread;
@@ -125,6 +124,7 @@ public class GrepPlugin implements PluginInterface {
   }
 
   private void initStructures(InfinispanManager infinispanManager) {
+    log = LoggerFactory.getLogger(GrepPlugin.class);
     //initialize maps
     countMap = new HashMap<>();
     urlMap = new HashMap<>();
