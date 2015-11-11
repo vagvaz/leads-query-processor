@@ -7,6 +7,7 @@ import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.utils.ProfileEvent;
 import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.LevelDBIndex;
+import eu.leads.processor.core.MapDBIndex;
 import org.infinispan.Cache;
 import org.infinispan.notifications.Listener;
 import org.infinispan.notifications.cachelistener.annotation.CacheEntryCreated;
@@ -29,7 +30,7 @@ import java.util.List;
   String cacheName;
   //    transient LevelDBIndex index;
   //    transient List<LevelDBIndex> indexes;
-  transient List<LevelDBIndex> indexes;
+  transient List<MapDBIndex> indexes;
   transient Cache targetCache;
   transient Cache keysCache;
   transient Cache dataCache;
@@ -55,7 +56,7 @@ import java.util.List;
   //        return indexes.get(i);
   //    }
 
-  public LevelDBIndex getIndex(int i) {
+  public MapDBIndex getIndex(int i) {
     isDirty = true;
     return indexes.get(i);
   }
@@ -64,7 +65,7 @@ import java.util.List;
   //    public void setIndex(LevelDBIndex index,int i) {
   //        this.indexes.set(i,index);
   //    }
-  public List<LevelDBIndex> getIndexes() {
+  public List<MapDBIndex> getIndexes() {
     return indexes;
   }
 
@@ -87,7 +88,7 @@ import java.util.List;
   @CacheEntryCreated public void created(CacheEntryCreatedEvent event) {
     if (isDirty) {
       System.err.println("DIRTY === ");
-      System.exit(-1);
+//      System.exit(-1);
     }
     if (event.isPre()) {
       return;
@@ -114,7 +115,7 @@ import java.util.List;
   @CacheEntryModified public void modified(CacheEntryModifiedEvent event) {
     if (isDirty) {
       System.err.println("DIRTY ++++++=== ");
-      System.exit(-1);
+//      System.exit(-1);
     }
     if (event.isPre()) {
       //            ComplexIntermediateKey key = (ComplexIntermediateKey) event.getKey();
@@ -155,7 +156,7 @@ import java.util.List;
     parallelism = LQPConfiguration.getInstance().getConfiguration().getInt("node.engine.parallelism", 4);
     indexes = new ArrayList<>(parallelism);
     for (int i = 0; i < parallelism; i++) {
-      indexes.add(new LevelDBIndex(
+      indexes.add(new MapDBIndex(
           System.getProperties().getProperty("java.io.tmpdir") + "/" + StringConstants.TMPPREFIX + "/interm-index/"
               + InfinispanClusterSingleton.getInstance().getManager().getUniquePath() + "/" + cacheName + i,
           cacheName + ".index-" + i));
@@ -175,7 +176,7 @@ import java.util.List;
   }
 
   @Override public void close() {
-    for (LevelDBIndex index : indexes) {
+    for (MapDBIndex index : indexes) {
       index.flush();
       index.close();
     }
@@ -201,7 +202,7 @@ import java.util.List;
 
   void waitForAllData() {
     System.err.println("get the size of target");
-    for (LevelDBIndex index : indexes) {
+    for (MapDBIndex index : indexes) {
       index.flush();
     }
 

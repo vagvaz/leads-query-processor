@@ -69,17 +69,15 @@ public class Pagerank {
           googlePrResult = googlePrResult.split(":")[2].trim();
           result = new Double(googlePrResult).intValue();
         } catch (Exception te) {
-          if (te instanceof TimeoutException) {
-
             random.setSeed(uri.hashCode());
             result = (Math.floor( random.nextDouble() * 100)) / 10.0f;
             System.err.println("e: " + te.getMessage());
-          }else{
-            te.printStackTrace();
-          }
         }
       } catch (Exception e) {
         e.printStackTrace();
+        random.setSeed(uri.hashCode());
+        result = (Math.floor( random.nextDouble() * 100)) / 10.0f;
+        System.err.println("e: " + e.getMessage());
       }
       cache.put(domain,result);
     }

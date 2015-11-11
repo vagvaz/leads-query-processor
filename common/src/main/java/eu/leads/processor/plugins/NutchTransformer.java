@@ -72,7 +72,7 @@ public class NutchTransformer {
          else if (entry.getValue().equals("domainName")){
             String transforUri = transformUri((String) wp.get("url"));
             try {
-               tuple.setAttribute("default.webpages.domainName",Pagerank.getDomainName(transforUri));
+               tuple.setAttribute("default.webpages.domainname",Pagerank.getDomainName(transforUri));
             } catch (URISyntaxException e) {
                e.printStackTrace();
             }

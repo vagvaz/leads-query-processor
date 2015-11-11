@@ -18,18 +18,17 @@ public class GrepPlugin implements PluginInterface {
   private BasicCache grepCache;
   private BasicCache summaryMap;
   private List<String> products;
-  private Logger log = LoggerFactory.getLogger(GrepPlugin.class);
+  private Logger log;
   private String globalEnsembleString;
   private String localEnsembleString;
   private EnsembleCacheManager globalManager;
   private EnsembleCacheManager countManager;
-  private Logger logger = LoggerFactory.getLogger(this.getClassName());
   private Map<String,Integer> countMap;
   private Map<String,String> urlMap;
   private Thread thread;
   private String targetCacheName;
   private Configuration configuration;
-  private String installedCacheName;
+  private String installedCacheName = "default.webpages";
 
 
   @Override
@@ -125,6 +124,7 @@ public class GrepPlugin implements PluginInterface {
   }
 
   private void initStructures(InfinispanManager infinispanManager) {
+    log = LoggerFactory.getLogger(GrepPlugin.class);
     //initialize maps
     countMap = new HashMap<>();
     urlMap = new HashMap<>();
@@ -134,6 +134,7 @@ public class GrepPlugin implements PluginInterface {
     summaryMap = (BasicCache) infinispanManager.getPersisentCache(targetCacheName+".count");
     if(globalEnsembleString==null || localEnsembleString == null){
       PrintUtilities.printAndLog(log,"global: " + globalEnsembleString + " local " + localEnsembleString);
+      return;
     } else{
       countManager = new EnsembleCacheManager(localEnsembleString);
       countManager.start();
@@ -144,6 +145,7 @@ public class GrepPlugin implements PluginInterface {
       summaryMap = countManager.getCache(targetCacheName+".count", new ArrayList<>(countManager.sites()),
           EnsembleCacheManager.Consistency.DIST);
     }
+    PrintUtilities.printAndLog(log,"2global: " + globalEnsembleString + " 2local " + localEnsembleString);
     //Create thread that periodically updates the caches from the local data
     thread = new Thread(new Runnable() {
       @Override public void run() {
