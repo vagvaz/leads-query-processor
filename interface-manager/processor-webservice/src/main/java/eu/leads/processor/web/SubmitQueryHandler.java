@@ -15,6 +15,7 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.logging.Logger;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -115,7 +116,6 @@ public class SubmitQueryHandler implements Handler<HttpServerRequest> {
             if (Strings.isNullOrEmpty(query) || query.equals("{}")) {
                 replyHandler.replyForError(null);
             }
-            JsonObject object = new JsonObject();
 
             Action action = new Action();
             action.setId(requestId);
@@ -126,8 +126,22 @@ public class SubmitQueryHandler implements Handler<HttpServerRequest> {
                 action.setLabel(IManagerConstants.QUIT);
                 action.setComponentType("webservice");
                 com.sendToAllGroup("leads.processor.control", action.asJsonObject());
+                    if(com.getConfig().containsField("webserviceAddrs")) {
+                        JsonArray webAddress = com.getConfig().getArray("webserviceAddrs"); //contains other webservice address
+                        for (Object addrs : webAddress.toList()) {
+                            try {
+                                System.out.println("WebService connect to " + addrs);
+                                WebServiceClient.initialize((String) addrs);
+                                System.out.println("Send quit to " + addrs);
+                                WebServiceClient.submitQuery("leads", queryJ.getString("sql"));
+                            } catch (IOException e) {
+                                System.err.println("Unable to send quit to" + addrs);
+                                e.printStackTrace();
+                            }
+                        }
+                    }
 
-            }
+             }
             else {
                 action.setLabel(IManagerConstants.SUBMIT_QUERY);
                 action.setOwnerId(com.getId());

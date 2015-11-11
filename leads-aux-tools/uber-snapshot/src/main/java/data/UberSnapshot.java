@@ -7,14 +7,14 @@ import eu.leads.processor.core.Tuple;
 import eu.leads.processor.plugins.pagerank.node.DSPMNode;
 import org.infinispan.Cache;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
+import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.util.CloseableIterable;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.vertx.java.core.json.JsonObject;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by vagvaz on 10/29/14.
@@ -225,7 +225,7 @@ public class
 
    private static void loadCacheTo(String s, String arg) throws IOException {
       String cacheName = s;
-      Map cache =  manager.getCache(cacheName);
+      BasicCache cache =  manager.getCache(cacheName);
       BufferedReader keyReader = new BufferedReader(new InputStreamReader(new FileInputStream(arg+"/"+cacheName+".keys")));
 //        BufferedReader sizeReader = new BufferedReader(new InputStreamReader(new FileInputStream(dir+"/"+cacheName+".sizes")));
       BufferedReader valueReader = new BufferedReader(new InputStreamReader(new FileInputStream(arg+"/"+cacheName+".values")));
@@ -248,6 +248,9 @@ public class
                if(valueLine != null && !valueLine.trim().equals("")) {
                   JsonObject ob = new JsonObject(valueLine);
                  Tuple tuple = new Tuple(valueLine.trim());
+                  if(cache.getName().startsWith("default.")) {
+                     renameAllAttributes(cache.getName(), tuple);
+                  }
                   try {
                      cache.put(keyLine.trim(), tuple);
 
@@ -274,6 +277,20 @@ public class
          e.printStackTrace();
       }
    }
+
+   private static void renameAllAttributes(String name, Tuple tuple) {
+      Set<String> attributes =  tuple.getFieldNames();
+      Map<String,List<String>> renameMap = new HashMap<>();
+      for(String at : attributes){
+         List<String> array = new ArrayList<>();
+         array.add(name+"."+at);
+         if(!at.startsWith(name)){
+            renameMap.put(at,array);
+         }
+      }
+      tuple.renameAttributes(renameMap);
+   }
+
    private static void loadDataEmbedded(String[] args) throws IOException, ClassNotFoundException {
       System.out.println("loading webpages");
          loadCache("default.webpages",args[1]);

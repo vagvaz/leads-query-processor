@@ -11,6 +11,7 @@ import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.ensemble.EnsembleCacheManager;
+import org.infinispan.ensemble.Site;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -36,7 +37,7 @@ public class SubmitWordCountTest {
   private static final String HAMM5_IP = "5.147.254.161";
   private static final String HAMM6_IP = "5.147.254.199";
   private static final String LOCAL = "127.0.0.1";
-  private static final String CACHE_NAME = "default.keywords";
+  private static final String CACHE_NAME = "default.page_core";
   private static final int PUT_THREADS_COUNT = 100;
   private static Map<String,String> microcloudAddresses;
   private static Map<String,String> activeIps;
@@ -99,7 +100,7 @@ public class SubmitWordCountTest {
             // put the remaining lines
             ensembleCache.put(id + "-" + String.valueOf(putCount++), new Tuple(data.toString()));
           }
-
+          Object value = getKeyFrom(ensembleCache,(Object)id);
           bufferedReader.close();
         } catch (FileNotFoundException e) {
           e.printStackTrace();
@@ -108,6 +109,19 @@ public class SubmitWordCountTest {
         }
       }
     }
+
+    private Object getKeyFrom(EnsembleCache ensembleCache, Object key) {
+      Object result = null;
+      for(Object s : ensembleCache.sites()){
+        EnsembleCache siteCache  = ((Site)s).getCache(ensembleCache.getName());
+        result = siteCache.get(key);
+        if(result != null) {
+          return result;
+        }
+      }
+      return result;
+    }
+
   }
 
   private static void putData(String dataDirectory) {
@@ -253,10 +267,12 @@ public class SubmitWordCountTest {
     if(combine) {
       jsonObject.getObject("operator").putString("combine", "1");
     }
-    reduceLocal = false;
+    reduceLocal = true;
     if (reduceLocal) {
       jsonObject.getObject("operator").putString("reduceLocal", "true");
     }
+//    jsonObject.getObject("operator").putString("recComposableReduce","recComposableReduce");
+    jsonObject.getObject("operator").putString("recComposableLocalReduce","recComposableLocalReduce");
     JsonObject targetEndpoints = scheduling;
     jsonObject.getObject("operator").putObject("targetEndpoints",targetEndpoints);
     //                   new JsonObject()
@@ -290,19 +306,20 @@ public class SubmitWordCountTest {
                                               new ArrayList<>(ensembleCacheManager.sites()),
                                               EnsembleCacheManager.Consistency.DIST);
 
-            String[] lines = {"this is a line",
-                              "arnaki aspro kai paxy",
-                              "ths manas to kamari",
-                              "this another line is yoda said",
-                              "rudolf to elafaki",
-                              "na fame pilafaki"};
+//            String[] lines = {"this is a line",
+//                              "arnaki aspro kai paxy",
+//                              "ths manas to kamari",
+//                              "this another line is yoda said",
+//                              "rudolf to elafaki",
+//                              "na fame pilafaki"};
 
+      String[] lines = {"this is a line arnaki aspro kai paxy         ths manas to kamari           this another line is yoda said     rudolf to elafaki       na fame pilafaki"};
             JsonObject data;
             System.out.print("Loading data to '" + CACHE_NAME + "' cache\n ");
             data = new JsonObject();
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < 200; i++) {
               data.putString(String.valueOf(i), lines[i % lines.length]);
-              if ((i + 1) % 100 == 0) {
+              if ((i + 1) % 1 == 0) {
                 ensembleCache.put(String.valueOf(i), new Tuple(data.toString()));
                 data = new JsonObject();
               }
@@ -335,7 +352,7 @@ public class SubmitWordCountTest {
 
       printResults(id, 5);
       verifyResults(id, resultWords, ensembleString);
-      printResults("metrics");
+//      printResults("metrics");
 
       System.out.println("\nDONE IN: " + secs + " sec");
 

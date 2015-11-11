@@ -34,7 +34,8 @@ public class BatchPutListener implements LeadsListener {
     private transient Cache targetCache;
     private transient ConcurrentMap<NotifyingFuture<Void>,NotifyingFuture<Void>> futures;
     private transient Object mutex = null;
-    private Logger log = LoggerFactory.getLogger(BatchPutListener.class);
+    private transient  EnsembleCacheUtilsSingle ensembleCacheUtilsSingle;
+    private transient Logger log = LoggerFactory.getLogger(BatchPutListener.class);
 
     public BatchPutListener(String compressedCache,String targetCacheName){
         this.compressedCache = compressedCache;
@@ -56,9 +57,12 @@ public class BatchPutListener implements LeadsListener {
                 targetCacheName = conf.getString("target");
             }
         }
+        System.err.println("get target cache");
         targetCache = (Cache) manager.getPersisentCache(targetCacheName);
         futures = new ConcurrentHashMap<>();
-
+        System.err.println("init ensembleCacheUtilsSingle");
+        ensembleCacheUtilsSingle  = new EnsembleCacheUtilsSingle();
+        System.err.println("end");
     }
 
     @Override public void initialize(InfinispanManager manager) {
@@ -73,6 +77,10 @@ public class BatchPutListener implements LeadsListener {
         futures.clear();
         targetCache = null;
         manager = null;
+    }
+
+    @Override public void setConfString(String s) {
+
     }
 
     @CacheEntryCreated
@@ -92,10 +100,13 @@ public class BatchPutListener implements LeadsListener {
                 return;
             }
             TupleBuffer tupleBuffer = new TupleBuffer((byte[]) value);
-            Map tmpb = new HashMap();
+//            Map tmpb = new HashMap();
             for (Map.Entry<Object, Object> entry : tupleBuffer.getBuffer().entrySet()) {
-                EnsembleCacheUtils.putToCacheDirect(targetCache,entry.getKey(),entry.getValue());
+                ensembleCacheUtilsSingle.putToCacheDirect(targetCache,entry.getKey(),entry.getValue());
             }
+//            tupleBuffer.flushToCache(targetCache);
+//            NotifyingFuture f = tupleBuffer.flushToCache(targetCache);
+//            futures.put(f,f);
             tupleBuffer.getBuffer().clear();
             tupleBuffer = null;
 
@@ -121,8 +132,8 @@ public class BatchPutListener implements LeadsListener {
         while(!isok){
 
             try {
-                EnsembleCacheUtils.waitForAuxPuts();
-            } catch (InterruptedException e) {
+                ensembleCacheUtilsSingle.waitForAuxPuts();
+            } catch (Exception e) {
                 PrintUtilities.logStackTrace(log,e.getStackTrace());
             }
             try{

@@ -37,4 +37,5 @@ public interface LeadsListener extends Serializable {
     public void close();
 
 
+    void setConfString(String s);
 }

@@ -17,7 +17,7 @@ import java.util.Properties;
 /**
  * Created by vagvaz on 2/18/15.
  */
-public class GenericMapperCallable<K,V,kOut,vOut> extends LeadsBaseCallable<K,V> {
+public class GenericMapperCallable<K, V, kOut, vOut> extends LeadsBaseCallable<K, V> {
   private String mapperJar;
   private String combinerJar;
   private String mapperClassName;
@@ -27,46 +27,49 @@ public class GenericMapperCallable<K,V,kOut,vOut> extends LeadsBaseCallable<K,V>
   private String storageType;
   private Properties storageConfiguration;
   private String intermediateCacheName;
-  private LeadsCollector<kOut,vOut> collector;
+  private LeadsCollector<kOut, vOut> collector;
   private String tmpdirPrefix;
 
   transient private LeadsMapper mapper;
   transient private LeadsCombiner combiner;
   transient LeadsStorage storageLayer;
   transient Logger log = null;
+
+  public GenericMapperCallable() {
+    super();
+  }
+
   public GenericMapperCallable(String configString, String output) {
     super(configString, output);
   }
 
 
-  @Override
-  public  void initialize(){
+  @Override public void initialize() {
     //Call super initialization
-    log = LoggerFactory.getLogger("GenericCallable" + mapperClassName );
+    log = LoggerFactory.getLogger("GenericCallable" + mapperClassName);
     super.initialize();
 
     //download mapper from storage layer
     //instatiate and initialize with the given configuration
-    storageLayer = LeadsStorageFactory.getInitializedStorage(storageType,storageConfiguration);
-    String localMapJarPath = tmpdirPrefix+"/mapreduce/"+mapperJar+"_"+mapperClassName;
-    storageLayer.download(mapperJar,localMapJarPath);
-    mapper = initializeMapper(localMapJarPath,mapperClassName,mapperConfig);
+    storageLayer = LeadsStorageFactory.getInitializedStorage(storageType, storageConfiguration);
+    String localMapJarPath = tmpdirPrefix + "/mapreduce/" + mapperJar + "_" + mapperClassName;
+    storageLayer.download(mapperJar, localMapJarPath);
+    mapper = initializeMapper(localMapJarPath, mapperClassName, mapperConfig);
 
     //download combiner from storage layer
     //instatiate and initialize with the given configuration
-    String localCombinerPath = tmpdirPrefix +"/mapreduce/"+combinerJar+"_"+combinerClassName;
-    storageLayer.download(combinerJar,localCombinerPath);
-    combiner = initiliazeCombiner(localCombinerPath,combinerClassName,combinerConfig);
+    String localCombinerPath = tmpdirPrefix + "/mapreduce/" + combinerJar + "_" + combinerClassName;
+    storageLayer.download(combinerJar, localCombinerPath);
+    combiner = initiliazeCombiner(localCombinerPath, combinerClassName, combinerConfig);
 
     //initialize cllector
-    collector.initializeCache(inputCache.getName(),imanager);
-//    collector.setCombiner(combiner);
+    collector.initializeCache(inputCache.getName(), imanager);
+    //    collector.setCombiner(combiner);
 
   }
 
 
-  private LeadsCombiner initiliazeCombiner(String localCombinerPath, String combinerClassName,
-                                            byte[] combinerConfig) {
+  private LeadsCombiner initiliazeCombiner(String localCombinerPath, String combinerClassName, byte[] combinerConfig) {
     //Get UrlClassLoader
     //Get instance of the Class
     //Store config to tmpidir
@@ -92,17 +95,17 @@ public class GenericMapperCallable<K,V,kOut,vOut> extends LeadsBaseCallable<K,V>
     }
 
 
-//    ConfigurationUtilities.addToClassPath(jarFileName);
+    //    ConfigurationUtilities.addToClassPath(jarFileName);
     //      .addToClassPath(System.getProperty("java.io.tmpdir") + "/leads/plugins/" + plugName
     //                        + ".jar");
 
     //    byte[] config = (byte[]) cache.get(plugName + ":conf");
     byte[] config = mapperConfig;
-    FSUtilities.flushToTmpDisk(tmpdirPrefix+"/mapreduce/"+mapperJar+"_"+mapperClassName +  "-conf.xml", config);
+    FSUtilities.flushToTmpDisk(tmpdirPrefix + "/mapreduce/" + mapperJar + "_" + mapperClassName + "-conf.xml", config);
     XMLConfiguration pluginConfig = null;
     try {
       pluginConfig =
-        new XMLConfiguration(tmpdirPrefix+"/mapreduce/"+mapperJar+"_"+mapperClassName + "-conf.xml");
+          new XMLConfiguration(tmpdirPrefix + "/mapreduce/" + mapperJar + "_" + mapperClassName + "-conf.xml");
     } catch (ConfigurationException e) {
       e.printStackTrace();
     }
@@ -110,11 +113,10 @@ public class GenericMapperCallable<K,V,kOut,vOut> extends LeadsBaseCallable<K,V>
     String className = mapperClassName;
     if (className != null && !className.equals("")) {
       try {
-        Class<?> mapperClass =
-          Class.forName(mapperClassName, true, classLoader);
+        Class<?> mapperClass = Class.forName(mapperClassName, true, classLoader);
         Constructor<?> con = mapperClass.getConstructor();
         mapper = (LeadsMapper) con.newInstance();
-//        mapper.initialize(pluginConfig, imanager);
+        //        mapper.initialize(pluginConfig, imanager);
         mapper.initialize(pluginConfig);
         result = mapper;
       } catch (ClassNotFoundException e) {
@@ -135,6 +137,6 @@ public class GenericMapperCallable<K,V,kOut,vOut> extends LeadsBaseCallable<K,V>
   }
 
   @Override public void executeOn(K key, V value) {
-    mapper.map(key,value,collector);
+    mapper.map(key, value, collector);
   }
 }

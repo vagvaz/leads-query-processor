@@ -119,22 +119,24 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
     }
     ComplexIntermediateKey that = (ComplexIntermediateKey) o;
 
-    //      if (site != null ? !site.equals(that.site) : that.site != null) return false;
-    //      if (node != null ? !node.equals(that.node) : that.node != null) return false;
-    //      if (key != null ? !key.equals(that.key) : that.key != null) return false;
-    //      return !(counter != null ? !counter.equals(that.counter) : that.counter != null);
-    if (site.equals(that.getSite())) {
-      if (node.equals(that.getNode())) {
-        if (key.equals(that.getKey())) {
-          if (cache.equals(that.getCache())) {
-            if (counter.equals(that.getCounter())) {
-              return true;
-            }
-          }
-        }
-      }
-    }
-    return false;
+          if (site != null ? !site.equals(that.site) : that.site != null) return false;
+          if (node != null ? !node.equals(that.node) : that.node != null) return false;
+          if (key != null ? !key.equals(that.key) : that.key != null) return false;
+          if(cache != null ? !cache.equals(that.cache) : that.cache != null) return false;
+          return !(counter != null ? !counter.equals(that.counter) : that.counter != null);
+
+//    if (site.equals(that.getSite())) {
+//      if (node.equals(that.getNode())) {
+//        if (key.equals(that.getKey())) {
+//          if (cache.equals(that.getCache())) {
+//            if (counter.equals(that.getCounter())) {
+//              return true;
+//            }
+//          }
+//        }
+//      }
+//    }
+//    return false;
     //     return that.toString().equals(this.toString());
   }
 
@@ -200,6 +202,9 @@ public class ComplexIntermediateKey implements Comparable, Serializable {
     return  "cache " + cache + " site " + site + " node " + node + " key " + key.toString() + " counter " + counter;
   }
 
+  public String asKey(){
+    return key.toString()+"{}"+cache+site+node+counter;
+  }
   public String getCache() {
     return cache;
   }

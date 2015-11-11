@@ -83,6 +83,8 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
                           new GetQueryStatusActionHandler(com, log, persistence, id));
       handlers.put(IManagerConstants.GET_RESULTS,
                           new GetResultsActionHandler(com, log, persistence, id));
+      handlers.put(IManagerConstants.GET_WEB_RESULTS,
+          new GetWebResultsActionHandler(com, log, persistence, id));
       handlers.put(IManagerConstants.CREATE_NEW_QUERY,
                           new CreateQueryActionHandler(com, log, persistence, id));
       handlers.put(IManagerConstants.CREATE_NEW_WORKFLOW,
@@ -99,7 +101,9 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
       handlers.put(IManagerConstants.CREATE_NEW_ENC_QUERY, new CreateEncQueryActionHandler(com,log,persistence,id));
       handlers.put(IManagerConstants.EXECUTE_MAPREDUCE,new ExecuteMRActionHandler(com,log,persistence,id));
       handlers.put(IManagerConstants.COMPLETED_MAPREDUCE, new CompletedMRActionHandler(com,log,persistence,id));
-
+      handlers.put(IManagerConstants.STOP_CACHE, new StopCacheActionHandler(com,log,persistence,id,globalConfig));
+      handlers.put(IManagerConstants.ADD_LISTENER, new AddListenerActionHandler(com,log,persistence,id,globalConfig));
+      handlers.put(IManagerConstants.REMOVE_LISTENER, new RemoveListenerActionHandler(com,log,persistence,id,globalConfig));
 
 
       bus.send(workqueue + ".register", msg, new Handler<Message<JsonObject>>() {
@@ -141,6 +145,7 @@ public class IManageProcessorWorker extends Verticle implements Handler<Message<
 
 
                   System.out.println(" Quit Imanager ");
+                  message.reply();
                }
             }
          } else {

@@ -30,10 +30,10 @@ public class StartCacheCallable<K, V> implements DistributedCallable<K, V, Void>
         this.cacheName = cacheName;
         this.isIndexed =isIndexed;
     }
-    public StartCacheCallable(String cacheName, boolean isIndexed,boolean isInMemory,int entries){
+    public StartCacheCallable(String cacheName, boolean isIndexed,boolean isPersistent,int entries){
         this.cacheName = cacheName;
         this.isIndexed =isIndexed;
-        this.isPersistent = isInMemory;
+        this.isPersistent = isPersistent;
         this.entries = entries;
     }
     /**

@@ -122,4 +122,9 @@ public class PrintUtilities {
         }
         System.err.println(s + "\n\n---END Remaining ---- " + manager.getCacheNames().size());
     }
+
+  public static void printAndLog(Logger profilerLog, String msg) {
+    System.err.println(msg);
+    profilerLog.error(msg);
+  }
 }

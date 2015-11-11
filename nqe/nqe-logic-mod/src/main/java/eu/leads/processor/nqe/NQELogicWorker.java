@@ -88,7 +88,16 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
                         //            action.setId(actionId);
                         action.getData().putString("replyTo", from);
                         com.sendWithEventBus(workQueueAddress, action.asJsonObject());
-                    }else {
+                    }else if(label.equals(NQEConstants.DEPLOY_CQL_OPERATOR)){
+                        action.getData().putString("replyTo",from);
+                        com.sendWithEventBus(workQueueAddress, action.asJsonObject());
+                    }else if(label.equals(NQEConstants.STOP_CQL)){
+                        com.sendWithEventBus(workQueueAddress,action.asJsonObject());
+                    }
+//                    else if(){
+//
+//                    }
+                    else {
                         log.error("Unknown PENDING Action received " + action.toString());
                         return;
                     }
@@ -118,7 +127,13 @@ public class NQELogicWorker extends Verticle implements LeadsMessageHandler {
                     } else if(label.equals(IManagerConstants.QUIT)){
                         System.out.println(" Quit Nqe logic ");
                         stop();
-                    }else {
+                    }else if(label.equals(NQEConstants.DEPLOY_CQL_OPERATOR)) {
+                        System.out.println(" CQL OPERATOR !!!! ");
+                        //action.getData().putString("STATUS", "SUCCESS");
+                        //com.sendTo(action.getData().getString("replyTo"), action.getResult());
+                        System.err.println("CQL OPERATOR DCOMPLETED");
+
+                    }else{
                         log.error("Unknown COMPLETED OR INPROCESS Action received " + action.toString());
                         return;
                     }

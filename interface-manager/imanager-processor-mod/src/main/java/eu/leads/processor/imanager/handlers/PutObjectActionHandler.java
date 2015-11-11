@@ -43,36 +43,50 @@ public class PutObjectActionHandler implements ActionHandler {
          else{
             log.error("put object used for creating cache");
             if(value.containsField("listener")){
-               String listeners = value.getString("listener");
-               if(listeners.contains("localIndexListener")) {
+               if(!value.containsField("cqlListener")) {
+                  String listeners = value.getString("listener");
+                  if (listeners.contains("localIndexListener")) {
 
-//                  Cache thecache = (Cache) persistence.getPersisentCache(cacheName);//, 1000);
-                  Cache thecache = (Cache) persistence.getInMemoryCache(cacheName, 1000);
-                  boolean toadd = true;
-                  for (Object l : thecache.getListeners()) {
-                     if (l instanceof LocalIndexListener) {
-                        toadd = false;
-                        break;
+                     //                  Cache thecache = (Cache) persistence.getPersisentCache(cacheName);//, 1000);
+                     Cache thecache = (Cache) persistence.getInMemoryCache(cacheName, 1000);
+                     boolean toadd = true;
+                     for (Object l : thecache.getListeners()) {
+                        if (l instanceof LocalIndexListener) {
+                           toadd = false;
+                           break;
+                        }
                      }
-                  }
-                  if (toadd) {
-                     LocalIndexListener listener = new LocalIndexListener(persistence, cacheName);
+                     if (toadd) {
+                        LocalIndexListener listener = new LocalIndexListener(persistence, cacheName);
 
-                     persistence.addListener(listener, cacheName);
+                        persistence.addListener(listener, cacheName);
+                     }
+                     if (listeners.contains("batchputListener")) {
+                        Cache compressedCache = (Cache) persistence.getInMemoryCache(cacheName + ".compressed", 4000);
+                        //                     Cache compressedCache = (Cache) persistence.getPersisentCache(cacheName+".compressed");
+                        BatchPutListener listener = new BatchPutListener(compressedCache.getName(), cacheName);
+                        persistence.addListener(listener, compressedCache.getName());
+                     }
+                  } else if (listeners.contains("batchputListener")) {
+                     //                  Cache compressedCache = (Cache) persistence.getPersisentCache(cacheName+".compressed");//,4000);
+                     Cache compressedCache = (Cache) persistence.getInMemoryCache(cacheName + ".compressed", 4000);
+                     BatchPutListener listener = new BatchPutListener(compressedCache.getName(), cacheName);
+                     persistence.addListener(listener, compressedCache.getName());
+                     Cache thecache = (Cache) persistence.getPersisentCache(cacheName);
                   }
-                  if(listeners.contains("batchputListener")){
-                     Cache compressedCache = (Cache) persistence.getInMemoryCache(cacheName+".compressed",4000);
-//                     Cache compressedCache = (Cache) persistence.getPersisentCache(cacheName+".compressed");
-                     BatchPutListener listener = new BatchPutListener(compressedCache.getName(),cacheName);
-                     persistence.addListener(listener,compressedCache.getName());
+               }else { //cql create cache
+                  String listener = value.getString("cqlListener");
+                  if(listener.equals("scan")){
+                     //create scan listener
                   }
-               }
-               else if (listeners.contains("batchputListener")){
-//                  Cache compressedCache = (Cache) persistence.getPersisentCache(cacheName+".compressed");//,4000);
-                  Cache compressedCache = (Cache) persistence.getInMemoryCache(cacheName+".compressed",4000);
-                  BatchPutListener listener = new BatchPutListener(compressedCache.getName(),cacheName);
-                  persistence.addListener(listener,compressedCache.getName());
-                  Cache thecache = (Cache) persistence.getPersisentCache(cacheName);
+                  else if (listener.equals("topk-1")){
+
+                  }
+                  else if(listener.equals("topk-2")){
+
+                  }else{
+
+                  }
                }
             }
             else{

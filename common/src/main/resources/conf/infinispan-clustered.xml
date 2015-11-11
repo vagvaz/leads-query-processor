@@ -29,6 +29,7 @@
         <jmx domain="eu.leads.processor" duplicate-domains="true"></jmx>
         <distributed-cache name="defaultCache" mode="SYNC" owners="1"  start="true"
                            statistics="true">
+
             <compatibility></compatibility>
             <!--<indexing index="NONE">-->
             <!--<property name="default.directory_provider">ram</property>-->

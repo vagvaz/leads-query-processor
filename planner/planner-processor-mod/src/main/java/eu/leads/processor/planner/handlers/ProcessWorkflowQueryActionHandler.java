@@ -2,12 +2,14 @@ package eu.leads.processor.planner.handlers;
 
 import eu.leads.processor.common.StringConstants;
 import eu.leads.processor.common.infinispan.InfinispanManager;
+import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.ActionHandler;
 import eu.leads.processor.core.ActionStatus;
 import eu.leads.processor.core.comp.LogProxy;
 import eu.leads.processor.core.net.Node;
 import eu.leads.processor.core.plan.*;
+import eu.leads.processor.planner.PlanUtils;
 import eu.leads.processor.web.WP4Client;
 import leads.tajo.module.TaJoModule;
 import org.apache.tajo.TajoConstants;
@@ -36,9 +38,11 @@ public class ProcessWorkflowQueryActionHandler implements ActionHandler {
     private final InfinispanManager persistence;
     private final String id;
     private final TaJoModule module;
-    private BasicCache<String,String> queriesCache;
+  private final String currentCluster;
+  private JsonObject globalInformation;
+  private BasicCache<String,String> queriesCache;
     public ProcessWorkflowQueryActionHandler(Node com, LogProxy log, InfinispanManager persistence,
-                                             String id, TaJoModule module,String schedHost,String schedport) {
+                                             String id, TaJoModule module,String schedHost,String schedport,JsonObject globalInformation) {
         this.com = com;
 //        this.log = log;
         this.persistence = persistence;
@@ -46,6 +50,8 @@ public class ProcessWorkflowQueryActionHandler implements ActionHandler {
         this.module = module;
        queriesCache =
            (BasicCache<String, String>) persistence.getPersisentCache(StringConstants.QUERIESCACHE);
+      currentCluster = LQPConfiguration.getInstance().getMicroClusterName();
+      this.globalInformation = globalInformation;
        WP4Client.initialize(schedHost,schedport);
     }
 
@@ -246,20 +252,31 @@ public class ProcessWorkflowQueryActionHandler implements ActionHandler {
         return plan;
     }
 
-    private Set<WorkflowPlan> evaluatePlansFromScheduler(Set<WorkflowPlan> candidatePlans) {
-        //Transform each plan to scheduler like format.
-        //Annotate each operator with k,q
-        //Send Request to Scheduler and receive Evaluations.
-       Set<WorkflowPlan> result = new HashSet<>();
-       for(WorkflowPlan plan : candidatePlans){
-//          JsonObject schedulerRep = plan.getSchedulerRep();
-//          schedulerRep = annotatePlan(schedulerRep,persistence);
-//          JsonObject annotatedPlan = WP4Client.evaluatePlan(schedulerRep);
-//          plan.updateWithAnnotations(annotatedPlan);
-          result.add(plan);
-       }
-       return result;
+  private Set<WorkflowPlan> evaluatePlansFromScheduler(Set<WorkflowPlan> candidatePlans) {
+    //Transform each plan to scheduler like format.
+    //Annotate each operator with k,q
+    //Send Request to Scheduler and receive Evaluations.
+    Set<WorkflowPlan> result = new HashSet<>();
+    for(WorkflowPlan plan : candidatePlans){
+      JsonObject p = plan.getPlanGraph().copy();
+      p = PlanUtils.handleRootOutputNodes(p);
+      p = PlanUtils.updateKeyspaceParameter(p);
+      p = PlanUtils.numberStages(p);
+      p = PlanUtils.annotatePlan(null, p);
+      JsonObject annotatedPlan = null;
+      //            try {
+      JsonObject schedulerRep = PlanUtils.getSchedulerRep(p,currentCluster);
+      //System.err.println("$$$$$$$$$$$$$$$$$$$$\n"+schedulerRep.encodePrettily());
+      annotatedPlan = PlanUtils.emulateScheduler(schedulerRep,globalInformation);
+
+      JsonObject updatedPlan = PlanUtils.updateInformation(plan.getPlanGraph(),annotatedPlan.getObject("stages"),globalInformation);
+      updatedPlan = PlanUtils.updateTargetEndpoints(updatedPlan);
+      //System.err.println(updatedPlan.encodePrettily());
+      plan.setPlanGraph(updatedPlan);
+      result.add(plan);
     }
+    return result;
+  }
 
     private JsonObject createFailResult(Exception e, Query query) {
         JsonObject ob = new JsonObject();

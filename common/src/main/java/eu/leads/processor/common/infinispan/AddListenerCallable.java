@@ -10,10 +10,10 @@ import java.util.Set;
 /**
  * Created by vagvaz on 6/4/14.
  */
-public class AddListenerCallable<K, V> implements DistributedCallable<K, V, Void>, Serializable {
-    private static final long serialVersionUID = 8331682008912636780L;
-    private final String cacheName;
-    private final Object listner;
+public class AddListenerCallable<K, V> implements DistributedCallable<K, V, String>, Serializable {
+//    private static final long serialVersionUID = 8331682008912636780L;
+    private  String cacheName;
+    private  Object listner;
     //    private final Configuration configuration;
     private transient Cache<K, V> cache;
 
@@ -27,18 +27,43 @@ public class AddListenerCallable<K, V> implements DistributedCallable<K, V, Void
      * {@inheritDoc}
      */
     @Override
-    public Void call() throws Exception {
-        if(cache.getCacheManager().cacheExists(cacheName)) {
-            if (cache.getAdvancedCache().getRpcManager().getMembers().contains(cache.getCacheManager().getAddress())) {
-                if (listner instanceof LeadsListener) {
-                    LeadsListener leadsListener = (LeadsListener) listner;
-                    leadsListener.initialize(new ClusterInfinispanManager((cache.getCacheManager())),null);
+    public String call() throws Exception {
+        try {
+            boolean toadd = true;
+            if (cache.getCacheManager().cacheExists(cacheName)) {
+//                if (cache.getAdvancedCache().getRpcManager().getMembers().contains(cache.getCacheManager().getAddress())) {
 
-                }
-                cache.getCacheManager().getCache(cacheName).addListener(listner);
+                    if (listner instanceof LeadsListener) {
+                        LeadsListener leadsListener = (LeadsListener) listner;
+                        for (Object l : cache.getListeners()) {
+                            if (l.getClass().getCanonicalName().equals(leadsListener.getClass().getCanonicalName())) {
+                                toadd = false;
+                            }
+                        }
+
+
+                    }
+                    if (toadd) {
+                        if (listner instanceof LeadsListener) {
+                            LeadsListener leadsListener = (LeadsListener) listner;
+                            leadsListener.initialize(new ClusterInfinispanManager(cache.getCacheManager()), null);
+                        }
+                        cache.getCacheManager().getCache(cacheName).addListener(listner);
+                    }
+//                }
             }
+            for (Object l : cache.getListeners()) {
+                if (l instanceof LeadsListener) {
+                    LeadsListener listener = (LeadsListener) l;
+                    System.err.println(
+                        listner.getClass().toString() + ": " + cache.getCacheManager().getAddress().toString() + " " + cache.getName() + " LEAD ID " + listener.getId());
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
-        return null;
+        System.err.println("return");
+        return cache.getCacheManager().getAddress().toString();
     }
 
     /**

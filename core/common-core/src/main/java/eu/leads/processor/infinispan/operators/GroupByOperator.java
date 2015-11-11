@@ -26,61 +26,60 @@ import java.util.List;
 public class GroupByOperator extends MapReduceOperator {
 
 
-    List<String> groupByColumns;
+  List<String> groupByColumns;
 
-    public GroupByOperator(Node com, InfinispanManager persistence,LogProxy log, Action action) {
+  public GroupByOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
 
-       super(com, persistence, log, action);
+    super(com, persistence, log, action);
 
-       JsonArray columns = conf.getObject("body").getArray("groupingKeys");
-       Iterator<Object> columnIterator = columns.iterator();
-       groupByColumns = new ArrayList<>(columns.size());
+    JsonArray columns = conf.getObject("body").getArray("groupingKeys");
+    Iterator<Object> columnIterator = columns.iterator();
+    groupByColumns = new ArrayList<>(columns.size());
 
-       while(columnIterator.hasNext()){
-         JsonObject columnObject = (JsonObject) columnIterator.next();
-         groupByColumns.add(columnObject.getString("name"));
-       }
-
-       JsonArray functions = conf.getObject("body").getArray("aggrFunctions");
-       Iterator<Object> funcIterator = functions.iterator();
-       List<JsonObject> aggregates = new ArrayList<>(functions.size());
-       while(funcIterator.hasNext()){
-          aggregates.add((JsonObject) funcIterator.next());
-       }
-   }
-
-   @Override
-    public void init(JsonObject config) {
-        super.init(conf);
-        setMapper(new GroupByMapper(conf.toString()));
-        setReducer(new GroupByReducer(conf.toString()));
-        init_statistics(this.getClass().getCanonicalName());
+    while (columnIterator.hasNext()) {
+      JsonObject columnObject = (JsonObject) columnIterator.next();
+      groupByColumns.add(columnObject.getString("name"));
     }
 
-    @Override
-    public void execute() {
-      super.execute();
-
+    JsonArray functions = conf.getObject("body").getArray("aggrFunctions");
+    Iterator<Object> funcIterator = functions.iterator();
+    List<JsonObject> aggregates = new ArrayList<>(functions.size());
+    while (funcIterator.hasNext()) {
+      aggregates.add((JsonObject) funcIterator.next());
     }
+  }
 
-    @Override
-    public void cleanup() {
-      super.cleanup();
-    }
+  @Override public void init(JsonObject config) {
+    super.init(conf);
+    setMapper(new GroupByMapper(conf.toString()));
+    setReducer(new GroupByReducer(conf.toString()));
+    init_statistics(this.getClass().getCanonicalName());
+  }
+
+  @Override public void execute() {
+    super.execute();
+
+  }
+
+  @Override public void cleanup() {
+    super.cleanup();
+  }
+
+  @Override public String getContinuousListenerClass() {
+    return null;
+  }
 
 
-   @Override
-   public void setupMapCallable() {
-//      init(conf);
-      setMapper(new GroupByMapper(conf.toString()));
-      super.setupMapCallable();
-   }
+  @Override public void setupMapCallable() {
+    //      init(conf);
+    setMapper(new GroupByMapper(conf.toString()));
+    super.setupMapCallable();
+  }
 
-   @Override
-   public void setupReduceCallable() {
-      setReducer(new GroupByReducer(conf.toString()));
-      super.setupReduceCallable();
-   }
+  @Override public void setupReduceCallable() {
+    setReducer(new GroupByReducer(conf.toString()));
+    super.setupReduceCallable();
+  }
 
 
 }

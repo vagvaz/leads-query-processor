@@ -10,6 +10,10 @@ import jline.console.completer.StringsCompleter;
 import jline.console.history.FileHistory;
 import jline.console.history.MemoryHistory;
 import jline.internal.Configuration;
+import org.infinispan.client.hotrod.annotation.ClientCacheEntryCreated;
+import org.infinispan.client.hotrod.annotation.ClientCacheEntryModified;
+import org.infinispan.client.hotrod.annotation.ClientCacheEntryRemoved;
+import org.infinispan.notifications.cachelistener.event.CacheEntryEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,9 +25,18 @@ import java.util.*;
 import static java.lang.Thread.sleep;
 
 public class leadsCli {
+  private static String currentquid;
+
+  public enum waitResults {WAIT_SQL, WAIT_CQL, FINISHED};
+  private static waitResults waitingQuery=waitResults.FINISHED;
+  private static HashMap<String,Tuple> cqlResults=null;
+
+
   transient protected static Random r;
   private static String host;
   private static int port;
+
+
   private static String username = "leads";
   protected long rowsC = 60;
   protected String[] loc = {"a", "b", "c", "d"};
@@ -32,6 +45,7 @@ public class leadsCli {
   private static boolean noPrint = false;
   public static void main(String[] args) throws Exception {
 
+    cqlResults=new HashMap<>();
     System.out.println(" === Leads Command Line Interface === ");
 
     InitializeWebClient(args);
@@ -46,6 +60,7 @@ public class leadsCli {
     ConsoleReader reader = null;
     try {
       reader = new ConsoleReader();
+      reader.setHandleUserInterrupt(true);
 
       MemoryHistory hist = setupHistory(reader, "leadscli");
 
@@ -118,7 +133,6 @@ public class leadsCli {
             }
           }
         }
-
       } while (true);
 
     } catch (Exception e) {
@@ -135,6 +149,29 @@ public class leadsCli {
     } finally {
       if (reader != null)
         reader.getTerminal().restore();
+    }
+  }
+
+  private static void handle_userInterrupt(){
+    try {
+    switch (waitingQuery) {
+      case WAIT_SQL:
+        waitingQuery=waitResults.FINISHED;
+        System.out.println(" User terminated.");
+        break;
+      case WAIT_CQL:
+        //connect to remote manager and send quit;
+
+        WebServiceClient.stopCQLQuery(currentquid);
+        waitingQuery=waitResults.FINISHED;
+        System.out.println(" User terminated.");
+        break;
+      case FINISHED:
+        break;
+
+    }
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
@@ -167,62 +204,83 @@ public class leadsCli {
 //        }
   }
 
-  static void send_query_and_wait(ConsoleReader reader, String sql) throws IOException, InterruptedException {
+  static void send_query_and_wait(final ConsoleReader reader, String sql) throws IOException, InterruptedException {
     long start = System.currentTimeMillis();
     long resultCompleted, resultArrived = 0, resultPrinted = 0;
     QueryStatus currentStatus = WebServiceClient.submitQuery(username, sql);
-    long submittime = System.currentTimeMillis();
+    currentquid=currentStatus.getId();
 
+    long submittime = System.currentTimeMillis();
     int getquerydelaytime = 1000;
-    while (!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED")) {
-      sleep(getquerydelaytime);
-      currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
+
+    Thread th = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        System.out.println("Ctrl + C, Terminate ");
+        while(true)
+          try {
+            reader.readLine();
+          } catch (jline.console.UserInterruptException e) {
+            handle_userInterrupt();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+      }
+    });
+    th.start();
+
+    if(sql.toLowerCase().contains(" range ")) {
+      System.out.print("Range query !!!");
+      cqlResults =new HashMap<>();
+      ResultsListener resL = new ResultsListener(cqlResults);
+      while (waitingQuery != waitResults.FINISHED)
+        sleep(getquerydelaytime);
+    }else {
+
+
+      while (!currentStatus.getStatus().equals("COMPLETED") && !currentStatus.getStatus().equals("FAILED") && waitingQuery != waitResults.FINISHED) {
+        sleep(getquerydelaytime);
+        currentStatus = WebServiceClient.getQueryStatus(currentStatus.getId());
 //            System.out.print("s: " + currentStatus.toString());
 //            System.out.println(", o: " + currentStatus.toString());
-      //System.out.println("The query with id " + currentStatus.getId() + " is " + currentStatus.getStatus());
-      System.out.printf("\rPlease wait ... elapsed: %f s", (System.currentTimeMillis() - start) / 1000.0);
-      if(reader.getInput().available()>0) {
-        System.out.print(" "+reader.getInput().available());
-        if (reader.readCharacter() == 27) {
-          System.out.println(" User terminated.");
-          break;
-        }
-      }
-
-    }
-    Date curr_date = new Date(System.currentTimeMillis());
-    DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    System.out.println("\n" + df.format(curr_date) + " The query with id " + currentStatus.getId() + " " + currentStatus.getStatus());
-    if (currentStatus.getStatus().equals("COMPLETED")) {
-      resultCompleted = System.currentTimeMillis();
-      System.out.println("Execution  time: " + (resultCompleted - submittime) + " ms.");
-      if(noResults) {
-        System.out.printf("Disabled results acquisition. Use \"printresults\" command to enable.");
-        QueryResults res = WebServiceClient.getQueryResults(currentStatus.getId(), -1, -1);
-      }else{
-        System.out.printf("Please wait ... getting results. ");
-        QueryResults res = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
-        resultArrived = System.currentTimeMillis();
-        System.out.printf("\rResult acquisition (delivery) time: " + (resultArrived - resultCompleted) + " ms.\n");
-        if(noPrint)
-          System.out.println("Disabled result print acquisition. Use \"printresults\" command to enable.");
-        else{
-          System.out.printf(" Please wait ... formatting results. ");
-          print_results(res);
-        }
-
-        resultPrinted = System.currentTimeMillis();
-        System.out.print("\rFound " + res.getResult().size() + " results.                                      \n");
-
+        //System.out.println("The query with id " + currentStatus.getId() + " is " + currentStatus.getStatus());
+        System.out.printf("\rPlease wait ... elapsed: %f s", (System.currentTimeMillis() - start) / 1000.0);
 
       }
-      System.out.print("\nSubmit time: " + (submittime - start) + " ms, ");
-      System.out.print("execution  time: " + (resultCompleted - submittime) + " ms, ");
-      System.out.print("acquisition (delivery) time: " + (resultArrived - resultCompleted) + " ms, ");
-      System.out.print("display time: " + (resultPrinted - resultArrived) + " ms, ");
-      System.out.print("Complete time: " + (resultPrinted - start) + " ms.\n");
-    } else {
-      System.err.println(" Execution terminated: " + currentStatus.getErrorMessage());
+      Date curr_date = new Date(System.currentTimeMillis());
+      DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      System.out.println("\n" + df.format(curr_date) + " The query with id " + currentStatus.getId() + " " + currentStatus.getStatus());
+      if (currentStatus.getStatus().equals("COMPLETED")) {
+        resultCompleted = System.currentTimeMillis();
+        System.out.println("Execution  time: " + (resultCompleted - submittime) + " ms.");
+        if (noResults) {
+          System.out.printf("Disabled results acquisition. Use \"printresults\" command to enable.");
+          QueryResults res = WebServiceClient.getQueryResults(currentStatus.getId(), -1, -1);
+        } else {
+          System.out.printf("Please wait ... getting results. ");
+          QueryResults res = WebServiceClient.getQueryResults(currentStatus.getId(), 0, -1);
+          resultArrived = System.currentTimeMillis();
+          System.out.printf("\rResult acquisition (delivery) time: " + (resultArrived - resultCompleted) + " ms.\n");
+          if (noPrint)
+            System.out.println("Disabled result print acquisition. Use \"printresults\" command to enable.");
+          else {
+            System.out.printf(" Please wait ... formatting results. ");
+            print_results(res);
+          }
+
+          resultPrinted = System.currentTimeMillis();
+          System.out.print("\rFound " + res.getResult().size() + " results.                                      \n");
+
+
+        }
+        System.out.print("\nSubmit time: " + (submittime - start) + " ms, ");
+        System.out.print("execution  time: " + (resultCompleted - submittime) + " ms, ");
+        System.out.print("acquisition (delivery) time: " + (resultArrived - resultCompleted) + " ms, ");
+        System.out.print("display time: " + (resultPrinted - resultArrived) + " ms, ");
+        System.out.print("Complete time: " + (resultPrinted - start) + " ms.\n");
+      } else {
+        System.err.println(" Execution terminated: " + currentStatus.getErrorMessage());
+      }
     }
     System.gc();
   }
@@ -330,5 +388,53 @@ public class leadsCli {
       System.out.println();
     }
     System.out.println("--------------------------");
+  }
+
+  static class ResultsListener {
+    public HashMap<String, Tuple> getTable() {
+      return table;
+    }
+    //private int collumnNamesPrinted=0;
+    private final HashMap<String, Tuple> table;
+    private Set<String> fields = null;
+
+    //        System.err.println("Plugin probably Failed on " + entry.getType() + " " + entry.getEventData().getKey() + " ---> " + entry.getEventData().getValue());
+    public ResultsListener(HashMap<String,Tuple> table) {
+      this.table = table;
+    }
+    @ClientCacheEntryCreated
+    @ClientCacheEntryModified
+    @ClientCacheEntryRemoved
+    public void handleClientEvent(CacheEntryEvent e) {
+      String[][] outputTable;
+      Tuple res = (Tuple) e;
+      int width = res.getFieldSet().size();
+      System.out.println(e);
+      int colCount = 0;
+      int rowCount = 0;
+      if (fields == null) {
+        outputTable = new String[2][width];
+        fields = res.getFieldSet();
+        //Read fields
+        for (String field : fields) {
+          outputTable[0][colCount] = field;
+          colCount++;
+        }
+        rowCount++;
+      } else
+        outputTable = new String[1][width];
+
+      colCount = 0;
+      for (String field : fields) {
+        Object value = res.getGenericAttribute(field);
+        if (value != null)
+          outputTable[rowCount][colCount] = value.toString();
+        else
+          outputTable[rowCount][colCount] = "(NULL)";
+        colCount++;
+      }
+      PrettyPrinter printer = new PrettyPrinter(System.out);
+      printer.print(outputTable);
+    }
   }
 }

@@ -33,7 +33,8 @@ import java.util.Set;
 /**
  * Created by vagvaz on 8/25/14.
  */
-public class PlannerCatalogWorker extends Verticle {
+public class
+    PlannerCatalogWorker extends Verticle {
   LeadsCatalog catalogServer = null;
   TajoConf conf = new TajoConf();
   JsonObject globalConfig;
@@ -185,7 +186,7 @@ public class PlannerCatalogWorker extends Verticle {
     } catch (ServiceException e) {
       e.printStackTrace();
     }
-//      SELECT C.fqdnurl AS fqdn,k.sentiment FROM keywords as k JOIN page_core as C  ON C.uri = k.uri  where k.partid like 'ecom_prod_name:000' group by fqdn order by  k.sentiment ;
+
     System.out.println(catalog.getFunctions().size() + " functions loaded.");
 
     Schema webPagesSchema = new Schema();
@@ -193,14 +194,14 @@ public class PlannerCatalogWorker extends Verticle {
     webPagesSchema.addColumn("domainname",Type.TEXT);
     webPagesSchema.addColumn("body",Type.TEXT);
     webPagesSchema.addColumn("responsecode",Type.INT8);
-    webPagesSchema.addColumn("language",Type.TEXT);
-    webPagesSchema.addColumn("charset",Type.TEXT);
-    webPagesSchema.addColumn("responsetime",Type.INT8);
+//    webPagesSchema.addColumn("language",Type.TEXT);
+//    webPagesSchema.addColumn("charset",Type.TEXT);
+//    webPagesSchema.addColumn("responsetime",Type.INT8);
     webPagesSchema.addColumn("links",Type.TEXT);
     webPagesSchema.addColumn("title",Type.TEXT);
     webPagesSchema.addColumn("ts",Type.INT8);
     webPagesSchema.addColumn("pagerank",Type.FLOAT8);
-    webPagesSchema.addColumn("sentiment",Type.FLOAT8);
+//    webPagesSchema.addColumn("sentiment",Type.FLOAT8);
 
     Schema entitiesSchema = new Schema();
     entitiesSchema.addColumn("webpageurl",Type.TEXT);
@@ -222,6 +223,22 @@ public class PlannerCatalogWorker extends Verticle {
     TableDesc webpages = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"webpages"), webPagesSchema, meta, getTestDir("webpages").toUri());
     //catalog.createTable(webpages);
     createTable(catalog,webpages);
+
+    TableDesc webpage = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"webpage"), webPagesSchema, meta, getTestDir("webpage").toUri());
+    createTable(catalog,webpage);
+
+    Schema grepSchema = new Schema();
+    grepSchema.addColumn("url",Type.TEXT);
+    grepSchema.addColumn("domainname",Type.TEXT);
+
+    grepSchema.addColumn("title",Type.TEXT);
+    grepSchema.addColumn("ts",Type.INT8);
+
+    TableDesc grep = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"greptable"), grepSchema, meta, getTestDir("greptable").toUri());
+    createTable(catalog,grep);
+
+    TableDesc demo = new TableDesc(CatalogUtil.buildFQName(StringConstants.DEFAULT_DATABASE_NAME,"demo"), grepSchema, meta, getTestDir("demo").toUri());
+    createTable(catalog,demo);
 
     Schema testwebPagesSchema = new Schema();
     testwebPagesSchema.addColumn("url",Type.TEXT);

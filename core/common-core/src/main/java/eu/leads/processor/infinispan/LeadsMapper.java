@@ -18,7 +18,7 @@ import java.util.*;
  * Time: 5:58 AM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, vIN, kOut, vOut>,Serializable {
+public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, vIN, kOut, vOut>, Serializable {
   /**
    *
    */
@@ -31,10 +31,10 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
   //    transient protected long overall;
   //    transient  protected Timer timer;
   //   transient  protected ProgressReport report;
-  transient  protected JsonObject inputSchema;
-  transient  protected JsonObject outputSchema;
-  transient  protected Map<String,String> outputMap;
-  transient  protected Map<String,List<JsonObject>> targetsMap;
+  transient protected JsonObject inputSchema;
+  transient protected JsonObject outputSchema;
+  transient protected Map<String, String> outputMap;
+  transient protected Map<String, List<JsonObject>> targetsMap;
   transient protected EmbeddedCacheManager manager;
   transient protected XMLConfiguration xmlConfiguration;
 
@@ -45,9 +45,16 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
   public LeadsMapper(JsonObject configuration) {
     this.conf = configuration;
   }
-  public LeadsMapper(String configString){this.configString = configString;}
 
-  public void  setCacheManager(EmbeddedCacheManager manager){
+  public LeadsMapper(String configString) {
+    this.configString = configString;
+  }
+
+  public void setConfigString(String configString) {
+    this.configString = configString;
+  }
+
+  public void setCacheManager(EmbeddedCacheManager manager) {
     this.manager = manager;
   }
 
@@ -59,7 +66,7 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
   public void initialize() {
 
     conf = new JsonObject(configString);
-    if(conf.containsField("body") && conf.getObject("body").containsField("outputSchema")) {
+    if (conf.containsField("body") && conf.getObject("body").containsField("outputSchema")) {
       outputSchema = conf.getObject("body").getObject("outputSchema");
       inputSchema = conf.getObject("body").getObject("inputSchema");
       targetsMap = new HashMap();
@@ -68,12 +75,13 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
       Iterator<Object> targetIterator = targets.iterator();
       while (targetIterator.hasNext()) {
         JsonObject target = (JsonObject) targetIterator.next();
-        List<JsonObject> tars = targetsMap.get(target.getObject("expr").getObject("body").getObject("column").getString("name"));
+        List<JsonObject> tars =
+            targetsMap.get(target.getObject("expr").getObject("body").getObject("column").getString("name"));
         if (tars == null) {
           tars = new ArrayList<>();
         }
         tars.add(target);
-        targetsMap.put(target.getObject("expr").getObject("body").getObject("column").getString("name"),tars);
+        targetsMap.put(target.getObject("expr").getObject("body").getObject("column").getString("name"), tars);
       }
     }
 
@@ -104,7 +112,7 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
   }
 
 
-  protected  void handlePagerank(Tuple t) {
+  protected void handlePagerank(Tuple t) {
 
     if (t.hasField("default.webpages.pagerank")) {
       if (!t.hasField("url"))

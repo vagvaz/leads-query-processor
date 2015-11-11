@@ -12,23 +12,17 @@ import eu.leads.processor.conf.LQPConfiguration;
 import eu.leads.processor.core.Action;
 import eu.leads.processor.core.Tuple;
 import eu.leads.processor.core.comp.LogProxy;
-import eu.leads.processor.core.index.*;
+import eu.leads.processor.core.index.LeadsIndex;
+import eu.leads.processor.core.index.LeadsIndexHelper;
 import eu.leads.processor.core.net.Node;
-import eu.leads.processor.infinispan.LocalDataFilter;
-import eu.leads.processor.math.MathUtils;
 import org.apache.tajo.algebra.*;
 import org.infinispan.Cache;
-import org.infinispan.commons.util.CloseableIterable;
-import org.infinispan.context.Flag;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
-import org.infinispan.versioning.utils.version.Version;
-import org.infinispan.versioning.utils.version.VersionScalar;
-import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static eu.leads.processor.common.infinispan.EnsembleCacheUtils.putToCache;
@@ -50,15 +44,14 @@ public class CreateIndexOperator extends BasicOperator {
 
   public CreateIndexOperator(Node com, InfinispanManager persistence, LogProxy log, Action action) {
     super(com, persistence, log, action);
-    if(this.action.getData().getObject("operator").getString("id")==null){
+    if (this.action.getData().getObject("operator").getString("id") == null) {
       System.out.println("Create Index Action: " + this.action.toString());
-      this.action.getData().getObject("operator").putString("id","Cindex");
+      this.action.getData().getObject("operator").putString("id", "Cindex");
     }
   }
 
-  @Override
-  public void init(JsonObject config) {
-    ensembleHost =  computeEnsembleHost();
+  @Override public void init(JsonObject config) {
+    ensembleHost = computeEnsembleHost();
     if (ensembleHost != null && !ensembleHost.equals("")) {
       emanager = new EnsembleCacheManager(ensembleHost);
       emanager.start();
@@ -76,7 +69,7 @@ public class CreateIndexOperator extends BasicOperator {
 
     IndexName = newExpr.getIndexName();
     if (IndexName.isEmpty())
-      IndexName = "noname"+UUID.randomUUID();
+      IndexName = "noname" + UUID.randomUUID();
 
     tableName = (((Relation) ((Projection) newExpr.getChild()).getChild())).getName();
     Sort.SortSpec[] collumns = newExpr.getSortSpecs();
@@ -103,37 +96,35 @@ public class CreateIndexOperator extends BasicOperator {
     sketchCaches = new ArrayList<>();
     sketches = new ArrayList<>();
     for (int c = 0; c < columnNames.size(); c++) {
-      if(!manager.getCacheManager().cacheExists(tableName + "." + columnNames.get(c))) {
+      if (!manager.getCacheManager().cacheExists(tableName + "." + columnNames.get(c))) {
         log.info("Creating Index Caches, column " + tableName + "." + columnNames.get(c));
-      }else {
-        log.info("Index Already exists on column ... but anyway reindexing" +tableName + "." + columnNames.get(c));
+      } else {
+        log.info("Index Already exists on column ... but anyway reindexing" + tableName + "." + columnNames.get(c));
       }
       indexCaches.add((Cache) manager.getIndexedPersistentCache(tableName + "." + columnNames.get(c)));
-      Cache tmp =(Cache) manager.getPersisentCache(tableName + "." + columnNames.get(c) + ".sketch");
+      Cache tmp = (Cache) manager.getPersisentCache(tableName + "." + columnNames.get(c) + ".sketch");
       sketchCaches.add(tmp);
       log.info("Creating DistCMSketch " + tableName + "." + columnNames.get(c) + ".sketch");
-      sketches.add(new DistCMSketch(tmp,false));
+      sketches.add(new DistCMSketch(tmp, false));
     }
 
     //indexCaches
     //fix tablename
     inputCache = (Cache) manager.getPersisentCache(tableName);
 
-   // System.out.println(" output cache: " + getOutput() +  " Action " + action.asJsonObject().toString());
+    // System.out.println(" output cache: " + getOutput() +  " Action " + action.asJsonObject().toString());
   }
 
-  @Override
-  public void run() {
+  @Override public void run() {
     LeadsIndexHelper lindHelp = new LeadsIndexHelper();
     int i = 0;
-    if(tableName==null)
-    {
-      log.error("EROOORRRR tableName: " + tableName +" null");
+    if (tableName == null) {
+      log.error("EROOORRRR tableName: " + tableName + " null");
       return;
     }
     System.out.println("inputCache Size : " + inputCache.getAdvancedCache());
     long timeStart = System.currentTimeMillis();
-    int reportRate= 100000;
+    int reportRate = 100000;
     for (Object key : inputCache.getAdvancedCache().keySet()) {
       try {
 
@@ -152,16 +143,18 @@ public class CreateIndexOperator extends BasicOperator {
           //sketches.get(c).add(value.getGenericAttribute(column));
           //if(i%10==0)
           //
-           if(i%reportRate==0) {
-             long time2 = System.currentTimeMillis();
-             System.out.println(" Put " + i + " Time: " + (time2-timeStart)/1000.0 + " Rate t/s" + reportRate/((time2-timeStart)/1000.0) );
-             timeStart=time2;
-           }
+          if (i % reportRate == 0) {
+            long time2 = System.currentTimeMillis();
+            System.out.println(
+                " Put " + i + " Time: " + (time2 - timeStart) / 1000.0 + " Rate t/s" + reportRate / ((time2 - timeStart)
+                    / 1000.0));
+            timeStart = time2;
+          }
         }
         i++;
 
 
-      }catch (Exception e){
+      } catch (Exception e) {
         System.err.println(" Exception " + i + " " + e.toString());
       }
 
@@ -171,7 +164,7 @@ public class CreateIndexOperator extends BasicOperator {
       EnsembleCacheUtils.waitForAllPuts();
     } catch (InterruptedException e) {
       e.printStackTrace();
-      PrintUtilities.logStackTrace(log,e.getStackTrace());
+      PrintUtilities.logStackTrace(log, e.getStackTrace());
     } catch (ExecutionException e) {
       e.printStackTrace();
       PrintUtilities.logStackTrace(log, e.getStackTrace());
@@ -179,28 +172,27 @@ public class CreateIndexOperator extends BasicOperator {
     cleanup();
   }
 
-  @Override
-  public void cleanup() {
+  @Override public void cleanup() {
     super.cleanup();
   }
 
-  @Override
-  public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
+  @Override public void createCaches(boolean isRemote, boolean executeOnlyMap, boolean executeOnlyReduce) {
 
   }
 
-  @Override
-  public void setupMapCallable() {
+  @Override public String getContinuousListenerClass() {
+    return null;
+  }
+
+  @Override public void setupMapCallable() {
 
   }
 
-  @Override
-  public void setupReduceCallable() {
+  @Override public void setupReduceCallable() {
 
   }
 
-  @Override
-  public boolean isSingleStage() {
+  @Override public boolean isSingleStage() {
     return true;
   }
 

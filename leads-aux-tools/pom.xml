@@ -17,7 +17,7 @@
         <module>bootstrapper</module>
         <module>data-snapshot</module>
         <module>uber-snapshot</module>
-        <!--<module>data-reader</module>-->
+        <module>data-reader</module>
         <module>load-csv</module>
         <module>wp4-scheduler-client</module>
         <module>data-replay</module>

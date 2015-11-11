@@ -233,6 +233,18 @@ public class Tuple extends DataType_bson implements Serializable,Externalizable{
     }
   }
 
+  public void renameAllForTable(String tablename) {
+    Set<String> oldNames = new HashSet<>(data.keySet());
+    String tmp = oldNames.iterator().next();
+    if(tmp.indexOf(".") == tmp.lastIndexOf(".")){
+      return;
+    }
+    String oldTable = tmp.substring(0,tmp.lastIndexOf("."));
+    for(String oldName : oldNames){
+      renameAttribute(oldName,oldName.replace(oldTable,tablename));
+    }
+  }
+
   public static class TupleExternalizer implements AdvancedExternalizer<Tuple> {
     @Override
     public void writeObject(ObjectOutput output, Tuple object) throws IOException {

@@ -36,6 +36,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
   String planner;
   LogProxy logg;
   Logger log;
+  JsonObject globalConfig;
   //    PersistenceProxy persistence;
   Node com;
   String id;
@@ -64,6 +65,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
 
     if(config.containsField("global")){
       JsonObject global = config.getObject("global");
+      globalConfig = global;
       if(global.containsField("hdfs.uri") && global.containsField("hdfs.prefix") && global.containsField("hdfs.user"))
       {
         storageConf.setProperty("hdfs.url", global.getString("hdfs.uri"));
@@ -112,14 +114,17 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             action.getData().putString("replyTo", msg.getString("from"));
             com.sendWithEventBus(workQueueAddress, action.asJsonObject());
           } else if (label.equals(IManagerConstants.GET_QUERY_STATUS)) {
-//            log.info("peding get query status");
+            //            log.info("peding get query status");
             action.getData().putString("replyTo", msg.getString("from"));
             com.sendWithEventBus(workQueueAddress, action.asJsonObject());
           } else if (label.equals(IManagerConstants.GET_RESULTS)) {
-//            log.info("completed reply get results");
+            //            log.info("completed reply get results");
             action.getData().putString("replyTo", msg.getString("from"));
             com.sendWithEventBus(workQueueAddress, action.asJsonObject());
-          } else if (label.equals(IManagerConstants.SUBMIT_QUERY)) {
+          } else if(label.equals(IManagerConstants.GET_WEB_RESULTS)){
+            action.getData().putString("replyTo", msg.getString("from"));
+            com.sendWithEventBus(workQueueAddress, action.asJsonObject());
+          }else if (label.equals(IManagerConstants.SUBMIT_QUERY)) {
             newAction = createNewAction(action);
             newAction.setCategory(ActionCategory.ACTION.toString());
             newAction.setLabel(IManagerConstants.CREATE_NEW_QUERY);
@@ -195,6 +200,15 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
           else if (label.equals(IManagerConstants.COMPLETED_MAPREDUCE)){
             action.getData().putString("replyTo", msg.getString("from"));
             com.sendWithEventBus(workQueueAddress, action.asJsonObject());
+          }else if(label.equals(IManagerConstants.STOP_CACHE)){
+            action.getData().putString("replyTo", msg.getString("from"));
+            com.sendWithEventBus(workQueueAddress, action.asJsonObject());
+          }else if(label.equals(IManagerConstants.ADD_LISTENER)){
+            action.getData().putString("replyTo", msg.getString("from"));
+            com.sendWithEventBus(workQueueAddress, action.asJsonObject());
+          } else if(label.equals(IManagerConstants.REMOVE_LISTENER)){
+            action.getData().putString("replyTo", msg.getString("from"));
+            com.sendWithEventBus(workQueueAddress, action.asJsonObject());
           }
           else {
             log.error("Unknown PENDING Action received " + action.toString());
@@ -219,7 +233,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
             }
             com.sendTo(action.getData().getString("replyTo"), action.getResult());
           } else if (label.equals(IManagerConstants.GET_QUERY_STATUS)) {
-//            log.info("completed reply get query status");
+            //            log.info("completed reply get query status");
             com.sendTo(action.getData().getString("replyTo"), action.getResult());
 
           } else if (label.equals(IManagerConstants.DEPLOY_PLUGIN)) {
@@ -242,7 +256,9 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
               com.sendTo(undeployAction.getData().getString("owner"), undeployAction.asJsonObject());
             }
           } else if (label.equals(IManagerConstants.GET_RESULTS)) {
-//            log.info("completed reply get query results");
+            //            log.info("completed reply get query results");
+            com.sendTo(action.getData().getString("replyTo"), action.getResult());
+          } else if(label.equals(IManagerConstants.GET_WEB_RESULTS)){
             com.sendTo(action.getData().getString("replyTo"), action.getResult());
           } else if (label.equals(IManagerConstants.CREATE_NEW_QUERY)) {
             JsonObject webServiceReply = action.getResult().getObject("status");
@@ -257,7 +273,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
               plannerAction.setData(action.getResult());
               newAction = plannerAction;
               com.sendTo(plannerAction.getDestination(),
-                          plannerAction.asJsonObject());
+                  plannerAction.asJsonObject());
             }
           } else if (label.equals(IManagerConstants.CREATE_NEW_WORKFLOW)) {
             JsonObject webServiceReply = action.getResult().getObject("status");
@@ -271,8 +287,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
               plannerAction.setDestination(StringConstants.PLANNERQUEUE);
               plannerAction.setData(action.getResult());
               newAction = plannerAction;
-              com.sendTo(plannerAction.getDestination(),
-                          plannerAction.asJsonObject());
+              com.sendTo(plannerAction.getDestination(), plannerAction.asJsonObject());
             }
           } else if (label.equals(IManagerConstants.CREATE_NEW_SPECIAL_QUERY)) {
             JsonObject webServiceReply = action.getResult().getObject("status");
@@ -287,7 +302,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
               plannerAction.setData(action.getResult());
               newAction = plannerAction;
               com.sendTo(plannerAction.getDestination(),
-                          plannerAction.asJsonObject());
+                  plannerAction.asJsonObject());
             }
           } else if (label.equals(IManagerConstants.REGISTER_PLUGIN)) {
             System.out.println(action.toString());
@@ -314,7 +329,7 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
               plannerAction.setData(action.getResult());
               newAction = plannerAction;
               com.sendTo(plannerAction.getDestination(),
-                          plannerAction.asJsonObject());
+                  plannerAction.asJsonObject());
             }
           }
           else if (label.equals(IManagerConstants.EXECUTE_MAPREDUCE)){
@@ -341,10 +356,19 @@ public class IManagerLogicWorker extends Verticle implements LeadsMessageHandler
           else if(label.equals(IManagerConstants.QUIT)){
             System.out.println(" Imanager logic worker recovery ");
             stop();
+          }else if(label.equals(IManagerConstants.STOP_CACHE)){
+            JsonObject webServiceReply = action.getResult();
+            com.sendTo(action.getData().getString("replyTo"),webServiceReply);
+          }else if(label.equals(IManagerConstants.ADD_LISTENER)){
+            JsonObject webServiceReply = action.getResult();
+            com.sendTo(action.getData().getString("replyTo"),webServiceReply);
+          } else if(label.equals(IManagerConstants.REMOVE_LISTENER)){
+            JsonObject webServiceReply = action.getResult();
+            com.sendTo(action.getData().getString("replyTo"),webServiceReply);
           }
           else {
             log.error("Unknown COMPLETED OR INPROCESS Action received " + action
-                                                                            .toString());
+                .toString());
             return;
           }
           if(newAction != null)

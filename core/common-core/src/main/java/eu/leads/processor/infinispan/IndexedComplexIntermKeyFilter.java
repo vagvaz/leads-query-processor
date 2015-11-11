@@ -8,20 +8,20 @@ import java.io.Serializable;
 /**
  * Created by vagvaz on 4/7/15.
  */
-public class IndexedComplexIntermKeyFilter implements KeyValueFilter<Object,Object>,Serializable {
-   private String filterKey;
-   public IndexedComplexIntermKeyFilter(String key) {
-      this.filterKey = key;
-   }
+public class IndexedComplexIntermKeyFilter implements KeyValueFilter<Object, Object>, Serializable {
+  private String filterKey;
 
-   @Override
-   public boolean accept(Object key, Object value, Metadata metadata) {
-      IndexedComplexIntermediateKey val = (IndexedComplexIntermediateKey)key;
-      if(val.getKey().equals(filterKey)){
-         return true;
-      }
-      return false;
-   }
+  public IndexedComplexIntermKeyFilter(String key) {
+    this.filterKey = key;
+  }
+
+  @Override public boolean accept(Object key, Object value, Metadata metadata) {
+    IndexedComplexIntermediateKey val = (IndexedComplexIntermediateKey) key;
+    if (val.getKey().equals(filterKey)) {
+      return true;
+    }
+    return false;
+  }
 
 
 

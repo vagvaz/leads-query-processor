@@ -2,7 +2,7 @@
 <!-- const.xml -->
 <config>
     <server>
-        <host>5.147.254.198</host>
+        <host>127.0.0.1</host>
         <!-- 5.147.254.198-->
         <port>8080</port>
         <username>leads-apatar</username>

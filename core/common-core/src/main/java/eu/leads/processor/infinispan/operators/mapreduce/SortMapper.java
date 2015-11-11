@@ -14,39 +14,41 @@ import org.vertx.java.core.json.JsonObject;
  */
 public class SortMapper extends LeadsMapper<String, Tuple, String, Tuple> {
 
-    transient protected String[] sortColumns;
-    transient protected Boolean[] asceding;
-    transient protected String[] types;
-    Integer counter = 0;
-    Integer numParts = 0;
+  transient protected String[] sortColumns;
+  transient protected Boolean[] asceding;
+  transient protected String[] types;
+  Integer counter = 0;
+  Integer numParts = 0;
 
-    public SortMapper(JsonObject configuration) {
-        super(configuration);
-    }
+  public SortMapper() {
+  }
 
-    public void initialize() {
-        counter = 0;
-        isInitialized = true;
-        super.initialize();
-        String columns = conf.getString("sortColumns");
+  public SortMapper(JsonObject configuration) {
+    super(configuration);
+  }
 
-    }
+  public void initialize() {
+    counter = 0;
+    isInitialized = true;
+    super.initialize();
+    String columns = conf.getString("sortColumns");
 
-    @Override
-    public void map(String key, Tuple value, Collector<String, Tuple> collector) {
-//        if (!isInitialized)
-//            initialize();
-//        progress();
-////        Tuple tuple = new Tuple(value);
-//       ArrayList<Tuple> tuples = new ArrayList<>();
-//       Comparator<Tuple> comparator = new TupleComparator(sortColumns,asceding,types);
-//       Collections.sort(tuples,comparator);
-//       for (Tuple t : tuples) {
-//          handlePagerank(t);
-//          out.put(key + ":" + counter, t);
-//          counter++;
-//       }
-//       tuples.clear();
-//       return output + key;
-     }
+  }
+
+  @Override public void map(String key, Tuple value, Collector<String, Tuple> collector) {
+    //        if (!isInitialized)
+    //            initialize();
+    //        progress();
+    ////        Tuple tuple = new Tuple(value);
+    //       ArrayList<Tuple> tuples = new ArrayList<>();
+    //       Comparator<Tuple> comparator = new TupleComparator(sortColumns,asceding,types);
+    //       Collections.sort(tuples,comparator);
+    //       for (Tuple t : tuples) {
+    //          handlePagerank(t);
+    //          out.put(key + ":" + counter, t);
+    //          counter++;
+    //       }
+    //       tuples.clear();
+    //       return output + key;
+  }
 }

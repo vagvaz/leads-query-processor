@@ -133,9 +133,9 @@ public class CM_Sketch<T> {
 
 	/**
 	 * 
-	 * @param b: calculation of inner product between data represented as this sketch object
+	 * @param b: calculation of inner grep between data represented as this sketch object
 	 * and sketch b
-	 * @return their inner product
+	 * @return their inner grep
 	 */
 	public long innerProduct(CM_Sketch<T> b){
 

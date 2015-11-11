@@ -22,7 +22,7 @@ import java.util.*;
 /**
  * Created by vagvaz on 11/21/14.
  */
-public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
+public class JoinMapper extends LeadsMapper<String, Tuple, String, Tuple> {
 
   //   private String configString;
   transient private String tableName;
@@ -31,66 +31,70 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
   transient Logger profilerLog;
   transient ProfileEvent mapEvent;
   private transient FilterOperatorTree tree;
-  private transient Map<String,List<String>> tableCols;
+  private transient Map<String, List<String>> tableCols;
   private transient BloomFilter bloomFilter;
   private transient boolean buildBloom;
   private transient boolean filterBloom;
   private transient String bloomCacheName;
   private transient Cache bloomCache;
-  private  int filtered = 0;
-//  private int counter = 0;
+  private int filtered = 0;
+
+  //  private int counter = 0;
+  public JoinMapper() {
+  }
+
+  ;
+
   public JoinMapper(String s) {
     super(s);
   }
 
-  @Override
-  public void map(String key, Tuple t, Collector<String, Tuple> collector) {
+  @Override public void map(String key, Tuple t, Collector<String, Tuple> collector) {
 
-//    if (!isInitialized)
-//      initialize();
-    if(tableName == null)
-    {
-      tableName = resolveTableName(t,tableCols);
+    //    if (!isInitialized)
+    //      initialize();
+    if (tableName == null) {
+      tableName = resolveTableName(t, tableCols);
     }
-//    mapEvent.start("JoinMapMapExecute");
+    //    mapEvent.start("JoinMapMapExecute");
     StringBuilder builder = new StringBuilder();
     //        String tupleId = key.substring(key.indexOf(":"));
     //Tuple t = new Tuple(value);
     //        Tuple t = new Tuple(value);
     //progress();
-//    profileEvent.start("JoinMapReadJoinAttributes");
+    //    profileEvent.start("JoinMapReadJoinAttributes");
     for (String c : joinColumns.get(tableName)) {
       builder.append(t.getGenericAttribute(c).toString() + ",");
     }
-//    profileEvent.end();
-//    profileEvent.start("JoinMapPrepareOutput");
+    //    profileEvent.end();
+    //    profileEvent.start("JoinMapPrepareOutput");
     String outkey = builder.toString();
     outkey.substring(0, outkey.length() - 1);
     //           collector.emit(outkey, t.asString());
     t.setAttribute("__table", tableName);
     t.setAttribute("__tupleKey", key);
-//    profileEvent.end();
-//    profileEvent.start("JoinMapEMitIntermediateResult");
-//    counter++;
-    if(buildBloom){
+    //    profileEvent.end();
+    //    profileEvent.start("JoinMapEMitIntermediateResult");
+    //    counter++;
+    if (buildBloom) {
       bloomFilter.put(outkey);
     }
-    if(filterBloom){
-      if(!bloomFilter.mightContain(outkey)){
+    if (filterBloom) {
+      if (!bloomFilter.mightContain(outkey)) {
         filtered++;
         return;
       }
     }
     collector.emit(outkey, t);
-//    profileEvent.end();
-//    mapEvent.end();
+    //    profileEvent.end();
+    //    mapEvent.end();
   }
 
   private String resolveTableName(Tuple t, Map<String, List<String>> tableCols) {
     String result = null;
-    for(Map.Entry<String,List<String>> entry: tableCols.entrySet()){
+    for (Map.Entry<String, List<String>> entry : tableCols.entrySet()) {
       String column = entry.getValue().get(0);
-      if(t.hasField(column)){
+      if (t.hasField(column)) {
         tableName = entry.getKey();
         result = entry.getKey();
         break;
@@ -103,12 +107,11 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
 
 
 
-  @Override
-  public void initialize() {
+  @Override public void initialize() {
     isInitialized = true;
     profilerLog = LoggerFactory.getLogger(JoinMapper.class);
-    profileEvent = new ProfileEvent("JoinMapInitialize",profilerLog);
-    mapEvent = new ProfileEvent("JoinMapExecute ",profilerLog);
+    profileEvent = new ProfileEvent("JoinMapInitialize", profilerLog);
+    mapEvent = new ProfileEvent("JoinMapExecute ", profilerLog);
 
     //       System.err.println("-------------Initialize");
     super.initialize();
@@ -118,12 +121,12 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
     tableCols = tree.getJoinColumns();
     //Infer columns
     JsonObject ob = new JsonObject();
-    for(Map.Entry<String,List<String>> entry : tableCols.entrySet()){
+    for (Map.Entry<String, List<String>> entry : tableCols.entrySet()) {
       JsonArray array = new JsonArray();
-      for(String col : entry.getValue()){
+      for (String col : entry.getValue()) {
         array.add(col);
       }
-      ob.putArray(entry.getKey(),array);
+      ob.putArray(entry.getKey(), array);
     }
     conf.putObject("joinColumns", ob);
 
@@ -148,34 +151,31 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
 
     tableName = conf.getString("inputCache");
     System.err.println("tablename " + tableName);
-    if(conf.containsField("buildBloomFilter")){
+    if (conf.containsField("buildBloomFilter")) {
       System.err.println("building bloom filter");
       bloomCacheName = conf.getObject("buildBloomFilter").getString("bloomCache");
       System.err.println("bloom cache is " + bloomCacheName);
       buildBloom = true;
-      bloomFilter = BloomFilter.create(Funnels.stringFunnel(Charset.defaultCharset()), 1000000 );
-    }
-    else{
+      bloomFilter = BloomFilter.create(Funnels.stringFunnel(Charset.defaultCharset()), 1000000);
+    } else {
       buildBloom = false;
       System.err.println("Do NOT BUILD BF");
     }
-    if(conf.containsField("useBloomFilter")){
+    if (conf.containsField("useBloomFilter")) {
       filterBloom = true;
       System.err.println("USING BLOOM FILTER...");
       bloomCacheName = conf.getObject("useBloomFilter").getString("bloomCache");
       bloomCache = (Cache) InfinispanClusterSingleton.getInstance().getManager().getPersisentCache(bloomCacheName);
-      for(Object o : bloomCache.keySet()){
-        String mc = (String)o;
+      for (Object o : bloomCache.keySet()) {
+        String mc = (String) o;
         System.err.println("MC BF: " + mc);
-        if(bloomFilter == null) {
-         bloomFilter = (BloomFilter) bloomCache.get(mc);
-        }
-        else{
-          bloomFilter.putAll((BloomFilter)bloomCache.get(mc));
+        if (bloomFilter == null) {
+          bloomFilter = (BloomFilter) bloomCache.get(mc);
+        } else {
+          bloomFilter.putAll((BloomFilter) bloomCache.get(mc));
         }
       }
-    }
-    else{
+    } else {
       System.err.println("DO NOT FILTER BF");
       filterBloom = false;
     }
@@ -183,19 +183,19 @@ public class JoinMapper extends LeadsMapper<String,Tuple,String,Tuple> {
   }
 
   @Override protected void finalizeTask() {
-    if(buildBloom){
+    if (buildBloom) {
       Cache cache = (Cache) InfinispanClusterSingleton.getInstance().getManager().getPersisentCache(bloomCacheName);
-      cache.put(InfinispanClusterSingleton.getInstance().getManager().getCacheManager().getAddress().toString(),bloomFilter);
+      cache.put(InfinispanClusterSingleton.getInstance().getManager().getCacheManager().getAddress().toString(),
+          bloomFilter);
     }
-    if(filterBloom) {
+    if (filterBloom) {
       System.err.println("Filtered tuples: " + filtered);
       profilerLog.error("Filtered tuples: " + filtered);
-    }
-    else{
+    } else {
       System.err.println("NO BLOOM FILTER");
       profilerLog.error("NO BLOOM FILTER" + filtered);
     }
     super.finalizeTask();
-//    System.err.println("\n\n\nC: " + counter);
+    //    System.err.println("\n\n\nC: " + counter);
   }
 }

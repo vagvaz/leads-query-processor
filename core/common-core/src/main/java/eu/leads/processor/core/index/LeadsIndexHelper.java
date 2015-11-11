@@ -6,24 +6,24 @@ package eu.leads.processor.core.index;
 
 public class LeadsIndexHelper {
 
-	LeadsIndex lInd = null;
+  LeadsIndex lInd = null;
 
-	public LeadsIndex CreateLeadsIndex(Object value, String key, String atributeName, String cacheName) {
-		if (value instanceof String)
-			lInd = new LeadsIndexString();
-		else if (value instanceof Integer)
-			lInd = new LeadsIndexInteger();
-		else if (value instanceof Float)
-			lInd = new LeadsIndexFloat();
-		else if (value instanceof Long)
-			lInd = new LeadsIndexLong();
-		else if (value instanceof Double)
-			lInd = new LeadsIndexDouble();
+  public LeadsIndex CreateLeadsIndex(Object value, String key, String atributeName, String cacheName) {
+    if (value instanceof String)
+      lInd = new LeadsIndexString();
+    else if (value instanceof Integer)
+      lInd = new LeadsIndexInteger();
+    else if (value instanceof Float)
+      lInd = new LeadsIndexFloat();
+    else if (value instanceof Long)
+      lInd = new LeadsIndexLong();
+    else if (value instanceof Double)
+      lInd = new LeadsIndexDouble();
 
-		lInd.setCacheName(cacheName);
-		lInd.setAttributeName(atributeName);
-		lInd.setKeyName(key);
-		lInd.setAttributeValue(value);
-		return lInd;
-	}
+    lInd.setCacheName(cacheName);
+    lInd.setAttributeName(atributeName);
+    lInd.setKeyName(key);
+    lInd.setAttributeValue(value);
+    return lInd;
+  }
 }

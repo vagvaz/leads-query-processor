@@ -69,7 +69,7 @@ public class main_test {
 		System.out.println("True zero count: "+myMap.get(1));
 		System.out.println(myecm.get(1, insertsNo-queryLength));
 
-		//inner product
+		//inner grep
 		slidingCMSketch myecm2 = new slidingCMSketch(delta, epsilon, queryLength, insertsNo, s, insertsNo, false);
 		myecm2.setAlphas(myecm.getAlphas());
 		myecm2.setBetas(myecm.getBetas());
@@ -93,7 +93,7 @@ public class main_test {
 		}
 		assert (ctr == queryLength);
 
-		//100% accurate inner product
+		//100% accurate inner grep
 		long innProd = 0;
 		for (Entry<Integer, Integer> e: myMap2.entrySet()){
 			if (myMap.containsKey(e.getKey())){
@@ -177,7 +177,7 @@ public class main_test {
 		System.out.println("True zero count: "+myMap.get(0));
 		System.out.println(mycm.estimateCount(new Integer(0)));
 
-		//inner product
+		//inner grep
 		CM_Sketch<Integer> mycm2 = new CM_Sketch<Integer>
 		(IntFunnel.INSTANCE, delta, epsilon);
 		mycm2.setRandomSeeds(mycm.getRandomSeeds());
@@ -195,7 +195,7 @@ public class main_test {
 			mycm2.put(new Integer(tmp));
 		}
 
-		//100% accurate inner product
+		//100% accurate inner grep
 		long innProd = 0;
 		for (Entry<Integer, Integer> e: myMap2.entrySet()){
 
@@ -242,7 +242,7 @@ public class main_test {
 		//count estimate
 		System.out.println(myams.estimateCount(new Integer(0)));
 
-		//inner product
+		//inner grep
 		AMS_Sketch<Integer> myams2 = new AMS_Sketch<Integer>
 		(IntFunnel.INSTANCE, delta, epsilon);
 		myams2.setRandomSeeds(myams.getRandomSeeds());
@@ -260,7 +260,7 @@ public class main_test {
 			myams2.put(new Integer(tmp));
 		}
 
-		//100% accurate inner product
+		//100% accurate inner grep
 		long innProd = 0;
 		for (Entry<Integer, Integer> e: myMap2.entrySet()){
 
