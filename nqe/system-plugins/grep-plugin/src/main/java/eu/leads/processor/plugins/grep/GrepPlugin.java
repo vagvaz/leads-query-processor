@@ -28,7 +28,7 @@ public class GrepPlugin implements PluginInterface {
   private Thread thread;
   private String targetCacheName;
   private Configuration configuration;
-  private String installedCacheName;
+  private String installedCacheName = "default.webpages";
 
 
   @Override
