@@ -81,7 +81,7 @@ public class GrepPlugin implements PluginInterface {
 
     if (!grepCache.containsKey(targetCacheName+":"+tuple.getAttribute(installedCacheName+".url"))) {
 
-      Set<String> set = tuple.getFieldSet();
+      Set<String> set = new HashSet<>(tuple.getFieldSet());
       for(String field : set){
         if(field.contains(installedCacheName)){
           tuple.renameAttribute(field,field.replace(installedCacheName,targetCacheName));
