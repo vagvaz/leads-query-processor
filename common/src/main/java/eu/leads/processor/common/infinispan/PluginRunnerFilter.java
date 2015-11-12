@@ -108,12 +108,13 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
     initialize();
   }
 
-  private void initialize() {
+  private synchronized void initialize() {
     try {
       if (isInitialized) {
         System.err.println("Already initialized !!!! not again  " + UUIDname);
         return;
       }
+      isInitialized = true;
       executor = new ThreadPoolExecutor(1,1,10000, TimeUnit.MILLISECONDS,new LinkedBlockingDeque<Runnable>());
       System.err.println("Initilize " + UUIDname);
       log = LoggerFactory.getLogger(PluginRunnerFilter.class);
@@ -182,16 +183,15 @@ public class PluginRunnerFilter implements CacheEventFilter,Serializable {
       Thread t = new Thread(new Runnable() {
         @Override public void run() {
           initializePlugin(pluginsCache, pluginName, user);
-
+          runnableThread.start();
 //          pluginRunnable.setPlugin(plugin);
           log.error("Plugin " + plugin.getClassName().toString() + " Loaded from jar and initialized");
         }
       });
 
       t.start();
-      runnableThread.start();
+
       //            initializePlugin(pluginsCache, pluginName, user);
-      isInitialized = true;
       log.error("Initialized plugin " + pluginName + " on " + targetCacheName);
       System.err.println("Initialized plugin " + pluginName + " on " + targetCacheName);
 
