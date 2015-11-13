@@ -150,7 +150,11 @@ public class DeployPluginActionHandler implements ActionHandler {
        }
 
        plugin.setUser(user);
-       activePlugins.put(targetCache+":"+plugin.getId()+plugin.getUser(),plugin);
+       for(RemoteCacheManager remoteCacheManager : remoteCacheManagers) {
+        RemoteCache cache = remoteCacheManager.getCache(activePlugins.getName());
+         cache.put(targetCache + ":" + plugin.getId() + plugin.getUser(), plugin);
+//         activePlugins.put(targetCache + ":" + plugin.getId() + plugin.getUser(), plugin);
+       }
        final PluginHandlerListener[] listener = {null};
        Thread t = new Thread(new Runnable() {
          @Override public void run() {

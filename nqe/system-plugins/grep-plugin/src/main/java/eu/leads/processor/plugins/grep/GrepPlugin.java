@@ -28,7 +28,7 @@ public class GrepPlugin implements PluginInterface {
   private Thread thread;
   private String targetCacheName;
   private Configuration configuration;
-  private String installedCacheName = "default.webpages";
+  private String installedCacheName = null;
 
 
   @Override
@@ -38,64 +38,6 @@ public class GrepPlugin implements PluginInterface {
     //initialize necessary structures
     initStructures(infinispanManager);
 
-  }
-
-  protected void processTuple(String key, Tuple tuple) {
-    log.error("grep plugin: " + key);
-    //Check Tuple against product words
-    for(String product : products) {
-      //Check if product is present in the body of a webpage
-      if (checkTupleAgainstProducts(tuple, product)) {
-        //update count for product and add webpage to greptable
-        updateStructures(tuple,product);
-      }
-    }
-  }
-
-  private boolean checkTupleAgainstProducts(Tuple tuple, String product) {
-    String body = null;
-    if(tuple.getFieldNames().contains(installedCacheName+".body")){
-      body = tuple.getAttribute(installedCacheName+".body");
-    }else if(tuple.getFieldNames().contains(installedCacheName+".content")) {
-      body = tuple.getAttribute(installedCacheName+".content");
-    }
-    if(body != null) {
-      if (body.toLowerCase().contains(product.toLowerCase())) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private void updateStructures(Tuple tuple, String product) {
-    Integer count = countMap.get(product);
-    if (count != null) {
-      count++;
-    } else {
-      count = 1;
-    }
-    if(!urlMap.containsKey(tuple.getAttribute(installedCacheName+".url"))){
-      urlMap.put(product,tuple.getAttribute(installedCacheName+".url"));
-    }
-    countMap.put(product, count);
-
-    if (!grepCache.containsKey(targetCacheName+":"+tuple.getAttribute(installedCacheName+".url"))) {
-
-      Set<String> set = new HashSet<>(tuple.getFieldSet());
-      for(String field : set){
-        if(field.contains(installedCacheName)){
-          tuple.renameAttribute(field,field.replace(installedCacheName,targetCacheName));
-        }
-      }
-      grepCache.put(targetCacheName+":"+tuple.getAttribute(installedCacheName+".url"), tuple);
-    }
-  }
-
-  private void readConfiguration(Configuration configuration) {
-    targetCacheName = configuration.getString("cache");
-    products = configuration.getList("words");
-    globalEnsembleString = configuration.getString("globalEnsembleString");
-    localEnsembleString = configuration.getString("localEnsembleString");
   }
 
   @Override
@@ -122,6 +64,81 @@ public class GrepPlugin implements PluginInterface {
       installedCacheName = objectObjectCache.getName();
     }
   }
+
+  protected void processTuple(String key, Tuple webpage) {
+    log.error("grep plugin: " + key);
+    //Plugin Logic
+    //Check if webpage contains any of the product words and update counters
+    for(String product : products) {
+
+      //Filtering Logic
+      //Check if product is present in the body of a webpage
+      if (checkTupleAgainstProducts(webpage, product)) {
+
+        //Processing Logic
+        //update count for product and add webpage to output
+        updateStructures(webpage,product);
+      }
+    }
+  }
+
+  /**
+   * Filtering Logic
+   * @param webpage containing the attributes of a webpage
+   * @param product product/word name
+   * @return true if the product name exist inside the body of the webpage false otherwise
+   */
+  private boolean checkTupleAgainstProducts(Tuple webpage, String product) {
+    String body = null;
+    if(webpage.getFieldNames().contains(installedCacheName+".body")){
+      body = webpage.getAttribute(installedCacheName+".body");
+    }else if(webpage.getFieldNames().contains(installedCacheName+".content")) {
+      body = webpage.getAttribute(installedCacheName+".content");
+    }
+    if(body != null) {
+      if (body.toLowerCase().contains(product.toLowerCase())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Processing Logic
+   * @param webpage webpage to output
+   * @param product product name contained in the webpage
+   */
+  private void updateStructures(Tuple webpage, String product) {
+    Integer count = countMap.get(product);
+    if (count != null) {
+      count++;
+    } else {
+      count = 1;
+    }
+    if(!urlMap.containsKey(webpage.getAttribute(installedCacheName+".url"))){
+      urlMap.put(product,webpage.getAttribute(installedCacheName+".url"));
+    }
+    countMap.put(product, count);
+
+    if (!grepCache.containsKey(targetCacheName+":"+webpage.getAttribute(installedCacheName+".url"))) {
+
+      Set<String> set = new HashSet<>(webpage.getFieldSet());
+      for(String field : set){
+        if(field.contains(installedCacheName)){
+          webpage.renameAttribute(field,field.replace(installedCacheName,targetCacheName));
+        }
+      }
+      grepCache.put(targetCacheName+":"+webpage.getAttribute(installedCacheName+".url"), webpage);
+    }
+  }
+
+  private void readConfiguration(Configuration configuration) {
+    targetCacheName = configuration.getString("cache");
+    products = configuration.getList("words");
+    globalEnsembleString = configuration.getString("globalEnsembleString");
+    localEnsembleString = configuration.getString("localEnsembleString");
+  }
+
 
   private void initStructures(InfinispanManager infinispanManager) {
     log = LoggerFactory.getLogger(GrepPlugin.class);
