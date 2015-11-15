@@ -1,5 +1,6 @@
 package eu.leads.processor.plugins.grep;
 
+import eu.leads.processor.common.infinispan.EnsembleCacheUtils;
 import eu.leads.processor.common.infinispan.InfinispanManager;
 import eu.leads.processor.common.utils.PrintUtilities;
 import eu.leads.processor.core.Tuple;
@@ -8,6 +9,7 @@ import org.apache.commons.configuration.Configuration;
 import org.infinispan.Cache;
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.ensemble.EnsembleCacheManager;
+import org.infinispan.ensemble.cache.EnsembleCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +18,7 @@ import java.util.*;
 public class GrepPlugin implements PluginInterface {
   private String id;
   private BasicCache grepCache;
-  private BasicCache summaryMap;
+  private EnsembleCache summaryMap;
   private List<String> products;
   private Logger log;
   private String globalEnsembleString;
@@ -128,7 +130,7 @@ public class GrepPlugin implements PluginInterface {
           webpage.renameAttribute(field,field.replace(installedCacheName,targetCacheName));
         }
       }
-      grepCache.put(targetCacheName+":"+webpage.getAttribute(installedCacheName+".url"), webpage);
+      grepCache.put(targetCacheName+":"+webpage.getAttribute(targetCacheName+".url"), webpage);
     }
   }
 
@@ -147,8 +149,8 @@ public class GrepPlugin implements PluginInterface {
     urlMap = new HashMap<>();
 
     //create local caches for remote puts
-    grepCache = (BasicCache) infinispanManager.getPersisentCache(targetCacheName);
-    summaryMap = (BasicCache) infinispanManager.getPersisentCache(targetCacheName+".count");
+    infinispanManager.getPersisentCache(targetCacheName);
+   infinispanManager.getPersisentCache(targetCacheName+".count");
     if(globalEnsembleString==null || localEnsembleString == null){
       PrintUtilities.printAndLog(log,"global: " + globalEnsembleString + " local " + localEnsembleString);
       return;
@@ -185,7 +187,7 @@ public class GrepPlugin implements PluginInterface {
   }
 
 
-  public int updateValue(BasicCache cache,String valueName, Integer count){
+  public int updateValue(EnsembleCache cache,String valueName, Integer count){
     Tuple t  = new Tuple();
     Tuple old = (Tuple) cache.get(valueName);
     boolean isok = false;
@@ -204,7 +206,7 @@ public class GrepPlugin implements PluginInterface {
         t.setAttribute("found",count);
       }
       cache.put(valueName,t);
-      old = (Tuple) cache.get(valueName);
+      old = (Tuple) EnsembleCacheUtils.getFromCache(cache,valueName);
       if(old.getNumberAttribute("found").intValue() > count){
         isok = true;
       }
