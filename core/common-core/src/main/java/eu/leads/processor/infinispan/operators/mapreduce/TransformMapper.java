@@ -17,7 +17,7 @@ public class TransformMapper extends LeadsMapper<String, Tuple, String, Tuple> {
   }
 
   public TransformMapper(String configString) {
-    super("");
+    super(configString);
   }
 
   public TransformMapper() {
@@ -87,12 +87,7 @@ public class TransformMapper extends LeadsMapper<String, Tuple, String, Tuple> {
     return url;
 
   }
-
-  private void intialize() {
-    isInitialized = true;
-    //       System.err.println("-------------Initialize");
+  @Override public void initialize() {
     super.initialize();
   }
-
-
 }

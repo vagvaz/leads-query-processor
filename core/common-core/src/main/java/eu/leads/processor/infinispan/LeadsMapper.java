@@ -72,6 +72,8 @@ public abstract class LeadsMapper<kIN, vIN, kOut, vOut> implements Mapper<kIN, v
       targetsMap = new HashMap();
       outputMap = new HashMap<>();
       JsonArray targets = conf.getObject("body").getArray("targets");
+      if(targets == null)
+        return;
       Iterator<Object> targetIterator = targets.iterator();
       while (targetIterator.hasNext()) {
         JsonObject target = (JsonObject) targetIterator.next();

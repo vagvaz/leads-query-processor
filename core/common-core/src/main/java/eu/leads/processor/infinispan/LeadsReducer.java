@@ -85,6 +85,8 @@ public class LeadsReducer<K, V> implements Reducer<K, V>, Serializable {
       targetsMap = new HashMap();
       outputMap = new HashMap<>();
       JsonArray targets = conf.getObject("body").getArray("targets");
+      if(targets == null)
+        return;
       Iterator<Object> targetIterator = targets.iterator();
       while (targetIterator.hasNext()) {
         JsonObject target = (JsonObject) targetIterator.next();

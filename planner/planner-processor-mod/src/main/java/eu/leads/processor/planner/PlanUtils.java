@@ -208,6 +208,7 @@ public class  PlanUtils {
         ( node.getString("nodetype").equals(LeadsNodeType.PROJECTION.toString()))  ||
         ( node.getString("nodetype").equals(LeadsNodeType.HAVING.toString()))  ||
         ( node.getString("nodetype").equals(LeadsNodeType.SELECTION.toString())) ||
+        ( node.getString("nodetype").equals(LeadsNodeType.ROOT.toString())) ||
       (node.getString("nodetype").equals(LeadsNodeType.EXPRS.toString()) && node.getObject("configuration")
           .getObject("body").getString("operationType").equals(OpType.CreateIndex.toString()))
         ){

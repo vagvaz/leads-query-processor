@@ -22,7 +22,7 @@ public class DemoMapReduceOperator extends MapReduceOperator {
   @Override public void init(JsonObject config) {
     super.init(conf);
     setMapper(new TransformMapper(conf.toString()));
-    setReducer(new TransformReducer(conf.toString()));
+    setFederationReducer(new TransformReducer(conf.toString()));
     init_statistics(this.getClass().getCanonicalName());
   }
 
@@ -58,14 +58,6 @@ public class DemoMapReduceOperator extends MapReduceOperator {
   public void setLocalReducer(LeadsReducer<?, ?> localReducer) {
     this.localReducer = localReducer;
   }
-  @Override public void execute() {
-    super.execute();
-  }
-
-  @Override public void cleanup() {
-    super.cleanup();
-  }
-
   @Override public String getContinuousListenerClass() {
     return null;
   }

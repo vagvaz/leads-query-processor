@@ -33,13 +33,13 @@ public class TransformReducer extends LeadsReducer<String, Tuple> {
   }
 
   public TransformReducer(String configString) {
-    super("");
+    super(configString);
   }
 
   @Override public void initialize() {
 
     isInitialized = true;
-    //        super.initialize();
+            super.initialize();
     //        imanager = new ClusterInfinispanManager(manager);
     conf = new JsonObject(configString);
     outputCacheName = conf.getString("output");
