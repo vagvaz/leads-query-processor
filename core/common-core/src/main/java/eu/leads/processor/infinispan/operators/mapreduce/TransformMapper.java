@@ -17,7 +17,7 @@ public class TransformMapper extends LeadsMapper<String, Tuple, String, Tuple> {
   }
 
   public TransformMapper(String configString) {
-    super(configString);
+    super("");
   }
 
   public TransformMapper() {

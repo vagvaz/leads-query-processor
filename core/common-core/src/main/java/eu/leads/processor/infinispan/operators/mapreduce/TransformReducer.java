@@ -33,7 +33,7 @@ public class TransformReducer extends LeadsReducer<String, Tuple> {
   }
 
   public TransformReducer(String configString) {
-    super(configString);
+    super("");
   }
 
   @Override public void initialize() {

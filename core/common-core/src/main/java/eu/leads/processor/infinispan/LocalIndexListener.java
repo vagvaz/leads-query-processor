@@ -178,7 +178,7 @@ import java.util.List;
   @Override public void close() {
     for (MapDBIndex index : indexes) {
       index.flush();
-      index.close();
+//      index.close();
     }
     indexes.clear();
     if (keysCache != null) {
